@@ -1,6 +1,7 @@
 """
 Demonstrates how to determine whether user has the permissions for a list
 """
+
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.permissions.kind import PermissionKind
 from tests import (

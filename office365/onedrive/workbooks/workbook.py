@@ -53,6 +53,7 @@ class Workbook(Entity):
         """Use this API to refresh an existing workbook session.
         :param str session_id: Identifier of the workbook session
         """
+
         def _construct_request(request):
             # type: (RequestOptions) -> None
             request.set_header("workbook-session-id", session_id)

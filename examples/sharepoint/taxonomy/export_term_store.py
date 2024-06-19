@@ -1,6 +1,7 @@
 """
 Export Term Store
 """
+
 import json
 
 from office365.sharepoint.client_context import ClientContext

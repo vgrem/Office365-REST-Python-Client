@@ -3,6 +3,7 @@ Demonstrates how to authenticate with user credentials (username and password) i
 
 
 """
+
 from office365.sharepoint.client_context import ClientContext
 from tests import test_password, test_site_url, test_username
 

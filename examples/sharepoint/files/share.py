@@ -2,6 +2,7 @@
 Creates a sharing link for a file based on the specified parameters and optionally
 sends an email to the people that are listed in the specified parameters
 """
+
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.sharing.links.kind import SharingLinkKind
 from tests import test_team_site_url, test_user_credentials

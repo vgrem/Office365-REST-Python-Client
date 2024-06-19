@@ -8,6 +8,7 @@ This example specifies a KQL query which does the following:
    - Limits the output to 2 records (2 rows)
 
 """
+
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_client_secret, test_tenant
 

@@ -1,6 +1,7 @@
 """
 Retrieves the permissions on the file that are assigned to the current user.
 """
+
 from pprint import pprint
 
 from office365.sharepoint.client_context import ClientContext

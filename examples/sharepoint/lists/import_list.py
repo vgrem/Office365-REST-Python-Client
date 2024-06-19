@@ -21,7 +21,7 @@ def load_data_source(amount=1000):
             "WorkAddress": fake.street_address(),
             "WorkCity": fake.city(),
             "WorkZip": fake.postcode(),
-            "WorkCountry": fake.country()
+            "WorkCountry": fake.country(),
             # "WebPage": {"Url": fake.url()},
         }
         contacts.append(contact)

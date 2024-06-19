@@ -4,6 +4,7 @@ OneNote, and Teams) in your organization.
 
 https://learn.microsoft.com/en-us/graph/api/reportroot-getm365appusercounts?view=graph-rest-1.0
 """
+
 import os
 import tempfile
 

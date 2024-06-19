@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 def create_upload_file_query(file, file_object):
     # type: (File|Attachment, IO) -> ServiceOperationQuery
-    """ Constructs upload file content query"""
+    """Constructs upload file content query"""
     qry = ServiceOperationQuery(file, "$value")
 
     def _construct_request(request):

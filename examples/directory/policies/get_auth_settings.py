@@ -4,6 +4,7 @@ Retrieves authorization related settings across the company
 https://learn.microsoft.com/en-us/graph/api/authorizationpolicy-get?view=graph-rest-1.0
 
 """
+
 from pprint import pprint
 
 from office365.graph_client import GraphClient

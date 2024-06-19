@@ -1,6 +1,7 @@
 """
 
 """
+
 import base64
 
 from office365.graph_client import GraphClient

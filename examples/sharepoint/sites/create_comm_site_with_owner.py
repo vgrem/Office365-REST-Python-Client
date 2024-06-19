@@ -3,6 +3,7 @@ Creates a modern site
 
 https://learn.microsoft.com/en-us/sharepoint/dev/apis/site-creation-rest#create-a-modern-site
 """
+
 from office365.sharepoint.client_context import ClientContext
 from tests import (
     create_unique_name,

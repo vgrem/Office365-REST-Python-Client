@@ -4,6 +4,7 @@ Demonstrates how to acquire access token via ADAL library
 Note: ADAL for Python is no longer receive new feature improvement. Its successor, MSAL for Python,
 are now generally available.
 """
+
 from office365.graph_client import GraphClient
 from tests import load_settings
 

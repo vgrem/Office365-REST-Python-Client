@@ -9,6 +9,7 @@ Note:
 
 https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows#interactive-and-non-interactive-authentication
 """
+
 import msal
 
 from office365.graph_client import GraphClient

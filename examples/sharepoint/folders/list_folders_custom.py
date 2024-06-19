@@ -1,6 +1,7 @@
 """
 Demonstrates how to enumerate a folder
 """
+
 from typing import Callable
 
 from office365.sharepoint.client_context import ClientContext

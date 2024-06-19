@@ -17,6 +17,7 @@ The example demonstrates how to use SharePoint App-Only principal (second option
 
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs
 """
+
 from office365.sharepoint.client_context import ClientContext
 from tests import test_client_id, test_client_secret, test_site_url
 

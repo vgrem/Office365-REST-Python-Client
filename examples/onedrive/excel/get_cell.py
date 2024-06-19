@@ -3,6 +3,7 @@ Gets the range object containing the single cell based on row and column numbers
 
 https://learn.microsoft.com/en-us/graph/api/worksheet-cell?view=graph-rest-1.0
 """
+
 import sys
 
 from office365.graph_client import GraphClient

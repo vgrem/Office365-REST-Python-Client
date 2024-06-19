@@ -5,6 +5,7 @@ to term set or not.
 To prevent this exception to occur:
 '-2146232832, Microsoft.SharePoint.SPFieldValidationException', 'The given guid does not exist in the term store'
 """
+
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.taxonomy.field import TaxonomyField

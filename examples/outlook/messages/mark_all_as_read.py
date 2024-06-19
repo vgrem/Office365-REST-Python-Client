@@ -1,6 +1,7 @@
 """
 Marks all items (messages) in folder as read
 """
+
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_password, test_tenant, test_username
 

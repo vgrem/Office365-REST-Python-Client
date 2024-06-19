@@ -3,6 +3,7 @@ Get a collection of identity provider resources that are configured for a tenant
 
 https://learn.microsoft.com/en-us/graph/api/identitycontainer-list-identityproviders?view=graph-rest-1.0&tabs=http
 """
+
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_client_secret, test_tenant
 

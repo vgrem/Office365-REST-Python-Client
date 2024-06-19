@@ -1,6 +1,7 @@
 """
 Demonstrates how to create a site field of type Taxonomy
 """
+
 import sys
 
 from office365.sharepoint.client_context import ClientContext

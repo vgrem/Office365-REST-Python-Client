@@ -3,6 +3,7 @@ Demonstrates how to download a file from SharePoint site
 Note: this method is considered a deprecated approach nowadays!
 Refer download.py which demonstrates how to download a file
 """
+
 import os
 import tempfile
 

@@ -1,6 +1,7 @@
 """
 Demonstrates how to download list item attachments
 """
+
 import os
 import tempfile
 
@@ -11,9 +12,7 @@ from tests import test_client_credentials, test_team_site_url
 
 def print_progress(attachment_file):
     # type: (Attachment) -> None
-    print(
-        "{0} has been downloaded".format(attachment_file.server_relative_url)
-    )
+    print("{0} has been downloaded".format(attachment_file.server_relative_url))
 
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)

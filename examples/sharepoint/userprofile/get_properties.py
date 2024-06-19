@@ -1,6 +1,7 @@
 """
  Gets user properties for the specified user
 """
+
 from pprint import pprint
 
 from office365.sharepoint.client_context import ClientContext

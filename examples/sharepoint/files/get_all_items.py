@@ -1,6 +1,7 @@
 """
 Enumerates files and folders within a library
 """
+
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.system_object_type import FileSystemObjectType
 from office365.sharepoint.listitems.listitem import ListItem

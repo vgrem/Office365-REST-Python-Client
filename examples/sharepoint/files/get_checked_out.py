@@ -1,6 +1,7 @@
 """
 Retrieves collection of checked-out files in a document library
 """
+
 import sys
 
 from office365.sharepoint.client_context import ClientContext

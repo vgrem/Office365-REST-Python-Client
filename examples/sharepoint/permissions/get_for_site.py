@@ -1,6 +1,7 @@
 """
 Returns the user permissions for the site
 """
+
 from pprint import pprint
 
 from office365.sharepoint.client_context import ClientContext

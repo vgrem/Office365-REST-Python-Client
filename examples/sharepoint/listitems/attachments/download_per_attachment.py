@@ -1,6 +1,7 @@
 """
 Demonstrates how to download list item attachments
 """
+
 import os
 import tempfile
 
@@ -24,4 +25,3 @@ for item in items:
         print(
             f"{attachment_file.server_relative_url} has been downloaded into {download_file_name}"
         )
-

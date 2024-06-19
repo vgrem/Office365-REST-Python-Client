@@ -1,6 +1,7 @@
 """
 Demonstrates how to enumerate folder files and download file's content
 """
+
 import os
 import tempfile
 

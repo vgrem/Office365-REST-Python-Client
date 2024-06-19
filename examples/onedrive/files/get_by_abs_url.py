@@ -1,6 +1,7 @@
 """
 Retrieves file by absolute url
 """
+
 from office365.graph_client import GraphClient
 from tests import (
     test_client_id,

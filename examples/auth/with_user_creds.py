@@ -3,6 +3,7 @@ Username Password Authentication flow
 
 https://github.com/AzureAD/microsoft-authentication-library-for-python/wiki/Username-Password-Authentication
 """
+
 import msal
 
 from office365.graph_client import GraphClient

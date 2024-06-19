@@ -5,6 +5,7 @@ Demonstrates how to share my calendar with another user
 
 https://learn.microsoft.com/en-us/graph/api/calendar-post-calendarpermissions?view=graph-rest-1.0
 """
+
 from office365.graph_client import GraphClient
 from office365.outlook.calendar.role_type import CalendarRoleType
 from tests import test_client_id, test_password, test_tenant, test_username

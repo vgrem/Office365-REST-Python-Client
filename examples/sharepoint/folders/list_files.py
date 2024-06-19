@@ -2,6 +2,7 @@
 Gets the files from the folder.
 If 'recursive' flag set to True, it traverses all sub folders
 """
+
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.file import File
 from tests import test_team_site_url, test_user_credentials

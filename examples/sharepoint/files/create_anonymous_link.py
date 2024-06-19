@@ -1,6 +1,7 @@
 """
 Creates and returns an anonymous link that can be used to access a document without needing to authenticate
 """
+
 import datetime
 from datetime import timedelta
 

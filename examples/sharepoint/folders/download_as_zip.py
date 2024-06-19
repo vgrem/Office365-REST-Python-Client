@@ -1,6 +1,7 @@
 """
 Demonstrates how to download folders content into a zip file
 """
+
 import os
 import tempfile
 

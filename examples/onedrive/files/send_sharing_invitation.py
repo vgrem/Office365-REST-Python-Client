@@ -6,6 +6,7 @@ file being collaborated on. The invitation grants Ryan read-write access to the 
 
 https://learn.microsoft.com/en-us/graph/api/driveitem-invite?view=graph-rest-1.0
 """
+
 from datetime import datetime, timedelta
 
 from office365.graph_client import GraphClient

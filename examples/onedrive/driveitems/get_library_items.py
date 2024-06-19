@@ -3,6 +3,7 @@ Enumerate items in a list
 
 https://learn.microsoft.com/en-us/graph/api/listitem-list?view=graph-rest-1.0
 """
+
 from office365.graph_client import GraphClient
 from tests import (
     test_client_id,

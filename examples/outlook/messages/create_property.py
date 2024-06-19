@@ -5,6 +5,7 @@ Demonstrates how to create one single-value extended property for the specified 
 
 https://learn.microsoft.com/en-us/graph/api/singlevaluelegacyextendedproperty-post-singlevalueextendedproperties?view=graph-rest-1.0
 """
+
 import sys
 
 from office365.graph_client import GraphClient

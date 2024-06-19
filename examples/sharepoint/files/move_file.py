@@ -1,6 +1,7 @@
 """
 Demonstrates how to move a folder within a site
 """
+
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.move_operations import MoveOperations
 from tests import test_team_site_url, test_user_credentials

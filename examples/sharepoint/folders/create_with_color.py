@@ -1,6 +1,7 @@
 """
 Demonstrates how to create a folder with a color
 """
+
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.folders.coloring_information import FolderColors
 from tests import test_team_site_url, test_user_credentials

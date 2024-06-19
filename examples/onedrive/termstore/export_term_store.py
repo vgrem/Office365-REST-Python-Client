@@ -1,6 +1,7 @@
 """
 Demonstrates how to retrieve a flat list of all TermSet objects
 """
+
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_client_secret, test_team_site_url, test_tenant
 

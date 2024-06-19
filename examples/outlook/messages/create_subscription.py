@@ -3,6 +3,7 @@ Demonstrates how to send a change notification when the user receives a new mail
 
 https://learn.microsoft.com/en-us/graph/api/subscription-post-subscriptions?view=graph-rest-1.0
 """
+
 import datetime
 
 from office365.graph_client import GraphClient

@@ -7,6 +7,7 @@ The following options are supported:
 
 https://learn.microsoft.com/en-us/entra/identity-platform/msal-authentication-flows#client-credentials
 """
+
 import msal
 
 from office365.graph_client import GraphClient

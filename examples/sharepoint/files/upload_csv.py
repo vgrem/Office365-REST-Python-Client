@@ -1,6 +1,7 @@
 """
 Demonstrates how to upload a CSV file to a SharePoint site
 """
+
 import os
 
 from office365.sharepoint.client_context import ClientContext

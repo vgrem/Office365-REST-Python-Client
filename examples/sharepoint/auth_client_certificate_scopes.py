@@ -4,6 +4,7 @@ Demonstrates how to authenticate using App-Only flow
 Refer this article for a detailed instruction:
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
 """
+
 import os
 
 from office365.sharepoint.client_context import ClientContext

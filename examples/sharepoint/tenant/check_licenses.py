@@ -2,6 +2,7 @@
 Checks whether a tenant has the Intune license
 
 """
+
 from office365.sharepoint.client_context import ClientContext
 from tests import test_admin_credentials, test_admin_site_url
 

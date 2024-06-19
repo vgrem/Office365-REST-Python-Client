@@ -3,6 +3,7 @@ Determine whether a user has access to a shared channel.
 
 https://learn.microsoft.com/en-us/graph/api/channel-doesuserhaveaccess?view=graph-rest-1.0
 """
+
 import sys
 
 from office365.graph_client import GraphClient

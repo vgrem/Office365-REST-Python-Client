@@ -8,6 +8,7 @@ Prerequisite: In Azure Portal, configure the Redirect URI of your
 
 https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows#interactive-and-non-interactive-authentication
 """
+
 import msal
 
 from office365.runtime.auth.token_response import TokenResponse

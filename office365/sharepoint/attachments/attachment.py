@@ -102,7 +102,7 @@ class Attachment(Entity):
     @property
     def server_relative_url(self):
         # type: () -> Optional[str]
-        """ The server-relative-url of the attachment """
+        """The server-relative-url of the attachment"""
         return self.properties.get("ServerRelativeUrl", None)
 
     @property

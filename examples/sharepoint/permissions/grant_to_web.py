@@ -1,6 +1,7 @@
 """
 Grants user access to web
 """
+
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.sharing.role_type import RoleType
 from tests import (

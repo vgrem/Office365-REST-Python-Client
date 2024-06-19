@@ -1,6 +1,7 @@
 """
 Demonstrates how to download a file from SharePoint site
 """
+
 import os
 import tempfile
 

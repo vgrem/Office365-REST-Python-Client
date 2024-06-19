@@ -101,7 +101,7 @@ class AttachmentCollection(EntityCollection[Attachment]):
 
     def upload(self, file, use_path=True):
         # type: (IO, bool) -> Attachment
-        """ Uploads the attachment """
+        """Uploads the attachment"""
         info = AttachmentCreationInformation(os.path.basename(file.name), file.read())
         if use_path:
             return self.add_using_path(info.filename, info.content)

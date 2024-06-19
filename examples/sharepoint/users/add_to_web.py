@@ -6,6 +6,7 @@ If the specified login name belongs to a valid user outside of the site, adds th
 returns the User object corresponding to that user.
 
 """
+
 from office365.sharepoint.client_context import ClientContext
 from tests import test_admin_credentials, test_team_site_url, test_user_principal_name
 

@@ -1,6 +1,7 @@
 """
 Downloads a site logo
 """
+
 import os
 import tempfile
 
