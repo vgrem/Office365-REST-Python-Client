@@ -15,13 +15,14 @@ class NavigationNode(Entity):
     """
 
     def __str__(self):
-        return self.title
+        return self.title or self.entity_type_name
 
     def __repr__(self):
-        return self.url
+        return self.url or self.entity_type_name
 
     @property
     def children(self):
+        # type: () -> NavigationNodeCollection
         """Gets the collection of child nodes of the navigation node."""
         return self.properties.get(
             "Children",
@@ -49,6 +50,7 @@ class NavigationNode(Entity):
 
     @url.setter
     def url(self, value):
+        # type: (str) -> None
         """Sets a value that specifies the URL stored with the navigation node."""
         self.set_property("Url", value)
 

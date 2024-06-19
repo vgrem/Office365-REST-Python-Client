@@ -1,4 +1,4 @@
-from typing import AnyStr, Optional, IO
+from typing import IO, AnyStr, Optional
 
 from typing_extensions import Self
 

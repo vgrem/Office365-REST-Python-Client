@@ -1,6 +1,6 @@
 import os
 from functools import partial
-from typing import IO, AnyStr, Optional, Callable
+from typing import IO, AnyStr, Callable, Optional
 
 from typing_extensions import Self
 
