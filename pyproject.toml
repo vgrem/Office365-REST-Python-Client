@@ -1,7 +1,7 @@
 [tool.ruff]
 line-length = 121
 # pyflakes, pycodestyle, isort
-select = ["F", "E", "W", "I001"]
+lint.select = ["F", "E", "W", "I001"]
 
 [tool.pylint]
 max-line-length = 120
@@ -61,7 +61,7 @@ ignore-long-lines = '^\s*# (<?https?://\S+>?|type: .+)$'
 [tool.pylint.MASTER]
 ignore-patterns = 'office365\todo\tasks\**'
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["F401"]
 "examples/**/*.py" = ["F401"]
 "office365/**/*.py" = ["F401"]

@@ -3,6 +3,7 @@ from typing import AnyStr
 
 from office365.runtime.compat import get_mime_type, message_as_bytes_or_string
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.batch import create_boundary
 from office365.runtime.queries.client_query import ClientQuery
 
@@ -32,9 +33,7 @@ class OneNotePageCreateQuery(ClientQuery):
         self._files = attachment_files
 
     def _construct_multipart_request(self, request):
-        """
-        :type request: office365.runtime.http.request_options.RequestOptions
-        """
+        # type: (RequestOptions) -> None
         request.method = HttpMethod.Post
         boundary = create_boundary("PageBoundary", True)
         request.set_header(

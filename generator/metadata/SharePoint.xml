@@ -398,6 +398,11 @@
             <Property Name="FieldValues" Type="Collection(SP.CAFieldValue)"/>
             <Property Name="ServerRedirectedEmbedUrl" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="GridInitInfoType">
+            <Property Name="ControllerId" Type="Edm.String"/>
+            <Property Name="GridSerializer" Type="Edm.String"/>
+            <Property Name="JsInitObj" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="HTMLFieldSecuritySetting">
             <Property Name="allowedDomains" Type="Collection(Edm.String)"/>
             <Property Name="allowEmbedding" Type="Edm.Int16" Nullable="false"/>
@@ -1971,6 +1976,7 @@
             <Key>
                <PropertyRef Name="Id"/>
             </Key>
+            <Property Name="AutofillInfo" Type="Edm.String"/>
             <Property Name="AutoIndexed" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanBeDeleted" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ClientSideComponentId" Type="Edm.Guid" Nullable="false"/>
@@ -2329,6 +2335,7 @@
             <Property Name="DefaultViewForContentType" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EditorModified" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Formats" Type="Edm.String"/>
+            <Property Name="GridInitInfo" Type="SP.GridInitInfoType"/>
             <Property Name="GridLayout" Type="Edm.String"/>
             <Property Name="Hidden" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="HtmlSchemaXml" Type="Edm.String"/>
@@ -10394,8 +10401,9 @@
             <FunctionImport Name="GetSiteMoveState" ReturnType="Edm.Int32" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
             </FunctionImport>
-            <FunctionImport Name="GetSiteSize" ReturnType="Edm.Int64" IsBindable="true">
+            <FunctionImport Name="GetSiteProperties" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
+               <Parameter Name="isDeleted" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="IsDbReadOnly" ReturnType="Edm.Boolean" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
@@ -12067,6 +12075,10 @@
                <Parameter Name="this" Type="SP.List"/>
                <Parameter Name="folderPath" Type="Edm.String"/>
                <Parameter Name="extension" Type="Edm.String"/>
+            </FunctionImport>
+            <FunctionImport Name="CreateHVCSItemApprovalRequest" ReturnType="Edm.String" IsBindable="true">
+               <Parameter Name="this" Type="SP.List"/>
+               <Parameter Name="createItemRequestPayload" Type="SP.ApprovalsCreateRequestParameters"/>
             </FunctionImport>
             <FunctionImport Name="CreateMappedView" ReturnType="SP.View" IsBindable="true" EntitySet="Views">
                <Parameter Name="this" Type="SP.List"/>
@@ -13793,10 +13805,12 @@
             <FunctionImport Name="SP_SharedWithMeItemCollection_RemoveFromSharedWithMe" ReturnType="Edm.String">
                <Parameter Name="spoIds" Type="Edm.String"/>
                <Parameter Name="itemIds" Type="Collection(Edm.String)"/>
+               <Parameter Name="workingSetIds" Type="Collection(Edm.String)"/>
             </FunctionImport>
             <FunctionImport Name="SP_SharedWithMeItemCollection_RestoreToSharedWithMe" ReturnType="Edm.String">
                <Parameter Name="spoIds" Type="Edm.String"/>
                <Parameter Name="itemIds" Type="Collection(Edm.String)"/>
+               <Parameter Name="workingSetIds" Type="Collection(Edm.String)"/>
             </FunctionImport>
             <FunctionImport Name="SP_SmartCache_Update">
                <Parameter Name="smartCacheJson" Type="Edm.String"/>
@@ -14526,6 +14540,9 @@
                <Parameter Name="this" Type="SP.File"/>
                <Parameter Name="comment" Type="Edm.String"/>
             </FunctionImport>
+            <FunctionImport Name="Archive" IsBindable="true">
+               <Parameter Name="this" Type="SP.File"/>
+            </FunctionImport>
             <FunctionImport Name="CancelUpload" IsBindable="true">
                <Parameter Name="this" Type="SP.File"/>
                <Parameter Name="uploadId" Type="Edm.Guid" Nullable="false"/>
@@ -14691,6 +14708,9 @@
                <Parameter Name="this" Type="SP.File"/>
                <Parameter Name="uploadId" Type="Edm.Guid" Nullable="false"/>
                <Parameter Name="stream" Type="Edm.Stream"/>
+            </FunctionImport>
+            <FunctionImport Name="Unarchive" IsBindable="true">
+               <Parameter Name="this" Type="SP.File"/>
             </FunctionImport>
             <FunctionImport Name="UndoCheckOut" IsBindable="true">
                <Parameter Name="this" Type="SP.File"/>
@@ -21491,6 +21511,9 @@
          <Annotations Target="SP.CurrencyInformation">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.GridInitInfoType">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ItemOrderUpdateValue">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -23160,6 +23183,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ContentType/EditFormTarget">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Field/AutofillInfo">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Field/ClientSideComponentId">
@@ -27474,10 +27500,10 @@
          <Annotations Target="SP.ApiData/SP_SharedWithMeItemCollection_GetSharedWithMeItems(Edm.Int32, Edm.String, Edm.Boolean)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SP_SharedWithMeItemCollection_RemoveFromSharedWithMe(Edm.String, Collection(Edm.String))">
+         <Annotations Target="SP.ApiData/SP_SharedWithMeItemCollection_RemoveFromSharedWithMe(Edm.String, Collection(Edm.String), Collection(Edm.String))">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SP_SharedWithMeItemCollection_RestoreToSharedWithMe(Edm.String, Collection(Edm.String))">
+         <Annotations Target="SP.ApiData/SP_SharedWithMeItemCollection_RestoreToSharedWithMe(Edm.String, Collection(Edm.String), Collection(Edm.String))">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_SmartCache_Update(Edm.String)">
@@ -35342,6 +35368,7 @@
             <Property Name="Audiences" Type="Collection(Edm.String)"/>
             <Property Name="Icon" Type="Edm.String"/>
             <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="ThumbnailOption" Type="Edm.String"/>
             <Property Name="Title" Type="Edm.String"/>
             <Property Name="Url" Type="Edm.String"/>
          </ComplexType>
@@ -37548,6 +37575,10 @@
             <Property Name="ResourceGroup" Type="Edm.String"/>
             <Property Name="SPContainerTypeBillingClassification" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="SPContentEventsCustomEmailProperty">
+            <Property Name="Category" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="EmailAddresses" Type="Collection(Edm.String)"/>
+         </ComplexType>
          <ComplexType Name="SPDataGovernanceInsightMetadata">
             <Property Name="ReportId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="Status" Type="Edm.String"/>
@@ -37875,8 +37906,6 @@
             <Property Name="LockState" Type="Edm.String"/>
             <Property Name="LoopDefaultSharingLinkRole" Type="Edm.Int32" Nullable="false"/>
             <Property Name="LoopDefaultSharingLinkScope" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="LoopOverrideSharingCapability" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="LoopSharingCapability" Type="Edm.Int32" Nullable="false"/>
             <Property Name="MajorVersionLimit" Type="Edm.Int32" Nullable="false"/>
             <Property Name="MajorWithMinorVersionsLimit" Type="Edm.Int32" Nullable="false"/>
             <Property Name="MediaTranscription" Type="Edm.Int32" Nullable="false"/>
@@ -38133,6 +38162,7 @@
             <Property Name="EnableDirectToCustomerBilling" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableDiscoverableByOrganizationForVideos" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableGuestSignInAcceleration" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="EnableMediaReactions" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableMinimumVersionRequirement" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableMipSiteLabel" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnablePromotedFileHandlers" Type="Edm.Boolean" Nullable="false"/>
@@ -38261,6 +38291,7 @@
             <Property Name="RequireAnonymousLinksExpireInDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ResourceQuota" Type="Edm.Double" Nullable="false"/>
             <Property Name="ResourceQuotaAllocated" Type="Edm.Double" Nullable="false"/>
+            <Property Name="RestrictedAccessControlforSitesErrorHelpLink" Type="Edm.String"/>
             <Property Name="RestrictedOneDriveLicense" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="RestrictedSharePointLicense" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="RootSiteUrl" Type="Edm.String"/>
@@ -40204,7 +40235,6 @@
             <Property Name="CoreDefaultShareLinkScope" Type="Edm.Int32" Nullable="false"/>
             <Property Name="CoreLoopDefaultSharingLinkRole" Type="Edm.Int32" Nullable="false"/>
             <Property Name="CoreLoopDefaultSharingLinkScope" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="CoreLoopSharingCapability" Type="Edm.Int32" Nullable="false"/>
             <Property Name="CoreRequestFilesLinkEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CoreRequestFilesLinkExpirationInDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="CoreSharingCapability" Type="Edm.Int32" Nullable="false"/>
@@ -40282,7 +40312,6 @@
             <Property Name="MySitesPublicEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="NotificationsInOneDriveForBusinessEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="NotificationsInSharePointEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="NotifyOwnersWhenInvitationsAccepted" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="NotifyOwnersWhenItemsReshared" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ODBAccessRequests" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ODBMembersCanShare" Type="Edm.Int32" Nullable="false"/>
@@ -40296,7 +40325,6 @@
             <Property Name="OneDriveForGuestsEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="OneDriveLoopDefaultSharingLinkRole" Type="Edm.Int32" Nullable="false"/>
             <Property Name="OneDriveLoopDefaultSharingLinkScope" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="OneDriveLoopSharingCapability" Type="Edm.Int32" Nullable="false"/>
             <Property Name="OneDriveRequestFilesLinkEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="OneDriveRequestFilesLinkExpirationInDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="OwnerAnonymousNotification" Type="Edm.Boolean" Nullable="false"/>
@@ -40308,8 +40336,8 @@
             <Property Name="RecycleBinRetentionPeriod" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ReduceTempTokenLifetimeEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ReduceTempTokenLifetimeValue" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="RequireAcceptingAccountMatchInvitedAccount" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="RequireAnonymousLinksExpireInDays" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="RestrictedAccessControlforSitesErrorHelpLink" Type="Edm.String"/>
             <Property Name="SearchResolveExactEmailOrUPN" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="SharingAllowedDomainList" Type="Edm.String"/>
             <Property Name="SharingBlockedDomainList" Type="Edm.String"/>

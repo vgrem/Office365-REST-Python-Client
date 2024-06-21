@@ -14,7 +14,7 @@ client = GraphClient.with_username_and_password(
 # source_path = "archive/Sample.rtf"
 local_path = "../../data/Financial Sample.xlsx"
 source_file = client.me.drive.root.upload_file(local_path).execute_query()
-# new_name = "Sample (copy).rtf"
+
 #  source_file = client.me.drive.root.get_by_path(source_path)  # source file item
 target_path = "archive/2018"
 target_folder = client.me.drive.root.get_by_path(target_path)

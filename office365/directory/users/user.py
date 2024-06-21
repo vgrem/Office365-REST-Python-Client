@@ -349,7 +349,7 @@ class User(DirectoryObject):
                 start_dt.isoformat(), end_dt.isoformat()
             )
 
-        self.context.add_query(qry).before_execute(_construct_request)
+        self.context.add_query(qry).before_query_execute(_construct_request)
         return return_type
 
     def get_reminder_view(self, start_dt, end_dt):

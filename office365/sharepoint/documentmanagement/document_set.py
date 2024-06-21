@@ -21,16 +21,9 @@ class DocumentSet(Folder):
 
         return_type = DocumentSet(context)
 
-        def _parent_folder_loaded():
-            custom_props = parent_folder.get_property("Properties")
-            list_id = custom_props.get("vti_x005f_listname")
-            target_list = context.web.lists.get_by_id(list_id)
-            target_list.ensure_property("Title", _create, target_list=target_list)
-
         def _create(target_list):
             # type: (List) -> None
             qry = ClientQuery(context, return_type=return_type)
-            context.add_query(qry)
             folder_url = parent_folder.serverRelativeUrl + "/" + name
             return_type.set_property("ServerRelativeUrl", folder_url)
 
@@ -43,7 +36,13 @@ class DocumentSet(Folder):
                 request.set_header("Slug", "{0}|{1}".format(folder_url, ct_id))
                 request.method = HttpMethod.Post
 
-            context.before_execute(_construct_request)
+            context.add_query(qry).before_query_execute(_construct_request)
+
+        def _parent_folder_loaded():
+            custom_props = parent_folder.get_property("Properties")
+            list_id = custom_props.get("vti_x005f_listname")
+            target_list = context.web.lists.get_by_id(list_id)
+            target_list.ensure_property("Title", _create, target_list=target_list)
 
         parent_folder.ensure_properties(
             ["UniqueId", "Properties", "ServerRelativeUrl"], _parent_folder_loaded

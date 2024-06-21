@@ -1,3 +1,5 @@
+from typing_extensions import Self
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.applications.application import WorkbookApplication
@@ -50,6 +52,7 @@ class Workbook(Entity):
         return return_type
 
     def refresh_session(self, session_id):
+        # type: (str) -> Self
         """Use this API to refresh an existing workbook session.
         :param str session_id: Identifier of the workbook session
         """
@@ -59,10 +62,11 @@ class Workbook(Entity):
             request.set_header("workbook-session-id", session_id)
 
         qry = ServiceOperationQuery(self, "refreshSession")
-        self.context.add_query(qry).before_execute(_construct_request)
+        self.context.add_query(qry).before_query_execute(_construct_request)
         return self
 
     def close_session(self, session_id):
+        # type: (str) -> Self
         """Use this API to close an existing workbook session.
         :param str session_id: Identifier of the workbook session
         """
@@ -72,7 +76,7 @@ class Workbook(Entity):
             # type: (RequestOptions) -> None
             request.set_header("workbook-session-id", session_id)
 
-        self.context.add_query(qry).before_execute(_construct_request)
+        self.context.add_query(qry).before_query_execute(_construct_request)
         return self
 
     @property

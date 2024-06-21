@@ -1,5 +1,6 @@
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.publishing.sites.communication.creation_request import (
@@ -61,13 +62,13 @@ class CommunicationSite(Entity):
         qry = ServiceOperationQuery(
             self, "Status", None, {"url": site_url}, None, response
         )
-        self.context.add_query(qry)
 
-        def _construct_status_request(request):
+        def _construct_request(request):
+            # type: (RequestOptions) -> None
             request.method = HttpMethod.Get
             request.url += "?url='{0}'".format(site_url)
 
-        self.context.before_execute(_construct_status_request)
+        self.context.add_query(qry).before_query_execute(_construct_request)
         return response
 
     def enable(self, design_package_id):

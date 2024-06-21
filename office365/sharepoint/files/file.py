@@ -684,7 +684,7 @@ class File(AbstractFile):
                         chunk_downloaded(bytes_read)
                     file_object.write(chunk)
 
-            self.context.add_query(qry).before_execute(
+            self.context.add_query(qry).before_query_execute(
                 _construct_request
             ).after_execute(_process_response)
 

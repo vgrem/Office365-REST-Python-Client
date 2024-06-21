@@ -1,3 +1,7 @@
+"""
+Demonstrates how to download large files.
+"""
+
 import os
 import tempfile
 
