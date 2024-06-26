@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import io
-from distutils.core import setup
 
-import setuptools
+from setuptools import setup, find_packages
 
 with io.open("README.md", mode="r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -48,7 +47,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    packages=setuptools.find_packages(
+    packages=find_packages(
         exclude=[
             "tests",
             "tests.*",
