@@ -33,5 +33,5 @@ def construct_request(request):
 
 
 client = GraphClient(acquire_token)
-client.before_execute(construct_request)
+client.pending_request().beforeExecute += construct_request
 messages = client.users[test_user_principal_name].messages.get().execute_query()

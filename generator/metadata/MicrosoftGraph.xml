@@ -21928,6 +21928,7 @@
             <Member Name="required" Value="0"/>
             <Member Name="recommended" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
+            <Member Name="peerRecommended" Value="3"/>
          </EnumType>
          <EnumType Name="courseStatus">
             <Member Name="notStarted" Value="0"/>
@@ -22367,7 +22368,7 @@
             <NavigationProperty Name="managedAppRegistrations" Type="Collection(graph.managedAppRegistration)"/>
             <NavigationProperty Name="deviceManagementTroubleshootingEvents" Type="Collection(graph.deviceManagementTroubleshootingEvent)" ContainsTarget="true"/>
             <NavigationProperty Name="planner" Type="graph.plannerUser" ContainsTarget="true"/>
-            <NavigationProperty Name="insights" Type="graph.officeGraphInsights" ContainsTarget="true"/>
+            <NavigationProperty Name="insights" Type="graph.itemInsights" ContainsTarget="true"/>
             <NavigationProperty Name="settings" Type="graph.userSettings" ContainsTarget="true"/>
             <NavigationProperty Name="onenote" Type="graph.onenote" ContainsTarget="true"/>
             <NavigationProperty Name="cloudClipboard" Type="graph.cloudClipboardRoot" ContainsTarget="true"/>
@@ -22850,11 +22851,13 @@
             <NavigationProperty Name="trending" Type="Collection(graph.trending)" ContainsTarget="true"/>
             <NavigationProperty Name="used" Type="Collection(graph.usedInsight)" ContainsTarget="true"/>
          </EntityType>
+         <EntityType Name="itemInsights" BaseType="graph.officeGraphInsights"/>
          <EntityType Name="userSettings" BaseType="graph.entity">
             <Property Name="contributionToContentDiscoveryAsOrganizationDisabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="contributionToContentDiscoveryDisabled" Type="Edm.Boolean" Nullable="false"/>
             <NavigationProperty Name="windows" Type="Collection(graph.windowsSetting)" ContainsTarget="true"/>
             <NavigationProperty Name="shiftPreferences" Type="graph.shiftPreferences" ContainsTarget="true"/>
+            <NavigationProperty Name="storage" Type="graph.userStorage" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="onenote" BaseType="graph.entity">
             <NavigationProperty Name="notebooks" Type="Collection(graph.notebook)" ContainsTarget="true"/>
@@ -26388,6 +26391,7 @@
          <EntityType Name="peopleAdminSettings" BaseType="graph.entity">
             <NavigationProperty Name="profileCardProperties" Type="Collection(graph.profileCardProperty)" ContainsTarget="true"/>
             <NavigationProperty Name="pronouns" Type="graph.pronounsSettings" ContainsTarget="true"/>
+            <NavigationProperty Name="itemInsights" Type="graph.insightsSettings" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="browserSharedCookie" BaseType="graph.entity">
             <Property Name="comment" Type="Edm.String" Nullable="false"/>
@@ -27756,6 +27760,10 @@
          </EntityType>
          <EntityType Name="storage">
             <NavigationProperty Name="fileStorage" Type="graph.fileStorage" ContainsTarget="true"/>
+            <NavigationProperty Name="settings" Type="graph.storageSettings" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="storageSettings" BaseType="graph.entity">
+            <NavigationProperty Name="quota" Type="graph.unifiedStorageQuota" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="accessAction" OpenType="true"/>
          <ComplexType Name="album">
@@ -32020,6 +32028,9 @@
          <EntityType Name="shiftPreferences" BaseType="graph.changeTrackedEntity">
             <Property Name="availability" Type="Collection(graph.shiftAvailability)"/>
          </EntityType>
+         <EntityType Name="userStorage" BaseType="graph.entity">
+            <NavigationProperty Name="quota" Type="graph.unifiedStorageQuota" ContainsTarget="true"/>
+         </EntityType>
          <ComplexType Name="CopyNotebookModel">
             <Property Name="createdBy" Type="Edm.String"/>
             <Property Name="createdByIdentity" Type="graph.identitySet"/>
@@ -32217,6 +32228,10 @@
          </EntityType>
          <EntityType Name="pronounsSettings" BaseType="graph.entity">
             <Property Name="isEnabledInOrganization" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="insightsSettings" BaseType="graph.entity">
+            <Property Name="disabledForGroup" Type="Edm.String"/>
+            <Property Name="isEnabledInOrganization" Type="Edm.Boolean"/>
          </EntityType>
          <ComplexType Name="approvalSettings">
             <Property Name="approvalMode" Type="Edm.String"/>
@@ -34000,6 +34015,21 @@
             <NavigationProperty Name="checklistItems" Type="Collection(graph.checklistItem)" ContainsTarget="true"/>
             <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
             <NavigationProperty Name="linkedResources" Type="Collection(graph.linkedResource)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="storageQuotaBreakdown" BaseType="graph.entity">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="manageWebUrl" Type="Edm.String"/>
+            <Property Name="used" Type="Edm.Int64"/>
+         </EntityType>
+         <EntityType Name="serviceStorageQuotaBreakdown" BaseType="graph.storageQuotaBreakdown"/>
+         <EntityType Name="unifiedStorageQuota" BaseType="graph.entity">
+            <Property Name="deleted" Type="Edm.Int64"/>
+            <Property Name="manageWebUrl" Type="Edm.String"/>
+            <Property Name="remaining" Type="Edm.Int64"/>
+            <Property Name="state" Type="Edm.String"/>
+            <Property Name="total" Type="Edm.Int64"/>
+            <Property Name="used" Type="Edm.Int64"/>
+            <NavigationProperty Name="services" Type="Collection(graph.serviceStorageQuotaBreakdown)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="employeeExperience">
             <NavigationProperty Name="learningCourseActivities" Type="Collection(graph.learningCourseActivity)" ContainsTarget="true"/>
@@ -38192,6 +38222,12 @@
             <Parameter Name="TimeZoneStandard" Type="graph.timeZoneStandard" Nullable="false"/>
             <ReturnType Type="Collection(graph.timeZoneInformation)" Nullable="false"/>
          </Function>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.fileStorageContainer"/>
+         </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
+         </Action>
          <Action Name="remove" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.site)"/>
             <Parameter Name="value" Type="Collection(graph.site)"/>
@@ -38282,9 +38318,6 @@
             <Parameter Name="participants" Type="Collection(graph.invitationParticipantInfo)" Nullable="false"/>
             <Parameter Name="clientContext" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="graph.inviteParticipantsOperation"/>
-         </Action>
-         <Action Name="permanentDelete" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
          </Action>
          <Action Name="preview" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.driveItem"/>

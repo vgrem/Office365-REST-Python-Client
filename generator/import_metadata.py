@@ -26,13 +26,13 @@ parser.add_argument(
     "--endpoint",
     dest="endpoint",
     help="Import metadata endpoint",
-    default="sharepoint",
+    default="graph",
 )
 parser.add_argument(
     "-p",
     "--path",
     dest="path",
-    default="./metadata/SharePoint.xml",
+    default="./metadata/MicrosoftGraph.xml",
     help="Import metadata endpoint",
 )
 
@@ -43,7 +43,7 @@ if args.endpoint == "sharepoint":
     ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)
     result = ctx.get_metadata().execute_query()
     export_to_file(args.path, result.value)
-elif args.endpoint == "microsoftgraph":
+elif args.endpoint == "graph":
     print("Importing Microsoft Graph model metadata...")
     client = GraphClient.with_client_secret(
         test_tenant, test_client_id, test_client_secret
