@@ -109,7 +109,7 @@ Steps to access:
   Usage:
 ```python
 from office365.sharepoint.client_context import ClientContext
-ctx = ClientContext(site_url).with_interactive(tenant_name_or_id, client_id)
+ctx = ClientContext("{site-url}").with_interactive("{tenant-name-or-id}", "{client-id}")
 me = ctx.web.current_user.get().execute_query()
 print(me.login_name)
 ```
@@ -142,19 +142,17 @@ print("Web title: {0}".format(web.properties['Title']))
 ```
 
 
-2. `RequestOptions class` - where you construct REST queries (and no model is involved)
+2. `SharePointRequest class` - where you construct REST queries (and no model is involved)
 
    The example demonstrates how to read `Web` properties:
    
 ```python
 import json
 from office365.runtime.auth.user_credential import UserCredential
-from office365.runtime.http.request_options import RequestOptions
-from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.request import SharePointRequest
 site_url = "https://{your-tenant-prefix}.sharepoint.com"
-ctx = ClientContext(site_url).with_credentials(UserCredential("{username}", "{password}"))
-request = RequestOptions("{0}/_api/web/".format(site_url))
-response = ctx.pending_request().execute_request_direct(request)
+request = SharePointRequest(site_url).with_credentials(UserCredential("{username}", "{password}"))
+response = request.execute_request("web")
 json = json.loads(response.content)
 web_title = json['d']['Title']
 print("Web title: {0}".format(web_title))
@@ -184,6 +182,7 @@ Refer [examples section](examples/sharepoint) for another scenarios
 
    Example:
    ```python
+   from office365.sharepoint.client_context import ClientContext
    client_credentials = ClientCredential('{client_id}','{client_secret}')
    ctx = ClientContext('{url}').with_credentials(client_credentials, environment='GCCH')
    ```
@@ -395,7 +394,7 @@ which corresponds to [`Create team` endpoint](https://docs.microsoft.com/en-us/g
 ```python
 from office365.graph_client import GraphClient
 client = GraphClient(acquire_token_func)
-new_team = client.groups["{group_id}"].add_team().execute_query_retry()
+new_team = client.groups["{group-id}"].add_team().execute_query_retry()
 ```
 
 Additional examples:
