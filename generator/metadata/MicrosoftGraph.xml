@@ -5074,6 +5074,43 @@
                </Record>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/accessControl">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Access control on the Bookings page."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/bookingPageColorCode">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Custom color for bookings page. Value should be in Hex format. Example: `#123456`."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/businessTimeZone">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The time zone of the customer. For a list of possible values, see [dateTimeTimeZone](https://learn.microsoft.com/en-us/graph/api/resources/datetimetimezone?view=graph-rest-beta)."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/customerConsentMessage">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Customer consent message that is displayed in the Booking page."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/enforceOneTimePassword">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Enforcing One Time Password (OTP) during appointment creation."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/isBusinessLogoDisplayEnabled">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Enable display of business logo display on the Bookings page."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/isCustomerConsentEnabled">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Enforces customer consent on the customer consent message before appointment is booked."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/isSearchEngineIndexabilityDisabled">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Disable booking page to be indexed by search engines. False by default."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/isTimeSlotTimeZoneSetToBusinessTimeZone">
+            <Annotation Term="Org.OData.Core.V1.Description" String="If business time zone the default value for the time slots that we show in the bookings page. False by default."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/privacyPolicyWebUrl">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The URL of the business' Privacy Policy."/>
+            <Annotation Term="Org.OData.Core.V1.IsURL" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.LongDescription" String="Example: https://www.contoso.com"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingPageSettings/termsAndConditionsWebUrl">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The URL of the business' Terms and Conditions."/>
+            <Annotation Term="Org.OData.Core.V1.IsURL" Bool="true"/>
+            <Annotation Term="Org.OData.Core.V1.LongDescription" String="Example: https://www.contoso.com"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.bookingReminder">
             <Annotation Term="Org.OData.Core.V1.Description" String="This type represents when and to whom to send an e-mail reminder."/>
          </Annotations>
@@ -5086,11 +5123,35 @@
          <Annotations Target="microsoft.graph.bookingReminder/recipients">
             <Annotation Term="Org.OData.Core.V1.Description" String="Who should receive the reminder."/>
          </Annotations>
+         <Annotations Target="microsoft.graph.bookingsAvailability/availabilityType">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Allow customers to set the type of availability."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingWorkHours">
+            <Annotation Term="Org.OData.Core.V1.Description" String="This type represents the set of working hours in a single day of the week."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingsAvailability/businessHours">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The hours of operation in a week. This is set to null if the availability type is not customWeeklyHours"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingsAvailabilityWindow/endDate">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Allow customers to end date of availability window."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingsAvailabilityWindow/startDate">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Allow customers to start date of availability window."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.bookingSchedulingPolicy">
             <Annotation Term="Org.OData.Core.V1.Description" String="This type represents the set of policies that dictate how bookings can be created in a Booking Calendar."/>
          </Annotations>
          <Annotations Target="microsoft.graph.bookingSchedulingPolicy/allowStaffSelection">
             <Annotation Term="Org.OData.Core.V1.Description" String="Allow customers to choose a specific person for the booking."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingSchedulingPolicy/customAvailabilities">
+            <Annotation Term="Org.OData.Core.V1.Description" String="collection of custom availabilities for a given time range."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingSchedulingPolicy/generalAvailability">
+            <Annotation Term="Org.OData.Core.V1.Description" String="General availability "/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingSchedulingPolicy/isMeetingInviteToCustomersEnabled">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Enable sending meeting invite to customers. False by default."/>
          </Annotations>
          <Annotations Target="microsoft.graph.bookingSchedulingPolicy/maximumAdvance">
             <Annotation Term="Org.OData.Core.V1.Description" String="Maximum number of days in advance that a booking can be made."/>
@@ -5104,9 +5165,6 @@
          <Annotations Target="microsoft.graph.bookingSchedulingPolicy/timeSlotInterval">
             <Annotation Term="Org.OData.Core.V1.Description" String="Duration of each time slot."/>
          </Annotations>
-         <Annotations Target="microsoft.graph.bookingWorkHours">
-            <Annotation Term="Org.OData.Core.V1.Description" String="This type represents the set of working hours in a single day of the week."/>
-         </Annotations>
          <Annotations Target="microsoft.graph.bookingWorkHours/day">
             <Annotation Term="Org.OData.Core.V1.Description" String="The day of the week represented by this instance."/>
          </Annotations>
@@ -5118,6 +5176,9 @@
          </Annotations>
          <Annotations Target="microsoft.graph.bookingAppointment/anonymousJoinWebUrl">
             <Annotation Term="Org.OData.Core.V1.IsURL" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.bookingAppointment/appointmentLabel">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Custom label that can be stamped on this appointment by users."/>
          </Annotations>
          <Annotations Target="microsoft.graph.bookingAppointment/customerNotes">
             <Annotation Term="Org.OData.Core.V1.Description" String="Notes from the customer associated with this appointment."/>
@@ -17001,6 +17062,11 @@
             <Member Name="radioButton" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
+         <EnumType Name="bookingPageAccessControl">
+            <Member Name="unrestricted" Value="0"/>
+            <Member Name="restrictedToOrganization" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="bookingPriceType">
             <Member Name="undefined" Value="0"/>
             <Member Name="fixedPrice" Value="1"/>
@@ -17024,6 +17090,12 @@
             <Member Name="slotsAvailable" Value="2"/>
             <Member Name="outOfOffice" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="bookingsServiceAvailabilityType">
+            <Member Name="bookWhenStaffAreFree" Value="0"/>
+            <Member Name="notBookable" Value="1"/>
+            <Member Name="customWeeklyHours" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
          <EnumType Name="bookingStaffMembershipStatus">
             <Member Name="active" Value="0"/>
@@ -17461,6 +17533,11 @@
          <EnumType Name="multiTenantOrganizationState">
             <Member Name="active" Value="0"/>
             <Member Name="inactive" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="nativeAuthenticationApisEnabled" IsFlags="true">
+            <Member Name="none" Value="0"/>
+            <Member Name="all" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
          <EnumType Name="onPremisesDirectorySynchronizationDeletionPreventionType">
@@ -21062,6 +21139,12 @@
             <Member Name="updateSimulation" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
+         <EnumType Name="clickSource">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="qrCode" Value="1"/>
+            <Member Name="phishingUrl" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
          <EnumType Name="coachmarkLocationType">
             <Member Name="unknown" Value="0"/>
             <Member Name="fromEmail" Value="1"/>
@@ -21598,6 +21681,25 @@
             <Member Name="rejectedByOrganizer" Value="4"/>
             <Member Name="unknownFutureValue" Value="11"/>
          </EnumType>
+         <EnumType Name="virtualEventRegistrationPredefinedQuestionLabel">
+            <Member Name="street" Value="0"/>
+            <Member Name="city" Value="1"/>
+            <Member Name="state" Value="2"/>
+            <Member Name="postalCode" Value="3"/>
+            <Member Name="countryOrRegion" Value="4"/>
+            <Member Name="industry" Value="5"/>
+            <Member Name="jobTitle" Value="6"/>
+            <Member Name="organization" Value="7"/>
+            <Member Name="unknownFutureValue" Value="8"/>
+         </EnumType>
+         <EnumType Name="virtualEventRegistrationQuestionAnswerInputType">
+            <Member Name="text" Value="0"/>
+            <Member Name="multilineText" Value="1"/>
+            <Member Name="singleChoice" Value="2"/>
+            <Member Name="multiChoice" Value="3"/>
+            <Member Name="boolean" Value="4"/>
+            <Member Name="unknownFutureValue" Value="5"/>
+         </EnumType>
          <EnumType Name="virtualEventStatus">
             <Member Name="draft" Value="0"/>
             <Member Name="published" Value="1"/>
@@ -22010,6 +22112,7 @@
             <Property Name="isFallbackPublicClient" Type="Edm.Boolean"/>
             <Property Name="keyCredentials" Type="Collection(graph.keyCredential)" Nullable="false"/>
             <Property Name="logo" Type="Edm.Stream" Nullable="false"/>
+            <Property Name="nativeAuthenticationApisEnabled" Type="graph.nativeAuthenticationApisEnabled"/>
             <Property Name="notes" Type="Edm.String"/>
             <Property Name="oauth2RequirePostResponse" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="optionalClaims" Type="graph.optionalClaims"/>
@@ -22165,7 +22268,7 @@
          </EntityType>
          <EntityType Name="appManagementPolicy" BaseType="graph.policyBase">
             <Property Name="isEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="restrictions" Type="graph.appManagementConfiguration"/>
+            <Property Name="restrictions" Type="graph.customAppManagementConfiguration"/>
             <NavigationProperty Name="appliesTo" Type="Collection(graph.directoryObject)"/>
          </EntityType>
          <EntityType Name="extensionProperty" BaseType="graph.directoryObject" OpenType="true">
@@ -22855,6 +22958,7 @@
          <EntityType Name="userSettings" BaseType="graph.entity">
             <Property Name="contributionToContentDiscoveryAsOrganizationDisabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="contributionToContentDiscoveryDisabled" Type="Edm.Boolean" Nullable="false"/>
+            <NavigationProperty Name="itemInsights" Type="graph.userInsightsSettings" ContainsTarget="true"/>
             <NavigationProperty Name="windows" Type="Collection(graph.windowsSetting)" ContainsTarget="true"/>
             <NavigationProperty Name="shiftPreferences" Type="graph.shiftPreferences" ContainsTarget="true"/>
             <NavigationProperty Name="storage" Type="graph.userStorage" ContainsTarget="true"/>
@@ -23616,9 +23720,9 @@
             <NavigationProperty Name="templates" Type="graph.policyTemplate" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="tenantAppManagementPolicy" BaseType="graph.policyBase">
-            <Property Name="applicationRestrictions" Type="graph.appManagementConfiguration"/>
+            <Property Name="applicationRestrictions" Type="graph.appManagementApplicationConfiguration"/>
             <Property Name="isEnabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="servicePrincipalRestrictions" Type="graph.appManagementConfiguration"/>
+            <Property Name="servicePrincipalRestrictions" Type="graph.appManagementServicePrincipalConfiguration"/>
          </EntityType>
          <EntityType Name="permissionGrantPolicy" BaseType="graph.policyBase">
             <NavigationProperty Name="excludes" Type="Collection(graph.permissionGrantConditionSet)" ContainsTarget="true"/>
@@ -23754,6 +23858,19 @@
             <Property Name="uniqueId" Type="Edm.String"/>
             <Property Name="uniqueIdType" Type="graph.locationUniqueIdType"/>
          </ComplexType>
+         <ComplexType Name="bookingPageSettings">
+            <Property Name="accessControl" Type="graph.bookingPageAccessControl" Nullable="false"/>
+            <Property Name="bookingPageColorCode" Type="Edm.String" Nullable="false"/>
+            <Property Name="businessTimeZone" Type="Edm.String" Nullable="false"/>
+            <Property Name="customerConsentMessage" Type="Edm.String" Nullable="false"/>
+            <Property Name="enforceOneTimePassword" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isBusinessLogoDisplayEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isCustomerConsentEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isSearchEngineIndexabilityDisabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isTimeSlotTimeZoneSetToBusinessTimeZone" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="privacyPolicyWebUrl" Type="Edm.String" Nullable="false"/>
+            <Property Name="termsAndConditionsWebUrl" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="bookingQuestionAssignment">
             <Property Name="isRequired" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="questionId" Type="Edm.String" Nullable="false"/>
@@ -23763,16 +23880,27 @@
             <Property Name="offset" Type="Edm.Duration" Nullable="false"/>
             <Property Name="recipients" Type="graph.bookingReminderRecipients" Nullable="false"/>
          </ComplexType>
-         <ComplexType Name="bookingSchedulingPolicy">
-            <Property Name="allowStaffSelection" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="maximumAdvance" Type="Edm.Duration" Nullable="false"/>
-            <Property Name="minimumLeadTime" Type="Edm.Duration" Nullable="false"/>
-            <Property Name="sendConfirmationsToOwner" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="timeSlotInterval" Type="Edm.Duration" Nullable="false"/>
+         <ComplexType Name="bookingsAvailability">
+            <Property Name="availabilityType" Type="graph.bookingsServiceAvailabilityType" Nullable="false"/>
+            <Property Name="businessHours" Type="Collection(graph.bookingWorkHours)"/>
          </ComplexType>
          <ComplexType Name="bookingWorkHours">
             <Property Name="day" Type="graph.dayOfWeek" Nullable="false"/>
             <Property Name="timeSlots" Type="Collection(graph.bookingWorkTimeSlot)"/>
+         </ComplexType>
+         <ComplexType Name="bookingsAvailabilityWindow" BaseType="graph.bookingsAvailability">
+            <Property Name="endDate" Type="Edm.Date"/>
+            <Property Name="startDate" Type="Edm.Date"/>
+         </ComplexType>
+         <ComplexType Name="bookingSchedulingPolicy">
+            <Property Name="allowStaffSelection" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="customAvailabilities" Type="Collection(graph.bookingsAvailabilityWindow)"/>
+            <Property Name="generalAvailability" Type="graph.bookingsAvailability"/>
+            <Property Name="isMeetingInviteToCustomersEnabled" Type="Edm.Boolean"/>
+            <Property Name="maximumAdvance" Type="Edm.Duration" Nullable="false"/>
+            <Property Name="minimumLeadTime" Type="Edm.Duration" Nullable="false"/>
+            <Property Name="sendConfirmationsToOwner" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="timeSlotInterval" Type="Edm.Duration" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="bookingWorkTimeSlot">
             <Property Name="endTime" Type="Edm.TimeOfDay" Nullable="false"/>
@@ -23809,6 +23937,8 @@
          <EntityType Name="bookingAppointment" BaseType="graph.entity">
             <Property Name="additionalInformation" Type="Edm.String"/>
             <Property Name="anonymousJoinWebUrl" Type="Edm.String"/>
+            <Property Name="appointmentLabel" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="customerEmailAddress" Type="Edm.String"/>
             <Property Name="customerName" Type="Edm.String"/>
             <Property Name="customerNotes" Type="Edm.String"/>
@@ -23818,8 +23948,10 @@
             <Property Name="duration" Type="Edm.Duration" Nullable="false"/>
             <Property Name="endDateTime" Type="graph.dateTimeTimeZone" Nullable="false"/>
             <Property Name="filledAttendeesCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="isCustomerAllowedToManageBooking" Type="Edm.Boolean"/>
             <Property Name="isLocationOnline" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="joinWebUrl" Type="Edm.String"/>
+            <Property Name="lastUpdatedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="maximumAttendeesCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="optOutOfCustomerEmail" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="postBuffer" Type="Edm.Duration" Nullable="false"/>
@@ -23838,13 +23970,16 @@
          </EntityType>
          <EntityType Name="bookingBusiness" BaseType="graph.entity">
             <Property Name="address" Type="graph.physicalAddress"/>
+            <Property Name="bookingPageSettings" Type="graph.bookingPageSettings"/>
             <Property Name="businessHours" Type="Collection(graph.bookingWorkHours)"/>
             <Property Name="businessType" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="defaultCurrencyIso" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
             <Property Name="email" Type="Edm.String"/>
             <Property Name="isPublished" Type="Edm.Boolean"/>
             <Property Name="languageTag" Type="Edm.String"/>
+            <Property Name="lastUpdatedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="phone" Type="Edm.String"/>
             <Property Name="publicUrl" Type="Edm.String"/>
             <Property Name="schedulingPolicy" Type="graph.bookingSchedulingPolicy"/>
@@ -23860,10 +23995,13 @@
          <EntityType Name="bookingCustomQuestion" BaseType="graph.entity">
             <Property Name="answerInputType" Type="graph.answerInputType"/>
             <Property Name="answerOptions" Type="Collection(Edm.String)"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="lastUpdatedDateTime" Type="Edm.DateTimeOffset"/>
          </EntityType>
          <EntityType Name="bookingService" BaseType="graph.entity">
             <Property Name="additionalInformation" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="customQuestions" Type="Collection(graph.bookingQuestionAssignment)"/>
             <Property Name="defaultDuration" Type="Edm.Duration" Nullable="false"/>
             <Property Name="defaultLocation" Type="graph.location"/>
@@ -23873,9 +24011,11 @@
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
             <Property Name="isAnonymousJoinEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isCustomerAllowedToManageBooking" Type="Edm.Boolean"/>
             <Property Name="isHiddenFromCustomers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="isLocationOnline" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="languageTag" Type="Edm.String" Nullable="false"/>
+            <Property Name="lastUpdatedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="maximumAttendeesCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="notes" Type="Edm.String"/>
             <Property Name="postBuffer" Type="Edm.Duration" Nullable="false"/>
@@ -23891,15 +24031,19 @@
          </EntityType>
          <EntityType Name="bookingCustomer" BaseType="graph.bookingCustomerBase">
             <Property Name="addresses" Type="Collection(graph.physicalAddress)"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
             <Property Name="emailAddress" Type="Edm.String"/>
+            <Property Name="lastUpdatedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="phones" Type="Collection(graph.phone)"/>
          </EntityType>
          <EntityType Name="bookingStaffMember" BaseType="graph.bookingStaffMemberBase">
             <Property Name="availabilityIsAffectedByPersonalCalendar" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
             <Property Name="emailAddress" Type="Edm.String"/>
             <Property Name="isEmailNotificationEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="lastUpdatedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="membershipStatus" Type="graph.bookingStaffMembershipStatus" Nullable="false"/>
             <Property Name="role" Type="graph.bookingStaffRole" Nullable="false"/>
             <Property Name="timeZone" Type="Edm.String"/>
@@ -23913,6 +24057,7 @@
          </EntityType>
          <EntityType Name="virtualEventsRoot" BaseType="graph.entity">
             <NavigationProperty Name="events" Type="Collection(graph.virtualEvent)" ContainsTarget="true"/>
+            <NavigationProperty Name="townhalls" Type="Collection(graph.virtualEventTownhall)" ContainsTarget="true"/>
             <NavigationProperty Name="webinars" Type="Collection(graph.virtualEventWebinar)" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="cloudPcAuditActor">
@@ -25599,10 +25744,11 @@
             <Property Name="appId" Type="Edm.String"/>
             <Property Name="delegatedPermissionIds" Type="Collection(Edm.String)" Nullable="false"/>
          </ComplexType>
-         <ComplexType Name="appManagementConfiguration">
+         <ComplexType Name="appManagementConfiguration" Abstract="true">
             <Property Name="keyCredentials" Type="Collection(graph.keyCredentialConfiguration)"/>
             <Property Name="passwordCredentials" Type="Collection(graph.passwordCredentialConfiguration)"/>
          </ComplexType>
+         <ComplexType Name="appManagementApplicationConfiguration" BaseType="graph.appManagementConfiguration"/>
          <ComplexType Name="keyCredentialConfiguration">
             <Property Name="maxLifetime" Type="Edm.Duration"/>
             <Property Name="restrictForAppsCreatedAfterDateTime" Type="Edm.DateTimeOffset"/>
@@ -25613,6 +25759,7 @@
             <Property Name="restrictForAppsCreatedAfterDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="restrictionType" Type="graph.appCredentialRestrictionType"/>
          </ComplexType>
+         <ComplexType Name="appManagementServicePrincipalConfiguration" BaseType="graph.appManagementConfiguration"/>
          <ComplexType Name="certificateAuthority">
             <Property Name="certificate" Type="Edm.Binary" Nullable="false"/>
             <Property Name="certificateRevocationListUrl" Type="Edm.String"/>
@@ -25655,6 +25802,7 @@
          <ComplexType Name="crossTenantUserSyncInbound">
             <Property Name="isSyncAllowed" Type="Edm.Boolean"/>
          </ComplexType>
+         <ComplexType Name="customAppManagementConfiguration" BaseType="graph.appManagementConfiguration"/>
          <ComplexType Name="invitationRedemptionIdentityProviderConfiguration">
             <Property Name="fallbackIdentityProvider" Type="graph.b2bIdentityProvidersType"/>
             <Property Name="primaryIdentityProviderPrecedenceOrder" Type="Collection(graph.b2bIdentityProvidersType)"/>
@@ -32014,6 +32162,9 @@
             <Property Name="resourceVisualization" Type="graph.resourceVisualization"/>
             <NavigationProperty Name="resource" Type="graph.entity"/>
          </EntityType>
+         <EntityType Name="userInsightsSettings" BaseType="graph.entity">
+            <Property Name="isEnabled" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
          <EntityType Name="windowsSetting" BaseType="graph.entity">
             <Property Name="payloadType" Type="Edm.String"/>
             <Property Name="settingType" Type="graph.windowsSettingType" Nullable="false"/>
@@ -32742,6 +32893,7 @@
          </ComplexType>
          <ComplexType Name="userSimulationEventInfo">
             <Property Name="browser" Type="Edm.String"/>
+            <Property Name="clickSource" Type="graph.clickSource"/>
             <Property Name="eventDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="eventName" Type="Edm.String"/>
             <Property Name="ipAddress" Type="Edm.String"/>
@@ -33262,6 +33414,18 @@
             <Property Name="sequenceId" Type="Edm.Int64" Nullable="false"/>
             <Property Name="tone" Type="graph.tone" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="virtualEventPresenterDetails">
+            <Property Name="bio" Type="graph.itemBody"/>
+            <Property Name="company" Type="Edm.String"/>
+            <Property Name="jobTitle" Type="Edm.String"/>
+            <Property Name="linkedInProfileWebUrl" Type="Edm.String"/>
+            <Property Name="personalSiteWebUrl" Type="Edm.String"/>
+            <Property Name="photo" Type="Edm.Stream"/>
+            <Property Name="twitterProfileWebUrl" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="virtualEventPresenterInfo" BaseType="graph.meetingParticipantInfo">
+            <Property Name="presenterDetails" Type="graph.virtualEventPresenterDetails"/>
+         </ComplexType>
          <ComplexType Name="virtualEventRegistrationQuestionAnswer">
             <Property Name="booleanValue" Type="Edm.Boolean"/>
             <Property Name="displayName" Type="Edm.String"/>
@@ -33341,7 +33505,13 @@
             <Property Name="endDateTime" Type="graph.dateTimeTimeZone"/>
             <Property Name="startDateTime" Type="graph.dateTimeTimeZone"/>
             <Property Name="status" Type="graph.virtualEventStatus"/>
+            <NavigationProperty Name="presenters" Type="Collection(graph.virtualEventPresenter)" ContainsTarget="true"/>
             <NavigationProperty Name="sessions" Type="Collection(graph.virtualEventSession)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="virtualEventPresenter" BaseType="graph.entity">
+            <Property Name="email" Type="Edm.String"/>
+            <Property Name="identity" Type="graph.identity"/>
+            <Property Name="presenterDetails" Type="graph.virtualEventPresenterDetails"/>
          </EntityType>
          <EntityType Name="virtualEventSession" BaseType="graph.onlineMeetingBase">
             <Property Name="endDateTime" Type="graph.dateTimeTimeZone"/>
@@ -33352,15 +33522,69 @@
             <Property Name="email" Type="Edm.String"/>
             <Property Name="firstName" Type="Edm.String"/>
             <Property Name="lastName" Type="Edm.String"/>
+            <Property Name="preferredLanguage" Type="Edm.String"/>
+            <Property Name="preferredTimezone" Type="Edm.String"/>
             <Property Name="registrationDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="registrationQuestionAnswers" Type="Collection(graph.virtualEventRegistrationQuestionAnswer)"/>
             <Property Name="status" Type="graph.virtualEventAttendeeRegistrationStatus"/>
             <Property Name="userId" Type="Edm.String"/>
+            <NavigationProperty Name="sessions" Type="Collection(graph.virtualEventSession)"/>
+            <Annotation Term="Org.OData.Core.V1.AlternateKeys">
+               <Collection>
+                  <Record Type="Org.OData.Core.V1.AlternateKey">
+                     <PropertyValue Property="Key">
+                        <Collection>
+                           <Record Type="Org.OData.Core.V1.PropertyRef">
+                              <PropertyValue Property="Alias" String="userId"/>
+                              <PropertyValue Property="Name" PropertyPath="userId"/>
+                           </Record>
+                        </Collection>
+                     </PropertyValue>
+                  </Record>
+                  <Record Type="Org.OData.Core.V1.AlternateKey">
+                     <PropertyValue Property="Key">
+                        <Collection>
+                           <Record Type="Org.OData.Core.V1.PropertyRef">
+                              <PropertyValue Property="Alias" String="email"/>
+                              <PropertyValue Property="Name" PropertyPath="email"/>
+                           </Record>
+                        </Collection>
+                     </PropertyValue>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </EntityType>
+         <EntityType Name="virtualEventRegistrationConfiguration" BaseType="graph.entity">
+            <Property Name="capacity" Type="Edm.Int32"/>
+            <Property Name="registrationWebUrl" Type="Edm.String"/>
+            <NavigationProperty Name="questions" Type="Collection(graph.virtualEventRegistrationQuestionBase)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="virtualEventRegistrationQuestionBase" BaseType="graph.entity" Abstract="true">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="isRequired" Type="Edm.Boolean"/>
+         </EntityType>
+         <EntityType Name="virtualEventRegistrationCustomQuestion" BaseType="graph.virtualEventRegistrationQuestionBase">
+            <Property Name="answerChoices" Type="Collection(Edm.String)"/>
+            <Property Name="answerInputType" Type="graph.virtualEventRegistrationQuestionAnswerInputType"/>
+         </EntityType>
+         <EntityType Name="virtualEventRegistrationPredefinedQuestion" BaseType="graph.virtualEventRegistrationQuestionBase">
+            <Property Name="label" Type="graph.virtualEventRegistrationPredefinedQuestionLabel"/>
+         </EntityType>
+         <EntityType Name="virtualEventTownhall" BaseType="graph.virtualEvent">
+            <Property Name="audience" Type="graph.meetingAudience"/>
+            <Property Name="coOrganizers" Type="Collection(graph.communicationsUserIdentity)"/>
+            <Property Name="invitedAttendees" Type="Collection(graph.identity)"/>
+            <Property Name="isInviteOnly" Type="Edm.Boolean"/>
          </EntityType>
          <EntityType Name="virtualEventWebinar" BaseType="graph.virtualEvent">
             <Property Name="audience" Type="graph.meetingAudience"/>
             <Property Name="coOrganizers" Type="Collection(graph.communicationsUserIdentity)"/>
+            <NavigationProperty Name="registrationConfiguration" Type="graph.virtualEventWebinarRegistrationConfiguration" ContainsTarget="true"/>
             <NavigationProperty Name="registrations" Type="Collection(graph.virtualEventRegistration)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="virtualEventWebinarRegistrationConfiguration" BaseType="graph.virtualEventRegistrationConfiguration">
+            <Property Name="isManualApprovalEnabled" Type="Edm.Boolean"/>
+            <Property Name="isWaitlistEnabled" Type="Edm.Boolean"/>
          </EntityType>
          <ComplexType Name="passwordResetResponse">
             <Property Name="newPassword" Type="Edm.String"/>
@@ -34744,6 +34968,12 @@
          <Action Name="cancel" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.printJob"/>
          </Action>
+         <Action Name="cancel" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.virtualEvent"/>
+         </Action>
+         <Action Name="cancel" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.virtualEventRegistration"/>
+         </Action>
          <Action Name="getStaffAvailability" IsBound="true">
             <Parameter Name="bookingBusiness" Type="graph.bookingBusiness" Nullable="false"/>
             <Parameter Name="staffIds" Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
@@ -34774,6 +35004,9 @@
          </Action>
          <Action Name="publish" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.sitePage"/>
+         </Action>
+         <Action Name="publish" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.virtualEvent"/>
          </Action>
          <Action Name="unpublish" IsBound="true">
             <Parameter Name="bookingBusiness" Type="graph.bookingBusiness" Nullable="false"/>
@@ -39560,6 +39793,14 @@
          </Function>
          <Function Name="getAllMessages" IsBound="true" EntitySetPath="bindingParameter/channels/messages">
             <Parameter Name="bindingParameter" Type="Collection(graph.deletedTeam)"/>
+            <ReturnType Type="Collection(graph.chatMessage)"/>
+         </Function>
+         <Function Name="getAllRetainedMessages" IsBound="true" EntitySetPath="bindingParameter/messages">
+            <Parameter Name="bindingParameter" Type="Collection(graph.channel)"/>
+            <ReturnType Type="Collection(graph.chatMessage)"/>
+         </Function>
+         <Function Name="getAllRetainedMessages" IsBound="true" EntitySetPath="bindingParameter/messages">
+            <Parameter Name="bindingParameter" Type="Collection(graph.chat)"/>
             <ReturnType Type="Collection(graph.chatMessage)"/>
          </Function>
          <Function Name="getTeamsLicensingDetails" IsBound="true">
