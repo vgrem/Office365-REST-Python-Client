@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -16,6 +18,7 @@ class SPHelper(Entity):
 
     @staticmethod
     def is_member_of(context, principal_name, group_id, result=None):
+        # type: (ClientContext, str, str, Optional[ClientResult[bool]]) -> ClientResult[bool]
         """
         :param str principal_name: User principal name
         :param str group_id: Group id
@@ -34,10 +37,7 @@ class SPHelper(Entity):
     @staticmethod
     def check_site_availability(context, site_url):
         # type: (ClientContext, str) -> ClientResult[bool]
-        """
-        :param str site_url: Site Url
-        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
-        """
+        """ """
         return_type = ClientResult(context)
         qry = ServiceOperationQuery(
             SPHelper(context),
@@ -121,6 +121,7 @@ class SPHelper(Entity):
 
     @staticmethod
     def get_owners(context, group_id, return_type=None):
+        # type: (ClientContext, str, Optional[EntityCollection[User]]) -> SPHelper
         """
         :param str group_id: Group identifier
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
@@ -137,6 +138,7 @@ class SPHelper(Entity):
 
     @staticmethod
     def remove_external_members(context, group_id):
+        # type: (ClientContext, str) -> SPHelper
         """
         :param str group_id: Group identifier
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context

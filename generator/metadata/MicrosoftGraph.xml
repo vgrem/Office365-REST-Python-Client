@@ -22026,6 +22026,15 @@
             <Member Name="flaggedEmails" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
+         <EnumType Name="communityPrivacy">
+            <Member Name="public" Value="0"/>
+            <Member Name="private" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="engagementAsyncOperationType">
+            <Member Name="createCommunity" Value="0"/>
+            <Member Name="unknownFutureValue" Value="1"/>
+         </EnumType>
          <EnumType Name="assignmentType">
             <Member Name="required" Value="0"/>
             <Member Name="recommended" Value="1"/>
@@ -28288,15 +28297,21 @@
             <Property Name="organizer" Type="graph.meetingParticipantInfo"/>
          </ComplexType>
          <EntityType Name="callRecording" BaseType="graph.entity">
+            <Property Name="callId" Type="Edm.String"/>
             <Property Name="content" Type="Edm.Stream"/>
+            <Property Name="contentCorrelationId" Type="Edm.String"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="meetingId" Type="Edm.String"/>
             <Property Name="meetingOrganizer" Type="graph.identitySet"/>
             <Property Name="recordingContentUrl" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="callTranscript" BaseType="graph.entity">
+            <Property Name="callId" Type="Edm.String"/>
             <Property Name="content" Type="Edm.Stream"/>
+            <Property Name="contentCorrelationId" Type="Edm.String"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="meetingId" Type="Edm.String"/>
             <Property Name="meetingOrganizer" Type="graph.identitySet"/>
             <Property Name="metadataContent" Type="Edm.Stream"/>
@@ -33433,6 +33448,9 @@
             <Property Name="questionId" Type="Edm.String"/>
             <Property Name="value" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="virtualEventSettings">
+            <Property Name="isAttendeeEmailNotificationEnabled" Type="Edm.Boolean"/>
+         </ComplexType>
          <EntityType Name="commsOperation" BaseType="graph.entity" OpenType="true">
             <Property Name="clientContext" Type="Edm.String"/>
             <Property Name="resultInfo" Type="graph.resultInfo"/>
@@ -33503,6 +33521,7 @@
             <Property Name="description" Type="graph.itemBody"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="endDateTime" Type="graph.dateTimeTimeZone"/>
+            <Property Name="settings" Type="graph.virtualEventSettings"/>
             <Property Name="startDateTime" Type="graph.dateTimeTimeZone"/>
             <Property Name="status" Type="graph.virtualEventStatus"/>
             <NavigationProperty Name="presenters" Type="Collection(graph.virtualEventPresenter)" ContainsTarget="true"/>
@@ -34255,9 +34274,23 @@
             <Property Name="used" Type="Edm.Int64"/>
             <NavigationProperty Name="services" Type="Collection(graph.serviceStorageQuotaBreakdown)" ContainsTarget="true"/>
          </EntityType>
+         <EntityType Name="community" BaseType="graph.entity">
+            <Property Name="description" Type="Edm.String" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="groupId" Type="Edm.String"/>
+            <Property Name="privacy" Type="graph.communityPrivacy" Nullable="false"/>
+            <NavigationProperty Name="group" Type="graph.group"/>
+            <NavigationProperty Name="owners" Type="Collection(graph.user)"/>
+         </EntityType>
          <EntityType Name="employeeExperience">
+            <NavigationProperty Name="communities" Type="Collection(graph.community)" ContainsTarget="true"/>
+            <NavigationProperty Name="engagementAsyncOperations" Type="Collection(graph.engagementAsyncOperation)" ContainsTarget="true"/>
             <NavigationProperty Name="learningCourseActivities" Type="Collection(graph.learningCourseActivity)" ContainsTarget="true"/>
             <NavigationProperty Name="learningProviders" Type="Collection(graph.learningProvider)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="engagementAsyncOperation" BaseType="graph.longRunningOperation">
+            <Property Name="operationType" Type="graph.engagementAsyncOperationType"/>
+            <Property Name="resourceId" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="learningCourseActivity" BaseType="graph.entity">
             <Property Name="completedDateTime" Type="Edm.DateTimeOffset"/>
@@ -35449,6 +35482,14 @@
             <Parameter Name="bindingParameter" Type="Collection(graph.listItem)"/>
             <Parameter Name="token" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="Collection(graph.listItem)"/>
+         </Function>
+         <Function Name="delta" IsBound="true" EntitySetPath="bindingParameter">
+            <Parameter Name="bindingParameter" Type="Collection(graph.callRecording)"/>
+            <ReturnType Type="Collection(graph.callRecording)"/>
+         </Function>
+         <Function Name="delta" IsBound="true" EntitySetPath="bindingParameter">
+            <Parameter Name="bindingParameter" Type="Collection(graph.callTranscript)"/>
+            <ReturnType Type="Collection(graph.callTranscript)"/>
          </Function>
          <Function Name="delta" IsBound="true" EntitySetPath="bindingParameter">
             <Parameter Name="bindingParameter" Type="Collection(graph.chatMessage)"/>
@@ -39622,6 +39663,32 @@
             <Parameter Name="subject" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="graph.onlineMeeting"/>
          </Action>
+         <Function Name="getAllRecordings" IsBound="true" EntitySetPath="bindingParameter/recordings" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.onlineMeeting)"/>
+            <Parameter Name="meetingOrganizerUserId" Type="Edm.String" Unicode="false">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <ReturnType Type="Collection(graph.callRecording)"/>
+         </Function>
+         <Function Name="getAllTranscripts" IsBound="true" EntitySetPath="bindingParameter/transcripts" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.onlineMeeting)"/>
+            <Parameter Name="meetingOrganizerUserId" Type="Edm.String" Unicode="false">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <ReturnType Type="Collection(graph.callTranscript)"/>
+         </Function>
          <Action Name="getPresencesByUserId" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.cloudCommunications"/>
             <Parameter Name="ids" Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>

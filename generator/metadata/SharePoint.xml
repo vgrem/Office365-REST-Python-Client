@@ -1333,15 +1333,6 @@
             <Property Name="Id" Type="Edm.String"/>
             <Property Name="MembersCanShare" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="SiteCopilotConfiguration">
-            <Property Name="settings" Type="SP.SiteCopilotSettings"/>
-            <Property Name="type" Type="Edm.Int32" Nullable="false"/>
-         </ComplexType>
-         <ComplexType Name="SiteCopilotSettings">
-            <Property Name="filename" Type="Edm.String"/>
-            <Property Name="serverRelativeUrl" Type="Edm.String"/>
-            <Property Name="webAbsoluteUrl" Type="Edm.String"/>
-         </ComplexType>
          <ComplexType Name="UpgradeInfo">
             <Property Name="ErrorFile" Type="Edm.String"/>
             <Property Name="Errors" Type="Edm.Int32" Nullable="false"/>
@@ -1731,7 +1722,6 @@
             <Property Name="ShareByLinkEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ShowPeoplePickerSuggestionsForGuestUsers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ShowUrlStructure" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="SiteCopilotConfiguration" Type="SP.SiteCopilotConfiguration"/>
             <Property Name="SitePolicyEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="SocialBarOnSitePagesDisabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="StatusBarLink" Type="Edm.String"/>
@@ -3661,6 +3651,12 @@
             </Key>
             <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
          </EntityType>
+         <EntityType Name="OutOfBoxFontPackageSettings">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
          <EntityType Name="SPPlaylist" Abstract="true">
             <Key>
                <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
@@ -5068,6 +5064,7 @@
             <EntitySet Name="ObjectSharingInformationUsers" EntityType="SP.ObjectSharingInformationUser"/>
             <EntitySet Name="ObjectSharingSettingss" EntityType="SP.ObjectSharingSettings"/>
             <EntitySet Name="OpenWebParameterss" EntityType="SP.OpenWebParameters"/>
+            <EntitySet Name="OutOfBoxFontPackageSettingss" EntityType="SP.OutOfBoxFontPackageSettings"/>
             <EntitySet Name="ClickManagers" EntityType="SP.PageInstrumentation.ClickManager"/>
             <EntitySet Name="PersonalListsProxys" EntityType="SP.PersonalListsProxy"/>
             <EntitySet Name="PickerSettingss" EntityType="SP.PickerSettings"/>
@@ -11657,6 +11654,8 @@
                <Parameter Name="this" Type="Microsoft.SharePoint.Internal.ActivityLogger"/>
                <Parameter Name="Operation" Type="Edm.String"/>
                <Parameter Name="SiteId" Type="Edm.Guid" Nullable="false"/>
+               <Parameter Name="WebId" Type="Edm.Guid" Nullable="false"/>
+               <Parameter Name="ListId" Type="Edm.Guid" Nullable="false"/>
                <Parameter Name="Requests" Type="Collection(Microsoft.SharePoint.Internal.LogActivityRequest)"/>
             </FunctionImport>
             <FunctionImport Name="SP_Internal_FlowPermissions_GetFlowPermissionLevelOnList" ReturnType="SP.ConnectorResult" IsComposable="true" EntitySet="ConnectorResults">
@@ -15230,6 +15229,10 @@
                <Parameter Name="title" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SP_OutOfBoxFontPackages_Load" ReturnType="Collection(SP.FontPackage)" IsComposable="true" EntitySet="Fontpackages"/>
+            <FunctionImport Name="SP_OutOfBoxFontPackageSettings_GetHideOutOfBoxFontPackages" ReturnType="Edm.Boolean" IsSideEffecting="false"/>
+            <FunctionImport Name="SP_OutOfBoxFontPackageSettings_SetHideOutOfBoxFontPackages" ReturnType="Edm.Boolean">
+               <Parameter Name="HideOOBFontPackages" Type="Edm.Boolean" Nullable="false"/>
+            </FunctionImport>
             <FunctionImport Name="SP_SPPlaylist_GetSubscriberInfo" ReturnType="SP.SPPlaylist_Subscriber" EntitySet="SPPlaylist_Subscribers">
                <Parameter Name="listId" Type="Edm.String"/>
             </FunctionImport>
@@ -17025,6 +17028,10 @@
             <FunctionImport Name="GetSiteSecondaryAdministrators" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsInfo)" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="secondaryAdministratorsFieldsData" Type="Microsoft.Online.SharePoint.TenantAdministration.SecondaryAdministratorsFieldsData"/>
+            </FunctionImport>
+            <FunctionImport Name="GetSitesFromSubstrate" ReturnType="Edm.String" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="searchText" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="GetSiteSubscriptionId" ReturnType="Edm.Guid" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -20715,9 +20722,6 @@
          <Annotations Target="SP.Publishing.SitePageFieldsData/TopicHeader">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.Publishing.SitePageFieldsData/TranspileContents">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="SP.Publishing.SitePageFieldsData/WebTranspileContent">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -22078,12 +22082,6 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.SensitivityLabelInfo">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="SP.SiteCopilotConfiguration">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="SP.SiteCopilotSettings">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.VisualizationAppInfo">
@@ -23968,9 +23966,6 @@
          <Annotations Target="SP.Site/ShowPeoplePickerSuggestionsForGuestUsers">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.Site/SiteCopilotConfiguration">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="SP.Site/SocialBarOnSitePagesDisabled">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -24821,6 +24816,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Approvals">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.OutOfBoxFontPackageSettings">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.RemoteWeb">
@@ -27920,6 +27918,12 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_OutOfBoxFontPackages_Load()">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SP_OutOfBoxFontPackageSettings_GetHideOutOfBoxFontPackages()">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SP_OutOfBoxFontPackageSettings_SetHideOutOfBoxFontPackages(Edm.Boolean)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_SPPlaylist_GetSubscriberInfo(Edm.String)">
@@ -32636,7 +32640,6 @@
             <Property Name="TeamsTranspileContent" Type="Edm.String"/>
             <Property Name="Title" Type="Edm.String"/>
             <Property Name="TopicHeader" Type="Edm.String"/>
-            <Property Name="TranspileContents" Type="Edm.String"/>
             <Property Name="WebTranspileContent" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SitePageCoAuthState">
@@ -33045,6 +33048,7 @@
             <Property Name="EntityType" Type="Edm.String"/>
             <Property Name="VerifiedTopicAllowedEditors" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="TranspileContent"/>
          <ComplexType Name="ViewProgressAnalyticsData" BaseType="SP.Publishing.ViewData">
             <Property Name="PercentageViewed" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
@@ -35466,8 +35470,7 @@
             <Property Name="Usage" Type="Microsoft.SharePoint.Internal.GptResponseUsage"/>
          </ComplexType>
          <ComplexType Name="LogActivityRequest">
-            <Property Name="AuditCreationTime" Type="Edm.String"/>
-            <Property Name="ListId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="LastAccessTime" Type="Edm.String"/>
             <Property Name="ListItemUniqueId" Type="Edm.Guid" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="TrackedItemUpdatesRequest">
@@ -37743,6 +37746,8 @@
             <Property Name="Value" Type="Edm.Boolean" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="SPOSitePropertiesEnumerableFilter">
+            <Property Name="ArchivedBy" Type="Edm.String"/>
+            <Property Name="ArchivedTime" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="ArchiveStatus" Type="Edm.String"/>
             <Property Name="Filter" Type="Edm.String"/>
             <Property Name="GroupIdDefined" Type="Edm.Int32" Nullable="false"/>
@@ -38138,6 +38143,8 @@
             <Property Name="AnonymousLinkExpirationInDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ApplyToExistingDocumentLibraries" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ApplyToNewDocumentLibraries" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="ArchivedBy" Type="Edm.String"/>
+            <Property Name="ArchivedTime" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="ArchiveStatus" Type="Edm.String"/>
             <Property Name="AuthContextStrength" Type="Edm.String"/>
             <Property Name="AuthenticationContextLimitedAccess" Type="Edm.Boolean" Nullable="false"/>

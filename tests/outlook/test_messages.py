@@ -7,7 +7,7 @@ from tests import test_user_principal_name, test_user_principal_name_alt
 from tests.graph_case import GraphTestCase
 
 
-class TestGraphMail(GraphTestCase):
+class TestOutlookMessages(GraphTestCase):
     target_message = None  # type: Message
 
     def test2_create_draft_message(self):

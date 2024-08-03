@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.outlook.mail.messages.rules.actions import MessageRuleActions
 from office365.outlook.mail.messages.rules.predicates import MessageRulePredicates
@@ -26,7 +28,6 @@ class MessageRule(Entity):
 
     @property
     def is_read_only(self):
-        """
-        Indicates if the rule is read-only and cannot be modified or deleted by the rules REST API.
-        """
+        # type: () -> Optional[bool]
+        """Indicates if the rule is read-only and cannot be modified or deleted by the rules REST API."""
         return self.properties.get("isReadOnly", None)

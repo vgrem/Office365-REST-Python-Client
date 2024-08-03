@@ -1,3 +1,4 @@
+from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.runtime.client_value import ClientValue
 
 
@@ -12,6 +13,9 @@ class AutomaticRepliesSetting(ClientValue):
         external_audience=None,
         external_reply_message=None,
         internal_reply_message=None,
+        scheduled_end_datetime=DateTimeTimeZone(),
+        scheduled_start_datetime=DateTimeTimeZone(),
+        status=None,
     ):
         """
         :param str external_audience: The set of audience external to the signed-in user's organization who will
@@ -25,3 +29,6 @@ class AutomaticRepliesSetting(ClientValue):
         self.externalAudience = external_audience
         self.externalReplyMessage = external_reply_message
         self.internalReplyMessage = internal_reply_message
+        self.scheduledEndDateTime = scheduled_end_datetime
+        self.scheduledStartDateTime = scheduled_start_datetime
+        self.status = status
