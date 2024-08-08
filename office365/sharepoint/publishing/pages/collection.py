@@ -62,7 +62,7 @@ class SitePageCollection(SitePageMetadataCollection[SitePage]):
         return return_type
 
     def get_page_column_state(self, url):
-        """ "
+        """
         Determines whether a specific SitePage is a single or multicolumn page.
 
         :param str url: URL of the SitePage for which to return state.

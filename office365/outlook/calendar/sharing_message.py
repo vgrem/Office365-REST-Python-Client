@@ -9,7 +9,7 @@ class CalendarSharingMessage(Message):
 
     @property
     def sharing_message_action(self):
-        """The CC: recipients for the message."""
+        """"""
         return self.properties.setdefault(
             "sharingMessageAction", CalendarSharingMessageAction()
         )

@@ -28,6 +28,11 @@
             <Member Name="failed" Value="5"/>
             <Member Name="unknownFutureValue" Value="6"/>
          </EnumType>
+         <EnumType Name="membershipChangeType">
+            <Member Name="add" Value="1"/>
+            <Member Name="remove" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
          <EnumType Name="valueType">
             <Member Name="enum" Value="0"/>
             <Member Name="string" Value="1"/>
@@ -76,11 +81,19 @@
          <EntityType Name="lifecycleWorkflowsContainer" BaseType="graph.entity">
             <NavigationProperty Name="customTaskExtensions" Type="Collection(microsoft.graph.identityGovernance.customTaskExtension)" ContainsTarget="true"/>
             <NavigationProperty Name="deletedItems" Type="graph.deletedItemContainer" ContainsTarget="true"/>
+            <NavigationProperty Name="insights" Type="microsoft.graph.identityGovernance.insights" ContainsTarget="true"/>
             <NavigationProperty Name="settings" Type="microsoft.graph.identityGovernance.lifecycleManagementSettings" Nullable="false" ContainsTarget="true"/>
             <NavigationProperty Name="taskDefinitions" Type="Collection(microsoft.graph.identityGovernance.taskDefinition)" ContainsTarget="true"/>
             <NavigationProperty Name="workflows" Type="Collection(microsoft.graph.identityGovernance.workflow)" ContainsTarget="true"/>
             <NavigationProperty Name="workflowTemplates" Type="Collection(microsoft.graph.identityGovernance.workflowTemplate)" ContainsTarget="true"/>
          </EntityType>
+         <ComplexType Name="workflowExecutionTrigger" Abstract="true"/>
+         <ComplexType Name="attributeChangeTrigger" BaseType="microsoft.graph.identityGovernance.workflowExecutionTrigger">
+            <Property Name="triggerAttributes" Type="Collection(microsoft.graph.identityGovernance.triggerAttribute)" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="triggerAttribute">
+            <Property Name="name" Type="Edm.String" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="customTaskExtensionCallbackConfiguration" BaseType="graph.customExtensionCallbackConfiguration">
             <NavigationProperty Name="authorizedApps" Type="Collection(graph.application)"/>
          </ComplexType>
@@ -113,6 +126,12 @@
             <NavigationProperty Name="subject" Type="graph.user" Nullable="false"/>
             <NavigationProperty Name="task" Type="microsoft.graph.identityGovernance.task" Nullable="false"/>
          </EntityType>
+         <ComplexType Name="groupBasedSubjectSet" BaseType="graph.subjectSet">
+            <NavigationProperty Name="groups" Type="Collection(graph.group)"/>
+         </ComplexType>
+         <ComplexType Name="membershipChangeTrigger" BaseType="microsoft.graph.identityGovernance.workflowExecutionTrigger">
+            <Property Name="changeType" Type="microsoft.graph.identityGovernance.membershipChangeType" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="workflowExecutionConditions" Abstract="true"/>
          <ComplexType Name="onDemandExecutionOnly" BaseType="microsoft.graph.identityGovernance.workflowExecutionConditions"/>
          <ComplexType Name="parameter">
@@ -137,10 +156,31 @@
             <Property Name="totalTasks" Type="Edm.Int32" Nullable="false"/>
             <Property Name="unprocessedTasks" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
-         <ComplexType Name="workflowExecutionTrigger" Abstract="true"/>
          <ComplexType Name="timeBasedAttributeTrigger" BaseType="microsoft.graph.identityGovernance.workflowExecutionTrigger">
             <Property Name="offsetInDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="timeBasedAttribute" Type="microsoft.graph.identityGovernance.workflowTriggerTimeBasedAttribute" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="topTasksInsightsSummary">
+            <Property Name="failedTasks" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="failedUsers" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulTasks" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulUsers" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="taskDefinitionDisplayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="taskDefinitionId" Type="Edm.String" Nullable="false"/>
+            <Property Name="totalTasks" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalUsers" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="topWorkflowsInsightsSummary">
+            <Property Name="failedRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="failedUsers" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulUsers" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalUsers" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="workflowCategory" Type="microsoft.graph.identityGovernance.lifecycleWorkflowCategory" Nullable="false"/>
+            <Property Name="workflowDisplayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="workflowId" Type="Edm.String" Nullable="false"/>
+            <Property Name="workflowVersion" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="triggerAndScopeBasedConditions" BaseType="microsoft.graph.identityGovernance.workflowExecutionConditions">
             <Property Name="scope" Type="graph.subjectSet"/>
@@ -160,6 +200,28 @@
             <Property Name="totalTasks" Type="Edm.Int32" Nullable="false"/>
             <Property Name="totalUsers" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="workflowsInsightsByCategory">
+            <Property Name="failedJoinerRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="failedLeaverRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="failedMoverRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulJoinerRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulLeaverRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulMoverRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalJoinerRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalLeaverRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalMoverRuns" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="workflowsInsightsSummary">
+            <Property Name="failedRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="failedTasks" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="failedUsers" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulTasks" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="successfulUsers" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalRuns" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalTasks" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalUsers" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
          <EntityType Name="customTaskExtension" BaseType="graph.customCalloutExtension">
             <Property Name="callbackConfiguration" Type="graph.customExtensionCallbackConfiguration"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
@@ -167,6 +229,7 @@
             <NavigationProperty Name="createdBy" Type="graph.user"/>
             <NavigationProperty Name="lastModifiedBy" Type="graph.user"/>
          </EntityType>
+         <EntityType Name="insights" BaseType="graph.entity"/>
          <EntityType Name="lifecycleManagementSettings" BaseType="graph.entity">
             <Property Name="emailSettings" Type="graph.emailSettings" Nullable="false"/>
             <Property Name="workflowScheduleIntervalInHours" Type="Edm.Int32" Nullable="false"/>
@@ -271,6 +334,30 @@
             <Parameter Name="startDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <Parameter Name="endDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
             <ReturnType Type="microsoft.graph.identityGovernance.userSummary"/>
+         </Function>
+         <Function Name="topTasksProcessedSummary" IsBound="true">
+            <Parameter Name="bindingParameter" Type="microsoft.graph.identityGovernance.insights"/>
+            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <ReturnType Type="Collection(microsoft.graph.identityGovernance.topTasksInsightsSummary)"/>
+         </Function>
+         <Function Name="topWorkflowsProcessedSummary" IsBound="true">
+            <Parameter Name="bindingParameter" Type="microsoft.graph.identityGovernance.insights"/>
+            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <ReturnType Type="Collection(microsoft.graph.identityGovernance.topWorkflowsInsightsSummary)"/>
+         </Function>
+         <Function Name="workflowsProcessedByCategory" IsBound="true">
+            <Parameter Name="bindingParameter" Type="microsoft.graph.identityGovernance.insights"/>
+            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <ReturnType Type="microsoft.graph.identityGovernance.workflowsInsightsByCategory"/>
+         </Function>
+         <Function Name="workflowsProcessedSummary" IsBound="true">
+            <Parameter Name="bindingParameter" Type="microsoft.graph.identityGovernance.insights"/>
+            <Parameter Name="startDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Parameter Name="endDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <ReturnType Type="microsoft.graph.identityGovernance.workflowsInsightsSummary"/>
          </Function>
          <Annotations Target="microsoft.graph.bookingPriceType">
             <Annotation Term="Org.OData.Core.V1.Description" String="Represents the type of pricing of a booking service."/>
@@ -3816,6 +3903,260 @@
                </Record>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.group">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="true"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.resourceSpecificPermissionGrant">
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
+               <Record>
+                  <PropertyValue Property="Filterable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SelectSupport">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
+            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.group/acceptedSenders">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.group/calendar">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+               <Record>
+                  <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.group/calendarView">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+               <Record>
+                  <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.group/conversations">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.group/events">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.group/rejectedSenders">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.group/threads">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.group/photo">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="true"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+               <Record>
+                  <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.group/photos">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
+               <Record>
+                  <PropertyValue Property="Countable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
+               <Record>
+                  <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+               <Record>
+                  <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
          <Annotations Target="microsoft.graph.user">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
                <Record>
@@ -4218,30 +4559,6 @@
                </Record>
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.resourceSpecificPermissionGrant">
-            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
-               <Record>
-                  <PropertyValue Property="Countable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.FilterRestrictions">
-               <Record>
-                  <PropertyValue Property="Filterable" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SelectSupport">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
-            <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="false"/>
          </Annotations>
          <Annotations Target="microsoft.graph.identityGovernance.task">
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
@@ -5841,236 +6158,6 @@
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
          </Annotations>
-         <Annotations Target="microsoft.graph.group">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="true"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.group/acceptedSenders">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
-               <Record>
-                  <PropertyValue Property="Searchable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
-               <Record>
-                  <PropertyValue Property="Updatable" Bool="false"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.group/calendar">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
-               <Record>
-                  <PropertyValue Property="Deletable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
-               <Record>
-                  <PropertyValue Property="Insertable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
-               <Record>
-                  <PropertyValue Property="Searchable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
-               <Record>
-                  <PropertyValue Property="Updatable" Bool="false"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.group/calendarView">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
-               <Record>
-                  <PropertyValue Property="Deletable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
-               <Record>
-                  <PropertyValue Property="Insertable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
-               <Record>
-                  <PropertyValue Property="Searchable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
-               <Record>
-                  <PropertyValue Property="Updatable" Bool="false"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.group/conversations">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
-               <Record>
-                  <PropertyValue Property="Updatable" Bool="false"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.group/events">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
-               <Record>
-                  <PropertyValue Property="Searchable" Bool="false"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.group/rejectedSenders">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
-               <Record>
-                  <PropertyValue Property="Searchable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
-               <Record>
-                  <PropertyValue Property="Updatable" Bool="false"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.group/threads">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
-               <Record>
-                  <PropertyValue Property="Searchable" Bool="false"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.group/photo">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
-               <Record>
-                  <PropertyValue Property="Deletable" Bool="true"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
-               <Record>
-                  <PropertyValue Property="Insertable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
-               <Record>
-                  <PropertyValue Property="Searchable" Bool="false"/>
-               </Record>
-            </Annotation>
-         </Annotations>
-         <Annotations Target="microsoft.graph.group/photos">
-            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
-               <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
-               <Record>
-                  <PropertyValue Property="Countable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
-               <Record>
-                  <PropertyValue Property="Deletable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
-               <Record>
-                  <PropertyValue Property="Expandable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
-               <Record>
-                  <PropertyValue Property="Insertable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
-               <Record>
-                  <PropertyValue Property="Searchable" Bool="false"/>
-               </Record>
-            </Annotation>
-            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
-               <Record>
-                  <PropertyValue Property="Updatable" Bool="false"/>
-               </Record>
-            </Annotation>
-         </Annotations>
          <Annotations Target="microsoft.graph.identityProvider">
             <Annotation Term="Org.OData.Core.V1.Revisions">
                <Collection>
@@ -6742,6 +6829,42 @@
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
          <Annotations Target="microsoft.graph.educationSubmission/webUrl">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.restorePointSearchResult/restorePoint">
+            <Annotation Term="Org.OData.Core.V1.AutoExpand" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.driveProtectionUnit/displayName">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.driveProtectionUnit/email">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.driveRestoreArtifact/restoredSiteName">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.driveRestoreArtifact/restoredSiteWebUrl">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.mailboxProtectionUnit/displayName">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.mailboxProtectionUnit/email">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.mailboxRestoreArtifact/restoredFolderName">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.siteProtectionUnit/siteName">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.siteProtectionUnit/siteWebUrl">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.siteRestoreArtifact/restoredSiteName">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.siteRestoreArtifact/restoredSiteWebUrl">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
          <Annotations Target="microsoft.graph.subscription">
@@ -17700,6 +17823,91 @@
             <Member Name="none" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
+         <EnumType Name="artifactRestoreStatus">
+            <Member Name="added" Value="0"/>
+            <Member Name="scheduling" Value="1"/>
+            <Member Name="scheduled" Value="2"/>
+            <Member Name="inProgress" Value="3"/>
+            <Member Name="succeeded" Value="4"/>
+            <Member Name="failed" Value="5"/>
+            <Member Name="unknownFutureValue" Value="6"/>
+         </EnumType>
+         <EnumType Name="backupServiceConsumer">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="firstparty" Value="1"/>
+            <Member Name="thirdparty" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="backupServiceStatus">
+            <Member Name="disabled" Value="0"/>
+            <Member Name="enabled" Value="1"/>
+            <Member Name="protectionChangeLocked" Value="2"/>
+            <Member Name="restoreLocked" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="destinationType">
+            <Member Name="new" Value="0"/>
+            <Member Name="inPlace" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="disableReason">
+            <Member Name="none" Value="0"/>
+            <Member Name="invalidBillingProfile" Value="1"/>
+            <Member Name="userRequested" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="protectionPolicyStatus">
+            <Member Name="inactive" Value="0"/>
+            <Member Name="activeWithErrors" Value="1"/>
+            <Member Name="updating" Value="2"/>
+            <Member Name="active" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="protectionRuleStatus">
+            <Member Name="draft" Value="0"/>
+            <Member Name="active" Value="1"/>
+            <Member Name="completed" Value="2"/>
+            <Member Name="completedWithErrors" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
+         <EnumType Name="protectionUnitStatus">
+            <Member Name="protectRequested" Value="0"/>
+            <Member Name="protected" Value="1"/>
+            <Member Name="unprotectRequested" Value="2"/>
+            <Member Name="unprotected" Value="3"/>
+            <Member Name="removeRequested" Value="4"/>
+            <Member Name="unknownFutureValue" Value="5"/>
+         </EnumType>
+         <EnumType Name="restorableArtifact">
+            <Member Name="message" Value="0"/>
+            <Member Name="unknownFutureValue" Value="1"/>
+         </EnumType>
+         <EnumType Name="restorePointPreference">
+            <Member Name="latest" Value="0"/>
+            <Member Name="oldest" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="restorePointTags" IsFlags="true">
+            <Member Name="none" Value="0"/>
+            <Member Name="fastRestore" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="restoreSessionStatus">
+            <Member Name="draft" Value="0"/>
+            <Member Name="activating" Value="1"/>
+            <Member Name="active" Value="2"/>
+            <Member Name="completedWithError" Value="3"/>
+            <Member Name="completed" Value="4"/>
+            <Member Name="unknownFutureValue" Value="5"/>
+            <Member Name="failed" Value="6"/>
+         </EnumType>
+         <EnumType Name="serviceAppStatus">
+            <Member Name="inactive" Value="0"/>
+            <Member Name="active" Value="1"/>
+            <Member Name="pendingActive" Value="2"/>
+            <Member Name="pendingInactive" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
          <EnumType Name="workbookOperationStatus">
             <Member Name="notStarted" Value="0"/>
             <Member Name="running" Value="1"/>
@@ -22332,6 +22540,321 @@
          <EntityType Name="deletedItemContainer" BaseType="graph.entity">
             <NavigationProperty Name="workflows" Type="Collection(microsoft.graph.identityGovernance.workflow)" ContainsTarget="true"/>
          </EntityType>
+         <EntityType Name="group" BaseType="graph.directoryObject" OpenType="true">
+            <Property Name="assignedLabels" Type="Collection(graph.assignedLabel)"/>
+            <Property Name="assignedLicenses" Type="Collection(graph.assignedLicense)"/>
+            <Property Name="classification" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="expirationDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="groupTypes" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="hasMembersWithLicenseErrors" Type="Edm.Boolean"/>
+            <Property Name="isAssignableToRole" Type="Edm.Boolean"/>
+            <Property Name="licenseProcessingState" Type="graph.licenseProcessingState"/>
+            <Property Name="mail" Type="Edm.String"/>
+            <Property Name="mailEnabled" Type="Edm.Boolean"/>
+            <Property Name="mailNickname" Type="Edm.String"/>
+            <Property Name="membershipRule" Type="Edm.String"/>
+            <Property Name="membershipRuleProcessingState" Type="Edm.String"/>
+            <Property Name="onPremisesDomainName" Type="Edm.String"/>
+            <Property Name="onPremisesLastSyncDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="onPremisesNetBiosName" Type="Edm.String"/>
+            <Property Name="onPremisesProvisioningErrors" Type="Collection(graph.onPremisesProvisioningError)"/>
+            <Property Name="onPremisesSamAccountName" Type="Edm.String"/>
+            <Property Name="onPremisesSecurityIdentifier" Type="Edm.String"/>
+            <Property Name="onPremisesSyncEnabled" Type="Edm.Boolean"/>
+            <Property Name="preferredDataLocation" Type="Edm.String"/>
+            <Property Name="preferredLanguage" Type="Edm.String"/>
+            <Property Name="proxyAddresses" Type="Collection(Edm.String)" Nullable="false"/>
+            <Property Name="renewedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="securityEnabled" Type="Edm.Boolean"/>
+            <Property Name="securityIdentifier" Type="Edm.String"/>
+            <Property Name="serviceProvisioningErrors" Type="Collection(graph.serviceProvisioningError)"/>
+            <Property Name="theme" Type="Edm.String"/>
+            <Property Name="uniqueName" Type="Edm.String"/>
+            <Property Name="visibility" Type="Edm.String"/>
+            <Property Name="allowExternalSenders" Type="Edm.Boolean"/>
+            <Property Name="autoSubscribeNewMembers" Type="Edm.Boolean"/>
+            <Property Name="hideFromAddressLists" Type="Edm.Boolean"/>
+            <Property Name="hideFromOutlookClients" Type="Edm.Boolean"/>
+            <Property Name="isSubscribedByMail" Type="Edm.Boolean"/>
+            <Property Name="unseenCount" Type="Edm.Int32"/>
+            <Property Name="isArchived" Type="Edm.Boolean"/>
+            <NavigationProperty Name="appRoleAssignments" Type="Collection(graph.appRoleAssignment)" ContainsTarget="true"/>
+            <NavigationProperty Name="createdOnBehalfOf" Type="graph.directoryObject"/>
+            <NavigationProperty Name="memberOf" Type="Collection(graph.directoryObject)"/>
+            <NavigationProperty Name="members" Type="Collection(graph.directoryObject)"/>
+            <NavigationProperty Name="membersWithLicenseErrors" Type="Collection(graph.directoryObject)"/>
+            <NavigationProperty Name="owners" Type="Collection(graph.directoryObject)"/>
+            <NavigationProperty Name="permissionGrants" Type="Collection(graph.resourceSpecificPermissionGrant)" ContainsTarget="true"/>
+            <NavigationProperty Name="settings" Type="Collection(graph.groupSetting)" ContainsTarget="true"/>
+            <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
+            <NavigationProperty Name="transitiveMembers" Type="Collection(graph.directoryObject)"/>
+            <NavigationProperty Name="acceptedSenders" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
+            <NavigationProperty Name="calendar" Type="graph.calendar" ContainsTarget="true"/>
+            <NavigationProperty Name="calendarView" Type="Collection(graph.event)" ContainsTarget="true"/>
+            <NavigationProperty Name="conversations" Type="Collection(graph.conversation)" ContainsTarget="true"/>
+            <NavigationProperty Name="events" Type="Collection(graph.event)" ContainsTarget="true"/>
+            <NavigationProperty Name="rejectedSenders" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
+            <NavigationProperty Name="threads" Type="Collection(graph.conversationThread)" ContainsTarget="true"/>
+            <NavigationProperty Name="drive" Type="graph.drive" ContainsTarget="true"/>
+            <NavigationProperty Name="drives" Type="Collection(graph.drive)" ContainsTarget="true"/>
+            <NavigationProperty Name="sites" Type="Collection(graph.site)" ContainsTarget="true"/>
+            <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
+            <NavigationProperty Name="groupLifecyclePolicies" Type="Collection(graph.groupLifecyclePolicy)" ContainsTarget="true"/>
+            <NavigationProperty Name="planner" Type="graph.plannerGroup" ContainsTarget="true"/>
+            <NavigationProperty Name="onenote" Type="graph.onenote" ContainsTarget="true"/>
+            <NavigationProperty Name="photo" Type="graph.profilePhoto" ContainsTarget="true"/>
+            <NavigationProperty Name="photos" Type="Collection(graph.profilePhoto)" ContainsTarget="true"/>
+            <NavigationProperty Name="team" Type="graph.team" ContainsTarget="true"/>
+            <Annotation Term="Org.OData.Core.V1.AlternateKeys">
+               <Collection>
+                  <Record Type="Org.OData.Core.V1.AlternateKey">
+                     <PropertyValue Property="Key">
+                        <Collection>
+                           <Record Type="Org.OData.Core.V1.PropertyRef">
+                              <PropertyValue Property="Alias" String="uniqueName"/>
+                              <PropertyValue Property="Name" PropertyPath="uniqueName"/>
+                           </Record>
+                        </Collection>
+                     </PropertyValue>
+                  </Record>
+               </Collection>
+            </Annotation>
+         </EntityType>
+         <ComplexType Name="assignedLabel">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="labelId" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="assignedLicense">
+            <Property Name="disabledPlans" Type="Collection(Edm.Guid)" Nullable="false"/>
+            <Property Name="skuId" Type="Edm.Guid"/>
+         </ComplexType>
+         <ComplexType Name="licenseProcessingState">
+            <Property Name="state" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="onPremisesProvisioningError">
+            <Property Name="category" Type="Edm.String"/>
+            <Property Name="occurredDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="propertyCausingError" Type="Edm.String"/>
+            <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="serviceProvisioningError" Abstract="true">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="isResolved" Type="Edm.Boolean"/>
+            <Property Name="serviceInstance" Type="Edm.String"/>
+         </ComplexType>
+         <EntityType Name="appRoleAssignment" BaseType="graph.directoryObject">
+            <Property Name="appRoleId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="principalDisplayName" Type="Edm.String"/>
+            <Property Name="principalId" Type="Edm.Guid"/>
+            <Property Name="principalType" Type="Edm.String"/>
+            <Property Name="resourceDisplayName" Type="Edm.String"/>
+            <Property Name="resourceId" Type="Edm.Guid"/>
+         </EntityType>
+         <EntityType Name="resourceSpecificPermissionGrant" BaseType="graph.directoryObject">
+            <Property Name="clientAppId" Type="Edm.String"/>
+            <Property Name="clientId" Type="Edm.String"/>
+            <Property Name="permission" Type="Edm.String"/>
+            <Property Name="permissionType" Type="Edm.String"/>
+            <Property Name="resourceAppId" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="groupSetting" BaseType="graph.entity" OpenType="true">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="templateId" Type="Edm.String"/>
+            <Property Name="values" Type="Collection(graph.settingValue)" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="calendar" BaseType="graph.entity">
+            <Property Name="allowedOnlineMeetingProviders" Type="Collection(graph.onlineMeetingProviderType)"/>
+            <Property Name="canEdit" Type="Edm.Boolean"/>
+            <Property Name="canShare" Type="Edm.Boolean"/>
+            <Property Name="canViewPrivateItems" Type="Edm.Boolean"/>
+            <Property Name="changeKey" Type="Edm.String"/>
+            <Property Name="color" Type="graph.calendarColor"/>
+            <Property Name="defaultOnlineMeetingProvider" Type="graph.onlineMeetingProviderType"/>
+            <Property Name="hexColor" Type="Edm.String"/>
+            <Property Name="isDefaultCalendar" Type="Edm.Boolean"/>
+            <Property Name="isRemovable" Type="Edm.Boolean"/>
+            <Property Name="isTallyingResponses" Type="Edm.Boolean"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="owner" Type="graph.emailAddress"/>
+            <NavigationProperty Name="calendarPermissions" Type="Collection(graph.calendarPermission)" ContainsTarget="true"/>
+            <NavigationProperty Name="calendarView" Type="Collection(graph.event)" ContainsTarget="true"/>
+            <NavigationProperty Name="events" Type="Collection(graph.event)" ContainsTarget="true"/>
+            <NavigationProperty Name="multiValueExtendedProperties" Type="Collection(graph.multiValueLegacyExtendedProperty)" ContainsTarget="true"/>
+            <NavigationProperty Name="singleValueExtendedProperties" Type="Collection(graph.singleValueLegacyExtendedProperty)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="outlookItem" BaseType="graph.entity" Abstract="true">
+            <Property Name="categories" Type="Collection(Edm.String)"/>
+            <Property Name="changeKey" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+         </EntityType>
+         <EntityType Name="event" BaseType="graph.outlookItem" OpenType="true">
+            <Property Name="allowNewTimeProposals" Type="Edm.Boolean"/>
+            <Property Name="attendees" Type="Collection(graph.attendee)"/>
+            <Property Name="body" Type="graph.itemBody"/>
+            <Property Name="bodyPreview" Type="Edm.String"/>
+            <Property Name="end" Type="graph.dateTimeTimeZone"/>
+            <Property Name="hasAttachments" Type="Edm.Boolean"/>
+            <Property Name="hideAttendees" Type="Edm.Boolean"/>
+            <Property Name="iCalUId" Type="Edm.String"/>
+            <Property Name="importance" Type="graph.importance"/>
+            <Property Name="isAllDay" Type="Edm.Boolean"/>
+            <Property Name="isCancelled" Type="Edm.Boolean"/>
+            <Property Name="isDraft" Type="Edm.Boolean"/>
+            <Property Name="isOnlineMeeting" Type="Edm.Boolean"/>
+            <Property Name="isOrganizer" Type="Edm.Boolean"/>
+            <Property Name="isReminderOn" Type="Edm.Boolean"/>
+            <Property Name="location" Type="graph.location"/>
+            <Property Name="locations" Type="Collection(graph.location)"/>
+            <Property Name="onlineMeeting" Type="graph.onlineMeetingInfo"/>
+            <Property Name="onlineMeetingProvider" Type="graph.onlineMeetingProviderType"/>
+            <Property Name="onlineMeetingUrl" Type="Edm.String"/>
+            <Property Name="organizer" Type="graph.recipient"/>
+            <Property Name="originalEndTimeZone" Type="Edm.String"/>
+            <Property Name="originalStart" Type="Edm.DateTimeOffset"/>
+            <Property Name="originalStartTimeZone" Type="Edm.String"/>
+            <Property Name="recurrence" Type="graph.patternedRecurrence"/>
+            <Property Name="reminderMinutesBeforeStart" Type="Edm.Int32"/>
+            <Property Name="responseRequested" Type="Edm.Boolean"/>
+            <Property Name="responseStatus" Type="graph.responseStatus"/>
+            <Property Name="sensitivity" Type="graph.sensitivity"/>
+            <Property Name="seriesMasterId" Type="Edm.String"/>
+            <Property Name="showAs" Type="graph.freeBusyStatus"/>
+            <Property Name="start" Type="graph.dateTimeTimeZone"/>
+            <Property Name="subject" Type="Edm.String"/>
+            <Property Name="transactionId" Type="Edm.String"/>
+            <Property Name="type" Type="graph.eventType"/>
+            <Property Name="webLink" Type="Edm.String"/>
+            <NavigationProperty Name="attachments" Type="Collection(graph.attachment)" ContainsTarget="true"/>
+            <NavigationProperty Name="calendar" Type="graph.calendar" ContainsTarget="true"/>
+            <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
+            <NavigationProperty Name="instances" Type="Collection(graph.event)" ContainsTarget="true"/>
+            <NavigationProperty Name="multiValueExtendedProperties" Type="Collection(graph.multiValueLegacyExtendedProperty)" ContainsTarget="true"/>
+            <NavigationProperty Name="singleValueExtendedProperties" Type="Collection(graph.singleValueLegacyExtendedProperty)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="conversation" BaseType="graph.entity">
+            <Property Name="hasAttachments" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="lastDeliveredDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="preview" Type="Edm.String" Nullable="false"/>
+            <Property Name="topic" Type="Edm.String" Nullable="false"/>
+            <Property Name="uniqueSenders" Type="Collection(Edm.String)" Nullable="false"/>
+            <NavigationProperty Name="threads" Type="Collection(graph.conversationThread)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="conversationThread" BaseType="graph.entity">
+            <Property Name="ccRecipients" Type="Collection(graph.recipient)" Nullable="false"/>
+            <Property Name="hasAttachments" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="isLocked" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="lastDeliveredDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="preview" Type="Edm.String" Nullable="false"/>
+            <Property Name="topic" Type="Edm.String" Nullable="false"/>
+            <Property Name="toRecipients" Type="Collection(graph.recipient)" Nullable="false"/>
+            <Property Name="uniqueSenders" Type="Collection(Edm.String)" Nullable="false"/>
+            <NavigationProperty Name="posts" Type="Collection(graph.post)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="baseItem" BaseType="graph.entity" Abstract="true">
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="eTag" Type="Edm.String"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="name" Type="Edm.String"/>
+            <Property Name="parentReference" Type="graph.itemReference"/>
+            <Property Name="webUrl" Type="Edm.String"/>
+            <NavigationProperty Name="createdByUser" Type="graph.user"/>
+            <NavigationProperty Name="lastModifiedByUser" Type="graph.user"/>
+         </EntityType>
+         <EntityType Name="drive" BaseType="graph.baseItem">
+            <Property Name="driveType" Type="Edm.String"/>
+            <Property Name="owner" Type="graph.identitySet"/>
+            <Property Name="quota" Type="graph.quota"/>
+            <Property Name="sharePointIds" Type="graph.sharepointIds"/>
+            <Property Name="system" Type="graph.systemFacet"/>
+            <NavigationProperty Name="bundles" Type="Collection(graph.driveItem)" ContainsTarget="true"/>
+            <NavigationProperty Name="following" Type="Collection(graph.driveItem)" ContainsTarget="true"/>
+            <NavigationProperty Name="items" Type="Collection(graph.driveItem)" ContainsTarget="true"/>
+            <NavigationProperty Name="list" Type="graph.list" ContainsTarget="true"/>
+            <NavigationProperty Name="root" Type="graph.driveItem" ContainsTarget="true"/>
+            <NavigationProperty Name="special" Type="Collection(graph.driveItem)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="site" BaseType="graph.baseItem">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="error" Type="graph.publicError"/>
+            <Property Name="isPersonalSite" Type="Edm.Boolean"/>
+            <Property Name="root" Type="graph.root"/>
+            <Property Name="sharepointIds" Type="graph.sharepointIds"/>
+            <Property Name="siteCollection" Type="graph.siteCollection"/>
+            <NavigationProperty Name="analytics" Type="graph.itemAnalytics"/>
+            <NavigationProperty Name="columns" Type="Collection(graph.columnDefinition)" ContainsTarget="true"/>
+            <NavigationProperty Name="contentTypes" Type="Collection(graph.contentType)" ContainsTarget="true"/>
+            <NavigationProperty Name="drive" Type="graph.drive" ContainsTarget="true"/>
+            <NavigationProperty Name="drives" Type="Collection(graph.drive)" ContainsTarget="true"/>
+            <NavigationProperty Name="externalColumns" Type="Collection(graph.columnDefinition)"/>
+            <NavigationProperty Name="items" Type="Collection(graph.baseItem)" ContainsTarget="true"/>
+            <NavigationProperty Name="lists" Type="Collection(graph.list)" ContainsTarget="true"/>
+            <NavigationProperty Name="operations" Type="Collection(graph.richLongRunningOperation)" ContainsTarget="true"/>
+            <NavigationProperty Name="pages" Type="Collection(graph.baseSitePage)" ContainsTarget="true"/>
+            <NavigationProperty Name="permissions" Type="Collection(graph.permission)" ContainsTarget="true"/>
+            <NavigationProperty Name="sites" Type="Collection(graph.site)" ContainsTarget="true"/>
+            <NavigationProperty Name="termStore" Type="microsoft.graph.termStore.store" ContainsTarget="true"/>
+            <NavigationProperty Name="termStores" Type="Collection(microsoft.graph.termStore.store)" ContainsTarget="true"/>
+            <NavigationProperty Name="onenote" Type="graph.onenote" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="extension" BaseType="graph.entity" Abstract="true" OpenType="true"/>
+         <EntityType Name="groupLifecyclePolicy" BaseType="graph.entity">
+            <Property Name="alternateNotificationEmails" Type="Edm.String"/>
+            <Property Name="groupLifetimeInDays" Type="Edm.Int32"/>
+            <Property Name="managedGroupTypes" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="plannerGroup" BaseType="graph.entity">
+            <NavigationProperty Name="plans" Type="Collection(graph.plannerPlan)"/>
+         </EntityType>
+         <EntityType Name="onenote" BaseType="graph.entity">
+            <NavigationProperty Name="notebooks" Type="Collection(graph.notebook)" ContainsTarget="true"/>
+            <NavigationProperty Name="operations" Type="Collection(graph.onenoteOperation)" ContainsTarget="true"/>
+            <NavigationProperty Name="pages" Type="Collection(graph.onenotePage)" ContainsTarget="true"/>
+            <NavigationProperty Name="resources" Type="Collection(graph.onenoteResource)" ContainsTarget="true"/>
+            <NavigationProperty Name="sectionGroups" Type="Collection(graph.sectionGroup)" ContainsTarget="true"/>
+            <NavigationProperty Name="sections" Type="Collection(graph.onenoteSection)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="profilePhoto" BaseType="graph.entity" HasStream="true">
+            <Property Name="height" Type="Edm.Int32"/>
+            <Property Name="width" Type="Edm.Int32"/>
+         </EntityType>
+         <EntityType Name="team" BaseType="graph.entity" OpenType="true">
+            <Property Name="classification" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="funSettings" Type="graph.teamFunSettings"/>
+            <Property Name="guestSettings" Type="graph.teamGuestSettings"/>
+            <Property Name="internalId" Type="Edm.String"/>
+            <Property Name="isArchived" Type="Edm.Boolean"/>
+            <Property Name="memberSettings" Type="graph.teamMemberSettings"/>
+            <Property Name="messagingSettings" Type="graph.teamMessagingSettings"/>
+            <Property Name="specialization" Type="graph.teamSpecialization"/>
+            <Property Name="summary" Type="graph.teamSummary"/>
+            <Property Name="tenantId" Type="Edm.String"/>
+            <Property Name="visibility" Type="graph.teamVisibilityType"/>
+            <Property Name="webUrl" Type="Edm.String"/>
+            <NavigationProperty Name="allChannels" Type="Collection(graph.channel)"/>
+            <NavigationProperty Name="channels" Type="Collection(graph.channel)" ContainsTarget="true"/>
+            <NavigationProperty Name="group" Type="graph.group"/>
+            <NavigationProperty Name="incomingChannels" Type="Collection(graph.channel)"/>
+            <NavigationProperty Name="installedApps" Type="Collection(graph.teamsAppInstallation)" ContainsTarget="true"/>
+            <NavigationProperty Name="members" Type="Collection(graph.conversationMember)" ContainsTarget="true"/>
+            <NavigationProperty Name="operations" Type="Collection(graph.teamsAsyncOperation)" ContainsTarget="true"/>
+            <NavigationProperty Name="permissionGrants" Type="Collection(graph.resourceSpecificPermissionGrant)" ContainsTarget="true"/>
+            <NavigationProperty Name="photo" Type="graph.profilePhoto" ContainsTarget="true"/>
+            <NavigationProperty Name="primaryChannel" Type="graph.channel" ContainsTarget="true"/>
+            <NavigationProperty Name="tags" Type="Collection(graph.teamworkTag)" ContainsTarget="true"/>
+            <NavigationProperty Name="template" Type="graph.teamsTemplate"/>
+            <NavigationProperty Name="schedule" Type="graph.schedule" ContainsTarget="true"/>
+         </EntityType>
          <EntityType Name="identityGovernance">
             <NavigationProperty Name="lifecycleWorkflows" Type="microsoft.graph.identityGovernance.lifecycleWorkflowsContainer" ContainsTarget="true"/>
             <NavigationProperty Name="accessReviews" Type="graph.accessReviewSet" ContainsTarget="true"/>
@@ -22505,10 +23028,6 @@
             <Property Name="lastSuccessfulSignInDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="lastSuccessfulSignInRequestId" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="assignedLicense">
-            <Property Name="disabledPlans" Type="Collection(Edm.Guid)" Nullable="false"/>
-            <Property Name="skuId" Type="Edm.Guid"/>
-         </ComplexType>
          <ComplexType Name="assignedPlan">
             <Property Name="assignedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="capabilityStatus" Type="Edm.String"/>
@@ -22553,12 +23072,6 @@
             <Property Name="extensionAttribute8" Type="Edm.String"/>
             <Property Name="extensionAttribute9" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="onPremisesProvisioningError">
-            <Property Name="category" Type="Edm.String"/>
-            <Property Name="occurredDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="propertyCausingError" Type="Edm.String"/>
-            <Property Name="value" Type="Edm.String"/>
-         </ComplexType>
          <ComplexType Name="passwordProfile">
             <Property Name="forceChangePasswordNextSignIn" Type="Edm.Boolean"/>
             <Property Name="forceChangePasswordNextSignInWithMfa" Type="Edm.Boolean"/>
@@ -22569,20 +23082,6 @@
             <Property Name="provisioningStatus" Type="Edm.String"/>
             <Property Name="service" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="serviceProvisioningError" Abstract="true">
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="isResolved" Type="Edm.Boolean"/>
-            <Property Name="serviceInstance" Type="Edm.String"/>
-         </ComplexType>
-         <EntityType Name="appRoleAssignment" BaseType="graph.directoryObject">
-            <Property Name="appRoleId" Type="Edm.Guid" Nullable="false"/>
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="principalDisplayName" Type="Edm.String"/>
-            <Property Name="principalId" Type="Edm.Guid"/>
-            <Property Name="principalType" Type="Edm.String"/>
-            <Property Name="resourceDisplayName" Type="Edm.String"/>
-            <Property Name="resourceId" Type="Edm.Guid"/>
-         </EntityType>
          <EntityType Name="licenseDetails" BaseType="graph.entity">
             <Property Name="servicePlans" Type="Collection(graph.servicePlanInfo)" Nullable="false"/>
             <Property Name="skuId" Type="Edm.Guid"/>
@@ -22611,81 +23110,11 @@
             <Property Name="userPurpose" Type="graph.userPurpose"/>
             <Property Name="workingHours" Type="graph.workingHours"/>
          </ComplexType>
-         <EntityType Name="calendar" BaseType="graph.entity">
-            <Property Name="allowedOnlineMeetingProviders" Type="Collection(graph.onlineMeetingProviderType)"/>
-            <Property Name="canEdit" Type="Edm.Boolean"/>
-            <Property Name="canShare" Type="Edm.Boolean"/>
-            <Property Name="canViewPrivateItems" Type="Edm.Boolean"/>
-            <Property Name="changeKey" Type="Edm.String"/>
-            <Property Name="color" Type="graph.calendarColor"/>
-            <Property Name="defaultOnlineMeetingProvider" Type="graph.onlineMeetingProviderType"/>
-            <Property Name="hexColor" Type="Edm.String"/>
-            <Property Name="isDefaultCalendar" Type="Edm.Boolean"/>
-            <Property Name="isRemovable" Type="Edm.Boolean"/>
-            <Property Name="isTallyingResponses" Type="Edm.Boolean"/>
-            <Property Name="name" Type="Edm.String"/>
-            <Property Name="owner" Type="graph.emailAddress"/>
-            <NavigationProperty Name="calendarPermissions" Type="Collection(graph.calendarPermission)" ContainsTarget="true"/>
-            <NavigationProperty Name="calendarView" Type="Collection(graph.event)" ContainsTarget="true"/>
-            <NavigationProperty Name="events" Type="Collection(graph.event)" ContainsTarget="true"/>
-            <NavigationProperty Name="multiValueExtendedProperties" Type="Collection(graph.multiValueLegacyExtendedProperty)" ContainsTarget="true"/>
-            <NavigationProperty Name="singleValueExtendedProperties" Type="Collection(graph.singleValueLegacyExtendedProperty)" ContainsTarget="true"/>
-         </EntityType>
          <EntityType Name="calendarGroup" BaseType="graph.entity">
             <Property Name="changeKey" Type="Edm.String"/>
             <Property Name="classId" Type="Edm.Guid"/>
             <Property Name="name" Type="Edm.String"/>
             <NavigationProperty Name="calendars" Type="Collection(graph.calendar)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="outlookItem" BaseType="graph.entity" Abstract="true">
-            <Property Name="categories" Type="Collection(Edm.String)"/>
-            <Property Name="changeKey" Type="Edm.String"/>
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
-         </EntityType>
-         <EntityType Name="event" BaseType="graph.outlookItem" OpenType="true">
-            <Property Name="allowNewTimeProposals" Type="Edm.Boolean"/>
-            <Property Name="attendees" Type="Collection(graph.attendee)"/>
-            <Property Name="body" Type="graph.itemBody"/>
-            <Property Name="bodyPreview" Type="Edm.String"/>
-            <Property Name="end" Type="graph.dateTimeTimeZone"/>
-            <Property Name="hasAttachments" Type="Edm.Boolean"/>
-            <Property Name="hideAttendees" Type="Edm.Boolean"/>
-            <Property Name="iCalUId" Type="Edm.String"/>
-            <Property Name="importance" Type="graph.importance"/>
-            <Property Name="isAllDay" Type="Edm.Boolean"/>
-            <Property Name="isCancelled" Type="Edm.Boolean"/>
-            <Property Name="isDraft" Type="Edm.Boolean"/>
-            <Property Name="isOnlineMeeting" Type="Edm.Boolean"/>
-            <Property Name="isOrganizer" Type="Edm.Boolean"/>
-            <Property Name="isReminderOn" Type="Edm.Boolean"/>
-            <Property Name="location" Type="graph.location"/>
-            <Property Name="locations" Type="Collection(graph.location)"/>
-            <Property Name="onlineMeeting" Type="graph.onlineMeetingInfo"/>
-            <Property Name="onlineMeetingProvider" Type="graph.onlineMeetingProviderType"/>
-            <Property Name="onlineMeetingUrl" Type="Edm.String"/>
-            <Property Name="organizer" Type="graph.recipient"/>
-            <Property Name="originalEndTimeZone" Type="Edm.String"/>
-            <Property Name="originalStart" Type="Edm.DateTimeOffset"/>
-            <Property Name="originalStartTimeZone" Type="Edm.String"/>
-            <Property Name="recurrence" Type="graph.patternedRecurrence"/>
-            <Property Name="reminderMinutesBeforeStart" Type="Edm.Int32"/>
-            <Property Name="responseRequested" Type="Edm.Boolean"/>
-            <Property Name="responseStatus" Type="graph.responseStatus"/>
-            <Property Name="sensitivity" Type="graph.sensitivity"/>
-            <Property Name="seriesMasterId" Type="Edm.String"/>
-            <Property Name="showAs" Type="graph.freeBusyStatus"/>
-            <Property Name="start" Type="graph.dateTimeTimeZone"/>
-            <Property Name="subject" Type="Edm.String"/>
-            <Property Name="transactionId" Type="Edm.String"/>
-            <Property Name="type" Type="graph.eventType"/>
-            <Property Name="webLink" Type="Edm.String"/>
-            <NavigationProperty Name="attachments" Type="Collection(graph.attachment)" ContainsTarget="true"/>
-            <NavigationProperty Name="calendar" Type="graph.calendar" ContainsTarget="true"/>
-            <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
-            <NavigationProperty Name="instances" Type="Collection(graph.event)" ContainsTarget="true"/>
-            <NavigationProperty Name="multiValueExtendedProperties" Type="Collection(graph.multiValueLegacyExtendedProperty)" ContainsTarget="true"/>
-            <NavigationProperty Name="singleValueExtendedProperties" Type="Collection(graph.singleValueLegacyExtendedProperty)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="contactFolder" BaseType="graph.entity">
             <Property Name="displayName" Type="Edm.String"/>
@@ -22806,56 +23235,6 @@
             <Property Name="websites" Type="Collection(graph.website)"/>
             <Property Name="yomiCompany" Type="Edm.String"/>
          </EntityType>
-         <EntityType Name="baseItem" BaseType="graph.entity" Abstract="true">
-            <Property Name="createdBy" Type="graph.identitySet"/>
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="eTag" Type="Edm.String"/>
-            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
-            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="name" Type="Edm.String"/>
-            <Property Name="parentReference" Type="graph.itemReference"/>
-            <Property Name="webUrl" Type="Edm.String"/>
-            <NavigationProperty Name="createdByUser" Type="graph.user"/>
-            <NavigationProperty Name="lastModifiedByUser" Type="graph.user"/>
-         </EntityType>
-         <EntityType Name="drive" BaseType="graph.baseItem">
-            <Property Name="driveType" Type="Edm.String"/>
-            <Property Name="owner" Type="graph.identitySet"/>
-            <Property Name="quota" Type="graph.quota"/>
-            <Property Name="sharePointIds" Type="graph.sharepointIds"/>
-            <Property Name="system" Type="graph.systemFacet"/>
-            <NavigationProperty Name="bundles" Type="Collection(graph.driveItem)" ContainsTarget="true"/>
-            <NavigationProperty Name="following" Type="Collection(graph.driveItem)" ContainsTarget="true"/>
-            <NavigationProperty Name="items" Type="Collection(graph.driveItem)" ContainsTarget="true"/>
-            <NavigationProperty Name="list" Type="graph.list" ContainsTarget="true"/>
-            <NavigationProperty Name="root" Type="graph.driveItem" ContainsTarget="true"/>
-            <NavigationProperty Name="special" Type="Collection(graph.driveItem)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="site" BaseType="graph.baseItem">
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="error" Type="graph.publicError"/>
-            <Property Name="isPersonalSite" Type="Edm.Boolean"/>
-            <Property Name="root" Type="graph.root"/>
-            <Property Name="sharepointIds" Type="graph.sharepointIds"/>
-            <Property Name="siteCollection" Type="graph.siteCollection"/>
-            <NavigationProperty Name="analytics" Type="graph.itemAnalytics"/>
-            <NavigationProperty Name="columns" Type="Collection(graph.columnDefinition)" ContainsTarget="true"/>
-            <NavigationProperty Name="contentTypes" Type="Collection(graph.contentType)" ContainsTarget="true"/>
-            <NavigationProperty Name="drive" Type="graph.drive" ContainsTarget="true"/>
-            <NavigationProperty Name="drives" Type="Collection(graph.drive)" ContainsTarget="true"/>
-            <NavigationProperty Name="externalColumns" Type="Collection(graph.columnDefinition)"/>
-            <NavigationProperty Name="items" Type="Collection(graph.baseItem)" ContainsTarget="true"/>
-            <NavigationProperty Name="lists" Type="Collection(graph.list)" ContainsTarget="true"/>
-            <NavigationProperty Name="operations" Type="Collection(graph.richLongRunningOperation)" ContainsTarget="true"/>
-            <NavigationProperty Name="pages" Type="Collection(graph.baseSitePage)" ContainsTarget="true"/>
-            <NavigationProperty Name="permissions" Type="Collection(graph.permission)" ContainsTarget="true"/>
-            <NavigationProperty Name="sites" Type="Collection(graph.site)" ContainsTarget="true"/>
-            <NavigationProperty Name="termStore" Type="microsoft.graph.termStore.store" ContainsTarget="true"/>
-            <NavigationProperty Name="termStores" Type="Collection(microsoft.graph.termStore.store)" ContainsTarget="true"/>
-            <NavigationProperty Name="onenote" Type="graph.onenote" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="extension" BaseType="graph.entity" Abstract="true" OpenType="true"/>
          <EntityType Name="agreementAcceptance" BaseType="graph.entity">
             <Property Name="agreementFileId" Type="Edm.String"/>
             <Property Name="agreementId" Type="Edm.String"/>
@@ -22972,20 +23351,8 @@
             <NavigationProperty Name="shiftPreferences" Type="graph.shiftPreferences" ContainsTarget="true"/>
             <NavigationProperty Name="storage" Type="graph.userStorage" ContainsTarget="true"/>
          </EntityType>
-         <EntityType Name="onenote" BaseType="graph.entity">
-            <NavigationProperty Name="notebooks" Type="Collection(graph.notebook)" ContainsTarget="true"/>
-            <NavigationProperty Name="operations" Type="Collection(graph.onenoteOperation)" ContainsTarget="true"/>
-            <NavigationProperty Name="pages" Type="Collection(graph.onenotePage)" ContainsTarget="true"/>
-            <NavigationProperty Name="resources" Type="Collection(graph.onenoteResource)" ContainsTarget="true"/>
-            <NavigationProperty Name="sectionGroups" Type="Collection(graph.sectionGroup)" ContainsTarget="true"/>
-            <NavigationProperty Name="sections" Type="Collection(graph.onenoteSection)" ContainsTarget="true"/>
-         </EntityType>
          <EntityType Name="cloudClipboardRoot" BaseType="graph.entity">
             <NavigationProperty Name="items" Type="Collection(graph.cloudClipboardItem)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="profilePhoto" BaseType="graph.entity" HasStream="true">
-            <Property Name="height" Type="Edm.Int32"/>
-            <Property Name="width" Type="Edm.Int32"/>
          </EntityType>
          <ComplexType Name="userPrint">
             <NavigationProperty Name="recentPrinterShares" Type="Collection(graph.printerShare)" ContainsTarget="true"/>
@@ -23072,43 +23439,6 @@
             <NavigationProperty Name="permissionGrants" Type="Collection(graph.resourceSpecificPermissionGrant)" ContainsTarget="true"/>
             <NavigationProperty Name="pinnedMessages" Type="Collection(graph.pinnedChatMessageInfo)" ContainsTarget="true"/>
             <NavigationProperty Name="tabs" Type="Collection(graph.teamsTab)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="team" BaseType="graph.entity" OpenType="true">
-            <Property Name="classification" Type="Edm.String"/>
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="funSettings" Type="graph.teamFunSettings"/>
-            <Property Name="guestSettings" Type="graph.teamGuestSettings"/>
-            <Property Name="internalId" Type="Edm.String"/>
-            <Property Name="isArchived" Type="Edm.Boolean"/>
-            <Property Name="memberSettings" Type="graph.teamMemberSettings"/>
-            <Property Name="messagingSettings" Type="graph.teamMessagingSettings"/>
-            <Property Name="specialization" Type="graph.teamSpecialization"/>
-            <Property Name="summary" Type="graph.teamSummary"/>
-            <Property Name="tenantId" Type="Edm.String"/>
-            <Property Name="visibility" Type="graph.teamVisibilityType"/>
-            <Property Name="webUrl" Type="Edm.String"/>
-            <NavigationProperty Name="allChannels" Type="Collection(graph.channel)"/>
-            <NavigationProperty Name="channels" Type="Collection(graph.channel)" ContainsTarget="true"/>
-            <NavigationProperty Name="group" Type="graph.group"/>
-            <NavigationProperty Name="incomingChannels" Type="Collection(graph.channel)"/>
-            <NavigationProperty Name="installedApps" Type="Collection(graph.teamsAppInstallation)" ContainsTarget="true"/>
-            <NavigationProperty Name="members" Type="Collection(graph.conversationMember)" ContainsTarget="true"/>
-            <NavigationProperty Name="operations" Type="Collection(graph.teamsAsyncOperation)" ContainsTarget="true"/>
-            <NavigationProperty Name="permissionGrants" Type="Collection(graph.resourceSpecificPermissionGrant)" ContainsTarget="true"/>
-            <NavigationProperty Name="photo" Type="graph.profilePhoto" ContainsTarget="true"/>
-            <NavigationProperty Name="primaryChannel" Type="graph.channel" ContainsTarget="true"/>
-            <NavigationProperty Name="tags" Type="Collection(graph.teamworkTag)" ContainsTarget="true"/>
-            <NavigationProperty Name="template" Type="graph.teamsTemplate"/>
-            <NavigationProperty Name="schedule" Type="graph.schedule" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="resourceSpecificPermissionGrant" BaseType="graph.directoryObject">
-            <Property Name="clientAppId" Type="Edm.String"/>
-            <Property Name="clientId" Type="Edm.String"/>
-            <Property Name="permission" Type="Edm.String"/>
-            <Property Name="permissionType" Type="Edm.String"/>
-            <Property Name="resourceAppId" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="userTeamwork" BaseType="graph.entity">
             <Property Name="locale" Type="Edm.String"/>
@@ -24062,7 +24392,28 @@
          <EntityType Name="solutionsRoot">
             <NavigationProperty Name="bookingBusinesses" Type="Collection(graph.bookingBusiness)" ContainsTarget="true"/>
             <NavigationProperty Name="bookingCurrencies" Type="Collection(graph.bookingCurrency)" ContainsTarget="true"/>
+            <NavigationProperty Name="backupRestore" Type="graph.backupRestoreRoot" ContainsTarget="true"/>
             <NavigationProperty Name="virtualEvents" Type="graph.virtualEventsRoot" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="backupRestoreRoot" BaseType="graph.entity">
+            <Property Name="serviceStatus" Type="graph.serviceStatus"/>
+            <NavigationProperty Name="driveInclusionRules" Type="Collection(graph.driveProtectionRule)" ContainsTarget="true"/>
+            <NavigationProperty Name="driveProtectionUnits" Type="Collection(graph.driveProtectionUnit)" ContainsTarget="true"/>
+            <NavigationProperty Name="exchangeProtectionPolicies" Type="Collection(graph.exchangeProtectionPolicy)" ContainsTarget="true"/>
+            <NavigationProperty Name="exchangeRestoreSessions" Type="Collection(graph.exchangeRestoreSession)" ContainsTarget="true"/>
+            <NavigationProperty Name="mailboxInclusionRules" Type="Collection(graph.mailboxProtectionRule)" ContainsTarget="true"/>
+            <NavigationProperty Name="mailboxProtectionUnits" Type="Collection(graph.mailboxProtectionUnit)" ContainsTarget="true"/>
+            <NavigationProperty Name="oneDriveForBusinessProtectionPolicies" Type="Collection(graph.oneDriveForBusinessProtectionPolicy)" ContainsTarget="true"/>
+            <NavigationProperty Name="oneDriveForBusinessRestoreSessions" Type="Collection(graph.oneDriveForBusinessRestoreSession)" ContainsTarget="true"/>
+            <NavigationProperty Name="protectionPolicies" Type="Collection(graph.protectionPolicyBase)" ContainsTarget="true"/>
+            <NavigationProperty Name="protectionUnits" Type="Collection(graph.protectionUnitBase)"/>
+            <NavigationProperty Name="restorePoints" Type="Collection(graph.restorePoint)" ContainsTarget="true"/>
+            <NavigationProperty Name="restoreSessions" Type="Collection(graph.restoreSessionBase)" ContainsTarget="true"/>
+            <NavigationProperty Name="serviceApps" Type="Collection(graph.serviceApp)" ContainsTarget="true"/>
+            <NavigationProperty Name="sharePointProtectionPolicies" Type="Collection(graph.sharePointProtectionPolicy)" ContainsTarget="true"/>
+            <NavigationProperty Name="sharePointRestoreSessions" Type="Collection(graph.sharePointRestoreSession)" ContainsTarget="true"/>
+            <NavigationProperty Name="siteInclusionRules" Type="Collection(graph.siteProtectionRule)" ContainsTarget="true"/>
+            <NavigationProperty Name="siteProtectionUnits" Type="Collection(graph.siteProtectionUnit)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="virtualEventsRoot" BaseType="graph.entity">
             <NavigationProperty Name="events" Type="Collection(graph.virtualEvent)" ContainsTarget="true"/>
@@ -25127,89 +25478,6 @@
             <NavigationProperty Name="sharedWithTeams" Type="Collection(graph.sharedWithChannelTeamInfo)" ContainsTarget="true"/>
             <NavigationProperty Name="tabs" Type="Collection(graph.teamsTab)" ContainsTarget="true"/>
          </EntityType>
-         <EntityType Name="group" BaseType="graph.directoryObject" OpenType="true">
-            <Property Name="assignedLabels" Type="Collection(graph.assignedLabel)"/>
-            <Property Name="assignedLicenses" Type="Collection(graph.assignedLicense)"/>
-            <Property Name="classification" Type="Edm.String"/>
-            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="description" Type="Edm.String"/>
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="expirationDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="groupTypes" Type="Collection(Edm.String)" Nullable="false"/>
-            <Property Name="hasMembersWithLicenseErrors" Type="Edm.Boolean"/>
-            <Property Name="isAssignableToRole" Type="Edm.Boolean"/>
-            <Property Name="licenseProcessingState" Type="graph.licenseProcessingState"/>
-            <Property Name="mail" Type="Edm.String"/>
-            <Property Name="mailEnabled" Type="Edm.Boolean"/>
-            <Property Name="mailNickname" Type="Edm.String"/>
-            <Property Name="membershipRule" Type="Edm.String"/>
-            <Property Name="membershipRuleProcessingState" Type="Edm.String"/>
-            <Property Name="onPremisesDomainName" Type="Edm.String"/>
-            <Property Name="onPremisesLastSyncDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="onPremisesNetBiosName" Type="Edm.String"/>
-            <Property Name="onPremisesProvisioningErrors" Type="Collection(graph.onPremisesProvisioningError)"/>
-            <Property Name="onPremisesSamAccountName" Type="Edm.String"/>
-            <Property Name="onPremisesSecurityIdentifier" Type="Edm.String"/>
-            <Property Name="onPremisesSyncEnabled" Type="Edm.Boolean"/>
-            <Property Name="preferredDataLocation" Type="Edm.String"/>
-            <Property Name="preferredLanguage" Type="Edm.String"/>
-            <Property Name="proxyAddresses" Type="Collection(Edm.String)" Nullable="false"/>
-            <Property Name="renewedDateTime" Type="Edm.DateTimeOffset"/>
-            <Property Name="securityEnabled" Type="Edm.Boolean"/>
-            <Property Name="securityIdentifier" Type="Edm.String"/>
-            <Property Name="serviceProvisioningErrors" Type="Collection(graph.serviceProvisioningError)"/>
-            <Property Name="theme" Type="Edm.String"/>
-            <Property Name="uniqueName" Type="Edm.String"/>
-            <Property Name="visibility" Type="Edm.String"/>
-            <Property Name="allowExternalSenders" Type="Edm.Boolean"/>
-            <Property Name="autoSubscribeNewMembers" Type="Edm.Boolean"/>
-            <Property Name="hideFromAddressLists" Type="Edm.Boolean"/>
-            <Property Name="hideFromOutlookClients" Type="Edm.Boolean"/>
-            <Property Name="isSubscribedByMail" Type="Edm.Boolean"/>
-            <Property Name="unseenCount" Type="Edm.Int32"/>
-            <Property Name="isArchived" Type="Edm.Boolean"/>
-            <NavigationProperty Name="appRoleAssignments" Type="Collection(graph.appRoleAssignment)" ContainsTarget="true"/>
-            <NavigationProperty Name="createdOnBehalfOf" Type="graph.directoryObject"/>
-            <NavigationProperty Name="memberOf" Type="Collection(graph.directoryObject)"/>
-            <NavigationProperty Name="members" Type="Collection(graph.directoryObject)"/>
-            <NavigationProperty Name="membersWithLicenseErrors" Type="Collection(graph.directoryObject)"/>
-            <NavigationProperty Name="owners" Type="Collection(graph.directoryObject)"/>
-            <NavigationProperty Name="permissionGrants" Type="Collection(graph.resourceSpecificPermissionGrant)" ContainsTarget="true"/>
-            <NavigationProperty Name="settings" Type="Collection(graph.groupSetting)" ContainsTarget="true"/>
-            <NavigationProperty Name="transitiveMemberOf" Type="Collection(graph.directoryObject)"/>
-            <NavigationProperty Name="transitiveMembers" Type="Collection(graph.directoryObject)"/>
-            <NavigationProperty Name="acceptedSenders" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
-            <NavigationProperty Name="calendar" Type="graph.calendar" ContainsTarget="true"/>
-            <NavigationProperty Name="calendarView" Type="Collection(graph.event)" ContainsTarget="true"/>
-            <NavigationProperty Name="conversations" Type="Collection(graph.conversation)" ContainsTarget="true"/>
-            <NavigationProperty Name="events" Type="Collection(graph.event)" ContainsTarget="true"/>
-            <NavigationProperty Name="rejectedSenders" Type="Collection(graph.directoryObject)" ContainsTarget="true"/>
-            <NavigationProperty Name="threads" Type="Collection(graph.conversationThread)" ContainsTarget="true"/>
-            <NavigationProperty Name="drive" Type="graph.drive" ContainsTarget="true"/>
-            <NavigationProperty Name="drives" Type="Collection(graph.drive)" ContainsTarget="true"/>
-            <NavigationProperty Name="sites" Type="Collection(graph.site)" ContainsTarget="true"/>
-            <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
-            <NavigationProperty Name="groupLifecyclePolicies" Type="Collection(graph.groupLifecyclePolicy)" ContainsTarget="true"/>
-            <NavigationProperty Name="planner" Type="graph.plannerGroup" ContainsTarget="true"/>
-            <NavigationProperty Name="onenote" Type="graph.onenote" ContainsTarget="true"/>
-            <NavigationProperty Name="photo" Type="graph.profilePhoto" ContainsTarget="true"/>
-            <NavigationProperty Name="photos" Type="Collection(graph.profilePhoto)" ContainsTarget="true"/>
-            <NavigationProperty Name="team" Type="graph.team" ContainsTarget="true"/>
-            <Annotation Term="Org.OData.Core.V1.AlternateKeys">
-               <Collection>
-                  <Record Type="Org.OData.Core.V1.AlternateKey">
-                     <PropertyValue Property="Key">
-                        <Collection>
-                           <Record Type="Org.OData.Core.V1.PropertyRef">
-                              <PropertyValue Property="Alias" String="uniqueName"/>
-                              <PropertyValue Property="Name" PropertyPath="uniqueName"/>
-                           </Record>
-                        </Collection>
-                     </PropertyValue>
-                  </Record>
-               </Collection>
-            </Annotation>
-         </EntityType>
          <EntityType Name="teamsAppInstallation" BaseType="graph.entity">
             <Property Name="consentedPermissionSet" Type="graph.teamsAppPermissionSet"/>
             <NavigationProperty Name="teamsApp" Type="graph.teamsApp"/>
@@ -25266,45 +25534,6 @@
             <Property Name="subcode" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
          <EntityType Name="compliance"/>
-         <ComplexType Name="assignedLabel">
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="labelId" Type="Edm.String"/>
-         </ComplexType>
-         <ComplexType Name="licenseProcessingState">
-            <Property Name="state" Type="Edm.String"/>
-         </ComplexType>
-         <EntityType Name="groupSetting" BaseType="graph.entity" OpenType="true">
-            <Property Name="displayName" Type="Edm.String"/>
-            <Property Name="templateId" Type="Edm.String"/>
-            <Property Name="values" Type="Collection(graph.settingValue)" Nullable="false"/>
-         </EntityType>
-         <EntityType Name="conversation" BaseType="graph.entity">
-            <Property Name="hasAttachments" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="lastDeliveredDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="preview" Type="Edm.String" Nullable="false"/>
-            <Property Name="topic" Type="Edm.String" Nullable="false"/>
-            <Property Name="uniqueSenders" Type="Collection(Edm.String)" Nullable="false"/>
-            <NavigationProperty Name="threads" Type="Collection(graph.conversationThread)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="conversationThread" BaseType="graph.entity">
-            <Property Name="ccRecipients" Type="Collection(graph.recipient)" Nullable="false"/>
-            <Property Name="hasAttachments" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="isLocked" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="lastDeliveredDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
-            <Property Name="preview" Type="Edm.String" Nullable="false"/>
-            <Property Name="topic" Type="Edm.String" Nullable="false"/>
-            <Property Name="toRecipients" Type="Collection(graph.recipient)" Nullable="false"/>
-            <Property Name="uniqueSenders" Type="Collection(Edm.String)" Nullable="false"/>
-            <NavigationProperty Name="posts" Type="Collection(graph.post)" ContainsTarget="true"/>
-         </EntityType>
-         <EntityType Name="groupLifecyclePolicy" BaseType="graph.entity">
-            <Property Name="alternateNotificationEmails" Type="Edm.String"/>
-            <Property Name="groupLifetimeInDays" Type="Edm.Int32"/>
-            <Property Name="managedGroupTypes" Type="Edm.String"/>
-         </EntityType>
-         <EntityType Name="plannerGroup" BaseType="graph.entity">
-            <NavigationProperty Name="plans" Type="Collection(graph.plannerPlan)"/>
-         </EntityType>
          <ComplexType Name="root"/>
          <ComplexType Name="sharepointIds">
             <Property Name="listId" Type="Edm.String"/>
@@ -26529,6 +26758,7 @@
             <NavigationProperty Name="sharepoint" Type="graph.sharepoint" ContainsTarget="true"/>
             <NavigationProperty Name="microsoft365Apps" Type="graph.adminMicrosoft365Apps" ContainsTarget="true"/>
             <NavigationProperty Name="serviceAnnouncement" Type="graph.serviceAnnouncement" ContainsTarget="true"/>
+            <NavigationProperty Name="reportSettings" Type="graph.adminReportSettings" ContainsTarget="true"/>
             <NavigationProperty Name="people" Type="graph.peopleAdminSettings" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="edge" BaseType="graph.entity">
@@ -26544,6 +26774,9 @@
             <NavigationProperty Name="healthOverviews" Type="Collection(graph.serviceHealth)" ContainsTarget="true"/>
             <NavigationProperty Name="issues" Type="Collection(graph.serviceHealthIssue)" ContainsTarget="true"/>
             <NavigationProperty Name="messages" Type="Collection(graph.serviceUpdateMessage)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="adminReportSettings" BaseType="graph.entity">
+            <Property Name="displayConcealedNames" Type="Edm.Boolean" Nullable="false"/>
          </EntityType>
          <EntityType Name="peopleAdminSettings" BaseType="graph.entity">
             <NavigationProperty Name="profileCardProperties" Type="Collection(graph.profileCardProperty)" ContainsTarget="true"/>
@@ -26935,6 +27168,158 @@
             <Property Name="externalId" Type="Edm.String"/>
             <Property Name="teacherNumber" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="artifactQuery">
+            <Property Name="artifactType" Type="graph.restorableArtifact"/>
+            <Property Name="queryExpression" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="restorePointSearchResponse">
+            <Property Name="noResultProtectionUnitIds" Type="Collection(Edm.String)"/>
+            <Property Name="searchResponseId" Type="Edm.String"/>
+            <Property Name="searchResults" Type="Collection(graph.restorePointSearchResult)"/>
+         </ComplexType>
+         <ComplexType Name="restorePointSearchResult">
+            <Property Name="artifactHitCount" Type="Edm.Int32"/>
+            <NavigationProperty Name="restorePoint" Type="graph.restorePoint"/>
+         </ComplexType>
+         <EntityType Name="restorePoint" BaseType="graph.entity">
+            <Property Name="expirationDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="protectionDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="tags" Type="graph.restorePointTags"/>
+            <NavigationProperty Name="protectionUnit" Type="graph.protectionUnitBase"/>
+         </EntityType>
+         <ComplexType Name="retentionSetting">
+            <Property Name="interval" Type="Edm.String"/>
+            <Property Name="period" Type="Edm.Duration"/>
+         </ComplexType>
+         <ComplexType Name="serviceStatus">
+            <Property Name="backupServiceConsumer" Type="graph.backupServiceConsumer"/>
+            <Property Name="disableReason" Type="graph.disableReason"/>
+            <Property Name="gracePeriodDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="restoreAllowedTillDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="status" Type="graph.backupServiceStatus"/>
+         </ComplexType>
+         <ComplexType Name="timePeriod">
+            <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="startDateTime" Type="Edm.DateTimeOffset"/>
+         </ComplexType>
+         <EntityType Name="protectionRuleBase" BaseType="graph.entity" Abstract="true">
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="error" Type="graph.publicError"/>
+            <Property Name="isAutoApplyEnabled" Type="Edm.Boolean"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="status" Type="graph.protectionRuleStatus"/>
+         </EntityType>
+         <EntityType Name="driveProtectionRule" BaseType="graph.protectionRuleBase">
+            <Property Name="driveExpression" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="protectionUnitBase" BaseType="graph.entity" Abstract="true">
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="error" Type="graph.publicError"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="policyId" Type="Edm.String"/>
+            <Property Name="status" Type="graph.protectionUnitStatus"/>
+         </EntityType>
+         <EntityType Name="driveProtectionUnit" BaseType="graph.protectionUnitBase">
+            <Property Name="directoryObjectId" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="email" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="protectionPolicyBase" BaseType="graph.entity" Abstract="true">
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="retentionSettings" Type="Collection(graph.retentionSetting)"/>
+            <Property Name="status" Type="graph.protectionPolicyStatus"/>
+         </EntityType>
+         <EntityType Name="exchangeProtectionPolicy" BaseType="graph.protectionPolicyBase">
+            <NavigationProperty Name="mailboxInclusionRules" Type="Collection(graph.mailboxProtectionRule)"/>
+            <NavigationProperty Name="mailboxProtectionUnits" Type="Collection(graph.mailboxProtectionUnit)"/>
+         </EntityType>
+         <EntityType Name="restoreSessionBase" BaseType="graph.entity">
+            <Property Name="completedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="error" Type="graph.publicError"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="status" Type="graph.restoreSessionStatus"/>
+         </EntityType>
+         <EntityType Name="exchangeRestoreSession" BaseType="graph.restoreSessionBase">
+            <NavigationProperty Name="granularMailboxRestoreArtifacts" Type="Collection(graph.granularMailboxRestoreArtifact)" ContainsTarget="true"/>
+            <NavigationProperty Name="mailboxRestoreArtifacts" Type="Collection(graph.mailboxRestoreArtifact)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="mailboxProtectionRule" BaseType="graph.protectionRuleBase">
+            <Property Name="mailboxExpression" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="mailboxProtectionUnit" BaseType="graph.protectionUnitBase">
+            <Property Name="directoryObjectId" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="email" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="oneDriveForBusinessProtectionPolicy" BaseType="graph.protectionPolicyBase">
+            <NavigationProperty Name="driveInclusionRules" Type="Collection(graph.driveProtectionRule)"/>
+            <NavigationProperty Name="driveProtectionUnits" Type="Collection(graph.driveProtectionUnit)"/>
+         </EntityType>
+         <EntityType Name="oneDriveForBusinessRestoreSession" BaseType="graph.restoreSessionBase">
+            <NavigationProperty Name="driveRestoreArtifacts" Type="Collection(graph.driveRestoreArtifact)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="serviceApp" BaseType="graph.entity">
+            <Property Name="application" Type="graph.identity"/>
+            <Property Name="effectiveDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="registrationDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="status" Type="graph.serviceAppStatus"/>
+         </EntityType>
+         <EntityType Name="sharePointProtectionPolicy" BaseType="graph.protectionPolicyBase">
+            <NavigationProperty Name="siteInclusionRules" Type="Collection(graph.siteProtectionRule)"/>
+            <NavigationProperty Name="siteProtectionUnits" Type="Collection(graph.siteProtectionUnit)"/>
+         </EntityType>
+         <EntityType Name="sharePointRestoreSession" BaseType="graph.restoreSessionBase">
+            <NavigationProperty Name="siteRestoreArtifacts" Type="Collection(graph.siteRestoreArtifact)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="siteProtectionRule" BaseType="graph.protectionRuleBase">
+            <Property Name="siteExpression" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="siteProtectionUnit" BaseType="graph.protectionUnitBase">
+            <Property Name="siteId" Type="Edm.String"/>
+            <Property Name="siteName" Type="Edm.String"/>
+            <Property Name="siteWebUrl" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="restoreArtifactBase" BaseType="graph.entity">
+            <Property Name="completionDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="destinationType" Type="graph.destinationType"/>
+            <Property Name="error" Type="graph.publicError"/>
+            <Property Name="startDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="status" Type="graph.artifactRestoreStatus"/>
+            <NavigationProperty Name="restorePoint" Type="graph.restorePoint"/>
+         </EntityType>
+         <EntityType Name="driveRestoreArtifact" BaseType="graph.restoreArtifactBase">
+            <Property Name="restoredSiteId" Type="Edm.String"/>
+            <Property Name="restoredSiteName" Type="Edm.String"/>
+            <Property Name="restoredSiteWebUrl" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="mailboxRestoreArtifact" BaseType="graph.restoreArtifactBase">
+            <Property Name="restoredFolderId" Type="Edm.String"/>
+            <Property Name="restoredFolderName" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="granularMailboxRestoreArtifact" BaseType="graph.mailboxRestoreArtifact">
+            <Property Name="artifactCount" Type="Edm.Int32"/>
+            <Property Name="searchResponseId" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="siteRestoreArtifact" BaseType="graph.restoreArtifactBase">
+            <Property Name="restoredSiteId" Type="Edm.String"/>
+            <Property Name="restoredSiteName" Type="Edm.String"/>
+            <Property Name="restoredSiteWebUrl" Type="Edm.String"/>
+         </EntityType>
          <ComplexType Name="Json"/>
          <ComplexType Name="workbookFilterCriteria">
             <Property Name="color" Type="Edm.String"/>
@@ -35521,11 +35906,32 @@
             <ReturnType Type="graph.educationAssignment"/>
          </Action>
          <Action Name="activate" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.protectionPolicyBase"/>
+            <ReturnType Type="graph.protectionPolicyBase"/>
+         </Action>
+         <Action Name="activate" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.restoreSessionBase"/>
+            <ReturnType Type="graph.restoreSessionBase"/>
+         </Action>
+         <Action Name="activate" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.serviceApp"/>
+            <Parameter Name="effectiveDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <ReturnType Type="graph.serviceApp"/>
+         </Action>
+         <Action Name="activate" IsBound="true">
             <Parameter Name="this" Type="graph.fileStorageContainer"/>
          </Action>
          <Action Name="deactivate" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
             <ReturnType Type="graph.educationAssignment"/>
+         </Action>
+         <Action Name="deactivate" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.protectionPolicyBase"/>
+            <ReturnType Type="graph.protectionPolicyBase"/>
+         </Action>
+         <Action Name="deactivate" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.serviceApp"/>
+            <ReturnType Type="graph.serviceApp"/>
          </Action>
          <Action Name="setUpFeedbackResourcesFolder" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.educationAssignment"/>
@@ -35571,6 +35977,36 @@
             <Parameter Name="bindingParameter" Type="graph.educationModule"/>
             <ReturnType Type="graph.educationModule"/>
          </Action>
+         <Action Name="enable" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.backupRestoreRoot"/>
+            <Parameter Name="appOwnerTenantId" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="graph.serviceStatus"/>
+         </Action>
+         <Action Name="run" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.protectionRuleBase"/>
+            <ReturnType Type="graph.protectionRuleBase"/>
+         </Action>
+         <Action Name="search" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.restorePoint)"/>
+            <Parameter Name="protectionUnitIds" Type="Collection(Edm.String)" Unicode="false"/>
+            <Parameter Name="protectionTimePeriod" Type="graph.timePeriod"/>
+            <Parameter Name="restorePointPreference" Type="graph.restorePointPreference"/>
+            <Parameter Name="tags" Type="graph.restorePointTags"/>
+            <Parameter Name="artifactQuery" Type="graph.artifactQuery">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+            <ReturnType Type="graph.restorePointSearchResponse"/>
+         </Action>
+         <Function Name="search" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
+            <Parameter Name="q" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="Collection(graph.driveItem)"/>
+         </Function>
+         <Function Name="search" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.drive"/>
+            <Parameter Name="q" Type="Edm.String" Unicode="false"/>
+            <ReturnType Type="Collection(graph.driveItem)"/>
+         </Function>
          <Action Name="abs" IsBound="true">
             <Parameter Name="bindparameter" Type="graph.workbookFunctions"/>
             <Parameter Name="number" Type="graph.Json"/>
@@ -38644,16 +39080,6 @@
             <Parameter Name="interval" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="Collection(graph.itemActivityStat)"/>
          </Function>
-         <Function Name="search" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
-            <Parameter Name="q" Type="Edm.String" Unicode="false"/>
-            <ReturnType Type="Collection(graph.driveItem)"/>
-         </Function>
-         <Function Name="search" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.drive"/>
-            <Parameter Name="q" Type="Edm.String" Unicode="false"/>
-            <ReturnType Type="Collection(graph.driveItem)"/>
-         </Function>
          <Action Name="associateWithHubSites" IsBound="true" EntitySetPath="bindingParameter">
             <Parameter Name="bindingParameter" Type="graph.contentType"/>
             <Parameter Name="hubSiteUrls" Type="Collection(Edm.String)" Nullable="false" Unicode="false"/>
@@ -39980,7 +40406,14 @@
             <Singleton Name="auditLogs" Type="microsoft.graph.auditLogRoot"/>
             <Singleton Name="reports" Type="microsoft.graph.reportRoot"/>
             <Singleton Name="authenticationMethodsPolicy" Type="microsoft.graph.authenticationMethodsPolicy"/>
-            <Singleton Name="solutions" Type="microsoft.graph.solutionsRoot"/>
+            <Singleton Name="solutions" Type="microsoft.graph.solutionsRoot">
+               <NavigationPropertyBinding Path="backupRestore/exchangeProtectionPolicies/mailboxInclusionRules" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/mailboxInclusionRules"/>
+               <NavigationPropertyBinding Path="backupRestore/exchangeProtectionPolicies/mailboxProtectionUnits" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/mailboxProtectionUnits"/>
+               <NavigationPropertyBinding Path="backupRestore/oneDriveForBusinessProtectionPolicies/driveInclusionRules" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/driveInclusionRules"/>
+               <NavigationPropertyBinding Path="backupRestore/oneDriveForBusinessProtectionPolicies/driveProtectionUnits" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/driveProtectionUnits"/>
+               <NavigationPropertyBinding Path="backupRestore/sharePointProtectionPolicies/siteInclusionRules" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/siteInclusionRules"/>
+               <NavigationPropertyBinding Path="backupRestore/sharePointProtectionPolicies/siteProtectionUnits" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/siteProtectionUnits"/>
+            </Singleton>
             <Singleton Name="deviceManagement" Type="microsoft.graph.deviceManagement"/>
             <Singleton Name="privacy" Type="microsoft.graph.privacy"/>
             <Singleton Name="security" Type="microsoft.graph.security">

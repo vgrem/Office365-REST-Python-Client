@@ -15,6 +15,8 @@ class MessageRulePredicates(ClientValue):
         from_addresses=None,
         has_attachments=None,
         header_contains=None,
+        importance=None,
+        is_approval_request=None,
     ):
         """
         :param list[str] body_contains: Represents the strings that should appear in the body of an incoming message
@@ -28,6 +30,7 @@ class MessageRulePredicates(ClientValue):
         :param bool has_attachments: Indicates whether an incoming message must have attachments in order for the
              condition or exception to apply.
         :param list[str] header_contains:
+        :param bool is_approval_request:
         """
         self.bodyContains = StringCollection(body_contains)
         self.bodyOrSubjectContains = StringCollection(body_or_subject_contains)
@@ -35,3 +38,5 @@ class MessageRulePredicates(ClientValue):
         self.fromAddresses = ClientValueCollection(Recipient, from_addresses)
         self.hasAttachments = has_attachments
         self.headerContains = StringCollection(header_contains)
+        self.importance = importance
+        self.isApprovalRequest = is_approval_request

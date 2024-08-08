@@ -1,6 +1,7 @@
 from typing import Optional
 
 from office365.entity import Entity
+from office365.onedrive.idle_session_signout import IdleSessionSignOut
 from office365.runtime.types.collections import StringCollection
 
 
@@ -25,6 +26,18 @@ class SharepointSettings(Entity):
         return self.properties.get(
             "excludedFileExtensionsForSyncApp", StringCollection()
         )
+
+    @property
+    def idle_session_sign_out(self):
+        # type: () -> IdleSessionSignOut
+        """Specifies the idle session sign-out policies for the tenant."""
+        return self.properties.get("idleSessionSignOut", IdleSessionSignOut())
+
+    @property
+    def is_commenting_on_site_pages_enabled(self):
+        # type: () -> Optional[bool]
+        """Indicates whether comments are allowed on modern site pages in SharePoint."""
+        return self.properties.get("isCommentingOnSitePagesEnabled", None)
 
     @property
     def site_creation_default_managed_path(self):

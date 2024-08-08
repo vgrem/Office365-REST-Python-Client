@@ -444,4 +444,9 @@ The following libraries will be installed when you install the client library:
 * [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/project/msal/)
 
 
+# ThanksTo
+
+Powerful Python IDE [`Pycharm`](https://www.jetbrains.com/pycharm) from [`Jetbrains`](https://jb.gg/OpenSourceSupport).
+
+[<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg">](https://jb.gg/OpenSourceSupport)
 
