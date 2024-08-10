@@ -59,6 +59,9 @@ class QueryOptions(object):
                 ClientObjectCollection,
             )
 
+            if name in query_options.select:
+                continue
+
             if isinstance(client_object, ClientObjectCollection):
                 prop = client_object.create_typed_object().get_property(name)
             else:

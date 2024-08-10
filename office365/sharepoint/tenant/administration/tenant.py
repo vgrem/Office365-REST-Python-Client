@@ -330,22 +330,46 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
-    def get_sp_list_item_count(self, listName):
+    def get_sp_list_item_count(self, list_name):
         # type: (str) -> ClientResult[int]
         """ """
         return_type = ClientResult(self.context)
-        payload = {"listName": listName}
+        payload = {"listName": list_name}
         qry = ServiceOperationQuery(
             self, "GetSPListItemCount", None, payload, None, return_type
         )
         self.context.add_query(qry)
         return return_type
 
+    def get_sp_list_root_folder_properties(self, list_name):
+        # type: (str) -> ClientResult[dict]
+        """ """
+        return_type = ClientResult(self.context)
+        payload = {"listName": list_name}
+        qry = ServiceOperationQuery(
+            self, "GetSPListRootFolderProperties", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_spo_all_web_templates(self, culture_name=None, compatibility_level=None):
+        # type: (str, int) -> SPOTenantWebTemplateCollection
+        """ """
+        return_type = SPOTenantWebTemplateCollection(self.context)
+        payload = {
+            "cultureName": culture_name,
+            "compatibilityLevel": compatibility_level,
+        }
+        qry = ServiceOperationQuery(
+            self, "GetSPOAllWebTemplates", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def check_tenant_intune_license(self):
-        """
-        Checks whether a tenant has the Intune license.
-        """
-        return_type = ClientResult(self.context)  # type: ClientResult[bool]
+        # type: () -> ClientResult[bool]
+        """Checks whether a tenant has the Intune license."""
+        return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(
             self, "CheckTenantIntuneLicense", None, None, None, return_type
         )

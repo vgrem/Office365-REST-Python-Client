@@ -201,7 +201,7 @@ class ClientContext(ClientRuntimeContext):
         """
         Construct and submit to a server a batch request
         :param int items_per_batch: Maximum to be selected for bulk operation
-        :param (int)-> None success_callback: A callback
+        :param (int)-> None success_callback: A success callback
         """
         batch_request = ODataBatchV3Request(JsonLightFormat())
         batch_request.beforeExecute += self._authenticate_request

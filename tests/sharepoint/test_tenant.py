@@ -188,3 +188,7 @@ class TestTenant(TestCase):
     # def test_26_get_ransomware_activities(self):
     #    result = self.tenant.get_ransomware_activities().execute_query()
     #    self.assertIsNotNone(result.value)
+
+    def test_27_get_get_spo_all_web_templates(self):
+        result = self.tenant.get_spo_all_web_templates().execute_query()
+        self.assertIsNotNone(result)
