@@ -61,3 +61,7 @@ class BatchQuery(ClientQuery):
     @property
     def url(self):
         return "{0}/$batch".format(self.context.service_root_url())
+
+    @property
+    def return_type(self):
+        return [q.return_type for q in self._queries]

@@ -8,6 +8,7 @@ from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
+from office365.runtime.client_object import ClientObject
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.compat import get_absolute_url, urlparse
@@ -197,11 +198,11 @@ class ClientContext(ClientRuntimeContext):
         return self
 
     def execute_batch(self, items_per_batch=100, success_callback=None):
-        # type: (int, Callable[[int], None]) -> Self
+        # type: (int, Callable[[List[ClientObject|ClientResult]], None]) -> Self
         """
         Construct and submit to a server a batch request
         :param int items_per_batch: Maximum to be selected for bulk operation
-        :param (int)-> None success_callback: A success callback
+        :param (List[ClientObject|ClientResult])-> None success_callback: A success callback
         """
         batch_request = ODataBatchV3Request(JsonLightFormat())
         batch_request.beforeExecute += self._authenticate_request
@@ -210,7 +211,7 @@ class ClientContext(ClientRuntimeContext):
             qry = self._get_next_query(items_per_batch)
             batch_request.execute_query(qry)
             if callable(success_callback):
-                success_callback(items_per_batch)
+                success_callback(qry.return_type)
         return self
 
     def pending_request(self):

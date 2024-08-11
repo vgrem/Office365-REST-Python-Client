@@ -2,13 +2,15 @@
 
 """
 
+from typing import List
+
 from office365.sharepoint.client_context import ClientContext
 from tests import test_client_credentials, test_site_url
 
 
-def print_progress(num_deleted):
-    # type: (int) -> None
-    print("{0} deleted.".format(num_deleted))
+def print_progress(deleted_lists):
+    # type: (List) -> None
+    print("{0} deleted.".format(len(deleted_lists)))
 
 
 ctx = ClientContext(test_site_url).with_credentials(test_client_credentials)

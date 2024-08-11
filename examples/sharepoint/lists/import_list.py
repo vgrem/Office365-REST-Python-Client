@@ -1,10 +1,16 @@
+from typing import List
+
 from faker import Faker
 
+from office365.runtime.client_object import ClientObject
 from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.listitems.listitem import ListItem
 from tests import test_team_site_url, test_user_credentials
 
 
-def print_progress(items_count):
+def print_progress(return_types):
+    # type: (List[ClientObject]) -> None
+    items_count = len([t for t in return_types if isinstance(t, ListItem)])
     print("{0} list items has been created".format(items_count))
 
 
@@ -41,7 +47,7 @@ def run(context):
         #        idx, len(contacts_data), contact_item.properties["Title"]
         #    )
         # )
-    ctx.execute_batch(items_per_batch=2, success_callback=print_progress)
+    ctx.execute_batch(items_per_batch=10, success_callback=print_progress)
 
 
 if __name__ == "__main__":

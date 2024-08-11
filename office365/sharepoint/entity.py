@@ -1,10 +1,11 @@
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, List
 
 from typing_extensions import Self
 
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.user_credential import UserCredential
 from office365.runtime.client_object import ClientObject
+from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
@@ -22,13 +23,13 @@ class Entity(ClientObject):
         return self
 
     def execute_batch(self, items_per_batch=100, success_callback=None):
-        # type: (int, Callable[[int], None]) -> Self
+        # type: (int, Callable[[List[ClientObject|ClientResult]], None]) -> Self
         """Construct and submit to a server a batch request"""
         return self.context.execute_batch(items_per_batch, success_callback)
 
     def with_credentials(self, credentials):
         # type: (UserCredential|ClientCredential) -> Self
-        """ """
+        """Initializes a client to acquire a token via user or client credentials"""
         self.context.with_credentials(credentials)
         return self
 

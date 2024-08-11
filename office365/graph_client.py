@@ -229,16 +229,19 @@ class GraphClient(ClientRuntimeContext):
 
         return GraphClient(_acquire_token)
 
-    def execute_batch(self, items_per_batch=100):
+    def execute_batch(self, items_per_batch=100, success_callback=None):
         """Constructs and submit a batch request
 
         :param int items_per_batch: Maximum to be selected for bulk operation
+        :param (List[ClientObject|ClientResult])-> None success_callback: A success callback
         """
         batch_request = ODataV4BatchRequest(V4JsonFormat())
         batch_request.beforeExecute += self._authenticate_request
         while self.has_pending_request:
             qry = self._get_next_query(items_per_batch)
             batch_request.execute_query(qry)
+            if callable(success_callback):
+                success_callback(qry.return_type)
         return self
 
     def pending_request(self):
