@@ -4,7 +4,10 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.tenant.administration.smtp_server import SmtpServer
-from office365.sharepoint.tenant.administration.types import DisableGroupify
+from office365.sharepoint.tenant.administration.types import (
+    AutoQuotaEnabled,
+    DisableGroupify,
+)
 
 
 class TenantAdminSettingsService(Entity):
@@ -24,6 +27,11 @@ class TenantAdminSettingsService(Entity):
         )
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def auto_quota_enabled(self):
+        """"""
+        return self.properties.get("AutoQuotaEnabled", AutoQuotaEnabled())
 
     @property
     def available_managed_paths_for_site_creation(self):

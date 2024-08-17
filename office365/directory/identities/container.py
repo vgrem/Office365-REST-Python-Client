@@ -1,3 +1,6 @@
+from office365.directory.authentication.conditions.event_listener import (
+    AuthenticationEventListener,
+)
 from office365.directory.identities.api_connector import IdentityApiConnector
 from office365.directory.identities.conditional_access_root import ConditionalAccessRoot
 from office365.directory.identities.providers.base_collection import (
@@ -18,6 +21,7 @@ class IdentityContainer(Entity):
 
     @property
     def api_connectors(self):
+        # type: () -> EntityCollection[IdentityApiConnector]
         """Represents entry point for API connectors."""
         return self.properties.get(
             "apiConnectors",
@@ -25,6 +29,19 @@ class IdentityContainer(Entity):
                 self.context,
                 IdentityApiConnector,
                 ResourcePath("apiConnectors", self.resource_path),
+            ),
+        )
+
+    @property
+    def authentication_event_listeners(self):
+        # type: () -> EntityCollection[AuthenticationEventListener]
+        """Get the collection of authenticationListener resources supported by the onSignupStart event."""
+        return self.properties.get(
+            "authenticationEventListeners",
+            EntityCollection(
+                self.context,
+                AuthenticationEventListener,
+                ResourcePath("authenticationEventListeners", self.resource_path),
             ),
         )
 
@@ -76,6 +93,7 @@ class IdentityContainer(Entity):
         if default_value is None:
             property_mapping = {
                 "apiConnectors": self.api_connectors,
+                "authenticationEventListeners": self.authentication_event_listeners,
                 "b2xUserFlows": self.b2x_user_flows,
                 "conditionalAccess": self.conditional_access,
                 "identityProviders": self.identity_providers,

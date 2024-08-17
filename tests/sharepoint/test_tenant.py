@@ -192,3 +192,8 @@ class TestTenant(TestCase):
     def test_27_get_get_spo_all_web_templates(self):
         result = self.tenant.get_spo_all_web_templates().execute_query()
         self.assertIsNotNone(result)
+
+    def test_28_get_get_collaboration_insights_data(self):
+        # Note: You need a SharePoint Advanced Management license to perform this action
+        result = self.tenant.get_collaboration_insights_data().execute_query()
+        self.assertIsNotNone(result.value)

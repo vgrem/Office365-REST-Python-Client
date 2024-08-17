@@ -53,6 +53,50 @@ class SiteProperties(Entity):
         return return_type
 
     @property
+    def allow_downloading_non_web_viewable_files(self):
+        # type: () -> Optional[bool]
+        """Specifies if non web viewable files can be downloaded."""
+        return self.properties.get("AllowDownloadingNonWebViewableFiles", None)
+
+    @property
+    def allow_editing(self):
+        # type: () -> Optional[bool]
+        """Prevents users from editing Office files in the browser and copying and pasting Office file contents
+        out of the browser window."""
+        return self.properties.get("AllowEditing", None)
+
+    @property
+    def allow_self_service_upgrade(self):
+        # type: () -> Optional[bool]
+        """Whether version to version upgrade is allowed on this site."""
+        return self.properties.get("AllowSelfServiceUpgrade", None)
+
+    @property
+    def anonymous_link_expiration_in_days(self):
+        # type: () -> Optional[int]
+        """Specifies all anonymous/anyone links that have been created
+        (or will be created) will expire after the set number of days."""
+        return self.properties.get("AnonymousLinkExpirationInDays", None)
+
+    @property
+    def apply_to_existing_document_libraries(self):
+        # type: () -> Optional[bool]
+        """Create a job to apply the version history limits setting to existing document libraries."""
+        return self.properties.get("ApplyToExistingDocumentLibraries", None)
+
+    @property
+    def apply_to_new_document_libraries(self):
+        # type: () -> Optional[bool]
+        """Gets site version policy for new document libraries."""
+        return self.properties.get("ApplyToNewDocumentLibraries", None)
+
+    @property
+    def archived_by(self):
+        # type: () -> Optional[str]
+        """Gets site version policy for new document libraries."""
+        return self.properties.get("ArchivedBy", None)
+
+    @property
     def deny_add_and_customize_pages(self):
         # type: () -> Optional[int]
         """Represents the status of the [DenyAddAndCustomizePages] feature on a site collection."""
@@ -69,6 +113,7 @@ class SiteProperties(Entity):
     @property
     def owner_login_name(self):
         # type: () -> Optional[str]
+        """ """
         return self.properties.get("OwnerLoginName", None)
 
     @property

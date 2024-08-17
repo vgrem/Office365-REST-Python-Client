@@ -26,7 +26,7 @@ size_chunk = 1000000
 local_path = "../../../tests/data/big_buck_bunny.mp4"
 with open(local_path, "rb") as f:
     uploaded_file = target_folder.files.create_upload_session(
-        f, size_chunk, print_upload_progress, "big_buck_bunny_v2.mp4"
+        f, size_chunk, print_upload_progress
     ).execute_query()
 
 print("File {0} has been uploaded successfully".format(uploaded_file.serverRelativeUrl))

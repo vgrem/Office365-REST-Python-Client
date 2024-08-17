@@ -34,6 +34,9 @@ from office365.sharepoint.tenant.administration.insights.onedrive_site_sharing i
 from office365.sharepoint.tenant.administration.insights.top_files_sharing import (
     TopFilesSharingInsights,
 )
+from office365.sharepoint.tenant.administration.policies.definition import (
+    TenantAdminPolicyDefinition,
+)
 from office365.sharepoint.tenant.administration.powerapps.environment import (
     PowerAppsEnvironment,
 )
@@ -69,6 +72,7 @@ from office365.sharepoint.tenant.administration.spo_operation import SpoOperatio
 from office365.sharepoint.tenant.administration.syntex.billing_context import (
     SyntexBillingContext,
 )
+from office365.sharepoint.tenant.administration.types import CreatePolicyRequest
 from office365.sharepoint.tenant.administration.webs.templates.collection import (
     SPOTenantWebTemplateCollection,
 )
@@ -521,6 +525,16 @@ class Tenant(Entity):
         )
         self.context.add_query(qry)
         return self
+
+    def create_policy_definition(self):
+        """ """
+        return_type = ClientResult(self.context, TenantAdminPolicyDefinition())
+        payload = {"policyInputParameters": CreatePolicyRequest()}
+        qry = ServiceOperationQuery(
+            self, "CreatePolicyDefinition", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
 
     def create_site(self, url, owner, title=None):
         """Queues a site collection for creation with the specified properties.

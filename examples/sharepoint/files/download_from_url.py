@@ -4,8 +4,10 @@ import tempfile
 from office365.sharepoint.files.file import File
 from tests import test_client_credentials, test_site_url
 
-abs_file_url = "{site_url}/sites/team/Shared Documents/big_buck_bunny.mp4".format(
-    site_url=test_site_url
+abs_file_url = (
+    "{site_url}/sites/team/Shared Documents/archive/big_buck_bunny.mp4".format(
+        site_url=test_site_url
+    )
 )
 
 with tempfile.TemporaryDirectory() as local_path:

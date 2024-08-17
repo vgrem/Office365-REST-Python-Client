@@ -103,6 +103,12 @@ class RegionalSettings(Entity):
         return self.properties.get("LocaleId", None)
 
     @property
+    def negative_sign(self):
+        # type: () -> Optional[str]
+        """ """
+        return self.properties.get("NegativeSign", None)
+
+    @property
     def work_days(self):
         # type: () -> Optional[int]
         """Gets a number that represents the work days of Web site calendars."""
