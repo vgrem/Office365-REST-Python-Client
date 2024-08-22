@@ -42,7 +42,7 @@ class ClientContext(ClientRuntimeContext):
     """SharePoint client context (SharePoint v1 API)"""
 
     def __init__(self, base_url, auth_context=None):
-        # type: (str, AuthenticationContext) -> None
+        # type: (str, AuthenticationContext | None) -> None
         """
         Instantiates a SharePoint client context
 
