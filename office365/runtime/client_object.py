@@ -61,7 +61,7 @@ class ClientObject(Generic[T]):
         timeout_secs=5,
         success_callback=None,
         failure_callback=None,
-        exceptions=(ClientRequestException,)
+        exceptions=(ClientRequestException,),
     ):
         """
         Executes the current set of data retrieval queries and method invocations and retries it if needed.
@@ -79,7 +79,7 @@ class ClientObject(Generic[T]):
             timeout_secs=timeout_secs,
             success_callback=success_callback,
             failure_callback=failure_callback,
-            exceptions=exceptions
+            exceptions=exceptions,
         )
         return self
 

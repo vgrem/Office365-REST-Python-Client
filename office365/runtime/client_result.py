@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Callable, Generic, Optional, TypeVar
 
 from typing_extensions import Self
 
+from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.request_options import RequestOptions
 
 if TYPE_CHECKING:
@@ -54,13 +55,29 @@ class ClientResult(Generic[T]):
         return self
 
     def execute_query_retry(
-        self, max_retry=5, timeout_secs=5, success_callback=None, failure_callback=None
+        self,
+        max_retry=5,
+        timeout_secs=5,
+        success_callback=None,
+        failure_callback=None,
+        exceptions=(ClientRequestException,),
     ):
-        """Executes the current set of data retrieval queries and method invocations and retries it if needed."""
+        """
+        Executes the current set of data retrieval queries and method invocations and retries it if needed.
+
+        :param int max_retry: Number of times to retry the request
+        :param int timeout_secs: Seconds to wait before retrying the request.
+        :param (office365.runtime.client_object.ClientObject)-> None success_callback: A callback to call
+            if the request executes successfully.
+        :param (int, requests.exceptions.RequestException)-> None failure_callback: A callback to call if the request
+            fails to execute
+        :param exceptions: tuple of exceptions that we retry
+        """
         self._context.execute_query_retry(
             max_retry=max_retry,
             timeout_secs=timeout_secs,
             success_callback=success_callback,
             failure_callback=failure_callback,
+            exceptions=exceptions,
         )
         return self
