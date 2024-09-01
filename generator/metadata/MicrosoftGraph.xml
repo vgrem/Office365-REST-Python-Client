@@ -16894,6 +16894,12 @@
          <Annotations Target="microsoft.graph.disconnect(microsoft.graph.remoteAssistancePartner)">
             <Annotation Term="Org.OData.Core.V1.Description" String="A request to remove the active TeamViewer connector"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.endWorkingTime(microsoft.graph.workingTimeSchedule)">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Triggers the policies associated with the end of working hours for user."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.startWorkingTime(microsoft.graph.workingTimeSchedule)">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Triggers the policies associated with the start of working hours for user."/>
+         </Annotations>
       </Schema>
       <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="microsoft.graph" Alias="graph">
          <EnumType Name="appliedConditionalAccessPolicyResult">
@@ -23017,6 +23023,7 @@
             <NavigationProperty Name="joinedTeams" Type="Collection(graph.team)" ContainsTarget="true"/>
             <NavigationProperty Name="permissionGrants" Type="Collection(graph.resourceSpecificPermissionGrant)" ContainsTarget="true"/>
             <NavigationProperty Name="teamwork" Type="graph.userTeamwork" ContainsTarget="true"/>
+            <NavigationProperty Name="solutions" Type="graph.userSolutionRoot" ContainsTarget="true"/>
             <NavigationProperty Name="todo" Type="graph.todo" ContainsTarget="true"/>
             <NavigationProperty Name="employeeExperience" Type="graph.employeeExperienceUser" ContainsTarget="true"/>
          </EntityType>
@@ -23445,6 +23452,9 @@
             <Property Name="region" Type="Edm.String"/>
             <NavigationProperty Name="associatedTeams" Type="Collection(graph.associatedTeamInfo)" ContainsTarget="true"/>
             <NavigationProperty Name="installedApps" Type="Collection(graph.userScopeTeamsAppInstallation)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="userSolutionRoot" BaseType="graph.entity">
+            <NavigationProperty Name="workingTimeSchedule" Type="graph.workingTimeSchedule" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="todo" BaseType="graph.entity">
             <NavigationProperty Name="lists" Type="Collection(graph.todoTaskList)" ContainsTarget="true"/>
@@ -34560,6 +34570,7 @@
             <Property Name="sharedTimeOff" Type="graph.timeOffItem"/>
             <Property Name="userId" Type="Edm.String"/>
          </EntityType>
+         <EntityType Name="workingTimeSchedule" BaseType="graph.entity"/>
          <EntityType Name="emailFileAssessmentRequest" BaseType="graph.threatAssessmentRequest">
             <Property Name="contentData" Type="Edm.String" Nullable="false"/>
             <Property Name="destinationRoutingReason" Type="graph.mailDestinationRoutingReason"/>
@@ -40309,6 +40320,12 @@
             <Parameter Name="notifyTeam" Type="Edm.Boolean"/>
             <Parameter Name="startDateTime" Type="Edm.DateTimeOffset"/>
             <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
+         </Action>
+         <Action Name="endWorkingTime" IsBound="true">
+            <Parameter Name="bindparameter" Type="graph.workingTimeSchedule" Nullable="false"/>
+         </Action>
+         <Action Name="startWorkingTime" IsBound="true">
+            <Parameter Name="bindparameter" Type="graph.workingTimeSchedule" Nullable="false"/>
          </Action>
          <EntityContainer Name="GraphService">
             <EntitySet Name="directoryObjects" EntityType="microsoft.graph.directoryObject"/>

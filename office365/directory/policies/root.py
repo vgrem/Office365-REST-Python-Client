@@ -13,6 +13,9 @@ from office365.directory.policies.cross_tenant_access import CrossTenantAccessPo
 from office365.directory.policies.device_registration import DeviceRegistrationPolicy
 from office365.directory.policies.permission_grant import PermissionGrantPolicy
 from office365.directory.policies.tenant_app_management import TenantAppManagementPolicy
+from office365.directory.policies.unified_role_management import (
+    UnifiedRoleManagementPolicy,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -162,6 +165,19 @@ class PolicyRoot(Entity):
             ),
         )
 
+    @property
+    def role_management_policies(self):
+        # type: () -> EntityCollection[UnifiedRoleManagementPolicy]
+        """Specifies the various policies associated with scopes and roles."""
+        return self.properties.get(
+            "roleManagementPolicies",
+            EntityCollection(
+                self.context,
+                UnifiedRoleManagementPolicy,
+                ResourcePath("roleManagementPolicies", self.resource_path),
+            ),
+        )
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
@@ -176,6 +192,7 @@ class PolicyRoot(Entity):
                 "defaultAppManagementPolicy": self.default_app_management_policy,
                 "deviceRegistrationPolicy": self.device_registration_policy,
                 "permissionGrantPolicies": self.permission_grant_policies,
+                "roleManagementPolicies": self.role_management_policies,
             }
             default_value = property_mapping.get(name, None)
         return super(PolicyRoot, self).get_property(name, default_value)

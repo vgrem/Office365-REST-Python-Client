@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Optional
 
 from typing_extensions import Self
@@ -102,7 +103,8 @@ class ServicePrincipal(DirectoryObject):
         self.context.add_query(qry)
         return return_type
 
-    def _ensure_client_service_principal(self, app, action):
+    def _get_service_principal_by_app(self, app, action):
+        # type: (Application|str, Callable[[Application], None]) -> None
         if isinstance(app, Application):
 
             def _after():
@@ -111,6 +113,50 @@ class ServicePrincipal(DirectoryObject):
             app.ensure_property("id", _after)
         else:
             self.context.service_principals.get_by_app(app).get().after_execute(action)
+
+    def get_delegated(self, app, principal, scope=None):
+        # type: (Application|str, User|str, AppRole|str) -> DeltaCollection[OAuth2PermissionGrant]
+        """Gets a delegated permission to the client service principal on behalf of a user"""
+
+        return_type = DeltaCollection(self.context, OAuth2PermissionGrant)
+
+        def _get_delegated(col):
+            # type: (DeltaCollection[OAuth2PermissionGrant]) -> None
+            if scope is None:
+                [return_type.add_child(g) for g in col if g.resource_id == self.id]
+            else:
+                [return_type.add_child(g) for g in col if g.scope == scope and g.resource_id == self.id]
+
+        def _principal_resolved(principal_id):
+            # type: (str) -> None
+            def _client_loaded(client):
+                # type: (ServicePrincipal) -> None
+                query_text = ("principalId eq '{0}' and clientId eq '{1}'").format(
+                    principal_id, client.id
+                )
+
+                (
+                    self.context.oauth2_permission_grants.get()
+                    .filter(query_text)
+                    .after_execute(_get_delegated)
+                )
+
+            self.context.service_principals.get_by_app(app).get().after_execute(
+                _client_loaded
+            )
+
+        def _resource_resolved():
+            if isinstance(principal, User):
+
+                def _after():
+                    _principal_resolved(principal.id)
+
+                principal.ensure_property("id", _after)
+            else:
+                _principal_resolved(principal)
+
+        self.ensure_property("id", _resource_resolved)
+        return return_type
 
     def grant_delegated(self, app, principal, scope):
         # type: (Application|str, User|str, AppRole|str) -> Self
@@ -130,7 +176,7 @@ class ServicePrincipal(DirectoryObject):
             def _after(return_type):
                 _grant_delegated(principal_id, return_type.id)
 
-            self._ensure_client_service_principal(app, _after)
+            self._get_service_principal_by_app(app, _after)
 
         def _ensure_principal():
             if isinstance(principal, User):
@@ -149,7 +195,7 @@ class ServicePrincipal(DirectoryObject):
         # type: (Application|str, User|str, AppRole|str) -> Self
         """"""
 
-        def _revoke(app_id, principal_id):
+        def _revoke_delegated(app_id, principal_id):
             # type: (str, str) -> None
 
             def _after(return_type):
@@ -158,7 +204,6 @@ class ServicePrincipal(DirectoryObject):
             query_text = "clientId eq '{0}' and principalId eq '{1}'".format(
                 app_id, principal_id
             )
-            # query_text = "clientId eq '{0}'".format(app_id)
             self.context.oauth2_permission_grants.filter(
                 query_text
             ).get().after_execute(_after)
@@ -167,14 +212,13 @@ class ServicePrincipal(DirectoryObject):
             if isinstance(principal, User):
 
                 def _after():
-                    _revoke(principal.id, return_type.id)
+                    _revoke_delegated(principal.id, return_type.id)
 
                 principal.ensure_property("id", _after)
             else:
-                _revoke(principal, return_type.id)
+                _revoke_delegated(principal, return_type.id)
 
-        self._ensure_client_service_principal(app, _ensure_principal)
-        # self.ensure_property("id", _ensure_principal)
+        self._get_service_principal_by_app(app, _ensure_principal)
         return self
 
     def grant_application(self, app, app_role):
