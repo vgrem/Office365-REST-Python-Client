@@ -1,3 +1,5 @@
+from typing_extensions import Self
+
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -52,6 +54,7 @@ class FieldLinkCollection(EntityCollection[FieldLink]):
         )
 
     def reorder(self, internal_names):
+        # type: (list[str]) -> Self
         """
         Rearranges the collection of field links in the order in which field internal names are specified.
 

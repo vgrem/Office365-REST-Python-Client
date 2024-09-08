@@ -282,6 +282,7 @@
             <Property Name="itemId" Type="Edm.String"/>
             <Property Name="itemUrlType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="listId" Type="Edm.String"/>
+            <Property Name="markDocAsFinal" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="title" Type="Edm.String"/>
             <Property Name="url" Type="Edm.String"/>
             <Property Name="version" Type="Edm.String"/>
@@ -4807,6 +4808,7 @@
             <EntitySet Name="ReorderingRuleCollections" EntityType="Microsoft.SharePoint.Client.Search.Query.ReorderingRuleCollection"/>
             <EntitySet Name="SortCollections" EntityType="Microsoft.SharePoint.Client.Search.Query.SortCollection"/>
             <EntitySet Name="StringCollections" EntityType="Microsoft.SharePoint.Client.Search.Query.StringCollection"/>
+            <EntitySet Name="DependencyPropertyMetadatas" EntityType="Microsoft.SharePoint.ClientSideComponent.DependencyPropertyMetadata"/>
             <EntitySet Name="HostedApps" EntityType="Microsoft.SharePoint.ClientSideComponent.HostedApp"/>
             <EntitySet Name="HostedAppAddResponses" EntityType="Microsoft.SharePoint.ClientSideComponent.HostedAppAddResponse"/>
             <EntitySet Name="HostedAppsManagers" EntityType="Microsoft.SharePoint.ClientSideComponent.HostedAppsManager"/>
@@ -4816,6 +4818,7 @@
             <EntitySet Name="CommentsAPIs" EntityType="Microsoft.SharePoint.Comments.CommentsAPI"/>
             <EntitySet Name="MigrationCompleteStateApis" EntityType="Microsoft.SharePoint.Convergence.MigrationCompleteStateApi"/>
             <EntitySet Name="OdcMetadataCleanedUpApis" EntityType="Microsoft.SharePoint.Convergence.OdcMetadataCleanedUpApi"/>
+            <EntitySet Name="CopilotListItemExtensionss" EntityType="Microsoft.SharePoint.Copilot.CopilotListItemExtensions"/>
             <EntitySet Name="VivaConnectionsPages" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaConnectionsPage"/>
             <EntitySet Name="VivaHomes" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaHome"/>
             <EntitySet Name="VivaResourceGetEndpoints" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaResourceGetEndpoint"/>
@@ -8843,10 +8846,12 @@
             </FunctionImport>
             <FunctionImport Name="SendTestEmail" ReturnType="SP.Publishing.SendTestEmailResponse" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
+               <Parameter Name="transpileContent" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SendTestTeamsMessage" ReturnType="SP.Publishing.SendTestTeamsMessageResponse" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
                <Parameter Name="audienceId" Type="Edm.String"/>
+               <Parameter Name="transpileContent" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SPSiteValidator" ReturnType="Collection(Edm.Int32)" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
@@ -10508,7 +10513,6 @@
             </FunctionImport>
             <FunctionImport Name="GetSiteProperties" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
-               <Parameter Name="isDeleted" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="IsDbReadOnly" ReturnType="Edm.Boolean" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
@@ -21683,6 +21687,33 @@
          <Annotations Target="Microsoft.SharePoint.Copilot.CopilotFileCollectionQueryResult/SkipToken">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusInformation">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusItem">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusItem/ListId">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusItem/SiteId">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusItem/Status">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusItem/UniqueId">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusItem/Url">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusItem/WebId">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusInformation/Items">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.SharePoint.Comments.CommentInformation">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -24297,6 +24328,9 @@
          <Annotations Target="SP.Publishing.SitePage/Name">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.Publishing.SitePage/PublicationMetadata">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.Publishing.SitePage/SitePageFlags">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -24310,9 +24344,6 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.CampaignPublication/EmailEndpoint">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="SP.Publishing.CampaignPublication/PublicationMetadata">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.CampaignPublication/PublicationStatus">
@@ -24657,6 +24688,9 @@
          <Annotations Target="SP.CopilotFileCollection">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.SharePoint.Copilot.CopilotListItemExtensions">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.SharePoint.Comments.comment">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -24667,6 +24701,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.Comments.CommentsAPI">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.ClientSideComponent.DependencyPropertyMetadata">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.ClientSideComponent.Spfx3rdPartyCustomPrincipalInfo">
@@ -25842,10 +25879,10 @@
          <Annotations Target="SP.ApiData/SchedulePublication(SP.Publishing.CampaignPublication, Edm.DateTime)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SendTestEmail(SP.Publishing.CampaignPublication)">
+         <Annotations Target="SP.ApiData/SendTestEmail(SP.Publishing.CampaignPublication, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SendTestTeamsMessage(SP.Publishing.CampaignPublication, Edm.String)">
+         <Annotations Target="SP.ApiData/SendTestTeamsMessage(SP.Publishing.CampaignPublication, Edm.String, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SPSiteValidator(SP.Publishing.CampaignPublication, Edm.String)">
@@ -32839,6 +32876,7 @@
             <Property Name="CreateCopyForEdit" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CreateIfMissing" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="DeleteSourcePage" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="DependencyPropertyTypesToDeepCopy" Type="Collection(Edm.Int32)" Nullable="false"/>
             <Property Name="DestinationPageUniqueId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="DestinationType" Type="Edm.Int32" Nullable="false"/>
             <Property Name="DestinationWebUrl" Type="Edm.String"/>
@@ -33325,12 +33363,12 @@
             <Property Name="Language" Type="Edm.String"/>
             <Property Name="LayoutWebpartsContent" Type="Edm.String"/>
             <Property Name="Name" Type="Edm.String"/>
+            <Property Name="PublicationMetadata" Type="Edm.String"/>
             <Property Name="SitePageFlags" Type="Edm.String"/>
             <NavigationProperty Name="Translations" Relationship="SP.SP_Publishing_SitePage_Translations_SP_TranslationStatusCollection_TranslationsPartner" ToRole="Translations" FromRole="TranslationsPartner"/>
          </EntityType>
          <EntityType Name="CampaignPublication" BaseType="SP.Publishing.SitePage">
             <Property Name="EmailEndpoint" Type="Edm.String"/>
-            <Property Name="PublicationMetadata" Type="Edm.String"/>
             <Property Name="PublicationStatus" Type="Edm.Int32"/>
             <Property Name="SharePointEndpoint" Type="Edm.String"/>
             <Property Name="TeamsEndpoint" Type="Edm.String"/>
@@ -35748,6 +35786,7 @@
             <Property Name="canvasContent" Type="Edm.String"/>
             <Property Name="dashboardItemId" Type="Edm.String"/>
             <Property Name="dashboardListId" Type="Edm.String"/>
+            <Property Name="dashboardUniqueItemId" Type="Edm.String"/>
             <Property Name="dashboardUrl" Type="Edm.String"/>
             <Property Name="extraComponents" Type="Collection(Microsoft.SharePoint.ClientSideComponent.SPClientSideComponentQueryResult)"/>
             <Property Name="personalizationData" Type="Microsoft.SharePoint.EmployeeEngagement.Experience.DashboardContent"/>
@@ -35829,6 +35868,12 @@
             <Property Name="version" Type="Edm.String"/>
          </ComplexType>
          <EntityType Name="HostedAppsManager">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="DependencyPropertyMetadata">
             <Key>
                <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
             </Key>
@@ -35921,6 +35966,23 @@
          <ComplexType Name="CopilotFileUserRelationship">
             <Property Name="LastAccessDateTime" Type="Edm.DateTime"/>
          </ComplexType>
+         <ComplexType Name="CopilotTransitiveSharingStatusInformation">
+            <Property Name="Items" Type="Collection(Microsoft.SharePoint.Copilot.CopilotTransitiveSharingStatusItem)"/>
+         </ComplexType>
+         <ComplexType Name="CopilotTransitiveSharingStatusItem">
+            <Property Name="ListId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="SiteId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="Status" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="UniqueId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="Url" Type="Edm.String"/>
+            <Property Name="WebId" Type="Edm.Guid" Nullable="false"/>
+         </ComplexType>
+         <EntityType Name="CopilotListItemExtensions" Abstract="true">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Containers">
          <ComplexType Name="SPActiveContainerCollection">
@@ -36712,6 +36774,9 @@
             <Property Name="canAddInternalPrincipal" Type="SP.Sharing.SharingAbilityStatus"/>
             <Property Name="canAddNewExternalPrincipal" Type="SP.Sharing.SharingAbilityStatus"/>
             <Property Name="canRequestGrantAccess" Type="SP.Sharing.SharingAbilityStatus"/>
+            <Property Name="canRequestGrantAccessForExistingExternalPrincipal" Type="SP.Sharing.SharingAbilityStatus"/>
+            <Property Name="canRequestGrantAccessForInternalPrincipal" Type="SP.Sharing.SharingAbilityStatus"/>
+            <Property Name="canRequestGrantAccessForNewExternalPrincipal" Type="SP.Sharing.SharingAbilityStatus"/>
             <Property Name="supportsEditPermission" Type="SP.Sharing.SharingAbilityStatus"/>
             <Property Name="supportsManageListPermission" Type="SP.Sharing.SharingAbilityStatus"/>
             <Property Name="supportsReadPermission" Type="SP.Sharing.SharingAbilityStatus"/>
@@ -38332,6 +38397,7 @@
             <Property Name="BlockDownloadPolicyFileTypeIds" Type="Collection(Edm.String)"/>
             <Property Name="BlockGuestsAsSiteAdmin" Type="Edm.Int32" Nullable="false"/>
             <Property Name="BonusDiskQuota" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="ClearGroupId" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ClearRestrictedAccessControl" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CommentsOnSitePagesDisabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CompatibilityLevel" Type="Edm.Int32" Nullable="false"/>
@@ -38796,8 +38862,6 @@
             <Property Name="StreamLaunchConfigUpdateCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="SyncPrivacyProfileProperties" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="SyntexBillingSubscriptionSettings" Type="Microsoft.Online.SharePoint.TenantAdministration.SyntexBillingContext"/>
-            <Property Name="SyntexExternalVideoSharingSettings" Type="Microsoft.Online.SharePoint.TenantAdministration.SyntexPremiumFeatureSettings"/>
-            <Property Name="SyntexHighResolutionPlaybackSettings" Type="Microsoft.Online.SharePoint.TenantAdministration.SyntexPremiumFeatureSettings"/>
             <Property Name="SyntexInternalFeatureFlags" Type="Collection(SP.KeyValue)"/>
             <Property Name="SyntexMediaAnalyticsSettings" Type="Microsoft.Online.SharePoint.TenantAdministration.SyntexPremiumFeatureSettings"/>
             <Property Name="SyntexPaygFeatureActivations" Type="Collection(SP.KeyValue)"/>
@@ -40838,8 +40902,6 @@
             <Property Name="StreamLaunchConfigUpdateCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="SyncPrivacyProfileProperties" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="SyntexBillingSubscriptionSettings" Type="Microsoft.Online.SharePoint.TenantAdministration.SyntexBillingContext"/>
-            <Property Name="SyntexExternalVideoSharingSettings" Type="Microsoft.Online.SharePoint.TenantAdministration.SyntexPremiumFeatureSettings"/>
-            <Property Name="SyntexHighResolutionPlaybackSettings" Type="Microsoft.Online.SharePoint.TenantAdministration.SyntexPremiumFeatureSettings"/>
             <Property Name="SyntexInternalFeatureFlags" Type="Collection(SP.KeyValue)"/>
             <Property Name="SyntexMediaAnalyticsSettings" Type="Microsoft.Online.SharePoint.TenantAdministration.SyntexPremiumFeatureSettings"/>
             <Property Name="SyntexPaygFeatureActivations" Type="Collection(SP.KeyValue)"/>

@@ -9,6 +9,8 @@ from office365.intune.devices.enrollment.configuration import (
 )
 from office365.intune.devices.managed import ManagedDevice
 from office365.intune.devices.management.reports.reports import DeviceManagementReports
+from office365.intune.devices.management.terms_and_conditions import TermsAndConditions
+from office365.intune.devices.management.virtual_endpoint import VirtualEndpoint
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -37,6 +39,28 @@ class DeviceManagement(Entity):
             "auditEvents",
             AuditEventCollection(
                 self.context, ResourcePath("auditEvents", self.resource_path)
+            ),
+        )
+
+    @property
+    def virtual_endpoint(self):
+        """"""
+        return self.properties.get(
+            "virtualEndpoint",
+            VirtualEndpoint(
+                self.context, ResourcePath("virtualEndpoint", self.resource_path)
+            ),
+        )
+
+    @property
+    def terms_and_conditions(self):
+        """"""
+        return self.properties.get(
+            "termsAndConditions",
+            EntityCollection(
+                self.context,
+                TermsAndConditions,
+                ResourcePath("termsAndConditions", self.resource_path),
             ),
         )
 
@@ -98,6 +122,8 @@ class DeviceManagement(Entity):
                 "deviceEnrollmentConfigurations": self.device_enrollment_configurations,
                 "intuneBrand": self.intune_brand,
                 "managedDevices": self.managed_devices,
+                "termsAndConditions": self.terms_and_conditions,
+                "virtualEndpoint": self.virtual_endpoint,
             }
             default_value = property_mapping.get(name, None)
         return super(DeviceManagement, self).get_property(name, default_value)

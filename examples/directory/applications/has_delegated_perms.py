@@ -8,10 +8,7 @@ from office365.graph_client import GraphClient
 from tests import (
     test_admin_principal_name,
     test_client_id,
-    test_password,
     test_tenant,
-    test_user_principal_name,
-    test_username,
 )
 
 # client = GraphClient.with_username_and_password(

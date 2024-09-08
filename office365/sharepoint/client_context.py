@@ -412,6 +412,14 @@ class ClientContext(ClientRuntimeContext):
         return AnnouncementsController(self, ResourcePath("Announcements"))
 
     @property
+    def brand_center(self):
+        """Alias to BrandCenter"""
+
+        from office365.sharepoint.brandcenter.brand_center import BrandCenter
+
+        return BrandCenter(self, ResourcePath("BrandCenter"))
+
+    @property
     def client_people_picker(self):
         """Query principals service alias"""
 

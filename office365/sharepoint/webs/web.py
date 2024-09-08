@@ -2311,8 +2311,48 @@ class Web(SecurableObject):
 
     @property
     def recycle_bin_enabled(self):
+        # type: () -> Optional[bool]
         """Specifies whether the Recycle Bin is enabled."""
         return self.properties.get("RecycleBinEnabled", None)
+
+    @property
+    def related_hub_site_ids(self):
+        # type: () -> Optional[str]
+        """ """
+        return self.properties.get("RelatedHubSiteIds", None)
+
+    @property
+    def request_access_email(self):
+        # type: () -> Optional[str]
+        """Gets the e-mail address to which requests for access are sent."""
+        return self.properties.get("RequestAccessEmail", None)
+
+    @property
+    def save_site_as_template_enabled(self):
+        # type: () -> Optional[bool]
+        """Specifies if the site (2) can be saved as a site template.
+
+        A feature that creates content which is not compatible for a site template can set this value to false to
+        stop users of this site (2) from generating an invalid site template.
+
+        A feature ought to never set this value to true when it is deactivated or at any other time since another
+        feature might have created content that is not compatible in a site template.
+
+        Setting this value to false, if it was true, will result in a site template that is not supported.
+        """
+        return self.properties.get("SaveSiteAsTemplateEnabled", None)
+
+    @property
+    def search_box_in_navbar(self):
+        # type: () -> Optional[int]
+        """Gets the e-mail address to which requests for access are sent."""
+        return self.properties.get("SearchBoxInNavBar", None)
+
+    @property
+    def search_box_placeholder_text(self):
+        # type: () -> Optional[str]
+        """Gets the placeholder text in SharePoint online search box for a given (sub) site."""
+        return self.properties.get("SearchBoxPlaceholderText", None)
 
     @property
     def navigation(self):

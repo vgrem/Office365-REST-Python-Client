@@ -125,7 +125,11 @@ class ServicePrincipal(DirectoryObject):
             if scope is None:
                 [return_type.add_child(g) for g in col if g.resource_id == self.id]
             else:
-                [return_type.add_child(g) for g in col if g.scope == scope and g.resource_id == self.id]
+                [
+                    return_type.add_child(g)
+                    for g in col
+                    if g.scope == scope and g.resource_id == self.id
+                ]
 
         def _principal_resolved(principal_id):
             # type: (str) -> None

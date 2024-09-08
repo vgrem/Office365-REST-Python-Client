@@ -18,7 +18,7 @@ class TestNavigation(SPTestCase):
         #    cls.assertTrue(result.value)
 
     # def test1_get_global_nav(self):
-    #    result = admin_client.navigation_service.global_nav().execute_query()
+    #    result = self.client.navigation_service.global_nav().execute_query()
     #    self.assertIsNotNone(result.value)
 
     def test_2_is_global_nav_enabled(self):

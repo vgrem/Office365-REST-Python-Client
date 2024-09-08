@@ -31,15 +31,3 @@ class SPTestCase(TestCase):
             if len(lists) == 1
             else web.lists.add(list_properties).execute_query()
         )
-
-    @staticmethod
-    def read_file_as_text(path):
-        with open(path, "r") as content_file:
-            file_content = content_file.read()
-        return file_content
-
-    @staticmethod
-    def read_file_as_binary(path):
-        with open(path, "rb") as content_file:
-            file_content = content_file.read()
-        return file_content
