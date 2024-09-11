@@ -138,7 +138,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         return self
 
     def paged(self, page_size=None, page_loaded=None):
-        # type: (int, Callable[[Self], None]) -> Self
+        # type: (int, Callable[[Self], None] | None) -> Self
         """Retrieves via server-driven paging mode"""
         self._paged_mode = True
         if callable(page_loaded):
@@ -158,7 +158,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         return self
 
     def get_all(self, page_size=None, page_loaded=None):
-        # type: (int, Callable[[Self], None]) -> Self
+        # type: (int, Callable[[Self], None] | None) -> Self
         """Gets all the items in a collection, regardless of the size."""
 
         def _page_loaded(col):
