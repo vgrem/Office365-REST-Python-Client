@@ -176,23 +176,26 @@ class ServicePrincipal(DirectoryObject):
                 scope=scope,
             )
 
-        def _ensure_app(principal_id):
-            def _after(return_type):
+        def _principal_resolved(principal_id):
+            # type: (str) -> None
+            def _client_loaded(return_type):
                 _grant_delegated(principal_id, return_type.id)
 
-            self._get_service_principal_by_app(app, _after)
+            self.context.service_principals.get_by_app(app).get().after_execute(
+                _client_loaded
+            )
 
-        def _ensure_principal():
+        def _resource_resolved():
             if isinstance(principal, User):
 
                 def _after():
-                    _ensure_app(principal.id)
+                    _principal_resolved(principal.id)
 
                 principal.ensure_property("id", _after)
             else:
-                _ensure_app(principal)
+                _principal_resolved(principal)
 
-        self.ensure_property("id", _ensure_principal)
+        self.ensure_property("id", _resource_resolved)
         return self
 
     def revoke_delegated(self, app, principal, scope):

@@ -3,6 +3,7 @@ import datetime
 from typing import Optional
 
 from office365.directory.applications.api import ApiApplication
+from office365.directory.applications.optional_claims import OptionalClaims
 from office365.directory.applications.public_client import PublicClientApplication
 from office365.directory.applications.roles.role import AppRole
 from office365.directory.applications.spa import SpaApplication
@@ -251,6 +252,20 @@ class Application(DirectoryObject):
         return self.properties.get("identifierUris", StringCollection())
 
     @property
+    def optional_claims(self):
+        """Application developers can configure optional claims in their Microsoft Entra applications to specify
+        the claims that are sent to their application by the Microsoft security token service.
+        """
+        return self.properties.get("optionalClaims", OptionalClaims())
+
+    @property
+    def password_credentials(self):
+        """The collection of password credentials associated with the application"""
+        return self.properties.get(
+            "passwordCredentials", ClientValueCollection(PasswordCredential)
+        )
+
+    @property
     def public_client(self):
         """Specifies settings for installed clients such as desktop or mobile devices."""
         return self.properties.get("publicClient", PublicClientApplication())
@@ -321,6 +336,8 @@ class Application(DirectoryObject):
                 "createdOnBehalfOf": self.created_on_behalf_of,
                 "extensionProperties": self.extension_properties,
                 "keyCredentials": self.key_credentials,
+                "optionalClaims": self.optional_claims,
+                "passwordCredentials": self.password_credentials,
                 "publicClient": self.public_client,
                 "tokenIssuancePolicies": self.token_issuance_policies,
             }

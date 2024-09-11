@@ -44,3 +44,7 @@ class TestDirectory(GraphTestCase):
     def test9_list_directory_role_templates(self):
         result = self.client.directory_role_templates.get().execute_query()
         self.assertIsNotNone(result.resource_path)
+
+    def test_10_list_device_local_credentials(self):
+        result = self.client.directory.device_local_credentials.get().execute_query()
+        self.assertIsNotNone(result.resource_path)

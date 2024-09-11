@@ -20,7 +20,7 @@ client = GraphClient.with_token_interactive(
 
 resource = client.service_principals.get_by_name("Microsoft Graph")
 # app_role = "User.Read.All"
-app_role = "BackupRestore-Control.Read.All"
+app_role = "DeviceLocalCredential.Read.All"
 user = client.users.get_by_principal_name(test_admin_principal_name)
 client_app = client.applications.get_by_app_id(test_client_id)
 # result = resource.get_delegated(client_app, user, app_role).execute_query()
