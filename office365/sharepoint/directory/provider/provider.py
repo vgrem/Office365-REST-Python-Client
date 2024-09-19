@@ -14,6 +14,7 @@ class SharePointDirectoryProvider(Entity):
         super(SharePointDirectoryProvider, self).__init__(context, resource_path)
 
     def read_directory_object(self, data):
+        # type: (DirectoryObjectData) -> ClientResult[DirectoryObjectData]
         """"""
         return_type = ClientResult(self.context, DirectoryObjectData())
         payload = {"data": data}

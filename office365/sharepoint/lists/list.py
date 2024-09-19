@@ -1,6 +1,9 @@
+import json
 import os
 from datetime import datetime
-from typing import TYPE_CHECKING, AnyStr, Dict, Optional
+from typing import IO, TYPE_CHECKING, AnyStr, Callable, Dict, Optional
+
+from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -24,6 +27,7 @@ from office365.sharepoint.files.checked_out_file_collection import (
     CheckedOutFileCollection,
 )
 from office365.sharepoint.files.file import File
+from office365.sharepoint.files.system_object_type import FileSystemObjectType
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.collection import FormCollection
@@ -77,6 +81,64 @@ class List(SecurableObject):
     def __repr__(self):
         return self.id or self.title or self.entity_type_name
 
+    def export(self, local_file, include_content=False, item_exported=None):
+        # type: (IO, bool, Callable[[ListItem|File|Folder], None]) -> Self
+        """Exports SharePoint List"""
+        import zipfile
+
+        def _append_file(name, data):
+            with zipfile.ZipFile(local_file.name, "a", zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr(name, data)
+
+        def _download_content(list_item):
+            # type: (ListItem) -> None
+            def _after_downloaded(result):
+                # type: (ClientResult[AnyStr]) -> None
+                item_path = list_item.properties["FileRef"].replace(
+                    self.root_folder.serverRelativeUrl, ""
+                )
+                _append_file(item_path, result.value)
+
+            list_item.file.get_content().after_execute(_after_downloaded)
+
+        def _export_items(items):
+            # type: (ListItemCollection) -> None
+
+            for item in items:
+                # item_path = item.properties["FileRef"].replace(self.root_folder.serverRelativeUrl, "")
+                item_path = str(item.id) + ".json"
+
+                if item.file_system_object_type == FileSystemObjectType.Folder:
+                    pass
+                else:
+                    _append_file(item_path, json.dumps(item.to_json()))
+
+                    if include_content:
+                        _download_content(item)
+
+                    if callable(item_exported):
+                        item_exported(item)
+
+        def _save_schema():
+            (
+                self.items.select(
+                    [
+                        "*",
+                        "Id",
+                        "FileRef",
+                        "FileDirRef",
+                        "FileLeafRef",
+                        "FileSystemObjectType",
+                    ]
+                )
+                # .expand(["File", "Folder"])
+                .get().paged(page_loaded=_export_items)
+            )
+
+        self.ensure_properties(["SchemaXml", "RootFolder"], _save_schema)
+
+        return self
+
     def clear(self):
         """Clears the list."""
 
@@ -125,6 +187,7 @@ class List(SecurableObject):
         return self
 
     def get_async_action_config(self):
+        """ """
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(
             self, "GetAsyncActionConfig", return_type=return_type

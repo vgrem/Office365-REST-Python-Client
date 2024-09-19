@@ -99,3 +99,7 @@ class TestSite(SPTestCase):
         )
         site_id = self.__class__.site_response.SiteId
         admin_ctx.site_manager.delete(site_id).execute_query()
+
+    # def test_15_get_block_download_policy_for_files_data(self):
+    #    result = self.client.site.get_block_download_policy_for_files_data().execute_query()
+    #    self.assertIsNotNone(result.value)

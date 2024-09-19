@@ -711,6 +711,16 @@ class ClientContext(ClientRuntimeContext):
         return WorkflowServicesManager.current(self)
 
     @property
+    def workflow_deployment_service(self):
+        """Alias to WorkflowServicesManager"""
+
+        from office365.sharepoint.workflowservices.deployment_service import (
+            WorkflowDeploymentService,
+        )
+
+        return WorkflowDeploymentService(self)
+
+    @property
     def work_items(self):
         """"""
         from office365.sharepoint.contentcenter.machinelearning.workitems.collection import (

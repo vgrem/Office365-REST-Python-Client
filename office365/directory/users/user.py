@@ -193,6 +193,16 @@ class User(DirectoryObject):
         self.context.add_query(qry)
         return return_type
 
+    def get_my_site(self):
+        """Gets user's site"""
+        return_type = Site(self.context)
+
+        def _loaded():
+            return_type.set_property("webUrl", self.my_site)
+
+        self.ensure_property("mySite", _loaded)
+        return return_type
+
     def send_mail(
         self,
         subject,
@@ -535,10 +545,20 @@ class User(DirectoryObject):
     @property
     def given_name(self):
         # type: () -> Optional[str]
-        """
-        The given name (first name) of the user. Maximum length is 64 characters.
-        """
+        """The given name (first name) of the user. Maximum length is 64 characters"""
         return self.properties.get("givenName", None)
+
+    @property
+    def my_site(self):
+        # type: () -> Optional[str]
+        """The URL for the user's site."""
+        return self.properties.get("mySite", None)
+
+    @property
+    def office_location(self):
+        # type: () -> Optional[str]
+        """The office location in the user's place of business."""
+        return self.properties.get("officeLocation", None)
 
     @property
     def user_principal_name(self):

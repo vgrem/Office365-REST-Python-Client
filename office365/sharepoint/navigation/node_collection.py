@@ -39,7 +39,7 @@ class NavigationNodeCollection(EntityCollection[NavigationNode]):
         :param int previous_node_id: Identifier of the navigation node after which the node identified by nodeId moves to
         """
         params = {"nodeId": node_id, "previousNodeId": previous_node_id}
-        qry = ServiceOperationQuery(self, "GetByIndex", params)
+        qry = ServiceOperationQuery(self, "MoveAfter", params)
         self.context.add_query(qry)
         return self
 

@@ -25913,6 +25913,9 @@
          <EntityType Name="administrativeUnit" BaseType="graph.directoryObject" OpenType="true">
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="membershipRule" Type="Edm.String"/>
+            <Property Name="membershipRuleProcessingState" Type="Edm.String"/>
+            <Property Name="membershipType" Type="Edm.String"/>
             <Property Name="visibility" Type="Edm.String"/>
             <NavigationProperty Name="members" Type="Collection(graph.directoryObject)"/>
             <NavigationProperty Name="scopedRoleMembers" Type="Collection(graph.scopedRoleMembership)" ContainsTarget="true"/>

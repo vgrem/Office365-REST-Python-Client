@@ -44,6 +44,6 @@ class TestDirectorySession(TestCase):
 
     # def test_7_get_directory_provider(self):
     #    from office365.sharepoint.directory.provider.object_data import DirectoryObjectData
-    #    data = DirectoryObjectData(Id="75c593b5-e5d2-48f3-b787-6646444b8885")
+    #    data = DirectoryObjectData(id_="75c593b5-e5d2-48f3-b787-6646444b8885")
     #    result = self.client.directory_provider.read_directory_object(data).execute_query()
     #    self.assertIsNotNone(result.resource_path)

@@ -42,6 +42,7 @@ from office365.sharepoint.flows.synchronization_result import FlowSynchronizatio
 from office365.sharepoint.folders.collection import FolderCollection
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.internal.paths.web import WebPath
+from office365.sharepoint.largeoperation.operation import SPLargeOperation
 from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.collection import ListCollection
 from office365.sharepoint.lists.creation_information import ListCreationInformation
@@ -206,6 +207,21 @@ class Web(SecurableObject):
         return_type = FlowSynchronizationResult(self.context)
         qry = ServiceOperationQuery(
             self, "ConsentToPowerPlatform", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_list_operation(self, list_id, operation_id):
+        # type: (str, str) -> SPLargeOperation
+        """ """
+        return_type = SPLargeOperation(self.context)
+        qry = ServiceOperationQuery(
+            self,
+            "GetListOperation",
+            None,
+            {"listId": list_id, "operationId": operation_id},
+            None,
+            return_type,
         )
         self.context.add_query(qry)
         return return_type

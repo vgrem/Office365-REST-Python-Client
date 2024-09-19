@@ -16,9 +16,7 @@ class Change(Entity):
 
     @property
     def change_token(self):
-        """
-        Returns an ChangeToken that represents the change.
-        """
+        """Returns an ChangeToken that represents the change."""
         return self.properties.get("ChangeToken", ChangeToken())
 
     @property

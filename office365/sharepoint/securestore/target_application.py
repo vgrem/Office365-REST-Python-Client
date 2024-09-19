@@ -1,4 +1,5 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.entity import Entity
 
 
@@ -10,6 +11,7 @@ class TargetApplication(Entity):
 
     @staticmethod
     def create(context, application_id, friendly_name):
+        # type: (ClientContext, str, str) -> "TargetApplication"
         """
         Creates a target application
 

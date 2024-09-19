@@ -22,6 +22,7 @@ class ChangeCollection(EntityCollection[Change]):
         from office365.sharepoint.changes.item import ChangeItem
         from office365.sharepoint.changes.list import ChangeList
         from office365.sharepoint.changes.user import ChangeUser
+        from office365.sharepoint.changes.view import ChangeView
         from office365.sharepoint.changes.web import ChangeWeb
 
         if "ItemId" in properties and "ListId" in properties:
@@ -40,3 +41,5 @@ class ChangeCollection(EntityCollection[Change]):
             self._item_type = ChangeAlert
         elif "FieldId" in properties:
             self._item_type = ChangeField
+        elif "ViewId" in properties:
+            self._item_type = ChangeView
