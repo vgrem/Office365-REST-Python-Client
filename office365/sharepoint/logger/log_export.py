@@ -14,12 +14,14 @@ class LogExport(Entity):
         )
 
     def get_files(self):
+        """ """
         return_type = LogFileInfoCollection(self.context)
         qry = ServiceOperationQuery(self, "GetFiles", None, None, None, return_type)
         self.context.add_query(qry)
         return return_type
 
     def get_log_types(self):
+        """ """
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(self, "GetLogTypes", None, None, None, return_type)
         self.context.add_query(qry)

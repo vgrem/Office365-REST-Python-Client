@@ -88,11 +88,6 @@ class TestGraphClient(GraphTestCase):
             str(path),
         )
 
-    # def test_12_build_operation_resource_path(self):
-    #    result = self.client.me.drive.root.get_by_path("archive/Sample.rtf")
-    #         .get_activities_by_interval().execute_query()
-    #    self.assertEqual("/me/drive/root/getActivitiesByInterval()", str(result.resource_path))
-
     def test_13_resolve_me_resource_path(self):
         current_user = self.client.me.get().execute_query()
         self.assertEqual(

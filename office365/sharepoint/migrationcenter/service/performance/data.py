@@ -31,14 +31,14 @@ class PerformanceDataCollection(EntityCollection[PerformanceData]):
             context, PerformanceData, resource_path
         )
 
-    def get_data(self, StartTime=None, EndTime=None, AgentId=None, TimeUnit=None):
+    def get_data(self, start_time=None, end_time=None, agent_id=None, time_unit=None):
         """ """
         return_type = ClientResult(self.context, PerformanceDashboardData())
         payload = {
-            "StartTime": StartTime,
-            "EndTime": EndTime,
-            "AgentId": AgentId,
-            "TimeUnit": TimeUnit,
+            "StartTime": start_time,
+            "EndTime": end_time,
+            "AgentId": agent_id,
+            "TimeUnit": time_unit,
         }
         qry = ServiceOperationQuery(self, "GetData", None, payload, None, return_type)
         self.context.add_query(qry)

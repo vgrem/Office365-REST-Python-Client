@@ -229,8 +229,10 @@ class GraphClient(ClientRuntimeContext):
 
         return GraphClient(_acquire_token)
 
-    def execute_batch(self, items_per_batch=100, success_callback=None):
+    def execute_batch(self, items_per_batch=20, success_callback=None):
         """Constructs and submit a batch request
+
+        Per Batch size limitations: JSON batch requests are currently limited to 20 individual requests.
 
         :param int items_per_batch: Maximum to be selected for bulk operation
         :param (List[ClientObject|ClientResult])-> None success_callback: A success callback

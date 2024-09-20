@@ -46,11 +46,8 @@ class ODataV4BatchRequest(ODataRequest):
             yield qry, resp
 
     def _prepare_payload(self, query):
-        """
-        Serializes a batch request body.
-
-        :type query: office365.runtime.queries.batch.BatchQuery
-        """
+        # type: (BatchQuery) -> Dict
+        """ Serializes a batch request body. """
         requests_json = []
         for qry in query.queries:
             qry_id = str(len(requests_json))
@@ -63,16 +60,16 @@ class ODataV4BatchRequest(ODataRequest):
         # type: (ClientQuery, str, Optional[List[str]]) -> Dict[str, Any]
         """ """
         request = query.build_request()
-        allowed_props = ["id", "method", "headers", "url", "body"]
-        request_json = dict(
-            (k, v)
-            for k, v in vars(request).items()
-            if v is not None and k in allowed_props
-        )
-        request_json["id"] = query_id
+
+        request_json = {
+            "id": query_id,
+            "url": request.url.replace(query.context.service_root_url(), ""),
+            "method": request.method,
+            "headers": request.headers,
+        }
+        if request.data:
+            request_json["body"] = request.data
+
         if depends_on is not None:
             request_json["dependsOn"] = depends_on
-        request_json["url"] = request_json["url"].replace(
-            query.context.service_root_url(), ""
-        )
         return request_json
