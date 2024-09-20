@@ -47,7 +47,7 @@ class ODataV4BatchRequest(ODataRequest):
 
     def _prepare_payload(self, query):
         # type: (BatchQuery) -> Dict
-        """ Serializes a batch request body. """
+        """Serializes a batch request body."""
         requests_json = []
         for qry in query.queries:
             qry_id = str(len(requests_json))
