@@ -43,6 +43,23 @@ class SiteScriptUtility(Entity):
         return return_type
 
     @staticmethod
+    def get_list_designs(context, store=None):
+        """
+        Gets a list designs.
+
+        :param office365.sharepoint.client_context.ClientContext context: SharePoint context
+        :param str store:
+        """
+        return_type = ClientResult(context, SiteDesignMetadata())
+        utility = SiteScriptUtility(context)
+        payload = {"store": store}
+        qry = ServiceOperationQuery(
+            utility, "GetListDesigns", None, payload, None, return_type, True
+        )
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
     def add_site_design_task(context, web_url, site_design_id):
         """
         :param office365.sharepoint.client_context.ClientContext context: SharePoint client context

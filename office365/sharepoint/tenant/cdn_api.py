@@ -13,7 +13,9 @@ class TenantCdnApi(Entity):
         )
 
     def get_cdn_urls(self, items=None):
-        """"""
+        """
+        :param list[str] items:
+        """
         payload = {
             "items": items,
         }

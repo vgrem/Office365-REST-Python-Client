@@ -109,6 +109,38 @@ class RegionalSettings(Entity):
         return self.properties.get("NegativeSign", None)
 
     @property
+    def neg_number_mode(self):
+        # type: () -> Optional[int]
+        """Specifies the negative number mode that is used for displaying negative numbers in calculated fields
+        based on the locale of the server."""
+        return self.properties.get("NegNumberMode", None)
+
+    @property
+    def pm(self):
+        # type: () -> Optional[str]
+        """Specifies the string that is used to represent time after noon on the site"""
+        return self.properties.get("PM", None)
+
+    @property
+    def positive_sign(self):
+        # type: () -> Optional[str]
+        """Specifies the symbol that is used to represent a positive number on the site"""
+        return self.properties.get("PositiveSign", None)
+
+    @property
+    def show_weeks(self):
+        # type: () -> Optional[bool]
+        """Specifies whether to display the week number in day or week views of a calendar."""
+        return self.properties.get("ShowWeeks", None)
+
+    @property
+    def thousand_separator(self):
+        # type: () -> Optional[str]
+        """Specifies the symbol that is used to separate thousands for numbers on the site. For example,
+        if the symbol is "," the number 123456789 would appear as "123,456,789"."""
+        return self.properties.get("ThousandSeparator", None)
+
+    @property
     def work_days(self):
         # type: () -> Optional[int]
         """Gets a number that represents the work days of Web site calendars."""

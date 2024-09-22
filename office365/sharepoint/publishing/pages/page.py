@@ -5,6 +5,7 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
+from office365.sharepoint.publishing.pages.coauth_state import SitePageCoAuthState
 from office365.sharepoint.publishing.pages.fields_data import SitePageFieldsData
 from office365.sharepoint.publishing.pages.metadata import SitePageMetadata
 from office365.sharepoint.translation.status_collection import (
@@ -131,6 +132,16 @@ class SitePage(SitePageMetadata):
         return_type = SitePage(self.context)
         qry = ServiceOperationQuery(
             self, "SavePageAsTemplate", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def save_page_co_auth(self, page_stream):
+        """ """
+        return_type = ClientResult(self.context, SitePageCoAuthState())
+        payload = {"pageStream": page_stream}
+        qry = ServiceOperationQuery(
+            self, "SavePageCoAuth", None, payload, None, return_type
         )
         self.context.add_query(qry)
         return return_type

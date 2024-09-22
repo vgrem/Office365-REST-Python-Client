@@ -23,7 +23,7 @@ class TestApp(TestCase):
         self.assertIsNotNone(result.resource_path)
 
     def test_2_get_corporate_catalog_site(self):
-        site = self.admin_client.tenant.get_corporate_catalog_site()
+        site = self.admin_client.tenant.get_corporate_catalog_site().execute_query()
         self.assertIsNotNone(site.resource_path)
 
     def test_3_list_apps(self):

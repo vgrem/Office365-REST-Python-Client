@@ -4,6 +4,8 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.viva.app_configuration import AppConfiguration
+from office365.sharepoint.viva.connections_page import VivaConnectionsPage
+from office365.sharepoint.viva.dashboard_configuration import DashboardConfiguration
 from office365.sharepoint.viva.home import VivaHome
 
 
@@ -18,9 +20,27 @@ class EmployeeEngagement(Entity):
         :param str override_language_code:
         """
         return_type = ClientResult(self.context, str())
-        payload = {"return return_type": override_language_code}
+        payload = {"override_language_code": override_language_code}
         qry = ServiceOperationQuery(
             self, "DashboardContent", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def full_dashboard_content(
+        self, canvas_as_json=None, include_personalization_data=None
+    ):
+        """
+        :param bool canvas_as_json:
+        :param bool include_personalization_data:
+        """
+        return_type = ClientResult(self.context, DashboardConfiguration())
+        payload = {
+            "canvasAsJson": canvas_as_json,
+            "includePersonalizationData": include_personalization_data,
+        }
+        qry = ServiceOperationQuery(
+            self, "FullDashboardContent", None, payload, None, return_type
         )
         self.context.add_query(qry)
         return return_type
@@ -45,3 +65,21 @@ class EmployeeEngagement(Entity):
                 self.context, ResourcePath("AppConfiguration", self.resource_path)
             ),
         )
+
+    @property
+    def viva_connections_page(self):
+        return self.properties.get(
+            "VivaConnectionsPage",
+            VivaConnectionsPage(
+                self.context, ResourcePath("VivaConnectionsPage", self.resource_path)
+            ),
+        )
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "AppConfiguration": self.app_configuration,
+                "VivaConnectionsPage": self.viva_connections_page,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(EmployeeEngagement, self).get_property(name, default_value)

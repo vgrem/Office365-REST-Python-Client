@@ -45,6 +45,7 @@ from office365.sharepoint.lists.bloom_filter import ListBloomFilter
 from office365.sharepoint.lists.creatables_info import CreatablesInfo
 from office365.sharepoint.lists.data_source import ListDataSource
 from office365.sharepoint.lists.rule import SPListRule
+from office365.sharepoint.lists.version_policy_manager import VersionPolicyManager
 from office365.sharepoint.navigation.configured_metadata_items import (
     ConfiguredMetadataNavigationItemCollection,
 )
@@ -131,8 +132,8 @@ class List(SecurableObject):
                         "FileSystemObjectType",
                     ]
                 )
-                # .expand(["File", "Folder"])
-                .get().paged(page_loaded=_export_items)
+                .get()
+                .paged(page_loaded=_export_items)
             )
 
         self.ensure_properties(["SchemaXml", "RootFolder"], _save_schema)
@@ -1129,6 +1130,16 @@ class List(SecurableObject):
         )
 
     @property
+    def version_policies(self):
+        """ """
+        return self.properties.get(
+            "VersionPolicies",
+            VersionPolicyManager(
+                self.context, ResourcePath("VersionPolicies", self.resource_path)
+            ),
+        )
+
+    @property
     def custom_action_elements(self):
         return self.properties.get(
             "CustomActionElements", CustomActionElementCollection()
@@ -1408,6 +1419,7 @@ class List(SecurableObject):
                 "RootFolder": self.root_folder,
                 "TitleResource": self.title_resource,
                 "UserCustomActions": self.user_custom_actions,
+                "VersionPolicies": self.version_policies,
             }
             default_value = property_mapping.get(name, None)
         return super(List, self).get_property(name, default_value)
@@ -1420,4 +1432,8 @@ class List(SecurableObject):
                 self._resource_path = self.parent_collection.get_by_id(
                     value
                 ).resource_path
+            elif name == "Url":
+                self._resource_path = ServiceOperationPath(
+                    "getList", [value], self.context.web.resource_path
+                )
         return self

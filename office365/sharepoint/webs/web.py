@@ -170,6 +170,17 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def get_access_request_list(self):
+        """ """
+        return_type = List(self.context)
+        self.lists.add_child(return_type)
+
+        def _get_access_request_list():
+            return_type.set_property("Url", self.access_request_list_url)
+
+        self.ensure_properties(["AccessRequestListUrl"], _get_access_request_list)
+        return return_type
+
     def get_site_script(
         self,
         include_branding=True,
@@ -1932,6 +1943,7 @@ class Web(SecurableObject):
     @property
     def access_request_list_url(self):
         # type: () -> Optional[str]
+        """Gets the URL of the access request list to the current site"""
         return self.properties.get("AccessRequestListUrl", None)
 
     @property

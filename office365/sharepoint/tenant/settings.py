@@ -1,5 +1,6 @@
 from typing import Optional
 
+from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
@@ -15,6 +16,15 @@ class TenantSettings(Entity):
         )
         self.context.add_query(qry)
         return self
+
+    def get_data_access_governance_report_config(self):
+        """ """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self, "GetDataAccessGovernanceReportConfig", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
 
     def set_corporate_catalog(self, url):
         """

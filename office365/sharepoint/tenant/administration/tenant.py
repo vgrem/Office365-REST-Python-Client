@@ -750,6 +750,41 @@ class Tenant(Entity):
         return self.properties.get("DefaultContentCenterSite", SiteInfoForSitePicker())
 
     @property
+    def no_access_redirect_url(self):
+        # type: () -> Optional[bool]
+        """Specifies the URL of the redirected site for those site collections which have the locked state "NoAccess"""
+        return self.properties.get("NoAccessRedirectUrl", None)
+
+    @property
+    def notifications_in_share_point_enabled(self):
+        # type: () -> Optional[bool]
+        """Enables or disables notifications in SharePoint."""
+        return self.properties.get("NotificationsInSharePointEnabled", None)
+
+    @property
+    def notify_owners_when_invitations_accepted(self):
+        # type: () -> Optional[bool]
+        """When this parameter is set to true and when an external user accepts an invitation to a resource
+        in a user's OneDrive for Business, the OneDrive for Business owner is notified by e-mail.
+        """
+        return self.properties.get("NotifyOwnersWhenInvitationsAccepted", None)
+
+    @property
+    def one_drive_storage_quota(self):
+        # type: () -> Optional[int]
+        """Gets a default OneDrive for Business storage quota for the tenant. It will be used for new OneDrive
+        for Business sites created."""
+        return self.properties.get("OneDriveStorageQuota", None)
+
+    @property
+    def notify_owners_when_items_reshared(self):
+        # type: () -> Optional[bool]
+        """When is set to true and another user re-shares a document from a
+        user's OneDrive for Business, the OneDrive for Business owner is notified by e-mail.
+        """
+        return self.properties.get("NotifyOwnersWhenItemsReshared", None)
+
+    @property
     def root_site_url(self):
         # type: () -> Optional[str]
         """The tenant's root site url"""

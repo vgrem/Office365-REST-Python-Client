@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -7,6 +9,9 @@ from office365.sharepoint.entity import Entity
 from office365.sharepoint.files.file import File
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.utilities.principal_info import PrincipalInfo
+
+if TYPE_CHECKING:
+    from office365.sharepoint.client_context import ClientContext
 
 
 class Utility(Entity):
@@ -161,6 +166,7 @@ class Utility(Entity):
 
     @staticmethod
     def log_custom_app_error(context, error):
+        # type: (ClientContext, str) -> ClientResult[int]
         """
         Logs an error from a SharePoint Add-in. The return value indicates the success or failure of this operation.
         These errors are of interest to administrators who monitor such apps (2).

@@ -189,11 +189,23 @@ class TestTenant(TestCase):
     #    result = self.tenant.get_ransomware_activities().execute_query()
     #    self.assertIsNotNone(result.value)
 
-    def test_27_get_get_spo_all_web_templates(self):
+    def test_27_get_spo_all_web_templates(self):
         result = self.tenant.get_spo_all_web_templates().execute_query()
         self.assertIsNotNone(result)
 
-    def test_28_get_get_collaboration_insights_data(self):
+    def test_28_get_collaboration_insights_data(self):
         # Note: You need a SharePoint Advanced Management license to perform this action
         result = self.tenant.get_collaboration_insights_data().execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test_29_get_app_service_principal(self):
+        from office365.sharepoint.tenant.administration.internal.appservice.principal import (
+            SPOWebAppServicePrincipal,
+        )
+
+        result = SPOWebAppServicePrincipal(self.client).get().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
+    def test_30_get_cdn_urls(self):
+        result = self.tenant.cdn_api.get_cdn_urls([test_team_site_url]).execute_query()
         self.assertIsNotNone(result.value)

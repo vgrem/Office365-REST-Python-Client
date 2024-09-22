@@ -28,6 +28,7 @@ class RankingLabeling(Entity):
         return self
 
     def normalize_result_url(self, url):
+        # type: (str) -> ClientResult[str]
         """
         A URL string after normalization. The input and output URL strings MUST resolve to the same document.
 

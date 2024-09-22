@@ -197,3 +197,11 @@ class TestSharePointWeb(SPTestCase):
     # def test_29_ensure_edu_class_setup(self):
     #    result = self.client.web.ensure_edu_class_setup(True).execute_query()
     #    self.assertIsNotNone(result.value)
+
+    # def test_30_get_acs_service_principals(self):
+    #    result = self.client.web.get_acs_service_principals().execute_query()
+    #    self.assertIsNotNone(result.value)
+
+    def test_31_get_access_request_list(self):
+        result = self.client.web.get_access_request_list().get().execute_query()
+        self.assertIsNotNone(result.resource_path)

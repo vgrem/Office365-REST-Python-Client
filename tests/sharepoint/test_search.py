@@ -79,6 +79,7 @@ class TestSearch(TestCase):
         self.assertIsNotNone(result.value)
 
     # def test7_get_crawled_urls(self):
+    #    from office365.sharepoint.search.administration.document_crawl_log import DocumentCrawlLog
     #    doc_crawl_log = DocumentCrawlLog(self.client)
     #    result = doc_crawl_log.get_crawled_urls().execute_query()
     #    self.assertIsNotNone(result.value)

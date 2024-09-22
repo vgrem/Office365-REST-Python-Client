@@ -205,6 +205,8 @@ class Office365Tenant(Entity):
 
         def _revoke_all_user_sessions(login_name):
             """
+            Logouts a user's sessions across all their devices
+
             :type login_name: str
             """
             qry = ServiceOperationQuery(
