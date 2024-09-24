@@ -45,6 +45,29 @@ class WorkbookFunctions(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def accr_int_m(self, issue, settlement, rate, par, basis):
+        """
+        Returns the accrued interest for a security that pays periodic interest.
+
+        :param any issue: The real number of which you want the absolute value.
+        :param any settlement: The security's settlement date. The security settlement date is the date after
+            the issue date when the security is traded to the buyer.
+        :param any rate: The security's annual coupon rate.
+        :param any par: The security's par value. If you omit par, ACCRINT uses $1,000.
+        :param any basis:
+        """
+        return_type = WorkbookFunctionResult(self.context)
+        payload = {
+            "issue": issue,
+            "settlement": settlement,
+            "rate": rate,
+            "par": par,
+            "basis": basis,
+        }
+        qry = ServiceOperationQuery(self, "accrIntM", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def days(self, start_date, end_date):
         """Returns the number of days between two dates.
 

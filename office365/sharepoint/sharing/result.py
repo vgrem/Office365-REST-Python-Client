@@ -4,6 +4,8 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.groups.collection import GroupCollection
+from office365.sharepoint.principal.groups.group import Group
+from office365.sharepoint.principal.users.collection import UserCollection
 from office365.sharepoint.sharing.invitation.creation_result import (
     SPInvitationCreationResult,
 )
@@ -79,6 +81,23 @@ class SharingResult(Entity):
         )
 
     @property
+    def group_users_added_to(self):
+        return self.properties.get(
+            "GroupUsersAddedTo",
+            Group(self.context, ResourcePath("GroupUsersAddedTo", self.resource_path)),
+        )
+
+    @property
+    def users_with_access_requests(self):
+        return self.properties.get(
+            "UsersWithAccessRequests",
+            UserCollection(
+                self.context,
+                ResourcePath("UsersWithAccessRequests", self.resource_path),
+            ),
+        )
+
+    @property
     def users_added_to_group(self):
         # type: () ->  ClientValueCollection[UserSharingResult]
         """Gets the list of users being added to the SharePoint permissions group."""
@@ -90,8 +109,10 @@ class SharingResult(Entity):
         if default_value is None:
             property_mapping = {
                 "GroupsSharedWith": self.groups_shared_with,
+                "GroupUsersAddedTo": self.group_users_added_to,
                 "UsersAddedToGroup": self.users_added_to_group,
                 "UniquelyPermissionedUsers": self.uniquely_permissioned_users,
+                "UsersWithAccessRequests": self.users_with_access_requests,
             }
             default_value = property_mapping.get(name, None)
         return super(SharingResult, self).get_property(name, default_value)

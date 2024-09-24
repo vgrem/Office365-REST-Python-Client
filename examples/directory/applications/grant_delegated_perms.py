@@ -24,4 +24,4 @@ resource = client.service_principals.get_by_name("Microsoft Graph")
 # app_role = "User.Read.All"
 app_role = "DeviceLocalCredential.Read.All"
 user = client.users.get_by_principal_name(test_user_principal_name)
-resource.grant_delegated(test_client_id, user, app_role).execute_query()
+resource.grant_delegated_permissions(test_client_id, user, app_role).execute_query()

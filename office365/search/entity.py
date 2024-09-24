@@ -1,9 +1,12 @@
 from typing import List, Optional
 
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.search.acronym import Acronym
 from office365.search.entity_type import EntityType
 from office365.search.query import SearchQuery
 from office365.search.request import SearchRequest
@@ -64,3 +67,15 @@ class SearchEntity(Entity):
         :param str query_string: Contains the query terms.
         """
         return self.query(query_string, entity_types=[EntityType.driveItem])
+
+    @property
+    def acronyms(self):
+        """Administrative answer in Microsoft Search results to define common acronyms in an organization."""
+        return self.properties.get(
+            "acronyms",
+            EntityCollection(
+                self.context,
+                Acronym,
+                ResourcePath("acronyms", self.resource_path),
+            ),
+        )

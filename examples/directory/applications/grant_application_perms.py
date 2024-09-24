@@ -30,7 +30,7 @@ resource = client.service_principals.get_by_name("Microsoft Graph")
 
 # Step 2: Grant an app role to a client app
 app = client.applications.get_by_app_id(test_client_id)
-resource.grant_application(app, "MailboxSettings.Read").execute_query()
+resource.grant_application_permissions(app, "MailboxSettings.Read").execute_query()
 
 
 # Step 3. Print app role assignments

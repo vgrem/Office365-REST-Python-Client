@@ -33,4 +33,4 @@ class DocumentsSharedWithGroup(Entity):
 
     @property
     def entity_type_name(self):
-        return "Microsoft.SharePoint.Portal.UserProfiles.group_id"
+        return "Microsoft.SharePoint.Portal.UserProfiles.DocumentsSharedWithGroup"

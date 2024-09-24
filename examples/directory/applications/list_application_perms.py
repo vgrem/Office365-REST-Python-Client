@@ -14,15 +14,21 @@ from tests import (
     test_client_secret,
 )
 
-#client = GraphClient.with_token_interactive(
+# client = GraphClient.with_token_interactive(
 #    test_tenant, test_client_id, test_admin_principal_name
-#)
+# )
 
 client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 
 
-resource = client.service_principals.get_by_name("Microsoft Graph").get().execute_query()
-result = resource.get_delegated_permissions(test_client_id, only_admin_consent=True).execute_query()
+resource = (
+    client.service_principals.get_by_name("Microsoft Graph")
+)
 
-for grant in result:
-    print(grant.scope)
+result = resource.get_application_permissions(test_client_id).execute_query()
+for app_role in result.value:
+    print(app_role)
+
+
+
+

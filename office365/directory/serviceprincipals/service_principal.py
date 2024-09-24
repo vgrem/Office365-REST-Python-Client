@@ -114,55 +114,59 @@ class ServicePrincipal(DirectoryObject):
         else:
             self.context.service_principals.get_by_app(app).get().after_execute(action)
 
-    def get_delegated(self, app, principal, scope=None):
-        # type: (Application|str, User|str, AppRole|str) -> DeltaCollection[OAuth2PermissionGrant]
-        """Gets a delegated permission to the client service principal on behalf of a user"""
+    def get_delegated_permissions(self, app, principal=None, only_admin_consent=False):
+        # type: (Application|str, User|str, bool) -> DeltaCollection[OAuth2PermissionGrant]
+        """Gets a delegated API permission"""
 
         return_type = DeltaCollection(self.context, OAuth2PermissionGrant)
 
-        def _get_delegated(col):
-            # type: (DeltaCollection[OAuth2PermissionGrant]) -> None
-            if scope is None:
-                [return_type.add_child(g) for g in col if g.resource_id == self.id]
+        def _get_delegated_permissions(client_id, principal_id=None):
+            # type: (str, str) -> None
+
+            if principal_id is None:
+
+                query_text = "clientId eq '{0}'".format(client_id)
+                if only_admin_consent:
+                    query_text = query_text + " and consentType eq 'AllPrincipals'"
+
             else:
-                [
-                    return_type.add_child(g)
-                    for g in col
-                    if g.scope == scope and g.resource_id == self.id
-                ]
-
-        def _principal_resolved(principal_id):
-            # type: (str) -> None
-            def _client_loaded(client):
-                # type: (ServicePrincipal) -> None
-                query_text = ("principalId eq '{0}' and clientId eq '{1}'").format(
-                    principal_id, client.id
+                query_text = "principalId eq '{0}' and clientId eq '{1}'".format(
+                    principal_id, client_id
                 )
 
-                (
-                    self.context.oauth2_permission_grants.get()
-                    .filter(query_text)
-                    .after_execute(_get_delegated)
-                )
+            def _loaded(col):
+                [return_type.add_child(g) for g in col if g.resource_id == self.id]
 
-            self.context.service_principals.get_by_app(app).get().after_execute(
-                _client_loaded
+            (
+                self.context.oauth2_permission_grants.get()
+                .filter(query_text)
+                .after_execute(_loaded)
             )
 
-        def _resource_resolved():
+        def _resolve_application():
+            # type: () -> None
+            def _after(service_principal):
+                if principal is None:
+                    _get_delegated_permissions(service_principal.id)
+                else:
+                    _resolve_principal(service_principal.id)
+
+            self.context.service_principals.get_by_app(app).get().after_execute(_after)
+
+        def _resolve_principal(app_id):
             if isinstance(principal, User):
 
                 def _after():
-                    _principal_resolved(principal.id)
+                    _get_delegated_permissions(app_id, principal.id)
 
                 principal.ensure_property("id", _after)
             else:
-                _principal_resolved(principal)
+                _get_delegated_permissions(app_id, principal)
 
-        self.ensure_property("id", _resource_resolved)
+        self.ensure_property("id", _resolve_application)
         return return_type
 
-    def grant_delegated(self, app, principal, scope):
+    def grant_delegated_permissions(self, app, principal, scope):
         # type: (Application|str, User|str, AppRole|str) -> Self
         """Grants a delegated permission to the client service principal on behalf of a user"""
 
@@ -198,11 +202,11 @@ class ServicePrincipal(DirectoryObject):
         self.ensure_property("id", _resource_resolved)
         return self
 
-    def revoke_delegated(self, app, principal, scope):
+    def revoke_delegated_permissions(self, app, principal, scope):
         # type: (Application|str, User|str, AppRole|str) -> Self
         """"""
 
-        def _revoke_delegated(app_id, principal_id):
+        def _revoke_delegated_permissions(app_id, principal_id):
             # type: (str, str) -> None
 
             def _after(return_type):
@@ -219,16 +223,40 @@ class ServicePrincipal(DirectoryObject):
             if isinstance(principal, User):
 
                 def _after():
-                    _revoke_delegated(principal.id, return_type.id)
+                    _revoke_delegated_permissions(principal.id, return_type.id)
 
                 principal.ensure_property("id", _after)
             else:
-                _revoke_delegated(principal, return_type.id)
+                _revoke_delegated_permissions(principal, return_type.id)
 
         self._get_service_principal_by_app(app, _ensure_principal)
         return self
 
-    def grant_application(self, app, app_role):
+    def get_application_permissions(self, app):
+        # type: (Application|str) -> ClientResult[AppRoleCollection]
+        return_type = ClientResult(self.context, AppRoleCollection())
+
+        def _get_application_permissions(app_id):
+            app_role_ids = [
+                app_role.app_role_id
+                for app_role in self.app_role_assigned_to
+                if app_role.principal_id == app_id
+            ]
+            for app_role in self.app_roles:
+                if app_role.id in app_role_ids:
+                    return_type.value.add(app_role)
+
+        def _resolve_app():
+
+            def _after(service_principal):
+                _get_application_permissions(service_principal.id)
+
+            self.context.service_principals.get_by_app(app).get().after_execute(_after)
+
+        self.ensure_properties(["id", "appRoles", "appRoleAssignedTo"], _resolve_app)
+        return return_type
+
+    def grant_application_permissions(self, app, app_role):
         # type: (Application|str, AppRole|str) -> Self
         """
         Grants an app role assignment to a client service principal
@@ -254,7 +282,7 @@ class ServicePrincipal(DirectoryObject):
         self.ensure_properties(["id", "appRoles"], _ensure_resource)
         return self
 
-    def revoke_application(self, app, app_role):
+    def revoke_application_permissions(self, app, app_role):
         # type: (Application|str, AppRole|str) -> Self
         """Revokes an app role assignment from a client service principal"""
 
@@ -327,6 +355,12 @@ class ServicePrincipal(DirectoryObject):
         return self.properties.get("appDisplayName", None)
 
     @property
+    def app_id(self):
+        # type: () -> Optional[str]
+        """The unique identifier for the associated application (its appId property)."""
+        return self.properties.get("appId", None)
+
+    @property
     def app_role_assigned_to(self):
         """
         App role assignments for this app or service, granted to users, groups, and other service principals.
@@ -335,6 +369,16 @@ class ServicePrincipal(DirectoryObject):
             "appRoleAssignedTo",
             AppRoleAssignmentCollection(
                 self.context, ResourcePath("appRoleAssignedTo", self.resource_path)
+            ),
+        )
+
+    @property
+    def app_role_assignments(self):
+        """Get an event collection or an appRoleAssignments."""
+        return self.properties.get(
+            "appRoleAssignments",
+            AppRoleAssignmentCollection(
+                self.context, ResourcePath("appRoleAssignments", self.resource_path)
             ),
         )
 
@@ -503,6 +547,7 @@ class ServicePrincipal(DirectoryObject):
             property_mapping = {
                 "appRoles": self.app_roles,
                 "appRoleAssignedTo": self.app_role_assigned_to,
+                "appRoleAssignments": self.app_role_assignments,
                 "created_objects": self.created_objects,
                 "keyCredentials": self.key_credentials,
                 "oauth2PermissionScopes": self.oauth2_permission_scopes,

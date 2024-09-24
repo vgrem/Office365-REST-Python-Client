@@ -27,6 +27,9 @@ from office365.sharepoint.sitehealth.summary import SiteHealthSummary
 from office365.sharepoint.sites.azure_container_Info import (
     ProvisionedTemporaryAzureContainerInfo,
 )
+from office365.sharepoint.sites.html_field_security_setting import (
+    HTMLFieldSecuritySetting,
+)
 from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.sites.upgrade_info import UpgradeInfo
 from office365.sharepoint.sites.usage_info import UsageInfo
@@ -504,7 +507,7 @@ class Site(Entity):
     @property
     def allowed_external_domains(self):
         # type: () -> Optional[bool]
-        return self.properties.get("AllowedExternalDomains", None)
+        return self.properties.get("AllowedExternalDomains", HTMLFieldSecuritySetting())
 
     @property
     def allow_master_page_editing(self):
@@ -573,6 +576,32 @@ class Site(Entity):
     def current_change_token(self):
         """Gets the current change token that is used in the change log for the site collection."""
         return self.properties.get("CurrentChangeToken", ChangeToken())
+
+    @property
+    def disable_flows(self):
+        # type: () -> Optional[bool]
+        """"""
+        return self.properties.get("DisableFlows", None)
+
+    @property
+    def external_sharing_tips_enabled(self):
+        # type: () -> Optional[bool]
+        """Gets a Boolean value that specifies whether users will be greeted with a notification bar telling them that
+        the site can be shared with external users. The value is true if the notification bar is enabled; otherwise,
+        it is false."""
+        return self.properties.get("ExternalSharingTipsEnabled", None)
+
+    @property
+    def external_user_expiration_in_days(self):
+        # type: () -> Optional[int]
+        """"""
+        return self.properties.get("ExternalUserExpirationInDays", None)
+
+    @property
+    def geo_location(self):
+        # type: () -> Optional[str]
+        """"""
+        return self.properties.get("GeoLocation", None)
 
     @property
     def group_id(self):

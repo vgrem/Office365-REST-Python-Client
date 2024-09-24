@@ -5,6 +5,9 @@ from typing import Optional
 from office365.directory.applications.api import ApiApplication
 from office365.directory.applications.optional_claims import OptionalClaims
 from office365.directory.applications.public_client import PublicClientApplication
+from office365.directory.applications.required_resource_access import (
+    RequiredResourceAccess,
+)
 from office365.directory.applications.roles.role import AppRole
 from office365.directory.applications.spa import SpaApplication
 from office365.directory.certificates.certification import Certification
@@ -53,7 +56,7 @@ class Application(DirectoryObject):
         :param datetime.datetime end_datetime: The date and time at which the credential expires. Default: now + 180days
         """
         if start_datetime is None:
-            start_datetime = datetime.datetime.utcnow()
+            start_datetime = datetime.datetime.now()
         if end_datetime is None:
             end_datetime = start_datetime + datetime.timedelta(days=180)
 
@@ -316,6 +319,16 @@ class Application(DirectoryObject):
         )
 
     @property
+    def required_resource_access(self):
+        """Specifies the resources that the application needs to access. This property also specifies the set
+        of delegated permissions and application roles that it needs for each of those resources.
+        This configuration of access to the required resources drives the consent experience.
+        """
+        return self.properties.get(
+            "requiredResourceAccess", ClientValueCollection(RequiredResourceAccess)
+        )
+
+    @property
     def token_issuance_policies(self):
         # type: () -> EntityCollection[TokenIssuancePolicy]
         """Get all tokenIssuancePolicies assigned to this object."""
@@ -339,6 +352,7 @@ class Application(DirectoryObject):
                 "optionalClaims": self.optional_claims,
                 "passwordCredentials": self.password_credentials,
                 "publicClient": self.public_client,
+                "requiredResourceAccess": self.required_resource_access,
                 "tokenIssuancePolicies": self.token_issuance_policies,
             }
             default_value = property_mapping.get(name, None)

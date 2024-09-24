@@ -1,9 +1,13 @@
 from office365.directory.authentication.strength_usage import (
     AuthenticationStrengthUsage,
 )
+from office365.directory.policies.update_allowed_combinations_result import (
+    UpdateAllowedCombinationsResult,
+)
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.function import FunctionQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class AuthenticationStrengthPolicy(Entity):
@@ -24,5 +28,22 @@ class AuthenticationStrengthPolicy(Entity):
         """
         return_type = ClientResult(self.context, AuthenticationStrengthUsage())
         qry = FunctionQuery(self, "usage", None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def update_allowed_combinations(self, allowed_combinations=None):
+        """
+        Update the allowedCombinations property of an authenticationStrengthPolicy object.
+        To update other properties of an authenticationStrengthPolicy object,
+        use the Update authenticationStrengthPolicy method.
+
+        :param list[str] allowed_combinations: The authentication method combinations allowed by this authentication
+             strength policy.
+        """
+        return_type = ClientResult(self.context, UpdateAllowedCombinationsResult())
+        payload = {"allowedCombinations": allowed_combinations}
+        qry = ServiceOperationQuery(
+            self, "updateAllowedCombinations", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

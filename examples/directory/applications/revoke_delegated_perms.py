@@ -19,4 +19,4 @@ client = GraphClient.with_token_interactive(
 # Step 1: Get resource service principal
 resource = client.service_principals.get_by_name("Microsoft Graph")
 user = client.users.get_by_principal_name(test_user_principal_name)
-resource.revoke_delegated(test_client_id, user, "User.Read.All").execute_query()
+resource.revoke_delegated_permissions(test_client_id, user, "User.Read.All").execute_query()

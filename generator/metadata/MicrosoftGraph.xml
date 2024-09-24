@@ -42522,9 +42522,9 @@
             <Property Name="callerNumber" Type="Edm.String"/>
             <Property Name="callId" Type="Edm.String"/>
             <Property Name="callType" Type="Edm.String"/>
-            <Property Name="charge" Type="Edm.Decimal" Scale="Variable"/>
+            <Property Name="charge" Type="Edm.Decimal" Scale="variable"/>
             <Property Name="conferenceId" Type="Edm.String"/>
-            <Property Name="connectionCharge" Type="Edm.Decimal" Scale="Variable"/>
+            <Property Name="connectionCharge" Type="Edm.Decimal" Scale="variable"/>
             <Property Name="currency" Type="Edm.String"/>
             <Property Name="destinationContext" Type="Edm.String"/>
             <Property Name="destinationName" Type="Edm.String"/>

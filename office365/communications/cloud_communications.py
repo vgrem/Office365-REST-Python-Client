@@ -1,4 +1,4 @@
-from office365.communications.callrecords.call_record import CallRecord
+from office365.communications.callrecords.collection import CallRecordCollection
 from office365.communications.calls.collection import CallCollection
 from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
@@ -37,9 +37,8 @@ class CloudCommunications(Entity):
         """ " """
         return self.properties.get(
             "callRecords",
-            EntityCollection(
+            CallRecordCollection(
                 self.context,
-                CallRecord,
                 ResourcePath("callRecords", self.resource_path),
             ),
         )

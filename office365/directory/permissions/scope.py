@@ -15,8 +15,13 @@ class PermissionScope(ClientValue):
         self,
         admin_consent_display_name=None,
         admin_consent_description=None,
-        _id=None,
+        id_=None,
         is_enabled=None,
+        origin=None,
+        type_=None,
+        user_consent_description=None,
+        user_consent_display_name=None,
+        value=None
     ):
         """
         :param str admin_consent_display_name: The permission's title, intended to be read by an administrator granting
@@ -24,13 +29,20 @@ class PermissionScope(ClientValue):
         :param str admin_consent_description: A description of the delegated permissions, intended to be read
             by an administrator granting the permission on behalf of all users. This text appears in tenant-wide
             admin consent experiences.
-        :param str _id: Unique delegated permission identifier inside the collection of delegated permissions defined
+        :param str id_: Unique delegated permission identifier inside the collection of delegated permissions defined
             for a resource application.
         :param str is_enabled: When creating or updating a permission, this property must be set to true
             (which is the default). To delete a permission, this property must first be set to false.
             At that point, in a subsequent call, the permission may be removed.
+
+        :param str value: Specifies the value to include in the scp (scope) claim in access tokens.
         """
         self.adminConsentDescription = admin_consent_description
         self.adminConsentDisplayName = admin_consent_display_name
-        self.id = _id
+        self.id = id_
         self.isEnabled = is_enabled
+        self.origin = origin
+        self.type = type_
+        self.userConsentDescription = user_consent_description
+        self.userConsentDisplayName = user_consent_display_name
+        self.value = value

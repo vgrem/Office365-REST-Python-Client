@@ -24,4 +24,4 @@ client = GraphClient.with_username_and_password(
 
 # Get resource
 resource = client.service_principals.get_by_name("Microsoft Graph")
-resource.revoke_application(test_client_id, "MailboxSettings.Read").execute_query()
+resource.revoke_application_permissions(test_client_id, "MailboxSettings.Read").execute_query()
