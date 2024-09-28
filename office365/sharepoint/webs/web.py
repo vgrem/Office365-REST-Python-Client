@@ -51,6 +51,7 @@ from office365.sharepoint.lists.document_library_information import (
 )
 from office365.sharepoint.lists.get_parameters import GetListsParameters
 from office365.sharepoint.lists.list import List
+from office365.sharepoint.lists.render_data_parameters import RenderListDataParameters
 from office365.sharepoint.lists.template_collection import ListTemplateCollection
 from office365.sharepoint.lists.template_type import ListTemplateType
 from office365.sharepoint.marketplace.corporatecuratedgallery.available_addins_response import (
@@ -220,6 +221,26 @@ class Web(SecurableObject):
             self, "ConsentToPowerPlatform", None, None, None, return_type
         )
         self.context.add_query(qry)
+        return return_type
+
+    def get_list_data_as_stream(self, path, view_xml=None):
+        """Returns list data from the specified list url and for the specified query parameters.
+
+        :param str path: A string that contains the site-relative URL for a list, for example, /Lists/Announcements.
+        :param str view_xml:
+        """
+        if view_xml is None:
+            view_xml = "<View><Query></Query></View>"
+        return_type = ClientResult(self.context, dict())
+
+        def _get_list_data_as_stream():
+            list_abs_url = self.url + path
+            parameters = RenderListDataParameters(view_xml=view_xml)
+            List.get_list_data_as_stream(
+                self.context, list_abs_url, parameters, return_type=return_type
+            )
+
+        self.ensure_property("Url", _get_list_data_as_stream)
         return return_type
 
     def get_list_operation(self, list_id, operation_id):

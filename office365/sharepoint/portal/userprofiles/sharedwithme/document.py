@@ -3,7 +3,7 @@ from typing import Optional
 
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.entity import Entity
-from office365.sharepoint.userprofiles.sharedwithme.document_user import (
+from office365.sharepoint.portal.userprofiles.sharedwithme.document_user import (
     SharedWithMeDocumentUser,
 )
 

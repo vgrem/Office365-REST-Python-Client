@@ -44,7 +44,7 @@ class TimeZone(Entity):
         return self.properties.get("Information", TimeZoneInformation())
 
 
-class TimeZoneCollection(EntityCollection):
+class TimeZoneCollection(EntityCollection[TimeZone]):
     """TimeZone collection"""
 
     def __init__(self, context, resource_path=None):

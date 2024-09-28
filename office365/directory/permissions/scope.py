@@ -21,7 +21,7 @@ class PermissionScope(ClientValue):
         type_=None,
         user_consent_description=None,
         user_consent_display_name=None,
-        value=None
+        value=None,
     ):
         """
         :param str admin_consent_display_name: The permission's title, intended to be read by an administrator granting

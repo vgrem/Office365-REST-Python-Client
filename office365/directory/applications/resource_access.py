@@ -2,8 +2,8 @@ from office365.runtime.client_value import ClientValue
 
 
 class ResourceAccess(ClientValue):
-    """ Object used to specify an OAuth 2.0 permission scope or an app role that an application requires,
-    through the resourceAccess property of the requiredResourceAccess resource type. """
+    """Object used to specify an OAuth 2.0 permission scope or an app role that an application requires,
+    through the resourceAccess property of the requiredResourceAccess resource type."""
 
     def __init__(self, id_=None, type_=None):
         """

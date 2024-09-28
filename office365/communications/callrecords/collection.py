@@ -29,7 +29,10 @@ class CallRecordCollection(EntityCollection[CallRecord]):
         return_type = ClientResult(
             self.context, ClientValueCollection(DirectRoutingLogRow)
         )
-        payload = {"fromDateTime": from_datetime.strftime('%Y-%m-%d'), "toDateTime": to_datetime.strftime('%Y-%m-%d')}
+        payload = {
+            "fromDateTime": from_datetime.strftime("%Y-%m-%d"),
+            "toDateTime": to_datetime.strftime("%Y-%m-%d"),
+        }
         qry = FunctionQuery(self, "getDirectRoutingCalls", payload, return_type)
 
         def _patch_request(request):

@@ -40,6 +40,8 @@ class ClientResult(Generic[T]):
 
         if isinstance(self._value, ClientValue):
             self._value.set_property(key, value, persist_changes)
+        elif isinstance(self._value, dict):
+            self._value[key] = value
         else:
             self._value = value
         return self

@@ -19,6 +19,9 @@ from office365.sharepoint.lists.render_override_parameters import (
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
 from office365.sharepoint.sites.home_sites_details import HomeSitesDetails
 from office365.sharepoint.sites.site import Site
+from office365.sharepoint.tenant.administration.app_billing_properties import (
+    SPOAppBillingProperties,
+)
 from office365.sharepoint.tenant.administration.collaboration.insights_data import (
     CollaborationInsightsData,
 )
@@ -88,8 +91,28 @@ class Tenant(Entity):
         )
         super(Tenant, self).__init__(context, static_path)
 
+    def accept_syntex_repository_terms_of_service(self):
+        """
+        Used to accept the Microsoft Syntex repository terms of service for your organization.
+        This acceptance is often necessary for enabling features related to document processing or repositories
+        in Microsoft Syntex.
+        """
+        qry = ServiceOperationQuery(self, "AcceptSyntexRepositoryTermsOfService")
+        self.context.add_query(qry)
+        return self
+
+    def activate_application_billing_policy(self, billing_policy_id):
+        """ """
+        payload = {"billingPolicyId": billing_policy_id}
+        return_type = ClientResult(self.context, SPOAppBillingProperties())
+        qry = ServiceOperationQuery(
+            self, "ActivateApplicationBillingPolicy", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def add_recent_admin_action_report(self):
-        """"""
+        """Logs recent administrative actions within a SharePoint Online tenant"""
         return_type = ClientResult(self.context, RecentAdminActionReport())
         payload = {"payload": RecentAdminActionReportPayload()}
         qry = ServiceOperationQuery(
@@ -121,6 +144,9 @@ class Tenant(Entity):
 
     def delete_policy_definition(self, item_id):
         """
+        Deletes a policy definition from a Microsoft 365 tenant.
+        Policy definitions may refer to specific settings related to compliance, security,
+        or site governance (such as site or group creation policies).
         :param int item_id:
         """
         qry = ServiceOperationQuery(
@@ -140,6 +166,7 @@ class Tenant(Entity):
         return self
 
     def get_spo_tenant_all_web_templates(self):
+        """ """
         return_type = SPOTenantWebTemplateCollection(self.context)
         qry = ServiceOperationQuery(
             self, "GetSPOTenantAllWebTemplates", None, None, None, return_type
@@ -148,6 +175,7 @@ class Tenant(Entity):
         return return_type
 
     def get_onedrive_site_sharing_insights(self, query_mode):
+        """Retrieves insights or reports related to OneDrive for Business site sharing activities"""
         return_type = ClientResult(self.context, OneDriveSiteSharingInsights())
         payload = {"queryMode": query_mode}
         qry = ServiceOperationQuery(
@@ -229,6 +257,7 @@ class Tenant(Entity):
 
     def get_home_sites(self):
         # type: () -> ClientResult[ClientValueCollection[HomeSitesDetails]]
+        """Retrieves the Home Site that has been designated for your Microsoft 365 tenant."""
         return_type = ClientResult(
             self.context,
             ClientValueCollection(HomeSitesDetails),  # pylint: disable=E1120
@@ -238,6 +267,7 @@ class Tenant(Entity):
         return return_type
 
     def get_home_sites_details(self):
+        """Retrieves detailed information about the Home Sites configured in a SharePoint Online tenant."""
         return_type = ClientResult(
             self.context, ClientValueCollection(HomeSitesDetails)
         )
@@ -267,12 +297,23 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
-    def export_to_csv(self, view_xml=None):
+    def export_to_csv(
+        self, view_xml=None, time_zone_id=None, columns_info=None, list_name=None
+    ):
         """
+        Exports tenant-level data to a CSV file.
         :param str view_xml:
+        :param int time_zone_id:
+        :param list columns_info:
+        :param str list_name:
         """
         return_type = ClientResult(self.context)
-        payload = {"viewXml": view_xml}
+        payload = {
+            "viewXml": view_xml,
+            "timeZoneId": time_zone_id,
+            "columnsInfo": columns_info,
+            "listName": list_name,
+        }
         qry = ServiceOperationQuery(
             self, "ExportToCSV", None, payload, None, return_type
         )

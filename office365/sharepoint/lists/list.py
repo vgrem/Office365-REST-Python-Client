@@ -393,25 +393,46 @@ class List(SecurableObject):
         return return_type
 
     @staticmethod
-    def get_list_data_as_stream(context, list_full_url, parameters=None):
+    def get_list_data_as_stream(
+        context,
+        list_full_url,
+        parameters=None,
+        casc_del_warn_message=None,
+        custom_action=None,
+        drill_down=None,
+        field=None,
+        field_internal_name=None,
+        return_type=None,
+    ):
         """
         Returns list data from the specified list url and for the specified query parameters.
 
         :param office365.sharepoint.client_context.ClientContext context: Client context
         :param str list_full_url: The absolute URL of the list.
         :param RenderListDataParameters parameters: The parameters to be used.
+        :param str casc_del_warn_message:
+        :param str custom_action:
+        :param str drill_down:
+        :param str field:
+        :param str field_internal_name:
+        :param ClientResult[dict] return_type: The return type.
         """
-        result = ClientResult(context)
+        if return_type is None:
+            return_type = ClientResult(context, dict())
         payload = {
             "listFullUrl": list_full_url,
             "parameters": parameters,
+            "CascDelWarnMessage": casc_del_warn_message,
+            "CustomAction": custom_action,
+            "DrillDown": drill_down,
+            "Field": field,
+            "FieldInternalName": field_internal_name,
         }
-        target_list = context.web.get_list(list_full_url)
         qry = ServiceOperationQuery(
-            target_list, "GetListDataAsStream", None, payload, None, result
+            List(context), "GetListDataAsStream", None, payload, None, return_type, True
         )
         context.add_query(qry)
-        return result
+        return return_type
 
     def bulk_validate_update_list_items(
         self,
@@ -451,6 +472,7 @@ class List(SecurableObject):
 
     def get_lookup_field_choices(self, target_field_name, paging_info=None):
         """
+        Retrieves the possible choices or values for a lookup field in a SharePoint list
         :param str target_field_name:
         :param str paging_info:
         """

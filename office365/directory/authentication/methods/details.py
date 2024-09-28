@@ -55,6 +55,32 @@ class UserRegistrationDetails(Entity):
         return self.properties.get("isSsprEnabled", None)
 
     @property
+    def user_display_name(self):
+        # type: () -> Optional[str]
+        """
+        The user display name, such as Adele Vance. Supports $filter (eq, startsWith) and $orderby.
+        """
+        return self.properties.get("userDisplayName", None)
+
+    @property
+    def user_preferred_method_for_secondary_authentication(self):
+        # type: () -> Optional[str]
+        """
+        The method the user selected as the default second-factor for performing multifactor authentication.
+        """
+        return self.properties.get(
+            "userPreferredMethodForSecondaryAuthentication", None
+        )
+
+    @property
+    def user_principal_name(self):
+        # type: () -> Optional[str]
+        """
+        The user principal name, such as AdeleV@contoso.com. Supports $filter (eq, startsWith) and $orderby.
+        """
+        return self.properties.get("userPrincipalName", None)
+
+    @property
     def user_type(self):
         # type: () -> Optional[str]
         """
@@ -62,3 +88,6 @@ class UserRegistrationDetails(Entity):
         The possible values are: member, guest, unknownFutureValue.
         """
         return self.properties.get("userType", None)
+
+    def __repr__(self):
+        return self.user_principal_name or self.id or self.entity_type_name

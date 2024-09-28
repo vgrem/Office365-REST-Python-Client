@@ -1,7 +1,9 @@
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
-from office365.sharepoint.userprofiles.sharedwithme.document import SharedWithMeDocument
+from office365.sharepoint.portal.userprofiles.sharedwithme.document import (
+    SharedWithMeDocument,
+)
 
 
 class DocumentsSharedWithGroup(Entity):

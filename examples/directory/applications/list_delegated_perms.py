@@ -10,19 +10,23 @@ https://learn.microsoft.com/en-us/graph/permissions-grant-via-msgraph?tabs=http&
 from office365.graph_client import GraphClient
 from tests import (
     test_client_id,
-    test_tenant,
     test_client_secret,
+    test_tenant,
 )
 
-#client = GraphClient.with_token_interactive(
+# client = GraphClient.with_token_interactive(
 #    test_tenant, test_client_id, test_admin_principal_name
-#)
+# )
 
 client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 
 
-resource = client.service_principals.get_by_name("Microsoft Graph").get().execute_query()
-result = resource.get_delegated_permissions(test_client_id, only_admin_consent=True).execute_query()
+resource = (
+    client.service_principals.get_by_name("Microsoft Graph").get().execute_query()
+)
+result = resource.get_delegated_permissions(
+    test_client_id, only_admin_consent=True
+).execute_query()
 
 for grant in result:
     print(grant.scope)

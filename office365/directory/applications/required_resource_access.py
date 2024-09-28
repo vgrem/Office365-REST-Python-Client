@@ -19,6 +19,5 @@ class RequiredResourceAccess(ClientValue):
         self.resourceAccess = ClientValueCollection(ResourceAccess, resource_access)
         self.resourceAppId = resource_app_id
 
-
     def __repr__(self):
         return self.resourceAppId or self.entity_type_name

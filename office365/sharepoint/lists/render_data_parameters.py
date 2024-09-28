@@ -16,6 +16,9 @@ class RenderListDataParameters(ClientValue):
         expand_groups=None,
         expand_user_field=None,
         filter_out_channel_folders_in_default_doc_lib=None,
+        require_folder_coloring_fields=None,
+        show_stub_file=None,
+        view_xml=None,
     ):
         """
         :param bool add_all_fields:
@@ -29,6 +32,9 @@ class RenderListDataParameters(ClientValue):
         :param bool expand_groups: Specifies whether to expand the grouping or not.
         :param bool expand_user_field:
         :param bool filter_out_channel_folders_in_default_doc_lib:
+        :param bool require_folder_coloring_fields:
+        :param bool show_stub_file:
+        :param str view_xml:
         """
         self.AddAllFields = add_all_fields
         self.AddAllViewFields = add_all_view_fields
@@ -44,6 +50,9 @@ class RenderListDataParameters(ClientValue):
         self.FilterOutChannelFoldersInDefaultDocLib = (
             filter_out_channel_folders_in_default_doc_lib
         )
+        self.RequireFolderColoringFields = require_folder_coloring_fields
+        self.ShowStubFile = show_stub_file
+        self.ViewXml = view_xml
 
     @property
     def entity_type_name(self):

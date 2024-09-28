@@ -3773,6 +3773,27 @@
                </Collection>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.communityPrivacy">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Types of communityPrivacy."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.communityPrivacy/public">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Any user from the tenant can join and participate in the community."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.communityPrivacy/private">
+            <Annotation Term="Org.OData.Core.V1.Description" String="A community administrator must add tenant users to the community before they can participate."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.communityPrivacy/unknownFutureValue">
+            <Annotation Term="Org.OData.Core.V1.Description" String="A marker value for members added after the release of this API."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.engagementAsyncOperationType">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Types of engagementAsyncOperationType. Members will be added here as more async operations are supported."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.engagementAsyncOperationType/createCommunity">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Operation to create a Viva Engage community."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.engagementAsyncOperationType/unknownFutureValue">
+            <Annotation Term="Org.OData.Core.V1.Description" String="A marker value for members added after the release of this API."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.directoryObject">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
                <Record>
@@ -3909,6 +3930,7 @@
                   <PropertyValue Property="Supported" Bool="true"/>
                </Record>
             </Annotation>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Represents a Microsoft Entra group."/>
          </Annotations>
          <Annotations Target="microsoft.graph.resourceSpecificPermissionGrant">
             <Annotation Term="Org.OData.Capabilities.V1.CountRestrictions">
@@ -4163,6 +4185,7 @@
                   <PropertyValue Property="Supported" Bool="true"/>
                </Record>
             </Annotation>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Represents a Microsoft Entra user account."/>
          </Annotations>
          <Annotations Target="microsoft.graph.oAuth2PermissionGrant">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
@@ -6157,6 +6180,9 @@
                </Record>
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.TopSupported" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.longRunningOperation">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The status of a long-running operation."/>
          </Annotations>
          <Annotations Target="microsoft.graph.identityProvider">
             <Annotation Term="Org.OData.Core.V1.Revisions">
@@ -16766,6 +16792,57 @@
                <Record>
                   <PropertyValue Property="Supported" Bool="true"/>
                </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.community">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Represents a community in Viva Engage that is a central place for conversations,
+files, events, and updates for people sharing a common interest or goal."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.community/description">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The description of the community. The maximum length is 1024 characters."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.community/displayName">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The name of the community. The maximum length is 255 characters."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.community/groupId">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The ID of the Microsoft 365 group that manages the membership of this community."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.community/privacy">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Defines the privacy level of the community. The possible values are: public, private, unknownFutureValue."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.community/group">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The Microsoft 365 group that manages the membership of this community."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.community/owners">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The admins of the community. Limited to 100 users."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.employeeExperience">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Represents a container that exposes navigation properties for employee experience resources."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.employeeExperience/communities">
+            <Annotation Term="Org.OData.Core.V1.Description" String="A collection of communities in Viva Engage."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.engagementAsyncOperation">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Represents the status of a Viva Engage async operation that is an operation that transcends the
+lifetime of a single API request. These operations are long-running or too expensive to complete
+within the time frame of their original request."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.employeeExperience/engagementAsyncOperations">
+            <Annotation Term="Org.OData.Core.V1.Description" String="A collection of long-running, asynchronous operations related to Viva Engage."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.engagementAsyncOperation/operationType">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The type of the long-running operation."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.engagementAsyncOperation/resourceId">
+            <Annotation Term="Org.OData.Core.V1.Description" String="The ID of the object created or modified as a result of this async operation."/>
+            <Annotation Term="Org.OData.Core.V1.Permissions">
+               <EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember>
             </Annotation>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceConfigurationDeviceActivity(microsoft.graph.reportRoot)">
@@ -40522,6 +40599,15 @@
             <Member Name="linkedFiles" Value="2"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="additionalOptions" IsFlags="true">
+            <Member Name="none" Value="0"/>
+            <Member Name="teamsAndYammerConversations" Value="1"/>
+            <Member Name="cloudAttachments" Value="2"/>
+            <Member Name="allDocumentVersions" Value="4"/>
+            <Member Name="subfolderContents" Value="8"/>
+            <Member Name="listAttachments" Value="16"/>
+            <Member Name="unknownFutureValue" Value="32"/>
+         </EnumType>
          <EnumType Name="caseAction">
             <Member Name="contentExport" Value="0"/>
             <Member Name="applyTags" Value="1"/>
@@ -40532,6 +40618,8 @@
             <Member Name="holdUpdate" Value="6"/>
             <Member Name="unknownFutureValue" Value="7"/>
             <Member Name="purgeData" Value="8"/>
+            <Member Name="exportReport" Value="9"/>
+            <Member Name="exportResult" Value="10"/>
          </EnumType>
          <EnumType Name="caseOperationStatus">
             <Member Name="notStarted" Value="0"/>
@@ -40577,11 +40665,27 @@
             <Member Name="allCaseNoncustodialDataSources" Value="8"/>
             <Member Name="unknownFutureValue" Value="16"/>
          </EnumType>
+         <EnumType Name="exportCriteria" IsFlags="true">
+            <Member Name="searchHits" Value="1"/>
+            <Member Name="partiallyIndexed" Value="2"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
          <EnumType Name="exportFileStructure">
             <Member Name="none" Value="0"/>
             <Member Name="directory" Value="1"/>
             <Member Name="pst" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="exportFormat">
+            <Member Name="pst" Value="0"/>
+            <Member Name="msg" Value="1"/>
+            <Member Name="eml" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="exportLocation" IsFlags="true">
+            <Member Name="responsiveLocations" Value="1"/>
+            <Member Name="nonresponsiveLocations" Value="2"/>
+            <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
          <EnumType Name="exportOptions" IsFlags="true">
             <Member Name="originalFiles" Value="1"/>
@@ -41218,6 +41322,17 @@
          <EntityType Name="ediscoveryReviewSetQuery" BaseType="microsoft.graph.security.search"/>
          <EntityType Name="ediscoveryHoldOperation" BaseType="microsoft.graph.security.caseOperation"/>
          <EntityType Name="ediscoveryPurgeDataOperation" BaseType="microsoft.graph.security.caseOperation"/>
+         <EntityType Name="ediscoverySearchExportOperation" BaseType="microsoft.graph.security.caseOperation">
+            <Property Name="additionalOptions" Type="microsoft.graph.security.additionalOptions"/>
+            <Property Name="description" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="exportCriteria" Type="microsoft.graph.security.exportCriteria"/>
+            <Property Name="exportFileMetadata" Type="Collection(microsoft.graph.security.exportFileMetadata)"/>
+            <Property Name="exportFormat" Type="microsoft.graph.security.exportFormat"/>
+            <Property Name="exportLocation" Type="microsoft.graph.security.exportLocation"/>
+            <Property Name="exportSingleItems" Type="Edm.Boolean"/>
+            <NavigationProperty Name="search" Type="microsoft.graph.security.ediscoverySearch"/>
+         </EntityType>
          <EntityType Name="ediscoveryTagOperation" BaseType="microsoft.graph.security.caseOperation"/>
          <EntityType Name="healthIssue" BaseType="graph.entity">
             <Property Name="additionalInformation" Type="Collection(Edm.String)" Nullable="false"/>
@@ -41361,13 +41476,16 @@
             <Property Name="azureAdDeviceId" Type="Edm.String"/>
             <Property Name="defenderAvStatus" Type="microsoft.graph.security.defenderAvStatus"/>
             <Property Name="deviceDnsName" Type="Edm.String"/>
+            <Property Name="dnsDomain" Type="Edm.String"/>
             <Property Name="firstSeenDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="healthStatus" Type="microsoft.graph.security.deviceHealthStatus"/>
+            <Property Name="hostName" Type="Edm.String"/>
             <Property Name="ipInterfaces" Type="Collection(Edm.String)"/>
             <Property Name="lastExternalIpAddress" Type="Edm.String"/>
             <Property Name="lastIpAddress" Type="Edm.String"/>
             <Property Name="loggedOnUsers" Type="Collection(microsoft.graph.security.loggedOnUser)"/>
             <Property Name="mdeDeviceId" Type="Edm.String"/>
+            <Property Name="ntDomain" Type="Edm.String"/>
             <Property Name="onboardingStatus" Type="microsoft.graph.security.onboardingStatus"/>
             <Property Name="osBuild" Type="Edm.Int64"/>
             <Property Name="osPlatform" Type="Edm.String"/>
@@ -42106,6 +42224,24 @@
          </Action>
          <Action Name="estimateStatistics" IsBound="true">
             <Parameter Name="bindingParameter" Type="microsoft.graph.security.ediscoverySearch"/>
+         </Action>
+         <Action Name="exportReport" IsBound="true">
+            <Parameter Name="bindingParameter" Type="microsoft.graph.security.ediscoverySearch"/>
+            <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="description" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="exportCriteria" Type="microsoft.graph.security.exportCriteria"/>
+            <Parameter Name="exportLocation" Type="microsoft.graph.security.exportLocation"/>
+            <Parameter Name="additionalOptions" Type="microsoft.graph.security.additionalOptions"/>
+         </Action>
+         <Action Name="exportResult" IsBound="true">
+            <Parameter Name="bindingParameter" Type="microsoft.graph.security.ediscoverySearch"/>
+            <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="description" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="exportCriteria" Type="microsoft.graph.security.exportCriteria"/>
+            <Parameter Name="exportLocation" Type="microsoft.graph.security.exportLocation"/>
+            <Parameter Name="additionalOptions" Type="microsoft.graph.security.additionalOptions"/>
+            <Parameter Name="exportFormat" Type="microsoft.graph.security.exportFormat"/>
+            <Parameter Name="exportSingleItems" Type="Edm.Boolean"/>
          </Action>
          <Action Name="purgeData" IsBound="true">
             <Parameter Name="bindingParameter" Type="microsoft.graph.security.ediscoverySearch"/>

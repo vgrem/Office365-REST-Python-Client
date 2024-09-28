@@ -15,12 +15,17 @@ from office365.sharepoint.portal.teams.recent_and_joined_response import (
 
 
 class GroupSiteManager(ClientObject):
+    """Management of Group Sites in SharePoint. Group Sites, also known as Microsoft 365 Groups,
+    provide collaboration spaces that integrate with various Microsoft 365 services like Teams, Outlook, and Planner.
+    """
+
     def __init__(self, context, resource_path=None):
         if resource_path is None:
             resource_path = ResourcePath("GroupSiteManager")
         super(GroupSiteManager, self).__init__(context, resource_path)
 
     def can_user_create_group(self):
+        """Determines if the current user can create group site"""
         return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(
             self, "CanUserCreateGroup", None, None, None, return_type
@@ -131,6 +136,7 @@ class GroupSiteManager(ClientObject):
         return result
 
     def get_current_user_shared_channel_member_groups(self):
+        """ """
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(
             self,
@@ -145,6 +151,8 @@ class GroupSiteManager(ClientObject):
 
     def get_team_channels(self, team_id, use_staging_endpoint=False):
         """
+        Retrieves the channels associated with a specific Microsoft 365 Group (or Team)
+
         :param str team_id:
         :param bool use_staging_endpoint:
         """
@@ -188,6 +196,8 @@ class GroupSiteManager(ClientObject):
         existing_joined_teams_data=None,
     ):
         """
+        Retrieves a list of teams that a user has recently accessed or joined
+
         :param bool include_recent:
         :param bool include_teams:
         :param bool include_pinned:
@@ -205,3 +215,7 @@ class GroupSiteManager(ClientObject):
         )
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.SharePoint.Portal.GroupSiteManager"

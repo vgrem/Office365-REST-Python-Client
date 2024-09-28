@@ -11,20 +11,20 @@ from office365.sharepoint.tenant.administration.sites.creation_data import (
 class SiteCreationSource(ClientValue):
     def __init__(
         self,
-        IsSyncThresholdLimitReached=None,
-        LastRefreshTimeStamp=None,
+        is_sync_threshold_limit_reached=None,
+        last_refresh_time_stamp=None,
         site_creation_data=None,
-        SyncThresholdLimit=None,
-        TotalSitesCount=None,
+        sync_threshold_limit=None,
+        total_sites_count=None,
     ):
         # type: (bool, datetime, List[SiteCreationData], int, int) -> None
-        self.IsSyncThresholdLimitReached = IsSyncThresholdLimitReached
-        self.LastRefreshTimeStamp = LastRefreshTimeStamp
+        self.IsSyncThresholdLimitReached = is_sync_threshold_limit_reached
+        self.LastRefreshTimeStamp = last_refresh_time_stamp
         self.SiteCreationData = ClientValueCollection(
             SiteCreationData, site_creation_data
         )
-        self.SyncThresholdLimit = SyncThresholdLimit
-        self.TotalSitesCount = TotalSitesCount
+        self.SyncThresholdLimit = sync_threshold_limit
+        self.TotalSitesCount = total_sites_count
 
     @property
     def entity_type_name(self):

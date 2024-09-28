@@ -3,11 +3,11 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
-from office365.sharepoint.sharing.user_role_assignment import UserRoleAssignment
-from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
-from office365.sharepoint.userprofiles.sharedwithme.view_item_removal_result import (
+from office365.sharepoint.portal.userprofiles.sharedwithme.view_item_removal_result import (
     SharedWithMeViewItemRemovalResult,
 )
+from office365.sharepoint.sharing.user_role_assignment import UserRoleAssignment
+from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 
 
 class DocumentSharingManager(Entity):
