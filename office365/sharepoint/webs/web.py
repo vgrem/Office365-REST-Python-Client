@@ -6,6 +6,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.activities.entity import SPActivityEntity
@@ -182,6 +183,19 @@ class Web(SecurableObject):
         self.ensure_properties(["AccessRequestListUrl"], _get_access_request_list)
         return return_type
 
+    def get_document_by_doc_id(self, doc_id):
+        """ """
+        return_type = ClientResult(self.context)
+        qry = ClientQuery(self.context, return_type=return_type)
+
+        def _construct_request(request):
+            request.url = "{0}/_layouts/15/DocIdRedir.aspx?ID={1}".format(
+                self.context.base_url, doc_id
+            )
+
+        self.context.add_query(qry).before_query_execute(_construct_request)
+        return return_type
+
     def get_site_script(
         self,
         include_branding=True,
@@ -242,6 +256,15 @@ class Web(SecurableObject):
 
         self.ensure_property("Url", _get_list_data_as_stream)
         return return_type
+
+    def get_onedrive_list_data_as_stream(self, view_xml=None):
+        """Returns list data from the specified list url and for the specified query parameters.
+
+        :param str view_xml:
+        """
+        if view_xml is None:
+            view_xml = "<View><Query></Query></View>"
+        return List.get_onedrive_list_data_as_stream(self.context, view_xml)
 
     def get_list_operation(self, list_id, operation_id):
         # type: (str, str) -> SPLargeOperation

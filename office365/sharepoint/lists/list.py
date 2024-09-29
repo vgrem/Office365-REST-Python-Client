@@ -1,4 +1,3 @@
-import json
 import os
 from datetime import datetime
 from typing import IO, TYPE_CHECKING, AnyStr, Callable, Dict, Optional
@@ -27,7 +26,6 @@ from office365.sharepoint.files.checked_out_file_collection import (
     CheckedOutFileCollection,
 )
 from office365.sharepoint.files.file import File
-from office365.sharepoint.files.system_object_type import FileSystemObjectType
 from office365.sharepoint.flows.synchronization_result import FlowSynchronizationResult
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.forms.collection import FormCollection
@@ -44,6 +42,7 @@ from office365.sharepoint.listitems.listitem import ListItem
 from office365.sharepoint.lists.bloom_filter import ListBloomFilter
 from office365.sharepoint.lists.creatables_info import CreatablesInfo
 from office365.sharepoint.lists.data_source import ListDataSource
+from office365.sharepoint.lists.render_data_parameters import RenderListDataParameters
 from office365.sharepoint.lists.rule import SPListRule
 from office365.sharepoint.lists.version_policy_manager import VersionPolicyManager
 from office365.sharepoint.navigation.configured_metadata_items import (
@@ -85,60 +84,9 @@ class List(SecurableObject):
     def export(self, local_file, include_content=False, item_exported=None):
         # type: (IO, bool, Callable[[ListItem|File|Folder], None]) -> Self
         """Exports SharePoint List"""
-        import zipfile
+        from office365.sharepoint.lists.exporter import ListExporter
 
-        def _append_file(name, data):
-            with zipfile.ZipFile(local_file.name, "a", zipfile.ZIP_DEFLATED) as zf:
-                zf.writestr(name, data)
-
-        def _download_content(list_item):
-            # type: (ListItem) -> None
-            def _after_downloaded(result):
-                # type: (ClientResult[AnyStr]) -> None
-                item_path = list_item.properties["FileRef"].replace(
-                    self.root_folder.serverRelativeUrl, ""
-                )
-                _append_file(item_path, result.value)
-
-            list_item.file.get_content().after_execute(_after_downloaded)
-
-        def _export_items(items):
-            # type: (ListItemCollection) -> None
-
-            for item in items:
-                # item_path = item.properties["FileRef"].replace(self.root_folder.serverRelativeUrl, "")
-                item_path = str(item.id) + ".json"
-
-                if item.file_system_object_type == FileSystemObjectType.Folder:
-                    pass
-                else:
-                    _append_file(item_path, json.dumps(item.to_json()))
-
-                    if include_content:
-                        _download_content(item)
-
-                    if callable(item_exported):
-                        item_exported(item)
-
-        def _save_schema():
-            (
-                self.items.select(
-                    [
-                        "*",
-                        "Id",
-                        "FileRef",
-                        "FileDirRef",
-                        "FileLeafRef",
-                        "FileSystemObjectType",
-                    ]
-                )
-                .get()
-                .paged(page_loaded=_export_items)
-            )
-
-        self.ensure_properties(["SchemaXml", "RootFolder"], _save_schema)
-
-        return self
+        return ListExporter.export(self, local_file, include_content, item_exported)
 
     def clear(self):
         """Clears the list."""
@@ -430,6 +378,32 @@ class List(SecurableObject):
         }
         qry = ServiceOperationQuery(
             List(context), "GetListDataAsStream", None, payload, None, return_type, True
+        )
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def get_onedrive_list_data_as_stream(context, parameters=None, return_type=None):
+        """
+        Returns list data from the specified list url and for the specified query parameters.
+
+        :param office365.sharepoint.client_context.ClientContext context: Client context
+        :param RenderListDataParameters parameters: The parameters to be used.
+        :param ClientResult[dict] return_type: The return type.
+        """
+        if return_type is None:
+            return_type = ClientResult(context, dict())
+        payload = {
+            "parameters": parameters,
+        }
+        qry = ServiceOperationQuery(
+            List(context),
+            "GetOneDriveListDataAsStream",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
         )
         context.add_query(qry)
         return return_type
@@ -734,6 +708,31 @@ class List(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def render_list_data_as_stream(
+        self, view_xml=None, render_options=None, expand_groups=None
+    ):
+        """Returns the data for the specified query view.
+
+        :param str view_xml: Specifies the CAML view XML.
+        :param int render_options: Specifies the type of output to return.
+        :param bool expand_groups: Specifies whether to expand the grouping or not.
+        """
+        return_type = ClientResult(self.context, dict())
+        if view_xml is None:
+            view_xml = "<View/>"
+        payload = {
+            "parameters": RenderListDataParameters(
+                view_xml=view_xml,
+                render_options=render_options,
+                expand_groups=expand_groups,
+            ),
+        }
+        qry = ServiceOperationQuery(
+            self, "RenderListDataAsStream", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def reserve_list_item_id(self):
         # type: () -> ClientResult[int]
         """Reserves the returned list item identifier for the idempotent creation of a list item."""
@@ -773,6 +772,17 @@ class List(SecurableObject):
         )
         self.context.add_query(qry)
         return return_type
+
+    def reset_doc_id(self):
+        """"""
+        from office365.sharepoint.documentmanagement.document_id import DocumentId
+
+        def _loaded():
+            doc_mng = DocumentId(self.context)
+            doc_mng.reset_doc_ids_in_library(self.root_folder.serverRelativeUrl)
+
+        self.ensure_property("RootFolder", _loaded)
+        return self
 
     @property
     def id(self):
@@ -1038,6 +1048,34 @@ class List(SecurableObject):
         # type: () -> Optional[bool]
         """ """
         return self.properties.get("HasContentAssemblyTemplates", None)
+
+    @property
+    def has_external_data_source(self):
+        # type: () -> Optional[bool]
+        """
+        Specifies whether the list is an external list.
+        """
+        return self.properties.get("HasExternalDataSource", None)
+
+    @property
+    def has_folder_coloring_fields(self):
+        # type: () -> Optional[bool]
+        """ """
+        return self.properties.get("HasFolderColoringFields", None)
+
+    @property
+    def irm_enabled(self):
+        # type: () -> Optional[bool]
+        """Gets a Boolean value that specifies whether Information Rights Management (IRM) is enabled for the list."""
+        return self.properties.get("IrmEnabled", None)
+
+    @property
+    def irm_expire(self):
+        # type: () -> Optional[bool]
+        """Gets a Boolean value that specifies whether Information Rights Management (IRM) expiration is enabled
+        for the list
+        """
+        return self.properties.get("IrmExpire", None)
 
     @property
     def items(self):

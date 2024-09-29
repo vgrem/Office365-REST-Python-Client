@@ -1,6 +1,25 @@
 from office365.runtime.client_value import ClientValue
 
 
+class RenderListDataOptions:
+    """The type of data to return when rendering a list view as JSON."""
+
+    """Default render type."""
+    None_ = 0
+
+    """ Returns the list data context information. """
+    ContextInfo = 1
+
+    """ Returns the list data. """
+    ListData = 2
+
+    """ Returns the list schema. """
+    ListSchema = 4
+
+    """ Returns the menu view of the list. """
+    MenuView = 8
+
+
 class RenderListDataParameters(ClientValue):
     """Specifies the parameters to be used to render list data as a JSON string"""
 
@@ -16,6 +35,7 @@ class RenderListDataParameters(ClientValue):
         expand_groups=None,
         expand_user_field=None,
         filter_out_channel_folders_in_default_doc_lib=None,
+        render_options=None,
         require_folder_coloring_fields=None,
         show_stub_file=None,
         view_xml=None,
@@ -32,9 +52,10 @@ class RenderListDataParameters(ClientValue):
         :param bool expand_groups: Specifies whether to expand the grouping or not.
         :param bool expand_user_field:
         :param bool filter_out_channel_folders_in_default_doc_lib:
+        :param int render_options: Specifies the type of output to return.
         :param bool require_folder_coloring_fields:
         :param bool show_stub_file:
-        :param str view_xml:
+        :param str view_xml: Specifies the CAML view XML.
         """
         self.AddAllFields = add_all_fields
         self.AddAllViewFields = add_all_view_fields
@@ -50,6 +71,7 @@ class RenderListDataParameters(ClientValue):
         self.FilterOutChannelFoldersInDefaultDocLib = (
             filter_out_channel_folders_in_default_doc_lib
         )
+        self.RenderOptions = render_options
         self.RequireFolderColoringFields = require_folder_coloring_fields
         self.ShowStubFile = show_stub_file
         self.ViewXml = view_xml

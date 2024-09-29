@@ -21,10 +21,6 @@ class TestSPList(SPTestCase):
     def tearDownClass(cls):
         pass
 
-    def test1_get_default_library(self):
-        default_lib = self.client.web.default_document_library().get().execute_query()
-        self.assertIsNotNone(default_lib.id)
-
     def test2_has_library_unique_perms(self):
         default_lib = self.client.web.default_document_library()
         default_lib.reset_role_inheritance()
@@ -179,3 +175,11 @@ class TestSPList(SPTestCase):
         site_pages = self.client.web.get_list_by_title("Site Pages")
         result = site_pages.get_metadata_navigation_settings().execute_query()
         self.assertIsNotNone(result.value)
+
+    def test_23_render_list_data_as_stream(self):
+        result = (
+            self.client.web.get_list_by_title("Site Pages")
+            .render_list_data_as_stream()
+            .execute_query()
+        )
+        self.assertIsInstance(result.value, dict)

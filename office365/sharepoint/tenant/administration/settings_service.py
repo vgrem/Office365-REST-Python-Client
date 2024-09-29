@@ -30,7 +30,10 @@ class TenantAdminSettingsService(Entity):
 
     @property
     def auto_quota_enabled(self):
-        """"""
+        """Controls whether automatic quota management is enabled for SharePoint Online site collections.
+        When this feature is enabled, SharePoint Online automatically adjusts the storage quota for site collections
+        based on their usage, helping to ensure that site collections don't run out of space.
+        """
         return self.properties.get("AutoQuotaEnabled", AutoQuotaEnabled())
 
     @property

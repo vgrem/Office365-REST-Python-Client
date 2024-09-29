@@ -31,18 +31,39 @@ class DocumentId(Entity):
         self.context.add_query(qry)
         return self
 
-    def reset_docids_in_library(self, decoded_url, content_type_id):
+    def reset_doc_ids_in_library(self, decoded_url, content_type_id=None):
         """
         Performs the same function as ResetDocIdByServerRelativePath (section 3.1.5.10.2.1.1), but for every
         document in the specified document library.
 
         :param str decoded_url: Server relative path to the document library, for which all document identifiers
             MUST be reset to guarantee global uniqueness in the farm.
-        :param str content_type_id: The content type identifier.
+        :param str or None content_type_id: The content type identifier.
         """
-        payload = {"DecodedUrl": decoded_url, "contentTypeId": content_type_id}
+        payload = {"decodedUrl": decoded_url, "contentTypeId": content_type_id}
         qry = ServiceOperationQuery(
             self, "ResetDocIdsInLibrary", None, payload, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def set_doc_id_site_prefix(
+        self, prefix, schedule_assignment, overwrite_existing_ids
+    ):
+        """
+        Allows to set or change the prefix used for Document IDs
+
+        :param str prefix:
+        :param bool schedule_assignment:
+        :param bool overwrite_existing_ids:
+        """
+        payload = {
+            "prefix": prefix,
+            "scheduleAssignment": schedule_assignment,
+            "overwriteExistingIds": overwrite_existing_ids,
+        }
+        qry = ServiceOperationQuery(
+            self, "SetDocIdSitePrefix", None, payload, None, None
         )
         self.context.add_query(qry)
         return self
@@ -50,3 +71,7 @@ class DocumentId(Entity):
     @property
     def entity_type_name(self):
         return "SP.DocumentManagement.DocumentId"
+
+    @property
+    def entity_type_id(self):
+        return "fb7276a2-cd36-448b-8a60-a589205f5a8f"

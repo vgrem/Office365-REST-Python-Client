@@ -14,6 +14,7 @@ from office365.sharepoint.fields.image_value import ImageFieldValue
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue
 from office365.sharepoint.fields.string_values import FieldStringValues
+from office365.sharepoint.fields.url_value import FieldUrlValue
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
 from office365.sharepoint.listitems.compliance_info import ListItemComplianceInfo
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
@@ -507,12 +508,25 @@ class ListItem(SecurableObject):
             ),
         )
 
+    @property
+    def doc_id(self):
+        # type: () -> Optional[str]
+        """Document ID fora document"""
+        return self.properties.get("OData__dlc_DocId", None)
+
+    @property
+    def doc_id_url(self):
+        # type: () -> Optional[FieldUrlValue]
+        """Document ID fora document"""
+        return self.properties.get("OData__dlc_DocIdUrl", FieldUrlValue())
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "AttachmentFiles": self.attachment_files,
                 "ContentType": self.content_type,
                 "ComplianceInfo": self.compliance_info,
+                "OData__dlc_DocIdUrl": self.doc_id_url,
                 "EffectiveBasePermissions": self.effective_base_permissions,
                 "GetDlpPolicyTip": self.get_dlp_policy_tip,
                 "FieldValuesAsHtml": self.field_values_as_html,
