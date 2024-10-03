@@ -7,6 +7,9 @@ from office365.onedrive.driveitems.publication_facet import PublicationFacet
 class BaseSitePage(BaseItem):
     """An abstract type that represents a page in the site page library."""
 
+    def __repr__(self):
+        return self.name or self.entity_type_name
+
     @property
     def publishing_state(self):
         # type: () -> Optional[str]

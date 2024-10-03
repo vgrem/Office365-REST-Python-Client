@@ -24,9 +24,7 @@ client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client
 resource = (
     client.service_principals.get_by_name("Microsoft Graph").get().execute_query()
 )
-result = resource.get_delegated_permissions(
-    test_client_id, only_admin_consent=True
-).execute_query()
+result = resource.get_delegated_permissions(test_client_id).execute_query()
 
 for grant in result:
-    print(grant.scope)
+    print(grant.scope + ";")

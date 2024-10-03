@@ -366,7 +366,7 @@ class DriveItem(BaseItem):
     def download_folder(
         self, download_file, after_file_downloaded=None, recursive=True
     ):
-        # type: (IO, Callable[[File], None], bool) -> "DriveItem"
+        # type: (IO, Callable[["DriveItem"], None], bool) -> "DriveItem"
         """
         Download the folder content
         """

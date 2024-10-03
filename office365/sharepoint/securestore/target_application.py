@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.entity import Entity
@@ -26,6 +28,12 @@ class TargetApplication(Entity):
         )
         context.add_query(qry)
         return return_type
+
+    @property
+    def application_id(self):
+        # type: () -> Optional[str]
+        """"""
+        return self.properties.get("ApplicationId", None)
 
     @property
     def entity_type_name(self):

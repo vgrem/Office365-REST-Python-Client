@@ -700,13 +700,33 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_billing_policy_id_for_app(self, application_id):
+        """ """
+        return_type = ClientResult(self.context)
+        payload = {"applicationId": application_id}
+        qry = ServiceOperationQuery(
+            self, "GetBillingPolicyIdForApp", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def connect_site_to_hub_site_by_id(self, site_url, hub_site_id):
         # type: (str, str) -> Self
-        """Connects Site to Hub Site"""
+        """Connects Site to Hub Site
+
+        :param str site_url:
+        :param str hub_site_id:
+        """
         params = {"siteUrl": site_url, "hubSiteId": hub_site_id}
         qry = ServiceOperationQuery(
             self, "ConnectSiteToHubSiteById", None, params, None, None
         )
+        self.context.add_query(qry)
+        return self
+
+    def ensure_brand_center_feature(self):
+        """Ensures that the Brand Center feature is enabled"""
+        qry = ServiceOperationQuery(self, "EnsureBrandCenterFeature")
         self.context.add_query(qry)
         return self
 

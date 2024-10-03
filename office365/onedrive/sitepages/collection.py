@@ -10,10 +10,22 @@ class SitePageCollection(EntityCollection[SitePage]):
     def __init__(self, context, resource_path=None):
         super(SitePageCollection, self).__init__(context, SitePage, resource_path)
 
+    def get(self):
+        def _construct_request(request):
+            # type: (RequestOptions) -> None
+            # request.url += "/microsoft.graph.sitePage"
+            pass
+
+        return super(SitePageCollection, self).get().before_execute(_construct_request)
+
+    def get_by_name(self, name):
+        return self.single("name eq '{0}'".format(name))
+
     def add(self, title):
         """
         Create a new sitePage in the site pages list in a site.
 
+        :param str title:
         """
 
         def _construct_request(request):

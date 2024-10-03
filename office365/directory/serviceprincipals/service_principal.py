@@ -114,28 +114,32 @@ class ServicePrincipal(DirectoryObject):
         else:
             self.context.service_principals.get_by_app(app).get().after_execute(action)
 
-    def get_delegated_permissions(self, app, principal=None, only_admin_consent=False):
-        # type: (Application|str, User|str, bool) -> DeltaCollection[OAuth2PermissionGrant]
+    def get_delegated_permissions(self, app, principal=None):
+        # type: (Application|str, User|str) -> ClientResult[StringCollection]
         """Gets a delegated API permission"""
 
-        return_type = DeltaCollection(self.context, OAuth2PermissionGrant)
+        return_type = ClientResult(self.context, StringCollection())
 
         def _get_delegated_permissions(client_id, principal_id=None):
             # type: (str, str) -> None
 
             if principal_id is None:
-
-                query_text = "clientId eq '{0}'".format(client_id)
-                if only_admin_consent:
-                    query_text = query_text + " and consentType eq 'AllPrincipals'"
-
+                query_text = (
+                    "clientId eq '{0}'  and consentType eq 'AllPrincipals'".format(
+                        client_id
+                    )
+                )
             else:
                 query_text = "principalId eq '{0}' and clientId eq '{1}'".format(
                     principal_id, client_id
                 )
 
             def _loaded(col):
-                [return_type.add_child(g) for g in col if g.resource_id == self.id]
+                scope_val = next(
+                    iter([g.scope for g in col if g.resource_id == self.id]), None
+                )
+                if scope_val is not None:
+                    [return_type.value.add(name) for name in scope_val.split(" ")]
 
             (
                 self.context.oauth2_permission_grants.get()

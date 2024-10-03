@@ -8,6 +8,7 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.event_handler import EventHandler
+from office365.runtime.types.exceptions import NotFoundException
 
 T = TypeVar("T")
 
@@ -213,8 +214,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
         def _after_loaded(col):
             # type: (ClientObjectCollection) -> None
             if len(col) == 0:
-                message = "Not found for filter: {0}".format(expression)
-                raise ValueError(message)
+                raise NotFoundException(return_type, expression)
             elif len(col) > 1:
                 message = "Ambiguous match found for filter: {0}".format(expression)
                 raise ValueError(message)

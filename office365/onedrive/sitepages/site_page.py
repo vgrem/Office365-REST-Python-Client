@@ -15,23 +15,23 @@ class SitePage(BaseSitePage):
     webParts."""
 
     def get_web_parts_by_position(
-        self, webPartIndex, horizontalSectionId, isInVerticalSection, columnId
+        self, web_part_index, horizontal_section_id, is_in_vertical_section, column_id
     ):
         """
         Get a collection of webPart by providing webPartPosition information.
 
-        :param float webPartIndex: Index of the current WebPart. Represents the order of WebPart in this column or
+        :param float web_part_index: Index of the current WebPart. Represents the order of WebPart in this column or
              section. Only works if either columnId or isInVerticalSection is provided.
-        :param float horizontalSectionId: Indicate the horizontal section where the WebPart located in.
-        :param bool isInVerticalSection: Indicate whether the WebPart located in the vertical section.
-        :param float columnId: Indicate the identifier of the column where the WebPart located in. Only works
+        :param float horizontal_section_id: Indicate the horizontal section where the WebPart located in.
+        :param bool is_in_vertical_section: Indicate whether the WebPart located in the vertical section.
+        :param float column_id: Indicate the identifier of the column where the WebPart located in. Only works
              if horizontalSectionId is provided.
         """
         params = {
-            "webPartIndex": webPartIndex,
-            "horizontalSectionId": horizontalSectionId,
-            "isInverticalSection": isInVerticalSection,
-            "columnId": columnId,
+            "webPartIndex": web_part_index,
+            "horizontalSectionId": horizontal_section_id,
+            "isInverticalSection": is_in_vertical_section,
+            "columnId": column_id,
         }
         return_type = EntityCollection(
             self.context, WebPart, ResourcePath("webParts", self.resource_path)

@@ -161,6 +161,7 @@ class Web(SecurableObject):
         return return_type
 
     def add_cross_farm_message(self, message):
+        # type: (str) -> ClientResult[bool]
         """
         :param str message:
         """
@@ -1317,6 +1318,7 @@ class Web(SecurableObject):
         display_format=DateTimeFieldFormatType.DateTime,
         calendar_type=CalendarType.None_,
     ):
+        # type: (str, int, int) -> ClientResult[str]
         """
         Returns parsed DateTime value.
 
