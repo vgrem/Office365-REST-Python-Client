@@ -17,6 +17,7 @@ class SubscriptionCollection(EntityCollection[Subscription]):
         expiration,
         client_state=None,
         latest_supported_tls_version=None,
+        include_resource_data=False,
     ):
         """
         Subscribes a listener application to receive change notifications when the requested type of changes occur
@@ -44,6 +45,7 @@ class SubscriptionCollection(EntityCollection[Subscription]):
             "expirationDateTime": expiration.isoformat() + "Z",
             "clientState": client_state,
             "latestSupportedTlsVersion": latest_supported_tls_version,
+            "includeResourceData": include_resource_data,
         }
         qry = CreateEntityQuery(self, payload, return_type)
         self.context.add_query(qry)
