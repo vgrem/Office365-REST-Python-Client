@@ -276,7 +276,7 @@ class ListItem(SecurableObject):
         """Validates and sets the values of the specified collection of fields for the list item.
 
         :param dict form_values: Specifies a collection of field internal names and values for the given field
-        :param dict new_document_update: Specifies whether the list item is a document being updated after upload.
+        :param bool new_document_update: Specifies whether the list item is a document being updated after upload.
         :param str checkin_comment: Check-in comment, if any. This parameter is only applicable when the list item
              is checked out.
         :param bool or None dates_in_utc:
@@ -313,8 +313,46 @@ class ListItem(SecurableObject):
 
     def system_update(self):
         """Update the list item."""
-        qry = ServiceOperationQuery(self, "SystemUpdate")
-        self.context.add_query(qry)
+
+        sys_metadata = ["EditorId", "Modified"]
+
+        def _after_system_update(result):
+            # type: (ClientResult[ClientValueCollection[ListItemFormUpdateValue]]) -> None
+            has_any_error = any([item.HasException for item in result.value])
+            if has_any_error:
+                raise ValueError(
+                    "Update ListItem failed"
+                )
+
+        def _system_update():
+            from office365.sharepoint.fields.user_value import FieldUserValue
+
+            form_values = self.persistable_properties
+            for n in sys_metadata:
+                if n == "Id":
+                    pass
+                elif n.endswith("Id"):
+                    user = self.context.web.site_users.get_by_id(self.get_property(n))
+                    form_values[n[:-2]] = FieldUserValue.from_user(user)
+                else:
+                   form_values[n] = self.get_property(n)
+
+            self.validate_update_list_item(
+                form_values=form_values,
+                dates_in_utc=True,
+                new_document_update=True,
+            ).after_execute(_after_system_update)
+
+
+        def _list_loaded():
+            if self.parent_list.base_template == 101:
+               self.ensure_properties(sys_metadata, _system_update)
+            else:
+                next_qry = ServiceOperationQuery(self, "SystemUpdate")
+                self.context.add_query(next_qry)
+
+        self.parent_list.ensure_properties(["BaseTemplate"], _list_loaded)
+        #self.ensure_properties(sys_metadata, _system_update)
         return self
 
     def update_overwrite_version(self):
@@ -378,7 +416,7 @@ class ListItem(SecurableObject):
         """Get parent List"""
         from office365.sharepoint.lists.list import List
 
-        return self.properties.get(
+        return self.properties.setdefault(
             "ParentList",
             List(self.context, ResourcePath("ParentList", self.resource_path)),
         )

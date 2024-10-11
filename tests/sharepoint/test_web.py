@@ -183,7 +183,11 @@ class TestSharePointWeb(SPTestCase):
         self.assertIsNotNone(result.value)
 
     # def test_26_list_acs_service_principals(self):
-    #    result = self.client.web.get_acs_service_principals().execute_query()
+    #    from office365.sharepoint.client_context import ClientContext
+    #    admin_client = ClientContext(test_team_site_url).with_credentials(
+    #        test_admin_credentials
+    #    )
+    #    result = admin_client.web.get_acs_service_principals().execute_query()
     #    self.assertIsNotNone(result.value)
 
     def test_27_ensure_tenant_app_catalog(self):
