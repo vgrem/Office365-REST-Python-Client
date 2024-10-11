@@ -1073,6 +1073,7 @@
             <Property Name="ContentVersion" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Entropy" Type="Edm.String"/>
             <Property Name="ETag" Type="Edm.String"/>
+            <Property Name="FieldValues" Type="Collection(SP.KeyValue)"/>
             <Property Name="IsLowPriorityRequest" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsMediaServiceRequest" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="MachineLearningSampleMeta" Type="SP.MachineLearningSampleMeta"/>
@@ -10559,6 +10560,9 @@
                <Parameter Name="partitionColumnName" Type="Edm.String"/>
                <Parameter Name="columnsToChecksum" Type="Collection(Edm.String)"/>
             </FunctionImport>
+            <FunctionImport Name="GetCPSChangeToken" ReturnType="Edm.Int64" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
+            </FunctionImport>
             <FunctionImport Name="GetDatabaseProperties" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
             </FunctionImport>
@@ -10595,6 +10599,12 @@
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
                <Parameter Name="lockRequestor" Type="Edm.String"/>
             </FunctionImport>
+            <FunctionImport Name="LockSite" ReturnType="Edm.Int32" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
+            </FunctionImport>
+            <FunctionImport Name="PauseCrawling" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
+            </FunctionImport>
             <FunctionImport Name="ProcessStorageMetricsChanges" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
             </FunctionImport>
@@ -10602,9 +10612,16 @@
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
                <Parameter Name="lockRequestor" Type="Edm.String"/>
             </FunctionImport>
+            <FunctionImport Name="ResumeCrawling" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
+            </FunctionImport>
             <FunctionImport Name="SourceCleanupAfterMove" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
                <Parameter Name="isDeleted" Type="Edm.Boolean" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="UnlockSiteOnFailure" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
+               <Parameter Name="originalLockFlags" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="Microsoft_SharePoint_Administration_SiteMove_Service_SiteRelocationJobManagementService" ReturnType="Microsoft.SharePoint.Administration.SiteMove.Service.SiteRelocationJobManagementService" IsComposable="true" EntitySet="SiteRelocationJobManagementServices"/>
             <FunctionImport Name="EnqueueSiteRelocationJob" IsBindable="true">
@@ -16769,6 +16786,10 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient"/>
                <Parameter Name="reportId" Type="Edm.Guid" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="GetSPODataAccessGovernanceInsightV2" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightResponse)" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient"/>
+               <Parameter Name="reportEntity" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
             <FunctionImport Name="RemoveDataAccessGovernanceReport" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient"/>
                <Parameter Name="reportId" Type="Edm.Guid" Nullable="false"/>
@@ -16976,9 +16997,6 @@
                <Parameter Name="orgAssetType" Type="Edm.Int32" Nullable="false"/>
                <Parameter Name="defaultOriginAdded" Type="Edm.Boolean" Nullable="false"/>
                <Parameter Name="configParam" Type="Microsoft.SharePoint.BrandCenter.OrgAssetsLibraryConfigParam"/>
-            </FunctionImport>
-            <FunctionImport Name="AppHasAdminSitePermission" ReturnType="Edm.String" IsBindable="true">
-               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
             <FunctionImport Name="ArchiveSiteById" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SpoOperation" IsBindable="true" EntitySet="SpoOperations">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -22262,6 +22280,9 @@
          <Annotations Target="SP.MediaServiceUpdateParameters/Entropy">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.MediaServiceUpdateParameters/FieldValues">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.MediaServiceUpdateParameters/MachineLearningSampleMeta">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -24322,6 +24343,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.SitePageMetadata/ContentTypeId">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Publishing.SitePageMetadata/Created">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Publishing.UserInfo">
@@ -31612,7 +31636,6 @@
             <Property Name="FinishVariance" Type="Edm.String"/>
             <Property Name="FinishVarianceMilliseconds" Type="Edm.Int32" Nullable="false"/>
             <Property Name="FinishVarianceTimeSpan" Type="Edm.Time" Nullable="false"/>
-            <Property Name="FixedCostAccrual" Type="Edm.Int32" Nullable="false"/>
             <Property Name="FreeSlack" Type="Edm.String"/>
             <Property Name="FreeSlackMilliseconds" Type="Edm.Int32" Nullable="false"/>
             <Property Name="FreeSlackTimeSpan" Type="Edm.Time" Nullable="false"/>
@@ -31815,6 +31838,7 @@
             <Property Name="Finish" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="FinishText" Type="Edm.String"/>
             <Property Name="FixedCost" Type="Edm.Double" Nullable="false"/>
+            <Property Name="FixedCostAccrual" Type="Edm.Int32" Nullable="false"/>
             <Property Name="IsActive" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsEffortDriven" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsLockedByManager" Type="Edm.Boolean" Nullable="false"/>
@@ -31980,6 +32004,7 @@
             <Property Name="Finish" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="FinishText" Type="Edm.String"/>
             <Property Name="FixedCost" Type="Edm.Double" Nullable="false"/>
+            <Property Name="FixedCostAccrual" Type="Edm.Int32" Nullable="false"/>
             <Property Name="IsActive" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsEffortDriven" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsLockedByManager" Type="Edm.Boolean" Nullable="false"/>
@@ -32039,6 +32064,7 @@
             <Property Name="DurationTimeSpan" Type="Edm.Time" Nullable="false"/>
             <Property Name="Finish" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="FinishText" Type="Edm.String"/>
+            <Property Name="FixedCostAccrual" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Name" Type="Edm.String"/>
             <Property Name="PercentComplete" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Priority" Type="Edm.Int32" Nullable="false"/>
@@ -33491,6 +33517,7 @@
             <Property Name="CommentCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="CommentsDisabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ContentTypeId" Type="Edm.String"/>
+            <Property Name="Created" Type="Edm.DateTime"/>
             <Property Name="Description" Type="Edm.String"/>
             <Property Name="DoesUserHaveEditPermission" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="FileName" Type="Edm.String"/>
@@ -38657,6 +38684,7 @@
             <Property Name="GroupId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="GroupOwnerLoginName" Type="Edm.String"/>
             <Property Name="HasHolds" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="HidePeoplePreviewingFiles" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="HubSiteId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="IBMode" Type="Edm.String"/>
             <Property Name="IBSegments" Type="Collection(Edm.Guid)" Nullable="false"/>
@@ -38862,6 +38890,7 @@
             <Property Name="AllowSelectSGsInODBListInTenant" Type="Collection(Edm.String)"/>
             <Property Name="AllowSensitivityLabelOnRecords" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AllowSharingOutsideRestrictedAccessControlGroups" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="AllowWebPropertyBagUpdateWhenDenyAddAndCustomizePagesIsEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AmplifyAdminSettings" Type="Edm.String"/>
             <Property Name="AnyoneLinkTrackUsers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AppBypassInformationBarriers" Type="Edm.Boolean" Nullable="false"/>
@@ -39131,6 +39160,7 @@
             <Property Name="TranslationSiteList" Type="Collection(Edm.Guid)" Nullable="false"/>
             <Property Name="TranslationSiteListFileName" Type="Edm.String"/>
             <Property Name="UniversalAnnotationDisabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="UnlicensedOdbSyntexBillingEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="UnlicensedOneDriveForBusinessTenantMetricsData" Type="Microsoft.SharePoint.Administration.OdbLicenseEnforcement.UnlicensedOdbTenantMetrics"/>
             <Property Name="UseFindPeopleInPeoplePicker" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="UsePersistentCookiesForExplorerView" Type="Edm.Boolean" Nullable="false"/>
@@ -40994,6 +41024,7 @@
             <Property Name="AllowSelectSecurityGroupsInSPSitesList" Type="Collection(Edm.String)"/>
             <Property Name="AllowSelectSGsInODBList" Type="Collection(Edm.String)"/>
             <Property Name="AllowSharingOutsideRestrictedAccessControlGroups" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="AllowWebPropertyBagUpdateWhenDenyAddAndCustomizePagesIsEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AnyoneLinkTrackUsers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AppBypassInformationBarriers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ApplyAppEnforcedRestrictionsToAdHocRecipients" Type="Edm.Boolean" Nullable="false"/>

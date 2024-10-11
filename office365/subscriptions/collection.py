@@ -39,12 +39,12 @@ class SubscriptionCollection(EntityCollection[Subscription]):
             The possible values are: v1_0, v1_1, v1_2, v1_3.
         :param bool include_resource_data: Indicates whether the resource data for the resource that generated the
             change notification should be included in the payload of the notification.
-        :param str encryption_certificate: Specifies the public key certificate which contains only the public key 
-            that Microsoft Graph uses to encrypt the resource data it returns to your app. For security, Microsoft 
-            Graph encrypts the resource data returned in a rich notification. You must provide a public encryption 
-            key as part of creating the subscription. 
+        :param str encryption_certificate: Specifies the public key certificate which contains only the public key
+            that Microsoft Graph uses to encrypt the resource data it returns to your app. For security, Microsoft
+            Graph encrypts the resource data returned in a rich notification. You must provide a public encryption
+            key as part of creating the subscription.
         :param str encryption_certificate_id: Specifies the identifier of the certificate used to encrypt the content
-            of the change notification. Use this ID to match in each change notification, which certificate to use 
+            of the change notification. Use this ID to match in each change notification, which certificate to use
             for decryption.
         :return: Subscription
         """

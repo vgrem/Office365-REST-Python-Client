@@ -385,7 +385,6 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
-
     def get_sp_list_item_count(self, list_name):
         # type: (str) -> ClientResult[int]
         """ """

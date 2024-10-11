@@ -320,9 +320,7 @@ class ListItem(SecurableObject):
             # type: (ClientResult[ClientValueCollection[ListItemFormUpdateValue]]) -> None
             has_any_error = any([item.HasException for item in result.value])
             if has_any_error:
-                raise ValueError(
-                    "Update ListItem failed"
-                )
+                raise ValueError("Update ListItem failed")
 
         def _system_update():
             from office365.sharepoint.fields.user_value import FieldUserValue
@@ -335,7 +333,7 @@ class ListItem(SecurableObject):
                     user = self.context.web.site_users.get_by_id(self.get_property(n))
                     form_values[n[:-2]] = FieldUserValue.from_user(user)
                 else:
-                   form_values[n] = self.get_property(n)
+                    form_values[n] = self.get_property(n)
 
             self.validate_update_list_item(
                 form_values=form_values,
@@ -343,16 +341,15 @@ class ListItem(SecurableObject):
                 new_document_update=True,
             ).after_execute(_after_system_update)
 
-
         def _list_loaded():
             if self.parent_list.base_template == 101:
-               self.ensure_properties(sys_metadata, _system_update)
+                self.ensure_properties(sys_metadata, _system_update)
             else:
                 next_qry = ServiceOperationQuery(self, "SystemUpdate")
                 self.context.add_query(next_qry)
 
         self.parent_list.ensure_properties(["BaseTemplate"], _list_loaded)
-        #self.ensure_properties(sys_metadata, _system_update)
+        # self.ensure_properties(sys_metadata, _system_update)
         return self
 
     def update_overwrite_version(self):
