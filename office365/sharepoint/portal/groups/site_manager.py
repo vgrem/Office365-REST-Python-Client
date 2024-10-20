@@ -4,6 +4,7 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.portal.channels.info_collection import ChannelInfoCollection
 from office365.sharepoint.portal.groups.creation_context import GroupCreationContext
 from office365.sharepoint.portal.groups.creation_information import (
     GroupCreationInformation,
@@ -88,6 +89,7 @@ class GroupSiteManager(ClientObject):
         return self
 
     def ensure_team_for_group(self):
+        """ """
         return_type = ClientResult(self.context)
         qry = ServiceOperationQuery(
             self, "EnsureTeamForGroup", None, None, None, return_type
@@ -96,6 +98,7 @@ class GroupSiteManager(ClientObject):
         return return_type
 
     def get_group_creation_context(self):
+        """ """
         return_type = ClientResult(self.context, GroupCreationContext())
         qry = ServiceOperationQuery(
             self, "GetGroupCreationContext", None, None, None, return_type
@@ -174,6 +177,21 @@ class GroupSiteManager(ClientObject):
         }
         qry = ServiceOperationQuery(
             self, "GetTeamChannelsDirect", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_team_channels_with_site_url(self, site_url):
+        """
+        Returns a list of team channels associated with a Microsoft 365 Group.
+        :param str site_url:
+        """
+        return_type = ClientResult(self.context, ChannelInfoCollection())
+        payload = {
+            "siteUrl": site_url,
+        }
+        qry = ServiceOperationQuery(
+            self, "GetTeamChannelsWithSiteUrl", None, payload, None, return_type
         )
         self.context.add_query(qry)
         return return_type

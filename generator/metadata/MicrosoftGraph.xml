@@ -34380,6 +34380,7 @@ within the time frame of their original request."/>
             <Property Name="teamId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="teamsAppAuthorization">
+            <Property Name="clientAppId" Type="Edm.String"/>
             <Property Name="requiredPermissionSet" Type="graph.teamsAppPermissionSet"/>
          </ComplexType>
          <ComplexType Name="teamsAppPermissionSet">
@@ -35841,6 +35842,9 @@ within the time frame of their original request."/>
          </Action>
          <Action Name="verify" IsBound="true" EntitySetPath="bindingParameter">
             <Parameter Name="bindingParameter" Type="graph.domain" Nullable="false"/>
+            <Parameter Name="forceTakeover" Type="Edm.Boolean">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
             <ReturnType Type="graph.domain"/>
          </Action>
          <Action Name="getAvailableExtensionProperties" IsBound="true" EntitySetPath="bindingParameter">
@@ -41608,7 +41612,7 @@ within the time frame of their original request."/>
             <Property Name="macAddress" Type="Edm.String"/>
             <Property Name="manufacturer" Type="Edm.String"/>
             <Property Name="model" Type="Edm.String"/>
-            <Property Name="nics" Type="microsoft.graph.security.nicEvidence"/>
+            <Property Name="nics" Type="Collection(microsoft.graph.security.nicEvidence)"/>
             <Property Name="operatingSystem" Type="Edm.String"/>
             <Property Name="owners" Type="Collection(Edm.String)"/>
             <Property Name="protocols" Type="Collection(Edm.String)"/>

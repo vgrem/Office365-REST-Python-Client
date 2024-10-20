@@ -13,6 +13,9 @@ from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 class SharePointRequest(ODataRequest):
     def __init__(self, base_url):
+        """
+        :param str base_url: Absolute Web or Site Url
+        """
         super().__init__(JsonLightFormat())
         self._auth_context = AuthenticationContext(url=base_url)
         self.beforeExecute += self._authenticate_request

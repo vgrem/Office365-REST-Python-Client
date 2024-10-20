@@ -66,3 +66,9 @@ class TestTeamSite(TestCase):
             self.client.group_site_manager.get_current_user_shared_channel_member_groups().execute_query()
         )
         self.assertIsNotNone(result.value)
+
+    def test_10_recent_and_joined_teams(self):
+        result = (
+            self.client.group_site_manager.recent_and_joined_teams().execute_query()
+        )
+        self.assertIsNotNone(result.value)

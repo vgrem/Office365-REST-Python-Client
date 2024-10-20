@@ -18,6 +18,7 @@ from office365.sharepoint.fields.url_value import FieldUrlValue
 from office365.sharepoint.likes.liked_by_information import LikedByInformation
 from office365.sharepoint.listitems.compliance_info import ListItemComplianceInfo
 from office365.sharepoint.listitems.form_update_value import ListItemFormUpdateValue
+from office365.sharepoint.listitems.update_parameters import ListItemUpdateParameters
 from office365.sharepoint.listitems.versions.collection import ListItemVersionCollection
 from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.policy.dlp_policy_tip import DlpPolicyTip
@@ -311,6 +312,21 @@ class ListItem(SecurableObject):
         super(ListItem, self).update()
         return self
 
+    def update_ex(self, bypass_quota_check=None, bypass_shared_lock=None):
+        """
+
+        :param bool bypass_quota_check:
+        :param bool bypass_shared_lock:
+        """
+        payload = {
+            "parameters": ListItemUpdateParameters(
+                bypass_quota_check, bypass_shared_lock
+            )
+        }
+        qry = ServiceOperationQuery(self, "UpdateEx", None, payload)
+        self.context.add_query(qry)
+        return self
+
     def system_update(self):
         """Update the list item."""
 
@@ -349,7 +365,6 @@ class ListItem(SecurableObject):
                 self.context.add_query(next_qry)
 
         self.parent_list.ensure_properties(["BaseTemplate"], _list_loaded)
-        # self.ensure_properties(sys_metadata, _system_update)
         return self
 
     def update_overwrite_version(self):
@@ -365,6 +380,17 @@ class ListItem(SecurableObject):
         :param bool value: Indicates whether comments for this item are disabled or not.
         """
         qry = ServiceOperationQuery(self, "SetCommentsDisabled", [value])
+        self.context.add_query(qry)
+        return self
+
+    def set_compliance_tag_with_hold(self, compliance_tag):
+        """
+        Sets a compliance tag with a hold
+
+        :param str compliance_tag: The applying label (tag) to the list item
+        """
+        payload = {"complianceTag": compliance_tag}
+        qry = ServiceOperationQuery(self, "SetComplianceTagWithHold", None, payload)
         self.context.add_query(qry)
         return self
 
