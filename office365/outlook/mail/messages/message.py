@@ -19,6 +19,7 @@ from office365.outlook.mail.messages.internet_header import InternetMessageHeade
 from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -122,6 +123,22 @@ class Message(OutlookItem):
             self.attachments.add_file(
                 os.path.basename(file_object.name), content.decode("utf-8")
             )
+        return self
+    
+    def update(self, payload):
+        """
+        Update the properties of a message. Only the properties that are set in the request body will be updated.
+
+        :param dict payload: A JSON object that contains the properties and values for the message.
+        """
+        def _construct_request(request):
+            request.method = HttpMethod.Patch
+
+
+            
+        qry = ServiceOperationQuery(self, None, payload)
+        self.context.add_query(qry).before_execute(_construct_request)
+        
         return self
 
     def send(self):
