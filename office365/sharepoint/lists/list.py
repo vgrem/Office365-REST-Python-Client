@@ -21,6 +21,7 @@ from office365.sharepoint.eventreceivers.definition_collection import (
     EventReceiverDefinitionCollection,
 )
 from office365.sharepoint.fields.collection import FieldCollection
+from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.related_field_collection import RelatedFieldCollection
 from office365.sharepoint.files.checked_out_file_collection import (
     CheckedOutFileCollection,
@@ -210,6 +211,16 @@ class List(SecurableObject):
             )
 
         self.ensure_property("RootFolder", _list_loaded)
+        return return_type
+
+    def ensure_signoff_status_field(self):
+        """"""
+        return_type = Field(self.context)
+        self.fields.add_child(return_type)
+        qry = ServiceOperationQuery(
+            self, "EnsureSignoffStatusField", None, None, None, return_type
+        )
+        self.context.add_query(qry)
         return return_type
 
     def get_all_rules(self):

@@ -20,5 +20,13 @@ class TestBusiness(GraphTestCase):
     #    result = self.__class__.business.get_staff_availability().execute_query()
     #    self.assertIsNotNone(result.resource_path)
 
-    def test4_delete_booking_business(self):
+    def test3_get(self):
+        result = self.__class__.business.get().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
+    def test4_publish(self):
+        result = self.__class__.business.publish().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
+    def test5_delete_booking_business(self):
         self.__class__.business.delete_object().execute_query()
