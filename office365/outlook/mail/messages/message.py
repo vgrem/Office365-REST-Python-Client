@@ -136,7 +136,7 @@ class Message(OutlookItem):
 
 
             
-        qry = ServiceOperationQuery(self, None, payload)
+        qry = ServiceOperationQuery(self, None, None, payload)
         self.context.add_query(qry).before_execute(_construct_request)
         
         return self
