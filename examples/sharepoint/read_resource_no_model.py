@@ -7,9 +7,12 @@ import json
 from office365.sharepoint.request import SharePointRequest
 from tests import test_site_url, test_user_credentials
 
-if __name__ == "__main__":
-    request = SharePointRequest(test_site_url).with_credentials(test_user_credentials)
-    response = request.execute_request("web")
+request = SharePointRequest(test_site_url).with_credentials(test_user_credentials)
+
+try:
+    response = request.execute_request("web/currentUser")
     json = json.loads(response.content)
-    web_title = json["d"]["Title"]
-    print("Web title: {0}".format(web_title))
+    prop_val = json["d"]["UserPrincipalName"]
+    print("UserPrincipalName: {0}".format(prop_val))
+except Exception as e:
+    print("An error occurred: {0}".format(e))

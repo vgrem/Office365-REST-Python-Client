@@ -14,15 +14,10 @@ from tests import (
     test_tenant,
 )
 
-# client = GraphClient.with_token_interactive(
-#    test_tenant, test_client_id, test_admin_principal_name
-# )
-
 client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 
 
 resource = client.service_principals.get_by_name("Microsoft Graph")
-
 result = resource.get_application_permissions(test_client_id).execute_query()
 for app_role in result.value:
     print(app_role)

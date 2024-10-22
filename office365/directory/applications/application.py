@@ -231,7 +231,7 @@ class Application(DirectoryObject):
     @property
     def key_credentials(self):
         """The collection of key credentials associated with the application. Not nullable."""
-        self._ser_property_names.append("keyCredentials")
+        self._properties_to_persist.append("keyCredentials")
         return self.properties.setdefault(
             "keyCredentials", ClientValueCollection(KeyCredential)
         )

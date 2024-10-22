@@ -209,3 +209,8 @@ class TestTenant(TestCase):
     def test_30_get_cdn_urls(self):
         result = self.tenant.cdn_api.get_cdn_urls([test_team_site_url]).execute_query()
         self.assertIsNotNone(result.value)
+
+    # You need a SharePoint Advanced Management license to perform this action
+    # def test_31_get_ransomware_events_overview(self):
+    #    result = self.tenant.get_ransomware_events_overview().execute_query()
+    #    self.assertIsNotNone(result.value)

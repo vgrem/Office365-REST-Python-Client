@@ -375,6 +375,16 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_ransomware_events_overview(self):
+        # type: () -> ClientResult[AnyStr]
+        """ """
+        return_type = ClientResult(self.context)
+        qry = ServiceOperationQuery(
+            self, "GetRansomwareEventsOverview", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_sp_list_item_count(self, list_name):
         # type: (str) -> ClientResult[int]
         """ """

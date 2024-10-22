@@ -18,22 +18,24 @@ from office365.graph_client import GraphClient
 from tests import (
     test_admin_principal_name,
     test_client_id,
+    test_client_secret,
     test_tenant,
 )
 
-client = GraphClient.with_token_interactive(
-    test_tenant, test_client_id, test_admin_principal_name
-)
+# client = GraphClient.with_token_interactive(
+#    test_tenant, test_client_id, test_admin_principal_name
+# )
+client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
 
 # Step 1: Get the resource service principal
 resource = client.service_principals.get_by_name("Microsoft Graph")
 
 # Step 2: Grant an app role to a client app
 app = client.applications.get_by_app_id(test_client_id)
-resource.grant_application_permissions(app, "MailboxSettings.Read").execute_query()
+resource.grant_application_permissions(app, "Bookings.Read.All").execute_query()
 
 
-# Step 3. Print app role assignments
+# Step 3 (optional). Print app role assignments
 result = resource.app_role_assigned_to.get_all().execute_query()
 for app_role_assignment in result:
     print(app_role_assignment)

@@ -30,7 +30,7 @@ class ClientObject(Generic[T]):
         # type: (ClientRuntimeContext, Optional[ResourcePath], Optional[ClientObjectCollection]) -> None
         """Base client object which define named properties and relationships of an entity."""
         self._properties = {}
-        self._ser_property_names = []
+        self._properties_to_persist = []
         self._query_options = QueryOptions()
         self._parent_collection = parent_collection
         self._context = context
@@ -43,9 +43,9 @@ class ClientObject(Generic[T]):
         self._properties = {
             k: v
             for k, v in self._properties.items()
-            if k not in self._ser_property_names
+            if k not in self._properties_to_persist
         }
-        self._ser_property_names = []
+        self._properties_to_persist = []
         self._query_options = QueryOptions()
         return self
 
@@ -139,8 +139,8 @@ class ClientObject(Generic[T]):
         Marks a property as a serializable
         :param str name: A property name
         """
-        if name not in self._ser_property_names:
-            self._ser_property_names.append(name)
+        if name not in self._properties_to_persist:
+            self._properties_to_persist.append(name)
         return self
 
     def get_property(self, name, default_value=None):
@@ -155,7 +155,7 @@ class ClientObject(Generic[T]):
         # type: (str|int, P_T, bool) -> Self
         """Sets property value"""
         if persist_changes:
-            self._ser_property_names.append(name)
+            self._properties_to_persist.append(name)
 
         typed_value = self.get_property(name)
         if isinstance(typed_value, (ClientObject, ClientValue)):
@@ -243,6 +243,14 @@ class ClientObject(Generic[T]):
         return self._properties
 
     @property
+    def persistable_properties(self):
+        return {
+            k: self.get_property(k)
+            for k in self._properties_to_persist
+            if k in self._properties
+        }
+
+    @property
     def parent_collection(self):
         """Parent collection"""
         return self._parent_collection
@@ -254,7 +262,7 @@ class ClientObject(Generic[T]):
             ser_prop_names = [n for n in self._properties.keys()]
             include_control_info = False
         else:
-            ser_prop_names = [n for n in self._ser_property_names]
+            ser_prop_names = [n for n in self._properties_to_persist]
             include_control_info = (
                 self.entity_type_name is not None
                 and json_format.include_control_information
