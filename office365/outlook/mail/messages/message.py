@@ -188,10 +188,7 @@ class Message(OutlookItem):
         You can then update the draft to add reply content to the body or change other message properties, or,
         simply send the draft.
         """
-        return_type = Message(self.context)
-        qry = ServiceOperationQuery(
-            self, "createReplyAll", None, None, None, return_type
-        )
+        qry = ServiceOperationQuery(self, "createReplyAll")
         self.context.add_query(qry)
         return self
 
