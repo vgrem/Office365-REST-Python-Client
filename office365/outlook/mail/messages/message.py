@@ -190,7 +190,7 @@ class Message(OutlookItem):
         """
         return_type = Message(self.context)
         qry = ServiceOperationQuery(
-            self, "createReplyAll", None, None, return_type
+            self, "createReplyAll", None, None, None, return_type
         )
         self.context.add_query(qry)
         return self
