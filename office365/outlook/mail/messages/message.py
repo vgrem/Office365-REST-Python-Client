@@ -164,10 +164,7 @@ class Message(OutlookItem):
 
     def reply_all(self):
         """Reply to all recipients of a message. The message is then saved in the Sent Items folder."""
-        return_type = Message(self.context)
-        qry = ServiceOperationQuery(
-            self, "replyAll", None, None, return_type
-        )
+        qry = ServiceOperationQuery(self, "replyAll")
         self.context.add_query(qry)
         return self
 
@@ -191,7 +188,10 @@ class Message(OutlookItem):
         You can then update the draft to add reply content to the body or change other message properties, or,
         simply send the draft.
         """
-        qry = ServiceOperationQuery(self, "createReplyAll")
+        return_type = Message(self.context)
+        qry = ServiceOperationQuery(
+            self, "createReplyAll", None, None, return_type
+        )
         self.context.add_query(qry)
         return self
 
