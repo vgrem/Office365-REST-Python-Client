@@ -164,7 +164,10 @@ class Message(OutlookItem):
 
     def reply_all(self):
         """Reply to all recipients of a message. The message is then saved in the Sent Items folder."""
-        qry = ServiceOperationQuery(self, "replyAll")
+        return_type = Message(self.context)
+        qry = ServiceOperationQuery(
+            self, "replyAll", None, None, return_type
+        )
         self.context.add_query(qry)
         return self
 
