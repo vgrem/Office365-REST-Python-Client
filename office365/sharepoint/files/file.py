@@ -1,5 +1,6 @@
 import datetime
 from typing import TYPE_CHECKING, AnyStr
+from urllib.parse import quote
 
 import requests
 
@@ -607,8 +608,11 @@ class File(AbstractFile):
         :type server_relative_url: str
         :type content: str
         """
-        url = r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
-            context.service_root_url(), server_relative_url
+        url = quote(
+            r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
+                context.service_root_url(), server_relative_url
+            ),
+            safe=":/",
         )
         request = RequestOptions(url)
         request.method = HttpMethod.Post
@@ -626,8 +630,11 @@ class File(AbstractFile):
         :type server_relative_url: str
         :return Response
         """
-        url = r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
-            context.service_root_url(), server_relative_url
+        url = quote(
+            r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
+                context.service_root_url(), server_relative_url
+            ),
+            safe=":/",
         )
         request = RequestOptions(url)
         request.method = HttpMethod.Get
