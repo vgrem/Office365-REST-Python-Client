@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -70,5 +70,5 @@ class SearchRequest(ClientValue):
     def to_json(self, json_format=None):
         # type: (Optional[ODataJsonFormat]) -> Dict
         json_value = super(SearchRequest, self).to_json(json_format)
-        json_value['from'] = json_value.pop('page_from', None)
+        json_value["from"] = json_value.pop("page_from", None)
         return json_value

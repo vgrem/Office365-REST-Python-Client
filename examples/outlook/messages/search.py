@@ -13,4 +13,4 @@ client = GraphClient.with_username_and_password(
 result = client.search.query_messages("Meet for lunch?").execute_query()
 for item in result.value:
     for hit in item.hitsContainers[0].hits:
-        print(hit.resource.get("webLink"))
+        print(hit.resource.get_property("webLink"))

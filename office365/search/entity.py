@@ -36,7 +36,7 @@ class SearchEntity(Entity):
         :param str query_string: Contains the query terms.
         :param list[str] entity_types: One or more types of resources expected in the response.
             Possible values are: list, site, listItem, message, event, drive, driveItem, externalItem.
-        :param int page_from: Specifies the offset for the search results. Offset 0 returns the very first result. Optional.
+        :param int page_from: Specifies the offset for the search results. Offset 0 returns the very first result.
         :param int size: The size of the page to be retrieved. The maximum value is 500. Optional.
         :param bool enable_top_results: This triggers hybrid sort for messages
         """
@@ -50,7 +50,9 @@ class SearchEntity(Entity):
 
         def _patch_hit(search_hit):
             # type: (SearchHit) -> None
-            resource_type_name = search_hit.get_property("resource").get('@odata.type', None)
+            resource_type_name = search_hit.get_property("resource").get(
+                "@odata.type", None
+            )
             resource_type = EntityType.resolve(resource_type_name)
             resource = resource_type(self.context, EntityPath())
             self.context.pending_request().map_json(search_hit.resource, resource)
@@ -73,7 +75,7 @@ class SearchEntity(Entity):
     ):
         """Searches Outlook messages. Alias to query method
         :param str query_string: Contains the query terms.
-        :param int page_from: Specifies the offset for the search results. Offset 0 returns the very first result. Optional.
+        :param int page_from: Specifies the offset for the search results. Offset 0 returns the very first result.
         :param int size: The size of the page to be retrieved. The maximum value is 500. Optional.
         :param bool enable_top_results: This triggers hybrid sort for messages
         """

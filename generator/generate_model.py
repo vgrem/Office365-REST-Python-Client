@@ -1,8 +1,6 @@
-from configparser import ConfigParser
 
 from generator import load_settings
 from generator.builders.type_builder import TypeBuilder
-from office365.runtime.odata.model import ODataModel
 from office365.runtime.odata.v3.metadata_reader import ODataV3Reader
 from office365.runtime.odata.v4.metadata_reader import ODataV4Reader
 
