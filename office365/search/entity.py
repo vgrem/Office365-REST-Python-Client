@@ -5,9 +5,11 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.v4.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.search.acronym import Acronym
 from office365.search.entity_type import EntityType
+from office365.search.hit import SearchHit
 from office365.search.query import SearchQuery
 from office365.search.request import SearchRequest
 from office365.search.response import SearchResponse
@@ -19,27 +21,40 @@ class SearchEntity(Entity):
     in Graph, but serves as an anchor to the query action.
     """
 
-    def query(self, query_string, entity_types=None):
-        # type: (str, Optional[List[str]]) -> ClientResult[ClientValueCollection[SearchResponse]]
+    def query(
+        self,
+        query_string,
+        entity_types=None,
+        page_from=None,
+        size=None,
+        enable_top_results=None,
+    ):
+        # type: (str, Optional[List[str]], Optional[int], Optional[int], Optional[bool]) -> ClientResult[ClientValueCollection[SearchResponse]]
         """
         Runs the query specified in the request body. Search results are provided in the response.
 
         :param str query_string: Contains the query terms.
         :param list[str] entity_types: One or more types of resources expected in the response.
             Possible values are: list, site, listItem, message, event, drive, driveItem, externalItem.
+        :param int page_from: Specifies the offset for the search results. Offset 0 returns the very first result. Optional.
+        :param int size: The size of the page to be retrieved. The maximum value is 500. Optional.
+        :param bool enable_top_results: This triggers hybrid sort for messages
         """
         search_request = SearchRequest(
-            query=SearchQuery(query_string), entity_types=entity_types
+            query=SearchQuery(query_string),
+            entity_types=entity_types,
+            page_from=page_from,
+            size=size,
+            enable_top_results=enable_top_results,
         )
-        payload = {"requests": ClientValueCollection(SearchRequest, [search_request])}
-        return_type = ClientResult(self.context, ClientValueCollection(SearchResponse))
-        qry = ServiceOperationQuery(self, "query", None, payload, None, return_type)
 
         def _patch_hit(search_hit):
-            pass
-            # resource = Entity(self.context)
-            # self.context.pending_request().map_json(search_hit.resource, resource)
-            # search_hit.set_property("resource", resource)
+            # type: (SearchHit) -> None
+            resource_type_name = search_hit.get_property("resource").get('@odata.type', None)
+            resource_type = EntityType.resolve(resource_type_name)
+            resource = resource_type(self.context, EntityPath())
+            self.context.pending_request().map_json(search_hit.resource, resource)
+            search_hit.set_property("resource", resource)
 
         def _process_response(result):
             # type: (ClientResult[ClientValueCollection[SearchResponse]]) -> None
@@ -47,14 +62,28 @@ class SearchEntity(Entity):
                 for hcs in item.hitsContainers:
                     [_patch_hit(hit) for hit in hcs.hits]
 
+        payload = {"requests": ClientValueCollection(SearchRequest, [search_request])}
+        return_type = ClientResult(self.context, ClientValueCollection(SearchResponse))
+        qry = ServiceOperationQuery(self, "query", None, payload, None, return_type)
         self.context.add_query(qry).after_query_execute(_process_response)
         return return_type
 
-    def query_messages(self, query_string):
+    def query_messages(
+        self, query_string, page_from=None, size=None, enable_top_results=None
+    ):
         """Searches Outlook messages. Alias to query method
         :param str query_string: Contains the query terms.
+        :param int page_from: Specifies the offset for the search results. Offset 0 returns the very first result. Optional.
+        :param int size: The size of the page to be retrieved. The maximum value is 500. Optional.
+        :param bool enable_top_results: This triggers hybrid sort for messages
         """
-        return self.query(query_string, entity_types=[EntityType.message])
+        return self.query(
+            query_string,
+            entity_types=[EntityType.message],
+            page_from=page_from,
+            size=size,
+            enable_top_results=enable_top_results,
+        )
 
     def query_events(self, query_string):
         """Searches Outlook calendar events. Alias to query method
@@ -62,11 +91,18 @@ class SearchEntity(Entity):
         """
         return self.query(query_string, entity_types=[EntityType.event])
 
-    def query_drive_items(self, query_string):
+    def query_drive_items(self, query_string, page_from=None, size=None):
         """Searches OneDrive items. Alias to query method
         :param str query_string: Contains the query terms.
+        :param int page_from: Specifies the offset for the search results. Offset 0 returns the very first result.
+        :param int size: The size of the page to be retrieved. The maximum value is 500.
         """
-        return self.query(query_string, entity_types=[EntityType.driveItem])
+        return self.query(
+            query_string,
+            entity_types=[EntityType.driveItem],
+            page_from=page_from,
+            size=size,
+        )
 
     @property
     def acronyms(self):

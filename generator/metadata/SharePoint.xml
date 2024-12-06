@@ -8806,6 +8806,7 @@
             <FunctionImport Name="SaveStreams" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
                <Parameter Name="contentStream" Type="Edm.Stream"/>
+               <Parameter Name="sharedLockId" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SchedulePublish" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
@@ -9027,6 +9028,7 @@
             <FunctionImport Name="SaveStreams" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
                <Parameter Name="contentStream" Type="Edm.Stream"/>
+               <Parameter Name="sharedLockId" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SchedulePublish" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.FeedVideoPage"/>
@@ -9272,6 +9274,7 @@
             <FunctionImport Name="SaveStreams" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
                <Parameter Name="contentStream" Type="Edm.Stream"/>
+               <Parameter Name="sharedLockId" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SchedulePublish" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.RepostPage"/>
@@ -9487,6 +9490,7 @@
             <FunctionImport Name="SaveStreams" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
                <Parameter Name="contentStream" Type="Edm.Stream"/>
+               <Parameter Name="sharedLockId" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SchedulePublish" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.SitePage3D"/>
@@ -9687,6 +9691,7 @@
             <FunctionImport Name="SaveStreams" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.SitePage"/>
                <Parameter Name="contentStream" Type="Edm.Stream"/>
+               <Parameter Name="sharedLockId" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SchedulePublish" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.SitePage"/>
@@ -9917,6 +9922,7 @@
             <FunctionImport Name="SaveStreams" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
                <Parameter Name="contentStream" Type="Edm.Stream"/>
+               <Parameter Name="sharedLockId" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SchedulePublish" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.TopicSitePage"/>
@@ -11906,9 +11912,6 @@
                <Parameter Name="canvasAsJson" Type="Edm.Boolean" Nullable="false"/>
                <Parameter Name="includePersonalizationData" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
-            <FunctionImport Name="GetConfiguredVivaConnectionsURL" ReturnType="Edm.String" IsSideEffecting="false" IsBindable="true">
-               <Parameter Name="this" Type="SP.EmployeeEngagement"/>
-            </FunctionImport>
             <FunctionImport Name="GetDashboardPersonalization" ReturnType="Edm.Boolean" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="SP.EmployeeEngagement"/>
             </FunctionImport>
@@ -12121,6 +12124,10 @@
             <FunctionImport Name="UpdateTenantTheme" ReturnType="SP.ThemeData" IsBindable="true">
                <Parameter Name="this" Type="SP.BrandCenter"/>
                <Parameter Name="themeData" Type="SP.ThemeData"/>
+            </FunctionImport>
+            <FunctionImport Name="ValidateSiteThemeName" ReturnType="Edm.Boolean" IsBindable="true">
+               <Parameter Name="this" Type="SP.BrandCenter"/>
+               <Parameter Name="name" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="ValidateTenantThemeName" ReturnType="Edm.Boolean" IsBindable="true">
                <Parameter Name="this" Type="SP.BrandCenter"/>
@@ -24542,6 +24549,9 @@
          <Annotations Target="SP.Publishing.SitePage/PublicationMetadata">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.Publishing.SitePage/PublicationRecipients">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.Publishing.SitePage/SitePageFlags">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -26045,7 +26055,7 @@
          <Annotations Target="SP.ApiData/SavePageCoAuth(SP.Publishing.CampaignPublication, Edm.Stream)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.CampaignPublication, Edm.Stream)">
+         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.CampaignPublication, Edm.Stream, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SchedulePublish(SP.Publishing.CampaignPublication, SP.Publishing.SitePageFieldsData)">
@@ -26234,7 +26244,7 @@
          <Annotations Target="SP.ApiData/SavePageCoAuth(SP.Publishing.FeedVideoPage, Edm.Stream)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.FeedVideoPage, Edm.Stream)">
+         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.FeedVideoPage, Edm.Stream, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SchedulePublish(SP.Publishing.FeedVideoPage, SP.Publishing.SitePageFieldsData)">
@@ -26375,7 +26385,7 @@
          <Annotations Target="SP.ApiData/SavePageCoAuth(SP.Publishing.RepostPage, Edm.Stream)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.RepostPage, Edm.Stream)">
+         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.RepostPage, Edm.Stream, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SchedulePublish(SP.Publishing.RepostPage, SP.Publishing.SitePageFieldsData)">
@@ -26495,7 +26505,7 @@
          <Annotations Target="SP.ApiData/SavePageCoAuth(SP.Publishing.SitePage3D, Edm.Stream)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.SitePage3D, Edm.Stream)">
+         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.SitePage3D, Edm.Stream, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SchedulePublish(SP.Publishing.SitePage3D, SP.Publishing.SitePageFieldsData)">
@@ -26654,7 +26664,7 @@
          <Annotations Target="SP.ApiData/SavePageCoAuth(SP.Publishing.SitePage, Edm.Stream)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.SitePage, Edm.Stream)">
+         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.SitePage, Edm.Stream, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SchedulePublish(SP.Publishing.SitePage, SP.Publishing.SitePageFieldsData)">
@@ -26825,7 +26835,7 @@
          <Annotations Target="SP.ApiData/SavePageCoAuth(SP.Publishing.TopicSitePage, Edm.Stream)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.TopicSitePage, Edm.Stream)">
+         <Annotations Target="SP.ApiData/SaveStreams(SP.Publishing.TopicSitePage, Edm.Stream, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SchedulePublish(SP.Publishing.TopicSitePage, SP.Publishing.SitePageFieldsData)">
@@ -27512,9 +27522,6 @@
          <Annotations Target="SP.ApiData/DashboardOOBContent(SP.EmployeeEngagement, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/GetConfiguredVivaConnectionsURL(SP.EmployeeEngagement)">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="SP.ApiData/GetDashboardPersonalization(SP.EmployeeEngagement)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -27645,6 +27652,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/UpdateTenantTheme(SP.BrandCenter, SP.ThemeData)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/ValidateSiteThemeName(SP.BrandCenter, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/ValidateTenantThemeName(SP.BrandCenter, Edm.String)">
@@ -33646,6 +33656,7 @@
             <Property Name="LayoutWebpartsContent" Type="Edm.String"/>
             <Property Name="Name" Type="Edm.String"/>
             <Property Name="PublicationMetadata" Type="Edm.String"/>
+            <Property Name="PublicationRecipients" Type="Edm.String"/>
             <Property Name="SitePageFlags" Type="Edm.String"/>
             <NavigationProperty Name="Translations" Relationship="SP.SP_Publishing_SitePage_Translations_SP_TranslationStatusCollection_TranslationsPartner" ToRole="Translations" FromRole="TranslationsPartner"/>
          </EntityType>
@@ -34231,6 +34242,7 @@
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Publishing.Amplify.Client">
          <ComplexType Name="ClientAmplifyEndpointInfo">
+            <Property Name="endpointSubType" Type="Edm.String"/>
             <Property Name="endpointType" Type="Edm.String"/>
             <Property Name="href" Type="Edm.String"/>
             <Property Name="id" Type="Edm.String"/>
@@ -36242,6 +36254,7 @@
             <Property Name="DashboardFormFactor" Type="Edm.String"/>
             <Property Name="DashboardId" Type="Edm.String"/>
             <Property Name="LastModifiedDate" Type="Edm.DateTime" Nullable="false"/>
+            <Property Name="UserACECards" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="DashboardCardDetails">
             <Property Name="ControlIndex" Type="Edm.Double" Nullable="false"/>
@@ -37222,6 +37235,7 @@
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="hasIRMProtection" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="id" Type="Edm.String"/>
+            <Property Name="sensitivityLabelProtectionType" Type="Edm.String"/>
             <Property Name="tooltip" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SharedWithMeViewItemRemovalResult">
@@ -38438,6 +38452,8 @@
             <Property Name="Status" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SPDataGovernanceInsightResponse">
+            <Property Name="CountOfSitesInReport" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="CountOfSitesInTenant" Type="Edm.Int32" Nullable="false"/>
             <Property Name="CreatedDateTime" Type="Edm.String"/>
             <Property Name="EEEUType" Type="Edm.String"/>
             <Property Name="LabelId" Type="Edm.Guid" Nullable="false"/>

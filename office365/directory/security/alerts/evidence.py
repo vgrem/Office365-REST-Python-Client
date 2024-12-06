@@ -3,7 +3,8 @@ from office365.runtime.types.collections import StringCollection
 
 
 class AlertEvidence(ClientValue):
-    """Evidence related to an alert."""
+    """The alertEvidence base type and its derived evidence types provide a means to organize and track rich data
+    about each artifact involved in an alert."""
 
     def __init__(self, created_datetime=None, detailed_roles=None):
         """

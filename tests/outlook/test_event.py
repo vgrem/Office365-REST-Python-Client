@@ -9,7 +9,7 @@ class TestOutlookEvent(GraphTestCase):
     target_event = None  # type: Event
 
     def test2_create_event(self):
-        when = datetime.utcnow() + timedelta(days=1)
+        when = datetime.now() + timedelta(days=1)
         new_event = self.client.me.calendar.events.add(
             subject="Let's go for lunch",
             body="Does mid month work for you?",

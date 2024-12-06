@@ -7,4 +7,8 @@ class PlannerChecklistItem(ClientValue):
     The checklist on a task is represented by the checklistItems object.
     """
 
-    pass
+    def __init__(self, title=None):
+        """
+        :param str|None title: The title of the checklist.
+        """
+        self.title = title

@@ -47,7 +47,7 @@ class TypeBuilder(ast.NodeTransformer):
             "EntityType": "entity_type.py",
         }
         path = abspath(
-            os.path.join(self._options["templatePath"], file_mapping[type_name])
+            os.path.join(self._options.get("templatepath"), file_mapping[type_name])
         )
         return path
 
@@ -65,7 +65,7 @@ class TypeBuilder(ast.NodeTransformer):
         else:
             type_info["state"] = "detached"
             type_info["file"] = abspath(
-                os.path.join(self._options["outputPath"], type_name + ".py")
+                os.path.join(self._options["outputpath"], type_name + ".py")
             )
         return type_info
 

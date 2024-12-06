@@ -3948,6 +3948,11 @@
                   <PropertyValue Property="Filterable" Bool="true"/>
                </Record>
             </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Referenceable" Bool="false"/>
+               </Record>
+            </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.SelectSupport">
                <Record>
                   <PropertyValue Property="Supported" Bool="true"/>
@@ -5350,6 +5355,11 @@
                   <PropertyValue Property="Insertable" Bool="false"/>
                </Record>
             </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Referenceable" Bool="false"/>
+               </Record>
+            </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.SelectSupport">
                <Record>
                   <PropertyValue Property="Supported" Bool="false"/>
@@ -5399,6 +5409,11 @@
             <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
                <Record>
                   <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Referenceable" Bool="false"/>
                </Record>
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.SkipSupported" Bool="false"/>
@@ -28342,6 +28357,9 @@ within the time frame of their original request."/>
             <Property Name="isSearchable" Type="Edm.Boolean"/>
             <Property Name="value" Type="Edm.String" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="fileStorageContainerSettings">
+            <Property Name="isOcrEnabled" Type="Edm.Boolean"/>
+         </ComplexType>
          <ComplexType Name="fileStorageContainerViewpoint">
             <Property Name="effectiveRole" Type="Edm.String" Nullable="false"/>
          </ComplexType>
@@ -28359,6 +28377,7 @@ within the time frame of their original request."/>
             <Property Name="customProperties" Type="graph.fileStorageContainerCustomPropertyDictionary"/>
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="settings" Type="graph.fileStorageContainerSettings" Nullable="false"/>
             <Property Name="status" Type="graph.fileStorageContainerStatus"/>
             <Property Name="viewpoint" Type="graph.fileStorageContainerViewpoint"/>
             <NavigationProperty Name="drive" Type="graph.drive" ContainsTarget="true"/>
@@ -34260,6 +34279,8 @@ within the time frame of their original request."/>
          </ComplexType>
          <ComplexType Name="chatMessageReaction">
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="reactionContentUrl" Type="Edm.String"/>
             <Property Name="reactionType" Type="Edm.String" Nullable="false"/>
             <Property Name="user" Type="graph.chatMessageReactionIdentitySet" Nullable="false"/>
          </ComplexType>
@@ -35397,6 +35418,9 @@ within the time frame of their original request."/>
          <Action Name="instantiate" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.applicationTemplate"/>
             <Parameter Name="displayName" Type="Edm.String" Unicode="false"/>
+            <Parameter Name="serviceManagementReference" Type="Edm.String" Unicode="false">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
             <ReturnType Type="graph.applicationServicePrincipal"/>
          </Action>
          <Action Name="setVerifiedPublisher" IsBound="true">
@@ -40705,8 +40729,8 @@ within the time frame of their original request."/>
          </EnumType>
          <EnumType Name="purgeType">
             <Member Name="recoverable" Value="0"/>
-            <Member Name="permanentlyDeleted" Value="1"/>
-            <Member Name="unknownFutureValue" Value="2"/>
+            <Member Name="unknownFutureValue" Value="1"/>
+            <Member Name="permanentlyDelete" Value="2"/>
          </EnumType>
          <EnumType Name="sourceType" IsFlags="true">
             <Member Name="mailbox" Value="1"/>

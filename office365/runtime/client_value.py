@@ -15,7 +15,7 @@ class ClientValue(object):
     """
 
     def set_property(self, k, v, persist_changes=True):
-        # type: (str, Any, bool) -> Self
+        # type: (str|int, Any, bool) -> Self
         prop_type = getattr(self, k, None)
         if isinstance(prop_type, ClientValue) and v is not None:
             if isinstance(v, list):
