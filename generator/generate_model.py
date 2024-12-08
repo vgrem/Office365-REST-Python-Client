@@ -1,4 +1,3 @@
-
 from generator import load_settings
 from generator.builders.type_builder import TypeBuilder
 from office365.runtime.odata.v3.metadata_reader import ODataV3Reader
