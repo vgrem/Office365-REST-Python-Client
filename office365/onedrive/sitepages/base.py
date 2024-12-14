@@ -1,6 +1,6 @@
 from typing import Optional
 
-from office365.base_item import BaseItem
+from office365.onedrive.base_item import BaseItem
 from office365.onedrive.driveitems.publication_facet import PublicationFacet
 
 

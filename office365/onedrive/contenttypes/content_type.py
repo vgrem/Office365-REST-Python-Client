@@ -1,6 +1,6 @@
 from typing import Optional
 
-from office365.base_item import BaseItem
+from office365.onedrive.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.columns.column_link import ColumnLink
 from office365.onedrive.columns.definition import ColumnDefinition

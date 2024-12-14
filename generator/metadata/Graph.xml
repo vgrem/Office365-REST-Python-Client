@@ -17290,6 +17290,11 @@ within the time frame of their original request."/>
             <Member Name="x509CertificateMultiFactor" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
+         <EnumType Name="x509CertificateCRLValidationConfigurationState">
+            <Member Name="disabled" Value="0"/>
+            <Member Name="enabled" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="x509CertificateRuleType">
             <Member Name="issuerSubject" Value="0"/>
             <Member Name="policyOID" Value="1"/>
@@ -18406,6 +18411,13 @@ within the time frame of their original request."/>
             <Member Name="fullyArchived" Value="1"/>
             <Member Name="reactivating" Value="2"/>
             <Member Name="unknownFutureValue" Value="3"/>
+         </EnumType>
+         <EnumType Name="siteLockState">
+            <Member Name="unlocked" Value="0"/>
+            <Member Name="lockedReadOnly" Value="1"/>
+            <Member Name="lockedNoAccess" Value="2"/>
+            <Member Name="lockedNoAdditions" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
          <EnumType Name="titleAreaLayoutType">
             <Member Name="imageAndTitle" Value="0"/>
@@ -22245,6 +22257,13 @@ within the time frame of their original request."/>
             <Member Name="unknownFutureValue" Value="7"/>
             <Member Name="emailUser" Value="8"/>
          </EnumType>
+         <EnumType Name="eligibilityFilteringEnabledEntities" IsFlags="true">
+            <Member Name="none" Value="0"/>
+            <Member Name="swapRequest" Value="1"/>
+            <Member Name="offerShiftRequest" Value="2"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+            <Member Name="timeOffReason" Value="8"/>
+         </EnumType>
          <EnumType Name="scheduleChangeRequestActor">
             <Member Name="sender" Value="0"/>
             <Member Name="recipient" Value="1"/>
@@ -22310,6 +22329,9 @@ within the time frame of their original request."/>
             <Member Name="openShiftRequest" Value="32"/>
             <Member Name="offerShiftRequest" Value="64"/>
             <Member Name="unknownFutureValue" Value="1024"/>
+            <Member Name="timeOffReason" Value="4096"/>
+            <Member Name="timeOff" Value="8192"/>
+            <Member Name="timeOffRequest" Value="16384"/>
          </EnumType>
          <EnumType Name="mailDestinationRoutingReason">
             <Member Name="none" Value="0"/>
@@ -24062,6 +24084,10 @@ within the time frame of their original request."/>
             <Property Name="x509CertificateRequiredAffinityLevel" Type="graph.x509CertificateAffinityLevel"/>
             <Property Name="x509CertificateRuleType" Type="graph.x509CertificateRuleType"/>
          </ComplexType>
+         <ComplexType Name="x509CertificateCRLValidationConfiguration">
+            <Property Name="exemptedCertificateAuthoritiesSubjectKeyIdentifiers" Type="Collection(Edm.String)"/>
+            <Property Name="state" Type="graph.x509CertificateCRLValidationConfigurationState" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="x509CertificateUserBinding">
             <Property Name="priority" Type="Edm.Int32" Nullable="false"/>
             <Property Name="trustAffinityLevel" Type="graph.x509CertificateAffinityLevel"/>
@@ -24286,6 +24312,7 @@ within the time frame of their original request."/>
          <EntityType Name="x509CertificateAuthenticationMethodConfiguration" BaseType="graph.authenticationMethodConfiguration">
             <Property Name="authenticationModeConfiguration" Type="graph.x509CertificateAuthenticationModeConfiguration"/>
             <Property Name="certificateUserBindings" Type="Collection(graph.x509CertificateUserBinding)"/>
+            <Property Name="crlValidationConfiguration" Type="graph.x509CertificateCRLValidationConfiguration" Nullable="false"/>
             <NavigationProperty Name="includeTargets" Type="Collection(graph.authenticationMethodTarget)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="x509CertificateCombinationConfiguration" BaseType="graph.authenticationCombinationConfiguration">
@@ -26544,6 +26571,7 @@ within the time frame of their original request."/>
             <Property Name="federatedIdpMfaBehavior" Type="graph.federatedIdpMfaBehavior"/>
             <Property Name="isSignedAuthenticationRequestRequired" Type="Edm.Boolean"/>
             <Property Name="nextSigningCertificate" Type="Edm.String"/>
+            <Property Name="passwordResetUri" Type="Edm.String"/>
             <Property Name="promptLoginBehavior" Type="graph.promptLoginBehavior"/>
             <Property Name="signingCertificateUpdateStatus" Type="graph.signingCertificateUpdateStatus"/>
             <Property Name="signOutUri" Type="Edm.String"/>
@@ -28428,6 +28456,7 @@ within the time frame of their original request."/>
          </ComplexType>
          <EntityType Name="fileStorage" BaseType="graph.entity">
             <NavigationProperty Name="containers" Type="Collection(graph.fileStorageContainer)" ContainsTarget="true"/>
+            <NavigationProperty Name="deletedContainers" Type="Collection(graph.fileStorageContainer)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="fileStorageContainer" BaseType="graph.entity">
             <Property Name="containerTypeId" Type="Edm.Guid" Nullable="false"/>
@@ -28435,11 +28464,17 @@ within the time frame of their original request."/>
             <Property Name="customProperties" Type="graph.fileStorageContainerCustomPropertyDictionary"/>
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String" Nullable="false"/>
+            <Property Name="lockState" Type="graph.siteLockState"/>
             <Property Name="settings" Type="graph.fileStorageContainerSettings" Nullable="false"/>
             <Property Name="status" Type="graph.fileStorageContainerStatus"/>
             <Property Name="viewpoint" Type="graph.fileStorageContainerViewpoint"/>
             <NavigationProperty Name="drive" Type="graph.drive" ContainsTarget="true"/>
             <NavigationProperty Name="permissions" Type="Collection(graph.permission)" ContainsTarget="true"/>
+            <NavigationProperty Name="recycleBin" Type="graph.recycleBin" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="recycleBin" BaseType="graph.baseItem" OpenType="true">
+            <Property Name="settings" Type="graph.recycleBinSettings"/>
+            <NavigationProperty Name="items" Type="Collection(graph.recycleBinItem)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="sharepointSettings" BaseType="graph.entity">
             <Property Name="allowedDomainGuidsForSyncApp" Type="Collection(Edm.Guid)"/>
@@ -28663,6 +28698,9 @@ within the time frame of their original request."/>
             <Property Name="likeCount" Type="Edm.Int32"/>
             <Property Name="shareCount" Type="Edm.Int32"/>
          </ComplexType>
+         <ComplexType Name="recycleBinSettings">
+            <Property Name="retentionPeriodOverrideDays" Type="Edm.Int32"/>
+         </ComplexType>
          <ComplexType Name="renameAction">
             <Property Name="newName" Type="Edm.String"/>
             <Property Name="oldName" Type="Edm.String"/>
@@ -28808,6 +28846,11 @@ within the time frame of their original request."/>
             <Property Name="move" Type="graph.itemActionStat"/>
             <Property Name="startDateTime" Type="Edm.DateTimeOffset"/>
             <NavigationProperty Name="activities" Type="Collection(graph.itemActivity)"/>
+         </EntityType>
+         <EntityType Name="recycleBinItem" BaseType="graph.baseItem" OpenType="true">
+            <Property Name="deletedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="deletedFromLocation" Type="Edm.String"/>
+            <Property Name="size" Type="Edm.Int64"/>
          </EntityType>
          <EntityType Name="sharedDriveItem" BaseType="graph.baseItem">
             <Property Name="owner" Type="graph.identitySet"/>
@@ -34641,6 +34684,7 @@ within the time frame of their original request."/>
          <EntityType Name="workforceIntegration" BaseType="graph.changeTrackedEntity">
             <Property Name="apiVersion" Type="Edm.Int32"/>
             <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="eligibilityFilteringEnabledEntities" Type="graph.eligibilityFilteringEnabledEntities"/>
             <Property Name="encryption" Type="graph.workforceIntegrationEncryption"/>
             <Property Name="isActive" Type="Edm.Boolean"/>
             <Property Name="supportedEntities" Type="graph.workforceIntegrationSupportedEntities"/>
@@ -34709,6 +34753,7 @@ within the time frame of their original request."/>
          </EntityType>
          <EntityType Name="openShift" BaseType="graph.changeTrackedEntity">
             <Property Name="draftOpenShift" Type="graph.openShiftItem"/>
+            <Property Name="isStagedForDeletion" Type="Edm.Boolean"/>
             <Property Name="schedulingGroupId" Type="Edm.String"/>
             <Property Name="sharedOpenShift" Type="graph.openShiftItem"/>
          </EntityType>
@@ -34722,6 +34767,7 @@ within the time frame of their original request."/>
          </EntityType>
          <EntityType Name="shift" BaseType="graph.changeTrackedEntity">
             <Property Name="draftShift" Type="graph.shiftItem"/>
+            <Property Name="isStagedForDeletion" Type="Edm.Boolean"/>
             <Property Name="schedulingGroupId" Type="Edm.String"/>
             <Property Name="sharedShift" Type="graph.shiftItem"/>
             <Property Name="userId" Type="Edm.String"/>
@@ -34741,6 +34787,7 @@ within the time frame of their original request."/>
          </EntityType>
          <EntityType Name="timeOff" BaseType="graph.changeTrackedEntity">
             <Property Name="draftTimeOff" Type="graph.timeOffItem"/>
+            <Property Name="isStagedForDeletion" Type="Edm.Boolean"/>
             <Property Name="sharedTimeOff" Type="graph.timeOffItem"/>
             <Property Name="userId" Type="Edm.String"/>
          </EntityType>
@@ -35686,6 +35733,10 @@ within the time frame of their original request."/>
                <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
             </Parameter>
             <ReturnType Type="graph.directoryObject"/>
+         </Action>
+         <Action Name="restore" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.fileStorageContainer"/>
+            <ReturnType Type="graph.fileStorageContainer"/>
          </Action>
          <Action Name="restore" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.driveItem"/>
@@ -39126,11 +39177,20 @@ within the time frame of their original request."/>
             <Parameter Name="TimeZoneStandard" Type="graph.timeZoneStandard" Nullable="false"/>
             <ReturnType Type="Collection(graph.timeZoneInformation)" Nullable="false"/>
          </Function>
+         <Action Name="lock" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.fileStorageContainer"/>
+            <Parameter Name="lockState" Type="graph.siteLockState">
+               <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
+            </Parameter>
+         </Action>
          <Action Name="permanentDelete" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.fileStorageContainer"/>
          </Action>
          <Action Name="permanentDelete" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.driveItem"/>
+         </Action>
+         <Action Name="unlock" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.fileStorageContainer"/>
          </Action>
          <Action Name="remove" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.site)"/>
@@ -39196,6 +39256,9 @@ within the time frame of their original request."/>
                <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
             </Parameter>
             <ReturnType Type="graph.permission"/>
+         </Action>
+         <Action Name="discardCheckout" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
          </Action>
          <Action Name="extractSensitivityLabels" IsBound="true">
             <Parameter Name="bindparameter" Type="graph.driveItem"/>
@@ -40798,6 +40861,9 @@ within the time frame of their original request."/>
             <Parameter Name="notifyTeam" Type="Edm.Boolean"/>
             <Parameter Name="startDateTime" Type="Edm.DateTimeOffset"/>
             <Parameter Name="endDateTime" Type="Edm.DateTimeOffset"/>
+         </Action>
+         <Action Name="stageForDeletion" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.changeTrackedEntity"/>
          </Action>
          <Action Name="endWorkingTime" IsBound="true">
             <Parameter Name="bindparameter" Type="graph.workingTimeSchedule" Nullable="false"/>

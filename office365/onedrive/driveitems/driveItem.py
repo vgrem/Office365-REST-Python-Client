@@ -9,7 +9,7 @@ from typing import IO, AnyStr, Callable, Optional, TypeVar
 import requests
 from typing_extensions import Self
 
-from office365.base_item import BaseItem
+from office365.onedrive.base_item import BaseItem
 from office365.delta_path import DeltaPath
 from office365.entity_collection import EntityCollection
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
