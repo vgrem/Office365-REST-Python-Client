@@ -1,7 +1,7 @@
 from typing import Optional
 
-from office365.onedrive.base_item import BaseItem
 from office365.entity_collection import EntityCollection
+from office365.onedrive.base_item import BaseItem
 from office365.onedrive.columns.definition_collection import ColumnDefinitionCollection
 from office365.onedrive.contenttypes.collection import ContentTypeCollection
 from office365.onedrive.listitems.list_item import ListItem

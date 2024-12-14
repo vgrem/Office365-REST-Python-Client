@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
-from office365.onedrive.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
+from office365.onedrive.base_item import BaseItem
 from office365.onedrive.columns.definition_collection import ColumnDefinitionCollection
 from office365.onedrive.contenttypes.collection import ContentTypeCollection
 from office365.onedrive.drives.drive import Drive

@@ -1,6 +1,6 @@
-from office365.onedrive.base_item import BaseItem
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity_collection import EntityCollection
+from office365.onedrive.base_item import BaseItem
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.internal.paths.root import RootPath
 from office365.onedrive.listitems.list_item import ListItem

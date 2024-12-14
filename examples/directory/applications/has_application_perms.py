@@ -18,7 +18,7 @@ client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client
 
 
 resource = client.service_principals.get_by_name("Microsoft Graph")
-app_role = "ThreatAssessment.Read.All"   # "Bookings.Read.All"
+app_role = "ThreatAssessment.Read.All"  # "Bookings.Read.All"
 result = resource.get_application_permissions(test_client_id).execute_query()
 if (
     len([cur_app_role for cur_app_role in result.value if cur_app_role == app_role])

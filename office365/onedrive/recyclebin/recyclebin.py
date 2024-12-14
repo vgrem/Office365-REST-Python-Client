@@ -16,7 +16,10 @@ class RecycleBin(BaseItem):
         return self.properties.setdefault(
             "items",
             EntityCollection(
-                self.context, RecycleBinItem, ResourcePath("items", self.resource_path), self
+                self.context,
+                RecycleBinItem,
+                ResourcePath("items", self.resource_path),
+                self,
             ),
         )
 

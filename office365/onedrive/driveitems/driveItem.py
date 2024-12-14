@@ -9,11 +9,11 @@ from typing import IO, AnyStr, Callable, Optional, TypeVar
 import requests
 from typing_extensions import Self
 
-from office365.onedrive.base_item import BaseItem
 from office365.delta_path import DeltaPath
 from office365.entity_collection import EntityCollection
 from office365.onedrive.analytics.item_activity_stat import ItemActivityStat
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
+from office365.onedrive.base_item import BaseItem
 from office365.onedrive.driveitems.audio import Audio
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.driveitems.geo_coordinates import GeoCoordinates

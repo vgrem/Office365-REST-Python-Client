@@ -1,8 +1,8 @@
 from typing import Optional
 
-from office365.onedrive.base_item import BaseItem
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity_collection import EntityCollection
+from office365.onedrive.base_item import BaseItem
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.driveitems.system_facet import SystemFacet

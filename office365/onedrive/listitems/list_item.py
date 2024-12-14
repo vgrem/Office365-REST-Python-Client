@@ -1,6 +1,6 @@
-from office365.onedrive.base_item import BaseItem
 from office365.entity_collection import EntityCollection
 from office365.onedrive.analytics.item_analytics import ItemAnalytics
+from office365.onedrive.base_item import BaseItem
 from office365.onedrive.contenttypes.info import ContentTypeInfo
 from office365.onedrive.documentsets.version import DocumentSetVersion
 from office365.onedrive.internal.queries.get_activities_by_interval import (

@@ -7343,10 +7343,6 @@
             <FunctionImport Name="Dispose" IsBindable="true">
                <Parameter Name="this" Type="SP.UserProfiles.PersonalCache"/>
             </FunctionImport>
-            <FunctionImport Name="LoadUserProfile" IsBindable="true">
-               <Parameter Name="this" Type="SP.UserProfiles.PersonalCache"/>
-               <Parameter Name="email" Type="Edm.String"/>
-            </FunctionImport>
             <FunctionImport Name="ReadCache" ReturnType="Collection(SP.UserProfiles.PersonalCacheItem)" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="SP.UserProfiles.PersonalCache"/>
                <Parameter Name="folderPath" Type="Edm.String"/>
@@ -8884,6 +8880,9 @@
             <FunctionImport Name="LoadMailDraft" ReturnType="SP.Publishing.CampaignPublicationMailDraftData" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
                <Parameter Name="requestParam" Type="SP.Publishing.CampaignPublicationLoadMailDraftParam"/>
+            </FunctionImport>
+            <FunctionImport Name="Prepare" ReturnType="Microsoft.SharePoint.Publishing.Amplify.Client.ClientAmplifyResults" IsBindable="true">
+               <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
             </FunctionImport>
             <FunctionImport Name="PublishAsBot" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.CampaignPublication"/>
@@ -12076,6 +12075,7 @@
             <FunctionImport Name="SaveDashboard" IsBindable="true">
                <Parameter Name="this" Type="SP.EmployeeExperienceController"/>
                <Parameter Name="employeeExperienceDashboardData" Type="Microsoft.SharePoint.EmployeeEngagement.Experience.DashboardContent"/>
+               <Parameter Name="userCards" Type="Edm.String"/>
                <Parameter Name="mySiteUrl" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="SetAnnouncementState" IsBindable="true">
@@ -12164,6 +12164,10 @@
                <Parameter Name="this" Type="SP.BrandCenter"/>
             </FunctionImport>
             <FunctionImport Name="DeleteSiteTheme" IsBindable="true">
+               <Parameter Name="this" Type="SP.BrandCenter"/>
+               <Parameter Name="themeId" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="DeleteTenantTheme" IsBindable="true">
                <Parameter Name="this" Type="SP.BrandCenter"/>
                <Parameter Name="themeId" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
@@ -15350,6 +15354,7 @@
             <FunctionImport Name="SP_Approvals_Disable">
                <Parameter Name="listId" Type="Edm.String"/>
                <Parameter Name="viewId" Type="Edm.String"/>
+               <Parameter Name="resetAll" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SP_Approvals_Enable">
                <Parameter Name="listId" Type="Edm.String"/>
@@ -17220,6 +17225,9 @@
             <FunctionImport Name="GetCollaborationInsightsOverview" ReturnType="Microsoft.SharePoint.Administration.TenantAdmin.CollaborationInsightsOverview" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
+            <FunctionImport Name="GetContentManagementAssesmentResults" ReturnType="Microsoft.SharePoint.Administration.TenantAdmin.ContentManagementAssessmentResults" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+            </FunctionImport>
             <FunctionImport Name="GetCopilotPromoOptInStatus" ReturnType="Edm.Boolean" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
@@ -17821,6 +17829,9 @@
             <FunctionImport Name="ReorderTargetedSites" ReturnType="Collection(SP.TargetedSiteDetails)" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="siteIds" Type="Collection(Edm.Guid)" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="RequestContentManagementAssessment" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
             <FunctionImport Name="RestoreContainer" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -20843,6 +20854,9 @@
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPClassificationPublishConfig/ModelClassification">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.Office.Server.ContentCenter.SPClassificationPublishConfig/ModelId">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.Office.Server.ContentCenter.SPRetentionLabelConfig">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -21878,10 +21892,25 @@
          <Annotations Target="Microsoft.SharePoint.Internal.GptResponse">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.SharePoint.IdentityModel.SPDefaultDocumentLibrary">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.IdentityModel.SPDefaultDocumentLibrary/lastModifiedBy">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.IdentityModel.SPDefaultDocumentLibrary/lastModifiedDateTime">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.SharePoint.IdentityModel.SPRubySite">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.IdentityModel.SPRubySite/channelGroupId">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.IdentityModel.SPRubySite/createdDateTime">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="Microsoft.SharePoint.IdentityModel.SPRubySite/defaultDocumentLibrary">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.IdentityModel.SPRubySite/description">
@@ -26109,9 +26138,6 @@
          <Annotations Target="SP.ApiData/Dispose(SP.UserProfiles.PersonalCache)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/LoadUserProfile(SP.UserProfiles.PersonalCache, Edm.String)">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="SP.ApiData/ReadCache(SP.UserProfiles.PersonalCache, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -26266,6 +26292,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/LoadMailDraft(SP.Publishing.CampaignPublication, SP.Publishing.CampaignPublicationLoadMailDraftParam)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/Prepare(SP.Publishing.CampaignPublication)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/PublishAsBot(SP.Publishing.CampaignPublication, Edm.String, Collection(Edm.String), Edm.String, Edm.String, Edm.String)">
@@ -27801,6 +27830,9 @@
          <Annotations Target="SP.ApiData/DeleteSiteTheme(SP.BrandCenter, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/DeleteTenantTheme(SP.BrandCenter, Edm.Int32)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/EnsureBrandColorsListFeature(SP.BrandCenter)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -28524,7 +28556,7 @@
          <Annotations Target="SP.ApiData/SP_Approvals_CreateItemRequest(SP.ApprovalsCreateRequestParameters)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SP_Approvals_Disable(Edm.String, Edm.String)">
+         <Annotations Target="SP.ApiData/SP_Approvals_Disable(Edm.String, Edm.String, Edm.Boolean)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_Approvals_Enable(Edm.String, Edm.Boolean, Edm.String)">
@@ -29296,6 +29328,7 @@
             <Property Name="ContentType" Type="Edm.String"/>
             <Property Name="Kind" Type="Edm.String"/>
             <Property Name="ModelClassification" Type="Edm.String"/>
+            <Property Name="ModelId" Type="Edm.String"/>
             <Property Name="RetentionLabel" Type="Microsoft.Office.Server.ContentCenter.SPRetentionLabelConfig"/>
             <Property Name="SensitivityLabel" Type="Microsoft.Office.Server.ContentCenter.SPSensitivityLabelConfig"/>
          </ComplexType>
@@ -33503,6 +33536,7 @@
             <Property Name="PrePublishValidationsErrorCodesForSharePointSites" Type="Collection(SP.Publishing.PrePublishValidationsErrorCodesForSharePointSite)"/>
             <Property Name="PrePublishValidationsErrorCodesForTeams" Type="Collection(SP.Publishing.PrePublishValidationsErrorCodesForTeams)"/>
             <Property Name="PrePublishValidationsErrorCodesForVivaEngage" Type="SP.Publishing.PrePublishValidationsErrorCodesForVivaEngage"/>
+            <Property Name="PrePublishValidationsErrorCodesForVivaEngageV2" Type="Collection(SP.Publishing.PrePublishValidationsErrorCodesForVivaEngage)"/>
          </ComplexType>
          <ComplexType Name="ProfileCoreProperties" BaseType="SP.Publishing.PersonIdentity">
             <Property Name="PictureUrl" Type="Edm.String"/>
@@ -33588,11 +33622,13 @@
             <Property Name="SharePointPublishingStatus" Type="Collection(SP.Publishing.SharePointPublishingStatusResponse)"/>
             <Property Name="TeamsPublishingStatus" Type="Collection(SP.Publishing.TeamsPublishingStatusResponse)"/>
             <Property Name="VivaEngagePublishingStatus" Type="SP.Publishing.VivaEngagePublishingStatus"/>
+            <Property Name="VivaEngageV2PublishingStatus" Type="Collection(SP.Publishing.VivaEngagePublishingStatus)"/>
             <Property Name="YammerPublishingStatus" Type="Collection(SP.KeyValue)"/>
          </ComplexType>
          <ComplexType Name="SharePointPublishingStatusResponse">
             <Property Name="SiteId" Type="Edm.String"/>
             <Property Name="Status" Type="SP.Publishing.SharePointPublishingStatus"/>
+            <Property Name="WebId" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SharePointPublishingStatus">
             <Property Name="DestinationPageURL" Type="Edm.String"/>
@@ -36223,8 +36259,14 @@
          </Association>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.IdentityModel">
+         <ComplexType Name="SPDefaultDocumentLibrary">
+            <Property Name="lastModifiedBy" Type="Edm.String"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTime" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="SPRubySite">
             <Property Name="channelGroupId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="createdDateTime" Type="Edm.DateTime" Nullable="false"/>
+            <Property Name="defaultDocumentLibrary" Type="Microsoft.SharePoint.IdentityModel.SPDefaultDocumentLibrary"/>
             <Property Name="description" Type="Edm.String"/>
             <Property Name="id" Type="Edm.Guid" Nullable="false"/>
             <Property Name="lastModifiedDateTime" Type="Edm.DateTime" Nullable="false"/>
@@ -36975,6 +37017,25 @@
             <Property Name="totalSites" Type="Edm.Int32" Nullable="false"/>
             <Property Name="totalUsers" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="ContentManagementAssessmentResults">
+            <Property Name="requestedTime" Type="Edm.DateTime"/>
+            <Property Name="siteLifecycleManagementPolicyExecutionId" Type="Edm.Int32"/>
+            <Property Name="siteLifecycleManagementPolicyId" Type="Edm.Guid"/>
+            <Property Name="siteLifecycleManagementPolicySyncState" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="sitePermissionsReportDefinitionId" Type="Edm.String"/>
+            <Property Name="sitePermissionsReportDetails" Type="Microsoft.SharePoint.Administration.TenantAdmin.SitePermissionsReportDetails"/>
+            <Property Name="sitePermissionsReportId" Type="Edm.String"/>
+            <Property Name="sitePermissionsReportQueuedTime" Type="Edm.DateTime"/>
+            <Property Name="sitePermissionsReportSyncState" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="timerJobLatestExecutionTime" Type="Edm.DateTime"/>
+            <Property Name="totalCountOfSitesInTenant" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="SitePermissionsReportDetails">
+            <Property Name="anyoneLinksSiteCount" Type="Edm.Int32"/>
+            <Property Name="externallySharedSiteCount" Type="Edm.Int32"/>
+            <Property Name="oversharedSiteCount" Type="Edm.Int32"/>
+            <Property Name="uniqueSiteCount" Type="Edm.Int32"/>
+         </ComplexType>
          <ComplexType Name="GroupSitesActivityDetail">
             <Property Name="GroupId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="LastActivityDate" Type="Edm.DateTime"/>
@@ -37235,10 +37296,13 @@
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Administration.OdbLicenseEnforcement">
          <ComplexType Name="UnlicensedOdbLicenseEnforcementWarningContext">
+            <Property Name="GeneratedOn" Type="Edm.DateTime" Nullable="false"/>
             <Property Name="WarningStatus" Type="Edm.Int32" Nullable="false"/>
             <Property Name="WarningStatusEffectiveUntil" Type="Edm.DateTime"/>
          </ComplexType>
          <ComplexType Name="UnlicensedOdbTenantMetrics">
+            <Property Name="billableCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="billableSizeBytes" Type="Edm.Double" Nullable="false"/>
             <Property Name="complianceHoldCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="complianceHoldSizeBytes" Type="Edm.Double" Nullable="false"/>
             <Property Name="count" Type="Edm.Int32" Nullable="false"/>
