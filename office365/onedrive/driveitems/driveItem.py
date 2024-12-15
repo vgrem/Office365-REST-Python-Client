@@ -66,6 +66,7 @@ class DriveItem(BaseItem):
     OneDrive and SharePoint are returned as driveItem resources"""
 
     def get_files(self, recursive=False, page_size=None):
+        # type: (bool, Optional[int]) -> EntityCollection["DriveItem"]
         """Retrieves files
         :param bool recursive: Determines whether to enumerate folders recursively
         :param int page_size: Page size
@@ -94,6 +95,7 @@ class DriveItem(BaseItem):
         return return_type
 
     def get_folders(self, recursive=False, page_size=None):
+        # type: (bool, Optional[int]) -> EntityCollection["DriveItem"]
         """Retrieves folders
         :param bool recursive: Determines whether to enumerate folders recursively
         :param int page_size: Page size
@@ -176,6 +178,16 @@ class DriveItem(BaseItem):
         )
         self.context.add_query(qry)
         return return_type
+
+    def discard_checkout(self):
+        """Discard the check out of a driveItem. This action releases a driveItem resource that was previously
+        checked out. Any changes made to the item while it was checked out are discarded.
+
+        The same user that performed the checkout must discard it. Another alternative is to use application permissions
+        """
+        qry = ServiceOperationQuery(self, "discardCheckout")
+        self.context.add_query(qry)
+        return self
 
     def extract_sensitivity_labels(self):
         # type: () -> ClientResult[ExtractSensitivityLabelsResult]
