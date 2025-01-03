@@ -1,5 +1,6 @@
 from typing import Any, Callable, List, Optional
 
+from office365.admin.admin import Admin
 from office365.booking.solutions.root import SolutionsRoot
 from office365.communications.cloud_communications import CloudCommunications
 from office365.delta_collection import DeltaCollection
@@ -36,7 +37,7 @@ from office365.directory.rolemanagement.management import RoleManagement
 from office365.directory.rolemanagement.role import DirectoryRole
 from office365.directory.security.security import Security
 from office365.directory.serviceprincipals.collection import ServicePrincipalCollection
-from office365.directory.tenant_relationship import TenantRelationship
+from office365.directory.tenantinformation.relationship import TenantRelationship
 from office365.directory.users.collection import UserCollection
 from office365.directory.users.user import User
 from office365.education.root import EducationRoot
@@ -47,7 +48,6 @@ from office365.intune.devices.collection import DeviceCollection
 from office365.intune.devices.management.management import DeviceManagement
 from office365.intune.organizations.contact import OrgContact
 from office365.intune.organizations.organization import Organization
-from office365.onedrive.admin import Admin
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot

@@ -1,8 +1,10 @@
 from office365.directory.security.alerts.alert import Alert
+from office365.directory.security.alerts.collection import AlertCollection
 from office365.directory.security.attacksimulations.root import AttackSimulationRoot
 from office365.directory.security.cases.root import CasesRoot
 from office365.directory.security.hunting_query_results import HuntingQueryResults
 from office365.directory.security.incidents.incident import Incident
+from office365.directory.security.scorecontrol.profile import SecureScoreControlProfile
 from office365.directory.security.threatintelligence.threat_intelligence import (
     ThreatIntelligence,
 )
@@ -35,12 +37,10 @@ class Security(Entity):
 
     @property
     def alerts(self):
-        # type: () -> EntityCollection[Alert]
+        # type: () -> AlertCollection
         return self.properties.get(
             "alerts",
-            EntityCollection(
-                self.context, Alert, ResourcePath("alerts", self.resource_path)
-            ),
+            AlertCollection(self.context, ResourcePath("alerts", self.resource_path)),
         )
 
     @property
@@ -84,6 +84,18 @@ class Security(Entity):
         )
 
     @property
+    def secure_score_control_profiles(self):
+        """"""
+        return self.properties.get(
+            "secureScoreControlProfiles",
+            EntityCollection(
+                self.context,
+                SecureScoreControlProfile,
+                ResourcePath("secureScoreControlProfiles", self.resource_path),
+            ),
+        )
+
+    @property
     def triggers(self):
         """"""
         return self.properties.get(
@@ -106,6 +118,7 @@ class Security(Entity):
             property_mapping = {
                 "alerts_v2": self.alerts_v2,
                 "attackSimulation": self.attack_simulation,
+                "secureScoreControlProfiles": self.secure_score_control_profiles,
                 "threatIntelligence": self.threat_intelligence,
             }
             default_value = property_mapping.get(name, None)

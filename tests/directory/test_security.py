@@ -11,11 +11,24 @@ class TestSecurity(TestCase):
             test_tenant, test_client_id, test_client_secret
         )
 
-    def test1_list_incidents(self):
+    def test1_create_alert(self):
+        pass
+        # result = self.client.security.alerts.add(
+        #    "Simulated Phishing Alert",
+        #    "This is a test alert for simulation purposes.",
+        #    "high",
+        #    "ThreatManagement",
+        #    "newAlert",
+        #    "Custom",
+        #    {"provider": "CustomProvider", "providerVersion": "1.0"},
+        # ).execute_query()
+        # self.assertIsNotNone(result.resource_path)
+
+    def test2_list_incidents(self):
         col = self.client.security.incidents.top(10).get().execute_query()
         self.assertIsNotNone(col.resource_path)
 
-    def test2_list_threat_assessment_requests(self):
+    def test3_list_threat_assessment_requests(self):
         col = (
             self.client.information_protection.threat_assessment_requests.get().execute_query()
         )

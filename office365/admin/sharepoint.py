@@ -1,5 +1,5 @@
+from office365.admin.sharepoint_settings import SharepointSettings
 from office365.entity import Entity
-from office365.onedrive.sharepoint_settings import SharepointSettings
 from office365.runtime.paths.resource_path import ResourcePath
 
 

@@ -264,7 +264,8 @@ class Web(SecurableObject):
         :param str view_xml:
         """
         if view_xml is None:
-            view_xml = "<View><Query></Query></View>"
+            view_xml = RenderListDataParameters()
+            view_xml.ViewXml = "<View><Query></Query></View>"
         return List.get_onedrive_list_data_as_stream(self.context, view_xml)
 
     def get_list_operation(self, list_id, operation_id):
@@ -2561,6 +2562,11 @@ class Web(SecurableObject):
         # type: () -> Optional[bool]
         """Specifies whether the tree view is enabled on the site"""
         return self.properties.get("TreeViewEnabled", None)
+
+    @property
+    def taxonomy_list(self):
+        """A special list that stores the mapping between taxonomy term IDs and their corresponding values"""
+        return self.lists.get_by_title("TaxonomyHiddenList")
 
     def get_property(self, name, default_value=None):
         if default_value is None:

@@ -39197,6 +39197,11 @@ within the time frame of their original request."/>
             <Parameter Name="value" Type="Collection(graph.site)"/>
             <ReturnType Type="Collection(graph.site)"/>
          </Action>
+         <Action Name="remove" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.conversationMember)"/>
+            <Parameter Name="values" Type="Collection(graph.conversationMember)"/>
+            <ReturnType Type="Collection(graph.actionResultPart)"/>
+         </Action>
          <Function Name="getAllSites" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.site)"/>
             <ReturnType Type="Collection(graph.site)"/>
