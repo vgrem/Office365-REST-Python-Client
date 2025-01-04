@@ -53,6 +53,17 @@ class WorkbookWorksheet(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def used_range(self, values_only=False):
+        """Return the used range of the given range object.
+
+        :param bool values_only: Optional. Considers only cells with values as used cells.
+        """
+        return_type = WorkbookRange(self.context)
+        params = {"valuesOnly": values_only}
+        qry = FunctionQuery(self, "usedRange", params, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     @property
     def charts(self):
         # type: () -> EntityCollection[WorkbookChart]

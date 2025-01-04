@@ -12,6 +12,12 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 class WorkbookRange(Entity):
     """Range represents a set of one or more contiguous cells such as a cell, a row, a column, block of cells, etc."""
 
+    def __repr__(self):
+        return self.address or self.entity_type_name
+
+    def __str__(self):
+        return self.address or self.entity_type_name
+
     def cell(self, row, column):
         """
         Gets the range object containing the single cell based on row and column numbers. The cell can be outside
@@ -52,6 +58,17 @@ class WorkbookRange(Entity):
         """Get the range visible from a filtered range."""
         return_type = WorkbookRangeView(self.context)
         qry = FunctionQuery(self, "visibleView", return_type=return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def used_range(self, values_only=False):
+        """Return the used range of the given range object.
+
+        :param bool values_only: Optional. Considers only cells with values as used cells.
+        """
+        return_type = WorkbookRange(self.context)
+        params = {"valuesOnly": values_only}
+        qry = FunctionQuery(self, "usedRange", params, return_type)
         self.context.add_query(qry)
         return return_type
 

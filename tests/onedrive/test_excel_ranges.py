@@ -30,7 +30,7 @@ class TestExcelRanges(GraphTestCase):
         self.__class__.named_item = result
 
     def test2_names_get(self):
-        result = self.__class__.named_item.get().execute_query()
+        result = self.__class__.named_item.get().execute_query_retry(2)
         self.assertIsNotNone(result.resource_path)
 
     def test3_list_range(self):
@@ -42,6 +42,10 @@ class TestExcelRanges(GraphTestCase):
     #    result = self.__class__.range.insert("Right").execute_query()
     #    self.assertIsNotNone(result.address)
 
-    def test5_clear_range(self):
+    def test5_used_range(self):
+        result = self.__class__.range.used_range().execute_query()
+        self.assertIsNotNone(result.address)
+
+    def test6_clear_range(self):
         result = self.__class__.range.clear().execute_query()
         self.assertIsNotNone(result.address)

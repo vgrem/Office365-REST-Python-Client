@@ -1,21 +1,46 @@
 from office365.entity import Entity
 from office365.onedrive.workbooks.charts.axes import WorkbookChartAxes
 from office365.onedrive.workbooks.charts.data_labels import WorkbookChartDataLabels
+from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class WorkbookChart(Entity):
     """Represents a chart object in a workbook."""
 
-    def set_position(self, startCell, endCell):
+    def image(self, width=None, height=None):
+        """Renders the chart as a base64-encoded image by scaling the chart to fit the specified dimensions.
+
+        :param int width: Specifies the width of the rendered image in pixels.
+        :param int height: Specifies the height of the rendered image in pixels.
+        """
+        return_type = ClientResult(self.context)
+        params = {"width": width, "height": height}
+        qry = FunctionQuery(self, "image", params, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def set_data(self, source_data, series_by):
+        """
+        Updates the data source of a chart
+        :param dict source_data:
+        :param str series_by:
+        """
+        payload = {"sourceData": source_data, "seriesBy": series_by}
+        qry = ServiceOperationQuery(self, "setData", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def set_position(self, start_cell, end_cell):
         """Positions the chart relative to cells on the worksheet.
-        :param str startCell: The start cell. It is where the chart is moved to. The start cell is the top-left or
+        :param str start_cell: The start cell. It is where the chart is moved to. The start cell is the top-left or
              top-right cell, depending on the user's right-to-left display settings.
-        :param str endCell: The end cell. If specified, the chart's width and height is set to fully cover up
+        :param str end_cell: The end cell. If specified, the chart's width and height is set to fully cover up
              this cell/range.
         """
-        payload = {"startCell": startCell, "endCell": endCell}
+        payload = {"startCell": start_cell, "endCell": end_cell}
         qry = ServiceOperationQuery(self, "setPosition", None, payload)
         self.context.add_query(qry)
         return self

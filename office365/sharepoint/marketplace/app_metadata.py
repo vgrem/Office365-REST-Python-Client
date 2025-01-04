@@ -7,6 +7,9 @@ from office365.sharepoint.entity import Entity
 class CorporateCatalogAppMetadata(Entity):
     """App metadata for apps stored in the corporate catalog."""
 
+    def __str__(self):
+        return self.title or self.entity_type_name
+
     def deploy(self, skip_feature_deployment):
         """This method deploys an app on the app catalog.  It MUST be called in the context of the tenant app
         catalog web or it will fail.
@@ -15,6 +18,13 @@ class CorporateCatalogAppMetadata(Entity):
         """
         payload = {"skipFeatureDeployment": skip_feature_deployment}
         qry = ServiceOperationQuery(self, "Deploy", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def remove(self):
+        """This is the inverse of the add step above. One removed from the app catalog,
+        the solution can't be deployed."""
+        qry = ServiceOperationQuery(self, "Remove")
         self.context.add_query(qry)
         return self
 
@@ -68,7 +78,8 @@ class CorporateCatalogAppMetadata(Entity):
 
     @property
     def property_ref_name(self):
-        return "AadAppId"
+        # return "AadAppId"
+        return "ID"
 
     @property
     def entity_type_name(self):

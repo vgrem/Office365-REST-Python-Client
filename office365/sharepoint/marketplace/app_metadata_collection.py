@@ -22,3 +22,11 @@ class CorporateCatalogAppMetadataCollection(
         return CorporateCatalogAppMetadata(
             self.context, ServiceOperationPath("GetById", [app_id], self.resource_path)
         )
+
+    def get_by_title(self, title):
+        """
+        Get app metadata by title.
+
+        :param str title: The title of the app to retrieve.
+        """
+        return self.first("title eq '{0}'".format(title))

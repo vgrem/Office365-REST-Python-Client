@@ -35,7 +35,11 @@ class TestExcelWorksheets(GraphTestCase):
         self.assertGreaterEqual(len(result), 1)
         self.__class__.worksheet = result[0]
 
-    def test3_protect_worksheet(self):
+    def test3_used_range(self):
+        result = self.__class__.worksheet.used_range().execute_query()
+        self.assertIsNotNone(result.address)
+
+    def test4_protect_worksheet(self):
         ws = self.__class__.worksheet
         options = WorkbookWorksheetProtectionOptions(allowDeleteRows=False)
         ws.protection.protect(options).execute_query()

@@ -1,3 +1,5 @@
+import os
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
@@ -7,6 +9,12 @@ from office365.sharepoint.files.file import File
 from office365.sharepoint.marketplace.app_metadata import CorporateCatalogAppMetadata
 from office365.sharepoint.marketplace.app_metadata_collection import (
     CorporateCatalogAppMetadataCollection,
+)
+from office365.sharepoint.marketplace.corporatecuratedgallery.app_request_information import (
+    SPStoreAppRequestInformation,
+)
+from office365.sharepoint.marketplace.corporatecuratedgallery.app_response_information import (
+    SPStoreAppResponseInformation,
 )
 from office365.sharepoint.marketplace.corporatecuratedgallery.app_upgrade_availability import (
     AppUpgradeAvailability,
@@ -22,7 +30,7 @@ from office365.sharepoint.marketplace.sitecollection.appcatalog.allowed_items im
 class TenantCorporateCatalogAccessor(Entity):
     """Accessor for the tenant corporate catalog."""
 
-    def add(self, content, overwrite, url):
+    def add(self, content, overwrite, url=None):
         """
         Adds a file to the corporate catalog.
 
@@ -32,8 +40,27 @@ class TenantCorporateCatalogAccessor(Entity):
         :param str url: Specifies the URL of the file to be added.
         """
         return_type = File(self.context)
-        payload = {"Content": content, "Overwrite": overwrite, "Url": url}
-        qry = ServiceOperationQuery(self, "Add", None, payload, None, return_type)
+        params = {"Overwrite": overwrite, "Url": url}
+        qry = ServiceOperationQuery(self, "Add", params, content, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def app_from_path(self, path, overwrite):
+        """
+        Adds a file to the corporate catalog.
+        """
+        with open(path, "rb") as f:
+            content = f.read()
+        url = os.path.basename(path)
+        return self.add(content=content, overwrite=overwrite, url=url)
+
+    def app_requests(self):
+        """"""
+        return_type = ClientResult(self.context, SPStoreAppResponseInformation())
+        payload = {"AppRequestInfo": SPStoreAppRequestInformation()}
+        qry = ServiceOperationQuery(
+            self, "AppRequests", None, payload, None, return_type
+        )
         self.context.add_query(qry)
         return return_type
 
@@ -69,6 +96,17 @@ class TenantCorporateCatalogAccessor(Entity):
         )
         self.context.add_query(qry)
         return return_type
+
+    def upload(self, content, overwrite, url, xor_hash=None):
+        payload = {
+            "Content": content,
+            "Overwrite": overwrite,
+            "Url": url,
+            "XorHash": xor_hash,
+        }
+        qry = ServiceOperationQuery(self, "Upload", None, payload)
+        self.context.add_query(qry)
+        return self
 
     def send_app_request_status_notification_email(self, request_guid):
         """
