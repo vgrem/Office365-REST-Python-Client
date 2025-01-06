@@ -2,6 +2,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
+from office365.sharepoint.multigeo.storage_quota import StorageQuota
 from office365.sharepoint.multigeo.unified_group import UnifiedGroup
 from office365.sharepoint.multigeo.user_personal_site_location import (
     UserPersonalSiteLocation,
@@ -38,6 +39,19 @@ class MultiGeoServices(Entity):
         )
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def storage_quotas(self):
+        # type: () -> EntityCollection[UnifiedGroup]
+        """ """
+        return self.properties.get(
+            "StorageQuotas",
+            EntityCollection(
+                self.context,
+                StorageQuota,
+                ResourcePath("StorageQuotas", self.resource_path),
+            ),
+        )
 
     @property
     def unified_groups(self):

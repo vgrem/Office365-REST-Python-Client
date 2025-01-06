@@ -19,6 +19,9 @@ from office365.sharepoint.marketplace.corporatecuratedgallery.app_response_infor
 from office365.sharepoint.marketplace.corporatecuratedgallery.app_upgrade_availability import (
     AppUpgradeAvailability,
 )
+from office365.sharepoint.marketplace.corporatecuratedgallery.card_designs import (
+    CardDesigns,
+)
 from office365.sharepoint.marketplace.corporatecuratedgallery.teams_package_download import (
     TeamsPackageDownload,
 )
@@ -46,6 +49,7 @@ class TenantCorporateCatalogAccessor(Entity):
         return return_type
 
     def app_from_path(self, path, overwrite):
+        # type: (str, bool) -> File
         """
         Adds a file to the corporate catalog.
         """
@@ -66,6 +70,7 @@ class TenantCorporateCatalogAccessor(Entity):
 
     def download_teams_solution(self, _id):
         """
+        Downloads a Microsoft Teams solution package associated with an app from the SharePoint App Catalog
         :param int _id:
         """
         return_type = TeamsPackageDownload(self.context)
@@ -87,6 +92,7 @@ class TenantCorporateCatalogAccessor(Entity):
 
     def is_app_upgrade_available(self, _id):
         """
+        Determines if an upgrade is available for an app in the SharePoint app catalog
         :param int _id:
         """
         return_type = ClientResult(self.context, AppUpgradeAvailability())
@@ -98,6 +104,7 @@ class TenantCorporateCatalogAccessor(Entity):
         return return_type
 
     def upload(self, content, overwrite, url, xor_hash=None):
+        """"""
         payload = {
             "Content": content,
             "Overwrite": overwrite,
@@ -110,6 +117,7 @@ class TenantCorporateCatalogAccessor(Entity):
 
     def send_app_request_status_notification_email(self, request_guid):
         """
+        Sends email notifications about the status of an app request in the corporate app catalog
         :param str request_guid:
         """
         qry = ServiceOperationQuery(
@@ -129,6 +137,14 @@ class TenantCorporateCatalogAccessor(Entity):
         )
 
     @property
+    def card_designs(self):
+        """Returns the card designs available in this corporate catalog."""
+        return self.properties.get(
+            "CardDesigns",
+            CardDesigns(self.context, ResourcePath("CardDesigns", self.resource_path)),
+        )
+
+    @property
     def site_collection_app_catalogs_sites(self):
         """Returns an accessor to the allow list of site collections allowed to have site collection corporate
         catalogs."""
@@ -140,10 +156,15 @@ class TenantCorporateCatalogAccessor(Entity):
             ),
         )
 
+    @property
+    def entity_type_name(self):
+        return "Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.TenantCorporateCatalogAccessor"
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "AvailableApps": self.available_apps,
+                "CardDesigns": self.card_designs,
                 "SiteCollectionAppCatalogsSites": self.site_collection_app_catalogs_sites,
             }
             default_value = property_mapping.get(name, None)

@@ -3,6 +3,9 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity import Entity
+from office365.sharepoint.tenant.administration.default_time_zone_id import (
+    TenantDefaultTimeZoneId,
+)
 from office365.sharepoint.tenant.administration.smtp_server import SmtpServer
 from office365.sharepoint.tenant.administration.types import (
     AutoQuotaEnabled,
@@ -11,7 +14,7 @@ from office365.sharepoint.tenant.administration.types import (
 
 
 class TenantAdminSettingsService(Entity):
-    """"""
+    """Manage various tenant-level settings related to SharePoint administration"""
 
     def __init__(self, context):
         static_path = ResourcePath(
@@ -20,7 +23,7 @@ class TenantAdminSettingsService(Entity):
         super(TenantAdminSettingsService, self).__init__(context, static_path)
 
     def get_tenant_sharing_status(self):
-        """"""
+        """Retrieves the current state of sharing settings for a tenant"""
         return_type = ClientResult(self.context, int())
         qry = ServiceOperationQuery(
             self, "GetTenantSharingStatus", None, None, None, return_type
@@ -38,20 +41,31 @@ class TenantAdminSettingsService(Entity):
 
     @property
     def available_managed_paths_for_site_creation(self):
-        """"""
+        """
+        Specifies the managed paths that are available for the creation of new SharePoint sites within a tenant.
+        """
         return self.properties.get(
             "AvailableManagedPathsForSiteCreation", StringCollection()
         )
 
     @property
     def disable_groupify(self):
-        """"""
+        """
+        Controls whether SharePoint site owners in your tenant are allowed to convert classic SharePoint sites into
+        Microsoft 365 Groups (a process commonly known as "groupifying" a site)
+        """
         return self.properties.get("DisableGroupify", DisableGroupify())
 
     @property
     def smtp_server(self):
-        """"""
+        """Specifies the server address or endpoint of the SMTP server that SharePoint Online or tenant-related
+        services use for sending emails"""
         return self.properties.get("SmtpServer", SmtpServer())
+
+    @property
+    def tenant_default_time_zone_id(self):
+        """Default time zone configured for a SharePoint Online tenant"""
+        return self.properties.get("TenantDefaultTimeZoneId", TenantDefaultTimeZoneId())
 
     @property
     def entity_type_name(self):
@@ -62,6 +76,7 @@ class TenantAdminSettingsService(Entity):
             property_mapping = {
                 "AvailableManagedPathsForSiteCreation": self.available_managed_paths_for_site_creation,
                 "SmtpServer": self.smtp_server,
+                "TenantDefaultTimeZoneId": self.tenant_default_time_zone_id,
             }
             default_value = property_mapping.get(name, None)
         return super(TenantAdminSettingsService, self).get_property(name, default_value)

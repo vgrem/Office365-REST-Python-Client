@@ -4,7 +4,7 @@ from office365.sharepoint.entity import Entity
 
 
 class TenantCrawlVersionsInfoProvider(Entity):
-    """ """
+    """Retrieves information about crawl versions for a tenant in SharePoint"""
 
     def disable_crawl_versions(self, site_id):
         """

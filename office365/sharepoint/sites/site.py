@@ -27,10 +27,10 @@ from office365.sharepoint.sitehealth.summary import SiteHealthSummary
 from office365.sharepoint.sites.azure_container_Info import (
     ProvisionedTemporaryAzureContainerInfo,
 )
+from office365.sharepoint.sites.home.site import SPHSite
 from office365.sharepoint.sites.html_field_security_setting import (
     HTMLFieldSecuritySetting,
 )
-from office365.sharepoint.sites.sph_site import SPHSite
 from office365.sharepoint.sites.upgrade_info import UpgradeInfo
 from office365.sharepoint.sites.usage_info import UsageInfo
 from office365.sharepoint.sites.version_policy_manager import SiteVersionPolicyManager

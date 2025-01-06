@@ -88,6 +88,8 @@ class SPHelper(Entity):
     @staticmethod
     def get_my_groups(context, logon_name, offset, length, return_type=None):
         """
+        Retrieves information about groups that a user belongs to.
+
         :param office365.sharepoint.client_context.ClientContext context: SharePoint context
         :param str logon_name: User's login
         :param int offset: Result offset

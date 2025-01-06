@@ -13,6 +13,12 @@ class SharePointDirectoryProvider(Entity):
             )
         super(SharePointDirectoryProvider, self).__init__(context, resource_path)
 
+    def check_site_availability(self, site_url):
+        """"""
+        from office365.sharepoint.directory.helper import SPHelper
+
+        return SPHelper.check_site_availability(self.context, site_url)
+
     def read_directory_object(self, data):
         # type: (DirectoryObjectData) -> ClientResult[DirectoryObjectData]
         """"""

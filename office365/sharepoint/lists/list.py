@@ -177,6 +177,21 @@ class List(SecurableObject):
         self.root_folder.ensure_property("ServerRelativeUrl", _loaded)
         return return_type
 
+    def get_flow_permission_level(self):
+        """"""
+        from office365.sharepoint.flows.connector_result import ConnectorResult
+        from office365.sharepoint.flows.permissions import FlowPermissions
+
+        return_type = ConnectorResult(self.context)
+
+        def _loaded():
+            FlowPermissions.get_flow_permission_level_on_list(
+                self.context, self.title, return_type
+            )
+
+        self.ensure_property("Title", _loaded)
+        return return_type
+
     def get_sharing_settings(self):
         """Retrieves a sharing settings for a List"""
         return_type = ObjectSharingSettings(self.context)

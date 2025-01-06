@@ -1,3 +1,7 @@
+from office365.runtime.client_value_collection import ClientValueCollection
+from office365.sharepoint.search.reports.abandonedqueries.item import (
+    ReportAbandonedQueriesItem,
+)
 from office365.sharepoint.search.reports.base import ReportBase
 
 
@@ -6,4 +10,10 @@ class ReportAbandonedQueries(ReportBase):
     queries that might create user dissatisfaction and to improve the discoverability of content.
     """
 
-    pass
+    def __init__(self, reports=None):
+        super(ReportAbandonedQueries, self).__init__()
+        self.Reports = ClientValueCollection(ReportAbandonedQueriesItem, reports)
+
+    @property
+    def entity_type_name(self):
+        return "Microsoft.Office.Server.Search.REST.ReportAbandonedQueries"

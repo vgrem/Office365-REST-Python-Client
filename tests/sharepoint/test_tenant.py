@@ -3,6 +3,7 @@ from unittest import TestCase
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
+from office365.sharepoint.sites.site import Site
 from office365.sharepoint.tenant.administration.sharing_capabilities import (
     SharingCapabilities,
 )
@@ -23,6 +24,7 @@ from tests import (
 
 class TestTenant(TestCase):
     target_site_props = None  # type: SiteProperties
+    target_site = None  # type: Site
 
     @classmethod
     def setUpClass(cls):
@@ -193,10 +195,11 @@ class TestTenant(TestCase):
         result = self.tenant.get_spo_all_web_templates().execute_query()
         self.assertIsNotNone(result)
 
-    def test_28_get_collaboration_insights_data(self):
-        # Note: You need a SharePoint Advanced Management license to perform this action
-        result = self.tenant.get_collaboration_insights_data().execute_query()
-        self.assertIsNotNone(result.value)
+    #SharePoint Advanced Management license is needed to perform this action
+    #def test_28_get_collaboration_insights_data(self):
+    #    # Note: You need a SharePoint Advanced Management license to perform this action
+    #    result = self.tenant.get_collaboration_insights_data().execute_query()
+    #    self.assertIsNotNone(result.value)
 
     def test_29_get_app_service_principal(self):
         from office365.sharepoint.tenant.administration.internal.appservice.principal import (
@@ -214,3 +217,25 @@ class TestTenant(TestCase):
     # def test_31_get_ransomware_events_overview(self):
     #    result = self.tenant.get_ransomware_events_overview().execute_query()
     #    self.assertIsNotNone(result.value)
+
+    def test_32_get_admin_endpoints(self):
+        result = self.tenant.admin_endpoints.get().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
+    def test_33_get_top_files_sharing_insights(self):
+        result = self.tenant.get_top_files_sharing_insights().execute_query()
+        self.assertIsNotNone(result.resource_path)
+
+    # def test_34_get_spo_app_billing_policies(self):
+    #    result = self.tenant.get_spo_app_billing_policies().execute_query()
+    #    self.assertIsNotNone(result.value)
+
+    # def test_35_get_site_move_service(self):
+    #    target_site = self.client.site.select(["Id"]).get().execute_query()
+    #    from office365.sharepoint.administration.sitemove.service import SiteMoveService
+    #    result = SiteMoveService(self.client, site_id=target_site.id).get().execute_query()
+    #    self.assertIsNotNone(result.resource_path)
+
+    def test_36_get_multi_geo_services(self):
+        result = self.tenant.multi_geo.storage_quotas.get().execute_query()
+        self.assertIsNotNone(result.resource_path)

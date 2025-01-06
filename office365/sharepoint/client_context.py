@@ -499,6 +499,22 @@ class ClientContext(ClientRuntimeContext):
         return FolderColoring(self, ResourcePath("foldercoloring"))
 
     @property
+    def font_packages(self):
+        """Alias to FontPackageCollection"""
+
+        from office365.sharepoint.fontpackages.collection import FontPackageCollection
+
+        return FontPackageCollection(self, ResourcePath("fontpackages"))
+
+    @property
+    def site_font_packages(self):
+        """Alias to FontPackageCollection"""
+
+        from office365.sharepoint.fontpackages.collection import FontPackageCollection
+
+        return FontPackageCollection(self, ResourcePath("sitefontpackages"))
+
+    @property
     def group_site_manager(self):
         """Alias to GroupSiteManager"""
         from office365.sharepoint.portal.groups.site_manager import GroupSiteManager
@@ -541,6 +557,16 @@ class ClientContext(ClientRuntimeContext):
         from office365.sharepoint.userprofiles.profile_loader import ProfileLoader
 
         return ProfileLoader(self)
+
+    @property
+    def document_crawl_log(self):
+        """Alias to DocumentCrawlLog"""
+
+        from office365.sharepoint.search.administration.document_crawl_log import (
+            DocumentCrawlLog,
+        )
+
+        return DocumentCrawlLog(self)
 
     @property
     def lists(self):
@@ -636,7 +662,7 @@ class ClientContext(ClientRuntimeContext):
     @property
     def home_site(self):
         """Alias to SPHSite."""
-        from office365.sharepoint.sites.sph_site import SPHSite
+        from office365.sharepoint.sites.home.site import SPHSite
 
         return SPHSite(self, ResourcePath("SPHSite"))
 

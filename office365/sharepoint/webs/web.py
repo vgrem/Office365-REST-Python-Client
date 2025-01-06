@@ -103,6 +103,9 @@ from office365.sharepoint.views.view import View
 from office365.sharepoint.webparts.client.collection import ClientWebPartCollection
 from office365.sharepoint.webs.calendar_type import CalendarType
 from office365.sharepoint.webs.context_web_information import ContextWebInformation
+from office365.sharepoint.webs.dataleakage_prevention_status_info import (
+    SPDataLeakagePreventionStatusInfo,
+)
 from office365.sharepoint.webs.information_collection import WebInformationCollection
 from office365.sharepoint.webs.modernize_homepage_result import ModernizeHomepageResult
 from office365.sharepoint.webs.multilingual_settings import MultilingualSettings
@@ -2199,6 +2202,16 @@ class Web(SecurableObject):
         return self.properties.get("Configuration", None)
 
     @property
+    def data_leakage_prevention_status_info(self):
+        return self.properties.get(
+            "DataLeakagePreventionStatusInfo",
+            SPDataLeakagePreventionStatusInfo(
+                self.context,
+                ResourcePath("DataLeakagePreventionStatusInfo", self.resource_path),
+            ),
+        )
+
+    @property
     def description_resource(self):
         """A UserResource object that represents the description of this web."""
         return self.properties.get(
@@ -2581,6 +2594,7 @@ class Web(SecurableObject):
                 "ContentTypes": self.content_types,
                 "ClientWebParts": self.client_web_parts,
                 "CurrentUser": self.current_user,
+                "DataLeakagePreventionStatusInfo": self.data_leakage_prevention_status_info,
                 "DescriptionResource": self.description_resource,
                 "DescriptionTranslations": self.description_translations,
                 "EffectiveBasePermissions": self.effective_base_permissions,

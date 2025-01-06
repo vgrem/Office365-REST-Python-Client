@@ -15,15 +15,29 @@ class DocumentCrawlLog(Entity):
         )
         super(DocumentCrawlLog, self).__init__(context, static_path)
 
-    def get_crawled_urls(self, get_count_only=False):
+    def get_crawled_urls(
+        self,
+        get_count_only=False,
+        max_rows=None,
+        query_string=None,
+        content_source_id=None,
+    ):
         """
         Retrieves information about all the contents that were crawled.
 
         :param bool get_count_only: f true, only the count of the contents crawled MUST be returned.
              If false, all the information about the crawled contents MUST be returned.
+        :param int max_rows:
+        :param str query_string:
+        :param int content_source_id:
         """
         return_type = ClientResult(self.context, SimpleDataTable())
-        payload = {"getCountOnly": get_count_only}
+        payload = {
+            "getCountOnly": get_count_only,
+            "maxRows": max_rows,
+            "queryString": query_string,
+            "contentSourceID": content_source_id,
+        }
         qry = ServiceOperationQuery(
             self, "GetCrawledUrls", None, payload, None, return_type
         )

@@ -17,11 +17,8 @@ from office365.sharepoint.lists.render_override_parameters import (
     RenderListDataOverrideParameters,
 )
 from office365.sharepoint.publishing.portal_health_status import PortalHealthStatus
-from office365.sharepoint.sites.home_sites_details import HomeSitesDetails
+from office365.sharepoint.sites.home.details import HomeSitesDetails
 from office365.sharepoint.sites.site import Site
-from office365.sharepoint.tenant.administration.app_billing_properties import (
-    SPOAppBillingProperties,
-)
 from office365.sharepoint.tenant.administration.collaboration.insights_data import (
     CollaborationInsightsData,
 )
@@ -36,6 +33,9 @@ from office365.sharepoint.tenant.administration.insights.onedrive_site_sharing i
 )
 from office365.sharepoint.tenant.administration.insights.top_files_sharing import (
     TopFilesSharingInsights,
+)
+from office365.sharepoint.tenant.administration.policies.app_billing_properties import (
+    SPOAppBillingProperties,
 )
 from office365.sharepoint.tenant.administration.policies.definition import (
     TenantAdminPolicyDefinition,
@@ -209,6 +209,7 @@ class Tenant(Entity):
         return return_type
 
     def render_recent_admin_actions(self):
+        """ """
         return_type = ClientResult(self.context)
         payload = {
             "parameters": RenderListDataParameters(),
@@ -220,8 +221,20 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
-    def get_top_files_sharing_insights(self, query_mode):
+    def get_spo_app_billing_policies(self):
+        """ """
+        return_type = ClientResult(
+            self.context, ClientValueCollection(SPOAppBillingProperties)
+        )
+        qry = ServiceOperationQuery(
+            self, "GetSPOAppBillingPolicies", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_top_files_sharing_insights(self, query_mode=None):
         """
+        Retrieves a report or data about the most shared files within a SharePoint Online tenant
         :param int query_mode:
         """
         payload = {"queryMode": query_mode}
@@ -489,6 +502,7 @@ class Tenant(Entity):
 
     def get_site_health_status(self, source_url):
         """
+        Checks the sitehealth of a specific SharePoint site or site collection in their tenant
         :type source_url: str
         """
         result = ClientResult(self.context, PortalHealthStatus())
@@ -649,6 +663,7 @@ class Tenant(Entity):
 
     def reorder_home_sites(self, home_sites_site_ids):
         """
+        Reorders Home Sites within a SharePoint Online tenant
         :param list[str] home_sites_site_ids:
         """
         payload = {"homeSitesSiteIds": home_sites_site_ids}
@@ -751,7 +766,7 @@ class Tenant(Entity):
 
     @property
     def admin_settings(self):
-        """ """
+        """Manage various tenant-level settings related to SharePoint administration"""
         from office365.sharepoint.tenant.administration.settings_service import (
             TenantAdminSettingsService,
         )
@@ -768,6 +783,14 @@ class Tenant(Entity):
         return MigrationCenterServices(self.context)
 
     @property
+    def multi_geo(self):
+        """ """
+
+        from office365.sharepoint.multigeo.services import MultiGeoServices
+
+        return MultiGeoServices(self.context)
+
+    @property
     def ai_builder_enabled(self):
         # type: () -> Optional[str]
         """Gets the value if the AIBuilder settings should be shown in the tenant"""
@@ -782,6 +805,7 @@ class Tenant(Entity):
 
     @property
     def _aggregated_site_collections_list(self):
+        """ """
         return self.context.web.lists.get_by_title(
             "DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_SITECOLLECTIONS"
         )
@@ -873,16 +897,38 @@ class Tenant(Entity):
 
     @property
     def cdn_api(self):
+        """ """
         from office365.sharepoint.tenant.cdn_api import TenantCdnApi
 
         return TenantCdnApi(self.context)
 
     @property
+    def crawl_versions_info_provider(self):
+        """Retrieves information about crawl versions for a tenant in SharePoint"""
+
+        from office365.sharepoint.search.administration.tenant_crawl_versions_info_provider import (
+            TenantCrawlVersionsInfoProvider,
+        )
+
+        return TenantCrawlVersionsInfoProvider(self.context)
+
+    @property
     def syntex_billing_subscription_settings(self):
-        """"""
+        """
+        Manages billing and subscription details for Microsoft Syntex in SharePoint Online or Microsoft 365 environments
+        """
         return self.properties.get(
             "SyntexBillingSubscriptionSettings", SyntexBillingContext()
         )
+
+    @property
+    def admin_endpoints(self):
+        """ """
+        from office365.sharepoint.tenant.administration.endpoints import (
+            TenantAdminEndpoints,
+        )
+
+        return TenantAdminEndpoints(self.context)
 
     @property
     def entity_type_name(self):

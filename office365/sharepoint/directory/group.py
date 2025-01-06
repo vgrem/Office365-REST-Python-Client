@@ -5,6 +5,8 @@ from office365.sharepoint.entity_collection import EntityCollection
 
 
 class Group(Entity):
+    """ """
+
     def get_members_info(self, row_limit):
         """"""
         return_type = MembersInfo(self.context)

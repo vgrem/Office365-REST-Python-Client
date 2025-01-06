@@ -4,6 +4,8 @@ from office365.sharepoint.entity import Entity
 
 
 class User(Entity):
+    """Represents a user in the SharePoint Directory"""
+
     def is_member_of(self, group_id):
         return_type = ClientResult(self.context)
 
@@ -18,6 +20,9 @@ class User(Entity):
         return return_type
 
     def get_my_groups(self):
+        """
+        Retrieves information about groups that a user belongs to.
+        """
         return_type = MyGroupsResult(self.context)
 
         def _user_loaded():

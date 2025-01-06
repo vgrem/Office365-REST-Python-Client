@@ -89,7 +89,7 @@ class TestSearch(TestCase):
     #    self.assertIsNotNone(result.value)
 
     # def test_11_get_crawled_urls(self):
-    #    result = DocumentCrawlLog(self.client).get_crawled_urls().execute_query()
+    #    result = self.client.document_crawl_log.get_crawled_urls().execute_query()
     #    self.assertIsNotNone(result.value)
 
     def test_12_results_page_address(self):
