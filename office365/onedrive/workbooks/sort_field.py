@@ -6,13 +6,18 @@ class WorkbookSortField(ClientValue):
     """Represents a condition in a sorting operation."""
 
     def __init__(
-        self, ascending=None, color=None, dataOption=None, icon=WorkbookIcon(), key=None
+        self,
+        ascending=None,
+        color=None,
+        data_option=None,
+        icon=WorkbookIcon(),
+        key=None,
     ):
         """
         :param bool ascending: Represents whether the sorting is done in an ascending fashion.
         :param str color: Represents the color that is the target of the condition if the sorting is on font
              or cell color.
-        :param str dataOption: Represents additional sorting options for this field.
+        :param str data_option: Represents additional sorting options for this field.
              Possible values are: Normal, TextAsNumber.
         :param WorkbookIcon icon: Represents the icon that is the target of the condition if the sorting
              is on the cell's icon.
@@ -21,6 +26,6 @@ class WorkbookSortField(ClientValue):
         """
         self.ascending = ascending
         self.color = color
-        self.dataOption = dataOption
+        self.dataOption = data_option
         self.icon = icon
         self.key = key

@@ -1,7 +1,9 @@
 from typing import Optional
 
+from office365.runtime.odata.type import ODataType
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.sharepoint.entity import Entity
+from office365.sharepoint.principal.type import PrincipalType
 
 
 class Principal(Entity):
@@ -59,6 +61,10 @@ class Principal(Entity):
         # type: () -> Optional[int]
         """Gets the type of the principal."""
         return self.properties.get("PrincipalType", None)
+
+    @property
+    def principal_type_name(self):
+        return ODataType.resolve_enum_key(PrincipalType, self.principal_type)
 
     @property
     def property_ref_name(self):

@@ -29,7 +29,11 @@ class TestOutlookEvent(GraphTestCase):
         event.subject = "Let's go for lunch (updated)"
         event.update().execute_query()
 
-    def test5_delete_event(self):
+    # def test5_cancel_event(self):
+    #    event = self.__class__.target_event
+    #    event.cancel().execute_query()
+
+    def test6_delete_event(self):
         event_to_delete = self.__class__.target_event
         event_to_delete.delete_object().execute_query()
         # verify

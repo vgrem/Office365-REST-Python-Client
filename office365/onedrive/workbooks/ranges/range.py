@@ -54,6 +54,15 @@ class WorkbookRange(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def last_row(self):
+        """
+        Get the last row within the range. For example, the last row of B2:D5 is B5:D5.
+        """
+        return_type = WorkbookRange(self.context)
+        qry = FunctionQuery(self, "lastRow", return_type=return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def visible_view(self):
         """Get the range visible from a filtered range."""
         return_type = WorkbookRangeView(self.context)

@@ -38,14 +38,18 @@ class TestExcelRanges(GraphTestCase):
         self.assertIsNotNone(result.address)
         self.__class__.range = result
 
+    def test4_last_row(self):
+        result = self.__class__.range.last_row().execute_query()
+        self.assertIsNotNone(result.address)
+
     # def test4_insert_range(self):
     #    result = self.__class__.range.insert("Right").execute_query()
     #    self.assertIsNotNone(result.address)
 
-    def test5_used_range(self):
+    def test6_used_range(self):
         result = self.__class__.range.used_range().execute_query()
         self.assertIsNotNone(result.address)
 
-    def test6_clear_range(self):
+    def test7_clear_range(self):
         result = self.__class__.range.clear().execute_query()
         self.assertIsNotNone(result.address)

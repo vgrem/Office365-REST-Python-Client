@@ -1,6 +1,10 @@
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.charts.axes import WorkbookChartAxes
 from office365.onedrive.workbooks.charts.data_labels import WorkbookChartDataLabels
+from office365.onedrive.workbooks.charts.legend import WorkbookChartLegend
+from office365.onedrive.workbooks.charts.series.series import WorkbookChartSeries
+from office365.onedrive.workbooks.charts.title import WorkbookChartTitle
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
@@ -55,12 +59,42 @@ class WorkbookChart(Entity):
 
     @property
     def data_labels(self):
-        """Represents the datalabels on the chart."""
+        """Represents the data labels on the chart."""
         return self.properties.get(
             "dataLabels",
             WorkbookChartDataLabels(
                 self.context, ResourcePath("dataLabels", self.resource_path)
             ),
+        )
+
+    @property
+    def legend(self):
+        """Represents the legend on the chart."""
+        return self.properties.get(
+            "legend",
+            WorkbookChartLegend(
+                self.context, ResourcePath("legend", self.resource_path)
+            ),
+        )
+
+    @property
+    def series(self):
+        """Represents chart series."""
+        return self.properties.get(
+            "series",
+            EntityCollection(
+                self.context,
+                WorkbookChartSeries,
+                ResourcePath("series", self.resource_path),
+            ),
+        )
+
+    @property
+    def title(self):
+        """Represents the title on the chart."""
+        return self.properties.get(
+            "title",
+            WorkbookChartTitle(self.context, ResourcePath("title", self.resource_path)),
         )
 
     @property

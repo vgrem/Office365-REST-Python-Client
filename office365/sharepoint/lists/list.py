@@ -89,6 +89,21 @@ class List(SecurableObject):
 
         return ListExporter.export(self, local_file, include_content, item_exported)
 
+    def can_customize_forms(self):
+        """"""
+        from office365.sharepoint.flows.connector_result import ConnectorResult
+        from office365.sharepoint.forms.customization import FormsCustomization
+
+        return_type = ConnectorResult(self.context)
+
+        def _can_customize_forms():
+            FormsCustomization.can_customize_forms(
+                self.context, self.title, return_type
+            )
+
+        self.ensure_property("Title", _can_customize_forms)
+        return return_type
+
     def clear(self):
         """Clears the list."""
 
