@@ -1,3 +1,5 @@
+import os
+
 from examples.sharepoint.lists.assessment.broken_tax_field_value import fields
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.workbooks.sort_field import WorkbookSortField
@@ -14,7 +16,7 @@ class TestExcelTables(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestExcelTables, cls).setUpClass()
-        path = "../data/Financial Sample.xlsx"
+        path = "{0}/../data/Financial Sample.xlsx".format(os.path.dirname(__file__))
         cls.excel_file = cls.client.me.drive.root.upload_file(path).execute_query()
         assert cls.excel_file.resource_path is not None
         cls.worksheet = (

@@ -55,7 +55,7 @@ from office365.outlook.calendar.place import Place
 from office365.outlook.calendar.rooms.list import RoomList
 from office365.planner.planner import Planner
 from office365.reports.root import ReportRoot
-from office365.runtime.auth.token_response import TokenResponse
+from office365.runtime.auth.entra.authentication_context import AuthenticationContext
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -77,11 +77,16 @@ from office365.teams.viva.employee_experience import EmployeeExperience
 class GraphClient(ClientRuntimeContext):
     """Graph Service client"""
 
-    def __init__(self, acquire_token_callback):
-        # type: (Callable[[], dict]) -> None
+    def __init__(self, acquire_token_callback=None, auth_context=None):
+        # type: (Callable[[], dict], AuthenticationContext) -> None
         super(GraphClient, self).__init__()
         self._pending_request = None
-        self._acquire_token_callback = acquire_token_callback
+        if acquire_token_callback is not None:
+            self._auth_context = AuthenticationContext().with_access_token(
+                acquire_token_callback
+            )
+        else:
+            self._auth_context = auth_context
 
     @staticmethod
     def with_certificate(
@@ -98,27 +103,10 @@ class GraphClient(ClientRuntimeContext):
         :param Any token_cache: Default cache is in memory only,
         Refer https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
         """
-        if scopes is None:
-            scopes = ["https://graph.microsoft.com/.default"]
-        authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
-        import msal
-
-        app = msal.ConfidentialClientApplication(
-            client_id,
-            authority=authority_url,
-            client_credential={
-                "thumbprint": thumbprint,
-                "private_key": private_key,
-            },
-            token_cache=token_cache,  # Default cache is in memory only.
-            # You can learn how to use SerializableTokenCache from
-            # https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
-        )
-
-        def _acquire_token():
-            return app.acquire_token_for_client(scopes=scopes)
-
-        return GraphClient(_acquire_token)
+        auth_ctx = AuthenticationContext(
+            tenant=tenant, scopes=scopes, token_cache=token_cache
+        ).with_certificate(client_id, thumbprint, private_key)
+        return GraphClient(auth_context=auth_ctx)
 
     @staticmethod
     def with_client_secret(
@@ -135,22 +123,11 @@ class GraphClient(ClientRuntimeContext):
         :param Any token_cache: Default cache is in memory only,
              Refer https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
         """
-        if scopes is None:
-            scopes = ["https://graph.microsoft.com/.default"]
-        authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
-        import msal
 
-        app = msal.ConfidentialClientApplication(
-            client_id,
-            authority=authority_url,
-            client_credential=client_secret,
-            token_cache=token_cache,
-        )
-
-        def _acquire_token():
-            return app.acquire_token_for_client(scopes=scopes)
-
-        return GraphClient(_acquire_token)
+        auth_ctx = AuthenticationContext(
+            tenant=tenant, scopes=scopes, token_cache=token_cache
+        ).with_client_secret(client_id, client_secret)
+        return GraphClient(auth_context=auth_ctx)
 
     @staticmethod
     def with_token_interactive(tenant, client_id, username=None, scopes=None):
@@ -164,32 +141,10 @@ class GraphClient(ClientRuntimeContext):
         :param str username: Typically a UPN in the form of an email address.
         :param list[str] or None scopes: Scopes requested to access an API
         """
-        if scopes is None:
-            scopes = ["https://graph.microsoft.com/.default"]
-        authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
-        import msal
-
-        app = msal.PublicClientApplication(client_id, authority=authority_url)
-
-        def _acquire_token():
-            # The pattern to acquire a token looks like this.
-            result = None
-
-            # Firstly, check the cache to see if this end user has signed in before
-            accounts = app.get_accounts(username=username)
-            if accounts:
-                chosen = accounts[0]  # Assuming the end user chose this one to proceed
-                # Now let's try to find a token in cache for this account
-                result = app.acquire_token_silent(scopes, account=chosen)
-
-            if not result:
-                result = app.acquire_token_interactive(
-                    scopes,
-                    login_hint=username,
-                )
-            return result
-
-        return GraphClient(_acquire_token)
+        auth_ctx = AuthenticationContext(
+            tenant=tenant, scopes=scopes
+        ).with_token_interactive(client_id, username)
+        return GraphClient(auth_context=auth_ctx)
 
     @staticmethod
     def with_username_and_password(tenant, client_id, username, password, scopes=None):
@@ -203,31 +158,10 @@ class GraphClient(ClientRuntimeContext):
         :param str password: The password.
         :param list[str] or None scopes: Scopes requested to access an API
         """
-        if scopes is None:
-            scopes = ["https://graph.microsoft.com/.default"]
-        authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
-        import msal
-
-        app = msal.PublicClientApplication(
-            authority=authority_url,
-            client_id=client_id,
-        )
-
-        def _acquire_token():
-            result = None
-            accounts = app.get_accounts(username=username)
-            if accounts:
-                result = app.acquire_token_silent(scopes, account=accounts[0])
-
-            if not result:
-                result = app.acquire_token_by_username_password(
-                    username=username,
-                    password=password,
-                    scopes=scopes,
-                )
-            return result
-
-        return GraphClient(_acquire_token)
+        auth_ctx = AuthenticationContext(
+            tenant=tenant, scopes=scopes
+        ).with_username_and_password(client_id, username, password)
+        return GraphClient(auth_context=auth_ctx)
 
     def execute_batch(self, items_per_batch=20, success_callback=None):
         """Constructs and submit a batch request
@@ -238,7 +172,7 @@ class GraphClient(ClientRuntimeContext):
         :param (List[ClientObject|ClientResult])-> None success_callback: A success callback
         """
         batch_request = ODataV4BatchRequest(V4JsonFormat())
-        batch_request.beforeExecute += self._authenticate_request
+        batch_request.beforeExecute += self._auth_context.authenticate_request
         while self.has_pending_request:
             qry = self._get_next_query(items_per_batch)
             batch_request.execute_query(qry)
@@ -250,7 +184,9 @@ class GraphClient(ClientRuntimeContext):
         # type: () -> GraphRequest
         if self._pending_request is None:
             self._pending_request = GraphRequest()
-            self._pending_request.beforeExecute += self._authenticate_request
+            self._pending_request.beforeExecute += (
+                self._auth_context.authenticate_request
+            )
             self._pending_request.beforeExecute += self._build_specific_query
         return self._pending_request
 
@@ -265,13 +201,6 @@ class GraphClient(ClientRuntimeContext):
             request.method = HttpMethod.Patch
         elif isinstance(self.current_query, DeleteEntityQuery):
             request.method = HttpMethod.Delete
-
-    def _authenticate_request(self, request):
-        # type: (RequestOptions) -> None
-        """Authenticate request."""
-        token_json = self._acquire_token_callback()
-        token = TokenResponse.from_json(token_json)
-        request.ensure_header("Authorization", "Bearer {0}".format(token.accessToken))
 
     @property
     def admin(self):
