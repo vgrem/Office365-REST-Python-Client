@@ -45,8 +45,8 @@ if args.endpoint == "sharepoint":
     export_to_file(args.path, result.value)
 elif args.endpoint == "graph":
     print("Importing Microsoft Graph model metadata...")
-    client = GraphClient.with_client_secret(
-        test_tenant, test_client_id, test_client_secret
+    client = GraphClient(tenant=test_tenant).with_client_secret(
+        test_client_id, test_client_secret
     )
     result = client.get_metadata().execute_query()
     export_to_file(args.path, result.value)

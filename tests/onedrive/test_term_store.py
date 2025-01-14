@@ -18,8 +18,8 @@ class TestTermStore(GraphTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestTermStore, cls).setUpClass()
-        client = GraphClient.with_client_secret(
-            test_tenant, test_client_id, test_client_secret
+        client = GraphClient(tenant=test_tenant).with_client_secret(
+            test_client_id, test_client_secret
         )
         cls.target_store = client.sites.get_by_url(test_root_site_url).term_store
 

@@ -11,8 +11,8 @@ from office365.graph_client import GraphClient
 from office365.onedrive.driveitems.driveItem import DriveItem
 from tests import test_client_id, test_password, test_tenant, test_username
 
-client = GraphClient.with_username_and_password(
-    test_tenant, test_client_id, test_username, test_password
+client = GraphClient(tenant=test_tenant).with_username_and_password(
+    test_client_id, test_username, test_password
 )
 folder_item = client.me.drive.root.get_by_path("archive").get().execute_query()
 

@@ -10,8 +10,8 @@ from office365.graph_client import GraphClient
 from tests import test_client_id, test_password, test_tenant, test_username
 
 when = datetime.utcnow() + timedelta(days=1)
-client = GraphClient.with_username_and_password(
-    test_tenant, test_client_id, test_username, test_password
+client = GraphClient(tenant=test_tenant).with_username_and_password(
+    test_client_id, test_username, test_password
 )
 new_event = client.me.calendar.events.add(
     subject="Let's go for lunch",

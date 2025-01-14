@@ -16,8 +16,8 @@ from tests import (
     test_username,
 )
 
-client = GraphClient.with_username_and_password(
-    test_tenant, test_client_id, test_username, test_password
+client = GraphClient(tenant=test_tenant).with_username_and_password(
+    test_client_id, test_username, test_password
 )
 team_name = create_unique_name("Team")
 print("Creating a team '{0}' ...".format(team_name))

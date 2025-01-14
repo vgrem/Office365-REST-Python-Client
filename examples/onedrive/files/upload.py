@@ -12,7 +12,9 @@ from tests import (
     test_user_principal_name_alt,
 )
 
-client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
+client = GraphClient(tenant=test_tenant).with_client_secret(
+    test_client_id, test_client_secret
+)
 user_drive = client.users.get_by_principal_name(test_user_principal_name_alt).drive
 folder = user_drive.root
 

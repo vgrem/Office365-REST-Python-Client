@@ -17,8 +17,8 @@ from tests import (
 )
 
 grp_name = create_unique_name("Group")
-client = GraphClient.with_username_and_password(
-    test_tenant, test_client_id, test_username, test_password
+client = GraphClient(tenant=test_tenant).with_username_and_password(
+    test_client_id, test_username, test_password
 )
 group = client.groups.create_m365(grp_name).execute_query()
 

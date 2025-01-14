@@ -18,8 +18,8 @@ from tests import (
     test_username,
 )
 
-client = GraphClient.with_username_and_password(
-    test_tenant, test_client_id, test_username, test_password
+client = GraphClient(tenant=test_tenant).with_username_and_password(
+    test_client_id, test_username, test_password
 )
 start_time = datetime.utcnow()
 end_time = start_time + timedelta(days=1)

@@ -1,39 +1,52 @@
 from typing import Optional
 
+from office365.azure_env import AzureEnvironment
 from office365.runtime.auth.token_response import TokenResponse
-from office365.runtime.http.request_options import RequestOptions
 
 
 class AuthenticationContext(object):
     """Provides authentication context for Microsoft Graph client"""
 
-    def __init__(self, tenant=None, scopes=None, token_cache=None):
+    def __init__(
+        self,
+        tenant=None,
+        scopes=None,
+        token_cache=None,
+        environment=AzureEnvironment.Global,
+    ):
         """
         :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
         :param list[str] or None scopes: Scopes requested to access an API
         :param Any token_cache: Default cache is in memory only,
             Refer https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
         """
-        if tenant is not None:
-            self._authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
+        self._tenant = tenant
         if scopes is None:
             scopes = ["https://graph.microsoft.com/.default"]
         self._scopes = scopes
         self._token_cache = token_cache
         self._token_callback = None
+        self._environment = environment
+        self._authority_urls = {
+            AzureEnvironment.Global: "https://login.microsoftonline.com",
+            AzureEnvironment.GCC: "https://login.microsoftonline.us",
+            AzureEnvironment.GCC_High: "https://login.microsoftonline.us",
+            AzureEnvironment.CN: "https://login.chinacloudapi.cn",
+        }
 
-    def with_access_token(self, token_callback):
-        self._token_callback = token_callback
-        return self
-
-    def authenticate_request(self, request):
-        # type: (RequestOptions) -> None
-        """Authenticate request."""
+    def acquire_token(self):
+        # type: () -> TokenResponse
+        """Acquire access token"""
         if not self._token_callback:
             raise ValueError("Token callback is not set.")
-        token_json = self._token_callback()
-        token = TokenResponse.from_json(token_json)
-        request.ensure_header("Authorization", "Bearer {0}".format(token.accessToken))
+        token_resp = self._token_callback()
+        token = TokenResponse.from_json(token_resp)
+        return token
+
+    def with_access_token(self, token_callback):
+        """"""
+        self._token_callback = token_callback
+        return self
 
     def with_certificate(self, client_id, thumbprint, private_key):
         """
@@ -47,7 +60,7 @@ class AuthenticationContext(object):
 
         app = msal.ConfidentialClientApplication(
             client_id,
-            authority=self._authority_url,
+            authority=self.authority_url,
             client_credential={
                 "thumbprint": thumbprint,
                 "private_key": private_key,
@@ -74,7 +87,7 @@ class AuthenticationContext(object):
 
         app = msal.ConfidentialClientApplication(
             client_id,
-            authority=self._authority_url,
+            authority=self.authority_url,
             client_credential=client_secret,
             token_cache=self._token_cache,
         )
@@ -95,7 +108,7 @@ class AuthenticationContext(object):
         """
         import msal
 
-        app = msal.PublicClientApplication(client_id, authority=self._authority_url)
+        app = msal.PublicClientApplication(client_id, authority=self.authority_url)
 
         def _acquire_token():
             # The pattern to acquire a token looks like this.
@@ -129,7 +142,7 @@ class AuthenticationContext(object):
         import msal
 
         app = msal.PublicClientApplication(
-            authority=self._authority_url,
+            authority=self.authority_url,
             client_id=client_id,
         )
 
@@ -148,3 +161,9 @@ class AuthenticationContext(object):
             return result
 
         return self.with_access_token(_acquire_token)
+
+    @property
+    def authority_url(self):
+        return "{0}/{1}".format(
+            self._authority_urls.get(self._environment), self._tenant
+        )

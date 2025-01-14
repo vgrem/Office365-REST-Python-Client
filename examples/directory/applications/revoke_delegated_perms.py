@@ -12,8 +12,8 @@ from tests import (
     test_user_principal_name,
 )
 
-client = GraphClient.with_token_interactive(
-    test_tenant, test_client_id, test_admin_principal_name
+client = GraphClient(tenant=test_tenant).with_token_interactive(
+    test_client_id, test_admin_principal_name
 )
 
 # Step 1: Get resource service principal

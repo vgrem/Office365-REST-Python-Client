@@ -12,7 +12,9 @@ from tests import (
     test_tenant,
 )
 
-client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
+client = GraphClient(tenant=test_tenant).with_client_secret(
+    test_client_id, test_client_secret
+)
 
 resource = client.service_principals.get_by_name("Microsoft Graph")
 scope = "DeviceLocalCredential.Read.All"

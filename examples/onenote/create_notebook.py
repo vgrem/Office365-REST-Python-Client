@@ -13,8 +13,8 @@ from tests import (
     test_username,
 )
 
-client = GraphClient.with_username_and_password(
-    test_tenant, test_client_id, test_username, test_password
+client = GraphClient(tenant=test_tenant).with_username_and_password(
+    test_client_id, test_username, test_password
 )
 display_name = create_unique_name("My Private notebook")
 notebook = client.me.onenote.notebooks.add(display_name).execute_query()

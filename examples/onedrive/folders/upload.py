@@ -12,8 +12,8 @@ def print_progress(uploaded_file):
     print("File has been uploaded into '{0}'".format(uploaded_file.web_url))
 
 
-client = GraphClient.with_username_and_password(
-    test_tenant, test_client_id, test_username, test_password
+client = GraphClient(tenant=test_tenant).with_username_and_password(
+    test_client_id, test_username, test_password
 )
 local_path = "../../data"
 drive_item = client.me.drive.root.get_by_path("Import")

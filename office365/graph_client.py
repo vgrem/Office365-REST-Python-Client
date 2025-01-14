@@ -1,6 +1,7 @@
 from typing import Any, Callable, List, Optional
 
 from office365.admin.admin import Admin
+from office365.azure_env import AzureEnvironment
 from office365.booking.solutions.root import SolutionsRoot
 from office365.communications.cloud_communications import CloudCommunications
 from office365.delta_collection import DeltaCollection
@@ -55,7 +56,6 @@ from office365.outlook.calendar.place import Place
 from office365.outlook.calendar.rooms.list import RoomList
 from office365.planner.planner import Planner
 from office365.reports.root import ReportRoot
-from office365.runtime.auth.entra.authentication_context import AuthenticationContext
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
@@ -77,91 +77,73 @@ from office365.teams.viva.employee_experience import EmployeeExperience
 class GraphClient(ClientRuntimeContext):
     """Graph Service client"""
 
-    def __init__(self, acquire_token_callback=None, auth_context=None):
-        # type: (Callable[[], dict], AuthenticationContext) -> None
-        super(GraphClient, self).__init__()
-        self._pending_request = None
-        if acquire_token_callback is not None:
-            self._auth_context = AuthenticationContext().with_access_token(
-                acquire_token_callback
-            )
-        else:
-            self._auth_context = auth_context
-
-    @staticmethod
-    def with_certificate(
-        tenant, client_id, thumbprint, private_key, scopes=None, token_cache=None
+    def __init__(
+        self,
+        token_callback=None,
+        tenant=None,
+        scopes=None,
+        token_cache=None,
+        environment=AzureEnvironment.Global,
     ):
+        # type: (Callable[[], dict], str, list[str], Any, str) -> None
         """
-        Initializes the confidential client with client certificate
-
-        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
-        :param str client_id: The OAuth client id of the calling application.
-        :param str thumbprint: Thumbprint
-        :param str private_key: Private key
-        :param list[str] or None scopes: Scopes requested to access an API
-        :param Any token_cache: Default cache is in memory only,
-        Refer https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
-        """
-        auth_ctx = AuthenticationContext(
-            tenant=tenant, scopes=scopes, token_cache=token_cache
-        ).with_certificate(client_id, thumbprint, private_key)
-        return GraphClient(auth_context=auth_ctx)
-
-    @staticmethod
-    def with_client_secret(
-        tenant, client_id, client_secret, scopes=None, token_cache=None
-    ):
-        # type: (str, str, str, List[str], Any) -> "GraphClient"
-        """
-        Initializes the confidential client with client secret
-
-        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
-        :param str client_id: The OAuth client id of the calling application.
-        :param str client_secret: Client secret
         :param list[str] or None scopes: Scopes requested to access an API
         :param Any token_cache: Default cache is in memory only,
              Refer https://msal-python.readthedocs.io/en/latest/#msal.SerializableTokenCache
         """
+        super(GraphClient, self).__init__()
+        self._pending_request = None
+        self._token_callback = token_callback
+        self._tenant = tenant
+        self._token_cache = token_cache
+        self._environment = environment
+        self._scopes = scopes
 
-        auth_ctx = AuthenticationContext(
-            tenant=tenant, scopes=scopes, token_cache=token_cache
-        ).with_client_secret(client_id, client_secret)
-        return GraphClient(auth_context=auth_ctx)
+    def with_certificate(self, client_id, thumbprint, private_key):
+        """
+        Initializes the confidential client with client certificate
 
-    @staticmethod
-    def with_token_interactive(tenant, client_id, username=None, scopes=None):
-        # type: (str, str, Optional[str], List[str]) -> "GraphClient"
+        :param str client_id: The OAuth client id of the calling application.
+        :param str thumbprint: Thumbprint
+        :param str private_key: Private key
+        """
+        self.pending_request().with_certificate(client_id, thumbprint, private_key)
+        return self
+
+    def with_client_secret(self, client_id, client_secret):
+        # type: (str, str) -> "GraphClient"
+        """
+        Initializes the confidential client with client secret
+
+        :param str client_id: The OAuth client id of the calling application.
+        :param str client_secret: Client secret
+        """
+        self.pending_request().with_client_secret(client_id, client_secret)
+        return self
+
+    def with_token_interactive(self, client_id, username=None):
+        # type: (str, Optional[str]) -> "GraphClient"
         """
         Initializes the client via user credentials
         Note: only works if your app is registered with redirect_uri as http://localhost
 
-        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
         :param str client_id: The OAuth client id of the calling application.
         :param str username: Typically a UPN in the form of an email address.
-        :param list[str] or None scopes: Scopes requested to access an API
         """
-        auth_ctx = AuthenticationContext(
-            tenant=tenant, scopes=scopes
-        ).with_token_interactive(client_id, username)
-        return GraphClient(auth_context=auth_ctx)
+        self.pending_request().with_token_interactive(client_id, username)
+        return self
 
-    @staticmethod
-    def with_username_and_password(tenant, client_id, username, password, scopes=None):
-        # type: (str, str, str, str, List[str]) -> "GraphClient"
+    def with_username_and_password(self, client_id, username, password):
+        # type: (str, str, str) -> "GraphClient"
         """
         Initializes the client via user credentials
 
-        :param str tenant: Tenant name, for example: contoso.onmicrosoft.com
         :param str client_id: The OAuth client id of the calling application.
         :param str username: Typically a UPN in the form of an email address.
         :param str password: The password.
-        :param list[str] or None scopes: Scopes requested to access an API
         """
-        auth_ctx = AuthenticationContext(
-            tenant=tenant, scopes=scopes
-        ).with_username_and_password(client_id, username, password)
-        return GraphClient(auth_context=auth_ctx)
+        self.pending_request().with_username_and_password(client_id, username, password)
+        return self
 
     def execute_batch(self, items_per_batch=20, success_callback=None):
         """Constructs and submit a batch request
@@ -172,7 +154,7 @@ class GraphClient(ClientRuntimeContext):
         :param (List[ClientObject|ClientResult])-> None success_callback: A success callback
         """
         batch_request = ODataV4BatchRequest(V4JsonFormat())
-        batch_request.beforeExecute += self._auth_context.authenticate_request
+        batch_request.beforeExecute += self.pending_request().authenticate_request
         while self.has_pending_request:
             qry = self._get_next_query(items_per_batch)
             batch_request.execute_query(qry)
@@ -183,10 +165,11 @@ class GraphClient(ClientRuntimeContext):
     def pending_request(self):
         # type: () -> GraphRequest
         if self._pending_request is None:
-            self._pending_request = GraphRequest()
-            self._pending_request.beforeExecute += (
-                self._auth_context.authenticate_request
+            self._pending_request = GraphRequest(
+                 tenant=self._tenant, environment=self._environment
             )
+            if callable(self._token_callback):
+               self._pending_request.with_access_token(self._token_callback)
             self._pending_request.beforeExecute += self._build_specific_query
         return self._pending_request
 

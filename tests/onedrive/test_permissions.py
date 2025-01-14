@@ -21,8 +21,8 @@ class TestPermissions(TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestPermissions, cls).setUpClass()
-        client = GraphClient.with_client_secret(
-            test_tenant, test_client_id, test_client_secret
+        client = GraphClient(tenant=test_tenant).with_client_secret(
+            test_client_id, test_client_secret
         )
         folder_name = "New_" + uuid.uuid4().hex
         cls.target_drive_item = client.sites.root.drive.root.create_folder(

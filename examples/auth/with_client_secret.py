@@ -2,7 +2,7 @@
 Acquires a token by using application secret
 
 The following options are supported:
-   - utilize built in GraphClient.with_client_secret(tenant, client_id, client_secret, scopes, token_cache) method
+   - utilize built in GraphClient(tenant=tenant).with_client_secret(client_id, client_secret) method
    - or provide a custom callback function to GraphClient constructor as demonstrated below
 
 https://learn.microsoft.com/en-us/entra/identity-platform/msal-authentication-flows#client-credentials

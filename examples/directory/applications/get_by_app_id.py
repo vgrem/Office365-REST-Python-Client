@@ -10,6 +10,8 @@ as Object ID and appId is referred to as Application (client) ID on the Azure po
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_client_secret, test_tenant
 
-client = GraphClient.with_client_secret(test_tenant, test_client_id, test_client_secret)
+client = GraphClient(tenant=test_tenant).with_client_secret(
+    test_client_id, test_client_secret
+)
 app = client.applications.get_by_app_id(test_client_id).get().execute_query()
 print(app)

@@ -13,7 +13,7 @@ https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentica
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_tenant
 
-client = GraphClient.with_token_interactive(test_tenant, test_client_id)
+client = GraphClient(tenant=test_tenant).with_token_interactive(test_client_id)
 me = client.me.get().execute_query()
 print("Welcome,  {0}!".format(me.given_name))
 site = client.sites.root.get().execute_query()
