@@ -41,8 +41,15 @@ from office365.sharepoint.webs.web import Web
 class ClientContext(ClientRuntimeContext):
     """SharePoint client context (SharePoint v1 API)"""
 
-    def __init__(self, base_url, auth_context=None):
-        # type: (str, AuthenticationContext | None) -> None
+    def __init__(
+        self,
+        base_url,
+        auth_context=None,
+        environment="commercial",
+        allow_ntlm=False,
+        browser_mode=False,
+    ):
+        # type: (str, Optional[AuthenticationContext], str, bool, bool) -> None
         """
         Instantiates a SharePoint client context
 
@@ -51,7 +58,12 @@ class ClientContext(ClientRuntimeContext):
         """
         super(ClientContext, self).__init__()
         if auth_context is None:
-            auth_context = AuthenticationContext(url=base_url)
+            auth_context = AuthenticationContext(
+                url=base_url,
+                environment=environment,
+                allow_ntlm=allow_ntlm,
+                browser_mode=browser_mode,
+            )
         self._auth_context = auth_context
         self._web = None
         self._site = None
@@ -138,36 +150,18 @@ class ClientContext(ClientRuntimeContext):
         self.authentication_context.with_access_token(token_func)
         return self
 
-    def with_user_credentials(
-        self,
-        username,
-        password,
-        allow_ntlm=False,
-        browser_mode=False,
-        environment="commercial",
-    ):
-        # type: (str, str, bool, bool, Optional[str]) -> Self
+    def with_user_credentials(self, username, password):
+        # type: (str, str) -> Self
         """
         Initializes a client to acquire a token via user credentials.
         :param str username: Typically, a UPN in the form of an email address
         :param str password: The password
-        :param bool allow_ntlm: Flag indicates whether NTLM scheme is enabled. Disabled by default
-        :param bool browser_mode:
-        :param str environment: The Office 365 Cloud Environment endpoint used for authentication
-            defaults to 'commercial'.
         """
-        self.authentication_context.with_credentials(
-            UserCredential(username, password),
-            allow_ntlm=allow_ntlm,
-            browser_mode=browser_mode,
-            environment=environment,
-        )
+        self.authentication_context.with_credentials(UserCredential(username, password))
         return self
 
-    def with_client_credentials(
-        self, client_id, client_secret, environment="commercial"
-    ):
-        # type: (str, str, Optional[str]) -> Self
+    def with_client_credentials(self, client_id, client_secret):
+        # type: (str, str) -> Self
         """
         Initializes a client to acquire a token via client credentials (SharePoint App-Only)
 
@@ -176,25 +170,19 @@ class ClientContext(ClientRuntimeContext):
 
         :param str client_id: The OAuth client id of the calling application
         :param str client_secret: Secret string that the application uses to prove its identity when requesting a token
-        :param str environment: The Office 365 Cloud Environment endpoint used for authentication
-            defaults to 'commercial'.
         """
         self.authentication_context.with_credentials(
-            ClientCredential(client_id, client_secret), environment=environment
+            ClientCredential(client_id, client_secret)
         )
         return self
 
-    def with_credentials(self, credentials, environment="commercial"):
-        # type: (UserCredential|ClientCredential, Optional[str]) -> Self
+    def with_credentials(self, credentials):
+        # type: (UserCredential|ClientCredential) -> Self
         """
         Initializes a client to acquire a token via user or client credentials
         :type credentials: UserCredential or ClientCredential
-        :param str environment: The Office 365 Cloud Environment endpoint used for authentication
-            defaults to 'commercial'.
         """
-        self.authentication_context.with_credentials(
-            credentials, environment=environment
-        )
+        self.authentication_context.with_credentials(credentials)
         return self
 
     def execute_batch(self, items_per_batch=100, success_callback=None):

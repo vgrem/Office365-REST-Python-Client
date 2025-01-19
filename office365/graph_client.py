@@ -166,10 +166,10 @@ class GraphClient(ClientRuntimeContext):
         # type: () -> GraphRequest
         if self._pending_request is None:
             self._pending_request = GraphRequest(
-                 tenant=self._tenant, environment=self._environment
+                tenant=self._tenant, environment=self._environment
             )
             if callable(self._token_callback):
-               self._pending_request.with_access_token(self._token_callback)
+                self._pending_request.with_access_token(self._token_callback)
             self._pending_request.beforeExecute += self._build_specific_query
         return self._pending_request
 

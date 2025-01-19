@@ -31,13 +31,22 @@ def _get_authorization_header(token):
 class AuthenticationContext(object):
     """Authentication context for SharePoint Online/OneDrive For Business"""
 
-    def __init__(self, url):
+    def __init__(
+        self, url, environment="commercial", allow_ntlm=False, browser_mode=False
+    ):
         """
         :param str url: SharePoint absolute web or site Url
+        :param str environment: The Office 365 Cloud Environment endpoint used for authentication
+            defaults to 'commercial'.
+        :param bool allow_ntlm: Flag indicates whether NTLM scheme is enabled. Disabled by default
+        :param bool browser_mode: Allow browser authentication
         """
         self.url = url.rstrip("/")
         self._authenticate = None
         self._cached_token = None
+        self._environment = environment
+        self._allow_ntlm = allow_ntlm
+        self._browser_mode = browser_mode
 
     def with_client_certificate(
         self,
@@ -171,33 +180,32 @@ class AuthenticationContext(object):
             )
 
         self._authenticate = _authenticate
+        return self
 
-    def with_credentials(self, credentials, **kwargs):
+    def with_credentials(self, credentials):
+        # type: (UserCredential | ClientCredential) -> "AuthenticationContext"
         """
         Initializes a client to acquire a token via user or client credentials
-
-        :param UserCredential or ClientCredential credentials:
         """
         if isinstance(credentials, ClientCredential):
-            environment = kwargs.get("environment")
             provider = ACSTokenProvider(
-                self.url, credentials.clientId, credentials.clientSecret, environment
+                self.url,
+                credentials.clientId,
+                credentials.clientSecret,
+                self._environment,
             )
         elif isinstance(credentials, UserCredential):
-            allow_ntlm = kwargs.get("allow_ntlm", False)
-            if allow_ntlm:
+            if self._allow_ntlm:
                 from office365.runtime.auth.providers.ntlm_provider import NtlmProvider
 
                 provider = NtlmProvider(credentials.userName, credentials.password)
             else:
-                browser_mode = kwargs.get("browser_mode", False)
-                environment = kwargs.get("environment")
                 provider = SamlTokenProvider(
                     self.url,
                     credentials.userName,
                     credentials.password,
-                    browser_mode,
-                    environment,
+                    self._browser_mode,
+                    self._environment,
                 )
         else:
             raise ValueError("Unknown credential type")
@@ -206,17 +214,17 @@ class AuthenticationContext(object):
             provider.authenticate_request(request)
 
         self._authenticate = _authenticate
+        return self
 
-    def acquire_token_for_user(self, username, password, browser_mode=False):
+    def acquire_token_for_user(self, username, password):
         """
         Initializes a client to acquire a token via user credentials
         Status: deprecated!
 
         :param str password: The user password
         :param str username: Typically a UPN in the form of an email address
-        :param bool browser_mode:
         """
-        provider = SamlTokenProvider(self.url, username, password, browser_mode)
+        provider = SamlTokenProvider(self.url, username, password, self._browser_mode)
 
         def _authenticate(request):
             provider.authenticate_request(request)
