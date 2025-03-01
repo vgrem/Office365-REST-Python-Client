@@ -2454,7 +2454,7 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="Apple bulk enrollment without user challenge. (DEP, Apple Configurator, Mobile Config)"/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentType/windowsAzureADJoin">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 Azure AD Join."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 Entra ID (Azure AD) Join."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentType/windowsBulkUserless">
             <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 Bulk enrollment through ICD with certificate."/>
@@ -2463,19 +2463,19 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 automatic enrollment. (Add work account)"/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentType/windowsBulkAzureDomainJoin">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 bulk Azure AD Join."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 bulk Entra ID (Azure AD) Join."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentType/windowsCoManagement">
             <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 Co-Management triggered by AutoPilot or Group Policy."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentType/windowsAzureADJoinUsingDeviceAuth">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 Azure AD Join using Device Auth."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Windows 10 Entra ID (Azure AD) Join using Device Auth."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentType/appleUserEnrollment">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Device managed by Apple user enrollment"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates the device is enrolled via Apple User Enrollment with Company Portal. It results in an enrollment with a new partition for managed apps and data and which supports a limited set of management capabilities"/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentType/appleUserEnrollmentWithServiceAccount">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Device managed by Apple user enrollment with service account"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates the device is enrolled via Apple User Enrollment with Company Portal using a device enrollment manager user. It results in an enrollment with a new partition for managed apps and data and which supports a limited set of management capabilities"/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceLogCollectionTemplateType">
             <Annotation Term="Org.OData.Core.V1.Description" String="Enum for the template type used for collecting logs"/>
@@ -2622,13 +2622,16 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="Owner type of device."/>
          </Annotations>
          <Annotations Target="microsoft.graph.managedDeviceOwnerType/unknown">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Unknown."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Unknown device owner type."/>
          </Annotations>
          <Annotations Target="microsoft.graph.managedDeviceOwnerType/company">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Owned by company."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Corporate device owner type."/>
          </Annotations>
          <Annotations Target="microsoft.graph.managedDeviceOwnerType/personal">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Owned by person."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Personal device owner type."/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.managedDeviceOwnerType/unknownFutureValue">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Evolvable enumeration sentinel value. Do not use."/>
          </Annotations>
          <Annotations Target="microsoft.graph.managedDevicePartnerReportedHealthState">
             <Annotation Term="Org.OData.Core.V1.Description" String="Available health states for the Device Health API"/>
@@ -2698,9 +2701,6 @@
          </Annotations>
          <Annotations Target="microsoft.graph.managementAgentType/microsoft365ManagedMdm">
             <Annotation Term="Org.OData.Core.V1.Description" String="This device is managed by Microsoft 365 through Intune."/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.managementAgentType/msSense">
-            <Annotation Term="Org.OData.Core.V1.Description" String=""/>
          </Annotations>
          <Annotations Target="microsoft.graph.obliterationBehavior">
             <Annotation Term="Org.OData.Core.V1.Description" String="In macOS 12 and later, this command uses Erase All Content and Settings (EACS) on Mac computers with the Apple M1 chip or the Apple T2 Security Chip. On those devices, if EACS can’t run, the device can use obliteration (macOS 11.x behavior). This key has no effect on machines prior to the T2 chip. Upon receiving this command, the device performs preflight checks to determine if the device is in a state that allows EACS. The ObliterationBehavior value defines the device's fallback behavior."/>
@@ -5668,9 +5668,6 @@
          <Annotations Target="microsoft.graph.solutionsRoot">
             <Annotation Term="Org.OData.Capabilities.V1.BatchContinueOnErrorSupported" Bool="true"/>
             <Annotation Term="Org.OData.Capabilities.V1.BatchSupported" Bool="true"/>
-         </Annotations>
-         <Annotations Target="microsoft.graph.deviceManagement">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Singleton entity that acts as a container for all device management functionality."/>
          </Annotations>
          <Annotations Target="microsoft.graph.auditEvent">
             <Annotation Term="Org.OData.Core.V1.Description" String="A class containing the properties for Audit Event."/>
@@ -10548,6 +10545,9 @@
          <Annotations Target="microsoft.graph.deviceConfiguration/deviceSettingStateSummaries">
             <Annotation Term="Org.OData.Core.V1.Description" String="Device Configuration Setting State Device Summary"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.deviceConfigurationDeviceStatus">
+            <Annotation Term="Org.OData.Core.V1.Description" String="Support for this Entity is being deprecated starting May 2026 &amp; will no longer be supported."/>
+         </Annotations>
          <Annotations Target="microsoft.graph.deviceConfiguration/deviceStatuses">
             <Annotation Term="Org.OData.Core.V1.Description" String="Device configuration installation status by device."/>
          </Annotations>
@@ -10627,7 +10627,7 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="UserPrincipalName."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceConfigurationState">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Device Configuration State for a given device."/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Support for this Entity is being deprecated starting May 2026 &amp; will no longer be supported."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceConfigurationState/displayName">
             <Annotation Term="Org.OData.Core.V1.Description" String="The name of the policy for this policyBase"/>
@@ -13311,22 +13311,22 @@
             <Annotation Term="Org.OData.Core.V1.Description" String="The maximum number of devices that a user can enroll"/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentPlatformRestrictionsConfiguration">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Device Enrollment Configuration that restricts the types of devices a user can enroll"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Default Device Enrollment Platform Restrictions Configuration that restricts the types of devices a user can enroll"/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentPlatformRestrictionsConfiguration/androidRestriction">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Android restrictions based on platform, platform operating system version, and device ownership"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates restrictions for Android platform."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentPlatformRestrictionsConfiguration/iosRestriction">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Ios restrictions based on platform, platform operating system version, and device ownership"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates restrictions for IOS platform."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentPlatformRestrictionsConfiguration/macOSRestriction">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Mac restrictions based on platform, platform operating system version, and device ownership"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates restrictions for MacOS platform."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentPlatformRestrictionsConfiguration/windowsMobileRestriction">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Windows mobile restrictions based on platform, platform operating system version, and device ownership"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates restrictions for Windows Mobile platform."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentPlatformRestrictionsConfiguration/windowsRestriction">
-            <Annotation Term="Org.OData.Core.V1.Description" String="Windows restrictions based on platform, platform operating system version, and device ownership"/>
+            <Annotation Term="Org.OData.Core.V1.Description" String="Indicates restrictions for Windows platform."/>
          </Annotations>
          <Annotations Target="microsoft.graph.deviceEnrollmentWindowsHelloForBusinessConfiguration">
             <Annotation Term="Org.OData.Core.V1.Description" String="Windows Hello for Business settings lets users access their devices using a gesture, such as biometric authentication, or a PIN. Configure settings for enrolled Windows 10, Windows 10 Mobile and later."/>
@@ -19840,6 +19840,7 @@ within the time frame of their original request."/>
             <Member Name="unknown" Value="0"/>
             <Member Name="company" Value="1"/>
             <Member Name="personal" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
          <EnumType Name="managedDevicePartnerReportedHealthState">
             <Member Name="unknown" Value="0"/>
@@ -21902,6 +21903,11 @@ within the time frame of their original request."/>
             <Member Name="administrator" Value="3"/>
             <Member Name="unknownFutureValue" Value="127"/>
          </EnumType>
+         <EnumType Name="allowedLobbyAdmitterRoles">
+            <Member Name="organizerAndCoOrganizersAndPresenters" Value="0"/>
+            <Member Name="organizerAndCoOrganizers" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="broadcastMeetingAudience">
             <Member Name="roleIsAttendee" Value="0"/>
             <Member Name="organization" Value="1"/>
@@ -21954,6 +21960,11 @@ within the time frame of their original request."/>
          <EnumType Name="meetingChatHistoryDefaultMode">
             <Member Name="none" Value="0"/>
             <Member Name="all" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
+         <EnumType Name="meetingLiveShareOptions">
+            <Member Name="enabled" Value="0"/>
+            <Member Name="disabled" Value="1"/>
             <Member Name="unknownFutureValue" Value="2"/>
          </EnumType>
          <EnumType Name="modality">
@@ -22257,6 +22268,12 @@ within the time frame of their original request."/>
             <Member Name="unknownFutureValue" Value="7"/>
             <Member Name="emailUser" Value="8"/>
          </EnumType>
+         <EnumType Name="confirmedBy" IsFlags="true">
+            <Member Name="none" Value="0"/>
+            <Member Name="user" Value="1"/>
+            <Member Name="manager" Value="2"/>
+            <Member Name="unknownFutureValue" Value="1024"/>
+         </EnumType>
          <EnumType Name="eligibilityFilteringEnabledEntities" IsFlags="true">
             <Member Name="none" Value="0"/>
             <Member Name="swapRequest" Value="1"/>
@@ -22291,6 +22308,12 @@ within the time frame of their original request."/>
             <Member Name="darkPink" Value="10"/>
             <Member Name="darkYellow" Value="11"/>
             <Member Name="unknownFutureValue" Value="12"/>
+         </EnumType>
+         <EnumType Name="timeCardState">
+            <Member Name="clockedIn" Value="0"/>
+            <Member Name="onBreak" Value="1"/>
+            <Member Name="clockedOut" Value="2"/>
+            <Member Name="unknownFutureValue" Value="3"/>
          </EnumType>
          <EnumType Name="timeOffReasonIconType">
             <Member Name="none" Value="0"/>
@@ -22329,6 +22352,7 @@ within the time frame of their original request."/>
             <Member Name="openShiftRequest" Value="32"/>
             <Member Name="offerShiftRequest" Value="64"/>
             <Member Name="unknownFutureValue" Value="1024"/>
+            <Member Name="timeCard" Value="2048"/>
             <Member Name="timeOffReason" Value="4096"/>
             <Member Name="timeOff" Value="8192"/>
             <Member Name="timeOffRequest" Value="16384"/>
@@ -22476,6 +22500,7 @@ within the time frame of their original request."/>
             <Property Name="appId" Type="Edm.String"/>
             <Property Name="applicationTemplateId" Type="Edm.String"/>
             <Property Name="appRoles" Type="Collection(graph.appRole)" Nullable="false"/>
+            <Property Name="authenticationBehaviors" Type="graph.authenticationBehaviors"/>
             <Property Name="certification" Type="graph.certification"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="defaultRedirectUri" Type="Edm.String"/>
@@ -22563,6 +22588,11 @@ within the time frame of their original request."/>
             <Property Name="isEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="origin" Type="Edm.String"/>
             <Property Name="value" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="authenticationBehaviors">
+            <Property Name="blockAzureADGraphAccess" Type="Edm.Boolean"/>
+            <Property Name="removeUnverifiedEmailClaim" Type="Edm.Boolean"/>
+            <Property Name="requireClientServicePrincipal" Type="Edm.Boolean"/>
          </ComplexType>
          <ComplexType Name="certification">
             <Property Name="certificationDetailsUrl" Type="Edm.String"/>
@@ -22991,6 +23021,7 @@ within the time frame of their original request."/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="description" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="firstChannelName" Type="Edm.String"/>
             <Property Name="funSettings" Type="graph.teamFunSettings"/>
             <Property Name="guestSettings" Type="graph.teamGuestSettings"/>
             <Property Name="internalId" Type="Edm.String"/>
@@ -23553,12 +23584,20 @@ within the time frame of their original request."/>
          <EntityType Name="onlineMeetingBase" BaseType="graph.entity" Abstract="true" OpenType="true">
             <Property Name="allowAttendeeToEnableCamera" Type="Edm.Boolean"/>
             <Property Name="allowAttendeeToEnableMic" Type="Edm.Boolean"/>
+            <Property Name="allowBreakoutRooms" Type="Edm.Boolean"/>
+            <Property Name="allowedLobbyAdmitters" Type="graph.allowedLobbyAdmitterRoles"/>
             <Property Name="allowedPresenters" Type="graph.onlineMeetingPresenters"/>
+            <Property Name="allowLiveShare" Type="graph.meetingLiveShareOptions"/>
             <Property Name="allowMeetingChat" Type="graph.meetingChatMode"/>
             <Property Name="allowParticipantsToChangeName" Type="Edm.Boolean"/>
+            <Property Name="allowPowerPointSharing" Type="Edm.Boolean"/>
+            <Property Name="allowRecording" Type="Edm.Boolean"/>
             <Property Name="allowTeamworkReactions" Type="Edm.Boolean"/>
+            <Property Name="allowTranscription" Type="Edm.Boolean"/>
+            <Property Name="allowWhiteboard" Type="Edm.Boolean"/>
             <Property Name="audioConferencing" Type="graph.audioConferencing"/>
             <Property Name="chatInfo" Type="graph.chatInfo"/>
+            <Property Name="chatRestrictions" Type="graph.chatRestrictions"/>
             <Property Name="isEntryExitAnnounced" Type="Edm.Boolean"/>
             <Property Name="joinInformation" Type="graph.itemBody"/>
             <Property Name="joinMeetingIdSettings" Type="graph.joinMeetingIdSettings"/>
@@ -23578,6 +23617,7 @@ within the time frame of their original request."/>
             <Property Name="endDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="externalId" Type="Edm.String"/>
             <Property Name="isBroadcast" Type="Edm.Boolean"/>
+            <Property Name="meetingTemplateId" Type="Edm.String"/>
             <Property Name="participants" Type="graph.meetingParticipants"/>
             <Property Name="startDateTime" Type="Edm.DateTimeOffset"/>
             <NavigationProperty Name="recordings" Type="Collection(graph.callRecording)" ContainsTarget="true"/>
@@ -23603,6 +23643,7 @@ within the time frame of their original request."/>
          <EntityType Name="chat" BaseType="graph.entity">
             <Property Name="chatType" Type="graph.chatType" Nullable="false"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="isHiddenForAllMembers" Type="Edm.Boolean"/>
             <Property Name="lastUpdatedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="onlineMeetingInfo" Type="graph.teamworkOnlineMeetingInfo"/>
             <Property Name="tenantId" Type="Edm.String"/>
@@ -24657,6 +24698,9 @@ within the time frame of their original request."/>
             <Property Name="healthChecks" Type="Collection(graph.cloudPcOnPremisesConnectionHealthCheck)"/>
             <Property Name="startDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="cloudPcProvisioningPolicyAutopatch">
+            <Property Name="autopatchGroupId" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="cloudPcRestorePointSetting">
             <Property Name="frequencyType" Type="graph.cloudPcRestorePointFrequencyType"/>
             <Property Name="userRestoreEnabled" Type="Edm.Boolean"/>
@@ -24746,6 +24790,7 @@ within the time frame of their original request."/>
          </EntityType>
          <EntityType Name="cloudPcProvisioningPolicy" BaseType="graph.entity">
             <Property Name="alternateResourceUrl" Type="Edm.String"/>
+            <Property Name="autopatch" Type="graph.cloudPcProvisioningPolicyAutopatch"/>
             <Property Name="cloudPcGroupDisplayName" Type="Edm.String"/>
             <Property Name="cloudPcNamingTemplate" Type="Edm.String"/>
             <Property Name="description" Type="Edm.String"/>
@@ -25657,6 +25702,7 @@ within the time frame of their original request."/>
             <Property Name="summary" Type="graph.channelSummary"/>
             <Property Name="tenantId" Type="Edm.String"/>
             <Property Name="webUrl" Type="Edm.String"/>
+            <NavigationProperty Name="allMembers" Type="Collection(graph.conversationMember)" ContainsTarget="true"/>
             <NavigationProperty Name="filesFolder" Type="graph.driveItem" ContainsTarget="true"/>
             <NavigationProperty Name="members" Type="Collection(graph.conversationMember)" ContainsTarget="true"/>
             <NavigationProperty Name="messages" Type="Collection(graph.chatMessage)" ContainsTarget="true"/>
@@ -25694,21 +25740,26 @@ within the time frame of their original request."/>
          <EntityType Name="teamsTemplate" BaseType="graph.entity"/>
          <EntityType Name="schedule" BaseType="graph.entity">
             <Property Name="enabled" Type="Edm.Boolean"/>
+            <Property Name="isActivitiesIncludedWhenCopyingShiftsEnabled" Type="Edm.Boolean"/>
             <Property Name="offerShiftRequestsEnabled" Type="Edm.Boolean"/>
             <Property Name="openShiftsEnabled" Type="Edm.Boolean"/>
             <Property Name="provisionStatus" Type="graph.operationStatus"/>
             <Property Name="provisionStatusCode" Type="Edm.String"/>
+            <Property Name="startDayOfWeek" Type="graph.dayOfWeek"/>
             <Property Name="swapShiftsRequestsEnabled" Type="Edm.Boolean"/>
             <Property Name="timeClockEnabled" Type="Edm.Boolean"/>
+            <Property Name="timeClockSettings" Type="graph.timeClockSettings"/>
             <Property Name="timeOffRequestsEnabled" Type="Edm.Boolean"/>
             <Property Name="timeZone" Type="Edm.String"/>
             <Property Name="workforceIntegrationIds" Type="Collection(Edm.String)"/>
+            <NavigationProperty Name="dayNotes" Type="Collection(graph.dayNote)" ContainsTarget="true"/>
             <NavigationProperty Name="offerShiftRequests" Type="Collection(graph.offerShiftRequest)" ContainsTarget="true"/>
             <NavigationProperty Name="openShiftChangeRequests" Type="Collection(graph.openShiftChangeRequest)" ContainsTarget="true"/>
             <NavigationProperty Name="openShifts" Type="Collection(graph.openShift)" ContainsTarget="true"/>
             <NavigationProperty Name="schedulingGroups" Type="Collection(graph.schedulingGroup)" ContainsTarget="true"/>
             <NavigationProperty Name="shifts" Type="Collection(graph.shift)" ContainsTarget="true"/>
             <NavigationProperty Name="swapShiftsChangeRequests" Type="Collection(graph.swapShiftsChangeRequest)" ContainsTarget="true"/>
+            <NavigationProperty Name="timeCards" Type="Collection(graph.timeCard)" ContainsTarget="true"/>
             <NavigationProperty Name="timeOffReasons" Type="Collection(graph.timeOffReason)" ContainsTarget="true"/>
             <NavigationProperty Name="timeOffRequests" Type="Collection(graph.timeOffRequest)" ContainsTarget="true"/>
             <NavigationProperty Name="timesOff" Type="Collection(graph.timeOff)" ContainsTarget="true"/>
@@ -32795,6 +32846,7 @@ within the time frame of their original request."/>
             <NavigationProperty Name="instances" Type="Collection(graph.windowsSettingInstance)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="changeTrackedEntity" BaseType="graph.entity" Abstract="true">
+            <Property Name="createdBy" Type="graph.identitySet"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="lastModifiedBy" Type="graph.identitySet"/>
             <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
@@ -33886,6 +33938,9 @@ within the time frame of their original request."/>
             <Property Name="replyChainMessageId" Type="Edm.String"/>
             <Property Name="threadId" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="chatRestrictions">
+            <Property Name="allowTextOnly" Type="Edm.Boolean"/>
+         </ComplexType>
          <ComplexType Name="commsNotification" OpenType="true">
             <Property Name="changeType" Type="graph.changeType" Nullable="false"/>
             <Property Name="resourceUrl" Type="Edm.String" Nullable="false"/>
@@ -34038,6 +34093,14 @@ within the time frame of their original request."/>
             <Property Name="sequenceId" Type="Edm.Int64" Nullable="false"/>
             <Property Name="tone" Type="graph.tone" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="virtualEventExternalInformation">
+            <Property Name="applicationId" Type="Edm.String"/>
+            <Property Name="externalEventId" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="virtualEventExternalRegistrationInformation">
+            <Property Name="referrer" Type="Edm.String"/>
+            <Property Name="registrationId" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="virtualEventPresenterDetails">
             <Property Name="bio" Type="graph.itemBody"/>
             <Property Name="company" Type="Edm.String"/>
@@ -34130,6 +34193,7 @@ within the time frame of their original request."/>
             <Property Name="description" Type="graph.itemBody"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="endDateTime" Type="graph.dateTimeTimeZone"/>
+            <Property Name="externalEventInformation" Type="Collection(graph.virtualEventExternalInformation)"/>
             <Property Name="settings" Type="graph.virtualEventSettings"/>
             <Property Name="startDateTime" Type="graph.dateTimeTimeZone"/>
             <Property Name="status" Type="graph.virtualEventStatus"/>
@@ -34148,6 +34212,7 @@ within the time frame of their original request."/>
          <EntityType Name="virtualEventRegistration" BaseType="graph.entity">
             <Property Name="cancelationDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="email" Type="Edm.String"/>
+            <Property Name="externalRegistrationInformation" Type="graph.virtualEventExternalRegistrationInformation"/>
             <Property Name="firstName" Type="Edm.String"/>
             <Property Name="lastName" Type="Edm.String"/>
             <Property Name="preferredLanguage" Type="Edm.String"/>
@@ -34728,6 +34793,25 @@ within the time frame of their original request."/>
             <Property Name="endTime" Type="Edm.TimeOfDay"/>
             <Property Name="startTime" Type="Edm.TimeOfDay"/>
          </ComplexType>
+         <ComplexType Name="timeCardBreak">
+            <Property Name="breakId" Type="Edm.String"/>
+            <Property Name="end" Type="graph.timeCardEvent"/>
+            <Property Name="notes" Type="graph.itemBody"/>
+            <Property Name="start" Type="graph.timeCardEvent" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="timeCardEvent">
+            <Property Name="dateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="isAtApprovedLocation" Type="Edm.Boolean"/>
+            <Property Name="notes" Type="graph.itemBody"/>
+         </ComplexType>
+         <ComplexType Name="timeCardEntry">
+            <Property Name="breaks" Type="Collection(graph.timeCardBreak)"/>
+            <Property Name="clockInEvent" Type="graph.timeCardEvent"/>
+            <Property Name="clockOutEvent" Type="graph.timeCardEvent"/>
+         </ComplexType>
+         <ComplexType Name="timeClockSettings">
+            <Property Name="approvedLocation" Type="graph.geoCoordinates"/>
+         </ComplexType>
          <ComplexType Name="timeOffItem" BaseType="graph.scheduleEntity">
             <Property Name="timeOffReasonId" Type="Edm.String"/>
          </ComplexType>
@@ -34735,6 +34819,11 @@ within the time frame of their original request."/>
             <Property Name="protocol" Type="graph.workforceIntegrationEncryptionProtocol"/>
             <Property Name="secret" Type="Edm.String"/>
          </ComplexType>
+         <EntityType Name="dayNote" BaseType="graph.changeTrackedEntity">
+            <Property Name="dayNoteDate" Type="Edm.Date"/>
+            <Property Name="draftDayNote" Type="graph.itemBody"/>
+            <Property Name="sharedDayNote" Type="graph.itemBody"/>
+         </EntityType>
          <EntityType Name="scheduleChangeRequest" BaseType="graph.changeTrackedEntity" Abstract="true">
             <Property Name="assignedTo" Type="graph.scheduleChangeRequestActor"/>
             <Property Name="managerActionDateTime" Type="Edm.DateTimeOffset"/>
@@ -34761,6 +34850,7 @@ within the time frame of their original request."/>
             <Property Name="openShiftId" Type="Edm.String"/>
          </EntityType>
          <EntityType Name="schedulingGroup" BaseType="graph.changeTrackedEntity">
+            <Property Name="code" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="isActive" Type="Edm.Boolean"/>
             <Property Name="userIds" Type="Collection(Edm.String)"/>
@@ -34775,7 +34865,18 @@ within the time frame of their original request."/>
          <EntityType Name="swapShiftsChangeRequest" BaseType="graph.offerShiftRequest">
             <Property Name="recipientShiftId" Type="Edm.String"/>
          </EntityType>
+         <EntityType Name="timeCard" BaseType="graph.changeTrackedEntity">
+            <Property Name="breaks" Type="Collection(graph.timeCardBreak)"/>
+            <Property Name="clockInEvent" Type="graph.timeCardEvent"/>
+            <Property Name="clockOutEvent" Type="graph.timeCardEvent"/>
+            <Property Name="confirmedBy" Type="graph.confirmedBy"/>
+            <Property Name="notes" Type="graph.itemBody"/>
+            <Property Name="originalEntry" Type="graph.timeCardEntry"/>
+            <Property Name="state" Type="graph.timeCardState"/>
+            <Property Name="userId" Type="Edm.String"/>
+         </EntityType>
          <EntityType Name="timeOffReason" BaseType="graph.changeTrackedEntity">
+            <Property Name="code" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="iconType" Type="graph.timeOffReasonIconType"/>
             <Property Name="isActive" Type="Edm.Boolean"/>
@@ -39054,6 +39155,30 @@ within the time frame of their original request."/>
             <Parameter Name="Comment" Type="Edm.String" Unicode="false"/>
             <Parameter Name="ToRecipients" Type="Collection(graph.recipient)" Nullable="false"/>
          </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.event"/>
+         </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.mailFolder"/>
+         </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.message"/>
+         </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.calendar"/>
+         </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.contact"/>
+         </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.contactFolder"/>
+         </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.fileStorageContainer"/>
+         </Action>
+         <Action Name="permanentDelete" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
+         </Action>
          <Action Name="snoozeReminder" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.event"/>
             <Parameter Name="NewReminderTime" Type="graph.dateTimeTimeZone" Nullable="false"/>
@@ -39182,12 +39307,6 @@ within the time frame of their original request."/>
             <Parameter Name="lockState" Type="graph.siteLockState">
                <Annotation Term="Org.OData.Core.V1.OptionalParameter"/>
             </Parameter>
-         </Action>
-         <Action Name="permanentDelete" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.fileStorageContainer"/>
-         </Action>
-         <Action Name="permanentDelete" IsBound="true">
-            <Parameter Name="bindingParameter" Type="graph.driveItem"/>
          </Action>
          <Action Name="unlock" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.fileStorageContainer"/>
@@ -40612,6 +40731,10 @@ within the time frame of their original request."/>
             <Parameter Name="clientContext" Type="Edm.String" Unicode="false"/>
             <ReturnType Type="graph.updateRecordingStatusOperation"/>
          </Action>
+         <Action Name="setExternalEventInformation" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.virtualEvent"/>
+            <Parameter Name="externalEventId" Type="Edm.String" Unicode="false"/>
+         </Action>
          <Action Name="clearPresence" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.presence"/>
             <Parameter Name="sessionId" Type="Edm.String" Unicode="false"/>
@@ -40693,10 +40816,21 @@ within the time frame of their original request."/>
             <ReturnType Type="graph.stopHoldMusicOperation"/>
          </Action>
          <Function Name="getByUserIdAndRole" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.virtualEventTownhall)"/>
+            <Parameter Name="userId" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <Parameter Name="role" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Collection(graph.virtualEventTownhall)"/>
+         </Function>
+         <Function Name="getByUserIdAndRole" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.virtualEventWebinar)"/>
             <Parameter Name="userId" Type="Edm.String" Nullable="false" Unicode="false"/>
             <Parameter Name="role" Type="Edm.String" Nullable="false" Unicode="false"/>
             <ReturnType Type="Collection(graph.virtualEventWebinar)"/>
+         </Function>
+         <Function Name="getByUserRole" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.virtualEventTownhall)"/>
+            <Parameter Name="role" Type="Edm.String" Nullable="false" Unicode="false"/>
+            <ReturnType Type="Collection(graph.virtualEventTownhall)"/>
          </Function>
          <Function Name="getByUserRole" IsBound="true">
             <Parameter Name="bindingParameter" Type="Collection(graph.virtualEventWebinar)"/>
@@ -40861,6 +40995,34 @@ within the time frame of their original request."/>
             <Parameter Name="bindingParameter" Type="graph.scheduleChangeRequest"/>
             <Parameter Name="message" Type="Edm.String" Unicode="false"/>
          </Action>
+         <Action Name="clockIn" IsBound="true">
+            <Parameter Name="bindingParameter" Type="Collection(graph.timeCard)"/>
+            <Parameter Name="isAtApprovedLocation" Type="Edm.Boolean"/>
+            <Parameter Name="notes" Type="graph.itemBody"/>
+            <ReturnType Type="graph.timeCard"/>
+         </Action>
+         <Action Name="clockOut" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.timeCard"/>
+            <Parameter Name="isAtApprovedLocation" Type="Edm.Boolean"/>
+            <Parameter Name="notes" Type="graph.itemBody"/>
+            <ReturnType Type="graph.timeCard"/>
+         </Action>
+         <Action Name="confirm" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.timeCard"/>
+            <ReturnType Type="graph.timeCard"/>
+         </Action>
+         <Action Name="endBreak" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.timeCard"/>
+            <Parameter Name="isAtApprovedLocation" Type="Edm.Boolean"/>
+            <Parameter Name="notes" Type="graph.itemBody"/>
+            <ReturnType Type="graph.timeCard"/>
+         </Action>
+         <Action Name="startBreak" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.timeCard"/>
+            <Parameter Name="isAtApprovedLocation" Type="Edm.Boolean"/>
+            <Parameter Name="notes" Type="graph.itemBody"/>
+            <ReturnType Type="graph.timeCard"/>
+         </Action>
          <Action Name="share" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.schedule"/>
             <Parameter Name="notifyTeam" Type="Edm.Boolean"/>
@@ -40902,6 +41064,7 @@ within the time frame of their original request."/>
                <NavigationPropertyBinding Path="createdOnBehalfOf" Target="directoryObjects"/>
                <NavigationPropertyBinding Path="owners" Target="directoryObjects"/>
             </EntitySet>
+            <EntitySet Name="appRoleAssignments" EntityType="microsoft.graph.appRoleAssignment"/>
             <EntitySet Name="certificateBasedAuthConfiguration" EntityType="microsoft.graph.certificateBasedAuthConfiguration"/>
             <EntitySet Name="contacts" EntityType="microsoft.graph.orgContact">
                <NavigationPropertyBinding Path="directReports" Target="directoryObjects"/>
@@ -41261,6 +41424,13 @@ within the time frame of their original request."/>
             <Member Name="resolved" Value="8"/>
             <Member Name="unknownFutureValue" Value="31"/>
          </EnumType>
+         <EnumType Name="antispamTeamsDirection">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="inbound" Value="1"/>
+            <Member Name="outbound" Value="2"/>
+            <Member Name="intraorg" Value="3"/>
+            <Member Name="unknownFutureValue" Value="31"/>
+         </EnumType>
          <EnumType Name="containerPortProtocol">
             <Member Name="udp" Value="0"/>
             <Member Name="tcp" Value="1"/>
@@ -41463,6 +41633,21 @@ within the time frame of their original request."/>
             <Member Name="microsoftDefenderForCloud" Value="256"/>
             <Member Name="microsoftSentinel" Value="512"/>
             <Member Name="microsoftInsiderRiskManagement" Value="1024"/>
+         </EnumType>
+         <EnumType Name="teamsDeliveryLocation">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="teams" Value="1"/>
+            <Member Name="quarantine" Value="2"/>
+            <Member Name="failed" Value="3"/>
+            <Member Name="unknownFutureValue" Value="31"/>
+         </EnumType>
+         <EnumType Name="teamsMessageDeliveryAction">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="deliveredAsSpam" Value="1"/>
+            <Member Name="delivered" Value="2"/>
+            <Member Name="blocked" Value="3"/>
+            <Member Name="replaced" Value="4"/>
+            <Member Name="unknownFutureValue" Value="31"/>
          </EnumType>
          <EnumType Name="vmCloudProvider">
             <Member Name="unknown" Value="0"/>
@@ -42209,6 +42394,7 @@ within the time frame of their original request."/>
          <ComplexType Name="mailboxEvidence" BaseType="microsoft.graph.security.alertEvidence">
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="primaryAddress" Type="Edm.String"/>
+            <Property Name="upn" Type="Edm.String"/>
             <Property Name="userAccount" Type="microsoft.graph.security.userAccount"/>
          </ComplexType>
          <ComplexType Name="userAccount">
@@ -42304,6 +42490,32 @@ within the time frame of their original request."/>
             <Property Name="submissionDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="submissionId" Type="Edm.String"/>
             <Property Name="submitter" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="teamsMessageEvidence" BaseType="microsoft.graph.security.alertEvidence">
+            <Property Name="campaignId" Type="Edm.String"/>
+            <Property Name="channelId" Type="Edm.String"/>
+            <Property Name="deliveryAction" Type="microsoft.graph.security.teamsMessageDeliveryAction"/>
+            <Property Name="deliveryLocation" Type="microsoft.graph.security.teamsDeliveryLocation"/>
+            <Property Name="files" Type="Collection(microsoft.graph.security.fileEvidence)"/>
+            <Property Name="groupId" Type="Edm.String"/>
+            <Property Name="isExternal" Type="Edm.Boolean"/>
+            <Property Name="isOwned" Type="Edm.Boolean"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="messageDirection" Type="microsoft.graph.security.antispamTeamsDirection"/>
+            <Property Name="messageId" Type="Edm.String"/>
+            <Property Name="owningTenantId" Type="Edm.Guid"/>
+            <Property Name="parentMessageId" Type="Edm.String"/>
+            <Property Name="receivedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="recipients" Type="Collection(Edm.String)"/>
+            <Property Name="senderFromAddress" Type="Edm.String"/>
+            <Property Name="senderIP" Type="Edm.String"/>
+            <Property Name="sourceAppName" Type="Edm.String"/>
+            <Property Name="sourceId" Type="Edm.String"/>
+            <Property Name="subject" Type="Edm.String"/>
+            <Property Name="suspiciousRecipients" Type="Collection(Edm.String)"/>
+            <Property Name="threadId" Type="Edm.String"/>
+            <Property Name="threadType" Type="Edm.String"/>
+            <Property Name="urls" Type="Collection(microsoft.graph.security.urlEvidence)"/>
          </ComplexType>
          <ComplexType Name="eventPropagationResult">
             <Property Name="location" Type="Edm.String"/>

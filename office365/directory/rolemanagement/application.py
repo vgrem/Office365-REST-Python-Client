@@ -1,3 +1,6 @@
+from office365.directory.identitygovernance.privilegedaccess.unified_role_assignment_schedule_request import (
+    UnifiedRoleAssignmentScheduleRequest,
+)
 from office365.directory.rolemanagement.unified_role_assignment import (
     UnifiedRoleAssignment,
 )
@@ -37,6 +40,18 @@ class RbacApplication(Entity):
                 self.context,
                 UnifiedRoleDefinition,
                 ResourcePath("roleDefinitions", self.resource_path),
+            ),
+        )
+
+    def role_assignment_schedule_requests(self):
+        # type: () -> EntityCollection[UnifiedRoleAssignmentScheduleRequest]
+        """Resource representing the roles allowed by RBAC providers and the permissions assigned to the roles."""
+        return self.properties.get(
+            "roleAssignmentScheduleRequests",
+            EntityCollection(
+                self.context,
+                UnifiedRoleAssignmentScheduleRequest,
+                ResourcePath("roleAssignmentScheduleRequests", self.resource_path),
             ),
         )
 

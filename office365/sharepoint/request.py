@@ -1,4 +1,4 @@
-from typing import Optional, List, Callable
+from typing import Callable, List, Optional
 
 from requests import Response
 from typing_extensions import Self

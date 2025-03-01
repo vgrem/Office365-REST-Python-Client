@@ -1,4 +1,6 @@
 from office365.directory.policies.base import PolicyBase
+from office365.directory.policies.template import PolicyTemplate
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 
 
@@ -13,3 +15,14 @@ class CrossTenantAccessPolicy(PolicyBase):
         and partner.microsoftonline.cn.
         """
         return self.properties.get("allowedCloudEndpoints", StringCollection())
+
+    def templates(self):
+        # type: () -> PolicyTemplate
+        """Represents the base policy in the directory for multitenant organization settings."""
+        return self.properties.get(
+            "templates",
+              PolicyTemplate(
+                self.context,
+                ResourcePath("templates", self.resource_path),
+            ),
+        )
