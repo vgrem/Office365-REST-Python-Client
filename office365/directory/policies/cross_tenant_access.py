@@ -21,7 +21,7 @@ class CrossTenantAccessPolicy(PolicyBase):
         """Represents the base policy in the directory for multitenant organization settings."""
         return self.properties.get(
             "templates",
-              PolicyTemplate(
+            PolicyTemplate(
                 self.context,
                 ResourcePath("templates", self.resource_path),
             ),

@@ -2,7 +2,7 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.charts.axes import WorkbookChartAxes
 from office365.onedrive.workbooks.charts.data_labels import WorkbookChartDataLabels
-from office365.onedrive.workbooks.charts.legend import WorkbookChartLegend
+from office365.onedrive.workbooks.charts.legend.legend import WorkbookChartLegend
 from office365.onedrive.workbooks.charts.series.series import WorkbookChartSeries
 from office365.onedrive.workbooks.charts.title import WorkbookChartTitle
 from office365.runtime.client_result import ClientResult

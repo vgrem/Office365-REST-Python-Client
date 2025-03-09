@@ -21,7 +21,6 @@ client = GraphClient(tenant=test_tenant).with_token_interactive(
 
 
 resource = client.service_principals.get_by_name("Microsoft Graph")
-# app_role = "User.Read.All"
-app_role = "DeviceLocalCredential.Read.All"
+app_role = "FileStorageContainer.Selected"
 user = client.users.get_by_principal_name(test_user_principal_name)
 resource.grant_delegated_permissions(test_client_id, user, app_role).execute_query()

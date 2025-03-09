@@ -43,6 +43,21 @@ class Authentication(Entity):
         )
 
     @property
+    def microsoft_authenticator_methods(self):
+        from office365.directory.authentication.methods.microsoft_authenticator import (
+            MicrosoftAuthenticatorAuthenticationMethod,
+        )
+
+        return self.properties.get(
+            "microsoftAuthenticatorMethods",
+            EntityCollection(
+                self.context,
+                MicrosoftAuthenticatorAuthenticationMethod,
+                ResourcePath("microsoftAuthenticatorMethods", self.resource_path),
+            ),
+        )
+
+    @property
     def phone_methods(self):
         """The phone numbers registered to a user for authentication."""
         from office365.directory.authentication.methods.phone import (
@@ -94,6 +109,7 @@ class Authentication(Entity):
             property_mapping = {
                 "emailMethods": self.email_methods,
                 "fido2Methods": self.fido2_methods,
+                "microsoftAuthenticatorMethods": self.microsoft_authenticator_methods,
                 "passwordMethods": self.password_methods,
                 "phoneMethods": self.phone_methods,
             }

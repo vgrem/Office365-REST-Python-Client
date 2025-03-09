@@ -34,3 +34,7 @@ class TestIdentity(TestCase):
             self.client.identity.authentication_event_listeners.get().execute_query()
         )
         self.assertIsNotNone(result.resource_path)
+
+    def test5_list_conditional_access_policies(self):
+        result = self.client.identity.conditional_access.policies.get().execute_query()
+        self.assertIsNotNone(result.resource_path)

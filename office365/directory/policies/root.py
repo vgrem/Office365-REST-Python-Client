@@ -11,6 +11,7 @@ from office365.directory.policies.authorization import AuthorizationPolicy
 from office365.directory.policies.conditional_access import ConditionalAccessPolicy
 from office365.directory.policies.cross_tenant_access import CrossTenantAccessPolicy
 from office365.directory.policies.device_registration import DeviceRegistrationPolicy
+from office365.directory.policies.feature_rollout import FeatureRolloutPolicy
 from office365.directory.policies.permission_grant import PermissionGrantPolicy
 from office365.directory.policies.tenant_app_management import TenantAppManagementPolicy
 from office365.directory.policies.unified_role_management import (
@@ -52,16 +53,6 @@ class PolicyRoot(Entity):
         )
 
     @property
-    def device_registration_policy(self):
-        """ """
-        return self.properties.get(
-            "deviceRegistrationPolicy",
-            DeviceRegistrationPolicy(
-                self.context,
-                ResourcePath("deviceRegistrationPolicy", self.resource_path),
-            ),
-        )
-
     def authentication_strength_policies(self):
         # type: () -> EntityCollection[AuthenticationStrengthPolicy]
         """
@@ -112,6 +103,19 @@ class PolicyRoot(Entity):
         )
 
     @property
+    def conditional_access_policies(self):
+        # type: () -> EntityCollection[ConditionalAccessPolicy]
+        """The custom rules that define an access scenario"""
+        return self.properties.get(
+            "conditionalAccessPolicies",
+            EntityCollection(
+                self.context,
+                ConditionalAccessPolicy,
+                ResourcePath("conditionalAccessPolicies", self.resource_path),
+            ),
+        )
+
+    @property
     def cross_tenant_access_policy(self):
         """
         The custom rules that define an access scenario when interacting with external Azure AD tenants.
@@ -121,6 +125,17 @@ class PolicyRoot(Entity):
             CrossTenantAccessPolicy(
                 self.context,
                 ResourcePath("crossTenantAccessPolicy", self.resource_path),
+            ),
+        )
+
+    @property
+    def device_registration_policy(self):
+        """ """
+        return self.properties.get(
+            "deviceRegistrationPolicy",
+            DeviceRegistrationPolicy(
+                self.context,
+                ResourcePath("deviceRegistrationPolicy", self.resource_path),
             ),
         )
 
@@ -138,6 +153,19 @@ class PolicyRoot(Entity):
         )
 
     @property
+    def feature_rollout_policies(self):
+        # type: () -> EntityCollection[FeatureRolloutPolicy]
+        """The feature rollout policy associated with a directory object."""
+        return self.properties.get(
+            "featureRolloutPolicies",
+            EntityCollection(
+                self.context,
+                FeatureRolloutPolicy,
+                ResourcePath("featureRolloutPolicies", self.resource_path),
+            ),
+        )
+
+    @property
     def permission_grant_policies(self):
         # type: () -> EntityCollection[PermissionGrantPolicy]
         """
@@ -149,19 +177,6 @@ class PolicyRoot(Entity):
                 self.context,
                 PermissionGrantPolicy,
                 ResourcePath("permissionGrantPolicies", self.resource_path),
-            ),
-        )
-
-    @property
-    def conditional_access_policies(self):
-        # type: () -> EntityCollection[ConditionalAccessPolicy]
-        """The custom rules that define an access scenario"""
-        return self.properties.get(
-            "conditionalAccessPolicies",
-            EntityCollection(
-                self.context,
-                ConditionalAccessPolicy,
-                ResourcePath("conditionalAccessPolicies", self.resource_path),
             ),
         )
 
@@ -191,6 +206,7 @@ class PolicyRoot(Entity):
                 "crossTenantAccessPolicy": self.cross_tenant_access_policy,
                 "defaultAppManagementPolicy": self.default_app_management_policy,
                 "deviceRegistrationPolicy": self.device_registration_policy,
+                "featureRolloutPolicies": self.feature_rollout_policies,
                 "permissionGrantPolicies": self.permission_grant_policies,
                 "roleManagementPolicies": self.role_management_policies,
             }

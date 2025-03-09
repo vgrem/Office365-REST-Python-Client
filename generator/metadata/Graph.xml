@@ -20466,6 +20466,11 @@ within the time frame of their original request."/>
             <Member Name="selfRenew" Value="9"/>
             <Member Name="unknownFutureValue" Value="10"/>
          </EnumType>
+         <EnumType Name="incompatiblePrinterSettings">
+            <Member Name="show" Value="0"/>
+            <Member Name="hide" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="printColorMode">
             <Member Name="blackAndWhite" Value="0"/>
             <Member Name="grayscale" Value="1"/>
@@ -33115,6 +33120,9 @@ within the time frame of their original request."/>
             <Property Name="notificationType" Type="Edm.String"/>
             <Property Name="recipientType" Type="Edm.String"/>
          </EntityType>
+         <ComplexType Name="airPrintSettings">
+            <Property Name="incompatiblePrinters" Type="graph.incompatiblePrinterSettings" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="archivedPrintJob">
             <Property Name="acquiredByPrinter" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="acquiredDateTime" Type="Edm.DateTimeOffset"/>
@@ -33186,6 +33194,9 @@ within the time frame of their original request."/>
             <Property Name="quality" Type="graph.printQuality"/>
             <Property Name="scaling" Type="graph.printScaling"/>
          </ComplexType>
+         <ComplexType Name="printerDiscoverySettings">
+            <Property Name="airPrint" Type="graph.airPrintSettings" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="printerLocation">
             <Property Name="altitudeInMeters" Type="Edm.Int32"/>
             <Property Name="building" Type="Edm.String"/>
@@ -33252,6 +33263,7 @@ within the time frame of their original request."/>
          </ComplexType>
          <ComplexType Name="printSettings">
             <Property Name="documentConversionEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="printerDiscoverySettings" Type="graph.printerDiscoverySettings"/>
          </ComplexType>
          <ComplexType Name="printTaskStatus">
             <Property Name="description" Type="Edm.String" Nullable="false"/>
@@ -33317,16 +33329,20 @@ within the time frame of their original request."/>
          <EntityType Name="printDocument" BaseType="graph.entity" HasStream="true">
             <Property Name="contentType" Type="Edm.String"/>
             <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="downloadedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="size" Type="Edm.Int64" Nullable="false"/>
+            <Property Name="uploadedDateTime" Type="Edm.DateTimeOffset"/>
          </EntityType>
          <EntityType Name="printTaskTrigger" BaseType="graph.entity">
             <Property Name="event" Type="graph.printEvent" Nullable="false"/>
             <NavigationProperty Name="definition" Type="graph.printTaskDefinition" Nullable="false"/>
          </EntityType>
          <EntityType Name="printJob" BaseType="graph.entity">
+            <Property Name="acknowledgedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="configuration" Type="graph.printJobConfiguration" Nullable="false"/>
             <Property Name="createdBy" Type="graph.userIdentity"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset" Nullable="false"/>
+            <Property Name="errorCode" Type="Edm.Int32"/>
             <Property Name="isFetchable" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="redirectedFrom" Type="Edm.String"/>
             <Property Name="redirectedTo" Type="Edm.String"/>

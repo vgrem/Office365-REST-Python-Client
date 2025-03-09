@@ -9,8 +9,10 @@ Steps:
     openssl req -x509 -newkey rsa:2048 -keyout selfsignkey.pem -out selfsigncert.pem -nodes -days 365
 
 2. register Azure AD application
-3. add permissions
-4. upload certificate (public key)
+3. assign permissions (for instance Sites.FullControl.All permission)
+4. grant Admin Consent.
+4. create and upload certificate (public key).
+5. assign App-Only Role to SharePoint.
 
 """
 

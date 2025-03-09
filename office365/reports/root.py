@@ -1,5 +1,6 @@
 from office365.directory.authentication.methods.root import AuthenticationMethodsRoot
 from office365.entity import Entity
+from office365.partners.partners import Partners
 from office365.reports.internal.queries.create_report_query import create_report_query
 from office365.reports.report import Report
 from office365.reports.security.root import SecurityReportsRoot
@@ -290,6 +291,14 @@ class ReportRoot(Entity):
             AuthenticationMethodsRoot(
                 self.context, ResourcePath("authenticationMethods", self.resource_path)
             ),
+        )
+
+    @property
+    def partners(self):
+        """Represents billing details for a Microsoft direct partner."""
+        return self.properties.get(
+            "partners",
+            Partners(self.context, ResourcePath("partners", self.resource_path)),
         )
 
     @property

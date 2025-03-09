@@ -52,6 +52,7 @@ from office365.intune.organizations.organization import Organization
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.shares.collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
+from office365.onedrive.storage.storage import Storage
 from office365.outlook.calendar.place import Place
 from office365.outlook.calendar.rooms.list import RoomList
 from office365.planner.planner import Planner
@@ -386,6 +387,13 @@ class GraphClient(ClientRuntimeContext):
         Exposes methods that you can use to get Microsoft Purview Information Protection labels and label policies.
         """
         return InformationProtection(self, ResourcePath("informationProtection"))
+
+    @property
+    def storage(self):
+        """
+        Facilitates the structures of fileStorageContainers.
+        """
+        return Storage(self, ResourcePath("storage"))
 
     @property
     def subscriptions(self):
