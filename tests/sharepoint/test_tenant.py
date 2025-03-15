@@ -202,11 +202,12 @@ class TestTenant(TestCase):
     #    self.assertIsNotNone(result.value)
 
     def test_29_get_app_service_principal(self):
-        from office365.sharepoint.tenant.administration.internal.appservice.principal import (
-            SPOWebAppServicePrincipal,
+
+        from office365.sharepoint.tenant.administration.app_service_principal_public import (
+            SPOWebAppServicePrincipalPublic,
         )
 
-        result = SPOWebAppServicePrincipal(self.client).get().execute_query()
+        result = SPOWebAppServicePrincipalPublic(self.client).get().execute_query()
         self.assertIsNotNone(result.resource_path)
 
     def test_30_get_cdn_urls(self):

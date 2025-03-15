@@ -245,6 +245,7 @@
             <Property Name="WebUrl" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="AgreementPermissionsData">
+            <Property Name="CanAddAmendment" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanCreateAgreement" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanCreateTemplate" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanImportAgreement" Type="Edm.Boolean" Nullable="false"/>
@@ -1125,6 +1126,7 @@
             <Property Name="SensitivityLabel" Type="Edm.String"/>
             <Property Name="SensitivityLabelAssignmentMethod" Type="Edm.Int32" Nullable="false"/>
             <Property Name="SkipSearchReindex" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="TranslatedLang" Type="Edm.String"/>
             <Property Name="VirusInfo" Type="Edm.String"/>
             <Property Name="VirusStatus" Type="Edm.String"/>
             <Property Name="XTenantLabelInfo" Type="Edm.String"/>
@@ -1575,6 +1577,14 @@
             <Property Name="IsExistingAgreement" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Language" Type="Edm.String"/>
             <Property Name="State" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="UploadDocumentInfo">
+            <Property Name="FileItemId" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="FileName" Type="Edm.String"/>
+            <Property Name="FileServerRedirectedEmbedUrl" Type="Edm.String"/>
+            <Property Name="FileServerRelativeUrl" Type="Edm.String"/>
+            <Property Name="FileUniqueId" Type="Edm.String"/>
+            <Property Name="FolderServerRelativeUrl" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SiteThemes">
             <Property Name="themeData" Type="Collection(SP.ThemeData)"/>
@@ -2250,17 +2260,13 @@
             <Property Name="EnableMinimalDownload" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ExcludeFromOfflineClient" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="FooterColorIndexInDarkMode" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="FooterColorIndexInDarkModeBeenSet" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="FooterColorIndexInLightMode" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="FooterColorIndexInLightModeBeenSet" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="FooterEmphasis" Type="Edm.Int32" Nullable="false"/>
             <Property Name="FooterEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="FooterLayout" Type="Edm.Int32" Nullable="false"/>
             <Property Name="HasWebTemplateExtension" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="HeaderColorIndexInDarkMode" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="HeaderColorIndexInDarkModeBeenSet" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="HeaderColorIndexInLightMode" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="HeaderColorIndexInLightModeBeenSet" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="HeaderEmphasis" Type="Edm.Int32" Nullable="false"/>
             <Property Name="HeaderLayout" Type="Edm.Int32" Nullable="false"/>
             <Property Name="HideTitleInHeader" Type="Edm.Boolean" Nullable="false"/>
@@ -3543,6 +3549,12 @@
             <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
          </EntityType>
          <EntityType Name="CurrencyList">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="DigitalLegacy" Abstract="true">
             <Key>
                <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
             </Key>
@@ -4909,6 +4921,8 @@
             <EntitySet Name="VivaHomes" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaHome"/>
             <EntitySet Name="VivaResourceGetEndpoints" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaResourceGetEndpoint"/>
             <EntitySet Name="VivaResourcess" EntityType="Microsoft.SharePoint.EmployeeEngagement.VivaResources"/>
+            <EntitySet Name="FileStatuss" EntityType="Microsoft.SharePoint.FilePublish.Model.FileStatus"/>
+            <EntitySet Name="RemovedStatuss" EntityType="Microsoft.SharePoint.FilePublish.Model.RemovedStatus"/>
             <EntitySet Name="SPFlights" EntityType="Microsoft.SharePoint.Flighting.Runtime.SPFlight"/>
             <EntitySet Name="SPAllOrgSGManagers" EntityType="Microsoft.SharePoint.IdentityModel.SPAllOrgSGManager"/>
             <EntitySet Name="SPAllOrgSGMetadatas" EntityType="Microsoft.SharePoint.IdentityModel.SPAllOrgSGMetadata"/>
@@ -5107,6 +5121,7 @@
             <EntitySet Name="CopySourceInfos" EntityType="SP.CopySourceInfo"/>
             <EntitySet Name="CreatablesInfos" EntityType="SP.CreatablesInfo"/>
             <EntitySet Name="CurrencyLists" EntityType="SP.CurrencyList"/>
+            <EntitySet Name="DigitalLegacys" EntityType="SP.DigitalLegacy"/>
             <EntitySet Name="DirectorySessions" EntityType="SP.Directory.DirectorySession"/>
             <EntitySet Name="Groups" EntityType="SP.Directory.Group"/>
             <EntitySet Name="Links" EntityType="SP.Directory.Link"/>
@@ -5164,6 +5179,7 @@
             <EntitySet Name="Navigations" EntityType="SP.Navigation"/>
             <EntitySet Name="NavigationNodes" EntityType="SP.NavigationNode"/>
             <EntitySet Name="NewsCollections" EntityType="SP.NewsCollection"/>
+            <EntitySet Name="AccessTokenOptionalClaims" EntityType="SP.OAuth.AccessTokenOptionalClaim"/>
             <EntitySet Name="Authentications" EntityType="SP.OAuth.Authentication"/>
             <EntitySet Name="NativeClients" EntityType="SP.OAuth.NativeClient"/>
             <EntitySet Name="Tokens1" EntityType="SP.OAuth.Token"/>
@@ -10640,7 +10656,7 @@
                <Parameter Name="fieldInternalName" Type="Edm.String"/>
                <Parameter Name="lockId" Type="Edm.String"/>
             </FunctionImport>
-            <FunctionImport Name="Archive" IsBindable="true">
+            <FunctionImport Name="Archive" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Workflow.SPWorkflowTask"/>
             </FunctionImport>
             <FunctionImport Name="DeleteObject" IsBindable="true">
@@ -10744,7 +10760,7 @@
             <FunctionImport Name="SystemUpdate" IsBindable="true">
                <Parameter Name="this" Type="SP.Workflow.SPWorkflowTask"/>
             </FunctionImport>
-            <FunctionImport Name="Unarchive" IsBindable="true">
+            <FunctionImport Name="Unarchive" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Workflow.SPWorkflowTask"/>
             </FunctionImport>
             <FunctionImport Name="Update" IsBindable="true">
@@ -13493,7 +13509,7 @@
                <Parameter Name="fieldInternalName" Type="Edm.String"/>
                <Parameter Name="lockId" Type="Edm.String"/>
             </FunctionImport>
-            <FunctionImport Name="Archive" IsBindable="true">
+            <FunctionImport Name="Archive" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.ListItem"/>
             </FunctionImport>
             <FunctionImport Name="DeleteObject" IsBindable="true">
@@ -13597,7 +13613,7 @@
             <FunctionImport Name="SystemUpdate" IsBindable="true">
                <Parameter Name="this" Type="SP.ListItem"/>
             </FunctionImport>
-            <FunctionImport Name="Unarchive" IsBindable="true">
+            <FunctionImport Name="Unarchive" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.ListItem"/>
             </FunctionImport>
             <FunctionImport Name="Update" IsBindable="true">
@@ -14107,6 +14123,9 @@
             <FunctionImport Name="ProcessExternalNotification" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="SP.Web"/>
                <Parameter Name="stream" Type="Edm.Stream"/>
+            </FunctionImport>
+            <FunctionImport Name="Recycle" IsBindable="true">
+               <Parameter Name="this" Type="SP.Web"/>
             </FunctionImport>
             <FunctionImport Name="RegisterPushNotificationSubscriber" ReturnType="SP.PushNotificationSubscriber" IsBindable="true" EntitySet="PushNotificationSubscribers">
                <Parameter Name="this" Type="SP.Web"/>
@@ -14657,6 +14676,7 @@
                <Parameter Name="this" Type="SP.RequestContext"/>
             </FunctionImport>
             <FunctionImport Name="SP_CurrencyList_GetList" ReturnType="SP.CurrencyInformationCollection"/>
+            <FunctionImport Name="SP_DigitalLegacy_GetSettingsAsStream" ReturnType="Edm.Stream" IsSideEffecting="false"/>
             <FunctionImport Name="Add" ReturnType="SP.EventReceiverDefinition" IsBindable="true" EntitySet="EventReceiverDefinitions">
                <Parameter Name="this" Type="Collection(SP.EventReceiverDefinition)"/>
                <Parameter Name="eventReceiverCreationInformation" Type="SP.EventReceiverDefinitionCreationInformation"/>
@@ -15164,6 +15184,14 @@
                <Parameter Name="XorHash" Type="Edm.String"/>
                <Parameter Name="contentStream" Type="Edm.Stream"/>
             </FunctionImport>
+            <FunctionImport Name="EnsurePublishedFile" ReturnType="Microsoft.SharePoint.FilePublish.Model.FileStatus" IsBindable="true" EntitySet="FileStatuss">
+               <Parameter Name="this" Type="Collection(SP.File)"/>
+               <Parameter Name="baseFilePath" Type="SP.ResourcePath"/>
+            </FunctionImport>
+            <FunctionImport Name="GetBaseFile" ReturnType="Microsoft.SharePoint.FilePublish.Model.FileStatus" IsComposable="true" IsBindable="true" EntitySet="FileStatuss">
+               <Parameter Name="this" Type="Collection(SP.File)"/>
+               <Parameter Name="publishedFilePath" Type="SP.ResourcePath"/>
+            </FunctionImport>
             <FunctionImport Name="GetByPathOrAddStub" ReturnType="SP.File" IsBindable="true" EntitySet="Files12">
                <Parameter Name="this" Type="Collection(SP.File)"/>
                <Parameter Name="DecodedUrl" Type="Edm.String"/>
@@ -15175,6 +15203,14 @@
             <FunctionImport Name="GetByUrlOrAddStub" ReturnType="SP.File" IsBindable="true" EntitySet="Files12">
                <Parameter Name="this" Type="Collection(SP.File)"/>
                <Parameter Name="urlOfFile" Type="Edm.String"/>
+            </FunctionImport>
+            <FunctionImport Name="GetPublishedFile" ReturnType="Microsoft.SharePoint.FilePublish.Model.FileStatus" IsComposable="true" IsBindable="true" EntitySet="FileStatuss">
+               <Parameter Name="this" Type="Collection(SP.File)"/>
+               <Parameter Name="baseFilePath" Type="SP.ResourcePath"/>
+            </FunctionImport>
+            <FunctionImport Name="StopPublish" ReturnType="Microsoft.SharePoint.FilePublish.Model.RemovedStatus" IsBindable="true" EntitySet="RemovedStatuss">
+               <Parameter Name="this" Type="Collection(SP.File)"/>
+               <Parameter Name="baseFilePath" Type="SP.ResourcePath"/>
             </FunctionImport>
             <FunctionImport Name="AddClientActivities" ReturnType="Collection(Microsoft.SharePoint.Activities.ActivityClientResponse)" IsBindable="true">
                <Parameter Name="this" Type="SP.File"/>
@@ -17709,6 +17745,11 @@
                <Parameter Name="startIndex" Type="Edm.Int32" Nullable="false"/>
                <Parameter Name="includeDetail" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="GetSitePropertiesBySiteId" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SiteProperties" IsBindable="true" EntitySet="SitePropertiess">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="siteId" Type="Edm.Guid" Nullable="false"/>
+               <Parameter Name="includeDetail" Type="Edm.Boolean" Nullable="false"/>
+            </FunctionImport>
             <FunctionImport Name="GetSitePropertiesByUrl" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SiteProperties" IsBindable="true" EntitySet="SitePropertiess">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="url" Type="Edm.String"/>
@@ -17800,6 +17841,9 @@
             <FunctionImport Name="GetSPOContainerTypes" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPContainerTypeProperties)" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="containerTenantType" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="GetSPOCopilotPromoUsageStatistics" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SPOCopilotPromoUsage" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
             <FunctionImport Name="GetSPODeletedContainers" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPDeletedContainerProperties)" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -20365,6 +20409,10 @@
             <AssociationSet Name="SP_NavigationNode_TitleResource_SP_UserResource_TitleResourcePartnerSet" Association="SP.SP_NavigationNode_TitleResource_SP_UserResource_TitleResourcePartner">
                <End Role="TitleResourcePartner" EntitySet="NavigationNodes"/>
                <End Role="TitleResource" EntitySet="UserResources"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_OAuth_TokenResponse_accessTokenOptionalClaim_SP_OAuth_AccessTokenOptionalClaim_accessTokenOptionalClaimPartnerSet" Association="SP.OAuth.SP_OAuth_TokenResponse_accessTokenOptionalClaim_SP_OAuth_AccessTokenOptionalClaim_accessTokenOptionalClaimPartner">
+               <End Role="accessTokenOptionalClaimPartner" EntitySet="TokenResponses"/>
+               <End Role="accessTokenOptionalClaim" EntitySet="AccessTokenOptionalClaims"/>
             </AssociationSet>
             <AssociationSet Name="SP_ObjectSharingInformation_SharedWithUsersCollection_SP_ObjectSharingInformationUser_SharedWithUsersCollectionPartnerSet" Association="SP.SP_ObjectSharingInformation_SharedWithUsersCollection_SP_ObjectSharingInformationUser_SharedWithUsersCollectionPartner">
                <End Role="SharedWithUsersCollectionPartner" EntitySet="ObjectSharingInformations"/>
@@ -23162,10 +23210,19 @@
          <Annotations Target="SP.Sharing.SharePointIds">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.Sharing.ItemSharingSettings">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.Sharing.LinkInfo">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Sharing.LinkParameters">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Sharing.MainAccessInformation">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Sharing.MainLinkInfo">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Sharing.MainLinkAbilities">
@@ -23220,6 +23277,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Sharing.PrincipalInfo">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Sharing.PermissionCollection/mainAccess">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Sharing.RecipientLimits">
@@ -24735,13 +24795,7 @@
          <Annotations Target="SP.Web/FooterColorIndexInDarkMode">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.Web/FooterColorIndexInDarkModeBeenSet">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="SP.Web/FooterColorIndexInLightMode">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="SP.Web/FooterColorIndexInLightModeBeenSet">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Web/FooterEmphasis">
@@ -24756,13 +24810,7 @@
          <Annotations Target="SP.Web/HeaderColorIndexInDarkMode">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.Web/HeaderColorIndexInDarkModeBeenSet">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="SP.Web/HeaderColorIndexInLightMode">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
-         <Annotations Target="SP.Web/HeaderColorIndexInLightModeBeenSet">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Web/HeaderEmphasis">
@@ -29145,6 +29193,9 @@
          <Annotations Target="SP.ApiData/SP_CurrencyList_GetList()">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.ApiData/SP_DigitalLegacy_GetSettingsAsStream()">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.ApiData/AddUsingPath(Collection(SP.File), Edm.String, Edm.Boolean, Edm.Boolean, Edm.Boolean, Edm.String, Edm.Stream)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -29704,6 +29755,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetSPOAppBillingPolicies(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/GetSPOCopilotPromoUsageStatistics(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetTenantSiteCreationSource(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
@@ -38275,6 +38329,14 @@
             <Property Name="tenantId" Type="Edm.String"/>
             <Property Name="webId" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="ItemSharingSettings">
+            <Property Name="blockSharingPushDown" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="itemId" Type="Edm.String"/>
+            <Property Name="itemMembersCanShare" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="itemName" Type="Edm.String"/>
+            <Property Name="itemType" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="parentId" Type="Edm.String"/>
+         </ComplexType>
          <ComplexType Name="LinkInfo">
             <Property Name="inheritedFrom" Type="SP.Sharing.InheritedFrom"/>
             <Property Name="isInherited" Type="Edm.Boolean" Nullable="false"/>
@@ -38285,6 +38347,16 @@
          </ComplexType>
          <ComplexType Name="LinkParameters">
             <Property Name="nav" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="MainAccessInformation">
+            <Property Name="mainLink" Type="SP.Sharing.MainLinkInfo"/>
+            <Property Name="sharingSettings" Type="SP.Sharing.ItemSharingSettings"/>
+         </ComplexType>
+         <ComplexType Name="MainLinkInfo">
+            <Property Name="accessors" Type="Collection(SP.Sharing.Principal)"/>
+            <Property Name="audience" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="role" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="url" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="MainLinkAbilities">
             <Property Name="canGetLink" Type="SP.Sharing.SharingAbilityStatus"/>
@@ -38312,6 +38384,7 @@
             <Property Name="appConsentPrincipals" Type="Collection(SP.Sharing.PrincipalInfo)"/>
             <Property Name="hasInheritedLinks" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="links" Type="Collection(SP.Sharing.LinkInfo)"/>
+            <Property Name="mainAccess" Type="SP.Sharing.MainAccessInformation"/>
             <Property Name="principals" Type="Collection(SP.Sharing.PrincipalInfo)"/>
             <Property Name="siteAdmins" Type="Collection(SP.Sharing.PrincipalInfo)"/>
             <Property Name="totalNumberOfPrincipals" Type="Edm.Int32" Nullable="false"/>
@@ -39325,6 +39398,12 @@
             <Property Name="IsReadOnly" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Value" Type="Edm.Boolean" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="MonthlyUsage">
+            <Property Name="CreatedDate" Type="Edm.String"/>
+            <Property Name="PromotionGranted" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="PromotionRemaining" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="PromotionUsed" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="NewSiteManagedPath">
             <Property Name="IsReadOnly" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Value" Type="Edm.String"/>
@@ -39713,6 +39792,11 @@
             <Property Name="SiteOwner" Type="Edm.String"/>
             <Property Name="Template" Type="Edm.String"/>
             <Property Name="URL" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="SPOCopilotPromoUsage">
+            <Property Name="IsCopilotPromoEligible" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="IsCopilotPromoStatusEnabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="MonthlyUsage" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.MonthlyUsage)"/>
          </ComplexType>
          <ComplexType Name="SPOFileVersionBatchDeleteJobProgress">
             <Property Name="BatchDeleteMode" Type="Edm.Int32" Nullable="false"/>
@@ -41912,6 +41996,13 @@
             <Property Name="resource" Type="Edm.String"/>
             <Property Name="scope" Type="Edm.String"/>
             <Property Name="token_type" Type="Edm.String"/>
+            <NavigationProperty Name="accessTokenOptionalClaim" Relationship="SP.OAuth.SP_OAuth_TokenResponse_accessTokenOptionalClaim_SP_OAuth_AccessTokenOptionalClaim_accessTokenOptionalClaimPartner" ToRole="accessTokenOptionalClaim" FromRole="accessTokenOptionalClaimPartner"/>
+         </EntityType>
+         <EntityType Name="AccessTokenOptionalClaim">
+            <Key>
+               <PropertyRef Name="Acrs"/>
+            </Key>
+            <Property Name="Acrs" Type="Edm.String" Nullable="false"/>
          </EntityType>
          <EntityType Name="NativeClient">
             <Key>
@@ -41938,6 +42029,10 @@
          <Association Name="Microsoft_SharePoint_Portal_SharePointHomeServiceContext_Token_SP_OAuth_TokenResponse_TokenPartner">
             <End Type="SP.OAuth.TokenResponse" Role="Token" Multiplicity="0..1"/>
             <End Type="Microsoft.SharePoint.Portal.SharePointHomeServiceContext" Role="TokenPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_OAuth_TokenResponse_accessTokenOptionalClaim_SP_OAuth_AccessTokenOptionalClaim_accessTokenOptionalClaimPartner">
+            <End Type="SP.OAuth.AccessTokenOptionalClaim" Role="accessTokenOptionalClaim" Multiplicity="0..1"/>
+            <End Type="SP.OAuth.TokenResponse" Role="accessTokenOptionalClaimPartner" Multiplicity="0..1"/>
          </Association>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Portal.WebControls">
@@ -42263,6 +42358,25 @@
          </EntityType>
          <EntityType Name="SPTenantIBInsightsReportSharePoint" BaseType="Microsoft.SharePoint.Insights.SPTenantIBInsightsReport">
             <Property Name="Implicit" Type="Collection(Edm.String)"/>
+         </EntityType>
+      </Schema>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.FilePublish.Model">
+         <EntityType Name="FileStatus">
+            <Key>
+               <PropertyRef Name="ErrorCode"/>
+            </Key>
+            <Property Name="ErrorCode" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="InitialCreation" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="Path" Type="SP.ResourcePath"/>
+            <Property Name="Succeeded" Type="Edm.Boolean" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="RemovedStatus">
+            <Key>
+               <PropertyRef Name="ErrorCode"/>
+            </Key>
+            <Property Name="ErrorCode" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="FoundAndRemovedFile" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="Succeeded" Type="Edm.Boolean" Nullable="false"/>
          </EntityType>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Convergence">

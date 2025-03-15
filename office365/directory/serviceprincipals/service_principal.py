@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from typing import Optional
 
 from typing_extensions import Self
@@ -249,6 +248,7 @@ class ServicePrincipal(DirectoryObject):
         return_type = ClientResult(self.context, AppRoleCollection())
 
         def _get_application_permissions(app_id):
+            # type: (str) -> None
             app_role_ids = [
                 app_role.app_role_id
                 for app_role in self.app_role_assigned_to

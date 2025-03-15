@@ -55,6 +55,9 @@ from office365.sharepoint.lists.list import List
 from office365.sharepoint.lists.render_data_parameters import RenderListDataParameters
 from office365.sharepoint.lists.template_collection import ListTemplateCollection
 from office365.sharepoint.lists.template_type import ListTemplateType
+from office365.sharepoint.marketplace.corporatecuratedgallery.addins.principals_response import (
+    SPGetAddinPrincipalsResponse,
+)
 from office365.sharepoint.marketplace.corporatecuratedgallery.available_addins_response import (
     SPAvailableAddinsResponse,
 )
@@ -540,6 +543,26 @@ class Web(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def get_addin_principals_having_permissions_in_sites(
+        self, server_relative_urls=None, urls=None
+    ):
+        """
+        :param list[str] server_relative_urls:
+        :param list[str] urls:
+        """
+        payload = {"serverRelativeUrls": server_relative_urls, "urls": urls}
+        return_type = ClientResult(self.context, SPGetAddinPrincipalsResponse())
+        qry = ServiceOperationQuery(
+            self,
+            "GetAddinPrincipalsHavingPermissionsInSites",
+            None,
+            payload,
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_app_bdc_catalog(self):
         """
         Returns the Business Data Connectivity (BDC) MetadataCatalog for an application that gives access to the
@@ -641,6 +664,42 @@ class Web(SecurableObject):
         }
         qry = ServiceOperationQuery(
             self, "GetRecycleBinItems", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_recycle_bin_items_by_query_info(
+        self,
+        is_ascending=True,
+        item_state=None,
+        order_by=None,
+        paging_info=None,
+        row_limit=100,
+        show_only_my_items=False,
+    ):
+        """
+        Gets the recycle bin items that are based on the specified query.
+
+        :param str paging_info: an Object that is used to obtain the next set of rows in a paged view of the Recycle Bin
+        :param int row_limit: a limit for the number of items returned in the query per page.
+        :param bool is_ascending: a Boolean value that specifies whether to sort in ascending order.
+        :param int order_by: the column by which to order the Recycle Bin query.
+        :param int item_state: Recycle Bin stage of items to return in the query.
+        :param bool show_only_my_items:
+        """
+        return_type = RecycleBinItemCollection(
+            self.context, self.recycle_bin.resource_path
+        )
+        payload = {
+            "rowLimit": row_limit,
+            "isAscending": is_ascending,
+            "pagingInfo": paging_info,
+            "orderBy": order_by,
+            "itemState": item_state,
+            "ShowOnlyMyItems": show_only_my_items,
+        }
+        qry = ServiceOperationQuery(
+            self, "GetRecycleBinItemsByQueryInfo", None, payload, None, return_type
         )
         self.context.add_query(qry)
         return return_type
