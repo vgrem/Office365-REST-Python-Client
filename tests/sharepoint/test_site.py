@@ -107,3 +107,7 @@ class TestSite(SPTestCase):
     def test_16_site_font_packages(self):
         result = self.client.site_font_packages.get().execute_query()
         self.assertIsNotNone(result.resource_path)
+
+    # def test_17_get_block_download_policy_for_files_data(self):
+    #    result = self.client.site.get_block_download_policy_for_files_data().execute_query()
+    #    self.assertIsNotNone(result.value)

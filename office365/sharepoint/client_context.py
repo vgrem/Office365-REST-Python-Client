@@ -676,7 +676,16 @@ class ClientContext(ClientRuntimeContext):
         )
 
     @property
+    def server_settings(self):
+        """Provides methods for obtaining server properties"""
+
+        from office365.sharepoint.server_settings import ServerSettings
+
+        return ServerSettings(self)
+
+    @property
     def social_following_manager(self):
+        """ """
         from office365.sharepoint.social.following.manager import SocialFollowingManager
 
         return SocialFollowingManager(self)
@@ -711,6 +720,7 @@ class ClientContext(ClientRuntimeContext):
 
     @property
     def viva_site_manager(self):
+        """"""
         from office365.sharepoint.viva.site_manager import VivaSiteManager
 
         return VivaSiteManager(self)

@@ -9,7 +9,6 @@ class SPAvailableAddinsResponse(ClientValue):
     def __init__(self, addins=None):
         self.addins = ClientValueCollection(SPAddinInstanceInfo, addins)
 
-
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.SPAvailableAddinsResponse"

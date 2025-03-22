@@ -21,6 +21,21 @@ class ChangeItem(Change):
         return self.properties.get("ContentTypeId", ContentTypeId())
 
     @property
+    def editor(self):
+        """Specifies the editor of the changed item."""
+        return self.properties.get("Editor", None)
+
+    @property
+    def editor_email_hint(self):
+        """Returns the email corresponding to Editor."""
+        return self.properties.get("EditorEmailHint", None)
+
+    @property
+    def editor_login_name(self):
+        """Returns login name of the Editor."""
+        return self.properties.get("EditorLoginName", None)
+
+    @property
     def file_type(self):
         # type: () -> Optional[str]
         """Returns the list item’s file type."""

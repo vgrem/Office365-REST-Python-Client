@@ -29474,6 +29474,20 @@ within the time frame of their original request."/>
             <NavigationProperty Name="incompatibleAccessPackages" Type="Collection(graph.accessPackage)"/>
             <NavigationProperty Name="incompatibleGroups" Type="Collection(graph.group)" ContainsTarget="true"/>
             <NavigationProperty Name="resourceRoleScopes" Type="Collection(graph.accessPackageResourceRoleScope)" ContainsTarget="true"/>
+            <Annotation Term="Org.OData.Core.V1.AlternateKeys">
+               <Collection>
+                  <Record Type="Org.OData.Core.V1.AlternateKey">
+                     <PropertyValue Property="Key">
+                        <Collection>
+                           <Record Type="Org.OData.Core.V1.PropertyRef">
+                              <PropertyValue Property="Alias" String="uniqueName"/>
+                              <PropertyValue Property="Name" PropertyPath="uniqueName"/>
+                           </Record>
+                        </Collection>
+                     </PropertyValue>
+                  </Record>
+               </Collection>
+            </Annotation>
          </EntityType>
          <EntityType Name="accessPackageAssignmentPolicy" BaseType="graph.entity">
             <Property Name="allowedTargetScope" Type="graph.allowedTargetScope"/>
@@ -29483,6 +29497,7 @@ within the time frame of their original request."/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="expiration" Type="graph.expirationPattern"/>
             <Property Name="modifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="notificationSettings" Type="graph.accessPackageNotificationSettings"/>
             <Property Name="requestApprovalSettings" Type="graph.accessPackageAssignmentApprovalSettings"/>
             <Property Name="requestorSettings" Type="graph.accessPackageAssignmentRequestorSettings"/>
             <Property Name="reviewSettings" Type="graph.accessPackageAssignmentReviewSettings"/>
@@ -29528,6 +29543,20 @@ within the time frame of their original request."/>
             <NavigationProperty Name="resourceRoles" Type="Collection(graph.accessPackageResourceRole)" ContainsTarget="true"/>
             <NavigationProperty Name="resources" Type="Collection(graph.accessPackageResource)" ContainsTarget="true"/>
             <NavigationProperty Name="resourceScopes" Type="Collection(graph.accessPackageResourceScope)" ContainsTarget="true"/>
+            <Annotation Term="Org.OData.Core.V1.AlternateKeys">
+               <Collection>
+                  <Record Type="Org.OData.Core.V1.AlternateKey">
+                     <PropertyValue Property="Key">
+                        <Collection>
+                           <Record Type="Org.OData.Core.V1.PropertyRef">
+                              <PropertyValue Property="Alias" String="uniqueName"/>
+                              <PropertyValue Property="Name" PropertyPath="uniqueName"/>
+                           </Record>
+                        </Collection>
+                     </PropertyValue>
+                  </Record>
+               </Collection>
+            </Annotation>
          </EntityType>
          <EntityType Name="connectedOrganization" BaseType="graph.entity">
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
@@ -29990,6 +30019,9 @@ within the time frame of their original request."/>
             <Property Name="gracePeriodBeforeAccessRemoval" Type="Edm.Duration"/>
             <Property Name="removeAccessWhenTargetLeavesAllowedTargets" Type="Edm.Boolean"/>
             <Property Name="requestAccessForAllowedTargets" Type="Edm.Boolean"/>
+         </ComplexType>
+         <ComplexType Name="accessPackageNotificationSettings">
+            <Property Name="isAssignmentNotificationDisabled" Type="Edm.Boolean" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="accessPackageResourceAttribute">
             <Property Name="destination" Type="graph.accessPackageResourceAttributeDestination"/>

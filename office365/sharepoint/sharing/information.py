@@ -2,6 +2,9 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.abilities import SharingAbilities
 from office365.sharepoint.sharing.access_request_settings import AccessRequestSettings
+from office365.sharepoint.sharing.domain_restriction_settings import (
+    DomainRestrictionSettings,
+)
 from office365.sharepoint.sharing.links.default_templates_collection import (
     SharingLinkDefaultTemplatesCollection,
 )
@@ -26,6 +29,13 @@ class SharingInformation(Entity):
     def anonymous_link_expiration_restriction_days(self):
         """Tenant's anonymous link expiration restriction in days."""
         return self.properties.get("anonymousLinkExpirationRestrictionDays", None)
+
+    @property
+    def domain_restriction_settings(self):
+        """Whether DomainRestrictionSettings is used to limit the external Users set by Admin."""
+        return self.properties.get(
+            "anonymousLinkExpirationRestrictionDays", DomainRestrictionSettings()
+        )
 
     @property
     def permissions_information(self):
@@ -62,6 +72,7 @@ class SharingInformation(Entity):
         if default_value is None:
             property_mapping = {
                 "accessRequestSettings": self.access_request_settings,
+                "domain_restriction_settings": self.domain_restriction_settings,
                 "permissionsInformation": self.permissions_information,
                 "pickerSettings": self.picker_settings,
                 "sharingAbilities": self.sharing_abilities,

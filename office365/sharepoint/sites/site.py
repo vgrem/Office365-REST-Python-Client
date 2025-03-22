@@ -27,6 +27,7 @@ from office365.sharepoint.sitehealth.summary import SiteHealthSummary
 from office365.sharepoint.sites.azure_container_Info import (
     ProvisionedTemporaryAzureContainerInfo,
 )
+from office365.sharepoint.sites.copy_job_progress import CopyJobProgress
 from office365.sharepoint.sites.home.site import SPHSite
 from office365.sharepoint.sites.html_field_security_setting import (
     HTMLFieldSecuritySetting,
@@ -153,6 +154,18 @@ class Site(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_copy_job_progress(self, copy_job_info=None):
+        """
+        :param copy_job_info: Optional copyJobInfo object.
+        """
+        payload = {"copyJobInfo": copy_job_info}
+        return_type = ClientResult(self.context, CopyJobProgress())
+        qry = ServiceOperationQuery(
+            self, "GetCopyJobProgress", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_site_logo(self):
         """Downloads a site logo"""
         return_type = ClientResult(self.context)
@@ -263,6 +276,18 @@ class Site(Entity):
             self.context.tenant.get_site_administrators(self.id, return_type)
 
         self.ensure_property("Id", _site_loaded)
+        return return_type
+
+    def get_web_path(self, site_id, web_id):
+        """
+        :param int site_id: The site identifier
+        :param int web_id: The web identifier
+        """
+        params = {"siteId": site_id, "webId": web_id}
+        return_type = ClientResult(self.context, SPResPath())
+
+        qry = ServiceOperationQuery(self, "GetWebPath", params, None, None, return_type)
+        self.context.add_query(qry)
         return return_type
 
     def get_web_templates(self, lcid=1033, override_compat_level=0):

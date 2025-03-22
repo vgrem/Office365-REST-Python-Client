@@ -108,6 +108,12 @@ class UserProfile(Entity):
         return self.properties.get("PersonalSiteFirstCreationTime", datetime.min)
 
     @property
+    def picture_url(self):
+        # type: () -> Optional[str]
+        """Specifies the photo URL for the current user."""
+        return self.properties.get("PictureUrl", None)
+
+    @property
     def public_url(self):
         # type: () -> Optional[str]
         """Specifies the public URL for the personal site of the current user."""

@@ -1,9 +1,12 @@
+from datetime import datetime
 from typing import Optional
 
 from office365.onedrive.listitems.list_item import ListItem
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.internal.paths.static_operation import StaticOperationPath
@@ -11,6 +14,7 @@ from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_sta
     DenyAddAndCustomizePagesStatus,
 )
 from office365.sharepoint.tenant.administration.spo_operation import SpoOperation
+from office365.sharepoint.translation.resource_entry import SPResourceEntry
 
 
 class SiteProperties(Entity):
@@ -97,6 +101,38 @@ class SiteProperties(Entity):
         return self.properties.get("ArchivedBy", None)
 
     @property
+    def archived_time(self):
+        # type: () -> Optional[datetime]
+        """Gets the time when site was archived."""
+        return self.properties.get("ArchivedTime", datetime.min)
+
+    @property
+    def block_download_links_file_type(self):
+        # type: () -> Optional[int]
+        """Block downloads for view-only files in SharePoint and OneDrive."""
+        return self.properties.get("BlockDownloadLinksFileType", None)
+
+    @property
+    def block_download_microsoft365_group_ids(self):
+        # type: () -> Optional[StringCollection]
+        """Block downloads for view-only files in SharePoint and OneDrive."""
+        return self.properties.get(
+            "BlockDownloadMicrosoft365GroupIds", StringCollection()
+        )
+
+    @property
+    def block_download_policy_file_type_ids(self):
+        # type: () -> Optional[StringCollection]
+        """"""
+        return self.properties.get("BlockDownloadPolicyFileTypeIds", StringCollection())
+
+    @property
+    def created_time(self):
+        # type: () -> Optional[datetime]
+        """Gets the time when the site was created."""
+        return self.properties.get("CreatedTime", datetime.min)
+
+    @property
     def deny_add_and_customize_pages(self):
         # type: () -> Optional[int]
         """Represents the status of the [DenyAddAndCustomizePages] feature on a site collection."""
@@ -109,6 +145,38 @@ class SiteProperties(Entity):
         # type: (int) -> None
         """Sets the status of the [DenyAddAndCustomizePages] feature on a site collection."""
         self.set_property("DenyAddAndCustomizePages", value)
+
+    @property
+    def last_content_modified_date(self):
+        # type: () -> Optional[datetime]
+        """Gets the last time content was modified on the site."""
+        return self.properties.get("LastContentModifiedDate", datetime.min)
+
+    @property
+    def group_owner_login_name(self):
+        # type: () -> Optional[str]
+        """Gets the Group Owner login name."""
+        return self.properties.get("GroupOwnerLoginName", None)
+
+    @property
+    def is_hub_site(self):
+        # type: () -> Optional[bool]
+        """"""
+        return self.properties.get("IsHubSite", None)
+
+    @property
+    def title(self):
+        # type: () -> Optional[str]
+        """Site title"""
+        return self.properties.get("Title", None)
+
+    @property
+    def title_translations(self):
+        # type: () -> Optional[str]
+        """Site titles"""
+        return self.properties.get(
+            "TitleTranslations", ClientValueCollection(SPResourceEntry)
+        )
 
     @property
     def owner_login_name(self):
@@ -172,6 +240,16 @@ class SiteProperties(Entity):
     def entity_type_name(self):
         # type: () -> str
         return "Microsoft.Online.SharePoint.TenantAdministration.SiteProperties"
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "ArchivedTime": self.archived_time,
+                "CreatedTime": self.created_time,
+                "LastContentModifiedDate": self.last_content_modified_date,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(SiteProperties, self).get_property(name, default_value)
 
     def set_property(self, name, value, persist_changes=True):
         super(SiteProperties, self).set_property(name, value, persist_changes)

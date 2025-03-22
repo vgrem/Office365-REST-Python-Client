@@ -398,6 +398,33 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_site_authorization_code_for_migration(self, endpoint_url):
+        return_type = ClientResult(self.context, str())
+        payload = {"endpointUrl": endpoint_url}
+        qry = ServiceOperationQuery(
+            self,
+            "GetSiteAuthorizationCodeForMigration",
+            None,
+            payload,
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_site_subscription_id(self):
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "GetSiteSubscriptionId",
+            None,
+            None,
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_sp_list_item_count(self, list_name):
         # type: (str) -> ClientResult[int]
         """ """
@@ -687,6 +714,22 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_site_properties_by_site_id(self, site_id, include_detail=False):
+        # type: (str, bool) -> SiteProperties
+        """
+        :param str site_id: A string that represents the site identifier.
+        :param bool include_detail: A Boolean value that indicates whether to include all of the SPSite properties.
+        """
+        return_type = SiteProperties(self.context)
+        return_type.set_property("siteId", site_id, False)
+        self.sites.add_child(return_type)
+        payload = {"siteId": site_id, "includeDetail": include_detail}
+        qry = ServiceOperationQuery(
+            self, "GetSitePropertiesBySiteId", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_site_properties_by_url(self, url, include_detail=False):
         # type: (str, bool) -> SiteProperties
         """
@@ -843,6 +886,34 @@ class Tenant(Entity):
     def default_content_center_site(self):
         """"""
         return self.properties.get("DefaultContentCenterSite", SiteInfoForSitePicker())
+
+    @property
+    def information_barriers_suspension(self):
+        # type: () -> Optional[bool]
+        """Gets information barriers in SharePoint and OneDrive in your organization"""
+        return self.properties.get("InformationBarriersSuspension", None)
+
+    @property
+    def ip_address_allow_list(self):
+        # type: () -> Optional[str]
+        """Configures multiple IP addresses or IP address ranges (IPv4 or IPv6), that are recognized as trusted."""
+        return self.properties.get("IPAddressAllowList", None)
+
+    @property
+    def ip_address_enforcement(self):
+        # type: () -> Optional[bool]
+        """Determines whether access from network locations that are defined by an administrator is allowed."""
+        return self.properties.get("IPAddressEnforcement", None)
+
+    @ip_address_enforcement.setter
+    def ip_address_enforcement(self, value):
+        # type: (bool) -> None
+        """
+        Allows access from network locations that are defined by an administrator.
+        Before the IPAddressEnforcement parameter is set, make sure you add a valid IPv4 or IPv6 address to the
+        IPAddressAllowList parameter.
+        """
+        self.set_property("IPAddressEnforcement", value)
 
     @property
     def no_access_redirect_url(self):
