@@ -20,7 +20,7 @@ class SPDataGovernanceInsightRestApiClient(SPDataGovernanceRestApiClientBase):
     def __init__(self, context, authorization_header, url, user_agent):
         # type: (ClientContext, str, str, str) -> None
         static_path = ServiceOperationPath(
-            "SP.AppContextSite",
+            "Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient",
             {
                 "authorizationHeader": authorization_header,
                 "url": url,

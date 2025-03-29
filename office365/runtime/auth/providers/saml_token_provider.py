@@ -132,9 +132,6 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             return info
         return None
 
-    def get_last_error(self):
-        return self.error
-
     def _acquire_service_token_from_adfs(self, adfs_url):
         logger = self.logger(self._acquire_service_token_from_adfs.__name__)
 
@@ -312,19 +309,16 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             raise ValueError(self.error)
         return cookies
 
-    @staticmethod
-    def _prepare_request_from_template(template_name, params):
+    def _prepare_request_from_template(self, template_name, params):
         """Construct the request body to acquire security token from STS endpoint"""
-        logger = SamlTokenProvider.logger()
+        logger = self.logger(self._prepare_request_from_template.__name__)
         logger.debug_secrets("params: %s", params)
-        f = open(
-            os.path.join(os.path.dirname(__file__), "templates", template_name),
-            encoding="utf8",
+
+        template_path = os.path.join(
+            os.path.dirname(__file__), "templates", template_name
         )
-        try:
+
+        with open(template_path, encoding="utf8") as f:
             data = f.read()
-            for key in params:
-                data = data.replace("{" + key + "}", str(params[key]))
-            return data
-        finally:
-            f.close()
+
+        return data.format(**params)

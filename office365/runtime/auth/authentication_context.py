@@ -2,7 +2,7 @@ import json
 import sys
 from typing import Any, Callable
 
-from typing_extensions import Required, TypedDict
+from typing_extensions import Required, Self, TypedDict
 
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
@@ -211,12 +211,14 @@ class AuthenticationContext(object):
             raise ValueError("Unknown credential type")
 
         def _authenticate(request):
+            # type: (RequestOptions) -> None
             provider.authenticate_request(request)
 
         self._authenticate = _authenticate
         return self
 
     def acquire_token_for_user(self, username, password):
+        # type: (str, str) -> Self
         """
         Initializes a client to acquire a token via user credentials
         Status: deprecated!
@@ -227,6 +229,7 @@ class AuthenticationContext(object):
         provider = SamlTokenProvider(self.url, username, password, self._browser_mode)
 
         def _authenticate(request):
+            # type: (RequestOptions) -> None
             provider.authenticate_request(request)
 
         self._authenticate = _authenticate
@@ -244,6 +247,7 @@ class AuthenticationContext(object):
         provider = ACSTokenProvider(self.url, client_id, client_secret)
 
         def _authenticate(request):
+            # type: (RequestOptions) -> None
             provider.authenticate_request(request)
 
         self._authenticate = _authenticate

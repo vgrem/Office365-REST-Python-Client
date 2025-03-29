@@ -826,6 +826,16 @@ class Tenant(Entity):
         return MigrationCenterServices(self.context)
 
     @property
+    def comms_messages(self):
+        """ """
+
+        from office365.sharepoint.tenant.administration.coms.messages_service_proxy import (
+            Office365CommsMessagesServiceProxy,
+        )
+
+        return Office365CommsMessagesServiceProxy(self.context)
+
+    @property
     def multi_geo(self):
         """ """
 

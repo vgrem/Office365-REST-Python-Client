@@ -35,3 +35,9 @@ class TestUtility(SPTestCase):
             self.client, "SitePages/Home.aspx"
         ).execute_query()
         self.assertIsNotNone(result.value)
+
+    # def test6_log_custom_app_error(self):
+    #    result = Utility.log_custom_app_error(
+    #        self.client, "App error"
+    #    ).execute_query()
+    #    self.assertIsNotNone(result.value)

@@ -31,13 +31,8 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
     def authenticate_request(self, request):
         # type: (RequestOptions) -> None
-        self.ensure_app_only_access_token()
+        self._ensure_app_only_access_token()
         request.set_header("Authorization", self._get_authorization_header())
-
-    def ensure_app_only_access_token(self):
-        if self._cached_token is None:
-            self._cached_token = self.get_app_only_access_token()
-        return self._cached_token and self._cached_token.is_valid
 
     def get_app_only_access_token(self):
         """Retrieves an app-only access token from ACS"""
@@ -52,6 +47,11 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
                 else "Acquire app-only access token failed."
             )
             raise ValueError(self.error)
+
+    def _ensure_app_only_access_token(self):
+        if self._cached_token is None:
+            self._cached_token = self.get_app_only_access_token()
+        return self._cached_token and self._cached_token.is_valid
 
     def _get_app_only_access_token(self, target_host, target_realm):
         """
@@ -119,6 +119,3 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
 
     def _get_authorization_header(self):
         return "Bearer {0}".format(self._cached_token.accessToken)
-
-    def get_last_error(self):
-        return self.error

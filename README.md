@@ -93,7 +93,7 @@ Steps to access:
    - [Granting access via Azure AD App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)  
    - [wiki](https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-with-certificate-credentials) 
   
-  Example: [connect_with_client_certificate.py](examples/sharepoint/auth_client_certificate.py)
+  Example: [with_certificate.py](examples/sharepoint/auth_certificate.py)
 
 #### 4. Interactive
 

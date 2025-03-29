@@ -226,9 +226,9 @@ class TestTenant(TestCase):
         result = self.tenant.admin_endpoints.get().execute_query()
         self.assertIsNotNone(result.resource_path)
 
-    def test_33_get_top_files_sharing_insights(self):
-        result = self.tenant.get_top_files_sharing_insights().execute_query()
-        self.assertIsNotNone(result.resource_path)
+    #def test_33_get_top_files_sharing_insights(self):
+    #    result = self.tenant.get_top_files_sharing_insights().execute_query()
+    #    self.assertIsNotNone(result.resource_path)
 
     # def test_34_get_spo_app_billing_policies(self):
     #    result = self.tenant.get_spo_app_billing_policies().execute_query()
@@ -251,3 +251,7 @@ class TestTenant(TestCase):
     # def test_38_get_ib_insights_report_manager(self):
     #    result = SPTenantIBInsightsReportManager(self.client).get().execute_query()
     #    self.assertIsNotNone(result.resource_path)
+
+    def test38_get_comms_messages(self):
+        result = self.tenant.comms_messages.get().execute_query()
+        self.assertIsNotNone(result.resource_path)

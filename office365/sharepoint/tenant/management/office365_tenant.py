@@ -107,14 +107,17 @@ class Office365Tenant(Entity):
         return return_type
 
     def set_block_download_file_type_policy_data(
-        self, blockDownloadFileTypePolicy, fileTypeIds, excludedBlockDownloadGroupIds
+        self,
+        block_download_file_type_policy,
+        file_type_ids,
+        excluded_block_download_group_ids,
     ):
         # type: (bool, list[int], list[str]) -> Self
         """"""
         payload = {
-            "blockDownloadFileTypePolicy": blockDownloadFileTypePolicy,
-            "fileTypeIds": fileTypeIds,
-            "excludedBlockDownloadGroupIds": excludedBlockDownloadGroupIds,
+            "blockDownloadFileTypePolicy": block_download_file_type_policy,
+            "fileTypeIds": file_type_ids,
+            "excludedBlockDownloadGroupIds": excluded_block_download_group_ids,
         }
         qry = ServiceOperationQuery(
             self, "SetBlockDownloadFileTypePolicyData", None, payload

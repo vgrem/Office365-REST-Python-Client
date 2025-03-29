@@ -10,6 +10,8 @@ from office365.sharepoint.tenant.administration.smtp_server import SmtpServer
 from office365.sharepoint.tenant.administration.types import (
     AutoQuotaEnabled,
     DisableGroupify,
+    DisableSelfServiceSiteCreation,
+    EnableAutoNewsDigest,
 )
 
 
@@ -57,6 +59,18 @@ class TenantAdminSettingsService(Entity):
         return self.properties.get("DisableGroupify", DisableGroupify())
 
     @property
+    def disable_self_service_site_creation(self):
+        """ " """
+        return self.properties.get(
+            "DisableSelfServiceSiteCreation", DisableSelfServiceSiteCreation()
+        )
+
+    @property
+    def enable_auto_news_digest(self):
+        """ " """
+        return self.properties.get("EnableAutoNewsDigest", EnableAutoNewsDigest())
+
+    @property
     def smtp_server(self):
         """Specifies the server address or endpoint of the SMTP server that SharePoint Online or tenant-related
         services use for sending emails"""
@@ -75,6 +89,10 @@ class TenantAdminSettingsService(Entity):
         if default_value is None:
             property_mapping = {
                 "AvailableManagedPathsForSiteCreation": self.available_managed_paths_for_site_creation,
+                "AutoQuotaEnabled": self.auto_quota_enabled,
+                "DisableGroupify": self.disable_groupify,
+                "DisableSelfServiceSiteCreation": self.disable_self_service_site_creation,
+                "EnableAutoNewsDigest": self.enable_auto_news_digest,
                 "SmtpServer": self.smtp_server,
                 "TenantDefaultTimeZoneId": self.tenant_default_time_zone_id,
             }
