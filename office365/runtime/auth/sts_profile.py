@@ -5,9 +5,7 @@ from office365.runtime.compat import timezone, urlparse
 
 class STSProfile(object):
     def __init__(self, authority_url, environment):
-        """
-        :type authority_url: str
-        """
+        # type: (str, str) -> None
         self.authorityUrl = authority_url
         if environment == "GCCH":
             self.serviceUrl = "https://login.microsoftonline.us"
@@ -16,12 +14,14 @@ class STSProfile(object):
         self.securityTokenServicePath = "extSTS.srf"
         self.userRealmServicePath = "GetUserRealm.srf"
         self.tokenIssuer = "urn:federation:MicrosoftOnline"
-        now = datetime.now(tz=timezone.utc)
-        self.created = now.astimezone(timezone.utc).isoformat("T")[:-9] + "Z"
-        self.expires = (now + timedelta(minutes=10)).astimezone(timezone.utc).isoformat(
-            "T"
-        )[:-9] + "Z"
+        self.created = datetime.now(tz=timezone.utc)
+        self.expires = self.created + timedelta(minutes=30)
         self.signInPage = "_forms/default.aspx?wa=wsignin1.0"
+
+    def reset(self):
+        """Renew the expiration time."""
+        self.created = datetime.now(tz=timezone.utc)
+        self.expires = self.created + timedelta(minutes=30)
 
     @property
     def tenant(self):

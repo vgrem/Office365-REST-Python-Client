@@ -1,5 +1,7 @@
 import os
 import uuid
+from datetime import datetime, timezone
+from typing import Optional
 from xml.dom import minidom
 from xml.etree import ElementTree
 
@@ -7,6 +9,7 @@ import requests
 import requests.utils
 
 import office365.logger
+from office365.runtime.auth.auth_cookies import AuthCookies
 from office365.runtime.auth.authentication_provider import AuthenticationProvider
 from office365.runtime.auth.sts_profile import STSProfile
 from office365.runtime.auth.user_realm_info import UserRealmInfo
@@ -20,23 +23,17 @@ def resolve_base_url(url):
     return parts[0] + "://" + host_name
 
 
-def xml_escape(s_val):
-    s_val = s_val.replace("&", "&amp;")
-    s_val = s_val.replace("<", "&lt;")
-    s_val = s_val.replace(">", "&gt;")
-    s_val = s_val.replace('"', "&quot;")
-    s_val = s_val.replace("'", "&apos;")
-    return s_val
+def string_escape(value):
+    value = value.replace("&", "&amp;")
+    value = value.replace("<", "&lt;")
+    value = value.replace(">", "&gt;")
+    value = value.replace('"', "&quot;")
+    value = value.replace("'", "&apos;")
+    return value
 
 
-def is_valid_auth_cookies(values):
-    """
-    Validates authorization cookies
-    """
-    return any(values) and (
-        values.get("FedAuth", None) is not None
-        or values.get("SPOIDCRL", None) is not None
-    )
+def datetime_escape(value):
+    return value.isoformat("T")[:-9] + "Z"
 
 
 class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
@@ -60,7 +57,7 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         self.error = ""
         self._username = username
         self._password = password
-        self._cached_auth_cookies = None
+        self._cached_auth_cookies = None  # type: Optional[AuthCookies]
         self.__ns_prefixes = {
             "S": "{http://www.w3.org/2003/05/soap-envelope}",
             "s": "{http://www.w3.org/2003/05/soap-envelope}",
@@ -82,24 +79,20 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         Authenticate request handler
         """
         logger = self.logger(self.authenticate_request.__name__)
-        self.ensure_authentication_cookie()
-        logger.debug_secrets(self._cached_auth_cookies)
-        cookie_header_value = "; ".join(
-            [
-                "=".join([key, str(val)])
-                for key, val in self._cached_auth_cookies.items()
-            ]
-        )
-        request.set_header("Cookie", cookie_header_value)
 
-    def ensure_authentication_cookie(self):
-        if self._cached_auth_cookies is None:
+        request_time = datetime.now(timezone.utc)
+        if (
+            self._cached_auth_cookies is None
+            or request_time >= self._sts_profile.expires
+        ):
+            self._sts_profile.reset()
             self._cached_auth_cookies = self.get_authentication_cookie()
-        return True
+        logger.debug_secrets(self._cached_auth_cookies)
+        request.set_header("Cookie", self._cached_auth_cookies.cookie_header)
 
     def get_authentication_cookie(self):
         """Acquire authentication cookie"""
-        logger = self.logger(self.ensure_authentication_cookie.__name__)
+        logger = self.logger(self.get_authentication_cookie.__name__)
         logger.debug("get_authentication_cookie called")
 
         try:
@@ -140,10 +133,10 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             {
                 "auth_url": adfs_url,
                 "message_id": str(uuid.uuid4()),
-                "username": xml_escape(self._username),
-                "password": xml_escape(self._password),
-                "created": self._sts_profile.created,
-                "expires": self._sts_profile.expires,
+                "username": string_escape(self._username),
+                "password": string_escape(self._password),
+                "created": datetime_escape(self._sts_profile.created),
+                "expires": datetime_escape(self._sts_profile.expires),
                 "issuer": self._sts_profile.tokenIssuer,
             },
         )
@@ -192,11 +185,11 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             "SAML.xml",
             {
                 "auth_url": self._sts_profile.authorityUrl,
-                "username": xml_escape(self._username),
-                "password": xml_escape(self._password),
+                "username": string_escape(self._username),
+                "password": string_escape(self._password),
                 "message_id": str(uuid.uuid4()),
-                "created": self._sts_profile.created,
-                "expires": self._sts_profile.expires,
+                "created": datetime_escape(self._sts_profile.created),
+                "expires": datetime_escape(self._sts_profile.expires),
                 "issuer": self._sts_profile.tokenIssuer,
             },
         )
@@ -297,9 +290,9 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
                 },
             )
         logger.debug_secrets("session.cookies: %s", session.cookies)
-        cookies = requests.utils.dict_from_cookiejar(session.cookies)
+        cookies = AuthCookies(requests.utils.dict_from_cookiejar(session.cookies))
         logger.debug_secrets("cookies: %s", cookies)
-        if not is_valid_auth_cookies(cookies):
+        if not cookies.is_valid:
             self.error = (
                 "An error occurred while retrieving auth cookies from {0}".format(
                     self._sts_profile.signin_page_url

@@ -26,13 +26,14 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         self.SharePointPrincipal = "00000003-0000-0ff1-ce00-000000000000"
         self._client_id = client_id
         self._client_secret = client_secret
-        self._cached_token = None
+        self._cached_token = None  # type: Optional[TokenResponse]
         self._environment = environment
 
     def authenticate_request(self, request):
         # type: (RequestOptions) -> None
-        self._ensure_app_only_access_token()
-        request.set_header("Authorization", self._get_authorization_header())
+        if self._cached_token is None:
+            self._cached_token = self.get_app_only_access_token()
+        request.set_header("Authorization", self._cached_token.authorization_header)
 
     def get_app_only_access_token(self):
         """Retrieves an app-only access token from ACS"""
@@ -47,11 +48,6 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
                 else "Acquire app-only access token failed."
             )
             raise ValueError(self.error)
-
-    def _ensure_app_only_access_token(self):
-        if self._cached_token is None:
-            self._cached_token = self.get_app_only_access_token()
-        return self._cached_token and self._cached_token.is_valid
 
     def _get_app_only_access_token(self, target_host, target_realm):
         """
@@ -86,11 +82,6 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
     def _get_realm_from_target_url(self):
         """Get the realm for the URL"""
         response = requests.head(url=self.url, headers={"Authorization": "Bearer"})
-        return self.process_realm_response(response)
-
-    @staticmethod
-    def process_realm_response(response):
-        # type: (requests.Response) -> Optional[str]
         header_key = "WWW-Authenticate"
         if header_key in response.headers:
             auth_values = response.headers[header_key].split(",")
@@ -116,6 +107,3 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
                     realm
                 )
             )
-
-    def _get_authorization_header(self):
-        return "Bearer {0}".format(self._cached_token.accessToken)

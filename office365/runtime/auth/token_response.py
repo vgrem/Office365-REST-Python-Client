@@ -9,6 +9,10 @@ class TokenResponse(object):
     def is_valid(self):
         return self.accessToken is not None and self.tokenType == "Bearer"
 
+    @property
+    def authorization_header(self):
+        return "Bearer {0}".format(self.accessToken)
+
     @staticmethod
     def from_json(value):
         error = value.get("error", None)
