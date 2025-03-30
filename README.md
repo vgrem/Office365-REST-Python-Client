@@ -1,3 +1,5 @@
+from office365.azure_env import AzureEnvironment
+
 # About
 Microsoft 365 & Microsoft Graph library for Python
 
@@ -172,19 +174,18 @@ The list of examples:
   
 Refer [examples section](examples/sharepoint) for another scenarios
 
-### Support for non-standard SharePoint Online Environments
+### Support for Azure environments
 
-  Support for non-standard SharePoint Environments is currently being implemented. Currently supported:
-  - GCC High
-
-  To enable authentication to GCC High endpoints, add the `environment='GCCH'` parameter when calling the 
+  To enable authentication to specific Azure environment endpoints, add the `environment` parameter when calling the 
   `ClientContext class` with `.with_user_credentials`, `.with_client_credentials`, or `.with_credentials`
 
    Example:
    ```python
+   from office365.azure_env import AzureEnvironment
    from office365.sharepoint.client_context import ClientContext
+   from office365.runtime.auth.client_credential import ClientCredential
    client_credentials = ClientCredential('{client_id}','{client_secret}')
-   ctx = ClientContext('{url}').with_credentials(client_credentials, environment='GCCH')
+   ctx = ClientContext('{url}', environment=AzureEnvironment.USGovernmentHigh).with_credentials(client_credentials)
    ```
 
 # Working with Outlook API
@@ -213,26 +214,13 @@ Using [Microsoft Authentication Library (MSAL) for Python](https://pypi.org/proj
 > in the provided examples. Other forms of token acquisition can be found here: https://msal-python.readthedocs.io/en/latest/
 
 ```python
-import msal
 from office365.graph_client import GraphClient
-
-def acquire_token():
-    """
-    Acquire token via MSAL
-    """
-    authority_url = 'https://login.microsoftonline.com/{tenant_id_or_name}'
-    app = msal.ConfidentialClientApplication(
-        authority=authority_url,
-        client_id='{client_id}',
-        client_credential='{client_secret}'
-    )
-    token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
-    return token
-
-
-client = GraphClient(acquire_token)
-
+client = GraphClient(tenant='{tenant_name_or_id}').with_client_secret(
+    client_id='{client_id}', 
+    client_secret='{client_secret}'
+)
 ```
+Example: [with_client_secret](examples/auth/with_client_secret.py)
 
 But in terms of Microsoft Graph API authentication, another OAuth spec compliant libraries 
 such as [adal](https://github.com/AzureAD/azure-activedirectory-library-for-python) 
@@ -268,7 +256,9 @@ The example demonstrates how to send an email via [Microsoft Graph endpoint](htt
 ```python
 from office365.graph_client import GraphClient
 
-client = GraphClient(acquire_token_func)
+client = GraphClient(tenant='{tenant_name_or_id}').with_username_and_password(
+    '{client_id}', '{username}', '{password}'
+)
 
 client.me.send_mail(
     subject="Meet for lunch?",
@@ -334,7 +324,7 @@ which corresponds to [`list available drives` endpoint](https://docs.microsoft.c
 from office365.graph_client import GraphClient
 
 tenant_name = "contoso.onmicrosoft.com"
-client = GraphClient(acquire_token_func)
+client = GraphClient(tenant=tenant_name)
 drives = client.drives.get().execute_query()
 for drive in drives:
     print("Drive url: {0}".format(drive.web_url))
@@ -415,7 +405,9 @@ Example: Create a new page
 
 ```python
 from office365.graph_client import GraphClient
-client = GraphClient(acquire_token_func)
+client = GraphClient(tenant='{tenant_name_or_id}').with_username_and_password(
+    '{client_id}', '{username}', '{password}'
+)
 
 files = {}
 with open("./MyPage.html", 'rb') as f, \
