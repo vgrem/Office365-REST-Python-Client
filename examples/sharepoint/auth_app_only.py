@@ -16,6 +16,11 @@ Important:
 The example demonstrates how to use SharePoint App-Only principal (second option)
 
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs
+
+Notice:
+Starting April 2, 2026, Azure Access Control service (ACS) usage will be retired for SharePoint in Microsoft 365
+and users will no longer be able to create or use Azure ACS principals to access SharePoint.
+Learn more about the [Access Control retirement](https://aka.ms/retirement/acs/support)
 """
 
 from office365.sharepoint.client_context import ClientContext

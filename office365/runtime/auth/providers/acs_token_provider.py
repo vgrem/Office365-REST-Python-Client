@@ -3,6 +3,7 @@ from typing import Optional
 import requests
 
 import office365.logger
+from office365.azure_env import AzureEnvironment
 from office365.runtime.auth.authentication_provider import AuthenticationProvider
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.compat import urlparse
@@ -10,7 +11,7 @@ from office365.runtime.http.request_options import RequestOptions
 
 
 class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
-    def __init__(self, url, client_id, client_secret, environment="commercial"):
+    def __init__(self, url, client_id, client_secret, environment=None):
         """
         Provider to acquire the access token from a Microsoft Azure Access Control Service (ACS)
 
@@ -18,7 +19,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         :param str client_secret: Secret string that the application uses to prove its identity when requesting a token
         :param str url: SharePoint web or site url
         :param str environment: The Office 365 Cloud Environment endpoint used for authentication
-            defaults to 'commercial'.
+            defaults to 'Azure Global'.
         """
         self.url = url
         self.redirect_url = None
@@ -61,9 +62,7 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             self.SharePointPrincipal, target_host, target_realm
         )
         principal_id = self.get_formatted_principal(self._client_id, None, target_realm)
-        sts_url = self.get_security_token_service_url(
-            target_realm, environment=self._environment
-        )
+        sts_url = self.get_security_token_service_url(target_realm)
         oauth2_request = {
             "grant_type": "client_credentials",
             "client_id": principal_id,
@@ -96,11 +95,12 @@ class ACSTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
             return "{0}/{1}@{2}".format(principal_name, host_name, realm)
         return "{0}@{1}".format(principal_name, realm)
 
-    @staticmethod
-    def get_security_token_service_url(realm, environment):
-        # type: (str, str) -> str
-        if environment == "GCCH":
-            return "https://login.microsoftonline.us/{0}/tokens/OAuth/2".format(realm)
+    def get_security_token_service_url(self, realm):
+        # type: (str) -> str
+        if self._environment:
+            return "{0}/{1}/tokens/OAuth/2".format(
+                AzureEnvironment.get_login_authority(self._environment), realm
+            )
         else:
             return (
                 "https://accounts.accesscontrol.windows.net/{0}/tokens/OAuth/2".format(

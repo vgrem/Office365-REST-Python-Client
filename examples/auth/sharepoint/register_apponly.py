@@ -16,9 +16,16 @@ Steps:
 
 """
 
+from office365.directory.applications.app_ids import MsAppIds
 from office365.graph_client import GraphClient
-from tests import test_client_id, test_password, test_tenant, test_username
+from tests import test_client_id, test_client_secret, test_tenant
 
-admin_client = GraphClient(tenant=test_tenant).with_username_and_password(
-    test_client_id, test_username, test_password
+client = GraphClient(tenant=test_tenant).with_client_secret(
+    test_client_id, test_client_secret
 )
+# client = GraphClient(tenant=test_tenant).with_token_interactive(test_client_id)
+resource = client.service_principals.get_by_app_id(
+    MsAppIds.Office_365_SharePoint_Online
+)
+app = client.applications.get_by_app_id(test_client_id)
+resource.grant_application_permissions(app, "Sites.FullControl.All").execute_query()

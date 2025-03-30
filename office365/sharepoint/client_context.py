@@ -45,7 +45,7 @@ class ClientContext(ClientRuntimeContext):
         self,
         base_url,
         auth_context=None,
-        environment="commercial",
+        environment=None,
         allow_ntlm=False,
         browser_mode=False,
     ):

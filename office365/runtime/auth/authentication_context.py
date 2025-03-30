@@ -4,6 +4,7 @@ from typing import Any, Callable
 
 from typing_extensions import Required, Self, TypedDict
 
+from office365.azure_env import AzureEnvironment
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
@@ -31,13 +32,11 @@ def _get_authorization_header(token):
 class AuthenticationContext(object):
     """Authentication context for SharePoint Online/OneDrive For Business"""
 
-    def __init__(
-        self, url, environment="commercial", allow_ntlm=False, browser_mode=False
-    ):
+    def __init__(self, url, environment=None, allow_ntlm=False, browser_mode=False):
         """
         :param str url: SharePoint absolute web or site Url
         :param str environment: The Office 365 Cloud Environment endpoint used for authentication
-            defaults to 'commercial'.
+            defaults to 'Azure Global'.
         :param bool allow_ntlm: Flag indicates whether NTLM scheme is enabled. Disabled by default
         :param bool browser_mode: Allow browser authentication
         """
@@ -80,7 +79,9 @@ class AuthenticationContext(object):
                 private_key = f.read()
 
         def _acquire_token():
-            authority_url = "https://login.microsoftonline.com/{0}".format(tenant)
+            authority_url = "{0}/{1}".format(
+                AzureEnvironment.get_login_authority(self._environment), tenant
+            )
             credentials = {
                 "thumbprint": thumbprint,
                 "private_key": private_key,
@@ -119,7 +120,9 @@ class AuthenticationContext(object):
 
             app = msal.PublicClientApplication(
                 client_id,
-                authority="https://login.microsoftonline.com/{0}".format(tenant),
+                authority="{0}/{1}".format(
+                    AzureEnvironment.get_login_authority(self._environment), tenant
+                ),
                 client_credential=None,
             )
             result = app.acquire_token_interactive(scopes=scopes)
@@ -145,7 +148,9 @@ class AuthenticationContext(object):
 
             app = msal.PublicClientApplication(
                 client_id,
-                authority="https://login.microsoftonline.com/{0}".format(tenant),
+                authority="{0}/{1}".format(
+                    AzureEnvironment.get_login_authority(self._environment), tenant
+                ),
                 client_credential=None,
             )
 
