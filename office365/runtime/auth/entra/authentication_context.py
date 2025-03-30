@@ -22,17 +22,13 @@ class AuthenticationContext(object):
         """
         self._tenant = tenant
         if scopes is None:
-            scopes = ["https://graph.microsoft.com/.default"]
+            scopes = [
+                "{0}/.default".format(AzureEnvironment.get_graph_authority(environment))
+            ]
         self._scopes = scopes
         self._token_cache = token_cache
         self._token_callback = None
         self._environment = environment
-        self._authority_urls = {
-            AzureEnvironment.Global: "https://login.microsoftonline.com",
-            AzureEnvironment.GCC: "https://login.microsoftonline.us",
-            AzureEnvironment.GCC_High: "https://login.microsoftonline.us",
-            AzureEnvironment.CN: "https://login.chinacloudapi.cn",
-        }
 
     def acquire_token(self):
         # type: () -> TokenResponse
@@ -165,5 +161,5 @@ class AuthenticationContext(object):
     @property
     def authority_url(self):
         return "{0}/{1}".format(
-            self._authority_urls.get(self._environment), self._tenant
+            AzureEnvironment.get_login_authority(self._environment), self._tenant
         )

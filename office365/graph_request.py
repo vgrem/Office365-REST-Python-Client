@@ -15,12 +15,6 @@ class GraphRequest(ODataRequest):
         super(GraphRequest, self).__init__(V4JsonFormat())
         self._version = version
         self._environment = environment
-        self._endpoints = {
-            AzureEnvironment.Global: "https://graph.microsoft.com",
-            AzureEnvironment.GCC: "https://graph.microsoft.us",
-            AzureEnvironment.GCC_High: "https://graph.microsoft.us",
-            AzureEnvironment.DoD: "https://dod-graph.microsoft.us",
-        }
         self._auth_context = AuthenticationContext(
             environment=environment, tenant=tenant
         )
@@ -90,4 +84,6 @@ class GraphRequest(ODataRequest):
     @property
     def service_root_url(self):
         # type: () -> str
-        return "{0}/{1}".format(self._endpoints.get(self._environment), self._version)
+        return "{0}/{1}".format(
+            AzureEnvironment.get_graph_authority(self._environment), self._version
+        )

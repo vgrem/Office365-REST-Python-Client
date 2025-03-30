@@ -226,7 +226,7 @@ class TestTenant(TestCase):
         result = self.tenant.admin_endpoints.get().execute_query()
         self.assertIsNotNone(result.resource_path)
 
-    #def test_33_get_top_files_sharing_insights(self):
+    # def test_33_get_top_files_sharing_insights(self):
     #    result = self.tenant.get_top_files_sharing_insights().execute_query()
     #    self.assertIsNotNone(result.resource_path)
 
