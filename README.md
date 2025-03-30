@@ -1,4 +1,3 @@
-from office365.azure_env import AzureEnvironment
 
 # About
 Microsoft 365 & Microsoft Graph library for Python
@@ -185,7 +184,7 @@ Refer [examples section](examples/sharepoint) for another scenarios
    from office365.sharepoint.client_context import ClientContext
    from office365.runtime.auth.client_credential import ClientCredential
    client_credentials = ClientCredential('{client_id}','{client_secret}')
-   ctx = ClientContext('{url}', environment=AzureEnvironment.USGovernmentHigh).with_credentials(client_credentials)
+   ctx = ClientContext('{site-url}', environment=AzureEnvironment.USGovernmentHigh).with_credentials(client_credentials)
    ```
 
 # Working with Outlook API
@@ -335,7 +334,7 @@ for drive in drives:
 
 ```python
 from office365.graph_client import GraphClient
-client = GraphClient(acquire_token_func)
+client = GraphClient(tenant="contoso.onmicrosoft.com")
 # retrieve drive properties 
 drive = client.users["{user_id_or_principal_name}"].drive.get().execute_query()
 # download files from OneDrive into local folder 

@@ -17,12 +17,6 @@ from office365.runtime.auth.user_realm_info import UserRealmInfo
 office365.logger.ensure_debug_secrets()
 
 
-def resolve_base_url(url):
-    parts = url.split("://")
-    host_name = parts[1].split("/")[0]
-    return parts[0] + "://" + host_name
-
-
 def string_escape(value):
     value = value.replace("&", "&amp;")
     value = value.replace("<", "&lt;")
@@ -37,7 +31,7 @@ def datetime_escape(value):
 
 
 class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
-    def __init__(self, url, username, password, browser_mode, environment="commercial"):
+    def __init__(self, url, username, password, browser_mode, environment=None):
         """
         SAML Security Token Service provider (claims-based authentication)
 
@@ -46,13 +40,11 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         :param str password: The password
         :param bool browser_mode:
         :param str environment: The Office 365 Cloud Environment endpoint used for authentication.
-        By default, this will be set to commercial ('commercial', 'GCCH')
         """
         # Security Token Service info
-        self._sts_profile = STSProfile(resolve_base_url(url), environment)
+        self._sts_profile = STSProfile(url, environment)
         # Obtain authentication cookies, using the browser mode
         self._browser_mode = browser_mode
-        self._environment = environment
         # Last occurred error
         self.error = ""
         self._username = username
@@ -137,7 +129,7 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
                 "password": string_escape(self._password),
                 "created": datetime_escape(self._sts_profile.created),
                 "expires": datetime_escape(self._sts_profile.expires),
-                "issuer": self._sts_profile.tokenIssuer,
+                "issuer": self._sts_profile.token_issuer,
             },
         )
 
@@ -184,13 +176,13 @@ class SamlTokenProvider(AuthenticationProvider, office365.logger.LoggerContext):
         payload = self._prepare_request_from_template(
             "SAML.xml",
             {
-                "auth_url": self._sts_profile.authorityUrl,
+                "auth_url": self._sts_profile.site_url,
                 "username": string_escape(self._username),
                 "password": string_escape(self._password),
                 "message_id": str(uuid.uuid4()),
                 "created": datetime_escape(self._sts_profile.created),
                 "expires": datetime_escape(self._sts_profile.expires),
-                "issuer": self._sts_profile.tokenIssuer,
+                "issuer": self._sts_profile.token_issuer,
             },
         )
         logger.debug_secrets("options: %s", payload)

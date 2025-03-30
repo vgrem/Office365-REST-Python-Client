@@ -3,6 +3,7 @@ from typing import Callable, List, Optional
 from requests import Response
 from typing_extensions import Self
 
+from office365.azure_env import AzureEnvironment
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.auth.client_credential import ClientCredential
 from office365.runtime.auth.token_response import TokenResponse
@@ -14,12 +15,11 @@ from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 class SharePointRequest(ODataRequest):
     def __init__(
-        self, base_url, environment="commercial", allow_ntlm=False, browser_mode=False
+        self, base_url, environment=AzureEnvironment.Global, allow_ntlm=False, browser_mode=False
     ):
         """
         :param str base_url: Absolute Web or Site Url
         :param str environment: The Office 365 Cloud Environment endpoint used for authentication
-            defaults to 'commercial'.
         :param bool allow_ntlm: Flag indicates whether NTLM scheme is enabled. Disabled by default
         :param bool browser_mode: Allow browser authentication
         """
