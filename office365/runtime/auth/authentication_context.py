@@ -1,5 +1,6 @@
 import json
 import sys
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
 
 from typing_extensions import Required, Self, TypedDict
@@ -46,6 +47,7 @@ class AuthenticationContext(object):
         self._environment = environment
         self._allow_ntlm = allow_ntlm
         self._browser_mode = browser_mode
+        self._token_expires = datetime.max
 
     def with_client_certificate(
         self,
@@ -178,8 +180,15 @@ class AuthenticationContext(object):
         """
 
         def _authenticate(request):
-            if self._cached_token is None:
+
+            request_time = datetime.now(timezone.utc)
+
+            if self._cached_token is None or request_time > self._token_expires:
                 self._cached_token = token_func()
+                if hasattr(self._cached_token, "expiresIn"):
+                    self._token_expires = request_time + timedelta(
+                        seconds=self._cached_token.expiresIn
+                    )
             request.set_header(
                 "Authorization", _get_authorization_header(self._cached_token)
             )
