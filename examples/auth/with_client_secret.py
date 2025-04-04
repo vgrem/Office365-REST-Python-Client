@@ -11,6 +11,8 @@ https://learn.microsoft.com/en-us/entra/identity-platform/msal-authentication-fl
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_client_secret, test_tenant
 
-client = GraphClient(tenant=test_tenant).with_client_secret(test_client_id, test_client_secret)
+client = GraphClient(tenant=test_tenant).with_client_secret(
+    test_client_id, test_client_secret
+)
 root_site = client.sites.root.get().execute_query()
 print(root_site.web_url)

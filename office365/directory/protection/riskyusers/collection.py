@@ -4,7 +4,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 
 
-class RiskyUserCollection(EntityCollection):
+class RiskyUserCollection(EntityCollection[RiskyUser]):
     """RiskyUser's collection"""
 
     def __init__(self, context, resource_path=None):

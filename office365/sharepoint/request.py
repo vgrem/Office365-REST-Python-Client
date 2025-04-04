@@ -15,7 +15,11 @@ from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 class SharePointRequest(ODataRequest):
     def __init__(
-        self, base_url, environment=AzureEnvironment.Global, allow_ntlm=False, browser_mode=False
+        self,
+        base_url,
+        environment=AzureEnvironment.Global,
+        allow_ntlm=False,
+        browser_mode=False,
     ):
         """
         :param str base_url: Absolute Web or Site Url

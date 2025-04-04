@@ -714,6 +714,17 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def restore_deleted_site_by_id(self, site_id):
+        """Restores deleted site with the specified URL
+        :param str site_id: A string representing the site identifier.
+        """
+        return_type = SpoOperation(self.context)
+        qry = ServiceOperationQuery(
+            self, "RestoreDeletedSiteById", [site_id], None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_site_properties_by_site_id(self, site_id, include_detail=False):
         # type: (str, bool) -> SiteProperties
         """
@@ -798,14 +809,30 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return self
 
-    def send_email(self, site_url):
-        # type: (str) -> ClientResult[bool]
+    def send_email(self, site_url, activity_event_json):
+        # type: (str, str) -> ClientResult[bool]
         """ """
         return_type = ClientResult(self.context, bool())
-        payload = {"siteUrl": site_url}
+        payload = {"siteUrl": site_url, "activityEventJson": activity_event_json}
         qry = ServiceOperationQuery(self, "SendEmail", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def set_copilot_promo_optin_status(self, copilot_promo_optin_enabled):
+        # type: (bool) -> ClientResult[bool]
+        """ """
+        payload = {"copilotPromoOptInEnabled": copilot_promo_optin_enabled}
+        qry = ServiceOperationQuery(self, "SetCopilotPromoOptInStatus", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def set_default_view(self, view_id, list_name):
+        # type: (str, str) -> Self
+        """ """
+        payload = {"viewId": view_id, "listName": list_name}
+        qry = ServiceOperationQuery(self, "SetDefaultView", None, payload)
+        self.context.add_query(qry)
+        return self
 
     @property
     def admin_settings(self):

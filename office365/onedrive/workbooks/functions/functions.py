@@ -82,3 +82,19 @@ class WorkbookFunctions(Entity):
         qry = ServiceOperationQuery(self, "days", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def power(self, number, power):
+        """
+        Returns the result of a number raised to a power.
+
+        :param int number: The base number.
+        :param int power: The exponent to which the base number is raised.
+        """
+        return_type = WorkbookFunctionResult(self.context)
+        payload = {
+            "number": number,
+            "power": power,
+        }
+        qry = ServiceOperationQuery(self, "power", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type

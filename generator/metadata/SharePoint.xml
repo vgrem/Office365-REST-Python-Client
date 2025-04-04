@@ -807,7 +807,9 @@
             <Property Name="IgnoreVersionHistory" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IncludeItemPermissions" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="IsMoveMode" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="MergeEmailNotifications" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="MoveAndShareFileInfo" Type="SP.SPMoveAndShareFileInfo"/>
+            <Property Name="MoveAndShareItems" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="MoveButKeepSource" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="NameConflictBehavior" Type="Edm.Int32" Nullable="false"/>
             <Property Name="SameWebCopyMoveOptimization" Type="Edm.Boolean" Nullable="false"/>
@@ -1857,6 +1859,7 @@
             <Property Name="CanCurrentUserEditMembership" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanCurrentUserManageGroup" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="CanCurrentUserViewMembership" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="ContainsCurrentUser" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Description" Type="Edm.String"/>
             <Property Name="OnlyAllowMembersViewMembership" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="OwnerTitle" Type="Edm.String"/>
@@ -4889,6 +4892,7 @@
             <EntitySet Name="PlacesEntitys" EntityType="Microsoft.SharePoint.AddToOneDrive.PlacesEntity"/>
             <EntitySet Name="placesInformations" EntityType="Microsoft.SharePoint.AddToOneDrive.placesInformation"/>
             <EntitySet Name="ArchiveFileSizeMetrics" EntityType="Microsoft.SharePoint.Administration.Archiving.ArchiveFileSizeMetric"/>
+            <EntitySet Name="SPVivaLearningManagers" EntityType="Microsoft.SharePoint.Administration.Claims.SPVivaLearningManager"/>
             <EntitySet Name="FeatureDefinitions" EntityType="Microsoft.SharePoint.Administration.FeatureDefinition"/>
             <EntitySet Name="SiteMoveServices" EntityType="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
             <EntitySet Name="SiteRelocationJobManagementServices" EntityType="Microsoft.SharePoint.Administration.SiteMove.Service.SiteRelocationJobManagementService"/>
@@ -8823,9 +8827,6 @@
             <FunctionImport Name="Active" ReturnType="Collection(SP.Publishing.AnnouncementsData)" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.AnnouncementsController"/>
             </FunctionImport>
-            <FunctionImport Name="Channel" ReturnType="Collection(SP.Publishing.ChannelAnnouncement)" IsSideEffecting="false" IsBindable="true">
-               <Parameter Name="this" Type="SP.Publishing.AnnouncementsController"/>
-            </FunctionImport>
             <FunctionImport Name="FlwPropertyFilteringMapping" IsBindable="true">
                <Parameter Name="this" Type="SP.Publishing.AnnouncementsController"/>
                <Parameter Name="flwPropertyFilteringMapping" Type="Edm.String"/>
@@ -10555,6 +10556,7 @@
             <FunctionImport Name="Clear" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Client.Search.Query.SortCollection"/>
             </FunctionImport>
+            <FunctionImport Name="Microsoft_SharePoint_Client_Search_Administration_DocumentCrawlLog_Create" ReturnType="Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog" EntitySet="DocumentCrawlLogs"/>
             <FunctionImport Name="GetCrawledUrls" ReturnType="SP.SimpleDataTable" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog"/>
                <Parameter Name="getCountOnly" Type="Edm.Boolean" Nullable="false"/>
@@ -10568,6 +10570,12 @@
                <Parameter Name="endDateTime" Type="Edm.DateTime" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="GetUnsuccesfulCrawledUrls" ReturnType="SP.SimpleDataTable" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog"/>
+               <Parameter Name="displayUrl" Type="Edm.String"/>
+               <Parameter Name="startDateTime" Type="Edm.DateTime" Nullable="false"/>
+               <Parameter Name="endDateTime" Type="Edm.DateTime" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="GetUnsuccesfulCrawledUrlsForEdiscovery" ReturnType="SP.SimpleDataTable" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Client.Search.Administration.DocumentCrawlLog"/>
                <Parameter Name="displayUrl" Type="Edm.String"/>
                <Parameter Name="startDateTime" Type="Edm.DateTime" Nullable="false"/>
@@ -12614,6 +12622,10 @@
             <FunctionImport Name="Upgrade" IsBindable="true">
                <Parameter Name="this" Type="SP.AppInstance"/>
                <Parameter Name="appPackageStream" Type="Edm.Stream"/>
+            </FunctionImport>
+            <FunctionImport Name="Microsoft_SharePoint_Administration_Claims_SPVivaLearningManager" ReturnType="Microsoft.SharePoint.Administration.Claims.SPVivaLearningManager" IsComposable="true" EntitySet="SPVivaLearningManagers"/>
+            <FunctionImport Name="RegisterListEventReceiver" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.Claims.SPVivaLearningManager"/>
             </FunctionImport>
             <FunctionImport Name="Microsoft_SharePoint_AddToOneDrive_MountService_GetRemoteItemInfo" ReturnType="Edm.String">
                <Parameter Name="request" Type="Microsoft.SharePoint.AddToOneDrive.GetRemoteItemInfoRequest"/>
@@ -38180,6 +38192,13 @@
             <Property Name="Config" Type="Microsoft.SharePoint.Administration.TenantAdmin.Copilot.AdaptiveCardConfig"/>
             <Property Name="SchemaVersion" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="ReportDetails" BaseType="Microsoft.SharePoint.Administration.TenantAdmin.Copilot.BaseRawDataSources">
+            <Property Name="Headers" Type="Collection(Edm.String)"/>
+            <Property Name="ReportRows" Type="Collection(Microsoft.SharePoint.Administration.TenantAdmin.Copilot.ReportRow)"/>
+         </ComplexType>
+         <ComplexType Name="ReportRow">
+            <Property Name="Row" Type="Collection(Edm.String)"/>
+         </ComplexType>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="SP.SiteHealth">
          <ComplexType Name="SiteHealthResult">
@@ -40478,6 +40497,7 @@
             <Property Name="EnableSensitivityLabelForPDF" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableSiteArchive" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="EnableTenantRestrictionsInsights" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="EnforceRequestDigest" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ESignatureAppList" Type="Collection(Edm.String)"/>
             <Property Name="ESignatureEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ESignatureSiteInfoList" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SiteInfoForSitePicker)"/>
@@ -42502,6 +42522,14 @@
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="SP.Analytics">
          <EntityType Name="AnalyticsUsageEntry">
+            <Key>
+               <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
+            </Key>
+            <Property Name="Id4a81de82eeb94d6080ea5bf63e27023a" Type="Edm.String" Nullable="false"/>
+         </EntityType>
+      </Schema>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Administration.Claims">
+         <EntityType Name="SPVivaLearningManager">
             <Key>
                <PropertyRef Name="Id4a81de82eeb94d6080ea5bf63e27023a"/>
             </Key>

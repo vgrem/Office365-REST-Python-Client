@@ -34,3 +34,9 @@ class LicenseDetails(Entity):
         for example: "AAD_Premium". Read-only
         """
         return self.properties.get("skuPartNumber", None)
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {"servicePlans": self.service_plans}
+            default_value = property_mapping.get(name, None)
+        return super(LicenseDetails, self).get_property(name, default_value)

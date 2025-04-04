@@ -26,3 +26,11 @@ class SimulationAutomation(Entity):
                 ResourcePath("runs", self.resource_path),
             ),
         )
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "createdBy": self.created_by,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(SimulationAutomation, self).get_property(name, default_value)

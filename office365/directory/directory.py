@@ -4,6 +4,7 @@ from office365.directory.custom_security_attribute_definition import (
 )
 from office365.directory.device_local_credential_info import DeviceLocalCredentialInfo
 from office365.directory.object_collection import DirectoryObjectCollection
+from office365.directory.subscriptions.company import CompanySubscription
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -47,6 +48,18 @@ class Directory(Entity):
                 self.context,
                 CustomSecurityAttributeDefinition,
                 ResourcePath("customSecurityAttributeDefinitions", self.resource_path),
+            ),
+        )
+
+    @property
+    def subscriptions(self):
+        """List of commercial subscriptions that an organization acquired."""
+        return self.properties.get(
+            "subscriptions",
+            EntityCollection(
+                self.context,
+                CompanySubscription,
+                ResourcePath("subscriptions", self.resource_path),
             ),
         )
 

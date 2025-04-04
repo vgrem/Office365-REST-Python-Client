@@ -3,6 +3,7 @@ from office365.sharepoint.entity import Entity
 from office365.sharepoint.migrationcenter.service.performance.data import (
     PerformanceDataCollection,
 )
+from office365.sharepoint.migrationcenter.service.teams import MigrationCenterTeams
 
 
 class MigrationCenterServices(Entity):
@@ -16,11 +17,22 @@ class MigrationCenterServices(Entity):
     @property
     def performance_data(self):
         # type: () -> PerformanceDataCollection
-        """Get root web"""
+        """"""
         return self.properties.get(
             "PerformanceData",
             PerformanceDataCollection(
                 self.context, ResourcePath("PerformanceData", self.resource_path)
+            ),
+        )
+
+    @property
+    def teams(self):
+        # type: () -> PerformanceDataCollection
+        """"""
+        return self.properties.get(
+            "Teams",
+            MigrationCenterTeams(
+                self.context, ResourcePath("Teams", self.resource_path)
             ),
         )
 

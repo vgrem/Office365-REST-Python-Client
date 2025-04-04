@@ -30,7 +30,9 @@ class STSProfile(object):
     @property
     def signin_page_url(self):
         site_info = urlparse(self._site_url)
-        return "{0}://{1}/_forms/default.aspx?wa=wsignin1.0".format(site_info.scheme, site_info.netloc)
+        return "{0}://{1}/_forms/default.aspx?wa=wsignin1.0".format(
+            site_info.scheme, site_info.netloc
+        )
 
     @property
     def user_realm_service_url(self):

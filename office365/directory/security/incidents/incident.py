@@ -44,7 +44,7 @@ class Incident(Entity):
     @property
     def created_datetime(self):
         """Time when the incident was first created."""
-        return self.properties("createdDateTime", datetime.min)
+        return self.properties.get("createdDateTime", datetime.min)
 
     @property
     def alerts(self):
@@ -56,6 +56,11 @@ class Incident(Entity):
                 self.context, Alert, ResourcePath("alerts", self.resource_path)
             ),
         )
+
+    @property
+    def entity_type_name(self):
+        # type: () -> str
+        return "microsoft.graph.security.incident"
 
     def get_property(self, name, default_value=None):
         if default_value is None:

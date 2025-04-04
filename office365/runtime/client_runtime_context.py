@@ -96,7 +96,7 @@ class ClientRuntimeContext(object):
         :param bool once: Flag which determines whether action is executed once or multiple times
         """
         if len(self._queries) == 0:
-            return
+            return self
         query = self._queries[-1]
 
         def _prepare_request(request):
@@ -130,7 +130,7 @@ class ClientRuntimeContext(object):
         # type: (Callable[[T|Response], None], bool, bool) -> Self
         """Attach an event handler which is triggered after query is submitted to server"""
         if len(self._queries) == 0:
-            return
+            return self
         query = self._queries[-1]
 
         def _process_response(resp):

@@ -18,6 +18,7 @@ class PolicyLicenseUtilities(Entity):
             None,
             None,
             return_type,
+            True,
         )
         context.add_query(qry)
         return return_type

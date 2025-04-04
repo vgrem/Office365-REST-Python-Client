@@ -123,3 +123,8 @@ class Security(Entity):
             }
             default_value = property_mapping.get(name, None)
         return super(Security, self).get_property(name, default_value)
+
+    @property
+    def entity_type_name(self):
+        # type: () -> str
+        return "microsoft.graph.security.alert"

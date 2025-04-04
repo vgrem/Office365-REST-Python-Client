@@ -12,17 +12,16 @@ class TestSecurity(TestCase):
         )
 
     def test1_create_alert(self):
-        pass
-        # result = self.client.security.alerts.add(
-        #    "Simulated Phishing Alert",
-        #    "This is a test alert for simulation purposes.",
-        #    "high",
-        #    "ThreatManagement",
-        #    "newAlert",
-        #    "Custom",
-        #    {"provider": "CustomProvider", "providerVersion": "1.0"},
-        # ).execute_query()
-        # self.assertIsNotNone(result.resource_path)
+        result = self.client.security.alerts.add(
+            "Simulated Phishing Alert",
+            "This is a test alert for simulation purposes.",
+            "high",
+            "ThreatManagement",
+            "newAlert",
+            "Custom",
+            {"provider": "CustomProvider", "providerVersion": "1.0"},
+        ).execute_query()
+        self.assertIsNotNone(result.resource_path)
 
     def test2_list_incidents(self):
         col = self.client.security.incidents.top(10).get().execute_query()

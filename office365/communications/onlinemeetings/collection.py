@@ -1,4 +1,5 @@
 from office365.communications.onlinemeetings.online_meeting import OnlineMeeting
+from office365.communications.onlinemeetings.recordings.call import CallRecording
 from office365.entity_collection import EntityCollection
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -62,6 +63,34 @@ class OnlineMeetingCollection(EntityCollection[OnlineMeeting]):
         }
         qry = ServiceOperationQuery(
             self, "createOrGet", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_all_recordings(
+        self, meeting_organizer_user_id, start_datetime=None, end_datetime=None
+    ):
+        """
+        Get all recordings from scheduled onlineMeeting instances for which the specified user is the organizer.
+        This API currently doesn't support getting call recordings from channel meetings.
+
+        :param str meeting_organizer_user_id: 	The user identifier of the meeting organizer to filter for artifacts
+            for meetings organized by the given user identifier.
+        :param datetime.datetime start_datetime: Optional parameter to filter for artifacts created after the given
+            start date. The timestamp type represents date and time information using ISO 8601 format and is always
+            in UTC
+        :param datetime.datetime end_datetime: Optional parameter to filter for artifacts created before the given
+            end date. The timestamp type represents date and time information using ISO 8601 format and is always
+            in UTC
+        """
+        return_type = EntityCollection(self.context, CallRecording)
+        payload = {
+            "meetingOrganizerUserId": meeting_organizer_user_id,
+            "startDateTime": start_datetime,
+            "endDateTime": end_datetime,
+        }
+        qry = ServiceOperationQuery(
+            self, "getAllRecordings", None, payload, None, return_type
         )
         self.context.add_query(qry)
         return return_type

@@ -29512,6 +29512,7 @@ within the time frame of their original request."/>
             <Property Name="completedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="customExtensionCalloutInstances" Type="Collection(graph.customExtensionCalloutInstance)"/>
+            <Property Name="justification" Type="Edm.String"/>
             <Property Name="requestType" Type="graph.accessPackageRequestType"/>
             <Property Name="schedule" Type="graph.entitlementManagementSchedule"/>
             <Property Name="state" Type="graph.accessPackageRequestState"/>
@@ -29972,6 +29973,7 @@ within the time frame of their original request."/>
          <ComplexType Name="accessPackageAssignmentApprovalSettings">
             <Property Name="isApprovalRequiredForAdd" Type="Edm.Boolean"/>
             <Property Name="isApprovalRequiredForUpdate" Type="Edm.Boolean"/>
+            <Property Name="isRequestorJustificationRequired" Type="Edm.Boolean"/>
             <Property Name="stages" Type="Collection(graph.accessPackageApprovalStage)"/>
          </ComplexType>
          <ComplexType Name="accessPackageAssignmentRequestCallbackData" BaseType="graph.customExtensionData">
@@ -29994,6 +29996,7 @@ within the time frame of their original request."/>
             <Property Name="allowCustomAssignmentSchedule" Type="Edm.Boolean"/>
             <Property Name="isApprovalRequiredForAdd" Type="Edm.Boolean"/>
             <Property Name="isApprovalRequiredForUpdate" Type="Edm.Boolean"/>
+            <Property Name="isRequestorJustificationRequired" Type="Edm.Boolean"/>
             <Property Name="policyDescription" Type="Edm.String"/>
             <Property Name="policyDisplayName" Type="Edm.String"/>
             <Property Name="policyId" Type="Edm.String"/>
