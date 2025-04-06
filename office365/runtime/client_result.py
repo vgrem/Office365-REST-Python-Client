@@ -28,10 +28,10 @@ class ClientResult(Generic[T]):
         self._context.before_query_execute(action)
         return self
 
-    def after_execute(self, action, execute_first=False):
-        # type: (Callable[[Self], None], bool) -> Self
+    def after_execute(self, action, execute_first=False, include_response=False):
+        # type: (Callable[[Self], None], bool, bool) -> Self
         """Attach an event handler which is triggered after query is submitted to server"""
-        self._context.after_query_execute(action, execute_first)
+        self._context.after_query_execute(action, execute_first, include_response)
         return self
 
     def set_property(self, key, value, persist_changes=False):

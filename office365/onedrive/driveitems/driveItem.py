@@ -449,8 +449,9 @@ class DriveItem(BaseItem):
                     chunk_downloaded(bytes_read)
                 file_object.write(chunk)
 
-        self.get_content().before_execute(_construct_request)
-        self.context.after_execute(_process_response)
+        self.get_content().before_execute(_construct_request).after_execute(
+            _process_response, include_response=True
+        )
         return self
 
     def create_folder(self, name, conflict_behavior=ConflictBehavior.Rename):

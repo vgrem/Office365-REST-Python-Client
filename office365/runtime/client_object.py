@@ -86,7 +86,7 @@ class ClientObject(Generic[T]):
     def before_execute(self, action):
         # type: (Callable[[RequestOptions], None]) -> Self
         """Attach an event handler to client object which gets triggered after query is submitted to server"""
-        self.context.before_execute(action)
+        self.context.before_query_execute(action)
         return self
 
     def after_execute(self, action, execute_first=False, include_response=False):
