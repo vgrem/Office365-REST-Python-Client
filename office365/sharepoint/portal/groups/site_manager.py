@@ -119,7 +119,7 @@ class GroupSiteManager(ClientObject):
             request.method = HttpMethod.Get
             request.url += "?groupId='{0}'".format(group_id)
 
-        self.context.add_query(qry).before_execute(_construct_request)
+        self.context.add_query(qry).before_query_execute(_construct_request)
         return return_type
 
     def get_current_user_joined_teams(

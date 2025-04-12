@@ -2,6 +2,8 @@ import json
 from datetime import datetime
 from typing import List, Optional
 
+from typing_extensions import Self
+
 from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
 from office365.delta_collection import DeltaCollection
@@ -36,6 +38,7 @@ from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote
 from office365.outlook.calendar.attendees.base import AttendeeBase
 from office365.outlook.calendar.calendar import Calendar
+from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.events.event import Event
 from office365.outlook.calendar.events.reminder import Reminder
 from office365.outlook.calendar.group import CalendarGroup
@@ -51,7 +54,7 @@ from office365.outlook.mail.mailbox_settings import MailboxSettings
 from office365.outlook.mail.messages.collection import MessageCollection
 from office365.outlook.mail.messages.message import Message
 from office365.outlook.mail.recipient import Recipient
-from office365.outlook.mail.tips import MailTips
+from office365.outlook.mail.tips.tips import MailTips
 from office365.outlook.user import OutlookUser
 from office365.planner.user import PlannerUser
 from office365.runtime.client_result import ClientResult
@@ -76,6 +79,60 @@ class User(DirectoryObject):
 
     def __repr__(self):
         return self.user_principal_name or self.id or self.entity_type_name
+
+    def enable_automatic_replies_setting(
+        self,
+        status,
+        scheduled_start_datetime,
+        scheduled_end_datetime,
+        internal_reply_message=None,
+        external_reply_message=None,
+    ):
+        # type: (str, datetime, datetime, str, str) -> Self
+        """
+        Enable, configure, automatic replies (notify people automatically upon receipt of their email)
+
+        """
+        from office365.outlook.mail.automatic_replies_setting import (
+            AutomaticRepliesSetting,
+        )
+
+        setting = AutomaticRepliesSetting(
+            status=status,
+            scheduled_start_datetime=DateTimeTimeZone.parse(scheduled_start_datetime),
+            scheduled_end_datetime=DateTimeTimeZone.parse(scheduled_end_datetime),
+            internal_reply_message=internal_reply_message,
+            external_reply_message=external_reply_message,
+        )
+
+        def _construct_request(request):
+            payload = {"automaticRepliesSetting": setting.to_json()}
+            request.data = payload
+            request.url += "/mailboxSettings"
+
+        self.update().before_execute(_construct_request)
+        return self
+
+    def disable_automatic_replies_setting(self, clear_all=False):
+        """
+        Disable automatic replies (notify people automatically upon receipt of their email)
+        :param bool clear_all: If true, clear all automatic replies settings
+        """
+        from office365.outlook.mail.automatic_replies_setting import (
+            AutomaticRepliesSetting,
+        )
+
+        setting = AutomaticRepliesSetting(
+            status="disabled",
+        )
+
+        def _construct_request(request):
+            payload = {"automaticRepliesSetting": setting.to_json()}
+            request.data = payload
+            request.url += "/mailboxSettings"
+
+        self.update().before_execute(_construct_request)
+        return self
 
     def add_extension(self, name):
         """
@@ -726,6 +783,10 @@ class User(DirectoryObject):
     def mailbox_settings(self):
         """Get the user's mailboxSettings."""
         return self.properties.get("mailboxSettings", MailboxSettings())
+
+    @mailbox_settings.setter
+    def mailbox_settings(self, value):
+        self.set_property("mailboxSettings", value)
 
     @property
     def calendar(self):

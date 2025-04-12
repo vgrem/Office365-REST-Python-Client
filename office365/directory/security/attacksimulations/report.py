@@ -14,11 +14,11 @@ class SimulationReport(ClientValue):
     participated in the campaign.
     """
 
-    def __init__(self, overview=SimulationReportOverview(), simulationUsers=None):
+    def __init__(self, overview=SimulationReportOverview(), simulation_users=None):
         """
         :param SimulationReportOverview overview: Overview of an attack simulation and training campaign.
         """
         self.overview = overview
         self.simulationUsers = ClientValueCollection(
-            UserSimulationDetails, simulationUsers
+            UserSimulationDetails, simulation_users
         )

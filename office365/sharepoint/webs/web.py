@@ -190,6 +190,20 @@ class Web(SecurableObject):
         self.ensure_properties(["AccessRequestListUrl"], _get_access_request_list)
         return return_type
 
+    def get_adaptive_card_extensions(self, include_errors=None, project=None):
+        payload = {
+            "includeErrors": include_errors,
+            "project": project,
+        }
+        return_type = ClientResult(
+            self.context, ClientValueCollection(SPClientSideComponentQueryResult)
+        )
+        qry = ServiceOperationQuery(
+            self, "GetAdaptiveCardExtensions", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_document_by_doc_id(self, doc_id):
         """ """
         return_type = ClientResult(self.context)
