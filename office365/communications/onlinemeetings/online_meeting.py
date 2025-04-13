@@ -124,7 +124,7 @@ class OnlineMeeting(Entity):
     @property
     def recordings(self):
         # type: () -> EntityCollection[CallRecording]
-        """he recordings of an online meeting"""
+        """The recordings of an online meeting"""
         return self.properties.get(
             "recordings",
             EntityCollection(

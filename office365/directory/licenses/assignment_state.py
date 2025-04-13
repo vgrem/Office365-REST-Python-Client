@@ -18,8 +18,8 @@ class LicenseAssignmentState(ClientValue):
         assigned_by_group=None,
         disabled_plans=None,
         error=None,
-        lastUpdatedDateTime=None,
-        skuId=None,
+        last_updated_datetime=None,
+        sku_id=None,
         state=None,
     ):
         """
@@ -31,13 +31,13 @@ class LicenseAssignmentState(ClientValue):
              The possible values are CountViolation, MutuallyExclusiveViolation, DependencyViolation,
              ProhibitedInUsageLocationViolation, UniquenessViolation, and Other.
              For more information on how to identify and resolve license assignment errors, see here.
-        :param str skuId: The unique identifier for the SKU. Read-Only.
+        :param str sku_id: The unique identifier for the SKU. Read-Only.
         :param str state: Indicate the current state of this assignment. Read-Only.
              The possible values are Active, ActiveWithError, Disabled, and Error.
         """
         self.assignedByGroup = assigned_by_group
         self.disabledPlans = StringCollection(disabled_plans)
         self.error = error
-        self.lastUpdatedDateTime = lastUpdatedDateTime
-        self.skuId = skuId
+        self.lastUpdatedDateTime = last_updated_datetime
+        self.skuId = sku_id
         self.state = state

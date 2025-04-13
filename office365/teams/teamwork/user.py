@@ -1,15 +1,59 @@
+from typing import Optional
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.teams.apps.user_scope_installation import UserScopeTeamsAppInstallation
+from office365.teams.associated_info import AssociatedTeamInfo
 
 
 class UserTeamwork(Entity):
     """A container for the range of Microsoft Teams functionalities that are available per user in the tenant."""
 
     @property
+    def locale(self):
+        # type: () -> Optional[str]
+        """Represents the location that a user selected in Microsoft Teams and doesn't follow the Office's locale
+        setting. A user's locale is represented by their preferred language and country or region.
+        For example, en-us. The language component follows two-letter codes as defined in ISO 639-1,
+        and the country component follows two-letter codes as defined in ISO 3166-1 alpha-2.
+        """
+        return self.properties.get("locale", None)
+
+    @property
+    def region(self):
+        # type: () -> Optional[str]
+        """Represents the region of the organization or the user. For users with multigeo licenses, the property
+        contains the user's region (if available). For users without multigeo licenses, the property contains
+        the organization's region.
+
+        The region value can be any region supported by the Teams payload.
+        The possible values are: Americas, Europe and MiddleEast, Asia Pacific, UAE, Australia, Brazil, Canada,
+        Switzerland, Germany, France, India, Japan, South Korea, Norway, Singapore, United Kingdom, South Africa,
+        Sweden, Qatar, Poland, Italy, Israel, Spain, Mexico, USGov Community Cloud, USGov Community Cloud High,
+        USGov Department of Defense, and China.
+        """
+        return self.properties.get("region", None)
+
+    @property
+    def associated_teams(self):
+        # type: () -> EntityCollection[AssociatedTeamInfo]
+        """
+        The apps installed in the personal scope of this user.
+        """
+        return self.properties.get(
+            "associatedTeams",
+            EntityCollection(
+                self.context,
+                AssociatedTeamInfo,
+                ResourcePath("associatedTeams", self.resource_path),
+            ),
+        )
+
+    @property
     def installed_apps(self):
+        # type: () -> EntityCollection[UserScopeTeamsAppInstallation]
         """
         The apps installed in the personal scope of this user.
         """
@@ -51,6 +95,9 @@ class UserTeamwork(Entity):
 
     def get_property(self, name, default_value=None):
         if default_value is None:
-            property_mapping = {"installedApps": self.installed_apps}
+            property_mapping = {
+                "associatedTeams": self.associated_teams,
+                "installedApps": self.installed_apps
+            }
             default_value = property_mapping.get(name, None)
         return super(UserTeamwork, self).get_property(name, default_value)

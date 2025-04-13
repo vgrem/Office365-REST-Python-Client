@@ -89,7 +89,7 @@ class ReportRoot(Entity):
             The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
             Dn where n represents the number of days over which the report is aggregated. Required.
         """
-        qry = create_report_query(self, "getEmailActivityUserDetail", period)
+        qry = create_report_query(self, "getEmailActivityUserDetail", period, return_stream=True)
         self.context.add_query(qry)
         return qry.return_type
 

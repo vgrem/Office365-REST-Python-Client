@@ -2,7 +2,9 @@ import datetime
 from typing import Optional
 
 from office365.directory.audit.activity_initiator import AuditActivityInitiator
+from office365.directory.audit.target_resource import TargetResource
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class DirectoryAudit(Entity):
@@ -24,6 +26,14 @@ class DirectoryAudit(Entity):
         For a list of activities logged, refer to Azure AD audit log categories and activities.
         """
         return self.properties.get("activityDisplayName", None)
+
+    @property
+    def additional_details(self):
+        # type: () -> Optional[dict]
+        """
+        Indicates additional details on the activity.
+        """
+        return self.properties.get("additionalDetails", None)
 
     @property
     def category(self):
@@ -70,6 +80,14 @@ class DirectoryAudit(Entity):
         return self.properties.get("loggedByService", None)
 
     @property
+    def result(self):
+        # type: () -> Optional[str]
+        """
+        Indicates the result of the activity. Possible values are: success, failure, timeout, unknownFutureValue.
+        """
+        return self.properties.get("result", None)
+
+    @property
     def result_reason(self):
         # type: () -> Optional[str]
         """
@@ -77,11 +95,24 @@ class DirectoryAudit(Entity):
         """
         return self.properties.get("resultReason", None)
 
+    @property
+    def target_resources(self):
+        # type: () -> Optional[str]
+        """
+        Indicates information on which resource was changed due to the activity. Target Resource Type can be User,
+        Device, Directory, App, Role, Group, Policy or Other. Supports $filter (eq) for id and displayName;
+        and $filter (startswith) for displayName.
+        """
+        return self.properties.get(
+            "targetResources", ClientValueCollection(TargetResource)
+        )
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "activityDateTime": self.activity_datetime,
                 "initiatedBy": self.initiated_by,
+                "targetResources": self.target_resources,
             }
             default_value = property_mapping.get(name, None)
         return super(DirectoryAudit, self).get_property(name, default_value)

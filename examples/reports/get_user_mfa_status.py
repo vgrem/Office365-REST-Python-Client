@@ -1,3 +1,8 @@
+"""
+Get a list of the authentication methods registered for a user as defined in the userRegistrationDetails object.
+This method doesn't work for disabled users.
+
+"""
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_client_secret, test_tenant
 

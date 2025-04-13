@@ -1,6 +1,8 @@
 from typing import Optional
 
 from office365.directory.object import DirectoryObject
+from office365.directory.permissions.scoped_role_membership import ScopedRoleMembership
+from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -34,5 +36,18 @@ class DirectoryRole(DirectoryObject):
             "members",
             DirectoryObjectCollection(
                 self.context, ResourcePath("members", self.resource_path)
+            ),
+        )
+
+    @property
+    def scoped_members(self):
+        """Members of this directory role that are scoped to administrative units. """
+
+        return self.properties.get(
+            "scopedMembers",
+            EntityCollection(
+                self.context,
+                ScopedRoleMembership,
+                ResourcePath("scopedMembers", self.resource_path),
             ),
         )

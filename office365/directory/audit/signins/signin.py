@@ -3,8 +3,12 @@ from typing import Optional
 
 from office365.directory.audit.signins.location import SignInLocation
 from office365.directory.audit.signins.status import SignInStatus
+from office365.directory.policies.applied_conditional_access import (
+    AppliedConditionalAccessPolicy,
+)
 from office365.entity import Entity
 from office365.intune.devices.detail import DeviceDetail
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 class SignIn(Entity):
@@ -23,6 +27,15 @@ class SignIn(Entity):
         # type: () -> Optional[str]
         """Unique GUID representing the app ID in the Azure Active Directory."""
         return self.properties.get("appId", None)
+
+    @property
+    def applied_conditional_access_policies(self):
+        # type: () -> Optional[str]
+        """Provides a list of conditional access policies that the corresponding sign-in activity triggers."""
+        return self.properties.get(
+            "appliedConditionalAccessPolicies",
+            ClientValueCollection(AppliedConditionalAccessPolicy),
+        )
 
     @property
     def client_app_used(self):
@@ -122,6 +135,7 @@ class SignIn(Entity):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
+                "appliedConditionalAccessPolicies": self.applied_conditional_access_policies,
                 "createdDateTime": self.created_datetime,
                 "deviceDetail": self.device_detail,
             }
