@@ -1,4 +1,15 @@
-class ClientQuery(object):
+from typing import TYPE_CHECKING, AnyStr, Dict, Generic, Optional, TypeVar, Union
+
+if TYPE_CHECKING:
+    from office365.runtime.client_object import ClientObject
+    from office365.runtime.client_result import ClientResult
+    from office365.runtime.client_runtime_context import ClientRuntimeContext
+    from office365.runtime.client_value import ClientValue
+
+T = TypeVar("T", bound=Union["ClientObject", "ClientResult"])
+
+
+class ClientQuery(Generic[T]):
     """Client query"""
 
     def __init__(
@@ -9,15 +20,9 @@ class ClientQuery(object):
         parameters_name=None,
         return_type=None,
     ):
+        # type: (ClientRuntimeContext, Optional[ClientObject], Optional[ClientObject|ClientValue|Dict|AnyStr], Optional[str], Optional[T]) -> None
         """
         Generic query
-
-        :type context: office365.runtime.client_runtime_context.ClientRuntimeContext
-        :type binding_type: office365.runtime.client_object.ClientObject or None
-        :type parameters_type: office365.runtime.client_object.ClientObject or ClientValue or dict or bytes or None
-        :type parameters_name: str or None
-        :type return_type: office365.runtime.client_object.ClientObject
-            or office365.runtime.client_result.ClientResult or None
         """
         self._context = context
         self._binding_type = binding_type

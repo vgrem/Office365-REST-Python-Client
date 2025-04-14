@@ -89,7 +89,9 @@ class ReportRoot(Entity):
             The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
             Dn where n represents the number of days over which the report is aggregated. Required.
         """
-        qry = create_report_query(self, "getEmailActivityUserDetail", period, return_stream=True)
+        qry = create_report_query(
+            self, "getEmailActivityUserDetail", period, return_stream=True
+        )
         self.context.add_query(qry)
         return qry.return_type
 
@@ -105,17 +107,47 @@ class ReportRoot(Entity):
         self.context.add_query(qry)
         return qry.return_type
 
+    def get_email_app_usage_user_counts(self, period):
+        """
+        Get the count of unique users that connected to Exchange Online using any email app.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(self, "getEmailAppUsageUserCounts", period, True)
+        self.context.add_query(qry)
+        return qry.return_type
+
+    def get_mailbox_usage_storage(self, period):
+        """
+        Get the amount of storage used in your organization.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(self, "getMailboxUsageStorage", period, True)
+        self.context.add_query(qry)
+        return qry.return_type
+
     def get_m365_app_user_counts(self, period=None):
         """
         Get a report that provides the trend in the number of active users for each app (Outlook, Word, Excel,
         PowerPoint, OneNote, and Teams) in your organization.
         """
-        return_type = ClientResult(self.context, str())
+        return_type = ClientResult(self.context, bytes())
         qry = FunctionQuery(
             self, "getM365AppUserCounts", {"period": period}, return_type
         )
         self.context.add_query(qry)
         return return_type
+
+    def get_office365_activation_counts(self):
+        """Get the count of Microsoft 365 activations on desktops and devices."""
+        qry = create_report_query(self, "getOffice365ActivationCounts")
+        self.context.add_query(qry)
+        return qry.return_type
 
     def get_office365_activations_user_counts(self):
         """Get the count of Microsoft 365 activations on desktops and devices."""
@@ -280,6 +312,20 @@ class ReportRoot(Entity):
             Dn where n represents the number of days over which the report is aggregated. Required.
         """
         qry = create_report_query(self, "getSharePointSiteUsageSiteCounts", period)
+        self.context.add_query(qry)
+        return qry.return_type
+
+    def get_teams_team_counts(self, period):
+        """
+        Get the number of teams of a particular type in an instance of Microsoft Teams.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(
+            self, "getTeamsTeamCounts", period, return_stream=True
+        )
         self.context.add_query(qry)
         return qry.return_type
 

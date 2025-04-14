@@ -1,8 +1,8 @@
 from office365.runtime.paths.service_operation import ServiceOperationPath
-from office365.runtime.queries.client_query import ClientQuery
+from office365.runtime.queries.client_query import ClientQuery, T
 
 
-class ServiceOperationQuery(ClientQuery):
+class ServiceOperationQuery(ClientQuery[T]):
     """ "Service operation query"""
 
     def __init__(
@@ -15,11 +15,6 @@ class ServiceOperationQuery(ClientQuery):
         return_type=None,
         is_static=False,
     ):
-        """
-
-        :type method_params: list or dict or office365.runtime.client_value.ClientValue or None
-        :type method_name: str or None
-        """
         super(ServiceOperationQuery, self).__init__(
             binding_type.context,
             binding_type,

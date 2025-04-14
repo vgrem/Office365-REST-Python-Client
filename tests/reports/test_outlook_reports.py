@@ -19,5 +19,11 @@ class TestOutlookReports(GraphTestCase):
         self.assertIsNotNone(result.value)
 
     def test3_get_email_activity_user_detail(self):
-        result = self.client.reports.get_email_activity_user_detail("D7").execute_query()
+        result = self.client.reports.get_email_activity_user_detail(
+            "D7"
+        ).execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test4_get_mailbox_usage_storage(self):
+        result = self.client.reports.get_mailbox_usage_storage("D30").execute_query()
         self.assertIsNotNone(result.value)

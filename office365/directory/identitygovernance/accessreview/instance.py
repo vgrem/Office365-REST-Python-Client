@@ -1,4 +1,6 @@
-from office365.directory.identitygovernance.accessreview.stages import AccessReviewStageCollection
+from office365.directory.identitygovernance.accessreview.stages import (
+    AccessReviewStageCollection,
+)
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 

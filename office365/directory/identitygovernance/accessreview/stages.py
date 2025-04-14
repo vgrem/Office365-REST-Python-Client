@@ -6,4 +6,6 @@ class AccessReviewStageCollection(EntityCollection[AccessReviewStage]):
     """AccessReviewStage collection"""
 
     def __init__(self, context, resource_path=None):
-        super(AccessReviewStageCollection, self).__init__(context, AccessReviewStage, resource_path)
+        super(AccessReviewStageCollection, self).__init__(
+            context, AccessReviewStage, resource_path
+        )

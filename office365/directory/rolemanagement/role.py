@@ -41,7 +41,7 @@ class DirectoryRole(DirectoryObject):
 
     @property
     def scoped_members(self):
-        """Members of this directory role that are scoped to administrative units. """
+        """Members of this directory role that are scoped to administrative units."""
 
         return self.properties.get(
             "scopedMembers",

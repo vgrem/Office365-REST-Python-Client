@@ -97,7 +97,7 @@ class UserTeamwork(Entity):
         if default_value is None:
             property_mapping = {
                 "associatedTeams": self.associated_teams,
-                "installedApps": self.installed_apps
+                "installedApps": self.installed_apps,
             }
             default_value = property_mapping.get(name, None)
         return super(UserTeamwork, self).get_property(name, default_value)

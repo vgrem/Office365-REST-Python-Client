@@ -1,14 +1,12 @@
 from office365.runtime.odata.query_options import QueryOptions
-from office365.runtime.queries.client_query import ClientQuery
+from office365.runtime.queries.client_query import ClientQuery, T
 
 
-class ReadEntityQuery(ClientQuery):
+class ReadEntityQuery(ClientQuery[T]):
     def __init__(self, return_type, properties_to_include=None):
+        # type: (T, list[str]) -> None
         """
         Read client object query
-
-        :type properties_to_include: list[str] or None
-        :type return_type: office365.runtime.client_object.ClientObject
         """
         super(ReadEntityQuery, self).__init__(
             return_type.context, return_type, None, None, return_type

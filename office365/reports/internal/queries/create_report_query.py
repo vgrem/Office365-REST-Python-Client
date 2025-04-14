@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 
 
 def create_report_query(report_root, report_name, period=None, return_stream=False):
-    # type: (ReportRoot, str, str, bool) -> FunctionQuery
     """
     Construct Report query
 
