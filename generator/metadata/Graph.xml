@@ -16180,6 +16180,18 @@
                </Record>
             </Annotation>
          </Annotations>
+         <Annotations Target="microsoft.graph.authentication/platformCredentialMethods">
+            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+               <Record>
+                  <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
          <Annotations Target="microsoft.graph.authentication/softwareOathMethods">
             <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
                <Record>
@@ -22090,6 +22102,15 @@ within the time frame of their original request."/>
             <Member Name="weak" Value="1"/>
             <Member Name="unknown" Value="2"/>
          </EnumType>
+         <EnumType Name="authenticationMethodPlatform">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="windows" Value="1"/>
+            <Member Name="macOS" Value="2"/>
+            <Member Name="iOS" Value="3"/>
+            <Member Name="android" Value="4"/>
+            <Member Name="linux" Value="5"/>
+            <Member Name="unknownFutureValue" Value="6"/>
+         </EnumType>
          <EnumType Name="authenticationMethodSignInState">
             <Member Name="notSupported" Value="0"/>
             <Member Name="notAllowedByPolicy" Value="1"/>
@@ -23641,6 +23662,7 @@ within the time frame of their original request."/>
             <NavigationProperty Name="operations" Type="Collection(graph.longRunningOperation)" ContainsTarget="true"/>
             <NavigationProperty Name="passwordMethods" Type="Collection(graph.passwordAuthenticationMethod)" ContainsTarget="true"/>
             <NavigationProperty Name="phoneMethods" Type="Collection(graph.phoneAuthenticationMethod)" ContainsTarget="true"/>
+            <NavigationProperty Name="platformCredentialMethods" Type="Collection(graph.platformCredentialAuthenticationMethod)" ContainsTarget="true"/>
             <NavigationProperty Name="softwareOathMethods" Type="Collection(graph.softwareOathAuthenticationMethod)" ContainsTarget="true"/>
             <NavigationProperty Name="temporaryAccessPassMethods" Type="Collection(graph.temporaryAccessPassAuthenticationMethod)" ContainsTarget="true"/>
             <NavigationProperty Name="windowsHelloForBusinessMethods" Type="Collection(graph.windowsHelloForBusinessAuthenticationMethod)" ContainsTarget="true"/>
@@ -25975,6 +25997,19 @@ within the time frame of their original request."/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="userFlowAttributeType" Type="graph.identityUserFlowAttributeType" Nullable="false"/>
          </EntityType>
+         <ComplexType Name="onAttributeCollectionStartHandler" Abstract="true"/>
+         <ComplexType Name="onAttributeCollectionStartCustomExtensionHandler" BaseType="graph.onAttributeCollectionStartHandler">
+            <Property Name="configuration" Type="graph.customExtensionOverwriteConfiguration"/>
+            <NavigationProperty Name="customExtension" Type="graph.onAttributeCollectionStartCustomExtension"/>
+         </ComplexType>
+         <EntityType Name="customAuthenticationExtension" BaseType="graph.customCalloutExtension" Abstract="true"/>
+         <EntityType Name="onAttributeCollectionStartCustomExtension" BaseType="graph.customAuthenticationExtension"/>
+         <ComplexType Name="onAttributeCollectionSubmitHandler" Abstract="true"/>
+         <ComplexType Name="onAttributeCollectionSubmitCustomExtensionHandler" BaseType="graph.onAttributeCollectionSubmitHandler">
+            <Property Name="configuration" Type="graph.customExtensionOverwriteConfiguration"/>
+            <NavigationProperty Name="customExtension" Type="graph.onAttributeCollectionSubmitCustomExtension"/>
+         </ComplexType>
+         <EntityType Name="onAttributeCollectionSubmitCustomExtension" BaseType="graph.customAuthenticationExtension"/>
          <ComplexType Name="onAuthenticationMethodLoadStartHandler" Abstract="true"/>
          <ComplexType Name="onAuthenticationMethodLoadStartExternalUsersSelfServiceSignUp" BaseType="graph.onAuthenticationMethodLoadStartHandler">
             <NavigationProperty Name="identityProviders" Type="Collection(graph.identityProviderBase)"/>
@@ -25991,7 +26026,6 @@ within the time frame of their original request."/>
             <Property Name="configuration" Type="graph.customExtensionOverwriteConfiguration"/>
             <NavigationProperty Name="customExtension" Type="graph.onTokenIssuanceStartCustomExtension"/>
          </ComplexType>
-         <EntityType Name="customAuthenticationExtension" BaseType="graph.customCalloutExtension" Abstract="true"/>
          <EntityType Name="onTokenIssuanceStartCustomExtension" BaseType="graph.customAuthenticationExtension">
             <Property Name="claimsForTokenConfiguration" Type="Collection(graph.onTokenIssuanceStartReturnClaim)"/>
          </EntityType>
@@ -26074,6 +26108,8 @@ within the time frame of their original request."/>
          </EntityType>
          <EntityType Name="externalUsersSelfServiceSignUpEventsFlow" BaseType="graph.authenticationEventsFlow">
             <Property Name="onAttributeCollection" Type="graph.onAttributeCollectionHandler"/>
+            <Property Name="onAttributeCollectionStart" Type="graph.onAttributeCollectionStartHandler"/>
+            <Property Name="onAttributeCollectionSubmit" Type="graph.onAttributeCollectionSubmitHandler"/>
             <Property Name="onAuthenticationMethodLoadStart" Type="graph.onAuthenticationMethodLoadStartHandler"/>
             <Property Name="onInteractiveAuthFlowStart" Type="graph.onInteractiveAuthFlowStartHandler"/>
             <Property Name="onUserCreateStart" Type="graph.onUserCreateStartHandler"/>
@@ -26092,6 +26128,12 @@ within the time frame of their original request."/>
          <EntityType Name="identityCustomUserFlowAttribute" BaseType="graph.identityUserFlowAttribute"/>
          <EntityType Name="onAttributeCollectionListener" BaseType="graph.authenticationEventListener">
             <Property Name="handler" Type="graph.onAttributeCollectionHandler"/>
+         </EntityType>
+         <EntityType Name="onAttributeCollectionStartListener" BaseType="graph.authenticationEventListener">
+            <Property Name="handler" Type="graph.onAttributeCollectionStartHandler"/>
+         </EntityType>
+         <EntityType Name="onAttributeCollectionSubmitListener" BaseType="graph.authenticationEventListener">
+            <Property Name="handler" Type="graph.onAttributeCollectionSubmitHandler"/>
          </EntityType>
          <EntityType Name="onAuthenticationMethodLoadStartListener" BaseType="graph.authenticationEventListener">
             <Property Name="handler" Type="graph.onAuthenticationMethodLoadStartHandler"/>
@@ -34360,6 +34402,13 @@ within the time frame of their original request."/>
             <Property Name="phoneNumber" Type="Edm.String"/>
             <Property Name="phoneType" Type="graph.authenticationPhoneType"/>
             <Property Name="smsSignInState" Type="graph.authenticationMethodSignInState"/>
+         </EntityType>
+         <EntityType Name="platformCredentialAuthenticationMethod" BaseType="graph.authenticationMethod">
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="keyStrength" Type="graph.authenticationMethodKeyStrength"/>
+            <Property Name="platform" Type="graph.authenticationMethodPlatform"/>
+            <NavigationProperty Name="device" Type="graph.device"/>
          </EntityType>
          <EntityType Name="softwareOathAuthenticationMethod" BaseType="graph.authenticationMethod">
             <Property Name="secretKey" Type="Edm.String"/>

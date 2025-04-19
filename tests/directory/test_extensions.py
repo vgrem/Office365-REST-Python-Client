@@ -13,7 +13,7 @@ class TestExtensions(GraphTestCase):
         super(TestExtensions, cls).setUpClass()
         app_name = create_unique_name("App")
         cls.target_app = cls.client.applications.add(
-            displayName=app_name
+            display_name=app_name
         ).execute_query()
 
     @classmethod

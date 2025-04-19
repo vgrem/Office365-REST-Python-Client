@@ -21,3 +21,15 @@ class TestSearchOneDrive(GraphTestCase):
     # def test3_search_events(self):
     #    result = self.client.search.query_events("Jon Doe").execute_query()
     #    self.assertIsNotNone(result.value)
+
+    def test4_search_list_items(self):
+        result = self.client.search.query_list_items("Guide").execute_query()
+        self.assertIsNotNone(result.value)
+
+    # def test5_search_people_by_name(self):
+    #    result = self.client.search.query_peoples("John").execute_query()
+    #    self.assertIsNotNone(result.value)
+
+    def test6_search_sites(self):
+        result = self.client.search.query_sites("team").execute_query()
+        self.assertIsNotNone(result.value)

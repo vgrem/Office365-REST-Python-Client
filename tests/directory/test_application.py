@@ -18,7 +18,7 @@ class TestApplication(GraphTestCase):
 
     def test2_create_app(self):
         new_app = self.client.applications.add(
-            displayName=self.app_name
+            display_name=self.app_name
         ).execute_query()
         self.assertIsNotNone(new_app.resource_path)
         self.__class__.target_app = new_app

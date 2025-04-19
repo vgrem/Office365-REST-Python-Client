@@ -7,6 +7,8 @@ from office365.onedrive.lists.list import List
 from office365.onedrive.sites.site import Site
 from office365.outlook.calendar.events.event import Event
 from office365.outlook.mail.messages.message import Message
+from office365.outlook.person import Person
+from office365.search.external.item import ExternalItem
 
 
 class EntityType:
@@ -20,7 +22,8 @@ class EntityType:
         "message": Message,
         "drive": Drive,
         "driveItem": DriveItem,
-        # "externalItem": ExternalItem
+        "externalItem": ExternalItem,
+        "person": Person,
     }
 
     def __init__(self):
@@ -47,3 +50,5 @@ class EntityType:
     driveItem = "driveItem"
 
     externalItem = "externalItem"
+
+    person = "person"
