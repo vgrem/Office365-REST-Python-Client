@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
 
+from typing_extensions import Self
+
 from office365.entity import Entity
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.compat import is_string_type
@@ -21,6 +23,17 @@ class EntityCollection(ClientObjectCollection[T]):
         super(EntityCollection, self).__init__(
             context, item_type, resource_path, parent
         )
+        self._delta_request_url = None
+
+    def token(self, value):
+        """
+        Apply delta query
+
+        :param str value: If unspecified, enumerates the hierarchy's current state. If latest, returns empty
+            response with latest delta token. If a previous delta token, returns new state since that token.
+        """
+        self.query_options.custom["token"] = value
+        return self
 
     def __getitem__(self, key):
         # type: (int | str) -> T
@@ -57,6 +70,14 @@ class EntityCollection(ClientObjectCollection[T]):
         return super(EntityCollection, self).create_typed_object(
             initial_properties, resource_path
         )
+
+    def set_property(self, key, value, persist_changes=False):
+        # type: (str | int, dict, bool) -> Self
+        if key == "__deltaLinkUrl":
+            self._delta_request_url = value
+        else:
+            super(EntityCollection, self).set_property(key, value, persist_changes)
+        return self
 
     @property
     def context(self):

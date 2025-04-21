@@ -7,7 +7,7 @@ from office365.directory.extensions.extended_property import (
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.outlook.mail.messages.collection import MessageCollection
-from office365.outlook.mail.messages.rules.rule import MessageRule
+from office365.outlook.mail.messages.rules.collection import MessageRuleCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
@@ -116,13 +116,12 @@ class MailFolder(Entity):
 
     @property
     def message_rules(self):
-        # type: () -> EntityCollection[MessageRule]
+        # type: () -> MessageRuleCollection
         """"""
         return self.properties.get(
             "messageRules",
-            EntityCollection(
+            MessageRuleCollection(
                 self.context,
-                MessageRule,
                 ResourcePath("messageRules", self.resource_path),
             ),
         )

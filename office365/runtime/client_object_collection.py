@@ -234,7 +234,7 @@ class ClientObjectCollection(ClientObject, Generic[T]):
     @property
     def has_next(self):
         # type: () -> bool
-        """"""
+        """Determines whether the collection contains a next page of data."""
         return self._next_request_url is not None
 
     @property

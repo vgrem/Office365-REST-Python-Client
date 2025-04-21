@@ -961,6 +961,7 @@ class Web(SecurableObject):
         return return_type
 
     def get_file_by_server_relative_url(self, server_relative_url):
+        # type: (str) -> File
         """
         Returns the file object located at the specified server-relative URL, for example:
             - "/sites/MySite/Shared Documents/MyDocument.docx"
@@ -978,6 +979,7 @@ class Web(SecurableObject):
         )
 
     def get_file_by_server_relative_path(self, path):
+        # type: (str) -> File
         """Returns the file object located at the specified server-relative path, for example:
             - "/sites/MySite/Shared Documents/MyDocument.docx"
             - "Shared Documents/MyDocument.docx"
@@ -995,6 +997,7 @@ class Web(SecurableObject):
         )
 
     def get_folder_by_server_relative_url(self, url):
+        # type: (str) -> Folder
         """Returns the folder object located at the specified server-relative URL.
 
         :param str url: Specifies the server-relative URL for the folder.
@@ -1008,6 +1011,7 @@ class Web(SecurableObject):
         )
 
     def get_folder_by_server_relative_path(self, decoded_url):
+        # type: (str) -> Folder
         """Returns the folder object located at the specified server-relative URL, for example:
              - "/sites/MySite/Shared Documents"
              - "Shared Documents"

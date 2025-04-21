@@ -15,7 +15,7 @@ class TestServicePrincipal(GraphTestCase):
         super(TestServicePrincipal, cls).setUpClass()
         app_name = create_unique_name("App")
         cls.target_app = cls.client.applications.add(
-            display_name=app_name
+            displayName=app_name
         ).execute_query()
 
     @classmethod
