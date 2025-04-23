@@ -4,10 +4,9 @@ from abc import ABCMeta
 class ODataJsonFormat(object):
     """OData JSON format"""
 
-    def __init__(self, metadata_level=None, etag=None):
-        # type: (str, str) -> None
+    def __init__(self, metadata_level=None):
+        # type: (str) -> None
         self.metadata_level = metadata_level
-        self.etag = etag
 
     __metaclass__ = ABCMeta
 
@@ -21,6 +20,18 @@ class ODataJsonFormat(object):
 
     @property
     def collection_next(self):
+        raise NotImplementedError
+
+    @property
+    def collection_delta(self):
+        raise NotImplementedError
+
+    @property
+    def etag(self):
+        raise NotImplementedError
+
+    @property
+    def value_tag(self):
         raise NotImplementedError
 
     @property

@@ -41,7 +41,7 @@ class TestExcelWorksheets(GraphTestCase):
 
     def test4_protect_worksheet(self):
         ws = self.__class__.worksheet
-        options = WorkbookWorksheetProtectionOptions(allowDeleteRows=False)
+        options = WorkbookWorksheetProtectionOptions(allow_delete_rows=False)
         ws.protection.protect(options).execute_query()
         result = ws.protection.get().execute_query()
         self.assertFalse(result.options.allowDeleteRows)

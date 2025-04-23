@@ -121,6 +121,12 @@ class WorkbookRange(Entity):
         return self.properties.get("columnIndex", None)
 
     @property
+    def row_index(self):
+        # type: () -> Optional[int]
+        """Returns the row number of the first cell in the range. Zero-indexed. Read-only."""
+        return self.properties.get("rowIndex", None)
+
+    @property
     def format(self):
         """Returns a format object, encapsulating the range's font, fill, borders, alignment, and other properties"""
         return self.properties.get(

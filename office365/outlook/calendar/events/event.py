@@ -78,6 +78,16 @@ class Event(OutlookItem):
         self.context.add_query(qry)
         return self
 
+    def permanent_delete(self):
+        """
+        Permanently delete an event and place it in the purges folder in the dumpster in the user's mailbox.
+        Email clients such as outlook or outlook on the web can't access permanently deleted items.
+        Unless there's a hold set on the mailbox, the items are permanently deleted after a set period of time.
+        """
+        qry = ServiceOperationQuery(self, "permanentDelete")
+        self.context.add_query(qry)
+        return self
+
     @property
     def allow_new_time_proposals(self):
         # type: () -> Optional[bool]
@@ -125,6 +135,53 @@ class Event(OutlookItem):
         start and end time must be set to midnight and be in the same time zone.
         """
         return self.properties.get("isAllDay", None)
+
+    @property
+    def is_cancelled(self):
+        # type: () -> Optional[bool]
+        """
+        Set to true if the event has been canceled.
+        """
+        return self.properties.get("isCancelled", None)
+
+    @property
+    def is_draft(self):
+        # type: () -> Optional[bool]
+        """
+        Set to true if the user has updated the meeting in Outlook but hasn't sent the updates to attendees.
+        Set to false if all changes are sent, or if the event is an appointment without any attendees.
+        """
+        return self.properties.get("isDraft", None)
+
+    @property
+    def is_online_meeting(self):
+        # type: () -> Optional[bool]
+        """
+        True if this event has online meeting information
+        (that is, onlineMeeting points to an onlineMeetingInfo resource), false otherwise.
+        Default is false (onlineMeeting is null). Optional.
+        After you set isOnlineMeeting to true, Microsoft Graph initializes onlineMeeting.
+        Subsequently, Outlook ignores any further changes to isOnlineMeeting, and the meeting remains available online.
+        """
+        return self.properties.get("isOnlineMeeting", None)
+
+    @property
+    def is_organizer(self):
+        # type: () -> Optional[bool]
+        """
+        Set to true if the calendar owner (specified by the owner property of the calendar) is the organizer of
+        the event (specified by the organizer property of the event). It also applies if a delegate organized the
+        event on behalf of the owner.
+        """
+        return self.properties.get("isOrganizer", None)
+
+    @property
+    def is_reminder_on(self):
+        # type: () -> Optional[bool]
+        """
+        Set to true if an alert is set to remind the user of the event.
+        """
+        return self.properties.get("isReminderOn", None)
 
     @property
     def start(self):

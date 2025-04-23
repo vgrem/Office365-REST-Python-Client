@@ -155,5 +155,3 @@ class ODataRequest(ClientRequest):
         media_type = self.json_format.media_type
         request.ensure_header("Content-Type", media_type)
         request.ensure_header("Accept", media_type)
-        if self.json_format.etag is not None:
-            request.ensure_header("If-Match", self.json_format.etag)

@@ -49,6 +49,6 @@ class TestDrive(GraphTestCase):
         result = self.client.me.drive.root.delta.get().execute_query()
         self.assertIsNotNone(result.resource_path)
 
-    #def test8_get_delta_link(self):
+    # def test8_get_delta_link(self):
     #    result = self.client.me.drive.root.delta.token("latest").get().execute_query()
     #    self.assertIsNotNone(result.resource_path)

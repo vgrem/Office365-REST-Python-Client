@@ -21023,7 +21023,9 @@
             <EntitySet Name="DocumentsItems" EntityType="SP.Data.DocumentsItem"/>
             <EntitySet Name="EnterpriseContentTypesUsageListItems" EntityType="SP.Data.EnterpriseContentTypesUsageListItem"/>
             <EntitySet Name="FormServerTemplatesItems" EntityType="SP.Data.FormServerTemplatesItem"/>
+            <EntitySet Name="LibHPV3ROCWItems" EntityType="SP.Data.LibHPV3ROCWItem"/>
             <EntitySet Name="LibKEEOE9G9Items" EntityType="SP.Data.LibKEEOE9G9Item"/>
+            <EntitySet Name="LibUMVSZ0U4Items" EntityType="SP.Data.LibUMVSZ0U4Item"/>
             <EntitySet Name="OData__x005f_catalogs_x002f_ltItems" EntityType="SP.Data.OData__x005f_catalogs_x002f_ltItem"/>
             <EntitySet Name="OData__x005f_catalogs_x002f_MaintenanceLogsItems" EntityType="SP.Data.OData__x005f_catalogs_x002f_MaintenanceLogsItem"/>
             <EntitySet Name="OData__x005f_catalogs_x002f_masterpageItems" EntityType="SP.Data.OData__x005f_catalogs_x002f_masterpageItem"/>
@@ -21172,6 +21174,18 @@
                <End Role="CheckoutUserPartner" EntitySet="FormServerTemplatesItems"/>
                <End Role="CheckoutUser" EntitySet="UserInfoItems"/>
             </AssociationSet>
+            <AssociationSet Name="SP_Data_LibHPV3ROCWItem_Author_SP_Data_UserInfoItem_AuthorPartnerSet" Association="SP.Data.SP_Data_LibHPV3ROCWItem_Author_SP_Data_UserInfoItem_AuthorPartner">
+               <End Role="AuthorPartner" EntitySet="LibHPV3ROCWItems"/>
+               <End Role="Author" EntitySet="UserInfoItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_LibHPV3ROCWItem_Editor_SP_Data_UserInfoItem_EditorPartnerSet" Association="SP.Data.SP_Data_LibHPV3ROCWItem_Editor_SP_Data_UserInfoItem_EditorPartner">
+               <End Role="EditorPartner" EntitySet="LibHPV3ROCWItems"/>
+               <End Role="Editor" EntitySet="UserInfoItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_LibHPV3ROCWItem_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartnerSet" Association="SP.Data.SP_Data_LibHPV3ROCWItem_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner">
+               <End Role="CheckoutUserPartner" EntitySet="LibHPV3ROCWItems"/>
+               <End Role="CheckoutUser" EntitySet="UserInfoItems"/>
+            </AssociationSet>
             <AssociationSet Name="SP_Data_LibKEEOE9G9Item_Author_SP_Data_UserInfoItem_AuthorPartnerSet" Association="SP.Data.SP_Data_LibKEEOE9G9Item_Author_SP_Data_UserInfoItem_AuthorPartner">
                <End Role="AuthorPartner" EntitySet="LibKEEOE9G9Items"/>
                <End Role="Author" EntitySet="UserInfoItems"/>
@@ -21182,6 +21196,18 @@
             </AssociationSet>
             <AssociationSet Name="SP_Data_LibKEEOE9G9Item_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartnerSet" Association="SP.Data.SP_Data_LibKEEOE9G9Item_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner">
                <End Role="CheckoutUserPartner" EntitySet="LibKEEOE9G9Items"/>
+               <End Role="CheckoutUser" EntitySet="UserInfoItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_LibUMVSZ0U4Item_Author_SP_Data_UserInfoItem_AuthorPartnerSet" Association="SP.Data.SP_Data_LibUMVSZ0U4Item_Author_SP_Data_UserInfoItem_AuthorPartner">
+               <End Role="AuthorPartner" EntitySet="LibUMVSZ0U4Items"/>
+               <End Role="Author" EntitySet="UserInfoItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_LibUMVSZ0U4Item_Editor_SP_Data_UserInfoItem_EditorPartnerSet" Association="SP.Data.SP_Data_LibUMVSZ0U4Item_Editor_SP_Data_UserInfoItem_EditorPartner">
+               <End Role="EditorPartner" EntitySet="LibUMVSZ0U4Items"/>
+               <End Role="Editor" EntitySet="UserInfoItems"/>
+            </AssociationSet>
+            <AssociationSet Name="SP_Data_LibUMVSZ0U4Item_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartnerSet" Association="SP.Data.SP_Data_LibUMVSZ0U4Item_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner">
+               <End Role="CheckoutUserPartner" EntitySet="LibUMVSZ0U4Items"/>
                <End Role="CheckoutUser" EntitySet="UserInfoItems"/>
             </AssociationSet>
             <AssociationSet Name="SP_Data_OData____x005f__catalogs__x002f__ltItem_Author_SP_Data_UserInfoItem_AuthorPartnerSet" Association="SP.Data.SP_Data_OData____x005f__catalogs__x002f__ltItem_Author_SP_Data_UserInfoItem_AuthorPartner">
@@ -44114,6 +44140,87 @@
             <NavigationProperty Name="Editor" Relationship="SP.Data.SP_Data_FormServerTemplatesItem_Editor_SP_Data_UserInfoItem_EditorPartner" ToRole="Editor" FromRole="EditorPartner"/>
             <NavigationProperty Name="CheckoutUser" Relationship="SP.Data.SP_Data_FormServerTemplatesItem_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner" ToRole="CheckoutUser" FromRole="CheckoutUserPartner"/>
          </EntityType>
+         <EntityType Name="LibHPV3ROCWItem" BaseType="SP.ListItem">
+            <Property Name="ID" Type="Edm.Int32"/>
+            <Property Name="ContentTypeId" Type="Edm.String"/>
+            <Property Name="Created" Type="Edm.DateTime"/>
+            <Property Name="AuthorId" Type="Edm.Int32"/>
+            <Property Name="Modified" Type="Edm.DateTime"/>
+            <Property Name="EditorId" Type="Edm.Int32"/>
+            <Property Name="OData__HasCopyDestinations" Type="Edm.Boolean"/>
+            <Property Name="OData__CopySource" Type="Edm.String"/>
+            <Property Name="OData__ModerationStatus" Type="Edm.Int32"/>
+            <Property Name="OData__ModerationComments" Type="Edm.String"/>
+            <Property Name="FileRef" Type="Edm.String"/>
+            <Property Name="FileDirRef" Type="Edm.String"/>
+            <Property Name="Last_x0020_Modified" Type="Edm.DateTime"/>
+            <Property Name="Created_x0020_Date" Type="Edm.DateTime"/>
+            <Property Name="FSObjType" Type="Edm.Int32"/>
+            <Property Name="PermMask" Type="Edm.String"/>
+            <Property Name="PrincipalCount" Type="Edm.String"/>
+            <Property Name="CheckoutUserId" Type="Edm.Int32"/>
+            <Property Name="FileLeafRef" Type="Edm.String"/>
+            <Property Name="UniqueId" Type="Edm.Guid"/>
+            <Property Name="OData__CheckinComment" Type="Edm.String"/>
+            <Property Name="LinkCheckedOutTitle" Type="Edm.String"/>
+            <Property Name="Modified_x0020_By" Type="Edm.String"/>
+            <Property Name="Created_x0020_By" Type="Edm.String"/>
+            <Property Name="File_x0020_Type" Type="Edm.String"/>
+            <Property Name="HTML_x0020_File_x0020_Type" Type="Edm.String"/>
+            <Property Name="OData__SourceUrl" Type="Edm.String"/>
+            <Property Name="OData__SharedFileIndex" Type="Edm.String"/>
+            <Property Name="OData__EditMenuTableStart" Type="Edm.String"/>
+            <Property Name="OData__EditMenuTableStart2" Type="Edm.String"/>
+            <Property Name="OData__EditMenuTableEnd" Type="Edm.String"/>
+            <Property Name="LinkFilenameNoMenu" Type="Edm.String"/>
+            <Property Name="LinkFilename" Type="Edm.String"/>
+            <Property Name="LinkFilename2" Type="Edm.String"/>
+            <Property Name="DocIcon" Type="Edm.String"/>
+            <Property Name="ServerUrl" Type="Edm.String"/>
+            <Property Name="EncodedAbsUrl" Type="Edm.String"/>
+            <Property Name="BaseName" Type="Edm.String"/>
+            <Property Name="FileSizeDisplay" Type="Edm.String"/>
+            <Property Name="OData__Level" Type="Edm.Int32"/>
+            <Property Name="OData__IsCurrentVersion" Type="Edm.Boolean"/>
+            <Property Name="OData__IsRecord" Type="Edm.String"/>
+            <Property Name="OData__DisplayName" Type="Edm.String"/>
+            <Property Name="OData__ColorHex" Type="Edm.String"/>
+            <Property Name="OData__ColorTag" Type="Edm.String"/>
+            <Property Name="OData__Emoji" Type="Edm.String"/>
+            <Property Name="MediaGeneratedMetadata" Type="Edm.String"/>
+            <Property Name="MediaUserMetadata" Type="Edm.String"/>
+            <Property Name="AppAuthorId" Type="Edm.Int32"/>
+            <Property Name="AppEditorId" Type="Edm.Int32"/>
+            <Property Name="SelectTitle" Type="Edm.String"/>
+            <Property Name="SelectFilename" Type="Edm.String"/>
+            <Property Name="Edit" Type="Edm.String"/>
+            <Property Name="owshiddenversion" Type="Edm.Int32"/>
+            <Property Name="OData__UIVersion" Type="Edm.Int32"/>
+            <Property Name="OData__UIVersionString" Type="Edm.String"/>
+            <Property Name="InstanceID" Type="Edm.Int32"/>
+            <Property Name="Order" Type="Edm.Double"/>
+            <Property Name="GUID" Type="Edm.Guid"/>
+            <Property Name="WorkflowVersion" Type="Edm.Int32"/>
+            <Property Name="WorkflowInstanceID" Type="Edm.Guid"/>
+            <Property Name="ComplianceAssetId" Type="Edm.String"/>
+            <Property Name="Title" Type="Edm.String"/>
+            <Property Name="TemplateUrl" Type="Edm.String"/>
+            <Property Name="xd_ProgID" Type="Edm.String"/>
+            <Property Name="xd_Signature" Type="Edm.Boolean"/>
+            <Property Name="Combine" Type="Edm.String"/>
+            <Property Name="RepairDocument" Type="Edm.String"/>
+            <Property Name="PolicyDisabledUICapabilities" Type="Edm.String"/>
+            <Property Name="OData__EffectiveIpLabelDisplayName" Type="Edm.String"/>
+            <Property Name="OData__ShortcutUrl" Type="SP.FieldUrlValue"/>
+            <Property Name="OData__ShortcutSiteId" Type="Edm.Guid"/>
+            <Property Name="OData__ShortcutWebId" Type="Edm.Guid"/>
+            <Property Name="OData__ShortcutUniqueId" Type="Edm.Guid"/>
+            <Property Name="OData__ExtendedDescription" Type="Edm.String"/>
+            <Property Name="TriggerFlowInfo" Type="Edm.String"/>
+            <NavigationProperty Name="Author" Relationship="SP.Data.SP_Data_LibHPV3ROCWItem_Author_SP_Data_UserInfoItem_AuthorPartner" ToRole="Author" FromRole="AuthorPartner"/>
+            <NavigationProperty Name="Editor" Relationship="SP.Data.SP_Data_LibHPV3ROCWItem_Editor_SP_Data_UserInfoItem_EditorPartner" ToRole="Editor" FromRole="EditorPartner"/>
+            <NavigationProperty Name="CheckoutUser" Relationship="SP.Data.SP_Data_LibHPV3ROCWItem_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner" ToRole="CheckoutUser" FromRole="CheckoutUserPartner"/>
+         </EntityType>
          <EntityType Name="LibKEEOE9G9Item" BaseType="SP.ListItem">
             <Property Name="ID" Type="Edm.Int32"/>
             <Property Name="ContentTypeId" Type="Edm.String"/>
@@ -44194,6 +44301,94 @@
             <NavigationProperty Name="Author" Relationship="SP.Data.SP_Data_LibKEEOE9G9Item_Author_SP_Data_UserInfoItem_AuthorPartner" ToRole="Author" FromRole="AuthorPartner"/>
             <NavigationProperty Name="Editor" Relationship="SP.Data.SP_Data_LibKEEOE9G9Item_Editor_SP_Data_UserInfoItem_EditorPartner" ToRole="Editor" FromRole="EditorPartner"/>
             <NavigationProperty Name="CheckoutUser" Relationship="SP.Data.SP_Data_LibKEEOE9G9Item_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner" ToRole="CheckoutUser" FromRole="CheckoutUserPartner"/>
+         </EntityType>
+         <EntityType Name="LibUMVSZ0U4Item" BaseType="SP.ListItem">
+            <Property Name="ContentTypeId" Type="Edm.String"/>
+            <Property Name="OData__ModerationComments" Type="Edm.String"/>
+            <Property Name="FileLeafRef" Type="Edm.String"/>
+            <Property Name="Modified_x0020_By" Type="Edm.String"/>
+            <Property Name="Created_x0020_By" Type="Edm.String"/>
+            <Property Name="File_x0020_Type" Type="Edm.String"/>
+            <Property Name="HTML_x0020_File_x0020_Type" Type="Edm.String"/>
+            <Property Name="OData__SourceUrl" Type="Edm.String"/>
+            <Property Name="OData__SharedFileIndex" Type="Edm.String"/>
+            <Property Name="OData__ColorHex" Type="Edm.String"/>
+            <Property Name="OData__ColorTag" Type="Edm.String"/>
+            <Property Name="OData__Emoji" Type="Edm.String"/>
+            <Property Name="MediaGeneratedMetadata" Type="Edm.String"/>
+            <Property Name="MediaUserMetadata" Type="Edm.String"/>
+            <Property Name="ComplianceAssetId" Type="Edm.String"/>
+            <Property Name="Title" Type="Edm.String"/>
+            <Property Name="TemplateUrl" Type="Edm.String"/>
+            <Property Name="xd_ProgID" Type="Edm.String"/>
+            <Property Name="xd_Signature" Type="Edm.Boolean"/>
+            <Property Name="OData__EffectiveIpLabelDisplayName" Type="Edm.String"/>
+            <Property Name="OData__ShortcutUrl" Type="SP.FieldUrlValue"/>
+            <Property Name="OData__ShortcutSiteId" Type="Edm.Guid"/>
+            <Property Name="OData__ShortcutWebId" Type="Edm.Guid"/>
+            <Property Name="OData__ShortcutUniqueId" Type="Edm.Guid"/>
+            <Property Name="OData__ExtendedDescription" Type="Edm.String"/>
+            <Property Name="TriggerFlowInfo" Type="Edm.String"/>
+            <Property Name="MediaServiceMetadata" Type="Edm.String"/>
+            <Property Name="MediaServiceFastMetadata" Type="Edm.String"/>
+            <Property Name="MediaServiceSearchProperties" Type="Edm.String"/>
+            <Property Name="MediaServiceDateTaken" Type="Edm.String"/>
+            <Property Name="MediaServiceGenerationTime" Type="Edm.String"/>
+            <Property Name="MediaServiceEventHashCode" Type="Edm.String"/>
+            <Property Name="MediaLengthInSeconds" Type="Edm.Int32"/>
+            <Property Name="ID" Type="Edm.Int32"/>
+            <Property Name="Created" Type="Edm.DateTime"/>
+            <Property Name="AuthorId" Type="Edm.Int32"/>
+            <Property Name="Modified" Type="Edm.DateTime"/>
+            <Property Name="EditorId" Type="Edm.Int32"/>
+            <Property Name="OData__HasCopyDestinations" Type="Edm.Boolean"/>
+            <Property Name="OData__CopySource" Type="Edm.String"/>
+            <Property Name="OData__ModerationStatus" Type="Edm.Int32"/>
+            <Property Name="FileRef" Type="Edm.String"/>
+            <Property Name="FileDirRef" Type="Edm.String"/>
+            <Property Name="Last_x0020_Modified" Type="Edm.DateTime"/>
+            <Property Name="Created_x0020_Date" Type="Edm.DateTime"/>
+            <Property Name="FSObjType" Type="Edm.Int32"/>
+            <Property Name="PermMask" Type="Edm.String"/>
+            <Property Name="PrincipalCount" Type="Edm.String"/>
+            <Property Name="CheckoutUserId" Type="Edm.Int32"/>
+            <Property Name="UniqueId" Type="Edm.Guid"/>
+            <Property Name="OData__CheckinComment" Type="Edm.String"/>
+            <Property Name="LinkCheckedOutTitle" Type="Edm.String"/>
+            <Property Name="OData__EditMenuTableStart" Type="Edm.String"/>
+            <Property Name="OData__EditMenuTableStart2" Type="Edm.String"/>
+            <Property Name="OData__EditMenuTableEnd" Type="Edm.String"/>
+            <Property Name="LinkFilenameNoMenu" Type="Edm.String"/>
+            <Property Name="LinkFilename" Type="Edm.String"/>
+            <Property Name="LinkFilename2" Type="Edm.String"/>
+            <Property Name="DocIcon" Type="Edm.String"/>
+            <Property Name="ServerUrl" Type="Edm.String"/>
+            <Property Name="EncodedAbsUrl" Type="Edm.String"/>
+            <Property Name="BaseName" Type="Edm.String"/>
+            <Property Name="FileSizeDisplay" Type="Edm.String"/>
+            <Property Name="OData__Level" Type="Edm.Int32"/>
+            <Property Name="OData__IsCurrentVersion" Type="Edm.Boolean"/>
+            <Property Name="OData__IsRecord" Type="Edm.String"/>
+            <Property Name="OData__DisplayName" Type="Edm.String"/>
+            <Property Name="AppAuthorId" Type="Edm.Int32"/>
+            <Property Name="AppEditorId" Type="Edm.Int32"/>
+            <Property Name="SelectTitle" Type="Edm.String"/>
+            <Property Name="SelectFilename" Type="Edm.String"/>
+            <Property Name="Edit" Type="Edm.String"/>
+            <Property Name="owshiddenversion" Type="Edm.Int32"/>
+            <Property Name="OData__UIVersion" Type="Edm.Int32"/>
+            <Property Name="OData__UIVersionString" Type="Edm.String"/>
+            <Property Name="InstanceID" Type="Edm.Int32"/>
+            <Property Name="Order" Type="Edm.Double"/>
+            <Property Name="GUID" Type="Edm.Guid"/>
+            <Property Name="WorkflowVersion" Type="Edm.Int32"/>
+            <Property Name="WorkflowInstanceID" Type="Edm.Guid"/>
+            <Property Name="Combine" Type="Edm.String"/>
+            <Property Name="RepairDocument" Type="Edm.String"/>
+            <Property Name="PolicyDisabledUICapabilities" Type="Edm.String"/>
+            <NavigationProperty Name="Author" Relationship="SP.Data.SP_Data_LibUMVSZ0U4Item_Author_SP_Data_UserInfoItem_AuthorPartner" ToRole="Author" FromRole="AuthorPartner"/>
+            <NavigationProperty Name="Editor" Relationship="SP.Data.SP_Data_LibUMVSZ0U4Item_Editor_SP_Data_UserInfoItem_EditorPartner" ToRole="Editor" FromRole="EditorPartner"/>
+            <NavigationProperty Name="CheckoutUser" Relationship="SP.Data.SP_Data_LibUMVSZ0U4Item_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner" ToRole="CheckoutUser" FromRole="CheckoutUserPartner"/>
          </EntityType>
          <EntityType Name="OData__x005f_catalogs_x002f_ltItem" BaseType="SP.ListItem">
             <Property Name="ID" Type="Edm.Int32"/>
@@ -45928,6 +46123,18 @@
             <End Type="SP.Data.UserInfoItem" Role="CheckoutUser" Multiplicity="0..1"/>
             <End Type="SP.Data.FormServerTemplatesItem" Role="CheckoutUserPartner" Multiplicity="0..1"/>
          </Association>
+         <Association Name="SP_Data_LibHPV3ROCWItem_Author_SP_Data_UserInfoItem_AuthorPartner">
+            <End Type="SP.Data.UserInfoItem" Role="Author" Multiplicity="0..1"/>
+            <End Type="SP.Data.LibHPV3ROCWItem" Role="AuthorPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_LibHPV3ROCWItem_Editor_SP_Data_UserInfoItem_EditorPartner">
+            <End Type="SP.Data.UserInfoItem" Role="Editor" Multiplicity="0..1"/>
+            <End Type="SP.Data.LibHPV3ROCWItem" Role="EditorPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_LibHPV3ROCWItem_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner">
+            <End Type="SP.Data.UserInfoItem" Role="CheckoutUser" Multiplicity="0..1"/>
+            <End Type="SP.Data.LibHPV3ROCWItem" Role="CheckoutUserPartner" Multiplicity="0..1"/>
+         </Association>
          <Association Name="SP_Data_LibKEEOE9G9Item_Author_SP_Data_UserInfoItem_AuthorPartner">
             <End Type="SP.Data.UserInfoItem" Role="Author" Multiplicity="0..1"/>
             <End Type="SP.Data.LibKEEOE9G9Item" Role="AuthorPartner" Multiplicity="0..1"/>
@@ -45939,6 +46146,18 @@
          <Association Name="SP_Data_LibKEEOE9G9Item_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner">
             <End Type="SP.Data.UserInfoItem" Role="CheckoutUser" Multiplicity="0..1"/>
             <End Type="SP.Data.LibKEEOE9G9Item" Role="CheckoutUserPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_LibUMVSZ0U4Item_Author_SP_Data_UserInfoItem_AuthorPartner">
+            <End Type="SP.Data.UserInfoItem" Role="Author" Multiplicity="0..1"/>
+            <End Type="SP.Data.LibUMVSZ0U4Item" Role="AuthorPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_LibUMVSZ0U4Item_Editor_SP_Data_UserInfoItem_EditorPartner">
+            <End Type="SP.Data.UserInfoItem" Role="Editor" Multiplicity="0..1"/>
+            <End Type="SP.Data.LibUMVSZ0U4Item" Role="EditorPartner" Multiplicity="0..1"/>
+         </Association>
+         <Association Name="SP_Data_LibUMVSZ0U4Item_CheckoutUser_SP_Data_UserInfoItem_CheckoutUserPartner">
+            <End Type="SP.Data.UserInfoItem" Role="CheckoutUser" Multiplicity="0..1"/>
+            <End Type="SP.Data.LibUMVSZ0U4Item" Role="CheckoutUserPartner" Multiplicity="0..1"/>
          </Association>
          <Association Name="SP_Data_OData____x005f__catalogs__x002f__ltItem_Author_SP_Data_UserInfoItem_AuthorPartner">
             <End Type="SP.Data.UserInfoItem" Role="Author" Multiplicity="0..1"/>

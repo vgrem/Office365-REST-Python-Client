@@ -26,8 +26,22 @@ class JsonLightFormat(ODataJsonFormat):
         return "__next"
 
     @property
+    def collection_delta(self):
+        """Property name for a reference to the next page of results"""
+        return "__delta"
+
+    @property
     def metadata_type(self):
         return "__metadata"
+
+    @property
+    def value_tag(self):
+        return "__value"
+
+    @property
+    def etag(self):
+        """The entity tag that represents the version of the object."""
+        return "__etag"
 
     @property
     def media_type(self):

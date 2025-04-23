@@ -14,7 +14,13 @@ class V4JsonFormat(ODataJsonFormat):
 
     @property
     def metadata_type(self):
+        """The OData entity type in Microsoft Graph that describes the represented object."""
         return "@odata.type"
+
+    @property
+    def value_tag(self):
+        """The OData entity type in Microsoft Graph that describes the represented object."""
+        return "@odata.value"
 
     @property
     def collection(self):
@@ -22,7 +28,20 @@ class V4JsonFormat(ODataJsonFormat):
 
     @property
     def collection_next(self):
+        """
+        Property name for a reference to the next page of results
+        """
         return "@odata.nextLink"
+
+    @property
+    def collection_delta(self):
+        """ """
+        return "@odata.deltaLink"
+
+    @property
+    def etag(self):
+        """The entity tag that represents the version of the object."""
+        return "@odata.etag"
 
     @property
     def media_type(self):
