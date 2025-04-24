@@ -3,7 +3,10 @@ from typing import TYPE_CHECKING
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.paths.v3.entity import EntityPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.attachments.collection import AttachmentCollection
@@ -396,9 +399,16 @@ class ListItem(SecurableObject):
 
     def get_comments(self):
         """Retrieve ListItem comments"""
-        return_type = CommentCollection(self.context)
+        return_type = CommentCollection(
+            self.context, ServiceOperationPath("GetComments", [], self.resource_path)
+        )
         qry = ServiceOperationQuery(self, "GetComments", [], None, None, return_type)
-        self.context.add_query(qry)
+
+        def _create_request(request):
+            # type: (RequestOptions) -> None
+            request.method = HttpMethod.Get
+
+        self.context.add_query(qry).before_query_execute(_create_request)
         return return_type
 
     def override_policy_tip(self, user_action, justification):
@@ -496,6 +506,17 @@ class ListItem(SecurableObject):
         return self.properties.get("EffectiveBasePermissions", BasePermissions())
 
     @property
+    def effective_base_permissions_for_ui(self):
+        """Specifies the effective base permissions for the current user, as they SHOULD be displayed in the user
+        interface (UI). If the list is not in read-only UI mode, the value of EffectiveBasePermissionsForUI
+        MUST be the same as the value of EffectiveBasePermissions (section 3.2.5.87.1.1.2).
+        If the list is in read-only UI mode, the value of EffectiveBasePermissionsForUI MUST be a subset of the
+        value of EffectiveBasePermissions."""
+        from office365.sharepoint.permissions.base_permissions import BasePermissions
+
+        return self.properties.get("EffectiveBasePermissionsForUI", BasePermissions())
+
+    @property
     def field_values(self):
         # type: () -> Optional[dict]
         """Gets a collection of key/value pairs containing the names and values for the fields of the list item."""
@@ -514,10 +535,39 @@ class ListItem(SecurableObject):
         return self.properties.get("FileSystemObjectType", None)
 
     @property
+    def icon_overlay(self):
+        # type: () -> Optional[str]
+        """This is an overlay icon for the item. If the parent list of the item does not already have the IconOverlay
+        field and The user setting the property does not have rights to add the field to the list then the property
+        will not be set for the item."""
+        return self.properties.get("IconOverlay", None)
+
+    @property
     def id(self):
         # type: () -> Optional[int]
         """Gets a value that specifies the list item identifier."""
         return self.properties.get("Id", None)
+
+    @property
+    def server_redirected_embed_uri(self):
+        # type: () -> Optional[str]
+        """Returns the path for previewing a document in the browser, often in an interactive way, if
+        that feature exists."""
+        return self.properties.get("ServerRedirectedEmbedUri", None)
+
+    @property
+    def server_redirected_embed_url(self):
+        # type: () -> Optional[str]
+        """Returns the URL for previewing a document in the browser, often in an interactive way, if that feature
+        exists. This is currently used in the hovering panel of search results and document library.
+        """
+        return self.properties.get("ServerRedirectedEmbedUri", None)
+
+    @property
+    def client_title(self):
+        # type: () -> Optional[str]
+        """ """
+        return self.properties.get("Client_Title", None)
 
     @property
     def compliance_info(self):
@@ -589,6 +639,7 @@ class ListItem(SecurableObject):
                 "ComplianceInfo": self.compliance_info,
                 "OData__dlc_DocIdUrl": self.doc_id_url,
                 "EffectiveBasePermissions": self.effective_base_permissions,
+                "EffectiveBasePermissionsForUI": self.effective_base_permissions_for_ui,
                 "GetDlpPolicyTip": self.get_dlp_policy_tip,
                 "FieldValuesAsHtml": self.field_values_as_html,
                 "LikedByInformation": self.liked_by_information,

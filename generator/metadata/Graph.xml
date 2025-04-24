@@ -6845,10 +6845,19 @@
          <Annotations Target="microsoft.graph.educationRubric/lastModifiedDateTime">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
+         <Annotations Target="microsoft.graph.educationSubmission/assignmentId">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
          <Annotations Target="microsoft.graph.educationSubmission/excusedBy">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
          <Annotations Target="microsoft.graph.educationSubmission/excusedDateTime">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.educationSubmission/lastModifiedBy">
+            <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+         </Annotations>
+         <Annotations Target="microsoft.graph.educationSubmission/lastModifiedDateTime">
             <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
          </Annotations>
          <Annotations Target="microsoft.graph.educationSubmission/reassignedBy">
@@ -25916,6 +25925,19 @@ within the time frame of their original request."/>
             <Property Name="roles" Type="Collection(Edm.String)"/>
             <Property Name="shareId" Type="Edm.String"/>
          </EntityType>
+         <EntityType Name="copilotAdmin" BaseType="graph.entity">
+            <NavigationProperty Name="settings" Type="graph.copilotAdminSetting" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="copilotAdminSetting" BaseType="graph.entity">
+            <NavigationProperty Name="limitedMode" Type="graph.copilotAdminLimitedMode" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="copilotAdminLimitedMode" BaseType="graph.entity">
+            <Property Name="groupId" Type="Edm.String"/>
+            <Property Name="isEnabledForGroup" Type="Edm.Boolean"/>
+         </EntityType>
+         <EntityType Name="copilotRoot">
+            <NavigationProperty Name="admin" Type="graph.copilotAdmin" ContainsTarget="true"/>
+         </EntityType>
          <ComplexType Name="apiAuthenticationConfigurationBase" Abstract="true"/>
          <ComplexType Name="assignmentOrder">
             <Property Name="order" Type="Collection(Edm.String)"/>
@@ -27265,8 +27287,11 @@ within the time frame of their original request."/>
             <Property Name="qualities" Type="Collection(graph.rubricQuality)"/>
          </EntityType>
          <EntityType Name="educationSubmission" BaseType="graph.entity">
+            <Property Name="assignmentId" Type="Edm.String"/>
             <Property Name="excusedBy" Type="graph.identitySet"/>
             <Property Name="excusedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="reassignedBy" Type="graph.identitySet"/>
             <Property Name="reassignedDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="recipient" Type="graph.educationSubmissionRecipient"/>
@@ -34225,7 +34250,9 @@ within the time frame of their original request."/>
          <EntityType Name="attendanceRecord" BaseType="graph.entity">
             <Property Name="attendanceIntervals" Type="Collection(graph.attendanceInterval)"/>
             <Property Name="emailAddress" Type="Edm.String"/>
+            <Property Name="externalRegistrationInformation" Type="graph.virtualEventExternalRegistrationInformation"/>
             <Property Name="identity" Type="graph.identity"/>
+            <Property Name="registrationId" Type="Edm.String"/>
             <Property Name="role" Type="Edm.String"/>
             <Property Name="totalAttendanceInSeconds" Type="Edm.Int32"/>
          </EntityType>
@@ -34255,6 +34282,7 @@ within the time frame of their original request."/>
             <Property Name="participants" Type="Collection(graph.invitationParticipantInfo)" Nullable="false"/>
          </EntityType>
          <EntityType Name="meetingAttendanceReport" BaseType="graph.entity">
+            <Property Name="externalEventInformation" Type="Collection(graph.virtualEventExternalInformation)"/>
             <Property Name="meetingEndDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="meetingStartDateTime" Type="Edm.DateTimeOffset"/>
             <Property Name="totalParticipantCount" Type="Edm.Int32"/>
@@ -36426,6 +36454,10 @@ within the time frame of their original request."/>
             <Parameter Name="bindingParameter" Type="graph.educationModule"/>
             <ReturnType Type="graph.educationModule"/>
          </Action>
+         <Function Name="getRecentlyModifiedSubmissions" IsBound="true">
+            <Parameter Name="bindingParameter" Type="graph.educationClass"/>
+            <ReturnType Type="Collection(graph.educationSubmission)"/>
+         </Function>
          <Action Name="enable" IsBound="true">
             <Parameter Name="bindingParameter" Type="graph.backupRestoreRoot"/>
             <Parameter Name="appOwnerTenantId" Type="Edm.String" Nullable="false" Unicode="false"/>
@@ -41265,6 +41297,7 @@ within the time frame of their original request."/>
                <NavigationPropertyBinding Path="threatIntelligence/hostSslCertificates/sslCertificate" Target="security/microsoft.graph.security.threatIntelligence/threatIntelligence/sslCertificates"/>
             </Singleton>
             <Singleton Name="compliance" Type="microsoft.graph.compliance"/>
+            <Singleton Name="copilot" Type="microsoft.graph.copilotRoot"/>
             <Singleton Name="identity" Type="microsoft.graph.identityContainer"/>
             <Singleton Name="directory" Type="microsoft.graph.directory">
                <NavigationPropertyBinding Path="administrativeUnits/members" Target="directoryObjects"/>

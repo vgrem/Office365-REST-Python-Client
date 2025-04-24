@@ -14,6 +14,7 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 class TestSharePointListItem(SPTestCase):
     target_list = None  # type: List
     target_item = None  # type: ListItem
+    deleted_item_guid = None # type: str
 
     @classmethod
     def setUpClass(cls):
@@ -115,15 +116,22 @@ class TestSharePointListItem(SPTestCase):
         ).execute_query()
         self.assertIsNotNone(comments.resource_path)
 
-    # def test_10_get_comments(self):
-    #    comments = self.__class__.target_item.get_comments().execute_query()
-    #    self.assertIsNotNone(comments.resource_path)
+    def test_10_get_comments(self):
+        comments = self.__class__.target_item.get_comments().execute_query()
+        self.assertIsNotNone(comments.resource_path)
 
     def test_14_recycle_item(self):
-        pass
+        item_to_recycle = self.__class__.target_item
+        result = item_to_recycle.recycle().execute_query()
+        self.assertIsNotNone(result.value)
+        self.__class__.deleted_item_guid = result.value
 
     def test_15_restore_item(self):
-        pass
+        recycle_item = self.client.web.recycle_bin.get_by_id(
+            self.__class__.deleted_item_guid
+        )
+        recycle_item.restore().execute_query()
+        self.assertIsNotNone(recycle_item.resource_path)
 
     def test_16_set_rating(self):
         result = self.__class__.target_item.set_rating(1).execute_query()
