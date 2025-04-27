@@ -35,6 +35,10 @@ class JsonLightFormat(ODataJsonFormat):
         return "__metadata"
 
     @property
+    def deferred_type(self):
+        return "__deferred"
+
+    @property
     def value_tag(self):
         return "__value"
 

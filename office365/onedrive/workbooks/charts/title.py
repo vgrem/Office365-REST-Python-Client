@@ -8,7 +8,7 @@ class WorkbookChartTitle(Entity):
 
     @property
     def format(self):
-        """	The formatting of a chart title, which includes fill and font formatting."""
+        """The formatting of a chart title, which includes fill and font formatting."""
         return self.properties.get(
             "format",
             WorkbookChartTitleFormat(

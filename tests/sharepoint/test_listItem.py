@@ -14,7 +14,7 @@ from tests.sharepoint.sharepoint_case import SPTestCase
 class TestSharePointListItem(SPTestCase):
     target_list = None  # type: List
     target_item = None  # type: ListItem
-    deleted_item_guid = None # type: str
+    deleted_item_guid = None  # type: str
 
     @classmethod
     def setUpClass(cls):

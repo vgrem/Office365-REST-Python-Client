@@ -97,6 +97,33 @@ class RegionalSettings(Entity):
         return self.properties.get("FirstWeekOfYear", None)
 
     @property
+    def is_east_asia(self):
+        # type: () -> Optional[bool]
+        """Returns "true" if the web locale is an East Asia locale; "false" otherwise."""
+        return self.properties.get("IsEastAsia", None)
+
+    @property
+    def is_right_to_left(self):
+        # type: () -> Optional[bool]
+        """Specifies whether the site uses a right-to-left language. If it uses a right-to-left language,
+        this value MUST be "true". Otherwise, this value MUST be "false"."""
+        return self.properties.get("IsRightToLeft", None)
+
+    @property
+    def is_ui_right_to_left(self):
+        # type: () -> Optional[bool]
+        """Specifies whether the UI of the site (2) uses a right-to-left language. If it uses a right-to-left language,
+        this value MUST be "true". Otherwise, this value MUST be "false"."""
+        return self.properties.get("IsUIRightToLeft", None)
+
+    @property
+    def list_separator(self):
+        # type: () -> Optional[str]
+        """Specifies the separator that is used for lists on the server. For example, if the separator is ",",
+        items in a list will appear as "1,2,3,4"."""
+        return self.properties.get("ListSeparator", None)
+
+    @property
     def locale_id(self):
         # type: () -> Optional[int]
         """Gets the locale identifier in use on the server."""

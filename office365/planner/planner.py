@@ -2,7 +2,7 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.planner.buckets.bucket import PlannerBucket
 from office365.planner.plans.collection import PlannerPlanCollection
-from office365.planner.tasks.task import PlannerTask
+from office365.planner.tasks.collection import PlannerTaskCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 
@@ -25,12 +25,12 @@ class Planner(Entity):
 
     @property
     def tasks(self):
-        # type: () -> EntityCollection[PlannerTask]
+        # type: () -> PlannerTaskCollection
         """Returns the plannerTasks assigned to the user."""
         return self.properties.get(
             "tasks",
-            EntityCollection(
-                self.context, PlannerTask, ResourcePath("tasks", self.resource_path)
+            PlannerTaskCollection(
+                self.context, ResourcePath("tasks", self.resource_path)
             ),
         )
 

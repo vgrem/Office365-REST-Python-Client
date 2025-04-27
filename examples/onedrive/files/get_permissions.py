@@ -14,4 +14,4 @@ file_path = "Archive/Financial Sample.xlsx"
 file_item = client.me.drive.root.get_by_path(file_path)
 permissions = file_item.permissions.get().execute_query()
 for perm in permissions:
-   print(perm.granted_to_v2)
+    print(perm.granted_to_v2)

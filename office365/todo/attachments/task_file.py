@@ -1,3 +1,5 @@
+from typing import AnyStr, Optional
+
 from office365.todo.attachments.base import AttachmentBase
 
 
@@ -10,5 +12,6 @@ class TaskFileAttachment(AttachmentBase):
 
     @property
     def content_bytes(self):
+        # type: () -> Optional[AnyStr]
         """The base64-encoded contents of the file."""
         return self.properties.get("contentBytes", None)

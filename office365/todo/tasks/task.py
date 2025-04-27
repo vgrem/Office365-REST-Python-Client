@@ -1,13 +1,44 @@
+from typing import Optional
+
 from office365.directory.extensions.extension import Extension
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.outlook.mail.item_body import ItemBody
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.todo.attachments.base import AttachmentBase
 from office365.todo.checklist_item import ChecklistItem
 from office365.todo.linked_resource import LinkedResource
 
 
 class TodoTask(Entity):
     """A todoTask represents a task, such as a piece of work or personal item, that can be tracked and completed."""
+
+    def __str__(self):
+        return self.title or self.entity_type_name
+
+    @property
+    def body(self):
+        """The task body that typically contains information about the task."""
+        return self.properties.get("body", ItemBody())
+
+    @property
+    def title(self):
+        # type: () -> Optional[str]
+        """A brief description of the task."""
+        return self.properties.get("title", None)
+
+    @property
+    def attachments(self):
+        # type: () -> EntityCollection[AttachmentBase]
+        """A collection of file attachments for the task."""
+        return self.properties.get(
+            "attachments",
+            EntityCollection(
+                self.context,
+                AttachmentBase,
+                ResourcePath("attachments", self.resource_path),
+            ),
+        )
 
     @property
     def extensions(self):

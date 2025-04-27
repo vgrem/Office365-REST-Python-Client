@@ -99,7 +99,7 @@ class ODataRequest(ClientRequest):
             elif isinstance(json, dict):
                 for name, value in json.items():
                     if isinstance(json_format, JsonLightFormat):
-                        is_valid = name != "__metadata" and not (
+                        is_valid = name != json_format.metadata_type and not (
                             isinstance(value, dict) and "__deferred" in value
                         )
                     else:

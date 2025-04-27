@@ -8,6 +8,12 @@ class StorageMetrics(Entity):
     """Specifies the storage-related metrics for list folders in the site"""
 
     @property
+    def additional_file_stream_size(self):
+        # type: () -> Optional[int]
+        """ """
+        return self.properties.get("AdditionalFileStreamSize", None)
+
+    @property
     def last_modified(self):
         # type: () -> Optional[datetime.datetime]
         """
@@ -41,3 +47,15 @@ class StorageMetrics(Entity):
         Total size for a file/folder includes stream, version, and metadata sizes.
         """
         return self.properties.get("TotalSize", None)
+
+    @property
+    def version_count(self):
+        # type: () -> Optional[int]
+        """ """
+        return self.properties.get("VersionCount", None)
+
+    @property
+    def version_size(self):
+        # type: () -> Optional[int]
+        """ """
+        return self.properties.get("VersionSize", None)

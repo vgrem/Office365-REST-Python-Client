@@ -718,6 +718,19 @@ class File(AbstractFile):
         return self.properties.get("ActivityCapabilities", ActivityCapabilities())
 
     @property
+    def checkin_comment(self):
+        # type: () -> Optional[str]
+        """Specifies the comment used when a document is checked into a document library.
+        Its length MUST be equal to or less than 1023."""
+        return self.properties.get("CheckInComment", None)
+
+    @property
+    def content_tag(self):
+        # type: () -> Optional[str]
+        """Returns internal version of content, used to validate document equality for read purposes."""
+        return self.properties.get("ContentTag", None)
+
+    @property
     def author(self):
         """Specifies the user who added the file."""
         return self.properties.get(
