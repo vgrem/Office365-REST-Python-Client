@@ -4,6 +4,7 @@ from office365.communications.calls.invitation_participant_info import (
     InvitationParticipantInfo,
 )
 from office365.communications.calls.participant_info import ParticipantInfo
+from office365.communications.onlinemeetings.restricted import OnlineMeetingRestricted
 from office365.communications.operations.invite_participants import (
     InviteParticipantsOperation,
 )
@@ -73,3 +74,8 @@ class Participant(Entity):
         # type: () -> Optional[str]
         """A blob of data provided by the participant in the roster."""
         return self.properties.get("metadata", None)
+
+    @property
+    def restricted_experience(self):
+        """Information about the reason or reasons media content from a participant is restricted."""
+        return self.properties.get("restrictedExperience", OnlineMeetingRestricted())

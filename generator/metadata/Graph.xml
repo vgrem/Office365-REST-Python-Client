@@ -4343,7 +4343,7 @@
          <Annotations Target="microsoft.graph.user/events">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
                <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
+                  <PropertyValue Property="Supported" Bool="true"/>
                </Record>
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
@@ -7043,7 +7043,7 @@
          <Annotations Target="microsoft.graph.calendar/events">
             <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
                <Record>
-                  <PropertyValue Property="Supported" Bool="false"/>
+                  <PropertyValue Property="Supported" Bool="true"/>
                </Record>
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
@@ -7228,6 +7228,40 @@
             <Annotation Term="Org.OData.Capabilities.V1.ExpandRestrictions">
                <Record>
                   <PropertyValue Property="Expandable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
+               <Record>
+                  <PropertyValue Property="Insertable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.NavigationRestrictions">
+               <Record>
+                  <PropertyValue Property="Navigability">
+                     <EnumMember>Org.OData.Capabilities.V1.NavigationType/Single</EnumMember>
+                  </PropertyValue>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions">
+               <Record>
+                  <PropertyValue Property="Searchable" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.UpdateRestrictions">
+               <Record>
+                  <PropertyValue Property="Updatable" Bool="false"/>
+               </Record>
+            </Annotation>
+         </Annotations>
+         <Annotations Target="microsoft.graph.event/exceptionOccurrences">
+            <Annotation Term="Org.OData.Capabilities.V1.ChangeTracking">
+               <Record>
+                  <PropertyValue Property="Supported" Bool="false"/>
+               </Record>
+            </Annotation>
+            <Annotation Term="Org.OData.Capabilities.V1.DeleteRestrictions">
+               <Record>
+                  <PropertyValue Property="Deletable" Bool="false"/>
                </Record>
             </Annotation>
             <Annotation Term="Org.OData.Capabilities.V1.InsertRestrictions">
@@ -18023,6 +18057,13 @@ within the time frame of their original request."/>
             <Member Name="completedWithErrors" Value="3"/>
             <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
+         <EnumType Name="protectionUnitsBulkJobStatus">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="active" Value="1"/>
+            <Member Name="completed" Value="2"/>
+            <Member Name="completedWithErrors" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
+         </EnumType>
          <EnumType Name="protectionUnitStatus">
             <Member Name="protectRequested" Value="0"/>
             <Member Name="protected" Value="1"/>
@@ -18034,6 +18075,13 @@ within the time frame of their original request."/>
          <EnumType Name="restorableArtifact">
             <Member Name="message" Value="0"/>
             <Member Name="unknownFutureValue" Value="1"/>
+         </EnumType>
+         <EnumType Name="restoreArtifactsBulkRequestStatus">
+            <Member Name="unknown" Value="0"/>
+            <Member Name="active" Value="1"/>
+            <Member Name="completed" Value="2"/>
+            <Member Name="completedWithErrors" Value="3"/>
+            <Member Name="unknownFutureValue" Value="4"/>
          </EnumType>
          <EnumType Name="restorePointPreference">
             <Member Name="latest" Value="0"/>
@@ -22923,6 +22971,7 @@ within the time frame of their original request."/>
             <Property Name="attendees" Type="Collection(graph.attendee)"/>
             <Property Name="body" Type="graph.itemBody"/>
             <Property Name="bodyPreview" Type="Edm.String"/>
+            <Property Name="cancelledOccurrences" Type="Collection(Edm.String)" Nullable="false"/>
             <Property Name="end" Type="graph.dateTimeTimeZone"/>
             <Property Name="hasAttachments" Type="Edm.Boolean"/>
             <Property Name="hideAttendees" Type="Edm.Boolean"/>
@@ -22957,6 +23006,7 @@ within the time frame of their original request."/>
             <Property Name="webLink" Type="Edm.String"/>
             <NavigationProperty Name="attachments" Type="Collection(graph.attachment)" ContainsTarget="true"/>
             <NavigationProperty Name="calendar" Type="graph.calendar" ContainsTarget="true"/>
+            <NavigationProperty Name="exceptionOccurrences" Type="Collection(graph.event)" ContainsTarget="true"/>
             <NavigationProperty Name="extensions" Type="Collection(graph.extension)" ContainsTarget="true"/>
             <NavigationProperty Name="instances" Type="Collection(graph.event)" ContainsTarget="true"/>
             <NavigationProperty Name="multiValueExtendedProperties" Type="Collection(graph.multiValueLegacyExtendedProperty)" ContainsTarget="true"/>
@@ -24661,10 +24711,12 @@ within the time frame of their original request."/>
             <Property Name="serviceStatus" Type="graph.serviceStatus"/>
             <NavigationProperty Name="driveInclusionRules" Type="Collection(graph.driveProtectionRule)" ContainsTarget="true"/>
             <NavigationProperty Name="driveProtectionUnits" Type="Collection(graph.driveProtectionUnit)" ContainsTarget="true"/>
+            <NavigationProperty Name="driveProtectionUnitsBulkAdditionJobs" Type="Collection(graph.driveProtectionUnitsBulkAdditionJob)" ContainsTarget="true"/>
             <NavigationProperty Name="exchangeProtectionPolicies" Type="Collection(graph.exchangeProtectionPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="exchangeRestoreSessions" Type="Collection(graph.exchangeRestoreSession)" ContainsTarget="true"/>
             <NavigationProperty Name="mailboxInclusionRules" Type="Collection(graph.mailboxProtectionRule)" ContainsTarget="true"/>
             <NavigationProperty Name="mailboxProtectionUnits" Type="Collection(graph.mailboxProtectionUnit)" ContainsTarget="true"/>
+            <NavigationProperty Name="mailboxProtectionUnitsBulkAdditionJobs" Type="Collection(graph.mailboxProtectionUnitsBulkAdditionJob)" ContainsTarget="true"/>
             <NavigationProperty Name="oneDriveForBusinessProtectionPolicies" Type="Collection(graph.oneDriveForBusinessProtectionPolicy)" ContainsTarget="true"/>
             <NavigationProperty Name="oneDriveForBusinessRestoreSessions" Type="Collection(graph.oneDriveForBusinessRestoreSession)" ContainsTarget="true"/>
             <NavigationProperty Name="protectionPolicies" Type="Collection(graph.protectionPolicyBase)" ContainsTarget="true"/>
@@ -24676,6 +24728,7 @@ within the time frame of their original request."/>
             <NavigationProperty Name="sharePointRestoreSessions" Type="Collection(graph.sharePointRestoreSession)" ContainsTarget="true"/>
             <NavigationProperty Name="siteInclusionRules" Type="Collection(graph.siteProtectionRule)" ContainsTarget="true"/>
             <NavigationProperty Name="siteProtectionUnits" Type="Collection(graph.siteProtectionUnit)" ContainsTarget="true"/>
+            <NavigationProperty Name="siteProtectionUnitsBulkAdditionJobs" Type="Collection(graph.siteProtectionUnitsBulkAdditionJob)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="virtualEventsRoot" BaseType="graph.entity">
             <NavigationProperty Name="events" Type="Collection(graph.virtualEvent)" ContainsTarget="true"/>
@@ -27547,6 +27600,19 @@ within the time frame of their original request."/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="email" Type="Edm.String"/>
          </EntityType>
+         <EntityType Name="protectionUnitsBulkJobBase" BaseType="graph.entity" Abstract="true">
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="error" Type="graph.publicError"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="status" Type="graph.protectionUnitsBulkJobStatus" Nullable="false"/>
+         </EntityType>
+         <EntityType Name="driveProtectionUnitsBulkAdditionJob" BaseType="graph.protectionUnitsBulkJobBase">
+            <Property Name="directoryObjectIds" Type="Collection(Edm.String)"/>
+            <Property Name="drives" Type="Collection(Edm.String)"/>
+         </EntityType>
          <EntityType Name="protectionPolicyBase" BaseType="graph.entity" Abstract="true">
             <Property Name="createdBy" Type="graph.identitySet"/>
             <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
@@ -27559,6 +27625,7 @@ within the time frame of their original request."/>
          <EntityType Name="exchangeProtectionPolicy" BaseType="graph.protectionPolicyBase">
             <NavigationProperty Name="mailboxInclusionRules" Type="Collection(graph.mailboxProtectionRule)"/>
             <NavigationProperty Name="mailboxProtectionUnits" Type="Collection(graph.mailboxProtectionUnit)"/>
+            <NavigationProperty Name="mailboxProtectionUnitsBulkAdditionJobs" Type="Collection(graph.mailboxProtectionUnitsBulkAdditionJob)"/>
          </EntityType>
          <EntityType Name="restoreSessionBase" BaseType="graph.entity">
             <Property Name="completedDateTime" Type="Edm.DateTimeOffset"/>
@@ -27572,6 +27639,7 @@ within the time frame of their original request."/>
          <EntityType Name="exchangeRestoreSession" BaseType="graph.restoreSessionBase">
             <NavigationProperty Name="granularMailboxRestoreArtifacts" Type="Collection(graph.granularMailboxRestoreArtifact)" ContainsTarget="true"/>
             <NavigationProperty Name="mailboxRestoreArtifacts" Type="Collection(graph.mailboxRestoreArtifact)" ContainsTarget="true"/>
+            <NavigationProperty Name="mailboxRestoreArtifactsBulkAdditionRequests" Type="Collection(graph.mailboxRestoreArtifactsBulkAdditionRequest)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="mailboxProtectionRule" BaseType="graph.protectionRuleBase">
             <Property Name="mailboxExpression" Type="Edm.String"/>
@@ -27581,12 +27649,18 @@ within the time frame of their original request."/>
             <Property Name="displayName" Type="Edm.String"/>
             <Property Name="email" Type="Edm.String"/>
          </EntityType>
+         <EntityType Name="mailboxProtectionUnitsBulkAdditionJob" BaseType="graph.protectionUnitsBulkJobBase">
+            <Property Name="directoryObjectIds" Type="Collection(Edm.String)"/>
+            <Property Name="mailboxes" Type="Collection(Edm.String)"/>
+         </EntityType>
          <EntityType Name="oneDriveForBusinessProtectionPolicy" BaseType="graph.protectionPolicyBase">
             <NavigationProperty Name="driveInclusionRules" Type="Collection(graph.driveProtectionRule)"/>
             <NavigationProperty Name="driveProtectionUnits" Type="Collection(graph.driveProtectionUnit)"/>
+            <NavigationProperty Name="driveProtectionUnitsBulkAdditionJobs" Type="Collection(graph.driveProtectionUnitsBulkAdditionJob)"/>
          </EntityType>
          <EntityType Name="oneDriveForBusinessRestoreSession" BaseType="graph.restoreSessionBase">
             <NavigationProperty Name="driveRestoreArtifacts" Type="Collection(graph.driveRestoreArtifact)" ContainsTarget="true"/>
+            <NavigationProperty Name="driveRestoreArtifactsBulkAdditionRequests" Type="Collection(graph.driveRestoreArtifactsBulkAdditionRequest)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="serviceApp" BaseType="graph.entity">
             <Property Name="application" Type="graph.identity"/>
@@ -27599,9 +27673,11 @@ within the time frame of their original request."/>
          <EntityType Name="sharePointProtectionPolicy" BaseType="graph.protectionPolicyBase">
             <NavigationProperty Name="siteInclusionRules" Type="Collection(graph.siteProtectionRule)"/>
             <NavigationProperty Name="siteProtectionUnits" Type="Collection(graph.siteProtectionUnit)"/>
+            <NavigationProperty Name="siteProtectionUnitsBulkAdditionJobs" Type="Collection(graph.siteProtectionUnitsBulkAdditionJob)"/>
          </EntityType>
          <EntityType Name="sharePointRestoreSession" BaseType="graph.restoreSessionBase">
             <NavigationProperty Name="siteRestoreArtifacts" Type="Collection(graph.siteRestoreArtifact)" ContainsTarget="true"/>
+            <NavigationProperty Name="siteRestoreArtifactsBulkAdditionRequests" Type="Collection(graph.siteRestoreArtifactsBulkAdditionRequest)" ContainsTarget="true"/>
          </EntityType>
          <EntityType Name="siteProtectionRule" BaseType="graph.protectionRuleBase">
             <Property Name="siteExpression" Type="Edm.String"/>
@@ -27610,6 +27686,10 @@ within the time frame of their original request."/>
             <Property Name="siteId" Type="Edm.String"/>
             <Property Name="siteName" Type="Edm.String"/>
             <Property Name="siteWebUrl" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="siteProtectionUnitsBulkAdditionJob" BaseType="graph.protectionUnitsBulkJobBase">
+            <Property Name="siteIds" Type="Collection(Edm.String)"/>
+            <Property Name="siteWebUrls" Type="Collection(Edm.String)"/>
          </EntityType>
          <EntityType Name="restoreArtifactBase" BaseType="graph.entity">
             <Property Name="completionDateTime" Type="Edm.DateTimeOffset"/>
@@ -27624,6 +27704,24 @@ within the time frame of their original request."/>
             <Property Name="restoredSiteName" Type="Edm.String"/>
             <Property Name="restoredSiteWebUrl" Type="Edm.String"/>
          </EntityType>
+         <EntityType Name="restoreArtifactsBulkRequestBase" BaseType="graph.entity">
+            <Property Name="createdBy" Type="graph.identitySet"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="destinationType" Type="graph.destinationType"/>
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="error" Type="graph.publicError"/>
+            <Property Name="lastModifiedBy" Type="graph.identitySet"/>
+            <Property Name="lastModifiedDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="protectionTimePeriod" Type="graph.timePeriod"/>
+            <Property Name="protectionUnitIds" Type="Collection(Edm.String)"/>
+            <Property Name="restorePointPreference" Type="graph.restorePointPreference"/>
+            <Property Name="status" Type="graph.restoreArtifactsBulkRequestStatus" Nullable="false"/>
+            <Property Name="tags" Type="graph.restorePointTags"/>
+         </EntityType>
+         <EntityType Name="driveRestoreArtifactsBulkAdditionRequest" BaseType="graph.restoreArtifactsBulkRequestBase">
+            <Property Name="directoryObjectIds" Type="Collection(Edm.String)"/>
+            <Property Name="drives" Type="Collection(Edm.String)"/>
+         </EntityType>
          <EntityType Name="mailboxRestoreArtifact" BaseType="graph.restoreArtifactBase">
             <Property Name="restoredFolderId" Type="Edm.String"/>
             <Property Name="restoredFolderName" Type="Edm.String"/>
@@ -27632,10 +27730,18 @@ within the time frame of their original request."/>
             <Property Name="artifactCount" Type="Edm.Int32"/>
             <Property Name="searchResponseId" Type="Edm.String" Nullable="false"/>
          </EntityType>
+         <EntityType Name="mailboxRestoreArtifactsBulkAdditionRequest" BaseType="graph.restoreArtifactsBulkRequestBase">
+            <Property Name="directoryObjectIds" Type="Collection(Edm.String)"/>
+            <Property Name="mailboxes" Type="Collection(Edm.String)"/>
+         </EntityType>
          <EntityType Name="siteRestoreArtifact" BaseType="graph.restoreArtifactBase">
             <Property Name="restoredSiteId" Type="Edm.String"/>
             <Property Name="restoredSiteName" Type="Edm.String"/>
             <Property Name="restoredSiteWebUrl" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="siteRestoreArtifactsBulkAdditionRequest" BaseType="graph.restoreArtifactsBulkRequestBase">
+            <Property Name="siteIds" Type="Collection(Edm.String)"/>
+            <Property Name="siteWebUrls" Type="Collection(Edm.String)"/>
          </EntityType>
          <ComplexType Name="Json"/>
          <ComplexType Name="workbookFilterCriteria">
@@ -36306,7 +36412,7 @@ within the time frame of their original request."/>
             <Parameter Name="bindingparameter" Type="Collection(graph.contactFolder)" Nullable="false"/>
             <ReturnType Type="Collection(graph.contactFolder)" Nullable="false"/>
          </Function>
-         <Function Name="delta" IsBound="true">
+         <Function Name="delta" IsBound="true" EntitySetPath="bindingparameter">
             <Parameter Name="bindingparameter" Type="Collection(graph.event)" Nullable="false"/>
             <ReturnType Type="Collection(graph.event)" Nullable="false"/>
          </Function>
@@ -41274,10 +41380,13 @@ within the time frame of their original request."/>
             <Singleton Name="solutions" Type="microsoft.graph.solutionsRoot">
                <NavigationPropertyBinding Path="backupRestore/exchangeProtectionPolicies/mailboxInclusionRules" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/mailboxInclusionRules"/>
                <NavigationPropertyBinding Path="backupRestore/exchangeProtectionPolicies/mailboxProtectionUnits" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/mailboxProtectionUnits"/>
+               <NavigationPropertyBinding Path="backupRestore/exchangeProtectionPolicies/mailboxProtectionUnitsBulkAdditionJobs" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/mailboxProtectionUnitsBulkAdditionJobs"/>
                <NavigationPropertyBinding Path="backupRestore/oneDriveForBusinessProtectionPolicies/driveInclusionRules" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/driveInclusionRules"/>
                <NavigationPropertyBinding Path="backupRestore/oneDriveForBusinessProtectionPolicies/driveProtectionUnits" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/driveProtectionUnits"/>
+               <NavigationPropertyBinding Path="backupRestore/oneDriveForBusinessProtectionPolicies/driveProtectionUnitsBulkAdditionJobs" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/driveProtectionUnitsBulkAdditionJobs"/>
                <NavigationPropertyBinding Path="backupRestore/sharePointProtectionPolicies/siteInclusionRules" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/siteInclusionRules"/>
                <NavigationPropertyBinding Path="backupRestore/sharePointProtectionPolicies/siteProtectionUnits" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/siteProtectionUnits"/>
+               <NavigationPropertyBinding Path="backupRestore/sharePointProtectionPolicies/siteProtectionUnitsBulkAdditionJobs" Target="solutions/microsoft.graph.backupRestoreRoot/backupRestore/siteProtectionUnitsBulkAdditionJobs"/>
             </Singleton>
             <Singleton Name="deviceManagement" Type="microsoft.graph.deviceManagement"/>
             <Singleton Name="privacy" Type="microsoft.graph.privacy"/>

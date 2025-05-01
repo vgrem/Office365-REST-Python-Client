@@ -14,9 +14,7 @@ class TestServicePrincipal(GraphTestCase):
     def setUpClass(cls):
         super(TestServicePrincipal, cls).setUpClass()
         app_name = create_unique_name("App")
-        cls.target_app = cls.client.applications.add(
-            displayName=app_name
-        ).execute_query()
+        cls.target_app = cls.client.applications.add(app_name).execute_query()
 
     @classmethod
     def tearDownClass(cls):

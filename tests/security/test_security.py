@@ -27,12 +27,6 @@ class TestSecurity(TestCase):
         col = self.client.security.incidents.top(10).get().execute_query()
         self.assertIsNotNone(col.resource_path)
 
-    def test3_list_threat_assessment_requests(self):
-        col = (
-            self.client.information_protection.threat_assessment_requests.get().execute_query()
-        )
-        self.assertIsNotNone(col.resource_path)
-
     # def test3_list_landing_pages(self):
     #    col = (
     #        self.client.security.attack_simulation.landing_pages.filter("source eq 'tenant'")

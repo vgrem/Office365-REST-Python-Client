@@ -1,6 +1,6 @@
 from typing import Optional
 
-from office365.directory.protection.threatassessment.request import (
+from office365.directory.protection.threatassessment.requests.request import (
     ThreatAssessmentRequest,
 )
 
@@ -18,3 +18,11 @@ class EmailFileAssessmentRequest(ThreatAssessmentRequest):
         Base64 encoded .eml email file content. The file content can't fetch back because it isn't stored.
         """
         return self.properties.get("contentData", None)
+
+    @property
+    def file_name(self):
+        # type: () -> Optional[str]
+        """
+        Base64 encoded .eml email file content. The file content can't fetch back because it isn't stored.
+        """
+        return self.properties.get("fileName", None)

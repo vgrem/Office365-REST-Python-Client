@@ -1,4 +1,4 @@
-from office365.directory.protection.threatassessment.request import (
+from office365.directory.protection.threatassessment.requests.request import (
     ThreatAssessmentRequest,
 )
 from office365.entity import Entity
@@ -11,6 +11,23 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 class InformationProtection(Entity):
     """Exposes methods that you can use to get Microsoft Purview Information Protection labels and label policies."""
 
+    def create_url_assessment(self, url, expected_assessment, category):
+        """Create a new threat assessment request."""
+        from office365.directory.protection.threatassessment.requests.url import (
+            UrlAssessmentRequest,
+        )
+
+        return_type = UrlAssessmentRequest(self.context)
+        return_type.set_property("url", url)
+        return_type.set_property("expectedAssessment", expected_assessment)
+        return_type.set_property("category", category)
+        self.threat_assessment_requests.add_child(return_type)
+        qry = CreateEntityQuery(
+            self.threat_assessment_requests, return_type, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def create_mail_assessment(
         self, message, recipient=None, expected_assessment="block", category="spam"
     ):
@@ -22,7 +39,7 @@ class InformationProtection(Entity):
         :param str category:
         """
 
-        from office365.directory.protection.threatassessment.mail_request import (
+        from office365.directory.protection.threatassessment.requests.mail import (
             MailAssessmentRequest,
         )
 

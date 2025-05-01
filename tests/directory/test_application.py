@@ -7,7 +7,6 @@ from tests.graph_case import GraphTestCase
 class TestApplication(GraphTestCase):
     target_app = None  # type: Application
     target_password = None  # type: PasswordCredential
-    app_name = create_unique_name("App")
 
     def test1_list_apps_and_templates(self):
         apps = self.client.applications.get().execute_query()
@@ -17,9 +16,8 @@ class TestApplication(GraphTestCase):
         self.assertIsNotNone(templates.resource_path)
 
     def test2_create_app(self):
-        new_app = self.client.applications.add(
-            display_name=self.app_name
-        ).execute_query()
+        app_name = create_unique_name("App")
+        new_app = self.client.applications.add(app_name).execute_query()
         self.assertIsNotNone(new_app.resource_path)
         self.__class__.target_app = new_app
 

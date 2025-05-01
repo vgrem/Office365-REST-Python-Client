@@ -14,6 +14,9 @@ from office365.directory.audit.signins.activity import SignInActivity
 from office365.directory.authentication.authentication import Authentication
 from office365.directory.extensions.extension import Extension
 from office365.directory.identities.object_identity import ObjectIdentity
+from office365.directory.identitygovernance.termsofuse.agreement_acceptance import (
+    AgreementAcceptance,
+)
 from office365.directory.insights.office_graph import OfficeGraphInsights
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.licenses.assigned_plan import AssignedPlan
@@ -55,6 +58,7 @@ from office365.outlook.mail.messages.collection import MessageCollection
 from office365.outlook.mail.messages.message import Message
 from office365.outlook.mail.recipient import Recipient
 from office365.outlook.mail.tips.tips import MailTips
+from office365.outlook.person import Person
 from office365.outlook.user import OutlookUser
 from office365.planner.user import PlannerUser
 from office365.runtime.client_result import ClientResult
@@ -69,6 +73,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.teams.chats.collection import ChatCollection
 from office365.teams.collection import TeamCollection
+from office365.teams.teamwork.shiftmanagement.user_solution_root import UserSolutionRoot
 from office365.teams.teamwork.user import UserTeamwork
 from office365.teams.viva.employee_experience_user import EmployeeExperienceUser
 from office365.todo.todo import Todo
@@ -1026,6 +1031,17 @@ class User(DirectoryObject):
         )
 
     @property
+    def people(self):
+        # type: () -> EntityCollection[Person]
+        """People that are relevant to the user. Read-only. Nullable."""
+        return self.properties.get(
+            "people",
+            EntityCollection(
+                self.context, Person, ResourcePath("people", self.resource_path)
+            ),
+        )
+
+    @property
     def onenote(self):
         # type: () -> Onenote
         """Represents the Onenote services available to a user."""
@@ -1048,6 +1064,20 @@ class User(DirectoryObject):
         return self.properties.get(
             "planner",
             PlannerUser(self.context, ResourcePath("planner", self.resource_path)),
+        )
+
+    @property
+    def agreement_acceptances(self):
+        """
+        The user's terms of use acceptance statuses
+        """
+        return self.properties.get(
+            "agreementAcceptances",
+            EntityCollection(
+                self.context,
+                AgreementAcceptance,
+                ResourcePath("agreementAcceptances", self.resource_path),
+            ),
         )
 
     @property
@@ -1138,6 +1168,17 @@ class User(DirectoryObject):
         return self.properties.get(
             "teamwork",
             UserTeamwork(self.context, ResourcePath("teamwork", self.resource_path)),
+        )
+
+    @property
+    def solutions(self):
+        # type: () -> UserSolutionRoot
+        """The identifier that relates the user to the working time schedule triggers. Read-Only. Nullable."""
+        return self.properties.get(
+            "solutions",
+            UserSolutionRoot(
+                self.context, ResourcePath("solutions", self.resource_path)
+            ),
         )
 
     @property

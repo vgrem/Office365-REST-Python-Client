@@ -12,9 +12,7 @@ class TestExtensions(GraphTestCase):
     def setUpClass(cls):
         super(TestExtensions, cls).setUpClass()
         app_name = create_unique_name("App")
-        cls.target_app = cls.client.applications.add(
-            display_name=app_name
-        ).execute_query()
+        cls.target_app = cls.client.applications.add(app_name).execute_query()
 
     @classmethod
     def tearDownClass(cls):

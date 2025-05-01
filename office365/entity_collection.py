@@ -73,7 +73,7 @@ class EntityCollection(ClientObjectCollection[T]):
 
     def set_property(self, key, value, persist_changes=False):
         # type: (str | int, dict, bool) -> Self
-        if key == "__deltaLinkUrl":
+        if key == self.context.pending_request().json_format.collection_delta:
             self._delta_request_url = value
         else:
             super(EntityCollection, self).set_property(key, value, persist_changes)

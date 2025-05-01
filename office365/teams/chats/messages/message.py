@@ -50,6 +50,23 @@ class ChatMessage(Entity):
         )
 
     @property
+    def subject(self):
+        # type: () -> Optional[str]
+        """
+        The subject of the chat message, in plaintext.
+        """
+        return self.properties.get("subject", None)
+
+    @property
+    def summary(self):
+        # type: () -> Optional[str]
+        """
+        Summary text of the chat message that could be used for push notifications and summary views or
+        fall back views. Only applies to channel chat messages, not chat messages in a chat.
+        """
+        return self.properties.get("summary", None)
+
+    @property
     def web_url(self):
         # type: () -> Optional[str]
         """

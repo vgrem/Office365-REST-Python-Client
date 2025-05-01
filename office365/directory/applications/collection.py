@@ -9,6 +9,17 @@ class ApplicationCollection(DeltaCollection[Application]):
     def __init__(self, context, resource_path=None):
         super(ApplicationCollection, self).__init__(context, Application, resource_path)
 
+    def add(self, display_name, **kwargs):
+        """
+        Create a new application object.
+        :param str display_name: Display name of the application.
+        """
+        props = {
+            "displayName": display_name,
+            **kwargs,
+        }
+        return super(ApplicationCollection, self).add(**props)
+
     def get_by_app_id(self, app_id):
         # type: (str) -> Application
         """Retrieves application by Application client identifier
