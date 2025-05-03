@@ -1,4 +1,4 @@
-from office365.directory.identitygovernance.privilegedaccess.schedule_instance import (
+from office365.directory.identitygovernance.privilegedaccess.schedule.instance import (
     PrivilegedAccessScheduleInstance,
 )
 

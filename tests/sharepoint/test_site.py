@@ -111,3 +111,7 @@ class TestSite(SPTestCase):
     # def test_17_get_block_download_policy_for_files_data(self):
     #    result = self.client.site.get_block_download_policy_for_files_data().execute_query()
     #    self.assertIsNotNone(result.value)
+
+    # def test_18_get_top_files(self):
+    #    result = self.client.site_manager_svc.top_files().execute_query()
+    #    self.assertIsNotNone(result.value)

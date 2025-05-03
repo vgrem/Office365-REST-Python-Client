@@ -12,7 +12,7 @@ from tests import test_client_credentials, test_team_site_url
 
 ctx = ClientContext(test_team_site_url).with_credentials(test_client_credentials)
 result = ClientPeoplePickerWebServiceInterface.client_people_picker_search_user(
-    ctx, "Joe"
+    ctx, "Jon"
 ).execute_query()
 entries = json.loads(result.value)
 for entry in entries:

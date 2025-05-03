@@ -145,6 +145,22 @@ class Utility(Entity):
         return utility
 
     @staticmethod
+    def unmark_discussion_as_featured(context, list_id, topic_ids):
+        """
+        This method is a static method.
+        :type context: office365.sharepoint.client_context.ClientContext
+        :type list_id: str
+        :type topic_ids: str
+        """
+        utility = Utility(context)
+        payload = {"listID": list_id, "topicIDs": topic_ids}
+        qry = ServiceOperationQuery(
+            utility, "UnmarkDiscussionAsFeatured", None, payload, None, None, True
+        )
+        context.add_query(qry)
+        return utility
+
+    @staticmethod
     def expand_groups_to_principals(context, inputs, max_count=None, return_type=None):
         """
         Expands groups to a collection of principals.

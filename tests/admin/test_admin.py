@@ -20,3 +20,7 @@ class TestAdmin(GraphTestCase):
     def test4_list_microsoft365_apps(self):
         result = self.client.admin.microsoft365_apps.get().execute_query()
         self.assertIsNotNone(result.resource_path)
+
+    # def test5_get_admin_people(self):
+    #    result = self.client.admin.people.get().execute_query()
+    #    self.assertIsNotNone(result.resource_path)

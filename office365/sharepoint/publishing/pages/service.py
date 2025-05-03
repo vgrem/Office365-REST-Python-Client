@@ -50,10 +50,11 @@ class SitePageService(Entity):
     def entity_type_name(self):
         return "SP.Publishing.SitePageService"
 
-    def create_page(self, title):
-        # type: (str) -> SitePage
+    def create_page(self, title, language=None):
+        # type: (str, Optional[str]) -> SitePage
         """Create a new sitePage in the site pages list in a site.
         :param str title: The title of Site Page
+        :param str language: The language of the Site Page.
         """
 
         def _page_created(return_type):
@@ -61,13 +62,13 @@ class SitePageService(Entity):
 
             def _draft_saved(result):
                 # type: (ClientResult[bool]) -> None
-                pass
+                return_type.get()
 
             return_type.save_draft(title=title).after_execute(
                 _draft_saved, execute_first=True
             )
 
-        return self.pages.add().after_execute(_page_created).get()
+        return self.pages.add().after_execute(_page_created)
 
     def create_and_publish_page(self, title):
         """

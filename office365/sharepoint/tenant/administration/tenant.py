@@ -40,6 +40,10 @@ from office365.sharepoint.tenant.administration.policies.app_billing_properties 
 from office365.sharepoint.tenant.administration.policies.definition import (
     TenantAdminPolicyDefinition,
 )
+from office365.sharepoint.tenant.administration.policies.file_version_types import (
+    SPOFileVersionBatchDeleteJobProgress,
+    SPOFileVersionPolicySettings,
+)
 from office365.sharepoint.tenant.administration.powerapps.environment import (
     PowerAppsEnvironment,
 )
@@ -398,6 +402,20 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_root_site_url(self):
+        """ """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "GetRootSiteUrl",
+            None,
+            None,
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_site_authorization_code_for_migration(self, endpoint_url):
         return_type = ClientResult(self.context, str())
         payload = {"endpointUrl": endpoint_url}
@@ -725,9 +743,42 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_file_version_policy_for_library(self, site_url, list_params=None):
+        """ """
+        return_type = ClientResult(self.context, SPOFileVersionPolicySettings())
+        payload = {"siteUrl": site_url, "listParams": list_params}
+        qry = ServiceOperationQuery(
+            self,
+            "GetFileVersionPolicyForLibrary",
+            None,
+            payload,
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_file_version_batch_delete_job_progress_for_library(
+        self, site_url, list_params
+    ):
+        """Gets the progress of the file version batch delete job for the specified site and list parameters."""
+        return_type = ClientResult(self.context, SPOFileVersionBatchDeleteJobProgress())
+        payload = {"siteUrl": site_url, "listParams": list_params}
+        qry = ServiceOperationQuery(
+            self,
+            "GetFileVersionBatchDeleteJobProgressForLibrary",
+            None,
+            payload,
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_site_properties_by_site_id(self, site_id, include_detail=False):
         # type: (str, bool) -> SiteProperties
-        """
+        """Gets the site properties for the specified site ID.
+
         :param str site_id: A string that represents the site identifier.
         :param bool include_detail: A Boolean value that indicates whether to include all of the SPSite properties.
         """
@@ -744,6 +795,8 @@ class Tenant(Entity):
     def get_site_properties_by_url(self, url, include_detail=False):
         # type: (str, bool) -> SiteProperties
         """
+         Gets the site properties for the specified URL.
+
         :param str url: A string that represents the site URL.
         :param bool include_detail: A Boolean value that indicates whether to include all of the SPSite properties.
         """
@@ -809,9 +862,18 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return self
 
+    def export_unlicensed_one_drive_for_business_list_to_csv(self):
+        """Exports a list of OneDrive for Business sites that are associated with unlicensed users into a CSV file"""
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self, "ExportUnlicensedOneDriveForBusinessListToCSV"
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def send_email(self, site_url, activity_event_json):
         # type: (str, str) -> ClientResult[bool]
-        """ """
+        """Send Email"""
         return_type = ClientResult(self.context, bool())
         payload = {"siteUrl": site_url, "activityEventJson": activity_event_json}
         qry = ServiceOperationQuery(self, "SendEmail", None, payload, None, return_type)
@@ -833,6 +895,50 @@ class Tenant(Entity):
         qry = ServiceOperationQuery(self, "SetDefaultView", None, payload)
         self.context.add_query(qry)
         return self
+
+    def get_file_version_policy(self):
+        return_type = ClientResult(self.context, str())
+
+        def _get_file_version_policy():
+            return_type.set_property("__value", self.file_version_policy_xml)
+
+        self.ensure_property("FileVersionPolicyXml", _get_file_version_policy)
+        return return_type
+
+    def set_file_version_policy(
+        self, is_auto_trim_enabled, major_version_limit, expire_versions_after_days
+    ):
+        """
+        Automatically delete older versions of documents after a specified number of days.
+        Specify the maximum number of major versions to retain and the number of major versions
+        for which all minor versions will be kept.
+
+        :param bool is_auto_trim_enabled: If true, versions are trimmed automatically.
+        :param int major_version_limit: Retains only many major versions.
+        :param int expire_versions_after_days: Deletes versions older than this many days.
+        """
+        payload = {
+            "isAutoTrimEnabled": is_auto_trim_enabled,
+            "majorVersionLimit": major_version_limit,
+            "expireVersionsAfterDays": expire_versions_after_days,
+        }
+        qry = ServiceOperationQuery(self, "SetFileVersionPolicy", None, payload)
+        self.context.add_query(qry)
+        return self
+
+    def clear_file_version_policy(self):
+        self.set_property("FileVersionPolicyXml", "")
+        self.update()
+        return self
+
+    @property
+    def app_service_principal(self):
+        """ """
+        from office365.sharepoint.tenant.administration.internal.appservice.principal import (
+            SPOWebAppServicePrincipal,
+        )
+
+        return SPOWebAppServicePrincipal(self.context)
 
     @property
     def admin_settings(self):
@@ -923,6 +1029,12 @@ class Tenant(Entity):
     def default_content_center_site(self):
         """"""
         return self.properties.get("DefaultContentCenterSite", SiteInfoForSitePicker())
+
+    @property
+    def file_version_policy_xml(self):
+        # type: () -> Optional[str]
+        """ """
+        return self.properties.get("FileVersionPolicyXml", None)
 
     @property
     def information_barriers_suspension(self):

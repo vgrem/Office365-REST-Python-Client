@@ -1,5 +1,5 @@
 from office365.directory.identitygovernance.privilegedaccess.approval import Approval
-from office365.directory.identitygovernance.privilegedaccess.group_assignment_schedule_instance import (
+from office365.directory.identitygovernance.privilegedaccess.schedule.group_assignment_instance import (
     PrivilegedAccessGroupAssignmentScheduleInstance,
 )
 from office365.entity import Entity

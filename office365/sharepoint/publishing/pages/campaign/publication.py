@@ -7,6 +7,8 @@ from office365.sharepoint.publishing.pages.page import SitePage
 
 
 class CampaignPublication(SitePage):
+    """ """
+
     def get_highlights_info(self):
         """ """
         return_type = HighlightsInfo(self.context)

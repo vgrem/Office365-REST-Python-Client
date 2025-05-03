@@ -218,6 +218,12 @@ class SitePage(SitePageMetadata):
         """Gets the CanvasContent1 for the current Site Page"""
         return self.properties.get("CanvasContent1", None)
 
+    @property
+    def language(self):
+        # type: () -> Optional[str]
+        """Gets the Language for the Site Page."""
+        return self.properties.get("Language", None)
+
     @canvas_content.setter
     def canvas_content(self, value):
         # type: (str) -> None

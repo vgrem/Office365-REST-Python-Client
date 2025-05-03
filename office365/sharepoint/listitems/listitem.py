@@ -59,6 +59,13 @@ class ListItem(SecurableObject):
         if parent_list is not None:
             self.set_property("ParentList", parent_list, False)
 
+    def archive(self):
+        """Archives the list item."""
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "Archive", None, None, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
     def share_link(self, link_kind, expiration=None, role=None, password=None):
         # type: (int, Optional[datetime.datetime], Optional[int], Optional[str]) -> ClientResult[ShareLinkResponse]
         """Creates a tokenized sharing link for a list item based on the specified parameters and optionally

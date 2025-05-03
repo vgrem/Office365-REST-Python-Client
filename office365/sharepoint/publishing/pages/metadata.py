@@ -129,13 +129,3 @@ class SitePageMetadata(Entity):
             }
             default_value = property_mapping.get(name, None)
         return super(SitePageMetadata, self).get_property(name, default_value)
-
-    def set_property(self, name, value, persist_changes=True):
-        if name == "Id":
-            if self._resource_path is None:
-                self._resource_path = self.parent_collection.get_by_id(
-                    value
-                ).resource_path
-            else:
-                self._resource_path.patch(value)
-        return super(SitePageMetadata, self).set_property(name, value, persist_changes)

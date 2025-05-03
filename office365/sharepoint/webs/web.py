@@ -2691,6 +2691,7 @@ class Web(SecurableObject):
                 "SiteGroups": self.site_groups,
                 "SiteUsers": self.site_users,
                 "SiteUserInfoList": self.site_user_info_list,
+                "SupportedUILanguageIds": self.supported_ui_language_ids,
                 "TenantAppCatalog": self.tenant_app_catalog,
                 "TitleResource": self.title_resource,
                 "UserCustomActions": self.user_custom_actions,

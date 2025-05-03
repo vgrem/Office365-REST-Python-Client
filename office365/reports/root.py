@@ -119,6 +119,19 @@ class ReportRoot(Entity):
         self.context.add_query(qry)
         return qry.return_type
 
+    ###
+    def get_email_app_usage_user_detail(self, period):
+        """
+        Get details about which activities users performed on the various email apps.
+
+        :param str period: Specifies the length of time over which the report is aggregated.
+            The supported values for {period_value} are: D7, D30, D90, and D180. These values follow the format
+            Dn where n represents the number of days over which the report is aggregated. Required.
+        """
+        qry = create_report_query(self, "getEmailAppUsageUserDetail", period, True)
+        self.context.add_query(qry)
+        return qry.return_type
+
     def get_mailbox_usage_storage(self, period):
         """
         Get the amount of storage used in your organization.
