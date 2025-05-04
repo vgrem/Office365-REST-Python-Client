@@ -274,8 +274,9 @@ class User(DirectoryObject):
         bcc_recipients=None,
         reply_to = None,
         save_to_sent_items=False,
+        body_type="Text",
     ):
-        # type: (str, str|ItemBody, List[str], List[str], List[str], bool) -> Message
+        # type: (str, str|ItemBody, List[str], List[str]|None, List[str]|None, List[str]|None, bool, str) -> Message
         """Send a new message on the fly
 
         :param str subject: The subject of the message.
@@ -286,10 +287,11 @@ class User(DirectoryObject):
         :param list[str] reply_to: The Reply-To: : recipients for the reply to the message.
         :param bool save_to_sent_items: Indicates whether to save the message in Sent Items. Specify it only if
             the parameter is false; default is true
+        :param str body_type: The type of the message body. It can be "HTML" or "Text". Default is "Text".
         """
         return_type = Message(self.context)
         return_type.subject = subject
-        return_type.body = body
+        return_type.body = (body, body_type)
         [
             return_type.to_recipients.add(Recipient.from_email(email))
             for email in to_recipients
