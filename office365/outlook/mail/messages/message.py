@@ -408,6 +408,14 @@ class Message(OutlookItem):
         )
 
     @property
+    def reply_to(self):
+        """The replyTo: recipients for the reply to the message."""
+        self._persist_changes("replyTo")
+        return self.properties.setdefault(
+            "replyTo", ClientValueCollection(Recipient)
+        )
+
+    @property
     def sender(self):
         """The account that is actually used to generate the message. In most cases, this value is the same as the
         from property. You can set this property to a different value when sending a message from a shared mailbox,
