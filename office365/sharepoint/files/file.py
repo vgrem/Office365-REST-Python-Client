@@ -1,6 +1,6 @@
 import datetime
 from typing import TYPE_CHECKING, AnyStr
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 import requests
 
@@ -608,9 +608,13 @@ class File(AbstractFile):
         :type server_relative_url: str
         :type content: str
         """
+        try:
+            decoded_server_relative_url = unquote(server_relative_url)
+        except (ValueError, AttributeError, TypeError):
+            decoded_server_relative_url = server_relative_url
         url = quote(
             r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
-                context.service_root_url(), server_relative_url
+                context.service_root_url(), decoded_server_relative_url
             ),
             safe=":/",
         )
@@ -630,9 +634,13 @@ class File(AbstractFile):
         :type server_relative_url: str
         :return Response
         """
+        try:
+            decoded_server_relative_url = unquote(server_relative_url)
+        except (ValueError, AttributeError, TypeError):
+            decoded_server_relative_url = server_relative_url
         url = quote(
             r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
-                context.service_root_url(), server_relative_url
+                context.service_root_url(), decoded_server_relative_url
             ),
             safe=":/",
         )
