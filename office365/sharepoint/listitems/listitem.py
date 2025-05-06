@@ -344,7 +344,7 @@ class ListItem(SecurableObject):
 
         def _after_system_update(result):
             # type: (ClientResult[ClientValueCollection[ListItemFormUpdateValue]]) -> None
-            has_any_error = any([item.HasException for item in result.value])
+            has_any_error = any(item.HasException for item in result.value)
             if has_any_error:
                 raise ValueError("Update ListItem failed")
 
