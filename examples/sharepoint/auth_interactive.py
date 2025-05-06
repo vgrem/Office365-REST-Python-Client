@@ -6,7 +6,8 @@ to more resource access permissions.
 Prerequisite: In Azure Portal, configure the Redirect URI of your
         "Mobile and Desktop application" as ``http://localhost``.
 
-https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows#interactive-and-non-interactive-authentication
+https://learn.microsoft.com/en-us/azure/active-directory/develop/
+msal-authentication-flows#interactive-and-non-interactive-authentication
 """
 
 from office365.sharepoint.client_context import ClientContext

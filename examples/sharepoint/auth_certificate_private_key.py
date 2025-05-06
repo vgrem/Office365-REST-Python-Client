@@ -16,14 +16,12 @@ Refer this article for a detailed instruction:
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
 """
 
-import os
-
 from office365.sharepoint.client_context import ClientContext
 from tests import test_cert_thumbprint, test_client_id, test_site_url, test_tenant
 
-cert_path = "{0}/../selfsignkey.pem".format(os.path.dirname(__file__))
-with open(cert_path, "r") as f:
-    private_key = open(cert_path).read()
+cert_path = "./selfsigncert.pem"
+with open(cert_path, "r", encoding="utf-8") as f:
+    private_key = f.read()
 
 cert_credentials = {
     "tenant": test_tenant,

@@ -16,7 +16,7 @@ def acquire_token():
 
     authority_url = "https://login.microsoftonline.com/{0}".format(test_tenant)
     auth_ctx = adal.AuthenticationContext(authority_url)
-    with open(cert_settings["certificate_path"], "r") as file:
+    with open(cert_settings["certificate_path"], "r", encoding="utf-8") as file:
         key = file.read()
     json_token = auth_ctx.acquire_token_with_client_certificate(
         test_site_url, cert_settings["client_id"], key, cert_settings["thumbprint"]

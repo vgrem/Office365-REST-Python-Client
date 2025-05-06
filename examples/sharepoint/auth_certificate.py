@@ -9,7 +9,8 @@ Demonstrates how to use Azure AD App-Only auth flow
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
 
 Refer wiki for a more details:
-https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-with-certificate-credentials
+https://github.com/vgrem/Office365-REST-Python-Client/wiki/
+How-to-connect-to-SharePoint-Online-with-certificate-credentials
 """
 
 from office365.sharepoint.client_context import ClientContext

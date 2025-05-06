@@ -9,7 +9,8 @@ Demonstrates how to use Azure AD App-Only auth flow
 https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
 
 Refer wiki for a more details:
-https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-with-certificate-credentials
+https://github.com/vgrem/Office365-REST-Python-Client/wiki/
+How-to-connect-to-SharePoint-Online-with-certificate-credentials
 
 To create a self signed certificate with encrypted private key run:
 openssl req -x509 -newkey rsa:2048 -keyout selfsignkey.pem -out selfsigncert.pem -days 365

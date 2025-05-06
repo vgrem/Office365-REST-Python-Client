@@ -30,7 +30,7 @@ class TypeBuilder(ast.NodeTransformer):
             self._status = "updated"
         else:
             template_file = self._resolve_template_file(self._schema.baseType)
-            with open(template_file) as f:
+            with open(template_file, encoding="utf-8") as f:
                 self._source_tree = ast.parse(f.read())
             self._status = "created"
         self.visit(self._source_tree)
@@ -38,7 +38,7 @@ class TypeBuilder(ast.NodeTransformer):
 
     def save(self):
         code = astunparse.unparse(self._source_tree)
-        with open(self.file, "w") as f:
+        with open(self.file, "w", encoding="utf-8") as f:
             f.write(code)
 
     def _resolve_template_file(self, type_name):

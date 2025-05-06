@@ -7,8 +7,10 @@ Important: for Application authenticated against Azure AD blade, calling SharePo
 using Client Credentials flow (app-only access) will return 401 error, meaning this flow is NOT supported (blocked)
 unless:
 
-- AAD app is explicitly granted access via ACS as explained here: https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs
-- Client Certificate flow is utilized instead as explained here https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
+- AAD app is explicitly granted access via ACS as explained here:
+   https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs
+- Client Certificate flow is utilized instead as explained here:
+   https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread
 
 
 

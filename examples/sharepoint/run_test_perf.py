@@ -6,7 +6,8 @@ The most useful value for diagnosing performance issues is SPRequestDuration, wh
 that the request took on the server to be processed. This can help determine if the request is heavy and resource
 intensive.
 
-https://learn.microsoft.com/en-us/microsoft-365/enterprise/diagnosing-performance-issues-with-sharepoint-online?view=o365-worldwide
+https://learn.microsoft.com/en-us/microsoft-365/enterprise/
+diagnosing-performance-issues-with-sharepoint-online?view=o365-worldwide
 """
 
 from requests import Response

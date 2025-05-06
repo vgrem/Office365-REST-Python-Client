@@ -7,7 +7,8 @@ Note:
     in AAD portal ensure Mobile and Desktop application is added for application
     and http://localhost is set as redirect uri
 
-https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows#interactive-and-non-interactive-authentication
+https://learn.microsoft.com/en-us/azure/active-directory/develop/
+msal-authentication-flows#interactive-and-non-interactive-authentication
 """
 
 from office365.graph_client import GraphClient

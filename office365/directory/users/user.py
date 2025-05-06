@@ -272,7 +272,7 @@ class User(DirectoryObject):
         to_recipients,
         cc_recipients=None,
         bcc_recipients=None,
-        reply_to = None,
+        reply_to=None,
         save_to_sent_items=False,
         body_type="Text",
     ):

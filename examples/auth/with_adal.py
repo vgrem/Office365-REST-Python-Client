@@ -10,7 +10,7 @@ from tests import load_settings
 
 
 def acquire_token():
-    import adal
+    import adal # pylint: disable=E0401
 
     settings = load_settings()
     authority_url = "https://login.microsoftonline.com/{0}".format(
