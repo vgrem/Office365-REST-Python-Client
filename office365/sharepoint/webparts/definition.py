@@ -8,6 +8,17 @@ class WebPartDefinition(Entity):
     """Represents a Web Part on a Web Part Page. Provides operations for moving, deleting, and changing the state of
     the Web Part."""
 
+    def close_web_part(self):
+        """
+        Closes the Web Part. If the Web Part is already closed, this method does nothing.
+
+        If the current user does not have permissions to modify the Web Part,
+        the server MUST ignore the call to this method.
+        """
+        qry = ServiceOperationQuery(self, "CloseWebPart")
+        self.context.add_query(qry)
+        return self
+
     def delete_web_part(self):
         """
         Deletes the Web Part from the page.
@@ -17,6 +28,21 @@ class WebPartDefinition(Entity):
         qry = ServiceOperationQuery(self, "DeleteWebPart")
         self.context.add_query(qry)
         return self
+
+    def save_web_part_changes(self):
+        """
+        Saves changes to the Web Part made by using other properties and methods on the WebPartDefinition object (1).
+
+        If the current user does not have permissions to modify the Web Part,
+        the protocol server MUST ignore the call to this method.
+        """
+        qry = ServiceOperationQuery(self, "SaveWebPartChanges")
+        self.context.add_query(qry)
+        return self
+
+    @property
+    def id(self):
+        return self.properties.get("Id", None)
 
     @property
     def web_part(self):

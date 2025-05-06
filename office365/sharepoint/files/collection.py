@@ -11,6 +11,7 @@ from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.files.creation_information import FileCreationInformation
 from office365.sharepoint.files.file import File
+from office365.sharepoint.files.publish.status import FileStatus
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 
 if TYPE_CHECKING:
@@ -23,6 +24,15 @@ class FileCollection(EntityCollection[File]):
     def __init__(self, context, resource_path=None, parent=None):
         # type: (ClientContext, ResourcePath, Folder) -> None
         super(FileCollection, self).__init__(context, File, resource_path, parent)
+
+    def get_published_file(self, base_file_path):
+        """ """
+        return_type = FileStatus(self.context)
+        qry = ServiceOperationQuery(
+            self, "GetPublishedFile", [base_file_path], None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
 
     def upload(self, path_or_file, file_name=None):
         # type: (str|IO, str) -> File

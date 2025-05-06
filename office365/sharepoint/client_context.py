@@ -418,6 +418,16 @@ class ClientContext(ClientRuntimeContext):
         return ClientPeoplePickerWebServiceInterface(self)
 
     @property
+    def component_context_info(self):
+        """ComponentContextInfo alias"""
+
+        from office365.sharepoint.clientsidecomponent.component_context_info import (
+            ComponentContextInfo,
+        )
+
+        return ComponentContextInfo(self, ResourcePath("ComponentContextInfo"))
+
+    @property
     def consumer_permissions(self):
         """Consumer permissions alias"""
         from office365.sharepoint.convergence.consumer_permissions import (

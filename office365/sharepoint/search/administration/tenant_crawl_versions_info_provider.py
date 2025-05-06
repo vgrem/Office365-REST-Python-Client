@@ -1,10 +1,26 @@
+from typing import TYPE_CHECKING
+
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 
+if TYPE_CHECKING:
+    from office365.sharepoint.client_context import ClientContext
+
 
 class TenantCrawlVersionsInfoProvider(Entity):
     """Retrieves information about crawl versions for a tenant in SharePoint"""
+
+    @staticmethod
+    def create(context):
+        # type: (ClientContext) -> TenantCrawlVersionsInfoProvider
+        return_type = TenantCrawlVersionsInfoProvider(context)
+        qry = ServiceOperationQuery(
+            return_type, "Create", None, None, None, return_type
+        )
+        qry.static = True
+        context.add_query(qry)
+        return return_type
 
     def disable_crawl_versions(self, site_id):
         """

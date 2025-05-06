@@ -56,13 +56,23 @@ class TestSharePointSharing(TestCase):
         ).execute_query()
         self.assertIsNone(result.error_message)
 
-    def test5_unshare_file(self):
+    def test5_get_shared_with_me_items(self):
+        from office365.sharepoint.portal.userprofiles.sharedwithme.item_collection import (
+            SharedWithMeItemCollection,
+        )
+
+        result = SharedWithMeItemCollection.get_shared_with_me_items(
+            self.client, 10
+        ).execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test6_unshare_file(self):
         target_file_item = self.client.web.get_list_item("/SitePages/Home.aspx")
         result = target_file_item.unshare().execute_query()
         self.assertIsInstance(result, SharingResult)
         self.assertIsNone(result.error_message)
 
-    def test6_share_web(self):
+    def test7_share_web(self):
         result = self.client.web.share(
             self.target_user.user_principal_name
         ).execute_query()
@@ -72,23 +82,23 @@ class TestSharePointSharing(TestCase):
         )
         self.assertIsNone(result.error_message)
 
-    def test7_unshare_web(self):
+    def test8_unshare_web(self):
         result = self.client.web.unshare().execute_query()
         self.assertIsInstance(result, SharingResult)
 
-    def test8_get_web_sharing_information(self):
+    def test9_get_web_sharing_information(self):
         result = ObjectSharingInformation.get_web_sharing_information(
             self.client
         ).execute_query()
         self.assertIsNotNone(result.properties)
 
-    def test9_get_site_sharing_report_capabilities(self):
+    def test_10_get_site_sharing_report_capabilities(self):
         result = SiteSharingReportHelper.get_site_sharing_report_capabilities(
             self.client
         ).execute_query()
         self.assertIsNotNone(result.value)
 
-    def test_10_get_get_list_sharing_settings(self):
+    def test_11_get_get_list_sharing_settings(self):
         result = (
             self.client.web.default_document_library()
             .get_sharing_settings()

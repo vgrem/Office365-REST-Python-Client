@@ -1,3 +1,5 @@
+from typing import Optional
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.abilities import SharingAbilities

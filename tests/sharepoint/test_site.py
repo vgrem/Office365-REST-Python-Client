@@ -91,7 +91,11 @@ class TestSite(SPTestCase):
         self.assertIsNotNone(result.value)
         self.assertTrue(self.__class__.site_response.SiteUrl == result.value)
 
-    def test_14_delete_site(self):
+    def test_14_is_deletable(self):
+        result = self.client.site.is_deletable().execute_query()
+        self.assertIsNotNone(result.value)
+
+    def test_15_delete_site(self):
         from office365.sharepoint.client_context import ClientContext
 
         admin_ctx = ClientContext(self.client.base_url).with_credentials(
@@ -100,18 +104,18 @@ class TestSite(SPTestCase):
         site_id = self.__class__.site_response.SiteId
         admin_ctx.site_manager.delete(site_id).execute_query()
 
-    # def test_15_get_block_download_policy_for_files_data(self):
+    # def test_16_get_block_download_policy_for_files_data(self):
     #    result = self.client.site.get_block_download_policy_for_files_data().execute_query()
     #    self.assertIsNotNone(result.value)
 
-    def test_16_site_font_packages(self):
+    def test_17_site_font_packages(self):
         result = self.client.site_font_packages.get().execute_query()
         self.assertIsNotNone(result.resource_path)
 
-    # def test_17_get_block_download_policy_for_files_data(self):
+    # def test_18_get_block_download_policy_for_files_data(self):
     #    result = self.client.site.get_block_download_policy_for_files_data().execute_query()
     #    self.assertIsNotNone(result.value)
 
-    # def test_18_get_top_files(self):
+    # def test_19_get_top_files(self):
     #    result = self.client.site_manager_svc.top_files().execute_query()
     #    self.assertIsNotNone(result.value)

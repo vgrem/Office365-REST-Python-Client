@@ -1,10 +1,14 @@
 from typing import TYPE_CHECKING, Optional
 
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.administration.orgassets.org_assets import OrgAssets
+from office365.sharepoint.clientsidecomponent.query_result import (
+    SPClientSideComponentQueryResult,
+)
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.files.file import File
 from office365.sharepoint.publishing.file_picker_options import FilePickerOptions
@@ -156,8 +160,24 @@ class SitePageService(Entity):
         return return_type
 
     @staticmethod
-    def get_available_full_page_applications():
-        pass
+    def get_available_full_page_applications(
+        context, include_errors=None, project=None
+    ):
+        return_type = ClientResult(
+            context, ClientValueCollection(SPClientSideComponentQueryResult)
+        )
+        params = {"includeErrors": include_errors, "project": project}
+        qry = ServiceOperationQuery(
+            SitePageService(context),
+            "GetAvailableFullPageApplications",
+            None,
+            params,
+            None,
+            return_type,
+            True,
+        )
+        context.add_query(qry)
+        return return_type
 
     @staticmethod
     def is_file_picker_external_image_search_enabled(context):

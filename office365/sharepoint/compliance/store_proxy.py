@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 
 class SPPolicyStoreProxy(Entity):
+    """ """
+
     @staticmethod
     def check_site_is_deletable_by_id(context, site_id, return_type=None):
         # type: (ClientContext, str, Optional[ClientResult[bool]]) -> ClientResult[bool]
@@ -82,6 +84,79 @@ class SPPolicyStoreProxy(Entity):
             self, "GetDynamicScopeBindingBySiteId", None, payload, None, return_type
         )
         self.context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def get_list_compliance_tag(context, list_url, return_type=None):
+        """ """
+        if return_type is None:
+            return_type = ClientResult(context, ComplianceTag())
+        payload = {"listUrl": list_url}
+        qry = ServiceOperationQuery(
+            SPPolicyStoreProxy(context),
+            "GetListComplianceTag",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
+        context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def set_list_compliance_tag(
+        context,
+        list_url,
+        compliance_tag_value,
+        block_delete=None,
+        block_edit=None,
+        sync_to_items=None,
+    ):
+        """ """
+        payload = {
+            "listUrl": list_url,
+            "complianceTagValue": compliance_tag_value,
+            "blockDelete": block_delete,
+            "blockEdit": block_edit,
+            "syncToItems": sync_to_items,
+        }
+        binding_type = SPPolicyStoreProxy(context)
+        qry = ServiceOperationQuery(
+            binding_type,
+            "SetListComplianceTag",
+            None,
+            payload,
+            None,
+            None,
+            True,
+        )
+        context.add_query(qry)
+        return binding_type
+
+    @staticmethod
+    def lock_record_item(
+        context, list_url, item_id, refresh_labeled_time, return_type=None
+    ):
+        """ """
+        if return_type is None:
+            return_type = ClientResult(context, int())
+        payload = {
+            "listUrl": list_url,
+            "itemId": item_id,
+            "refreshLabeledTime": refresh_labeled_time,
+        }
+
+        qry = ServiceOperationQuery(
+            SPPolicyStoreProxy(context),
+            "LockRecordItem",
+            None,
+            payload,
+            None,
+            return_type,
+            True,
+        )
+        context.add_query(qry)
         return return_type
 
     @property

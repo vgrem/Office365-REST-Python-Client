@@ -11,6 +11,60 @@ from office365.runtime.queries.create_entity import CreateEntityQuery
 class InformationProtection(Entity):
     """Exposes methods that you can use to get Microsoft Purview Information Protection labels and label policies."""
 
+    def create_email_file_assessment(
+        self, recipient_email, content_data, expected_assessment, category
+    ):
+        """Create an email assessment request
+
+        :param str recipient_email: The mail recipient whose policies are used to assess the mail.
+        :param str content_data: Base64 encoded file content. The file content can't fetch back because it isn't stored.
+        :param str expected_assessment: The expected assessment from submitter. Possible values are: block, unblock.
+        :param str category: The threat category. Possible values are: spam, phishing, malware.
+        """
+
+        from office365.directory.protection.threatassessment.requests.email_file import (
+            EmailFileAssessmentRequest,
+        )
+
+        return_type = EmailFileAssessmentRequest(self.context)
+        return_type.set_property("recipientEmail", recipient_email)
+        return_type.set_property("contentData", content_data)
+        return_type.set_property("expectedAssessment", expected_assessment)
+        return_type.set_property("category", category)
+        self.threat_assessment_requests.add_child(return_type)
+        qry = CreateEntityQuery(
+            self.threat_assessment_requests, return_type, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def create_file_assessment(
+        self, file_name, content_data, expected_assessment, category
+    ):
+        """Create a new threat assessment request.
+
+        :param str file_name: File name
+        :param str content_data: Base64 encoded file content. The file content can't fetch back because it isn't stored.
+        :param str expected_assessment: The expected assessment from submitter. Possible values are: block, unblock.
+        :param str category: The threat category. Possible values are: spam, phishing, malware.
+        """
+
+        from office365.directory.protection.threatassessment.requests.file import (
+            FileAssessmentRequest,
+        )
+
+        return_type = FileAssessmentRequest(self.context)
+        return_type.set_property("fileName", file_name)
+        return_type.set_property("contentData", content_data)
+        return_type.set_property("expectedAssessment", expected_assessment)
+        return_type.set_property("category", category)
+        self.threat_assessment_requests.add_child(return_type)
+        qry = CreateEntityQuery(
+            self.threat_assessment_requests, return_type, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def create_url_assessment(self, url, expected_assessment, category):
         """Create a new threat assessment request."""
         from office365.directory.protection.threatassessment.requests.url import (

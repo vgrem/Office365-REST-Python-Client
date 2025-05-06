@@ -153,9 +153,10 @@ class PeopleManager(Entity):
 
         :param str or User user_or_name: User or Login name of the specified user.
         """
-        return_type = ClientResult(self.context)
+        return_type = ClientResult(self.context, dict())
 
         def _user_resolved(account_name):
+            # type: (str) -> None
             params = {"accountName": account_name}
             qry = ServiceOperationQuery(
                 self, "GetUserProfileProperties", params, None, None, return_type

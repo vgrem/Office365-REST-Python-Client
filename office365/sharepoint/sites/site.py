@@ -57,6 +57,50 @@ class Site(Entity):
     def __init__(self, context, resource_path=None):
         super(Site, self).__init__(context, ResourcePath("Site", resource_path))
 
+    def create_migration_ingestion_job(
+        self,
+        g_web_id,
+        azure_container_source_uri,
+        azure_container_manifest_uri,
+        azure_queue_report_uri,
+        ingestion_task_key,
+    ):
+        """ """
+        return_type = ClientResult(self.context, str())
+        payload = {
+            "gWebId": g_web_id,
+            "azureContainerSourceUri": azure_container_source_uri,
+            "azureContainerManifestUri": azure_container_manifest_uri,
+            "azureQueueReportUri": azure_queue_report_uri,
+            "ingestionTaskKey": ingestion_task_key,
+        }
+        qry = ServiceOperationQuery(
+            self, "CreateMigrationIngestionJob", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def create_migration_job(
+        self,
+        g_web_id=None,
+        azure_container_source_uri=None,
+        azure_container_manifest_uri=None,
+        azure_queue_report_uri=None,
+    ):
+        """ """
+        return_type = ClientResult(self.context, str())
+        payload = {
+            "gWebId": g_web_id,
+            "azureContainerSourceUri": azure_container_source_uri,
+            "azureContainerManifestUri": azure_container_manifest_uri,
+            "azureQueueReportUri": azure_queue_report_uri,
+        }
+        qry = ServiceOperationQuery(
+            self, "CreateMigrationJob", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def create_preview_site(self, upgrade=None, sendemail=None):
         """
         Schedules the creation of an evaluation copy of the site collection for the purposes of evaluating an upgrade
@@ -409,6 +453,16 @@ class Site(Entity):
             context.site, "Exists", None, payload, None, return_type, True
         )
         context.add_query(qry)
+        return return_type
+
+    def is_deletable(self):
+        """"""
+        return_type = ClientResult(self.context, bool())
+
+        def _is_site_deletable():
+            SPPolicyStoreProxy.is_site_deletable(self.context, self.url, return_type)
+
+        self.ensure_property("Url", _is_site_deletable)
         return return_type
 
     def get_catalog(self, type_catalog):

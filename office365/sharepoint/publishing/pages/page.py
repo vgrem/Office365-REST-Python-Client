@@ -2,10 +2,14 @@ from typing import Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.publishing.pages.coauth_state import SitePageCoAuthState
+from office365.sharepoint.publishing.pages.dependency_metadata import (
+    SitePageDependencyMetadata,
+)
 from office365.sharepoint.publishing.pages.fields_data import SitePageFieldsData
 from office365.sharepoint.publishing.pages.metadata import SitePageMetadata
 from office365.sharepoint.translation.status_collection import (
@@ -55,6 +59,25 @@ class SitePage(SitePageMetadata):
         qry = ServiceOperationQuery(self, "EnsureTitleResource")
         self.context.add_query(qry)
         return self
+
+    def get_dependency_metadata(self):
+        """ """
+        return_type = ClientResult(
+            self.context, ClientValueCollection(SitePageDependencyMetadata)
+        )
+        qry = ServiceOperationQuery(
+            self, "GetDependencyMetadata", return_type=return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_version(self, version_id):
+        """ """
+        return_type = SitePage(self.context, self.resource_path)
+        qry = ServiceOperationQuery(
+            self, "GetVersion", [version_id], None, None, return_type
+        )
+        self.context.add_query(qry)
 
     def save_page(
         self, title, canvas_content=None, banner_image_url=None, topic_header=None

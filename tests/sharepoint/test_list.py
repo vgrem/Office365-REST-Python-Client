@@ -183,3 +183,8 @@ class TestSPList(SPTestCase):
             .execute_query()
         )
         self.assertIsInstance(result.value, dict)
+
+    def test_24_get_compliance_tag(self):
+        site_pages = self.client.web.get_list_by_title("Site Pages")
+        result = site_pages.get_compliance_tag().execute_query()
+        self.assertIsNotNone(result.value)

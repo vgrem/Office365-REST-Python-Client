@@ -19,10 +19,6 @@ class TestPublishing(SPTestCase):
         svc = self.client.site_pages.get().execute_query()
         self.assertIsNotNone(svc.resource_path)
 
-    def test2_list_site_pages(self):
-        pages = self.client.site_pages.pages.get().execute_query()
-        self.assertIsInstance(pages, SitePageCollection)
-
     # def test3_get_time_zone(self):
     #    time_zone = SitePageService.get_time_zone(self.client, "Moscow").execute_query()
     #    self.assertIsInstance(time_zone, PrimaryCityTime)

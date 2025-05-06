@@ -37,6 +37,9 @@ from office365.sharepoint.tenant.administration.insights.top_files_sharing impor
 from office365.sharepoint.tenant.administration.policies.app_billing_properties import (
     SPOAppBillingProperties,
 )
+from office365.sharepoint.tenant.administration.policies.content_security_configuration import (
+    SPOContentSecurityPolicyConfiguration,
+)
 from office365.sharepoint.tenant.administration.policies.definition import (
     TenantAdminPolicyDefinition,
 )
@@ -225,6 +228,15 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def get_content_security_policy(self):
+        """"""
+        return_type = SPOContentSecurityPolicyConfiguration(self.context)
+        qry = ServiceOperationQuery(
+            self, "GetContentSecurityPolicy", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
     def get_spo_app_billing_policies(self):
         """ """
         return_type = ClientResult(
@@ -310,6 +322,32 @@ class Tenant(Entity):
         return_type = ClientResult(self.context, bool())
         qry = ServiceOperationQuery(
             self, "HasValidEducationLicense", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def is_request_content_management_assessment_eligible(self):
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(
+            self,
+            "IsRequestContentManagementAssessmentEligible",
+            None,
+            None,
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def is_syntex_repository_terms_of_service_accepted(self):
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(
+            self,
+            "IsSyntexRepositoryTermsOfServiceAccepted",
+            None,
+            None,
+            None,
+            return_type,
         )
         self.context.add_query(qry)
         return return_type
