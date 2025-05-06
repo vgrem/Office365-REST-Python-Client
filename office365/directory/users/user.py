@@ -272,9 +272,11 @@ class User(DirectoryObject):
         to_recipients,
         cc_recipients=None,
         bcc_recipients=None,
+        reply_to = None,
         save_to_sent_items=False,
+        body_type="Text",
     ):
-        # type: (str, str|ItemBody, List[str], List[str], List[str], bool) -> Message
+        # type: (str, str|ItemBody, List[str], List[str]|None, List[str]|None, List[str]|None, bool, str) -> Message
         """Send a new message on the fly
 
         :param str subject: The subject of the message.
@@ -282,12 +284,14 @@ class User(DirectoryObject):
         :param list[str] to_recipients: The To: recipients for the message.
         :param list[str] cc_recipients: The CC: recipients for the message.
         :param list[str] bcc_recipients: The BCC: recipients for the message.
+        :param list[str] reply_to: The Reply-To: : recipients for the reply to the message.
         :param bool save_to_sent_items: Indicates whether to save the message in Sent Items. Specify it only if
             the parameter is false; default is true
+        :param str body_type: The type of the message body. It can be "HTML" or "Text". Default is "Text".
         """
         return_type = Message(self.context)
         return_type.subject = subject
-        return_type.body = body
+        return_type.body = (body, body_type)
         [
             return_type.to_recipients.add(Recipient.from_email(email))
             for email in to_recipients
@@ -301,6 +305,11 @@ class User(DirectoryObject):
             [
                 return_type.cc_recipients.add(Recipient.from_email(email))
                 for email in cc_recipients
+            ]
+        if reply_to is not None:
+            [
+                return_type.reply_to.add(Recipient.from_email(email))
+                for email in reply_to
             ]
 
         payload = {"message": return_type, "saveToSentItems": save_to_sent_items}

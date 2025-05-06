@@ -258,11 +258,22 @@ class Message(OutlookItem):
 
     @body.setter
     def body(self, value):
-        # type: (str|ItemBody) -> None
+        # type: (str|ItemBody|tuple) -> None
         """Sets the body of the message. It can be in HTML or text format."""
-        if not isinstance(value, ItemBody):
-            value = ItemBody(value)
-        self.set_property("body", value)
+        content_type = "Text"  # Default content type
+        if isinstance(value, tuple):
+            if len(value) != 2:
+                raise ValueError("value must be a tuple of (content, content_type)")
+            content, content_type = value
+        else:
+            content = value
+        if isinstance(content, ItemBody):
+            self.set_property("body", content)
+            return
+        if content_type.lower() not in ["text", "html"]:
+            raise ValueError("content_type must be either 'Text' or 'HTML'")
+        item_body = ItemBody(content=content, content_type=content_type)
+        self.set_property("body", item_body)
 
     @property
     def body_preview(self):
@@ -405,6 +416,14 @@ class Message(OutlookItem):
         self._persist_changes("ccRecipients")
         return self.properties.setdefault(
             "ccRecipients", ClientValueCollection(Recipient)
+        )
+
+    @property
+    def reply_to(self):
+        """The replyTo: recipients for the reply to the message."""
+        self._persist_changes("replyTo")
+        return self.properties.setdefault(
+            "replyTo", ClientValueCollection(Recipient)
         )
 
     @property
