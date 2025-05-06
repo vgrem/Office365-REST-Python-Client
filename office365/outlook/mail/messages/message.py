@@ -422,9 +422,7 @@ class Message(OutlookItem):
     def reply_to(self):
         """The replyTo: recipients for the reply to the message."""
         self._persist_changes("replyTo")
-        return self.properties.setdefault(
-            "replyTo", ClientValueCollection(Recipient)
-        )
+        return self.properties.setdefault("replyTo", ClientValueCollection(Recipient))
 
     @property
     def sender(self):
