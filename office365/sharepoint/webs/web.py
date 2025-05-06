@@ -266,7 +266,7 @@ class Web(SecurableObject):
         """
         if view_xml is None:
             view_xml = "<View><Query></Query></View>"
-        return_type = ClientResult(self.context, dict())
+        return_type = ClientResult(self.context, {})
 
         def _get_list_data_as_stream():
             list_abs_url = self.url + path

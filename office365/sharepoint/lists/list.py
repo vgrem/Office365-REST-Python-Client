@@ -407,7 +407,7 @@ class List(SecurableObject):
         :param ClientResult[dict] return_type: The return type.
         """
         if return_type is None:
-            return_type = ClientResult(context, dict())
+            return_type = ClientResult(context, {})
         payload = {
             "listFullUrl": list_full_url,
             "parameters": parameters,
@@ -433,7 +433,7 @@ class List(SecurableObject):
         :param ClientResult[dict] return_type: The return type.
         """
         if return_type is None:
-            return_type = ClientResult(context, dict())
+            return_type = ClientResult(context, {})
         payload = {
             "parameters": parameters,
         }
@@ -758,7 +758,7 @@ class List(SecurableObject):
         :param int render_options: Specifies the type of output to return.
         :param bool expand_groups: Specifies whether to expand the grouping or not.
         """
-        return_type = ClientResult(self.context, dict())
+        return_type = ClientResult(self.context, {})
         if view_xml is None:
             view_xml = "<View/>"
         payload = {

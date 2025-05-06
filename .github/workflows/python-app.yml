@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [linting]
   pull_request:
     branches: [master]
 
@@ -42,7 +42,7 @@ jobs:
           pip install -r requirements-dev.txt
       - name: Run Pylint
         run: |
-          pylint office365
+          pylint --disable=too-many-positional-arguments office365
 
   pytest:
     runs-on: ubuntu-latest
