@@ -610,7 +610,7 @@ class File(AbstractFile):
         """
         try:
             decoded_server_relative_url = unquote(server_relative_url)
-        except Exception:
+        except (ValueError, AttributeError, TypeError):
             decoded_server_relative_url = server_relative_url
         url = quote(
             r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
@@ -636,7 +636,7 @@ class File(AbstractFile):
         """
         try:
             decoded_server_relative_url = unquote(server_relative_url)
-        except Exception:
+        except (ValueError, AttributeError, TypeError):
             decoded_server_relative_url = server_relative_url
         url = quote(
             r"{0}/web/getFileByServerRelativePath(DecodedUrl='{1}')/\$value".format(
