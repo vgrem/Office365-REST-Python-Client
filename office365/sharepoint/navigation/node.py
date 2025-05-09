@@ -2,7 +2,6 @@ from typing import Optional
 
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
-from office365.sharepoint.navigation.node_collection import NavigationNodeCollection
 from office365.sharepoint.translation.user_resource import UserResource
 
 
@@ -20,8 +19,12 @@ class NavigationNode(Entity):
 
     @property
     def children(self):
-        # type: () -> NavigationNodeCollection
+        # type: () -> 'NavigationNodeCollection'
         """Gets the collection of child nodes of the navigation node."""
+        from office365.sharepoint.navigation.node_collection import (
+            NavigationNodeCollection,
+        )
+
         return self.properties.get(
             "Children",
             NavigationNodeCollection(
@@ -66,7 +69,7 @@ class NavigationNode(Entity):
 
     @property
     def parent_collection(self):
-        # type: () -> NavigationNodeCollection
+        # type: () -> 'NavigationNodeCollection'
         return self._parent_collection
 
     @property
@@ -84,13 +87,3 @@ class NavigationNode(Entity):
             property_mapping = {"TitleResource": self.title_resource}
             default_value = property_mapping.get(name, None)
         return super(NavigationNode, self).get_property(name, default_value)
-
-    def set_property(self, name, value, persist_changes=True):
-        super(NavigationNode, self).set_property(name, value, persist_changes)
-        # fallback: create a new resource path
-        if self._resource_path is None:
-            if name == "Id":
-                self._resource_path = self.parent_collection.get_by_id(
-                    value
-                ).resource_path
-        return self

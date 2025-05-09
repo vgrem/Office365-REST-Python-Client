@@ -17,6 +17,7 @@ class BrandCenter(Entity):
         super(BrandCenter, self).__init__(context, ResourcePath("SP.BrandCenter"))
 
     def configuration(self):
+        """ """
         return_type = ClientResult(self.context, BrandCenterConfiguration())
         qry = ServiceOperationQuery(
             self, "Configuration", None, None, None, return_type
@@ -25,6 +26,7 @@ class BrandCenter(Entity):
         return return_type
 
     def get_site_themes(self):
+        """ """
         return_type = ClientResult(self.context, SiteThemes())
         qry = ServiceOperationQuery(
             self, "GetSiteThemes", None, None, None, return_type
