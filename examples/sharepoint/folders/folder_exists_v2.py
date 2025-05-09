@@ -1,5 +1,5 @@
 """
- How to determine whether folder exist?
+How to determine whether folder exist?
 """
 
 from office365.runtime.client_request_exception import ClientRequestException

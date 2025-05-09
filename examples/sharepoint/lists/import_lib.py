@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 from random import randrange
 

@@ -2358,11 +2358,17 @@
             <Property Name="FooterEmphasis" Type="Edm.Int32" Nullable="false"/>
             <Property Name="FooterEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="FooterLayout" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="FooterOverlayColor" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="FooterOverlayGradientDirection" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="FooterOverlayOpacity" Type="Edm.Int32" Nullable="false"/>
             <Property Name="HasWebTemplateExtension" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="HeaderColorIndexInDarkMode" Type="Edm.Int32" Nullable="false"/>
             <Property Name="HeaderColorIndexInLightMode" Type="Edm.Int32" Nullable="false"/>
             <Property Name="HeaderEmphasis" Type="Edm.Int32" Nullable="false"/>
             <Property Name="HeaderLayout" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="HeaderOverlayColor" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="HeaderOverlayGradientDirection" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="HeaderOverlayOpacity" Type="Edm.Int32" Nullable="false"/>
             <Property Name="HideTitleInHeader" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="HorizontalQuickLaunch" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
@@ -14358,6 +14364,12 @@
                <Parameter Name="footerColorIndexInDarkMode" Type="Edm.Int32"/>
                <Parameter Name="footerAlignment" Type="Edm.Int32"/>
                <Parameter Name="footerBlur" Type="Edm.Int32"/>
+               <Parameter Name="headerOverlayColor" Type="Edm.Int32"/>
+               <Parameter Name="headerOverlayGradientDirection" Type="Edm.Int32"/>
+               <Parameter Name="headerOverlayOpacity" Type="Edm.Int32"/>
+               <Parameter Name="footerOverlayColor" Type="Edm.Int32"/>
+               <Parameter Name="footerOverlayGradientDirection" Type="Edm.Int32"/>
+               <Parameter Name="footerOverlayOpacity" Type="Edm.Int32"/>
             </FunctionImport>
             <FunctionImport Name="SetDefaultNewPageTemplateId" IsBindable="true">
                <Parameter Name="this" Type="SP.Web"/>
@@ -14879,7 +14891,10 @@
                <Parameter Name="this" Type="SP.RequestContext"/>
             </FunctionImport>
             <FunctionImport Name="SP_CurrencyList_GetList" ReturnType="SP.CurrencyInformationCollection"/>
-            <FunctionImport Name="SP_DigitalLegacy_GetSettingsAsStream" ReturnType="Edm.Stream"/>
+            <FunctionImport Name="SP_DigitalLegacy_GetSettingsAsStream" ReturnType="Edm.Stream" IsSideEffecting="false"/>
+            <FunctionImport Name="SP_DigitalLegacy_NominateBeneficiary" ReturnType="Edm.Stream">
+               <Parameter Name="beneficiaryEmail" Type="Edm.String"/>
+            </FunctionImport>
             <FunctionImport Name="Add" ReturnType="SP.EventReceiverDefinition" IsBindable="true" EntitySet="EventReceiverDefinitions">
                <Parameter Name="this" Type="Collection(SP.EventReceiverDefinition)"/>
                <Parameter Name="eventReceiverCreationInformation" Type="SP.EventReceiverDefinitionCreationInformation"/>
@@ -17400,6 +17415,13 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient"/>
                <Parameter Name="reportId" Type="Edm.Guid" Nullable="false"/>
             </FunctionImport>
+            <FunctionImport Name="GetSPOAuditDataCollectionForAllReports" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPAuditDataCollectionResponse)" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient"/>
+            </FunctionImport>
+            <FunctionImport Name="GetSPOAuditDataCollectionForReport" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPAuditDataCollectionResponse)" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient"/>
+               <Parameter Name="reportEntity" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
             <FunctionImport Name="GetSPODataAccessGovernanceInsight" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightResponse)" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient"/>
                <Parameter Name="reportEntity" Type="Edm.Int32" Nullable="false"/>
@@ -17416,6 +17438,11 @@
             <FunctionImport Name="RemoveDataAccessGovernanceReport" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient"/>
                <Parameter Name="reportId" Type="Edm.Guid" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="SetOptInStatusForReports" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SPAuditDataCollectionResponse" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightRestApiClient"/>
+               <Parameter Name="reportEntity" Type="Edm.Int32" Nullable="false"/>
+               <Parameter Name="optInStatus" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="Microsoft_Online_SharePoint_TenantAdministration_SPDataGovernanceRestApiClientBase" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceRestApiClientBase" IsComposable="true" EntitySet="SPDataGovernanceRestApiClientBases">
                <Parameter Name="authorizationHeader" Type="Edm.String"/>
@@ -17648,6 +17675,7 @@
             <FunctionImport Name="AddSyntexCustomModelSetting" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="modelSetting" Type="SP.SyntexCustomModelSetting"/>
+               <Parameter Name="scenario" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="AddTenantAdminListItem" ReturnType="SP.ListItem" IsBindable="true" EntitySet="ListItems">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -17734,6 +17762,7 @@
             <FunctionImport Name="DeleteSyntexCustomModelSetting" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="uniqueId" Type="Edm.String"/>
+               <Parameter Name="scenario" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="DisableCollaborationInsightsDataCollection" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -18104,6 +18133,10 @@
             </FunctionImport>
             <FunctionImport Name="GetSPOWebTemplatesAllowedForArchiving" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SPOTenantWebTemplateCollection" IsComposable="true" IsBindable="true" EntitySet="SPOTenantWebTemplateCollections">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+            </FunctionImport>
+            <FunctionImport Name="GetSyntexCustomModelSettings" ReturnType="Collection(SP.SyntexCustomModelSetting)" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="scenario" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="GetTargetedSitesDetails" ReturnType="Collection(SP.TargetedSiteDetails)" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -18743,6 +18776,7 @@
             <FunctionImport Name="UpdateSyntexCustomModelSetting" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="modelSetting" Type="SP.SyntexCustomModelSetting"/>
+               <Parameter Name="scenario" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="UpdateTargetedSite" ReturnType="SP.TargetedSiteDetails" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -23930,6 +23964,9 @@
          <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.SiteUserGroupsData">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.SPAuditDataCollectionResponse">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="Microsoft.Online.SharePoint.TenantAdministration.SPDataGovernanceInsightExportedReport">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -25173,6 +25210,15 @@
          <Annotations Target="SP.Web/FooterLayout">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
+         <Annotations Target="SP.Web/FooterOverlayColor">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Web/FooterOverlayGradientDirection">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Web/FooterOverlayOpacity">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
          <Annotations Target="SP.Web/HasWebTemplateExtension">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -25186,6 +25232,15 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.Web/HeaderLayout">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Web/HeaderOverlayColor">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Web/HeaderOverlayGradientDirection">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.Web/HeaderOverlayOpacity">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="Microsoft.SharePoint.ClientSideComponent.HostedAppsManager">
@@ -28173,9 +28228,6 @@
          <Annotations Target="SP.ApiData/GetCurrentAppPermissions(Microsoft.SharePoint.TWS.AuthTestService)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SignVerifiableEvent(Microsoft.SharePoint.TWS.AuthTestService, Edm.String, Edm.String, Edm.String, Edm.String, Edm.String)">
-            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
-         </Annotations>
          <Annotations Target="SP.ApiData/VerifySPAppRequestContextIsNull(Microsoft.SharePoint.TWS.AuthTestService)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
@@ -29280,7 +29332,7 @@
          <Annotations Target="SP.ApiData/SetAccessRequestSiteDescriptionAndUpdate(SP.Web, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SetChromeOptions(SP.Web, Edm.Int32, Edm.Int32, Edm.Boolean, Edm.Boolean, Edm.Int32, Edm.Int32, Edm.Boolean, Edm.Int32, Edm.Boolean, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32)">
+         <Annotations Target="SP.ApiData/SetChromeOptions(SP.Web, Edm.Int32, Edm.Int32, Edm.Boolean, Edm.Boolean, Edm.Int32, Edm.Int32, Edm.Boolean, Edm.Int32, Edm.Boolean, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SetDefaultNewPageTemplateId(SP.Web, Edm.Guid)">
@@ -29566,6 +29618,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SP_DigitalLegacy_GetSettingsAsStream()">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/SP_DigitalLegacy_NominateBeneficiary(Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/AddUsingPath(Collection(SP.File), Edm.String, Edm.Boolean, Edm.Boolean, Edm.Boolean, Edm.String, Edm.Stream)">
@@ -30072,7 +30127,7 @@
          <Annotations Target="SP.ApiData/AddSPOAppPrioritizationPolicy(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Guid, Edm.Guid, Edm.String, Edm.String, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/AddSyntexCustomModelSetting(Microsoft.Online.SharePoint.TenantAdministration.Tenant, SP.SyntexCustomModelSetting)">
+         <Annotations Target="SP.ApiData/AddSyntexCustomModelSetting(Microsoft.Online.SharePoint.TenantAdministration.Tenant, SP.SyntexCustomModelSetting, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/AddToOrgAssetsLibAndCdnV2(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Int32, Edm.String, Edm.String, Edm.Int32, Edm.Boolean)">
@@ -30096,7 +30151,7 @@
          <Annotations Target="SP.ApiData/DeleteSPOAppPrioritizationPolicy(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/DeleteSyntexCustomModelSetting(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String)">
+         <Annotations Target="SP.ApiData/DeleteSyntexCustomModelSetting(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetBillingPolicyIdForApp(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Guid)">
@@ -30130,6 +30185,9 @@
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetSPOCopilotPromoUsageStatistics(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/GetSyntexCustomModelSettings(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetTenantSiteCreationSource(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
@@ -30168,7 +30226,7 @@
          <Annotations Target="SP.ApiData/SetTrackViewFeatureAlwaysVisible(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/UpdateSyntexCustomModelSetting(Microsoft.Online.SharePoint.TenantAdministration.Tenant, SP.SyntexCustomModelSetting)">
+         <Annotations Target="SP.ApiData/UpdateSyntexCustomModelSetting(Microsoft.Online.SharePoint.TenantAdministration.Tenant, SP.SyntexCustomModelSetting, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/ValidateMultipleHomeSitesParameterExists(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Boolean)">
@@ -37032,6 +37090,7 @@
          </ComplexType>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="SP.MicroService">
+         <ComplexType Name="MicroServiceWorkItemAuthCryptoProvider"/>
          <ComplexType Name="MicroServiceWorkItemProperties">
             <Property Name="ApiPath" Type="Edm.String"/>
             <Property Name="CustomProperties" Type="Collection(SP.KeyValue)"/>
@@ -37807,6 +37866,8 @@
          </ComplexType>
          <ComplexType Name="SPActiveContainerProperties">
             <Property Name="ApplicationName" Type="Edm.String"/>
+            <Property Name="ArchivedBy" Type="Edm.String"/>
+            <Property Name="ArchiveStatus" Type="Edm.String"/>
             <Property Name="ContainerApiUrl" Type="Edm.String"/>
             <Property Name="ContainerId" Type="Edm.String"/>
             <Property Name="ContainerName" Type="Edm.String"/>
@@ -37816,6 +37877,7 @@
             <Property Name="CreatedOn" Type="Edm.String"/>
             <Property Name="DeletedOn" Type="Edm.String"/>
             <Property Name="Description" Type="Edm.String"/>
+            <Property Name="LastArchivedDateTime" Type="Edm.String"/>
             <Property Name="OpticalCharacterRecognitionEnabled" Type="Edm.Boolean"/>
             <Property Name="Owners" Type="Collection(Microsoft.SharePoint.Containers.SPActiveContainerMemberProperties)"/>
             <Property Name="OwnersCount" Type="Edm.Int32" Nullable="false"/>
@@ -38250,7 +38312,11 @@
             <Property Name="totalSites" Type="Edm.Int32" Nullable="false"/>
             <Property Name="totalUsers" Type="Edm.Int32" Nullable="false"/>
          </ComplexType>
-         <ComplexType Name="ContentManagementAssessmentPolicyReportDetails"/>
+         <ComplexType Name="ContentManagementAssessmentPolicyReportDetails">
+            <Property Name="totalImpactedSites" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalInactiveSites" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="totalOwnerlessSites" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="ContentManagementAssessmentResults">
             <Property Name="requestedTime" Type="Edm.DateTime"/>
             <Property Name="siteLifecycleManagementPolicyExecutionId" Type="Edm.Int32"/>
@@ -38800,7 +38866,6 @@
          </ComplexType>
          <ComplexType Name="MainAccessInformation">
             <Property Name="mainLink" Type="SP.Sharing.MainLinkInfo"/>
-            <Property Name="mainLinkDefaults" Type="SP.Sharing.MainLinkInfo"/>
             <Property Name="sharingSettings" Type="SP.Sharing.ItemSharingSettings"/>
          </ComplexType>
          <ComplexType Name="MainLinkInfo">
@@ -40027,6 +40092,12 @@
             <Property Name="IsReadOnly" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Value" Type="Edm.String"/>
          </ComplexType>
+         <ComplexType Name="SPAuditDataCollectionResponse">
+            <Property Name="DataCollectionStatus" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="OptInDateTime" Type="Edm.DateTime" Nullable="false"/>
+            <Property Name="OptOutDateTime" Type="Edm.DateTime" Nullable="false"/>
+            <Property Name="ReportEntity" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
          <ComplexType Name="SPContainerApplicationProperties">
             <Property Name="ContainerTypeId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="IsGovernableByAdmin" Type="Edm.Boolean" Nullable="false"/>
@@ -40170,6 +40241,7 @@
             <Property Name="TemplatesSitePermissions" Type="Collection(Edm.String)"/>
             <Property Name="TriggeredDateTime" Type="Edm.String"/>
             <Property Name="UserID" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="UserIDList" Type="Collection(Edm.Guid)" Nullable="false"/>
             <Property Name="UserLimit" Type="Edm.Int32" Nullable="false"/>
             <Property Name="Version" Type="Edm.String"/>
             <Property Name="Workload" Type="Edm.String"/>
@@ -41196,6 +41268,7 @@
             <Property Name="ActionId" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ClientName" Type="Edm.String"/>
             <Property Name="DebugCommand" Type="Edm.String"/>
+            <Property Name="DeltaSyncQualified" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="Duration" Type="Edm.Time" Nullable="false"/>
             <Property Name="ErrorCode" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ErrorMessage" Type="Edm.String"/>
@@ -42821,8 +42894,10 @@
             </Key>
             <Property Name="ErrorCode" Type="Edm.Int32" Nullable="false"/>
             <Property Name="InitialCreation" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="ParentListId" Type="Edm.Guid"/>
             <Property Name="Path" Type="SP.ResourcePath"/>
             <Property Name="Succeeded" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="UniqueId" Type="Edm.Guid"/>
          </EntityType>
          <EntityType Name="RemovedStatus">
             <Key>

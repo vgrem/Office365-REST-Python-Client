@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 from office365.graph_client import GraphClient
 from office365.onedrive.driveitems.driveItem import DriveItem
