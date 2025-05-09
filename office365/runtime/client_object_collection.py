@@ -81,14 +81,12 @@ class ClientObjectCollection(ClientObject, Generic[T]):
 
     def __iter__(self):
         # type: () -> Iterator[T]
-        for item in self._data:
-            yield item
+        yield from self._data
         if self._paged_mode:
             while self.has_next:
                 self._get_next().execute_query()
                 next_items = self._data[self._current_pos :]
-                for next_item in next_items:
-                    yield next_item
+                yield from next_items
 
     def __len__(self):
         # type: () -> int
