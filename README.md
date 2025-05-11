@@ -14,23 +14,23 @@ Microsoft 365 & Microsoft Graph library for Python
 
 ## Status
 [![Downloads](https://pepy.tech/badge/office365-rest-python-client/month)](https://pepy.tech/project/office365-rest-python-client)
-[![PyPI](https://img.shields.io/pypi/v/Office365-REST-Python-Client.svg)](https://pypi.python.org/pypi/Office365-REST-Python-Client)
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/Office365-REST-Python-Client.svg)](https://pypi.python.org/pypi/Office365-REST-Python-Client/)
-[![Build Status](https://travis-ci.com/vgrem/Office365-REST-Python-Client.svg?branch=master)](https://travis-ci.com/vgrem/Office365-REST-Python-Client)
+[![PyPI](https://img.shields.io/pypi/v/office365-rest-python-client.svg)](https://pypi.python.org/pypi/office365-rest-python-client)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/office365-rest-python-client.svg)](https://pypi.python.org/pypi/office365-rest-python-client/)
+[![Build Status](https://travis-ci.com/vgrem/office365-rest-python-client.svg?branch=master)](https://travis-ci.com/vgrem/office365-rest-python-client)
 
 # Installation
 
 Use pip:
 
 ```
-pip install Office365-REST-Python-Client
+pip install office365-rest-python-client
 ```
 
 ### Note 
 >
 >Alternatively the _latest_ version could be directly installed via GitHub:
 >```
->pip install git+https://github.com/vgrem/Office365-REST-Python-Client.git
+>pip install git+https://github.com/vgrem/office365-rest-python-client.git
 >```
 
 # Authentication
@@ -74,7 +74,7 @@ Steps to access:
   
    Documentation:
    - [Granting access using SharePoint App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs)  
-   - [wiki](https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-and-and-SharePoint-2013-2016-2019-on-premises--with-app-principal)
+   - [wiki](https://github.com/vgrem/office365-rest-python-client/wiki/How-to-connect-to-SharePoint-Online-and-and-SharePoint-2013-2016-2019-on-premises--with-app-principal)
   
    Example: [connect_with_app_principal.py](examples/sharepoint/auth_app_only.py)
   
@@ -92,7 +92,7 @@ Steps to access:
 
   Documentation: 
    - [Granting access via Azure AD App-Only](https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)  
-   - [wiki](https://github.com/vgrem/Office365-REST-Python-Client/wiki/How-to-connect-to-SharePoint-Online-with-certificate-credentials) 
+   - [wiki](https://github.com/vgrem/office365-rest-python-client/wiki/How-to-connect-to-SharePoint-Online-with-certificate-credentials) 
   
   Example: [with_certificate.py](examples/sharepoint/auth_certificate.py)
 

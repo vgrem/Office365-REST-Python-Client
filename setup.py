@@ -17,7 +17,7 @@ setup(
     description="Microsoft 365 & Microsoft Graph Library for Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/vgrem/Office365-REST-Python-Client",
+    url="https://github.com/vgrem/office365-rest-python-client",
     install_requires=[
         "requests",
         "msal",

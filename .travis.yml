@@ -10,7 +10,7 @@ script:
 - python setup.py test
 stages:
 - name: test
-  if: repo = "vgrem/Office365-REST-Python-Client"
+  if: repo = "vgrem/office365-rest-python-client"
 - name: deploy
 jobs:
   include:
@@ -25,4 +25,4 @@ jobs:
       on:
         tags: true
         python: 3.6
-        repo: vgrem/Office365-REST-Python-Client
+        repo: vgrem/office365-rest-python-client
