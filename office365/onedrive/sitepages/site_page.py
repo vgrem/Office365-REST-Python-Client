@@ -15,7 +15,11 @@ class SitePage(BaseSitePage):
     webParts."""
 
     def get_web_parts_by_position(
-        self, web_part_index, horizontal_section_id, is_in_vertical_section, column_id
+        self,
+        web_part_index=None,
+        horizontal_section_id=None,
+        is_in_vertical_section=None,
+        column_id=None,
     ):
         """
         Get a collection of webPart by providing webPartPosition information.
@@ -40,6 +44,13 @@ class SitePage(BaseSitePage):
         self.context.add_query(qry)
         return return_type
 
+    def checkin(self):
+        """
+        Check in the latest version of a sitePage resource, which makes the version of the page available to all users.
+        If the page is checked out, check in the page and publish it. If the page is checked out to the caller
+        of this API, the page is automatically checked in and then published."""
+        return self
+
     def publish(self):
         """
         Publish the latest version of a sitePage resource, which makes the version of the page available to all users.
@@ -49,7 +60,7 @@ class SitePage(BaseSitePage):
         If a page approval flow has been activated in the page library, the page is not published until the approval
         flow is completed.
         """
-        qry = ServiceOperationQuery(self, "publish")
+        qry = ServiceOperationQuery(self, "microsoft.graph.sitePage/publish")
         self.context.add_query(qry)
         return self
 

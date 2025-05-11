@@ -4,7 +4,7 @@ from office365.entity_collection import EntityCollection
 from office365.onedrive.base_item import BaseItem
 from office365.onedrive.columns.definition_collection import ColumnDefinitionCollection
 from office365.onedrive.contenttypes.collection import ContentTypeCollection
-from office365.onedrive.listitems.list_item import ListItem
+from office365.onedrive.listitems.collection import ListItemCollection
 from office365.onedrive.lists.info import ListInfo
 from office365.onedrive.operations.rich_long_running import RichLongRunningOperation
 from office365.onedrive.sharepoint_ids import SharePointIds
@@ -68,13 +68,11 @@ class List(BaseItem):
 
     @property
     def items(self):
-        # type: () -> EntityCollection[ListItem]
+        # type: () -> ListItemCollection
         """All items contained in the list."""
         return self.properties.get(
             "items",
-            EntityCollection(
-                self.context, ListItem, ResourcePath("items", self.resource_path)
-            ),
+            ListItemCollection(self.context, ResourcePath("items", self.resource_path)),
         )
 
     @property

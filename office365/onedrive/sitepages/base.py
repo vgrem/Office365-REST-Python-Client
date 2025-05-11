@@ -30,3 +30,11 @@ class BaseSitePage(BaseItem):
         # type: () -> Optional[str]
         """Title of the sitePage."""
         return self.properties.get("title", None)
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "publishingState": self.publishing_state,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(BaseSitePage, self).get_property(name, default_value)

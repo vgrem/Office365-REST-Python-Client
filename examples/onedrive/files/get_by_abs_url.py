@@ -18,6 +18,4 @@ client = GraphClient(tenant=test_tenant).with_username_and_password(
 )
 
 file_item = client.shares.by_url(file_abs_url).drive_item.get().execute_query()
-
-result = file_item.get_content().execute_query()
-print(result.value)
+print(file_item.id)

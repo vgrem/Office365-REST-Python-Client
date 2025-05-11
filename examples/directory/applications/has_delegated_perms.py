@@ -17,11 +17,14 @@ client = GraphClient(tenant=test_tenant).with_client_secret(
 )
 
 resource = client.service_principals.get_by_name("Microsoft Graph")
-scope = "FileStorageContainer.Selected"
+scope = "BackupRestore-Control.Read.All"
 user = client.users.get_by_principal_name(test_admin_principal_name)
 client_app = client.applications.get_by_app_id(test_client_id)
 result = resource.get_delegated_permissions(test_client_id).execute_query()
-if len([cur_scope for cur_scope in result.value if cur_scope == scope]) == 0:
+found_scope = next(
+    (cur_scope for cur_scope in result.value if cur_scope == scope), None
+)
+if found_scope is None:
     print("Delegated permission '{0}' is not granted".format(scope))
 else:
     print(result.value)

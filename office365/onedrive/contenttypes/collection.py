@@ -6,6 +6,8 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class ContentTypeCollection(EntityCollection[ContentType]):
+    """Content type collection"""
+
     def __init__(self, context, resource_path):
         super(ContentTypeCollection, self).__init__(context, ContentType, resource_path)
 
