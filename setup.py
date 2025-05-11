@@ -8,7 +8,7 @@ with io.open("README.md", mode="r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="Office365-REST-Python-Client",
+    name="office365-rest-python-client",
     version="2.6.2",
     author="Vadim Gremyachev",
     author_email="vvgrem@gmail.com",
