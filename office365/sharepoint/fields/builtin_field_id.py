@@ -10,6 +10,14 @@ class SPBuiltInFieldId:
     FSObjType = "FSObjType"
     """Identifies a field that contains information about the file system type"""
 
+    FileDirRef = "FileDirRef"
+    """Identifies a field that contains information about the file directory for the specified
+    SharePoint Foundation object."""
+
+    FileLeafRef = "FileLeafRef"
+    """Identifies a field that contains information about the server-relative URL for the file node that is
+    associated with the specified SharePoint Foundation object."""
+
     FileType = "FileType"
     """Identifies a field that contains information about the file type for version history of the specified
     SharePoint Foundation library picture object."""

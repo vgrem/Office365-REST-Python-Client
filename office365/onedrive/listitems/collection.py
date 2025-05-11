@@ -8,7 +8,7 @@ class ListItemCollection(EntityCollection[ListItem]):
 
     def __init__(self, context, resource_path):
         super(ListItemCollection, self).__init__(context, ListItem, resource_path)
-        self._honor_nonindexed = False
+        self._honor_nonindexed = True
 
     def honor_nonindexed(self, value):
         # type: (bool) -> "ListItemCollection"
@@ -32,3 +32,7 @@ class ListItemCollection(EntityCollection[ListItem]):
     def get_by_name(self, name):
         """Retrieve a list item by name"""
         return self.single("fields/FileLeafRef eq '{0}'".format(name))
+
+    def get_by_path(self, path):
+        """Retrieve a list item by path"""
+        return self.single("fields/FileRef eq '{0}'".format(path))

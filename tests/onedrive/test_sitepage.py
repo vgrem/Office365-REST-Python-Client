@@ -31,11 +31,7 @@ class TestSitePage(GraphTestCase):
     def test3_checkin_site_page(self):
         page_name = self.__class__.target_page.name
         pages_list = self.test_site.lists.get_by_name("Site Pages")
-        list_item = (
-            pages_list.items.honor_nonindexed(True)
-            .get_by_name(page_name)
-            .execute_query()
-        )
+        list_item = pages_list.items.get_by_name(page_name).execute_query()
         list_item.drive_item.checkin("Initial version").execute_query()
         self.assertIsNotNone(list_item.resource_path)
 
@@ -73,13 +69,4 @@ class TestSitePage(GraphTestCase):
 
     def test_11_get_site_page_list(self):
         result = self.test_site.lists.get_by_name("Site Pages").get().execute_query()
-        self.assertIsNotNone(result.resource_path)
-
-    def test_12_get_site_page_item_by_name(self):
-        pages_list = self.test_site.lists.get_by_name("Site Pages")
-        result = (
-            pages_list.items.honor_nonindexed(True)
-            .get_by_name("Home.aspx")
-            .execute_query()
-        )
         self.assertIsNotNone(result.resource_path)

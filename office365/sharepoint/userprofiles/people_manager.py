@@ -148,12 +148,13 @@ class PeopleManager(Entity):
         return self
 
     def get_user_profile_properties(self, user_or_name):
+        # type: (str|User) -> ClientResult[dict]
         """
         Gets the specified user profile properties for the specified user.
 
         :param str or User user_or_name: User or Login name of the specified user.
         """
-        return_type = ClientResult(self.context, dict())
+        return_type = ClientResult(self.context, {})
 
         def _user_resolved(account_name):
             # type: (str) -> None
