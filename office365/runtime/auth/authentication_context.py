@@ -47,7 +47,7 @@ class AuthenticationContext(object):
         self._environment = environment
         self._allow_ntlm = allow_ntlm
         self._browser_mode = browser_mode
-        self._token_expires = datetime.max
+        self._token_expires = datetime.max.replace(tzinfo=timezone.utc)
 
     def with_client_certificate(
         self,
