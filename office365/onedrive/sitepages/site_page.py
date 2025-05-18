@@ -44,11 +44,18 @@ class SitePage(BaseSitePage):
         self.context.add_query(qry)
         return return_type
 
-    def checkin(self):
+    def checkin(self, message):
         """
         Check in the latest version of a sitePage resource, which makes the version of the page available to all users.
         If the page is checked out, check in the page and publish it. If the page is checked out to the caller
         of this API, the page is automatically checked in and then published."""
+
+        def _page_loaded():
+            pages_list = self.parent_collection.parent
+            list_item = pages_list.items.get_by_name(self.name)
+            list_item.drive_item.checkin(message)
+
+        self.ensure_property("name", _page_loaded)
         return self
 
     def publish(self):

@@ -29,11 +29,9 @@ class TestSitePage(GraphTestCase):
         self.assertIsNotNone(result.resource_path)
 
     def test3_checkin_site_page(self):
-        page_name = self.__class__.target_page.name
-        pages_list = self.test_site.lists.get_by_name("Site Pages")
-        list_item = pages_list.items.get_by_name(page_name).execute_query()
-        list_item.drive_item.checkin("Initial version").execute_query()
-        self.assertIsNotNone(list_item.resource_path)
+        page = self.__class__.target_page
+        result = page.checkin("Initial version").execute_query()
+        self.assertIsNotNone(result.resource_path)
 
     def test4_get_site_page_pub_state(self):
         page = self.__class__.target_page

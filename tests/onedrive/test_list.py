@@ -49,3 +49,11 @@ class TestList(GraphTestCase):
 
     def test7_delete_list(self):
         self.__class__.target_list.delete_object().execute_query()
+
+    def test8_get_pages_list(self):
+        result = (
+            self.client.sites.root.lists.get_by_name("Site Pages")
+            .get()
+            .execute_query()
+        )
+        self.assertIsNotNone(result.resource_path)

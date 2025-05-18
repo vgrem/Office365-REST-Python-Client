@@ -22245,6 +22245,11 @@ within the time frame of their original request."/>
             <Member Name="or" Value="0"/>
             <Member Name="and" Value="1"/>
          </EnumType>
+         <EnumType Name="aiInteractionType">
+            <Member Name="userPrompt" Value="0"/>
+            <Member Name="aiResponse" Value="1"/>
+            <Member Name="unknownFutureValue" Value="2"/>
+         </EnumType>
          <EnumType Name="callRecordingStatus">
             <Member Name="success" Value="0"/>
             <Member Name="failure" Value="1"/>
@@ -26043,6 +26048,12 @@ within the time frame of their original request."/>
          </EntityType>
          <EntityType Name="copilotRoot">
             <NavigationProperty Name="admin" Type="graph.copilotAdmin" ContainsTarget="true"/>
+            <NavigationProperty Name="interactionHistory" Type="graph.aiInteractionHistory" ContainsTarget="true"/>
+            <NavigationProperty Name="users" Type="Collection(graph.aiUser)" ContainsTarget="true"/>
+         </EntityType>
+         <EntityType Name="aiInteractionHistory" BaseType="graph.entity"/>
+         <EntityType Name="aiUser" BaseType="graph.entity">
+            <NavigationProperty Name="interactionHistory" Type="graph.aiInteractionHistory" ContainsTarget="true"/>
          </EntityType>
          <ComplexType Name="apiAuthenticationConfigurationBase" Abstract="true"/>
          <ComplexType Name="assignmentOrder">
@@ -34673,6 +34684,36 @@ within the time frame of their original request."/>
          <ComplexType Name="aadUserNotificationRecipient" BaseType="graph.teamworkNotificationRecipient">
             <Property Name="userId" Type="Edm.String" Nullable="false"/>
          </ComplexType>
+         <ComplexType Name="aiInteractionAttachment">
+            <Property Name="attachmentId" Type="Edm.String"/>
+            <Property Name="content" Type="Edm.String"/>
+            <Property Name="contentType" Type="Edm.String"/>
+            <Property Name="contentUrl" Type="Edm.String"/>
+            <Property Name="name" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="aiInteractionContext">
+            <Property Name="contextReference" Type="Edm.String"/>
+            <Property Name="contextType" Type="Edm.String"/>
+            <Property Name="displayName" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="aiInteractionLink">
+            <Property Name="displayName" Type="Edm.String"/>
+            <Property Name="linkType" Type="Edm.String"/>
+            <Property Name="linkUrl" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="aiInteractionMention">
+            <Property Name="mentioned" Type="graph.aiInteractionMentionedIdentitySet"/>
+            <Property Name="mentionId" Type="Edm.Int32"/>
+            <Property Name="mentionText" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="aiInteractionMentionedIdentitySet" BaseType="graph.identitySet" OpenType="true">
+            <Property Name="conversation" Type="graph.teamworkConversationIdentity"/>
+            <Property Name="tag" Type="graph.teamworkTagIdentity"/>
+         </ComplexType>
+         <ComplexType Name="teamworkConversationIdentity" BaseType="graph.identity" OpenType="true">
+            <Property Name="conversationIdentityType" Type="graph.teamworkConversationIdentityType"/>
+         </ComplexType>
+         <ComplexType Name="teamworkTagIdentity" BaseType="graph.identity" OpenType="true"/>
          <ComplexType Name="eventMessageDetail" Abstract="true"/>
          <ComplexType Name="callEndedEventMessageDetail" BaseType="graph.eventMessageDetail">
             <Property Name="callDuration" Type="Edm.Duration"/>
@@ -34777,9 +34818,6 @@ within the time frame of their original request."/>
          </ComplexType>
          <ComplexType Name="chatMessageMentionedIdentitySet" BaseType="graph.identitySet" OpenType="true">
             <Property Name="conversation" Type="graph.teamworkConversationIdentity"/>
-         </ComplexType>
-         <ComplexType Name="teamworkConversationIdentity" BaseType="graph.identity" OpenType="true">
-            <Property Name="conversationIdentityType" Type="graph.teamworkConversationIdentityType"/>
          </ComplexType>
          <ComplexType Name="chatMessagePolicyViolation">
             <Property Name="dlpAction" Type="graph.chatMessagePolicyViolationDlpActionTypes"/>
@@ -34938,12 +34976,27 @@ within the time frame of their original request."/>
             <Property Name="joinWebUrl" Type="Edm.String"/>
             <Property Name="organizer" Type="graph.teamworkUserIdentity"/>
          </ComplexType>
-         <ComplexType Name="teamworkTagIdentity" BaseType="graph.identity" OpenType="true"/>
          <EntityType Name="aadUserConversationMember" BaseType="graph.conversationMember">
             <Property Name="email" Type="Edm.String"/>
             <Property Name="tenantId" Type="Edm.String"/>
             <Property Name="userId" Type="Edm.String"/>
             <NavigationProperty Name="user" Type="graph.user"/>
+         </EntityType>
+         <EntityType Name="aiInteraction" BaseType="graph.entity">
+            <Property Name="appClass" Type="Edm.String" Nullable="false"/>
+            <Property Name="attachments" Type="Collection(graph.aiInteractionAttachment)"/>
+            <Property Name="body" Type="graph.itemBody"/>
+            <Property Name="contexts" Type="Collection(graph.aiInteractionContext)"/>
+            <Property Name="conversationType" Type="Edm.String"/>
+            <Property Name="createdDateTime" Type="Edm.DateTimeOffset"/>
+            <Property Name="etag" Type="Edm.String"/>
+            <Property Name="from" Type="graph.identitySet" Nullable="false"/>
+            <Property Name="interactionType" Type="graph.aiInteractionType" Nullable="false"/>
+            <Property Name="links" Type="Collection(graph.aiInteractionLink)"/>
+            <Property Name="locale" Type="Edm.String" Nullable="false"/>
+            <Property Name="mentions" Type="Collection(graph.aiInteractionMention)"/>
+            <Property Name="requestId" Type="Edm.String" Nullable="false"/>
+            <Property Name="sessionId" Type="Edm.String" Nullable="false"/>
          </EntityType>
          <EntityType Name="anonymousGuestConversationMember" BaseType="graph.conversationMember">
             <Property Name="anonymousGuestId" Type="Edm.String"/>
@@ -41304,6 +41357,10 @@ within the time frame of their original request."/>
          <Function Name="getAllMessages" IsBound="true" EntitySetPath="bindingParameter/channels/messages">
             <Parameter Name="bindingParameter" Type="Collection(graph.deletedTeam)"/>
             <ReturnType Type="Collection(graph.chatMessage)"/>
+         </Function>
+         <Function Name="getAllEnterpriseInteractions" IsBound="true" IsComposable="true">
+            <Parameter Name="bindingParameter" Type="graph.aiInteractionHistory"/>
+            <ReturnType Type="Collection(graph.aiInteraction)"/>
          </Function>
          <Function Name="getAllRetainedMessages" IsBound="true" EntitySetPath="bindingParameter/messages">
             <Parameter Name="bindingParameter" Type="Collection(graph.channel)"/>

@@ -4,6 +4,7 @@ from office365.directory.security.attacksimulations.root import AttackSimulation
 from office365.directory.security.cases.root import CasesRoot
 from office365.directory.security.hunting_query_results import HuntingQueryResults
 from office365.directory.security.incidents.incident import Incident
+from office365.directory.security.labels.root import LabelsRoot
 from office365.directory.security.scorecontrol.profile import SecureScoreControlProfile
 from office365.directory.security.threatintelligence.threat_intelligence import (
     ThreatIntelligence,
@@ -81,6 +82,15 @@ class Security(Entity):
             EntityCollection(
                 self.context, Incident, ResourcePath("incidents", self.resource_path)
             ),
+        )
+
+    @property
+    def labels(self):
+        # type: () -> LabelsRoot
+        """"""
+        return self.properties.get(
+            "labels",
+            LabelsRoot(self.context, ResourcePath("labels", self.resource_path)),
         )
 
     @property

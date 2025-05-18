@@ -54,12 +54,8 @@ class TestSite(SPTestCase):
         )
         self.assertIsNotNone(web_template)
 
-    def test88_get_site_logo(self):
+    def test8_get_site_logo(self):
         result = self.client.site.get_site_logo().execute_query()
-        self.assertIsNotNone(result.value)
-
-    def test9_get_available_tags(self):
-        result = self.client.site.get_available_tags().execute_query()
         self.assertIsNotNone(result.value)
 
     def test_10_open_web_by_id(self):

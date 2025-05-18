@@ -231,8 +231,15 @@ class Site(BaseItem):
         """The collection of site pages under this site."""
         return self.properties.get(
             "pages",
-            SitePageCollection(self.context, ResourcePath("pages", self.resource_path)),
+            SitePageCollection(
+                self.context, ResourcePath("pages", self.resource_path), self.pages_list
+            ),
         )
+
+    @property
+    def pages_list(self):
+        """The list that contains the site pages."""
+        return self.lists.get_by_name("Site Pages")
 
     @property
     def term_store(self):

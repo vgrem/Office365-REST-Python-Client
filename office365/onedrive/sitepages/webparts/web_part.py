@@ -14,4 +14,4 @@ class WebPart(Entity):
             self, "getPositionOfWebPart", return_type=return_type
         )
         self.context.add_query(qry)
-        return self
+        return return_type

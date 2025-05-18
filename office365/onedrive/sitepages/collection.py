@@ -1,14 +1,24 @@
+from typing import TYPE_CHECKING
+
 from office365.entity_collection import EntityCollection
 from office365.onedrive.sitepages.site_page import SitePage
 from office365.onedrive.sitepages.title_area import TitleArea
 from office365.runtime.http.request_options import RequestOptions
+from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.graph_client import GraphClient
+    from office365.onedrive.lists.list import List
 
 
 class SitePageCollection(EntityCollection[SitePage]):
     """Sites container"""
 
-    def __init__(self, context, resource_path=None):
-        super(SitePageCollection, self).__init__(context, SitePage, resource_path)
+    def __init__(self, context, resource_path=None, parent_list=None):
+        # type: (GraphClient, ResourcePath, List) -> None
+        super(SitePageCollection, self).__init__(
+            context, SitePage, resource_path, parent_list
+        )
 
     def get(self):
         def _construct_request(request):

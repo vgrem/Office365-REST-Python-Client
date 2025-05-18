@@ -192,6 +192,31 @@ class List(SecurableObject):
         list_folder.ensure_property("ServerRelativeUrl", _get_compliance_tag)
         return return_type
 
+    def set_compliance_tag(
+        self,
+        compliance_tag_value,
+        block_delete=None,
+        block_edit=None,
+        sync_to_items=None,
+    ):
+        """ """
+        list_folder = self.root_folder
+
+        def _set_compliance_tag():
+            from office365.sharepoint.compliance.store_proxy import SPPolicyStoreProxy
+
+            SPPolicyStoreProxy.set_list_compliance_tag(
+                self.context,
+                list_folder.serverRelativeUrl,
+                compliance_tag_value,
+                block_delete,
+                block_edit,
+                sync_to_items,
+            )
+
+        list_folder.ensure_property("ServerRelativeUrl", _set_compliance_tag)
+        return self
+
     def get_metadata_navigation_settings(self):
         """Retrieves the configured metadata navigation settings for the list."""
         from office365.sharepoint.navigation.metadata_settings import (

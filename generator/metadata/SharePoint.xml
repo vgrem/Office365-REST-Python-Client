@@ -4929,6 +4929,7 @@
             <EntitySet Name="OrgRelationGroupManagedPaths" EntityType="Microsoft.Online.SharePoint.MultiGeo.Service.OrgRelationGroupManagedPath"/>
             <EntitySet Name="OrgRelationNotifications" EntityType="Microsoft.Online.SharePoint.MultiGeo.Service.OrgRelationNotification"/>
             <EntitySet Name="OrgRelationVerifications" EntityType="Microsoft.Online.SharePoint.MultiGeo.Service.OrgRelationVerification"/>
+            <EntitySet Name="ResolveUserUpnByUserObjectIds" EntityType="Microsoft.Online.SharePoint.MultiGeo.Service.ResolveUserUpnByUserObjectId"/>
             <EntitySet Name="RestoreWorkflowCounts" EntityType="Microsoft.Online.SharePoint.MultiGeo.Service.RestoreWorkflowCount"/>
             <EntitySet Name="SiteAtTargetEntityDatas" EntityType="Microsoft.Online.SharePoint.MultiGeo.Service.SiteAtTargetEntityData"/>
             <EntitySet Name="StorageQuotas" EntityType="Microsoft.Online.SharePoint.MultiGeo.Service.StorageQuota"/>
@@ -6957,6 +6958,10 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.MultiGeo.Service.MultiGeoServicesBeta"/>
                <Parameter Name="encodedVerificationQuery" Type="Edm.String"/>
             </FunctionImport>
+            <FunctionImport Name="ResolveUserUpnByUserObjectId" ReturnType="Microsoft.Online.SharePoint.MultiGeo.Service.ResolveUserUpnByUserObjectId" IsComposable="true" IsBindable="true" EntitySet="ResolveUserUpnByUserObjectIds">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.MultiGeo.Service.MultiGeoServicesBeta"/>
+               <Parameter Name="userObjectId" Type="Edm.String"/>
+            </FunctionImport>
             <FunctionImport Name="RestoreWorkflowCount" ReturnType="Microsoft.Online.SharePoint.MultiGeo.Service.RestoreWorkflowCount" IsComposable="true" IsBindable="true" EntitySet="RestoreWorkflowCounts">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.MultiGeo.Service.MultiGeoServicesBeta"/>
                <Parameter Name="isCrossTenant" Type="Edm.Boolean" Nullable="false"/>
@@ -6985,6 +6990,9 @@
             </FunctionImport>
             <FunctionImport Name="Microsoft_Online_SharePoint_MultiGeo_Service_OrgRelationVerification" ReturnType="Microsoft.Online.SharePoint.MultiGeo.Service.OrgRelationVerification" IsComposable="true" EntitySet="OrgRelationVerifications">
                <Parameter Name="encodedVerificationQuery" Type="Edm.String"/>
+            </FunctionImport>
+            <FunctionImport Name="Microsoft_Online_SharePoint_MultiGeo_Service_ResolveUserUpnByUserObjectId" ReturnType="Microsoft.Online.SharePoint.MultiGeo.Service.ResolveUserUpnByUserObjectId" IsComposable="true" EntitySet="ResolveUserUpnByUserObjectIds">
+               <Parameter Name="userObjectId" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="Microsoft_Online_SharePoint_MultiGeo_Service_RestoreWorkflowCount" ReturnType="Microsoft.Online.SharePoint.MultiGeo.Service.RestoreWorkflowCount" IsComposable="true" EntitySet="RestoreWorkflowCounts">
                <Parameter Name="isCrossTenant" Type="Edm.Boolean" Nullable="false"/>
@@ -11071,16 +11079,13 @@
             <FunctionImport Name="GetDatabaseProperties" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
             </FunctionImport>
-            <FunctionImport Name="GetDataChunks" ReturnType="Edm.String" IsBindable="true">
-               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
-            </FunctionImport>
-            <FunctionImport Name="GetDataChunksWithChecksum" ReturnType="Edm.String" IsBindable="true">
-               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
-            </FunctionImport>
-            <FunctionImport Name="GetDataChunkWithChecksum" ReturnType="Edm.String" IsBindable="true">
+            <FunctionImport Name="GetDataChunk" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
                <Parameter Name="tableName" Type="Edm.String"/>
                <Parameter Name="schemaName" Type="Edm.String"/>
+            </FunctionImport>
+            <FunctionImport Name="GetDataChunks" ReturnType="Edm.String" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
             </FunctionImport>
             <FunctionImport Name="GetDataReader" ReturnType="Edm.String" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.Administration.SiteMove.Service.SiteMoveService"/>
@@ -11913,6 +11918,12 @@
                <Parameter Name="mySiteUrl" Type="Edm.String"/>
             </FunctionImport>
             <FunctionImport Name="Microsoft_SharePoint_SiteManager_SiteManagerService" ReturnType="Microsoft.SharePoint.SiteManager.SiteManagerService" IsComposable="true" EntitySet="SiteManagers"/>
+            <FunctionImport Name="EnsureRedirectUrlListFeature" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.SiteManager.SiteManagerService"/>
+            </FunctionImport>
+            <FunctionImport Name="RetiredPagesView" IsSideEffecting="false" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.SharePoint.SiteManager.SiteManagerService"/>
+            </FunctionImport>
             <FunctionImport Name="TopFiles" ReturnType="Microsoft.SharePoint.SiteManager.TopSiteFilesResult" IsSideEffecting="false" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.SharePoint.SiteManager.SiteManagerService"/>
                <Parameter Name="maxCount" Type="Edm.Int32" Nullable="false"/>
@@ -17654,14 +17665,6 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="payload" Type="Collection(Microsoft.SharePoint.Administration.TenantAdmin.TenantAdminRecentActionPayload)"/>
             </FunctionImport>
-            <FunctionImport Name="AddSPOAppPrioritizationPolicy" IsBindable="true">
-               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
-               <Parameter Name="appId" Type="Edm.Guid" Nullable="false"/>
-               <Parameter Name="azureSubscriptionId" Type="Edm.Guid" Nullable="false"/>
-               <Parameter Name="resourceGroup" Type="Edm.String"/>
-               <Parameter Name="account" Type="Edm.String"/>
-               <Parameter Name="quotaMultiplier" Type="Edm.Int32" Nullable="false"/>
-            </FunctionImport>
             <FunctionImport Name="AddSPOContainerUserRole" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="ContainerId" Type="Edm.String"/>
@@ -17671,6 +17674,12 @@
             <FunctionImport Name="AddSPORestrictedSearchAllowedList" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="siteUrls" Type="Collection(Edm.String)"/>
+            </FunctionImport>
+            <FunctionImport Name="AddSPOServicePrioritizationAppRegistration" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="appId" Type="Edm.Guid" Nullable="false"/>
+               <Parameter Name="policyId" Type="Edm.Guid" Nullable="false"/>
+               <Parameter Name="quotaMultiplier" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="AddSyntexCustomModelSetting" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -17755,9 +17764,9 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="reportId" Type="Edm.Int32" Nullable="false"/>
             </FunctionImport>
-            <FunctionImport Name="DeleteSPOAppPrioritizationPolicy" IsBindable="true">
+            <FunctionImport Name="DeleteSPOServicePrioritizationAppRegistration" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
-               <Parameter Name="policyId" Type="Edm.String"/>
+               <Parameter Name="appId" Type="Edm.Guid" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="DeleteSyntexCustomModelSetting" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -18069,9 +18078,6 @@
             <FunctionImport Name="GetSPOAppBillingPolicies" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPOAppBillingProperties)" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
-            <FunctionImport Name="GetSPOAppPrioritizationPolicies" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SPOAppPrioritizationPolicies" IsBindable="true">
-               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
-            </FunctionImport>
             <FunctionImport Name="GetSPOContainerByContainerId" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SPContainerProperties" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="containerId" Type="Edm.String"/>
@@ -18110,6 +18116,20 @@
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
             <FunctionImport Name="GetSPORestrictedSearchMode" ReturnType="Edm.Int32" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+            </FunctionImport>
+            <FunctionImport Name="GetSPOServicePrioritizationAppRegistrations" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SPOServicePrioritizationAppRegistrations" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+            </FunctionImport>
+            <FunctionImport Name="GetSPOServicePrioritizationBillingPayload" ReturnType="Microsoft.Online.SharePoint.TenantAdministration.SPOServicePrioritizationBillingPayload" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="billingPolicyId" Type="Edm.String"/>
+               <Parameter Name="azureSubscriptionId" Type="Edm.Guid" Nullable="false"/>
+               <Parameter Name="resourceGroup" Type="Edm.String"/>
+               <Parameter Name="azureRegion" Type="Edm.String"/>
+               <Parameter Name="friendlyName" Type="Edm.String"/>
+            </FunctionImport>
+            <FunctionImport Name="GetSPOServicePrioritizationBillingPolicies" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPOServicePrioritizationPolicyFromTenantStore)" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
             </FunctionImport>
             <FunctionImport Name="GetSPOSiteCreationSources" ReturnType="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPOSiteCreationSource)" IsSideEffecting="false" IsBindable="true">
@@ -18650,14 +18670,6 @@
                <Parameter Name="sphSiteUrl" Type="Edm.String"/>
                <Parameter Name="configuration" Type="Microsoft.SharePoint.PortalAndOrgNews.HomeSiteConfigurationParam"/>
             </FunctionImport>
-            <FunctionImport Name="SetSPOAppPrioritizationPolicy" IsBindable="true">
-               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
-               <Parameter Name="policyId" Type="Edm.String"/>
-               <Parameter Name="enabled" Type="Edm.Boolean" Nullable="false"/>
-               <Parameter Name="enabledHasValue" Type="Edm.Boolean" Nullable="false"/>
-               <Parameter Name="quotaMultiplier" Type="Edm.Int32" Nullable="false"/>
-               <Parameter Name="quotaMultiplierHasValue" Type="Edm.Boolean" Nullable="false"/>
-            </FunctionImport>
             <FunctionImport Name="SetSPOContainerProperties" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="spContainerProperties" Type="Microsoft.Online.SharePoint.TenantAdministration.SPContainerProperties"/>
@@ -18673,6 +18685,14 @@
             <FunctionImport Name="SetSPORestrictedSearchMode" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
                <Parameter Name="mode" Type="Edm.Int32" Nullable="false"/>
+            </FunctionImport>
+            <FunctionImport Name="SetSPOServicePrioritizationAppRegistration" IsBindable="true">
+               <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
+               <Parameter Name="appId" Type="Edm.Guid" Nullable="false"/>
+               <Parameter Name="enabled" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="enabledHasValue" Type="Edm.Boolean" Nullable="false"/>
+               <Parameter Name="quotaMultiplier" Type="Edm.Int32" Nullable="false"/>
+               <Parameter Name="quotaMultiplierHasValue" Type="Edm.Boolean" Nullable="false"/>
             </FunctionImport>
             <FunctionImport Name="SetSPOSyntexApplicationsClearOverrideSharingCapability" IsBindable="true">
                <Parameter Name="this" Type="Microsoft.Online.SharePoint.TenantAdministration.Tenant"/>
@@ -30124,7 +30144,7 @@
          <Annotations Target="SP.ApiData/ActivateApplicationBillingPolicy(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/AddSPOAppPrioritizationPolicy(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Guid, Edm.Guid, Edm.String, Edm.String, Edm.Int32)">
+         <Annotations Target="SP.ApiData/AddSPOServicePrioritizationAppRegistration(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Guid, Edm.Guid, Edm.Int32)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/AddSyntexCustomModelSetting(Microsoft.Online.SharePoint.TenantAdministration.Tenant, SP.SyntexCustomModelSetting, Edm.Int32)">
@@ -30148,7 +30168,7 @@
          <Annotations Target="SP.ApiData/CreateApplicationBillingPolicyValidation(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/DeleteSPOAppPrioritizationPolicy(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String)">
+         <Annotations Target="SP.ApiData/DeleteSPOServicePrioritizationAppRegistration(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Guid)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/DeleteSyntexCustomModelSetting(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String, Edm.Int32)">
@@ -30181,10 +30201,16 @@
          <Annotations Target="SP.ApiData/GetSPOAppBillingPolicies(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/GetSPOAppPrioritizationPolicies(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
+         <Annotations Target="SP.ApiData/GetSPOCopilotPromoUsageStatistics(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/GetSPOCopilotPromoUsageStatistics(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
+         <Annotations Target="SP.ApiData/GetSPOServicePrioritizationAppRegistrations(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/GetSPOServicePrioritizationBillingPayload(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String, Edm.Guid, Edm.String, Edm.String, Edm.String)">
+            <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
+         </Annotations>
+         <Annotations Target="SP.ApiData/GetSPOServicePrioritizationBillingPolicies(Microsoft.Online.SharePoint.TenantAdministration.Tenant)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/GetSyntexCustomModelSettings(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Int32)">
@@ -30217,7 +30243,7 @@
          <Annotations Target="SP.ApiData/SetSiteUserGroups(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Microsoft.Online.SharePoint.TenantAdministration.SiteUserGroupsData)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
-         <Annotations Target="SP.ApiData/SetSPOAppPrioritizationPolicy(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String, Edm.Boolean, Edm.Boolean, Edm.Int32, Edm.Boolean)">
+         <Annotations Target="SP.ApiData/SetSPOServicePrioritizationAppRegistration(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.Guid, Edm.Boolean, Edm.Boolean, Edm.Int32, Edm.Boolean)">
             <ValueAnnotation Term="Com.Microsoft.VisualStudio.CodeGen.IsBeta" Bool="true"/>
          </Annotations>
          <Annotations Target="SP.ApiData/SetSyntexPaygFeatureActivation(Microsoft.Online.SharePoint.TenantAdministration.Tenant, Edm.String, Edm.String)">
@@ -31396,6 +31422,12 @@
             </Key>
             <Property Name="PartnerSiteSubscriptionId" Type="Edm.Guid" Nullable="false"/>
             <Property Name="Result" Type="Edm.String"/>
+         </EntityType>
+         <EntityType Name="ResolveUserUpnByUserObjectId">
+            <Key>
+               <PropertyRef Name="UserPrincipalName"/>
+            </Key>
+            <Property Name="UserPrincipalName" Type="Edm.String" Nullable="false"/>
          </EntityType>
          <EntityType Name="RestoreWorkflowCount">
             <Key>
@@ -38333,8 +38365,8 @@
          </ComplexType>
          <ComplexType Name="SitePermissionsReportDetails">
             <Property Name="anyoneLinksSiteCount" Type="Edm.Int32"/>
-            <Property Name="externallySharedSiteCount" Type="Edm.Int32"/>
-            <Property Name="oversharedSiteCount" Type="Edm.Int32"/>
+            <Property Name="eeeuPermissionSiteCount" Type="Edm.Int32"/>
+            <Property Name="uniquePermissionSiteCount" Type="Edm.Int32"/>
             <Property Name="uniqueSiteCount" Type="Edm.Int32"/>
          </ComplexType>
          <ComplexType Name="GroupSitesActivityDetail">
@@ -38586,8 +38618,8 @@
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.Administration.TenantAdmin.Copilot">
          <ComplexType Name="AdaptiveCardConfig">
-            <Property Name="Data" Type="Microsoft.SharePoint.Administration.TenantAdmin.Copilot.BaseRawDataSources"/>
-            <Property Name="FeatureName" Type="Edm.String"/>
+            <Property Name="data" Type="Microsoft.SharePoint.Administration.TenantAdmin.Copilot.BaseRawDataSources"/>
+            <Property Name="featureName" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="BaseRawDataSources">
             <Property Name="DisplayMessage" Type="Edm.String"/>
@@ -38601,13 +38633,13 @@
             <Property Name="StatementName" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="CopilotTranspilerResponse">
-            <Property Name="Data" Type="Microsoft.SharePoint.Administration.TenantAdmin.Copilot.TranspilerResponse"/>
-            <Property Name="ErrorMessage" Type="Edm.String"/>
-            <Property Name="IsEligible" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="data" Type="Microsoft.SharePoint.Administration.TenantAdmin.Copilot.TranspilerResponse"/>
+            <Property Name="errorMessage" Type="Edm.String"/>
+            <Property Name="isEligible" Type="Edm.Boolean" Nullable="false"/>
          </ComplexType>
          <ComplexType Name="TranspilerResponse">
-            <Property Name="Config" Type="Microsoft.SharePoint.Administration.TenantAdmin.Copilot.AdaptiveCardConfig"/>
-            <Property Name="SchemaVersion" Type="Edm.String"/>
+            <Property Name="config" Type="Microsoft.SharePoint.Administration.TenantAdmin.Copilot.AdaptiveCardConfig"/>
+            <Property Name="schemaVersion" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="ReportDetails" BaseType="Microsoft.SharePoint.Administration.TenantAdmin.Copilot.BaseRawDataSources">
             <Property Name="Headers" Type="Collection(Edm.String)"/>
@@ -38644,6 +38676,8 @@
             <Property Name="WarningStatusEffectiveUntil" Type="Edm.DateTime"/>
          </ComplexType>
          <ComplexType Name="UnlicensedOdbTenantMetrics">
+            <Property Name="adminLockedCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="adminLockedSizeBytes" Type="Edm.Double" Nullable="false"/>
             <Property Name="billableCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="billableSizeBytes" Type="Edm.Double" Nullable="false"/>
             <Property Name="complianceHoldCount" Type="Edm.Int32" Nullable="false"/>
@@ -38659,6 +38693,8 @@
             <Property Name="retentionPeriodCount" Type="Edm.Int32" Nullable="false"/>
             <Property Name="retentionPeriodSizeBytes" Type="Edm.Double" Nullable="false"/>
             <Property Name="sizeBytes" Type="Edm.Double" Nullable="false"/>
+            <Property Name="unknownCount" Type="Edm.Int32" Nullable="false"/>
+            <Property Name="unknownSizeBytes" Type="Edm.Double" Nullable="false"/>
          </ComplexType>
       </Schema>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="Microsoft.SharePoint.AddToOneDrive">
@@ -40293,19 +40329,6 @@
             <Property Name="SubscriptionState" Type="Edm.String"/>
             <Property Name="UsageCharges" Type="Edm.String"/>
          </ComplexType>
-         <ComplexType Name="SPOAppPrioritizationPolicies">
-            <Property Name="Policies" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPOAppPrioritizationPolicy)"/>
-         </ComplexType>
-         <ComplexType Name="SPOAppPrioritizationPolicy">
-            <Property Name="Account" Type="Edm.String"/>
-            <Property Name="AppId" Type="Edm.String"/>
-            <Property Name="AzureSubscription" Type="Edm.String"/>
-            <Property Name="Enabled" Type="Edm.Boolean" Nullable="false"/>
-            <Property Name="PolicyId" Type="Edm.String"/>
-            <Property Name="Provider" Type="Edm.String"/>
-            <Property Name="QuotaMultiplier" Type="Edm.Int32" Nullable="false"/>
-            <Property Name="ResourceGroup" Type="Edm.String"/>
-         </ComplexType>
          <ComplexType Name="SPOContentSecurityPolicyEntry">
             <Property Name="Manual" Type="Edm.Boolean"/>
             <Property Name="Modified" Type="Edm.DateTime"/>
@@ -40396,6 +40419,35 @@
             <Property Name="SiteTitle" Type="Edm.String"/>
             <Property Name="SiteUrl" Type="Edm.String"/>
             <Property Name="TimeCreated" Type="Edm.DateTime" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="SPOServicePrioritizationAppRegistrations">
+            <Property Name="Registrations" Type="Collection(Microsoft.Online.SharePoint.TenantAdministration.SPOServicePrioritizationAppRegistration)"/>
+         </ComplexType>
+         <ComplexType Name="SPOServicePrioritizationAppRegistration">
+            <Property Name="AppId" Type="Edm.String"/>
+            <Property Name="Enabled" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="PolicyId" Type="Edm.String"/>
+            <Property Name="QuotaMultiplier" Type="Edm.Int32" Nullable="false"/>
+         </ComplexType>
+         <ComplexType Name="SPOServicePrioritizationBillingPayload">
+            <Property Name="AzureRegion" Type="Edm.String"/>
+            <Property Name="AzureSubscription" Type="Edm.String"/>
+            <Property Name="Feature" Type="Edm.String"/>
+            <Property Name="FriendlyName" Type="Edm.String"/>
+            <Property Name="IdentityId" Type="Edm.String"/>
+            <Property Name="IdentityType" Type="Edm.String"/>
+            <Property Name="PolicyId" Type="Edm.String"/>
+            <Property Name="ResourceGroup" Type="Edm.String"/>
+            <Property Name="Scope" Type="Edm.String"/>
+            <Property Name="Service" Type="Edm.String"/>
+            <Property Name="Tags" Type="Edm.String"/>
+         </ComplexType>
+         <ComplexType Name="SPOServicePrioritizationPolicyFromTenantStore">
+            <Property Name="AzureRegion" Type="Edm.String"/>
+            <Property Name="AzureSubscriptionId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="FriendlyName" Type="Edm.String"/>
+            <Property Name="PolicyId" Type="Edm.Guid" Nullable="false"/>
+            <Property Name="ResourceGroup" Type="Edm.String"/>
          </ComplexType>
          <ComplexType Name="SPOSiteCreationSource">
             <Property Name="DisplayName" Type="Edm.String"/>
@@ -40556,6 +40608,7 @@
             <Property Name="AllowEditing" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AllowFileArchive" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AllowSelfServiceUpgrade" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="AllowWebPropertyBagUpdateWhenDenyAddAndCustomizePagesIsEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AnonymousLinkExpirationInDays" Type="Edm.Int32" Nullable="false"/>
             <Property Name="ApplyToExistingDocumentLibraries" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ApplyToNewDocumentLibraries" Type="Edm.Boolean" Nullable="false"/>
@@ -40817,6 +40870,7 @@
             <Property Name="AllowWebPropertyBagUpdateWhenDenyAddAndCustomizePagesIsEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AmplifyAdminSettings" Type="Edm.String"/>
             <Property Name="AnyoneLinkTrackUsers" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="AppAccessInformationBarriersAllowList" Type="Collection(Edm.Guid)" Nullable="false"/>
             <Property Name="AppBypassInformationBarriers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ApplyAppEnforcedRestrictionsToAdHocRecipients" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AppOnlyBypassPeoplePickerPolicies" Type="Edm.Boolean" Nullable="false"/>
@@ -43030,6 +43084,7 @@
             <Property Name="AllowSharingOutsideRestrictedAccessControlGroups" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AllowWebPropertyBagUpdateWhenDenyAddAndCustomizePagesIsEnabled" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AnyoneLinkTrackUsers" Type="Edm.Boolean" Nullable="false"/>
+            <Property Name="AppAccessInformationBarriersAllowList" Type="Collection(Edm.Guid)" Nullable="false"/>
             <Property Name="AppBypassInformationBarriers" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="ApplyAppEnforcedRestrictionsToAdHocRecipients" Type="Edm.Boolean" Nullable="false"/>
             <Property Name="AppOnlyBypassPeoplePickerPolicies" Type="Edm.Boolean" Nullable="false"/>

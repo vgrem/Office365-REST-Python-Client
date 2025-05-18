@@ -28,7 +28,9 @@ class ListCollection(EntityCollection[List]):
         return return_type
 
     def get_by_name(self, name):
+        """ Retrieve list object by name"""
         return List(self.context, EntityPath(name, self.resource_path))
 
     def get_by_id(self, list_id):
+        """Retrieve list object by id"""
         return List(self.context, EntityPath(list_id, self.resource_path))

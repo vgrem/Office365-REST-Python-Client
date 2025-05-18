@@ -4,6 +4,7 @@ from office365.admin.admin import Admin
 from office365.azure_env import AzureEnvironment
 from office365.booking.solutions.root import SolutionsRoot
 from office365.communications.cloud_communications import CloudCommunications
+from office365.copilot.root import CopilotRoot
 from office365.delta_collection import DeltaCollection
 from office365.directory.applications.collection import ApplicationCollection
 from office365.directory.applications.template import ApplicationTemplate
@@ -237,7 +238,13 @@ class GraphClient(ClientRuntimeContext):
         return InvitationCollection(self, ResourcePath("invitations"))
 
     @property
+    def copilot(self):
+        """"""
+        return CopilotRoot(self, ResourcePath("copilot"))
+
+    @property
     def identity_protection(self):
+        """Identity Protection alias"""
         return IdentityProtectionRoot(self, ResourcePath("identityProtection"))
 
     @property

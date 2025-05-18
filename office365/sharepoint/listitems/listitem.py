@@ -66,6 +66,23 @@ class ListItem(SecurableObject):
         self.context.add_query(qry)
         return return_type
 
+    def lock_record_item(self):
+        """Locks the list item."""
+        list_folder = self.parent_list.root_folder
+        return_type = ClientResult(self.context, int())
+        from office365.sharepoint.compliance.store_proxy import SPPolicyStoreProxy
+
+        def _lock_record_item():
+            SPPolicyStoreProxy.lock_record_item(
+                self.context,
+                list_folder.serverRelativeUrl,
+                self.id,
+                return_type=return_type,
+            )
+
+        list_folder.ensure_property("ServerRelativeUrl", _lock_record_item)
+        return return_type
+
     def share_link(self, link_kind, expiration=None, role=None, password=None):
         # type: (int, Optional[datetime.datetime], Optional[int], Optional[str]) -> ClientResult[ShareLinkResponse]
         """Creates a tokenized sharing link for a list item based on the specified parameters and optionally
