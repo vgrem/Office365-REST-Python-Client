@@ -1,6 +1,7 @@
 from office365.backuprestore.root import BackupRestoreRoot
 from office365.booking.business.collection import BookingBusinessCollection
 from office365.booking.currency import BookingCurrency
+from office365.communications.virtualevents.root import VirtualEventsRoot
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -43,12 +44,25 @@ class SolutionsRoot(Entity):
             ),
         )
 
+    @property
+    def virtual_events(self):
+        # type: () -> VirtualEventsRoot
+        """A collection of virtual events."""
+        return self.properties.get(
+            "virtualEvents",
+            VirtualEventsRoot(
+                self.context,
+                ResourcePath("virtualEvents", self.resource_path),
+            ),
+        )
+
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
                 "bookingBusinesses": self.booking_businesses,
                 "bookingCurrencies": self.booking_currencies,
                 "backupRestore": self.backup_restore,
+                "virtualEvents": self.virtual_events,
             }
             default_value = property_mapping.get(name, None)
         return super(SolutionsRoot, self).get_property(name, default_value)

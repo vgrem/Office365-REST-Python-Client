@@ -26,10 +26,26 @@ class PerformanceData(MigrationPerformanceEntityData):
 
 
 class PerformanceDataCollection(EntityCollection[PerformanceData]):
+    """ """
+
     def __init__(self, context, resource_path=None):
         super(PerformanceDataCollection, self).__init__(
             context, PerformanceData, resource_path
         )
+
+    def get_perf_data_test(self, start_time=None, end_time=None, agent_id=None):
+        """ """
+        return_type = ClientResult(self.context, PerformanceDashboardData())
+        payload = {
+            "StartTime": start_time,
+            "EndTime": end_time,
+            "AgentId": agent_id,
+        }
+        qry = ServiceOperationQuery(
+            self, "GetPerfDataTest", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
 
     def get_data(self, start_time=None, end_time=None, agent_id=None, time_unit=None):
         """ """

@@ -130,7 +130,7 @@ class SPPolicyStoreProxy(Entity):
         block_edit=None,
         sync_to_items=None,
     ):
-        """ Apply a retention label ("compliance tag") to a list or document library."""
+        """Apply a retention label ("compliance tag") to a list or document library."""
         payload = {
             "listUrl": list_url,
             "complianceTagValue": compliance_tag_value,

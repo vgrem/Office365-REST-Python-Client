@@ -4,11 +4,21 @@ from office365.directory.protection.policy.one_drive_for_business import (
 )
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 
 class BackupRestoreRoot(Entity):
     """Represents the Microsoft 365 Backup Storage service in a tenant."""
+
+    def enable(self, app_owner_tenant_id):
+        """Enable the Microsoft 365 Backup Storage service for a tenant."""
+        return_type = ClientResult(self.context, ServiceStatus())
+        payload = {"appOwnerTenantId": app_owner_tenant_id}
+        qry = ServiceOperationQuery(self, "enable", None, payload, None, return_type)
+        self.context.add_query(qry)
+        return return_type
 
     @property
     def service_status(self):

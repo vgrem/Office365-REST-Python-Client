@@ -82,7 +82,10 @@ from office365.sharepoint.tenant.administration.spo_operation import SpoOperatio
 from office365.sharepoint.tenant.administration.syntex.billing_context import (
     SyntexBillingContext,
 )
-from office365.sharepoint.tenant.administration.types import CreatePolicyRequest
+from office365.sharepoint.tenant.administration.types import (
+    CreatePolicyRequest,
+    SPOCopilotPromoUsage,
+)
 from office365.sharepoint.tenant.administration.webs.templates.collection import (
     SPOTenantWebTemplateCollection,
 )
@@ -128,6 +131,16 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
+    def check_m365_copilot_business_chat_license(self):
+        """ """
+        return_type = ClientResult(self.context, bool())
+        from office365.sharepoint.policy.license_utilities import PolicyLicenseUtilities
+
+        PolicyLicenseUtilities.check_tenant_m365_copilot_business_chat_license(
+            self.context
+        )
+        return return_type
+
     def get_corporate_catalog_site(self):
         """Retrieves Corporate Catalog Site"""
         settings = TenantSettings.current(self.context)
@@ -145,6 +158,15 @@ class Tenant(Entity):
         payload = {"requestOptions": ChatGptRequestOptions()}
         qry = ServiceOperationQuery(
             self, "GetChatGptResponse", None, payload, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_spo_copilot_promo_usage_statistics(self):
+        """ """
+        return_type = ClientResult(self.context, SPOCopilotPromoUsage())
+        qry = ServiceOperationQuery(
+            self, "GetSPOCopilotPromoUsageStatistics", None, None, None, return_type
         )
         self.context.add_query(qry)
         return return_type

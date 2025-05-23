@@ -1,5 +1,6 @@
 from typing import Optional
 
+from office365.directory.identities.provider import IdentityProvider
 from office365.directory.identities.userflows.language_configuration import (
     UserFlowLanguageConfiguration,
 )
@@ -19,6 +20,19 @@ class B2XIdentityUserFlow(IdentityUserFlow):
     User flows define the experience the end user sees while signing up, including which identity providers they can
     use to authenticate, along with which attributes are collected as part of the sign up process.
     """
+
+    @property
+    def identity_providers(self):
+        # type: () -> EntityCollection[IdentityProvider]
+        """TThe identity providers included in the user flow."""
+        return self.properties.get(
+            "identityProviders",
+            EntityCollection(
+                self.context,
+                IdentityProvider,
+                ResourcePath("identityProviders", self.resource_path),
+            ),
+        )
 
     @property
     def languages(self):
@@ -59,7 +73,8 @@ class B2XIdentityUserFlow(IdentityUserFlow):
     def get_property(self, name, default_value=None):
         if default_value is None:
             property_mapping = {
-                "userAttributeAssignments": self.user_attribute_assignments
+                "identityProviders": self.identity_providers,
+                "userAttributeAssignments": self.user_attribute_assignments,
             }
             default_value = property_mapping.get(name, None)
         return super(B2XIdentityUserFlow, self).get_property(name, default_value)

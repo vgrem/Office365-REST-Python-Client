@@ -1,4 +1,3 @@
-from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 
@@ -9,7 +8,7 @@ class VariationsTranslationTimerJob(Entity):
     """
 
     @staticmethod
-    def export_items(context, list_url, item_ids, addresses_to_email):
+    def export_items(context, list_url, item_ids, addresses_to_email=None):
         """
         The protocol client calls this method to export a specific set of list items.
 
@@ -21,8 +20,8 @@ class VariationsTranslationTimerJob(Entity):
         """
         payload = {
             "list": list_url,
-            "itemIds": ClientValueCollection(int, item_ids),
-            "addressesToEmail": ClientValueCollection(str, addresses_to_email),
+            "itemIds": item_ids,
+            "addressesToEmail": addresses_to_email,
         }
         binding_type = VariationsTranslationTimerJob(context)
         qry = ServiceOperationQuery(

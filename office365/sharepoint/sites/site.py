@@ -57,6 +57,18 @@ class Site(Entity):
     def __init__(self, context, resource_path=None):
         super(Site, self).__init__(context, ResourcePath("Site", resource_path))
 
+    def cancel_delete_file_versions(self):
+        """ """
+        qry = ServiceOperationQuery(self, "CancelDeleteFileVersions")
+        self.context.add_query(qry)
+        return self
+
+    def cancel_set_version_policy_for_doc_libs(self):
+        """ """
+        qry = ServiceOperationQuery(self, "CancelSetVersionPolicyForDocLibs")
+        self.context.add_query(qry)
+        return self
+
     def create_migration_ingestion_job(
         self,
         g_web_id,

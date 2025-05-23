@@ -12,9 +12,6 @@ from office365.sharepoint.tenant.administration.sites.properties_collection impo
     SitePropertiesCollection,
 )
 from office365.sharepoint.tenant.administration.tenant import Tenant
-from office365.sharepoint.tenant.insights.report_manager import (
-    SPTenantIBInsightsReportManager,
-)
 from office365.sharepoint.tenant.management.office365_tenant import Office365Tenant
 from office365.sharepoint.tenant.settings import TenantSettings
 from tests import (
@@ -255,3 +252,7 @@ class TestTenant(TestCase):
     def test38_get_comms_messages(self):
         result = self.tenant.comms_messages.get().execute_query()
         self.assertIsNotNone(result.resource_path)
+
+    # def test39_check_m365_copilot_business_chat_license(self):
+    #    result = self.tenant.check_m365_copilot_business_chat_license().execute_query()
+    #    self.assertIsNotNone(result.value)

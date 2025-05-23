@@ -7,6 +7,8 @@ from office365.sharepoint.migrationcenter.service.teams import MigrationCenterTe
 
 
 class MigrationCenterServices(Entity):
+    """Migration center services"""
+
     def __init__(self, context, resource_path=None):
         if resource_path is None:
             resource_path = ResourcePath(

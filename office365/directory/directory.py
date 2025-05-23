@@ -1,4 +1,7 @@
 from office365.directory.administrative_unit import AdministrativeUnit
+from office365.directory.certificates.public_key_infrastructure_root import (
+    PublicKeyInfrastructureRoot,
+)
 from office365.directory.custom_security_attribute_definition import (
     CustomSecurityAttributeDefinition,
 )
@@ -52,6 +55,17 @@ class Directory(Entity):
         )
 
     @property
+    def public_key_infrastructure(self):
+        """"""
+        return self.properties.get(
+            "publicKeyInfrastructure",
+            PublicKeyInfrastructureRoot(
+                self.context,
+                ResourcePath("publicKeyInfrastructure", self.resource_path),
+            ),
+        )
+
+    @property
     def subscriptions(self):
         """List of commercial subscriptions that an organization acquired."""
         return self.properties.get(
@@ -99,3 +113,12 @@ class Directory(Entity):
     def deleted_service_principals(self):
         """Recently deleted service Principals"""
         return self.deleted_items("microsoft.graph.servicePrincipal")
+
+    def get_property(self, name, default_value=None):
+        if default_value is None:
+            property_mapping = {
+                "customSecurityAttributeDefinitions": self.custom_security_attribute_definitions,
+                "publicKeyInfrastructure": self.public_key_infrastructure,
+            }
+            default_value = property_mapping.get(name, None)
+        return super(Directory, self).get_property(name, default_value)

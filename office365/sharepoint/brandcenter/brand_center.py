@@ -2,6 +2,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.brandcenter.configuration import BrandCenterConfiguration
+from office365.sharepoint.brandcenter.theme_data import ThemeData
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.sites.themes import SiteThemes
 
@@ -21,6 +22,16 @@ class BrandCenter(Entity):
         return_type = ClientResult(self.context, BrandCenterConfiguration())
         qry = ServiceOperationQuery(
             self, "Configuration", None, None, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def add_site_theme(self, theme_data):
+        """ """
+        return_type = ClientResult(self.context, ThemeData())
+        payload = {"themeData": theme_data}
+        qry = ServiceOperationQuery(
+            self, "AddSiteTheme", None, payload, None, return_type
         )
         self.context.add_query(qry)
         return return_type

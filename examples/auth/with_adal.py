@@ -6,22 +6,19 @@ are now generally available.
 """
 
 from office365.graph_client import GraphClient
-from tests import load_settings
+from tests import test_tenant_name, test_client_id, test_username, test_password
 
 
 def acquire_token():
     import adal  # pylint: disable=E0401
 
-    settings = load_settings()
-    authority_url = "https://login.microsoftonline.com/{0}".format(
-        settings["default"]["tenant"]
-    )
+    authority_url = "https://login.microsoftonline.com/{0}".format(test_tenant_name)
     auth_ctx = adal.AuthenticationContext(authority_url)
     token = auth_ctx.acquire_token_with_username_password(
         "https://graph.microsoft.com",
-        settings["user_credentials"]["username"],
-        settings["user_credentials"]["password"],
-        settings["client_credentials"]["client_id"],
+        test_username,
+        test_password,
+        test_client_id,
     )
     return token
 

@@ -106,3 +106,7 @@ class CreatePolicyRequest(ClientValue):
     @property
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.TenantAdministration.CreatePolicyRequest"
+
+
+class SPOCopilotPromoUsage(ClientValue):
+    """"""

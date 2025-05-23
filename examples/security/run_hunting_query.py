@@ -16,7 +16,10 @@ client = GraphClient(tenant=test_tenant).with_client_secret(
     test_client_id, test_client_secret
 )
 query = """
-DeviceProcessEvents | where InitiatingProcessFileName =~ \"powershell.exe\" | project Timestamp, FileName, \
-InitiatingProcessFileName | order by Timestamp desc | limit 2"""
+DeviceProcessEvents
+| where InitiatingProcessFileName =~ \"powershell.exe\"
+| project Timestamp, FileName, InitiatingProcessFileName
+| order by Timestamp desc | limit 2"""
+
 result = client.security.run_hunting_query(query).execute_query()
 print(result.value)
