@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from office365.graph_client import GraphClient
 from tests import test_client_id, test_client_secret, test_tenant
-from tests.test_decorators import requires_app_permission
+from tests.decorators import requires_app_permission
 
 
 class TestRooms(TestCase):

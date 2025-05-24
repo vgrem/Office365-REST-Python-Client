@@ -268,6 +268,18 @@ class Group(DirectoryObject):
         )
 
     @property
+    def rejected_senders(self):
+        """
+        The list of users or groups not allowed to create posts or calendar events in this group. Nullable
+        """
+        return self.properties.get(
+            "rejectedSenders",
+            DirectoryObjectCollection(
+                self.context, ResourcePath("rejectedSenders", self.resource_path)
+            ),
+        )
+
+    @property
     def transitive_members(self):
         """
         Get a list of the group's members. A group can have members, devices, organizational contacts,
@@ -425,6 +437,7 @@ class Group(DirectoryObject):
                 "groupTypes": self.group_types,
                 "licenseProcessingState": self.license_processing_state,
                 "permissionGrants": self.permission_grants,
+                "rejectedSenders": self.rejected_senders,
                 "transitiveMembers": self.transitive_members,
                 "transitiveMemberOf": self.transitive_member_of,
             }

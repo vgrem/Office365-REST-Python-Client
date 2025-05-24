@@ -6,7 +6,7 @@ are now generally available.
 """
 
 from office365.graph_client import GraphClient
-from tests import test_tenant_name, test_client_id, test_username, test_password
+from tests import test_client_id, test_password, test_tenant_name, test_username
 
 
 def acquire_token():

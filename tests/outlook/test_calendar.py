@@ -4,6 +4,7 @@ from typing import Optional
 from office365.outlook.calendar.calendar import Calendar
 from office365.outlook.calendar.email_address import EmailAddress
 from tests import create_unique_name, test_user_principal_name
+from tests.decorators import requires_delegated_permission
 from tests.graph_case import GraphTestCase
 
 
@@ -21,10 +22,19 @@ class TestCalendar(GraphTestCase):
     def tearDownClass(cls):
         pass
 
+    @requires_delegated_permission(
+        "Calendars.Read.Shared", "Calendars.ReadWrite.Shared"
+    )
     def test1_find_my_meeting_times(self):
         result = self.client.me.find_meeting_times().execute_query()
         self.assertIsNotNone(result.value.meetingTimeSuggestions)
 
+    @requires_delegated_permission(
+        "Calendars.ReadBasic",
+        "Calendars.Read",
+        "Calendars.ReadWrite",
+        "Calendars.ReadWrite.Shared",
+    )
     def test2_get_my_schedule(self):
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(days=7)
@@ -35,10 +45,22 @@ class TestCalendar(GraphTestCase):
         ).execute_query()
         self.assertIsNotNone(result.value)
 
+    @requires_delegated_permission(
+        "Calendars.ReadBasic",
+        "Calendars.ReadWrite",
+        "Calendars.Read",
+        "Calendars.ReadWrite.Shared",
+    )
     def test3_list_my_cal_groups(self):
         cal_groups = self.client.me.calendar_groups.get().execute_query()
         self.assertIsNotNone(cal_groups.resource_path)
 
+    @requires_delegated_permission(
+        "Calendars.ReadBasic",
+        "Calendars.ReadWrite",
+        "Calendars.Read",
+        "Calendars.ReadWrite.Shared",
+    )
     def test4_list_my_cal_permissions(self):
         result = self.client.me.calendar.calendar_permissions.get().execute_query()
         self.assertIsNotNone(result.resource_path)
