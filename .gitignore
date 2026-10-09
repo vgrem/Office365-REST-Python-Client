@@ -20,6 +20,9 @@ tests/selfsigncert.pem
 # Generator run checkpoints
 generator/.checkpoints/
 
+# Generator documentation cache (regenerated from graphopenapi.yaml)
+generator/documentation/graphopenapi.cache.json
+
 # Example run checkpoints (data-pipeline resume state)
 *.checkpoint.json
 
