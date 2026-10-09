@@ -6,7 +6,7 @@ import ast
 from pathlib import Path
 
 import pytest
-from generator.builders.type import TypeBuilder
+from generator.builders.type import TypeBuilder, _qualify_datetime
 from generator.builders.type_registry import TypeRegistry
 from generator.odata.method import MethodInformation
 from generator.odata.property import PropertyInformation
@@ -118,3 +118,35 @@ def test_keyword_field_names_are_sanitized(tmp_path: Path):
     ast.parse(source)
     assert "class_: str | None" in source
     assert "from_: str | None" in source
+
+
+def test_update_preserves_existing_source(tmp_path: Path, monkeypatch):
+    """Updating a file only appends new members; comments and ignores survive."""
+    target = tmp_path / "test_thing.py"
+    target.write_text(
+        "from __future__ import annotations\n"
+        "\n"
+        "\n"
+        "class TestThing:\n"
+        "    # keep me\n"
+        "    def existing(self) -> None:  # type: ignore[misc]\n"
+        "        pass\n",
+        encoding="utf8",
+    )
+    monkeypatch.setattr(TypeBuilder, "_module_file", staticmethod(lambda name: str(target)))
+    builder = TypeBuilder(_schema(), _options(tmp_path), resolver=_StubResolver())
+    builder.build()
+    source = builder.render()
+
+    assert builder.status == "updated"
+    assert "# keep me" in source
+    assert "# type: ignore[misc]" in source
+    assert "def title" in source
+    # render() must not mutate the built nodes (it runs for validation and save)
+    assert source == builder.render()
+
+
+def test_datetime_references_use_the_module_form():
+    """When a file uses ``import datetime``, generated refs become ``datetime.datetime``."""
+    node = ast.parse("def f(x: datetime) -> None: ...").body[0]
+    assert "datetime.datetime" in ast.unparse(_qualify_datetime(node))

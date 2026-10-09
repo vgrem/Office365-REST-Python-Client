@@ -1,4 +1,5 @@
 import ast
+import copy
 import importlib.util
 import inspect
 import keyword
@@ -33,6 +34,37 @@ _RESERVED_METHOD_NAMES = (
 _RESERVED_PROPERTY_NAMES = {name for name in dir(ClientObject)} | {name for name in dir(ClientValue)}
 
 
+def _is_type_checking(node: ast.If) -> bool:
+    test = node.test
+    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+    )
+
+
+def _is_datetime_class_import(imp: ast.stmt) -> bool:
+    return (
+        isinstance(imp, ast.ImportFrom)
+        and imp.module == "datetime"
+        and any(alias.name == "datetime" for alias in imp.names)
+    )
+
+
+class _DatetimeQualifier(ast.NodeTransformer):
+    """Qualify generated ``datetime`` references as ``datetime.datetime`` (module form)."""
+
+    def visit_Name(self, node: ast.Name):
+        if isinstance(node.ctx, ast.Load) and node.id == "datetime":
+            return ast.copy_location(
+                ast.Attribute(value=ast.Name(id="datetime", ctx=ast.Load()), attr="datetime", ctx=ast.Load()),
+                node,
+            )
+        return node
+
+
+def _qualify_datetime(node: ast.stmt) -> ast.stmt:
+    return _DatetimeQualifier().visit(copy.deepcopy(node))
+
+
 class TypeBuilder(ast.NodeTransformer):
     """Type builder"""
 
@@ -56,6 +88,9 @@ class TypeBuilder(ast.NodeTransformer):
         self._changes: List[str] = []
         self._docstring: Optional[str] = None
         self._entity_type_name_exists: bool = False
+        self._original_text: Optional[str] = None
+        self._added_members: List[ast.stmt] = []
+        self._added_imports: List[ast.stmt] = []
         self._resolver = resolver or TypeRegistry(
             (options or {}).get("modules", "").split(","),
             namespace=(options or {}).get("namespace", ""),
@@ -181,7 +216,8 @@ class TypeBuilder(ast.NodeTransformer):
 
         if self.state == "attached":
             with open(self.file, encoding="utf-8") as f:
-                self._source_tree = ast.parse(f.read())
+                self._original_text = f.read()
+            self._source_tree = ast.parse(self._original_text)
             self._status = "updated"
         else:
             self._source_tree = self._template.load()
@@ -219,6 +255,7 @@ class TypeBuilder(ast.NodeTransformer):
         for imp in self._template.build_references(collector):
             if self._insert_import(module, imp, existing, insert_index):
                 insert_index += 1
+                self._added_imports.append(imp)
 
     def _insert_import(self, module: ast.Module, imp: ast.stmt, existing: set, index: int) -> bool:
         """Insert an import (or ``TYPE_CHECKING`` block) with only the missing names."""
@@ -277,6 +314,7 @@ class TypeBuilder(ast.NodeTransformer):
                 for node in member_nodes:
                     class_node.body.insert(insert_pos, node)
                     insert_pos += 1
+                self._added_members.extend(member_nodes)
                 self._changes.append(f"member: {member_builder.name}")
                 existing_members.add(member_builder.name)
 
@@ -304,14 +342,14 @@ class TypeBuilder(ast.NodeTransformer):
                 continue
             if prop.docstring:
                 doc = prop.docstring.replace("\\n", "\n")
-                class_node.body.insert(
-                    len(class_node.body) - 1,
-                    ast.Expr(value=ast.Constant(value=doc)),
-                )
+                doc_node = ast.Expr(value=ast.Constant(value=doc))
+                class_node.body.insert(len(class_node.body) - 1, doc_node)
                 insert_pos += 1
+                self._added_members.append(doc_node)
             ann = self._build_value_annotation(prop)
             class_node.body.insert(insert_pos, ann)
             insert_pos += 1
+            self._added_members.append(ann)
             self._changes.append(f"property annotation: {prop.schema.Name}")
 
     def _build_value_annotation(self, prop: PropertyBuilder) -> ast.AnnAssign:
@@ -385,6 +423,7 @@ class TypeBuilder(ast.NodeTransformer):
                 for method in property_methods:
                     class_node.body.insert(insert_pos, method)
                     insert_pos += 1
+                self._added_members.extend(property_methods)
                 self._changes.append(f"property: {prop.name}")
 
     def _generate_methods_enabled(self) -> bool:
@@ -403,8 +442,10 @@ class TypeBuilder(ast.NodeTransformer):
         for method in self._methods:
             if method.status == "attached":
                 continue
-            for node in method.build(context_type):
+            method_nodes = method.build(context_type)
+            for node in method_nodes:
                 class_node.body.append(node)
+            self._added_members.extend(method_nodes)
             self._changes.append(f"method: {method.name}")
 
     def _build_post(self, class_node: ast.ClassDef):
@@ -430,10 +471,97 @@ class TypeBuilder(ast.NodeTransformer):
         self._ensure_entity_type_name(class_node)
 
     def render(self) -> str:
-        """Return the generated module source without writing it."""
+        """Return the generated module source without writing it.
+
+        Created files are emitted from the built tree. Existing files keep their
+        original source verbatim and only receive the newly added members and
+        imports, so comments, ``# type: ignore`` and formatting survive.
+        """
         assert self._source_tree is not None
+        if self._original_text is not None:
+            return self._render_update()
         ast.fix_missing_locations(self._source_tree)
         return normalize_quotes(ast.unparse(self._source_tree))
+
+    def _render_update(self) -> str:
+        """Splice the newly built members/imports into the original source text."""
+        assert self._original_text is not None
+        original_tree = ast.parse(self._original_text)
+        members = list(self._added_members)
+        imports = list(self._added_imports)
+
+        if self._uses_module_datetime(original_tree):
+            # The file binds ``datetime`` to the module (``import datetime``); keep
+            # that form and qualify generated references as ``datetime.datetime``.
+            imports = [imp for imp in imports if not _is_datetime_class_import(imp)]
+            members = [_qualify_datetime(node) for node in members]
+
+        runtime_lines: list[str] = []
+        type_checking_lines: list[str] = []
+        for imp in imports:
+            if isinstance(imp, ast.If) and _is_type_checking(imp):
+                type_checking_lines.extend(ast.unparse(stmt) for stmt in imp.body)
+            else:
+                runtime_lines.append(ast.unparse(imp))
+
+        lines = self._original_text.splitlines()
+        class_end = self._class_body_end_line(original_tree)
+        runtime_insert = self._last_runtime_import_line(original_tree)
+        tc_block = self._find_type_checking_block(original_tree)
+
+        # Insert from the bottom up so earlier line numbers stay valid.
+        if members:
+            body = "\n\n".join(self._render_member(node) for node in members)
+            lines[class_end:class_end] = ["", *body.splitlines()]
+
+        if type_checking_lines:
+            if tc_block is not None:
+                lines[tc_block.end_lineno : tc_block.end_lineno] = ["    " + line for line in type_checking_lines]
+            else:
+                block = ["if TYPE_CHECKING:", *("    " + line for line in type_checking_lines)]
+                lines[runtime_insert:runtime_insert] = block
+
+        if runtime_lines:
+            lines[runtime_insert:runtime_insert] = runtime_lines
+
+        return "\n".join(lines) + ("\n" if self._original_text.endswith("\n") else "")
+
+    @staticmethod
+    def _render_member(node: ast.stmt) -> str:
+        module = ast.Module(body=[node], type_ignores=[])
+        ast.fix_missing_locations(module)
+        code = normalize_quotes(ast.unparse(module))
+        return "\n".join("    " + line if line.strip() else line for line in code.splitlines())
+
+    @staticmethod
+    def _class_body_end_line(tree: ast.Module) -> int:
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef):
+                last = node.body[-1]
+                return last.end_lineno or last.lineno
+        return len(tree.body)
+
+    @staticmethod
+    def _last_runtime_import_line(tree: ast.Module) -> int:
+        line = 0
+        for node in tree.body:
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                line = node.end_lineno or line
+        return line
+
+    @staticmethod
+    def _find_type_checking_block(tree: ast.Module) -> Optional[ast.If]:
+        for node in tree.body:
+            if isinstance(node, ast.If) and _is_type_checking(node):
+                return node
+        return None
+
+    @staticmethod
+    def _uses_module_datetime(tree: ast.Module) -> bool:
+        return any(
+            isinstance(node, ast.Import) and any(alias.name == "datetime" for alias in node.names)
+            for node in ast.walk(tree)
+        )
 
     def save(self):
         code = self.render()
@@ -479,6 +607,7 @@ class TypeBuilder(ast.NodeTransformer):
         if not self._entity_type_name_exists:
             entity_type_name_method = self._build_type_name_property(self._schema.FullName)
             class_node.body.append(entity_type_name_method)
+            self._added_members.append(entity_type_name_method)
             self._changes.append("entity_type_name property")
 
     @staticmethod
