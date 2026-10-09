@@ -18,6 +18,9 @@ class ViewFieldCollection(Entity):
         items = self.items
         return len(items) if items else 0
 
+    def __iter__(self):
+        return iter(self.items or [])
+
     def __getitem__(self, index: int) -> str:
         """Gets view field by index"""
         items = self.items
