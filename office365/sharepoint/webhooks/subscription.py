@@ -3,6 +3,7 @@ from typing import Optional, Union
 
 from typing_extensions import Self
 
+from office365.runtime.converters.scalars import iso_z
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
@@ -41,7 +42,7 @@ class Subscription(Entity):
     def expiration_datetime(self, value: Union[datetime, str]) -> None:
         """Sets endpoint that will be called when an event occurs."""
         if isinstance(value, datetime):
-            self.set_property("expirationDateTime", value.isoformat())
+            self.set_property("expirationDateTime", iso_z(value))
         else:
             self.set_property("expirationDateTime", value)
 

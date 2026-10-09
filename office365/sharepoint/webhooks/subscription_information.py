@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Dict, Optional, cast
 
 from office365.runtime.client_value import ClientValue
+from office365.runtime.converters.scalars import iso_z
 from office365.runtime.types.collections import StringCollection
 
 
@@ -21,7 +22,7 @@ class SubscriptionInformation(ClientValue):
 
     def to_json(self, json_format=None):
         json = cast(Dict, super().to_json(json_format))
-        json["expirationDateTime"] = self.expirationDateTime.isoformat()
+        json["expirationDateTime"] = iso_z(self.expirationDateTime)
         return json
 
     @property

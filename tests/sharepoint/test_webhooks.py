@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import ClassVar, Optional
 
 from office365.sharepoint.lists.list import List
@@ -32,7 +32,7 @@ class TestSPWebHooks(SPTestCase):
         target_list = TestSPWebHooks.target_list
         if not target_list:
             self.skipTest("No target list from setup")
-        expiration = datetime.utcnow() + timedelta(days=30)
+        expiration = datetime.now(timezone.utc) + timedelta(days=30)
         subscription = target_list.subscriptions.add(self.push_service_url, expiration).execute_query()
         self.assertIsNotNone(subscription.notification_url)
         TestSPWebHooks.target_subscription = subscription
@@ -51,7 +51,7 @@ class TestSPWebHooks(SPTestCase):
         if not target_subscription:
             self.skipTest("No target subscription from previous test")
         subscription = target_subscription
-        subscription.expiration_datetime = datetime.utcnow() + timedelta(days=10)
+        subscription.expiration_datetime = datetime.now(timezone.utc) + timedelta(days=10)
         subscription.update().execute_query()
 
     def test_04_delete_subscription(self):

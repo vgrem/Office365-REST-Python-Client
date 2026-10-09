@@ -53,6 +53,8 @@ sequenceDiagram
 ## Quick start
 
 ```python
+from datetime import datetime, timedelta, timezone
+
 from office365.sharepoint.client_context import ClientContext
 
 ctx = ClientContext("https://contoso.sharepoint.com/sites/team").with_client_certificate(
@@ -61,8 +63,11 @@ ctx = ClientContext("https://contoso.sharepoint.com/sites/team").with_client_cer
 
 target_list = ctx.web.lists.get_by_title("Documents")
 
-# Subscribe
-sub = target_list.subscriptions.add("https://your-app.azurewebsites.net/webhook/notifications").execute_query()
+# Subscribe (SharePoint requires an explicit expiration, max 180 days)
+expiration = datetime.now(timezone.utc) + timedelta(days=30)
+sub = target_list.subscriptions.add(
+    "https://your-app.azurewebsites.net/webhook/notifications", expiration
+).execute_query()
 print(f"Subscribed: {sub.id} (expires: {sub.expiration_datetime})")
 ```
 

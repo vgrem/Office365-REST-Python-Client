@@ -326,6 +326,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a wire date-time and rejected it with `System.FormatException: String was not
   recognized as a valid DateTime`. Expirations are now normalized to UTC with
   second precision and a trailing `Z` (new `iso_z` helper).
+- **Webhook subscription expiration format:** `SubscriptionInformation.to_json`
+  and `Subscription.expiration_datetime` serialized the date with
+  `datetime.isoformat()`, emitting microseconds (and a `+00:00` offset for an
+  aware value). The field is an `Edm.DateTime`, so both now use the UTC `Z` form
+  (`iso_z`).
 - **`Group.created_datetime` returns `None` when absent:** it previously returned
   the `datetime.min` sentinel (a naive year-1 datetime), which silently corrupted
   age comparisons and formatting. It is now `Optional[datetime]` — `None` when the
