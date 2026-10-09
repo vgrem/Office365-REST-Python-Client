@@ -19,6 +19,8 @@ def main():
     parser.add_argument("--hidden", action="store_true", help="Hide the field")
     parser.add_argument("--group", help="Field group")
     parser.add_argument("--description", help="Field description")
+    parser.add_argument("--hide-in-forms", action="store_true", help="Hide from the new/edit forms (keep display form)")
+    parser.add_argument("--index", action="store_true", help="Enable the list index on the field")
     args = parser.parse_args()
 
     ctx = ClientContext(site_url).with_client_certificate(
@@ -37,17 +39,20 @@ def main():
         changes["Group"] = args.group
     if args.description:
         changes["Description"] = args.description
-    field.update_properties(**changes).execute_query()
+    if changes:
+        field.update_properties(**changes).execute_query()
+        print(f"Updated: {', '.join(changes)}")
 
-    # Form visibility (show in display form, hide from new/edit forms)
-    field.set_show_in_new_form(False)
-    field.set_show_in_edit_form(False)
-    field.set_show_in_display_form(True)
-    field.update().execute_query()
+    if args.hide_in_forms:
+        field.set_show_in_new_form(False)
+        field.set_show_in_edit_form(False)
+        field.set_show_in_display_form(True)
+        field.update().execute_query()
+        print("Hidden from the new/edit forms")
 
-    # Enable the list index
-    result = field.enable_index().execute_query()
-    print(f"Field updated: {field.internal_name}  (indexed: {result.value})")
+    if args.index:
+        result = field.enable_index().execute_query()
+        print(f"Index enabled: {result.value}")
 
 
 if __name__ == "__main__":

@@ -33,7 +33,6 @@ FIELDS = [
 def main():
     parser = argparse.ArgumentParser(description="Provision typed fields from a schema spec")
     parser.add_argument("--list-title", default=LIST_TITLE, help="Target list")
-    parser.add_argument("--keep", action="store_true", help="Keep created fields (default: delete after demo)")
     args = parser.parse_args()
 
     ctx = ClientContext(site_url).with_client_certificate(
