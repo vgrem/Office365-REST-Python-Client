@@ -21,16 +21,12 @@ def main():
     )
     ct = ctx.web.ensure_content_type(name=args.name).execute_query()
     field = ctx.web.fields.get_by_internal_name_or_title(args.field)
-    ctx.load(field, ["Id", "InternalName"]).execute_query()
+    ctx.load(field, ["InternalName"]).execute_query()
 
-    # Add the field so there is something to remove
-    ct.field_links.add(field).execute_query()
-
-    # Find the field link by its field internal name and delete it
     links = ct.field_links.get().execute_query()
     target = next((link for link in links if link.field_internal_name == field.internal_name), None)
     if target is None:
-        raise SystemExit(f"Field '{args.field}' not found on content type")
+        raise SystemExit(f"Field '{args.field}' is not linked to content type '{args.name}'")
     target.delete_object().execute_query()
     print(f"Field removed from content type: {field.internal_name}")
 

@@ -22,14 +22,17 @@ def main():
     )
     ct = ctx.web.ensure_content_type(name=args.name).execute_query()
 
-    # Add the fields (if not already present) so they can be reordered
+    # Link any field that is not already part of the content type
+    existing = {link.field_internal_name for link in ct.field_links.get().execute_query()}
     for field_name in args.order:
+        if field_name in existing:
+            continue
         field = ctx.web.fields.get_by_internal_name_or_title(field_name)
         ct.field_links.add(field).execute_query()
         print(f"Field added: {field_name}")
 
     ct.reorder_fields(args.order).execute_query()
-    print(f"Fields reordered: {' → '.join(args.order)}")
+    print(f"Fields reordered: {' -> '.join(args.order)}")
 
     if not args.keep:
         ct.delete_object().execute_query()

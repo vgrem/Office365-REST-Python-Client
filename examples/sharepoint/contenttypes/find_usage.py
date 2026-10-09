@@ -16,7 +16,7 @@ from tests.settings import cert_path, cert_thumbprint, client_id, site_url, tena
 def main():
     parser = argparse.ArgumentParser(description="Find lists that use a content type")
     parser.add_argument("--name", help="Content type name")
-    parser.add_argument("--id", dest="string_id", help="Content type string id (e.g. 0x0120...")
+    parser.add_argument("--id", dest="string_id", help="Content type string id (e.g. 0x0120...)")
     parser.add_argument("--list-title", help="Only scan this list (default: all lists)")
     parser.add_argument("--include-hidden", action="store_true", help="Also scan hidden/system lists")
     args = parser.parse_args()
@@ -36,7 +36,7 @@ def main():
     print(f"Scanning lists for '{ct.name}' ({ct.string_id})...\n")
 
     if args.list_title:
-        lists = [ctx.web.lists.get_by_title(args.list_title)]
+        lists = [ctx.web.lists.get_by_title(args.list_title).get().execute_query()]
     else:
         lists = ctx.web.lists.get().execute_query()
 

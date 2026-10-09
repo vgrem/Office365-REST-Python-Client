@@ -20,16 +20,20 @@ def main():
     ctx = ClientContext(site_url).with_client_certificate(
         tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
     )
-    ct = ctx.web.content_types.add(
+    site_ct = ctx.web.content_types.add(
         ContentTypeCreationInformation(Name=args.name, Description="For Contoso projects")
     ).execute_query()
-    if ct.string_id is None:
+    if site_ct.string_id is None:
         raise SystemExit("Failed to create content type")
 
     target_list = ctx.web.lists.get_by_title(args.list_title)
-    target_list.content_types.add(ContentTypeCreationInformation(Name=args.name, Id=ct.string_id)).execute_query()
-    ct.set_default(True).update().execute_query()
-    print(f"Default content type set: {ct.name}")
+    list_ct = target_list.content_types.add(
+        ContentTypeCreationInformation(Name=args.name, Id=site_ct.string_id)
+    ).execute_query()
+
+    # The default flag lives on the list's content type binding
+    list_ct.set_default(True).update().execute_query()
+    print(f"Default content type set: {list_ct.name} on '{args.list_title}'")
 
 
 if __name__ == "__main__":

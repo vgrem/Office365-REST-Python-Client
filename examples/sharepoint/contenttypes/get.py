@@ -22,12 +22,12 @@ def main():
     ctx = ClientContext(site_url).with_client_certificate(
         tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
     )
-    ct = (
-        ctx.web.content_types.find_by_name(args.name, required=True)
-        if args.name
-        else ctx.web.content_types.get_by_id(args.id)
-    )
-    ct.execute_query()
+    if args.name:
+        ct = ctx.web.content_types.find_by_name(args.name, required=True)
+    else:
+        assert args.id is not None
+        ct = ctx.web.content_types.get_by_id(args.id)
+    ctx.load(ct, ["Name", "Description", "Id", "StringId"]).execute_query()
 
     print(f"Name: {ct.name}")
     print(f"Description: {ct.description}")
