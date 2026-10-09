@@ -103,7 +103,11 @@ class TypeReferenceCollector:
             return
         module = self._module_for(prop.schema.TypeName, name)
         if module:
-            self._type_checking[name] = module
+            # A ClientValue dataclass uses the type in ``field(default_factory=X)``
+            # at runtime, so it needs a real import; entity annotations can stay
+            # under TYPE_CHECKING (the getter imports lazily).
+            target = self._entries if self.needs_dataclass else self._type_checking
+            target[name] = module
 
     def add_object_type(self, prop: PropertyBuilder) -> None:
         """Track type references for navigation properties.

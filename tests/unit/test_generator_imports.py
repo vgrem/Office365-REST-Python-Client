@@ -11,6 +11,23 @@ from generator.odata.property import PropertyInformation
 from generator.odata.type_information import TypeInformation
 
 _TEMPLATES = Path(__file__).resolve().parents[2] / "generator" / "templates" / "sharepoint"
+_TEMPLATES_GRAPH = Path(__file__).resolve().parents[2] / "generator" / "templates" / "graph"
+
+
+class _FixedResolver:
+    """Resolves every type to one module (for import-placement tests)."""
+
+    def __init__(self, module: str) -> None:
+        self._module = module
+
+    def resolve(self, type_name):
+        return None
+
+    def module_for(self, type_name):
+        return self._module
+
+    def members_of(self, type_name):
+        return set()
 
 
 def _build_navigation_type(tmp_path: Path) -> str:
@@ -51,6 +68,23 @@ def test_complex_value_collection_does_not_emit_bracketed_import(tmp_path: Path)
     source = builder.render()
     ast.parse(source)
     assert [line for line in source.splitlines() if line.startswith("from ") and "[" in line] == []
+
+
+def test_client_value_field_type_is_a_runtime_import(tmp_path: Path):
+    """A dataclass field's ``default_factory=X`` needs X at runtime, not only under TYPE_CHECKING."""
+    schema = TypeInformation(BaseTypeFullName="ComplexType", FullName="microsoft.graph.TestValue", IsValueObject=True)
+    schema.add_property(PropertyInformation(Name="Subject", TypeName="microsoft.graph.WorkflowSubject"))
+    options = {"template_path": str(_TEMPLATES_GRAPH), "output_path": str(tmp_path), "modules": "office365"}
+    builder = TypeBuilder(schema, options, resolver=_FixedResolver("office365.workflow_subject"))
+    builder.build()
+    source = builder.render()
+    ast.parse(source)
+
+    lines = source.splitlines()
+    import_line = "from office365.workflow_subject import WorkflowSubject"
+    runtime_index = lines.index(import_line)
+    type_checking_index = next((i for i, line in enumerate(lines) if line.startswith("if TYPE_CHECKING:")), len(lines))
+    assert runtime_index < type_checking_index  # module-level, before the TYPE_CHECKING block
 
 
 def test_method_entity_return_is_imported_lazily(tmp_path: Path):
