@@ -119,8 +119,11 @@ def main() -> int:
 
     client = _sign_in(tenant, client_id, admin, args.interactive)
     app = client.applications.ensure(args.app_name).execute_query()
-    client.service_principals.ensure(app.app_id).execute_query()
-    print(f"Ensured app '{app.display_name}' ({app.app_id}).")
+    app_id = app.app_id
+    if app_id is None:
+        sys.exit("The provisioned app has no application id.")
+    client.service_principals.ensure(app_id).execute_query()
+    print(f"Ensured app '{app.display_name}' ({app_id}).")
     thumbprint = _ensure_certificate(app, args.app_name, args.force_cert)
 
     scope = SITES_FULL_CONTROL if args.scope == "all" else SITES_SELECTED
@@ -132,7 +135,7 @@ def main() -> int:
             site.grant_app_access(app, args.role).execute_query()
             print(f"Granted '{args.role}' to the app on {site_url}.")
 
-    _print_connection_values(tenant, client_id, app.app_id, thumbprint)
+    _print_connection_values(tenant, client_id, app_id, thumbprint)
     return 0
 
 

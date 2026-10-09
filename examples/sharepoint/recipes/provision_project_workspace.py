@@ -76,7 +76,8 @@ def main() -> None:
     doc_fields = library.ensure_fields(DOC_LIBRARY_FIELDS)
     ctx.execute_query()
     library.views.ensure_view("By stage", fields=["Title", "ProjectStage", "ClientDueDate", "Budget"]).execute_query()
-    print(f"Library  : {library.title}  (columns: {', '.join(f.internal_name for f in doc_fields)}, view: By stage)")
+    doc_columns = ", ".join(f.internal_name or "?" for f in doc_fields)
+    print(f"Library  : {library.title}  (columns: {doc_columns}, view: By stage)")
 
     # 2. Task list with typed columns and a view.
     tasks = ctx.web.lists.ensure_list(
@@ -88,7 +89,8 @@ def main() -> None:
     task_fields = tasks.ensure_fields(TASK_FIELDS)
     ctx.execute_query()
     tasks.views.ensure_view("Open tasks", fields=["Title", "Status", "Owner", "DueDate"]).execute_query()
-    print(f"Task list: {tasks.title}  (columns: {', '.join(f.internal_name for f in task_fields)}, view: Open tasks)")
+    task_columns = ", ".join(f.internal_name or "?" for f in task_fields)
+    print(f"Task list: {tasks.title}  (columns: {task_columns}, view: Open tasks)")
 
     # 3. Seed starter rows once, so re-runs stay idempotent.
     if not tasks.items.get().execute_query():
