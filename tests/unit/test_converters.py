@@ -5,7 +5,7 @@ from __future__ import annotations
 import io
 import unittest
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import cast
 
@@ -18,7 +18,7 @@ from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.converters.csv_writer import write_csv
 from office365.runtime.converters.records import iter_records
-from office365.runtime.converters.scalars import parse_datetime, parse_int
+from office365.runtime.converters.scalars import iso_z, parse_datetime, parse_int
 from office365.runtime.converters.value import _add_type_metadata, declared_type, deserialize_value, serialize_value
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.v4.json_format import V4JsonFormat
@@ -53,6 +53,21 @@ class TestScalarConverters(unittest.TestCase):
     def test_parse_datetime_naive_round_trip(self):
         value = datetime(2025, 1, 15, 12, 34, 56)
         self.assertEqual(parse_datetime(value.isoformat()), value)
+
+    def test_iso_z_utc(self):
+        value = datetime(2025, 1, 15, 12, 34, 56, 123456, tzinfo=timezone.utc)
+        self.assertEqual(iso_z(value), "2025-01-15T12:34:56Z")
+
+    def test_iso_z_converts_non_utc_offset(self):
+        value = datetime(2025, 1, 15, 14, 34, 56, tzinfo=timezone(timedelta(hours=2)))
+        self.assertEqual(iso_z(value), "2025-01-15T12:34:56Z")
+
+    def test_iso_z_naive_assumed_utc(self):
+        value = datetime(2025, 1, 15, 12, 34, 56)
+        self.assertEqual(iso_z(value), "2025-01-15T12:34:56Z")
+
+    def test_iso_z_none(self):
+        self.assertIsNone(iso_z(None))
 
 
 class value__Level(Enum):

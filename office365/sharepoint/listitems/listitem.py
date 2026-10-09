@@ -7,6 +7,7 @@ from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.converters.scalars import iso_z
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
@@ -114,6 +115,7 @@ class ListItem(SecurableObject):
         expiration: Union[None, datetime.datetime] = None,
         role: Union[None, int] = None,
         password: Union[None, str] = None,
+        share_id: Union[None, str] = None,
     ) -> ClientResult[ShareLinkResponse]:
         """Creates a tokenized sharing link for a list item based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
@@ -129,14 +131,17 @@ class ListItem(SecurableObject):
                 for all other kinds.
             password: Optional password value to apply to the tokenized sharing link, if it can support password
                 protection.
+            share_id: Unique identifier of an existing tokenized sharing link to retrieve and update. When omitted
+                the server retrieves a matching link or creates a new one.
         """
         return_type = ClientResult(self.context, ShareLinkResponse())
         request = ShareLinkRequest(
             settings=ShareLinkSettings(
                 linkKind=link_kind,
-                expiration=expiration.isoformat() if expiration else None,
+                expiration=iso_z(expiration),
                 role=role,
                 password=password,
+                shareId=share_id,
             )
         )
         if password:

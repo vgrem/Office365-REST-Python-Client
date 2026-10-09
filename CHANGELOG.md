@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Sharing-link updates:** `ListItem.share_link` / `File.share_link` /
+  `Folder.share_link` accept an optional `share_id` (the `ShareId` returned when a
+  link was created). The server then updates that existing tokenized link in place
+  — for example to change its expiration — instead of creating a second link for
+  the same item. The `update_sharing_link` example now updates the link it just
+  created.
 - **Declarative OData query-option capabilities:** `@query_capabilities(...)` on a
   `ClientObjectCollection` subclass declares the query options an endpoint rejects
   (or the exact set it allows). The fluent setters — `top`, `skip`, `order_by`,
@@ -313,6 +319,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (start here → common tasks → full catalog), and the auth pages cross-link it.
 
 ### Fixed
+- **Sharing-link expiration rejected as an invalid date:** `ListItem.share_link`
+  serialized the `expiration` argument with `datetime.isoformat()`, emitting a
+  numeric UTC offset plus microseconds (for example
+  `2026-10-16T17:29:49.638704+00:00`). The `ShareLink` endpoint parses that field as
+  a wire date-time and rejected it with `System.FormatException: String was not
+  recognized as a valid DateTime`. Expirations are now normalized to UTC with
+  second precision and a trailing `Z` (new `iso_z` helper).
 - **`Group.created_datetime` returns `None` when absent:** it previously returned
   the `datetime.min` sentinel (a naive year-1 datetime), which silently corrupted
   age comparisons and formatting. It is now `Optional[datetime]` — `None` when the

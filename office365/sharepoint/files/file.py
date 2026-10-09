@@ -280,6 +280,7 @@ class File(AbstractFile):
         expiration: Optional[datetime] = None,
         role: Optional[int] = None,
         password: Optional[str] = None,
+        share_id: Optional[str] = None,
     ) -> ClientResult[ShareLinkResponse]:
         """Creates a tokenized sharing link for a file based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
@@ -295,8 +296,10 @@ class File(AbstractFile):
                 for all other kinds.
             password: Optional password value to apply to the tokenized sharing link, if it can support password
                 protection.
+            share_id: Unique identifier of an existing tokenized sharing link to retrieve and update. When omitted
+                the server retrieves a matching link or creates a new one.
         """
-        return self.listItemAllFields.share_link(link_kind, expiration, role, password)
+        return self.listItemAllFields.share_link(link_kind, expiration, role, password, share_id)
 
     def unshare_link(self, link_kind, share_id=None) -> ListItem:
         """Removes the specified tokenized sharing link of the file.

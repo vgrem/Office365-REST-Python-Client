@@ -100,6 +100,21 @@ def iso_or_none(value: Any) -> Optional[str]:
     return value.isoformat(timespec="seconds") if hasattr(value, "isoformat") else (str(value) or None)
 
 
+def iso_z(value: Any) -> Optional[str]:
+    """UTC ISO-8601 string with a ``Z`` suffix (second precision); ``None`` for ``None``.
+
+    SharePoint and Microsoft Graph parse date-time strings on the wire as UTC
+    with a trailing ``Z``; some endpoints (for example ``ShareLink``) reject a
+    numeric offset such as ``+00:00`` as an invalid date. Naive datetimes are
+    assumed to be UTC.
+    """
+    if value is None:
+        return None
+    if value.tzinfo is not None:
+        value = value.astimezone(timezone.utc)
+    return value.replace(tzinfo=None).isoformat(timespec="seconds") + "Z"
+
+
 def _normalize_datetime_string(value: str) -> str:
     """Truncate or pad fractional seconds to exactly 6 digits for %f compatibility."""
     if "." not in value:

@@ -385,6 +385,7 @@ class Folder(Entity):
         expiration: Optional[datetime] = None,
         role: Optional[int] = None,
         password: Optional[str] = None,
+        share_id: Optional[str] = None,
     ) -> ClientResult[ShareLinkResponse]:
         """Creates a tokenized sharing link for a folder based on the specified parameters and optionally
         sends an email to the people that are listed in the specified parameters.
@@ -402,7 +403,7 @@ class Folder(Entity):
                 protection.
         """
         return self.list_item_all_fields.share_link(
-            link_kind=link_kind, expiration=expiration, role=role, password=password
+            link_kind=link_kind, expiration=expiration, role=role, password=password, share_id=share_id
         )
 
     def unshare_link(self, link_kind: int, share_id: Optional[str] = None) -> Self:
