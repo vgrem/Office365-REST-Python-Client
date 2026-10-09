@@ -37,6 +37,7 @@ def _role_rows(role_assignments) -> list[str]:
 
 
 def _print_securable(label: str, securable) -> None:
+    securable.context.load(securable, ["HasUniqueRoleAssignments"])
     assignments = securable.role_assignments.expand(["Member", "RoleDefinitionBindings"]).get().execute_query()
     unique = "unique" if securable.has_unique_role_assignments else "inherited"
     rows = _role_rows(assignments)
