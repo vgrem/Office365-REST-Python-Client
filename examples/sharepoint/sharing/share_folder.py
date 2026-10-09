@@ -1,24 +1,38 @@
-"""
-Demonstrates how to create and retrieve a tokenized sharing link for a folder.
+"""Create an anonymous sharing link for a folder, then resolve it by guest URL.
 
 https://learn.microsoft.com/en-us/sharepoint/dev/apis/sharing-rest-api
 """
+
+import argparse
+import sys
 
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.sharing.links.kind import SharingLinkKind
 from tests.settings import cert_path, cert_thumbprint, client_id, team_site_url, tenant
 
-ctx = ClientContext(team_site_url).with_client_certificate(
-    tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
-)
-folder = ctx.web.get_folder_by_server_relative_url("Shared Documents/Archive")
 
-# Share a folder
-result = folder.share_link(SharingLinkKind.AnonymousView).execute_query()
+def main():
+    parser = argparse.ArgumentParser(description="Share a folder and resolve the guest URL")
+    parser.add_argument(
+        "--folder-url",
+        default="Shared Documents/Archive",
+        help="server-relative URL of the folder",
+    )
+    args = parser.parse_args()
 
-# Optional step: resolve folder by guest url
-guest_url = result.value.sharingLinkInfo.Url
-if guest_url is None:
-    raise SystemExit("Failed to create a sharing link")
-shared_folder = ctx.web.get_folder_by_guest_url(guest_url).execute_query()
-print(shared_folder)
+    ctx = ClientContext(team_site_url).with_client_certificate(
+        tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
+    )
+    folder = ctx.web.get_folder_by_server_relative_url(args.folder_url)
+    result = folder.share_link(SharingLinkKind.AnonymousView).execute_query()
+    guest_url = result.value.sharingLinkInfo.Url
+    if guest_url is None:
+        sys.exit("Failed to create a sharing link")
+    print(f"Anonymous link: {guest_url}")
+
+    shared_folder = ctx.web.get_folder_by_guest_url(guest_url).execute_query()
+    print(f"Resolved folder: {shared_folder.server_relative_url}")
+
+
+if __name__ == "__main__":
+    main()

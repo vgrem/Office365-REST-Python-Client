@@ -42,7 +42,8 @@ def main():
 
     # -- Step 2: import JSON array file -> new list --
     target = ctx.web.lists.ensure_list(args.target_list).execute_query()
-    target.ensure_fields(args.select.split(",")).execute_query()
+    target.ensure_fields(args.select.split(","))
+    ctx.execute_query()
     hook = None if args.no_progress else progress_bar(f"Importing into {args.target_list}")
     with open(path, "r", encoding="utf-8") as f:
         target.items.from_json(f, progress=hook).execute_query()

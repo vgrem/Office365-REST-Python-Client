@@ -65,7 +65,8 @@ def main():
         header = csv.DictReader(f).fieldnames
         f.seek(0)
         if header:
-            lst.ensure_fields(header).execute_query()
+            lst.ensure_fields(header)
+            ctx.execute_query()
         hook = None if args.no_progress else progress_bar(f"Importing {os.path.basename(path)}")
         lst.queue_records(read_csv_records(f), progress=hook).execute_query()
 

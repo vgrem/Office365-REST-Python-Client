@@ -1,59 +1,47 @@
-"""Parallel download of SharePoint files with ThreadPoolExecutor.
+"""
+Download multiple files in parallel — without managing threads or contexts.
 
-Each worker thread uses its own ClientContext, since a ClientContext is not
-thread-safe (shared query queue / current-query state).
+Queue one ``file.download`` per destination, then drain the context's queue with
+``execute_query_parallel``: the library overlaps the requests with bounded
+concurrency, retries transient failures, and reuses one connection pool.
 
-Token-cache caveat: per-thread contexts each build their own MSAL app and
-acquire their own access token (plus OIDC discovery on first use). For small
-fan-out this is fine; for many/long-running downloads, prefer sharing a single
-token via ``with_access_token(...)`` or an MSAL ``SerializableTokenCache``
-(note: it isn't safe to persist concurrently without a lock).
+Requires delegated permission ``Sites.Read.All``.
 
 https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/file-operations
 """
 
 import argparse
-import concurrent.futures
-import os
 import tempfile
+from pathlib import Path
 
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import client_id, password, site_url, tenant, username
 
 
-def download_one(path: str, output_dir: str) -> str:
-    """Download a single file using its own thread-safe context."""
-    ctx = ClientContext(site_url).with_username_and_password(
-        tenant=tenant, client_id=client_id, username=username, password=password
-    )
-    local_path = os.path.join(output_dir, os.path.basename(path))
-    with open(local_path, "wb") as local_file:
-        ctx.web.get_file_by_server_relative_path(path).download(local_file).execute_query()
-    return local_path
-
-
 def main():
-    parser = argparse.ArgumentParser(description="Download SharePoint files in parallel")
+    parser = argparse.ArgumentParser(description="Download multiple files in parallel")
     parser.add_argument("paths", nargs="+", help="server-relative file paths to download")
-    parser.add_argument("--max-workers", type=int, default=4, help="number of parallel workers (default: 4)")
+    parser.add_argument("--concurrency", type=int, default=4, help="maximum concurrent requests")
     parser.add_argument("--output-dir", default=None, help="local output directory (default: temp)")
     args = parser.parse_args()
 
-    output_dir = args.output_dir or tempfile.mkdtemp()
+    ctx = ClientContext(site_url).with_username_and_password(
+        tenant=tenant, client_id=client_id, username=username, password=password
+    )
+    output_dir = Path(args.output_dir or tempfile.mkdtemp())
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=args.max_workers) as executor:
-        futures = {executor.submit(download_one, path, output_dir): path for path in args.paths}
-        ok = 0
-        for future in concurrent.futures.as_completed(futures):
-            path = futures[future]
-            try:
-                local_path = future.result()
-                ok += 1
-                print(f"[OK] {path} -> {local_path}")
-            except Exception as e:
-                print(f"[FAIL] {path}: {e}")
+    handles = []
+    for path in args.paths:
+        handle = open(output_dir / Path(path).name, "wb")
+        handles.append(handle)
+        ctx.web.get_file_by_server_relative_path(path).download(handle)  # queue
 
-    print(f"\nDownloaded {ok} of {len(args.paths)} files into {output_dir}")
+    try:
+        ctx.execute_query_parallel(concurrency=args.concurrency)
+    finally:
+        for handle in handles:
+            handle.close()
+    print(f"Downloaded {len(args.paths)} file(s) into {output_dir}")
 
 
 if __name__ == "__main__":

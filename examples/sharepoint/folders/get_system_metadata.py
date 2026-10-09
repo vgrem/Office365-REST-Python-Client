@@ -1,54 +1,35 @@
 """
-Retrieves folder system metadata.
+Retrieve folder authorship metadata (the associated list item's Author/Editor).
 
-See https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/folder-operations
+https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/folder-operations
 """
+
+import argparse
 
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import cert_path, cert_thumbprint, client_id, team_site_url, tenant
 
-ctx = ClientContext(team_site_url).with_client_certificate(
-    tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
-)
-list_title = "Documents"
+_FIELDS = ["Author/Id", "Author/Title", "Author/Name", "Editor/Id", "Editor/Title", "Editor/Name"]
 
-folder_items = (
-    ctx.web.lists.get_by_title(list_title)
-    .items.filter("FSObjType eq 1")
-    .select(
-        [
-            "FSObjType",
-            "Author/Id",
-            "Author/Title",
-            "Author/Name",
-            "Editor/Id",
-            "Editor/Title",
-            "Editor/Name",
-        ]
+
+def main():
+    parser = argparse.ArgumentParser(description="Retrieve folder system metadata")
+    parser.add_argument("--folder-url", default="Shared Documents/Archive", help="server-relative folder URL")
+    args = parser.parse_args()
+
+    ctx = ClientContext(team_site_url).with_client_certificate(
+        tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
     )
-    .expand(["Author", "Editor"])
-    .get()
-    .execute_query()
-)
-
-folder_path = "Archive"  # folder relative path
-folder_item = (
-    ctx.web.lists.get_by_title(list_title)
-    .get_item_by_url(folder_path)
-    .select(
-        [
-            "Author/Id",
-            "Author/Title",
-            "Author/Name",
-            "Editor/Id",
-            "Editor/Title",
-            "Editor/Name",
-        ]
+    item = (
+        ctx.web.get_folder_by_server_relative_url(args.folder_url)
+        .list_item_all_fields.select(_FIELDS)
+        .expand(["Author", "Editor"])
+        .get()
+        .execute_query()
     )
-    .expand(["Author", "Editor"])
-    .get()
-    .execute_query()
-)
+    print(f"Author: {item.properties.get('Author')}")
+    print(f"Editor: {item.properties.get('Editor')}")
 
-print(folder_item.properties.get("Author"))
-print(folder_item.properties.get("Editor"))
+
+if __name__ == "__main__":
+    main()

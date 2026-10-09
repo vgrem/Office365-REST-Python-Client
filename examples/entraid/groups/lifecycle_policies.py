@@ -35,6 +35,9 @@ def main():
     if not args.group or not policies:
         return
     group = client.groups.find_by_name(args.group, required=True).execute_query()
+    if group.id is None:
+        print(f"Group '{group.display_name}' has no id.")
+        return
     if args.renew:
         group.renew().execute_query()
         print(f"\nRenewed '{group.display_name}'.")

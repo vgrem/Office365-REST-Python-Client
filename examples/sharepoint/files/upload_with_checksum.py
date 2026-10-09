@@ -1,5 +1,7 @@
 """
-Demonstrates how to upload a file
+Upload a file and verify the transfer with a checksum (``upload_with_checksum``).
+
+https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/file-operations
 """
 
 import argparse

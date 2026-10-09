@@ -19,8 +19,8 @@ from tests.settings import client_id, password, team_site_url, tenant, username
 
 def main():
     parser = argparse.ArgumentParser(description="Gets the files from a folder")
-    parser.add_argument("--folder-url", default="Data_Import", help="folder url")
-    parser.add_argument("--recursive", action="store_true", default=True, help="traverse all sub folders")
+    parser.add_argument("--folder-url", default="Shared Documents", help="server-relative folder URL")
+    parser.add_argument("--recursive", action="store_true", help="traverse all sub folders")
     args = parser.parse_args()
 
     ctx = ClientContext(team_site_url).with_username_and_password(

@@ -34,7 +34,7 @@ def main():
     files = folder.get_files(recursive=args.recursive, page_size=args.page_size).execute_query()
 
     print(f"Found {len(files)} file(s) in '{args.folder_url}'")
-    for file in files[:10]:
+    for file in list(files)[:10]:
         print(f"  {file.name}")
 
 

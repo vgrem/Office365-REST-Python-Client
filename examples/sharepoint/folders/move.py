@@ -1,36 +1,29 @@
 """
-Demonstrates how to move a folder within a site.
+Move a folder under another folder.
 
-See https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/folder-operations
+https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/folder-operations
 """
 
 import argparse
-import uuid
 
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import cert_path, cert_thumbprint, client_id, team_site_url, tenant
 
 
 def main():
-    argparse.ArgumentParser(description="Moves a folder within a site").parse_args()
+    parser = argparse.ArgumentParser(description="Move a folder under another folder")
+    parser.add_argument("--folder-url", default="Shared Documents/Archive", help="source folder URL")
+    parser.add_argument("--target-url", default="Shared Documents/Archive2", help="destination parent folder URL")
+    args = parser.parse_args()
 
     ctx = ClientContext(team_site_url).with_client_certificate(
         tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
     )
+    folder_from = ctx.web.get_folder_by_server_relative_url(args.folder_url)
+    folder_to_parent = ctx.web.get_folder_by_server_relative_url(args.target_url)
 
-    print("Creating a temporary folders in a Documents library ...")
-    folder_from = ctx.web.default_document_library().root_folder.add(f"Name{uuid.uuid4().hex[:8]}")
-    folder_to_parent = ctx.web.default_document_library().root_folder.add(f"Name{uuid.uuid4().hex[:8]}")
-    # folder_to_url = "Shared Documents/archive"
-
-    print("Moving folder...")
-    # folder_to = folder_from.move_to_using_path(folder_to_parent).execute_query()
     folder_to = folder_from.move_to(folder_to_parent).execute_query()
-    print(f"Folder has been moved into '{folder_to.server_relative_url}'")
-
-    print("Cleaning up temporary folders ...")
-    folder_to_parent.delete_object().execute_query()
-    print("Done")
+    print(f"Moved '{args.folder_url}' into '{folder_to.server_relative_url}'")
 
 
 if __name__ == "__main__":

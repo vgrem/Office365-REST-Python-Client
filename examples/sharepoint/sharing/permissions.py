@@ -14,11 +14,14 @@ import sys
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import cert_path, cert_thumbprint, client_id, team_site_url, tenant
 
-FILE_URL = "Shared Documents/Financial Sample.xlsx"
-
 
 def main():
     parser = argparse.ArgumentParser(description="Manage permissions on a file")
+    parser.add_argument(
+        "--file-url",
+        default="Shared Documents/Financial Sample.xlsx",
+        help="server-relative URL of the file",
+    )
     parser.add_argument("--user", required=True, help="Login name of the user, e.g. i:0#.f|membership|user@contoso.com")
     parser.add_argument("--role", default="Edit", help="Role to grant, e.g. Read, Edit (default: Edit)")
     parser.add_argument("--reset", action="store_true", help="Reset permission inheritance at the end")
@@ -27,9 +30,9 @@ def main():
     ctx = ClientContext(team_site_url).with_client_certificate(
         tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
     )
-    item = ctx.web.get_file_by_server_relative_url(FILE_URL).listItemAllFields
+    item = ctx.web.get_file_by_server_relative_url(args.file_url).listItemAllFields
     ctx.load(item, ["Id", "HasUniqueRoleAssignments"]).execute_query()
-    print(f"File: {FILE_URL}  (unique permissions: {item.has_unique_role_assignments})\n")
+    print(f"File: {args.file_url}  (unique permissions: {item.has_unique_role_assignments})\n")
 
     # 1. Break permission inheritance (make permissions unique)
     item.break_role_inheritance().execute_query()

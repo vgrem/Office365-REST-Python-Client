@@ -22,8 +22,9 @@ def main():
         tenant=tenant, client_id=client_id, username=username, password=password
     )
     item = ctx.web.lists.get_by_title(args.list_title).items.get_by_id(args.item_id)
-    item.set_property(args.field, datetime.now()).update().execute_query()
-    print(f"Set {args.field} on item {args.item_id} to {datetime.now()}")
+    now = datetime.now()
+    item.set_property(args.field, now).update().execute_query()
+    print(f"Set {args.field} on item {args.item_id} to {now}")
 
 
 if __name__ == "__main__":

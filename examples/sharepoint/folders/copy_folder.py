@@ -20,27 +20,11 @@ def main():
         tenant=tenant, client_id=client_id, username=username, password=password
     )
 
-    # creates a temporary folder first in a Documents library
-    # folder_from = ctx.web.default_document_library().root_folder.add(
-    #    f"Name{uuid.uuid4().hex[:8]}"
-    # )
     folder_from = ctx.web.get_folder_by_server_relative_url(args.from_url)
-
-    # folder_to = ctx.web.default_document_library().root_folder.add(f"Name{uuid.uuid4().hex[:8]}")
-    # folder_to_url = "/sites/team/Shared Documents/Archive/2001/01"
     folder_to = ctx.web.get_folder_by_server_relative_url(args.to_url)
 
-    # copies the folder with a new name
     folder = folder_from.copy_to(folder_to).execute_query()
-    print(
-        "Folder has been copied from '{0}' into '{1}'".format(
-            folder_from.server_relative_url, folder.server_relative_url
-        )
-    )
-
-    # clean up
-    # folder_from.delete_object().execute_query()
-    # folder.delete_object().execute_query()
+    print(f"Copied '{folder_from.server_relative_url}' into '{folder.server_relative_url}'")
 
 
 if __name__ == "__main__":

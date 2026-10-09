@@ -23,8 +23,7 @@ def main():
 
     doc_lib = ctx.web.lists.get_by_title(args.list_title)
     items = (
-        doc_lib.items.select(["FileSystemObjectType"])
-        .select(["Id", "FileRef", "FileDirRef", "FileLeafRef"])
+        doc_lib.items.select(["Id", "FileRef", "FileDirRef", "FileLeafRef"])
         .filter("FSObjType eq 0")
         .get_all()
         .execute_query()

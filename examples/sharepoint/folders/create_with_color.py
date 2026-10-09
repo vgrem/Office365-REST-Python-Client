@@ -13,7 +13,7 @@ from tests.settings import cert_path, cert_thumbprint, client_id, team_site_url,
 
 def main():
     parser = argparse.ArgumentParser(description="Creates a folder with a color")
-    parser.add_argument("--name", default="Report1234", help="folder name")
+    parser.add_argument("--name", default="Reports", help="folder name")
     args = parser.parse_args()
 
     ctx = ClientContext(team_site_url).with_client_certificate(

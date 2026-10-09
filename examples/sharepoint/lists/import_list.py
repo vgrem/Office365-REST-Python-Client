@@ -54,5 +54,6 @@ if __name__ == "__main__":
     )
     contacts = load_source()
     contacts_list = client.web.lists.ensure_list("Contacts_Large").execute_query()
-    contacts_list.ensure_fields(list(contacts[0].keys())).execute_query()
+    contacts_list.ensure_fields(list(contacts[0].keys()))
+    client.execute_query()
     run_import(contacts, contacts_list)

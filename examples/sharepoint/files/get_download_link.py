@@ -17,8 +17,13 @@ def main():
         tenant=tenant, client_id=client_id, username=username, password=password
     )
 
-    result = ctx.web.get_file_by_server_relative_path(args.file_url).get_pre_authorized_access_url(1).execute_query()
-    print(result.value)
+    # The link stays valid for 1 hour (capped by the web application's max).
+    link = (
+        ctx.web.get_file_by_server_relative_path(args.file_url)
+        .get_pre_authorized_access_url(expiration_hours=1)
+        .execute_query()
+    )
+    print(link.value)
 
 
 if __name__ == "__main__":

@@ -64,7 +64,8 @@ def main():
 
     # -- Load: queue an item-create per record into the target list --
     target = ctx.web.lists.ensure_list(args.target_list).execute_query()
-    target.ensure_fields(args.select.split(",")).execute_query()
+    target.ensure_fields(args.select.split(","))
+    ctx.execute_query()
     write_hook = None if args.no_progress else progress_bar(f"Loading into {args.target_list}")
     target.items.queue_records(cleaned, progress=write_hook).execute_query()
     print(f"Loaded {len(cleaned)} records into '{target.title}'")

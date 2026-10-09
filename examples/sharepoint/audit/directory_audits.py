@@ -11,12 +11,14 @@ from tests.settings import client_id, client_secret, tenant
 
 
 def main():
-    argparse.ArgumentParser(description="List Azure AD directory audit logs").parse_args()
+    parser = argparse.ArgumentParser(description="List Azure AD directory audit logs")
+    parser.add_argument("--top", type=int, default=10, help="number of records to fetch")
+    args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
-    audits = client.audit_logs.directory_audits.top(10).get().execute_query()
-    for a in audits:
-        print(f"{a.activity_datetime}: {a.activity_display_name} ({a.category})")
+    audits = client.audit_logs.directory_audits.top(args.top).get().execute_query()
+    for audit in audits:
+        print(f"{audit.activity_datetime}: {audit.activity_display_name} ({audit.category})")
 
 
 if __name__ == "__main__":

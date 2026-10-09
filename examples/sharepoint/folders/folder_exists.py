@@ -1,22 +1,29 @@
 """
-How to determine whether a folder exists.
+Determine whether a folder exists (without raising on a miss).
 
-Uses the ``Exists`` property. An alternative approach is to try
-the request and handle FileNotFoundException (HTTP 404).
+Uses the ``Exists`` property; an alternative is to try the request and handle
+``FileNotFoundException`` (HTTP 404).
 
-See https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/folder-operations
+https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/folder-operations
 """
+
+import argparse
 
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import cert_path, cert_thumbprint, client_id, site_url, tenant
 
-ctx = ClientContext(site_url).with_client_certificate(
-    tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
-)
 
-folder_path = "Shared Documents"
-folder = ctx.web.get_folder_by_server_relative_url(folder_path).select(["Exists"]).get().execute_query()
-if folder.exists:
-    print(f"Folder '{folder_path}' is found")
-else:
-    print(f"Folder '{folder_path}' not found")
+def main():
+    parser = argparse.ArgumentParser(description="Check whether a folder exists")
+    parser.add_argument("--folder-url", default="Shared Documents", help="server-relative folder URL")
+    args = parser.parse_args()
+
+    ctx = ClientContext(site_url).with_client_certificate(
+        tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
+    )
+    folder = ctx.web.get_folder_by_server_relative_url(args.folder_url).select(["Exists"]).get().execute_query()
+    print(f"Folder '{args.folder_url}' {'is found' if folder.exists else 'not found'}")
+
+
+if __name__ == "__main__":
+    main()

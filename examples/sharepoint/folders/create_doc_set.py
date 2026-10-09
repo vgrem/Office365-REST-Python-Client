@@ -14,7 +14,7 @@ from tests.settings import cert_path, cert_thumbprint, client_id, team_site_url,
 
 def main():
     parser = argparse.ArgumentParser(description="Creates a new Document Set")
-    parser.add_argument("--name", default="10", help="document set name")
+    parser.add_argument("--name", default="Project", help="document set name")
     args = parser.parse_args()
 
     ctx = ClientContext(team_site_url).with_client_certificate(
