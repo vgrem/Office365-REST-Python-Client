@@ -15,13 +15,13 @@ from generator.services import get_service, service_names
 GENERATOR_DIR = Path(__file__).parent
 
 
-def generate(service: str, *, dry_run: bool = False) -> None:
+def generate(service: str, *, dry_run: bool = False, update_only: bool = False) -> None:
     """Read the service metadata and generate/update the corresponding model files."""
     definition = get_service(service)
     options = GeneratorOptions.load(service, GENERATOR_DIR, dry_run=dry_run)
     reader: ODataReader = definition.reader(options.metadata_path)
     documentation = definition.documentation() if definition.documentation else None
-    GeneratorPipeline(reader.read(), options, documentation, base_dir=GENERATOR_DIR).run()
+    GeneratorPipeline(reader.read(), options, documentation, base_dir=GENERATOR_DIR, update_only=update_only).run()
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -34,6 +34,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="which model to generate (default: sharepoint)",
     )
     parser.add_argument("--dry-run", action="store_true", help="validate and report without writing files")
+    parser.add_argument(
+        "--update-only",
+        action="store_true",
+        help="only update types that already exist in the model; never create new files",
+    )
     args = parser.parse_args(argv)
-    generate(args.service, dry_run=args.dry_run)
+    generate(args.service, dry_run=args.dry_run, update_only=args.update_only)
     return 0

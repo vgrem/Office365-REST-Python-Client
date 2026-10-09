@@ -11,7 +11,6 @@ from generator.config import GeneratorOptions
 from generator.documentation.base import DocumentationProvider
 from generator.filters import TypeFilter
 from generator.odata.model import ODataModel
-from generator.odata.type_information import TypeInformation
 from generator.validation import ValidationError, validate_source
 
 
@@ -24,10 +23,12 @@ class GeneratorPipeline:
         options: GeneratorOptions,
         docs_service: Optional[DocumentationProvider] = None,
         base_dir: Path = Path("."),
+        update_only: bool = False,
     ) -> None:
         self._model = model
         self._options = options
         self._docs = docs_service
+        self._update_only = update_only
         self._builder_options = options.builder_options()
         self._filter = TypeFilter.from_options(options)
         self._checkpoint = Checkpoint(checkpoint_path(options.metadata_path, base_dir))
@@ -37,6 +38,7 @@ class GeneratorPipeline:
         total = len(self._model.types)
         self._skip_start_at_count()
         count = len(self._checkpoint.processed)
+        skipped_new = 0
         for name in self._model.types:
             schema = self._model.types[name]
             if self._filter.before_start(name):
@@ -44,9 +46,16 @@ class GeneratorPipeline:
                 continue
             if self._filter.should_skip(name, schema, self._checkpoint.processed):
                 continue
+            builder = TypeBuilder(schema, self._builder_options, self._docs)
+            if self._update_only and builder.state != "attached":
+                skipped_new += 1
+                self._checkpoint.add(name, persist=False)
+                continue
             count += 1
             print(f"[{count}/{total}] Processing: {name}")
-            self._process(name, schema)
+            self._process(name, builder)
+        if skipped_new:
+            print(f"  Skipped {skipped_new} new type(s) (update-only)")
         self._checkpoint.clear()
 
     def _skip_start_at_count(self) -> None:
@@ -57,10 +66,9 @@ class GeneratorPipeline:
             self._checkpoint.processed.add(name)
         print(f"  Skipping first {start_at} types (start_at={start_at})")
 
-    def _process(self, name: str, schema: TypeInformation) -> None:
+    def _process(self, name: str, builder: TypeBuilder) -> None:
         """Build, validate (before writing) and checkpoint a single type."""
         try:
-            builder = TypeBuilder(schema, self._builder_options, self._docs)
             builder.build()
             if builder.status in {"created", "updated"}:
                 issues = validate_source(builder.render(), builder.file)
