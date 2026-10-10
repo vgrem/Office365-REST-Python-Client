@@ -2,15 +2,10 @@
 
 from __future__ import annotations
 
-import importlib
-import json
-import shutil
-import subprocess
 from pathlib import Path
 from typing import Optional
 
 from generator.builders.member import sanitize_member_name
-from generator.builders.render import ruff_binary
 from generator.builders.type import TypeBuilder
 from generator.builders.type_registry import TypeRegistry
 from generator.checkpoint import Checkpoint, checkpoint_path
@@ -28,50 +23,10 @@ from generator.manifest import (
     schema_members,
 )
 from generator.odata.model import ODataModel
+from generator.reporting import Reporter
 from generator.routing import Router, planned_module
 from generator.validation import ValidationError, validate_source
-
-
-def semantic_issues(source: str, filename: str) -> list[str]:
-    """Syntax and undefined-name issues in rendered source.
-
-    ``validate_source`` only checks structure (duplicate class/member); this adds
-    a compile and a ``ruff`` ``F821``/``F811`` pass so missing imports surface
-    during ``--dry-run``, before anything is written.
-    """
-    try:
-        compile(source, filename, "exec")
-    except SyntaxError as e:
-        return [f"syntax error at line {e.lineno}: {e.msg}"]
-    ruff = ruff_binary()
-    if ruff is None:
-        return []
-    try:
-        proc = subprocess.run(
-            [
-                ruff,
-                "check",
-                "--isolated",
-                "--select",
-                "F821,F811",
-                "--no-cache",
-                "--output-format",
-                "concise",
-                "--stdin-filename",
-                filename,
-                "-",
-            ],
-            input=source,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=30,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return []
-    if proc.returncode == 0:
-        return []
-    return [line.split(": ", 1)[-1] for line in proc.stdout.splitlines() if ": F8" in line]
+from generator.verification import PostCommitVerifier, semantic_issues
 
 
 class GeneratorPipeline:
@@ -101,8 +56,6 @@ class GeneratorPipeline:
         self._update_only = update_only
         self._only_types = tuple(only_types or ())
         self._force = force
-        self._smoke = smoke
-        self._check = check
         self._metadata_path = options.metadata_path
         self._base_dir = base_dir
         self._report_path = report_path
@@ -136,6 +89,8 @@ class GeneratorPipeline:
         )
         self._checkpoint = Checkpoint(checkpoint_path(options.metadata_path, base_dir))
         self._output_root = Path(options.output_path).resolve()
+        self._reporter = Reporter(self._metadata_path, report_path, options.dry_run)
+        self._verifier = PostCommitVerifier(self._output_root, smoke=smoke, check=check)
 
     def run(self) -> None:
         """Build, validate and (unless dry-run) commit every in-scope type."""
@@ -186,20 +141,17 @@ class GeneratorPipeline:
 
         self._commit(planned)
         self._checkpoint.clear()
-        self._print_summary(planned, skipped_new, unrouted)
-        self._report_metadata_changes(changes)
+        self._reporter.summary(planned, skipped_new, unrouted)
+        self._reporter.metadata_changes(changes)
         if not self._options.dry_run:
-            if self._smoke:
-                self._smoke_import(planned)
-            if self._check:
-                self._run_checks(planned)
+            self._verifier.verify(planned)
             Manifest(
                 manifest_path(self._metadata_path, self._base_dir),
                 metadata_fingerprint(self._metadata_path),
                 current_members,
                 run_signature(self._options),
             ).save()
-        self._write_report(planned, unrouted, changes)
+        self._reporter.write(planned, unrouted, changes)
 
     def _can_skip(self) -> bool:
         """True when a previous successful run already covered this exact input."""
@@ -208,59 +160,6 @@ class GeneratorPipeline:
         if self._checkpoint.processed:
             return False  # an interrupted run must be resumed, not skipped
         return bool(self._previous.signature) and self._previous.signature == run_signature(self._options)
-
-    def _module_name(self, file: str) -> Optional[str]:
-        """The importable module name for a generated file, or ``None``."""
-        try:
-            relative = Path(file).resolve().relative_to(self._output_root)
-        except ValueError:
-            return None
-        parts = [self._output_root.name, *relative.with_suffix("").parts]
-        if not all(part.isidentifier() for part in parts):
-            return None
-        return ".".join(parts)
-
-    def _smoke_import(self, planned: list[tuple[str, TypeBuilder]]) -> None:
-        """Import every written module to catch runtime import errors."""
-        failures: list[str] = []
-        for _name, builder in planned:
-            module = self._module_name(builder.file)
-            if module is None:
-                continue
-            try:
-                importlib.import_module(module)
-            except Exception as e:  # noqa: BLE001 - report any import failure
-                failures.append(f"{module}: {type(e).__name__}: {e}")
-        if failures:
-            for failure in failures:
-                print(f"  import failed: {failure}")
-            raise ValidationError(f"{len(failures)} generated module(s) failed to import")
-
-    def _run_checks(self, planned: list[tuple[str, TypeBuilder]]) -> None:
-        """Run ``ruff`` and ``pyright`` on the written output (opt-in, slow)."""
-        files = [builder.file for _name, builder in planned if Path(builder.file).exists()]
-        if not files:
-            return
-        ruff = ruff_binary()
-        if ruff is not None:
-            proc = subprocess.run([ruff, "check", *files], capture_output=True, text=True, check=False)
-            if proc.returncode != 0:
-                print(proc.stdout.strip()[:4000])
-                raise ValidationError("ruff check failed on generated files")
-        self._run_pyright()
-
-    def _run_pyright(self) -> None:
-        """Type-check the output using the repository's pyright configuration."""
-        if shutil.which("pyright"):
-            command = ["pyright"]
-        elif shutil.which("uv"):
-            command = ["uv", "run", "pyright"]
-        else:
-            return
-        proc = subprocess.run(command, capture_output=True, text=True, check=False)
-        if proc.returncode != 0:
-            print((proc.stdout or proc.stderr).strip()[-4000:])
-            raise ValidationError("pyright reported errors in the generated output")
 
     def _warn_unknown_types(self) -> None:
         missing = [name for name in self._only_types if name not in self._model.types]
@@ -306,44 +205,3 @@ class GeneratorPipeline:
         except ValueError:
             return False
         return True
-
-    def _print_summary(self, planned, skipped_new: int, unrouted: list[str]) -> None:
-        created = sum(1 for _, builder in planned if builder.status == "created")
-        updated = sum(1 for _, builder in planned if builder.status == "updated")
-        prefix = "[dry-run] " if self._options.dry_run else ""
-        print(
-            f"\n{prefix}planned: {created} created, {updated} updated; "
-            f"skipped: {skipped_new} new (update-only), {len(unrouted)} unrouted"
-        )
-        if unrouted:
-            print("  Skipped types (first 15):")
-            for name in unrouted[:15]:
-                print(f"    {name}")
-
-    def _report_metadata_changes(self, changes: MetadataChanges) -> None:
-        """Report metadata deletions (kept in code — never auto-removed)."""
-        if changes.is_empty:
-            return
-        print("\nMetadata removed since the last sync (kept in code):")
-        if changes.removed_types:
-            shown = ", ".join(changes.removed_types[:10])
-            print(f"  {len(changes.removed_types)} type(s): {shown}")
-        if changes.removed_members:
-            total = sum(len(members) for members in changes.removed_members.values())
-            print(f"  {total} member(s) across {len(changes.removed_members)} type(s):")
-            for name, members in list(changes.removed_members.items())[:15]:
-                print(f"    {name}: {', '.join(members)}")
-
-    def _write_report(self, planned, unrouted: list[str], changes: MetadataChanges) -> None:
-        if not self._report_path:
-            return
-        payload = {
-            "metadata": self._metadata_path,
-            "created": [name for name, builder in planned if builder.status == "created"],
-            "updated": [name for name, builder in planned if builder.status == "updated"],
-            "skipped_unrouted": unrouted,
-            "removed_types": changes.removed_types,
-            "removed_members": changes.removed_members,
-        }
-        Path(self._report_path).write_text(json.dumps(payload, indent=2), encoding="utf-8")
-        print(f"\nReport written to {self._report_path}")

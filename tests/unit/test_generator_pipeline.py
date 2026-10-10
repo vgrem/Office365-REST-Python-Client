@@ -4,14 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 from generator import pipeline as pipeline_module
 from generator.config import GeneratorOptions
 from generator.manifest import Manifest, manifest_path, run_signature
 from generator.odata.model import ODataModel
 from generator.odata.type_information import TypeInformation
 from generator.pipeline import GeneratorPipeline
-from generator.validation import ValidationError
 
 
 class _FakeBuilder:
@@ -87,26 +85,6 @@ def _real_options(tmp_path: Path) -> GeneratorOptions:
         output_path=str(tmp_path / "office365"),
         template_path=str(tmp_path),
     )
-
-
-def test_module_name_derives_a_dotted_path(tmp_path: Path) -> None:
-    pipeline = GeneratorPipeline(_model(), _real_options(tmp_path), base_dir=tmp_path)
-    assert pipeline._module_name(str(tmp_path / "office365" / "a" / "b.py")) == "office365.a.b"
-    assert pipeline._module_name(str(tmp_path / "elsewhere" / "b.py")) is None
-
-
-def test_smoke_import_raises_on_import_failure(tmp_path: Path, monkeypatch) -> None:
-    pipeline = GeneratorPipeline(_model(), _real_options(tmp_path), base_dir=tmp_path)
-
-    class _Builder:
-        file = str(tmp_path / "office365" / "thing.py")
-
-    def _boom(module: str):
-        raise ImportError("boom")
-
-    monkeypatch.setattr(pipeline_module.importlib, "import_module", _boom)
-    with pytest.raises(ValidationError, match="failed to import"):
-        pipeline._smoke_import([("x", _Builder())])
 
 
 def test_can_skip_only_when_the_recorded_signature_matches(tmp_path: Path) -> None:
