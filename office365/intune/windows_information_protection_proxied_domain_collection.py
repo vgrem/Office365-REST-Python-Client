@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from office365.common.proxied_domain import ProxiedDomain
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 @dataclass
@@ -12,3 +14,7 @@ class WindowsInformationProtectionProxiedDomainCollection(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.WindowsInformationProtectionProxiedDomainCollection"
+
+    proxiedDomains: ClientValueCollection[ProxiedDomain] = field(
+        default_factory=lambda: ClientValueCollection(ProxiedDomain)
+    )

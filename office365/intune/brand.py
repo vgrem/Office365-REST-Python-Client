@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from office365.common.mime_content import MimeContent
 from office365.intune.rgb_color import RgbColor
 from office365.runtime.client_value import ClientValue
 
@@ -25,3 +26,7 @@ class IntuneBrand(ClientValue):
         return "microsoft.graph.IntuneBrand"
 
     themeColor: RgbColor = field(default_factory=RgbColor)
+
+    darkBackgroundLogo: MimeContent = field(default_factory=MimeContent)
+
+    lightBackgroundLogo: MimeContent = field(default_factory=MimeContent)

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from office365.common.key_value import KeyValue
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 @dataclass
@@ -13,3 +15,9 @@ class ContentCustomization(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ContentCustomization"
+
+    attributeCollection: ClientValueCollection[KeyValue] = field(default_factory=lambda: ClientValueCollection(KeyValue))
+
+    registrationCampaign: ClientValueCollection[KeyValue] = field(
+        default_factory=lambda: ClientValueCollection(KeyValue)
+    )

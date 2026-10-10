@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from office365.directory.security.coachmark_location import CoachmarkLocation
 from office365.runtime.client_value import ClientValue
 
 
@@ -16,3 +17,5 @@ class PayloadCoachmark(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.PayloadCoachmark"
+
+    coachmarkLocation: CoachmarkLocation = field(default_factory=CoachmarkLocation)

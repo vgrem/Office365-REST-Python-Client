@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from office365.common.setting_source import SettingSource
 from office365.intune.devices.compliance.status import ComplianceStatus
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 @dataclass
@@ -23,3 +25,5 @@ class DeviceCompliancePolicySettingState(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.DeviceCompliancePolicySettingState"
+
+    sources: ClientValueCollection[SettingSource] = field(default_factory=lambda: ClientValueCollection(SettingSource))
