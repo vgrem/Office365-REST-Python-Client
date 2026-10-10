@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from office365.directory.synchronization.linked_objects import SynchronizationLinkedObjects
 from office365.runtime.client_value import ClientValue
+
+if TYPE_CHECKING:
+    from office365.directory.synchronization.linked_objects import SynchronizationLinkedObjects
 
 
 @dataclass
 class SynchronizationJobSubject(ClientValue):
-    links: SynchronizationLinkedObjects = field(default_factory=SynchronizationLinkedObjects)
+    links: SynchronizationLinkedObjects | None = None
     objectId: str | None = None
     objectTypeName: str | None = None
 
