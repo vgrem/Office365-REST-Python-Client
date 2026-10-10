@@ -14,3 +14,5 @@ class AccessReviewInstanceDecisionItemResource(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessReviewInstanceDecisionItemResource"
+
+    description: str | None = None

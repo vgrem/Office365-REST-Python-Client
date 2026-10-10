@@ -14,3 +14,5 @@ class AuthenticationBehaviors(ClientValue):
     @property
     def entity_type_name(self):
         return "microsoft.graph.AuthenticationBehaviors"
+
+    coopEnforcement: bool | None = None

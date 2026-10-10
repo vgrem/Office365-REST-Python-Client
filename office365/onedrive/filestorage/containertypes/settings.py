@@ -44,3 +44,5 @@ class FileStorageContainerTypeSettings(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.FileStorageContainerTypeSettings"
+
+    isOfficeRestricted: bool | None = None
