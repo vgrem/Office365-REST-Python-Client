@@ -1,7 +1,8 @@
 """End-to-end test: synthetic CSDL -> reader -> pipeline -> generated files.
 
-Exercises the whole flow (v3 and v4), including idempotency on an unchanged
-metadata and additions-only behaviour when a type gains a member.
+Exercises the whole flow (v3 and v4) for **every** kind (complex, entity, enum)
+plus generated operation methods, idempotency on unchanged metadata, and
+additions-only behaviour when a type gains a member.
 """
 
 from __future__ import annotations
@@ -20,11 +21,23 @@ _V3_CSDL = """<?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
   <edmx:DataServices>
     <Schema Namespace="SP" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <EnumType Name="WidgetKind">
+        <Member Name="alpha" Value="0" />
+        <Member Name="beta" Value="1" />
+      </EnumType>
+      <ComplexType Name="WidgetSettings">
+        <Property Name="name" Type="Edm.String" />
+        <Property Name="kind" Type="SP.WidgetKind" />
+      </ComplexType>
       <EntityType Name="Widget">
         <Key><PropertyRef Name="Id" /></Key>
         <Property Name="Id" Type="Edm.String" Nullable="false" />
         <Property Name="Title" Type="Edm.String" />
       </EntityType>
+      <FunctionImport Name="DoThing" ReturnType="Edm.String" IsBindable="true" IsComposable="true">
+        <Parameter Name="this" Type="SP.Widget" />
+        <Parameter Name="count" Type="Edm.Int32" />
+      </FunctionImport>
     </Schema>
   </edmx:DataServices>
 </edmx:Edmx>
@@ -38,10 +51,17 @@ _V4_CSDL = """<?xml version="1.0" encoding="utf-8"?>
         <Member Name="alpha" Value="0" />
         <Member Name="beta" Value="1" />
       </EnumType>
-      <ComplexType Name="Widget">
-        <Property Name="name" Type="Edm.String" />
+      <ComplexType Name="WidgetSettings">
         <Property Name="kind" Type="microsoft.graph.WidgetKind" />
       </ComplexType>
+      <EntityType Name="Widget">
+        <Key><PropertyRef Name="id" /></Key>
+        <Property Name="id" Type="Edm.String" Nullable="false" />
+      </EntityType>
+      <Action Name="reset" IsBound="true">
+        <Parameter Name="bindingParameter" Type="microsoft.graph.Widget" />
+        <Parameter Name="reason" Type="Edm.String" />
+      </Action>
     </Schema>
   </edmx:DataServices>
 </edmx:Edmx>
@@ -56,6 +76,7 @@ def _options(tmp_path: Path, *, template: str, namespace: str, kinds: list[str],
         modules="office365.runtime.types",
         namespace=namespace,
         include_base_types=kinds,
+        generate_methods="true",
         routing={prefix: "office365"},
     )
 
@@ -65,21 +86,33 @@ def _run(options: GeneratorOptions, reader: type, tmp_path: Path, *, force: bool
     GeneratorPipeline(model, options, base_dir=tmp_path, force=force, smoke=False).run()
 
 
-def test_sharepoint_entity_end_to_end(tmp_path: Path) -> None:
+def _source(tmp_path: Path, name: str) -> str:
+    source = (tmp_path / "office365" / name).read_text(encoding="utf-8")
+    ast.parse(source)
+    return source
+
+
+def test_sharepoint_generates_all_kinds_and_methods(tmp_path: Path) -> None:
     (tmp_path / "metadata.xml").write_text(_V3_CSDL, encoding="utf-8")
-    options = _options(tmp_path, template="sharepoint", namespace="SP", kinds=["EntityType"], prefix="SP")
+    kinds = ["EntityType", "ComplexType", "EnumType"]
+    options = _options(tmp_path, template="sharepoint", namespace="SP", kinds=kinds, prefix="SP")
 
     _run(options, ODataV3Reader, tmp_path)
-    widget = tmp_path / "office365" / "widget.py"
-    assert widget.is_file()
-    source = widget.read_text(encoding="utf-8")
-    ast.parse(source)
-    assert "class Widget(Entity):" in source
-    assert '"Title"' in source and '"Id"' in source
+
+    entity = _source(tmp_path, "widget.py")
+    complex_type = _source(tmp_path, "widget_settings.py")
+    enum = _source(tmp_path, "widget_kind.py")
+
+    assert "class Widget(Entity):" in entity
+    assert "def do_thing" in entity  # bound FunctionImport -> generated method
+    assert "class WidgetSettings(ClientValue):" in complex_type
+    assert "kind: WidgetKind = WidgetKind.alpha" in complex_type  # planned enum default
+    assert "class WidgetKind(Enum):" in enum
 
     # Re-running an unchanged metadata (bypassing the fast path) is a no-op.
     _run(options, ODataV3Reader, tmp_path, force=True)
-    assert widget.read_text(encoding="utf-8") == source
+    assert _source(tmp_path, "widget.py") == entity
+    assert _source(tmp_path, "widget_settings.py") == complex_type
 
 
 def test_sharepoint_end_to_end_is_additions_only(tmp_path: Path) -> None:
@@ -103,33 +136,27 @@ def test_sharepoint_end_to_end_is_additions_only(tmp_path: Path) -> None:
 
     assert '"Note"' in after  # new member added
     for line in before.splitlines():
-        if line.strip() and not line.startswith("from __future__"):
+        if line.strip():
             assert line in after  # nothing existing was dropped
 
 
-def test_graph_complex_and_enum_end_to_end(tmp_path: Path) -> None:
+def test_graph_generates_all_kinds_and_methods(tmp_path: Path) -> None:
     (tmp_path / "metadata.xml").write_text(_V4_CSDL, encoding="utf-8")
-    options = _options(
-        tmp_path, template="graph", namespace="", kinds=["ComplexType", "EnumType"], prefix="microsoft.graph"
-    )
+    kinds = ["ComplexType", "EnumType", "EntityType"]
+    options = _options(tmp_path, template="graph", namespace="", kinds=kinds, prefix="microsoft.graph")
 
     _run(options, ODataV4Reader, tmp_path)
 
-    widget = tmp_path / "office365" / "widget.py"
-    enum = tmp_path / "office365" / "widget_kind.py"
-    assert widget.is_file() and enum.is_file()
-    widget_source = widget.read_text(encoding="utf-8")
-    enum_source = enum.read_text(encoding="utf-8")
-    ast.parse(widget_source)
-    ast.parse(enum_source)
+    entity = _source(tmp_path, "widget.py")
+    complex_type = _source(tmp_path, "widget_settings.py")
+    enum = _source(tmp_path, "widget_kind.py")
 
-    assert "class Widget(ClientValue):" in widget_source
-    # an enum field planned in the same run defaults to its first member
-    assert "kind: WidgetKind = WidgetKind.alpha" in widget_source
-    assert "class WidgetKind(Enum):" in enum_source
-    assert 'alpha = "0"' in enum_source
+    assert "class Widget(Entity):" in entity
+    assert "def reset" in entity  # bound Action -> generated method
+    assert "class WidgetSettings(ClientValue):" in complex_type
+    assert "kind: WidgetKind = WidgetKind.alpha" in complex_type
+    assert "class WidgetKind(Enum):" in enum
 
     # Idempotent on an unchanged metadata.
     _run(options, ODataV4Reader, tmp_path, force=True)
-    assert widget.read_text(encoding="utf-8") == widget_source
-    assert enum.read_text(encoding="utf-8") == enum_source
+    assert _source(tmp_path, "widget.py") == entity
