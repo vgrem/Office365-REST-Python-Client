@@ -173,6 +173,7 @@ class TypeBuilder(ast.NodeTransformer):
         self._added_members: List[ast.stmt] = []
         self._added_imports: List[ast.stmt] = []
         self._rendered: Optional[str] = None
+        self._uses_field = False
         self._resolver = resolver or TypeRegistry(
             (options or {}).get("modules", "").split(","),
             namespace=(options or {}).get("namespace", ""),
@@ -379,10 +380,12 @@ class TypeBuilder(ast.NodeTransformer):
         assert self._options is not None
         collector = TypeReferenceCollector(self._resolver)
         collector.needs_dataclass = self._schema.BaseTypeFullName == "ComplexType" and bool(self._properties)
+        collector.needs_field = self._uses_field
 
         for prop in self._properties:
             prop_type = prop.client_type_name
-            if prop_type in TypeReferenceCollector.OPTIONAL_TYPES:
+            if prop_type in TypeReferenceCollector.OPTIONAL_TYPES and not collector.needs_dataclass:
+                # Getters use ``Optional[X]``; dataclass fields use ``X | None``.
                 collector.add("Optional")
             collector.add(prop_type)
             collector.add_custom(prop)
@@ -561,6 +564,9 @@ class TypeBuilder(ast.NodeTransformer):
                             op=ast.BitOr(),
                             right=ast.Constant(value=None),
                         )
+
+        if isinstance(default, ast.Call) and isinstance(default.func, ast.Name) and default.func.id == "field":
+            self._uses_field = True
 
         return ast.AnnAssign(
             target=ast.Name(id=self._safe_member_name(prop.schema.Name), ctx=ast.Store()),
