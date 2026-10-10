@@ -72,7 +72,7 @@ def suggest_routing(service: str) -> None:
     options = GeneratorOptions.load(service, GENERATOR_DIR)
     model = definition.reader(options.metadata_path).read()
     registry = TypeRegistry(options.modules.split(","), namespace=options.namespace)
-    router = Router.from_options(options.builder_options())
+    router = Router.from_options(options.builder_context())
     print(render_suggestions(model, TypeFilter.from_options(options), registry, router))
 
 

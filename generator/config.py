@@ -9,6 +9,8 @@ from typing import Any
 
 import yaml
 
+from generator.builders.context import BuilderContext
+
 
 class ConfigError(Exception):
     """Raised when a generator config file is missing, malformed or inconsistent."""
@@ -149,20 +151,18 @@ class GeneratorOptions:
             dry_run=dry_run,
         )
 
-    def builder_options(self) -> dict:
-        """The plain dict the builders consume (decouples them from config)."""
-        options: dict = {
-            "template_path": self.template_path,
-            "output_path": self.output_path,
-            "modules": self.modules,
-            "context_type": self.context_type,
-            "generate_methods": self.generate_methods,
-            "namespace": self.namespace,
-            "ignored_properties": self.ignored_properties,
-            "ignored_methods": self.ignored_methods,
-            "type_routing": self.type_routing,
-            "dry_run": self.dry_run,
-        }
-        for namespace, module in self.routing.items():
-            options[f"routing_{namespace}"] = module
-        return options
+    def builder_context(self) -> BuilderContext:
+        """The typed, immutable context the builders consume."""
+        return BuilderContext(
+            template_path=self.template_path,
+            output_path=self.output_path,
+            modules=self.modules,
+            namespace=self.namespace,
+            context_type=self.context_type,
+            generate_methods=self.generate_methods,
+            ignored_properties=tuple(self.ignored_properties),
+            ignored_methods=tuple(self.ignored_methods),
+            routing=dict(self.routing),
+            type_routing=dict(self.type_routing),
+            dry_run=self.dry_run,
+        )

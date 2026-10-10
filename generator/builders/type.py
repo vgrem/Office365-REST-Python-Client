@@ -15,6 +15,7 @@ from office365.runtime.odata.type import ODataType
 from typing_extensions import Self
 
 from generator.builders.collector import TypeReferenceCollector
+from generator.builders.context import BuilderContext
 from generator.builders.member import MemberBuilder
 from generator.builders.method import MethodBuilder
 from generator.builders.naming import to_snake_case
@@ -157,7 +158,7 @@ class TypeBuilder(ast.NodeTransformer):
         resolver: Optional[TypeRegistry] = None,
     ):
         self._schema = type_schema
-        self._options = options
+        self._context = BuilderContext.from_options(options)
         self._docs_service = docs_service
         self._template: Optional[TemplateContext] = None
         self._type_info: Optional[Dict] = None
@@ -169,7 +170,7 @@ class TypeBuilder(ast.NodeTransformer):
         self._changes: List[str] = []
         self._docstring: Optional[str] = None
         self._entity_type_name_exists: bool = False
-        self._known_types: set[str] = set((options or {}).get("known_types", ()))
+        self._known_types: set[str] = set(self._context.known_types)
         self._original_text: Optional[str] = None
         self._added_members: List[ast.stmt] = []
         self._added_imports: List[ast.stmt] = []
@@ -177,13 +178,13 @@ class TypeBuilder(ast.NodeTransformer):
         self._uses_field = False
         self._field_alias = "field"
         self._added_props: List[PropertyBuilder] = []
-        self._cyclic_types: set[str] = set((options or {}).get("cyclic_types", ()))
+        self._cyclic_types: set[str] = set(self._context.cyclic_types)
         #: OData enum name -> first member name (for defaults on planned enums).
-        self._enum_defaults: dict[str, str] = dict((options or {}).get("enum_defaults", {}))
+        self._enum_defaults: dict[str, str] = dict(self._context.enum_defaults)
         self._resolver = resolver or TypeRegistry(
-            (options or {}).get("modules", "").split(","),
-            namespace=(options or {}).get("namespace", ""),
-            type_modules=(options or {}).get("type_modules"),
+            self._context.modules.split(","),
+            namespace=self._context.namespace,
+            type_modules=self._context.type_modules,
         )
 
     def _process(self, module: ast.Module) -> None:
@@ -245,9 +246,8 @@ class TypeBuilder(ast.NodeTransformer):
         can expose both a property and a bound function with the same name (e.g.
         ``Settings``), which would otherwise generate two identical members.
         """
-        options = self._options or {}
         reserved_props = self._reserved_names(_RESERVED_PROPERTY_NAMES)
-        ignored_properties = set(options.get("ignored_properties", []))
+        ignored_properties = set(self._context.ignored_properties)
         self._properties = []
         seen_props: set[str] = set()
         if any(name == "field" for name in self._schema.Properties):
@@ -267,7 +267,7 @@ class TypeBuilder(ast.NodeTransformer):
 
         self._members = [MemberBuilder(member_schema) for _, member_schema in self._schema.Members.items()]
 
-        ignored_methods = set(options.get("ignored_methods", []))
+        ignored_methods = set(self._context.ignored_methods)
         reserved_methods = self._reserved_names(_RESERVED_METHOD_NAMES) | seen_props
         self._methods = []
         seen_methods: set[str] = set()
@@ -362,11 +362,7 @@ class TypeBuilder(ast.NodeTransformer):
         return node
 
     def build(self) -> Self:
-        assert self._options is not None
-        self._template = TemplateContext(
-            self._options.get("template_path", self._options.get("templatepath", "")),
-            self._schema,
-        )
+        self._template = TemplateContext(self._context.template_path, self._schema)
 
         if self.state == "attached":
             with open(self.file, encoding="utf-8") as f:
@@ -399,7 +395,6 @@ class TypeBuilder(ast.NodeTransformer):
     def _build_imports(self, module: ast.Module):
         """Build missing imports using TypeReferenceCollector (deduplicated)."""
         assert self._template is not None
-        assert self._options is not None
         collector = TypeReferenceCollector(self._resolver)
         collector.needs_dataclass = self._schema.BaseTypeFullName == "ComplexType" and bool(self._added_props)
         collector.needs_field = self._uses_field
@@ -415,7 +410,7 @@ class TypeBuilder(ast.NodeTransformer):
             if prop.is_object_type:
                 collector.add_object_type(prop)
 
-        context_type = self._options.get("context_type", "ClientContext")
+        context_type = self._context.context_type
         if self._generate_methods_enabled():
             for method in self._methods:
                 if method.status != "attached":
@@ -607,7 +602,7 @@ class TypeBuilder(ast.NodeTransformer):
         """
         default: ast.expr = prop.build_default_value()
         make_optional = False
-        if self._options and not prop.is_collection_type:
+        if not prop.is_collection_type:
             resolved = prop.resolve_client_type()
             if resolved is not None and inspect.isclass(resolved):
                 if issubclass(resolved, Enum):
@@ -665,17 +660,13 @@ class TypeBuilder(ast.NodeTransformer):
 
     def _generate_methods_enabled(self) -> bool:
         """Whether operation method generation is enabled via config."""
-        if self._options is None:
-            return False
-        value = self._options.get("generate_methods", "")
-        return str(value).strip().lower() in {"true", "1", "yes"}
+        return self._context.methods_enabled
 
     def _build_methods(self, class_node: ast.ClassDef) -> None:
         """Insert generated operation methods (functions/actions) that are missing."""
         if not self._methods or not self._generate_methods_enabled():
             return
-        assert self._options is not None
-        context_type = self._options.get("context_type", "ClientContext")
+        context_type = self._context.context_type
         for method in self._methods:
             if method.status == "attached":
                 continue
@@ -947,7 +938,6 @@ class TypeBuilder(ast.NodeTransformer):
     def _resolve_type(self) -> Dict[str, str]:
         type_info: Dict[str, str] = {}
 
-        assert self._options is not None
         module_name = self._resolver.strict_module_for(self._schema.FullName)
         origin = self._module_file(module_name) if module_name else None
         if origin is not None:
@@ -956,8 +946,8 @@ class TypeBuilder(ast.NodeTransformer):
             type_info["routed"] = "1"
         else:
             namespace = ".".join(self._schema.FullName.split(".")[:-1])
-            module_path = Router.from_options(self._options).module_for(self._schema.FullName)
-            output_base = self._options.get("output_path", self._options.get("outputpath", ""))
+            module_path = Router.from_options(self._context).module_for(self._schema.FullName)
+            output_base = self._context.output_path
             file_stem = self._to_snake_case(self.client_type_name)
             if module_path:
                 module_path, file_stem = descend_module(module_path, self.client_type_name, output_base)

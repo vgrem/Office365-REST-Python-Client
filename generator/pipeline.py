@@ -107,11 +107,11 @@ class GeneratorPipeline:
         self._base_dir = base_dir
         self._report_path = report_path
         self._previous = Manifest.load(options.metadata_path, base_dir)
-        self._builder_options = options.builder_options()
+        self._builder_context = options.builder_context()
         self._filter = TypeFilter.from_options(options)
         # Only types this run will actually generate (attached or routed) are
         # importable by name; members referencing the rest are skipped.
-        router = Router.from_options(self._builder_options)
+        router = Router.from_options(self._builder_context)
         registry = TypeRegistry(options.modules.split(","), namespace=options.namespace)
         known_types: set[str] = set()
         type_modules: dict[str, str] = {}
@@ -122,16 +122,18 @@ class GeneratorPipeline:
             if module is not None:
                 known_types.add(name)
                 type_modules[name] = module
-        self._builder_options["known_types"] = known_types
-        self._builder_options["type_modules"] = type_modules
-        self._builder_options["cyclic_types"] = find_cyclic_types(model, known_types)
         #: First member per in-scope enum, so enum-typed fields planned in this run
         #: default to the first member rather than ``field(default_factory=Enum)``.
         enum_defaults: dict[str, str] = {}
         for name, schema in model.types.items():
             if schema.BaseTypeFullName == "EnumType" and self._filter.in_scope(name, schema):
                 enum_defaults[name] = next((sanitize_member_name(m) for m in schema.Members), "")
-        self._builder_options["enum_defaults"] = enum_defaults
+        self._builder_context = self._builder_context.with_plan(
+            known_types=frozenset(known_types),
+            type_modules=type_modules,
+            cyclic_types=frozenset(find_cyclic_types(model, known_types)),
+            enum_defaults=enum_defaults,
+        )
         self._checkpoint = Checkpoint(checkpoint_path(options.metadata_path, base_dir))
         self._output_root = Path(options.output_path).resolve()
 
@@ -163,7 +165,7 @@ class GeneratorPipeline:
                     continue
                 if self._filter.should_skip(name, schema, self._checkpoint.processed):
                     continue
-            builder = TypeBuilder(schema, self._builder_options, self._docs)
+            builder = TypeBuilder(schema, self._builder_context, self._docs)
             if builder.skip_reason:
                 unrouted.append(name)
                 self._checkpoint.add(name, persist=False)

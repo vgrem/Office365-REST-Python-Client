@@ -52,11 +52,15 @@ class Router:
     types: dict[str, str] = field(default_factory=dict)
 
     @classmethod
-    def from_options(cls, options: dict) -> "Router":
-        namespace = {
-            key[len("routing_") :]: value.strip() for key, value in options.items() if key.startswith("routing_")
-        }
-        types = {name: module.strip() for name, module in (options.get("type_routing") or {}).items()}
+    def from_options(cls, options) -> "Router":
+        if isinstance(options, dict):
+            namespace = {
+                key[len("routing_") :]: value.strip() for key, value in options.items() if key.startswith("routing_")
+            }
+            types = {name: module.strip() for name, module in (options.get("type_routing") or {}).items()}
+        else:  # BuilderContext
+            namespace = {name: str(module).strip() for name, module in options.routing.items()}
+            types = {name: str(module).strip() for name, module in options.type_routing.items()}
         return cls(namespace, types)
 
     def module_for(self, type_name: str) -> Optional[str]:
