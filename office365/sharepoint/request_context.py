@@ -1,8 +1,8 @@
-from office365.runtime.client_object import ClientObject
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.sharepoint.entity import Entity
 
 
-class RequestContext(ClientObject):
+class RequestContext(Entity):
     """
     Provides basic WSS context information: site, web, list, and list item.
 

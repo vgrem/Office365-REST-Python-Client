@@ -356,9 +356,22 @@ class TypeBuilder(ast.NodeTransformer):
         self._process(self._source_tree)
         self._build_imports(self._source_tree)
 
+        if self._status in {"created", "updated"} and self._class_name_collides_with_import(self._source_tree):
+            print(f"  Skipping {self.client_type_name}: name collides with an imported type")
+            self._status = None
+
         if self._status == "updated" and len(self._changes) == 0:
             self._status = None
         return self
+
+    def _class_name_collides_with_import(self, module: ast.Module) -> bool:
+        """True when the class name shadows an imported name (e.g. ``StringCollection``)."""
+        for node in module.body:
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                for alias in node.names:
+                    if alias.asname is None and alias.name == self.client_type_name:
+                        return True
+        return False
 
     def _build_imports(self, module: ast.Module):
         """Build missing imports using TypeReferenceCollector (deduplicated)."""
