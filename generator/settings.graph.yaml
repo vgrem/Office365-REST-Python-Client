@@ -276,39 +276,8 @@ type_routing:
   SystemBrowserEnabledOn: office365.intune
   WellknownListName: office365.onedrive
 
-# Graph entity types (bare microsoft.graph.*), clustered by name.
-  Managed*: office365.intune
-  Configuration*: office365.intune
-  Workbook*: office365.onedrive
-  Todo*: office365.todo
-  Engagement*: office365.teams
-  Ai*: office365.copilot
-  Agent*: office365.directory
-  Cross*: office365.directory
-  Identity*: office365.directory
-  Domain*: office365.directory
-  Role*: office365.directory
-  B2B*: office365.directory
-  Qr*: office365.directory
-  OnAttributeCollection*: office365.directory
-  OnOtpSend*: office365.directory
-  OnPasswordSubmit*: office365.directory
-  CustomAuthentication*: office365.directory
-  ExternalAuthentication*: office365.directory
-  MicrosoftAuthenticator*: office365.directory
-  SoftwareOath*: office365.directory
-  AppleManagedIdentityProvider: office365.directory
-  Exchange*: office365.admin
-  Billing*: office365.admin
-  ServiceAnnouncement*: office365.admin
-  Mailbox*: office365.directory.security
-  SiteProtection*: office365.directory.security
-  SiteRestore*: office365.directory.security
-  DriveProtection*: office365.directory.security
-  DriveRestore*: office365.directory.security
-  Granular*: office365.directory.security
-  Restore*: office365.directory.security
-  TenantProtection*: office365.directory.security
+# Verified product rules (candidates are proposed by --suggest-routing).
+  BillingMetrics*: office365.partners.billing
 
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common
@@ -435,3 +404,42 @@ type_routing:
   "VerifiedIdProfile": office365.directory
   "WorkPlanOccurrence": office365.directory.users
   "WorkPlanRecurrence": office365.directory.users
+
+# Microsoft Graph service taxonomy (docs per-service TOCs) -> module.
+# Fed to --suggest-routing; NOT part of generation-time routing (stays offline).
+services:
+  agents: office365.directory
+  applications: office365.directory.applications
+  audit-log-query: office365.directory.audit
+  backup-and-recovery: office365.backuprestore
+  backup-storage: office365.backuprestore
+  calendars: office365.outlook.calendar
+  change-notifications: office365.subscriptions
+  compliance: office365.directory.security
+  cross-device-experiences: office365.directory
+  customer-booking: office365.booking
+  device-and-app-management: office365.intune
+  education: office365.education
+  employee-experience: office365.directory
+  extensions: office365.directory
+  external-data-connections: office365.externalconnectors
+  files: office365.onedrive
+  groups: office365.directory.groups
+  identity-and-access: office365.directory
+  mail: office365.outlook.mail
+  mailbox-import-and-export: office365.admin
+  notes: office365.onenote
+  partner-billing-reports: office365.partners.billing
+  people-and-workplace-intelligence: office365.directory
+  personal-contacts: office365.outlook
+  reports: office365.reports
+  search: office365.search
+  security: office365.directory.security
+  sites-and-lists: office365.onedrive
+  tasks-and-plans: office365.planner
+  teamwork-and-communications: office365.teams
+  tenant-management: office365.directory
+  tenants: office365.directory
+  to-do-tasks: office365.todo
+  users: office365.directory.users
+  workbooks-and-charts: office365.onedrive

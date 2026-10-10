@@ -237,13 +237,23 @@ def infer_placements(model, type_filter, registry, router: Router, rounds: int =
     return assigned
 
 
-def render_suggestions(model, type_filter, registry, router: Router) -> str:
+def render_suggestions(
+    model,
+    type_filter,
+    registry,
+    router: Router,
+    services: Optional[dict[str, str]] = None,
+    service_map: Optional[dict[str, str]] = None,
+) -> str:
     """Paste-ready routing proposals for types without a *specific* route.
 
-    The reference graph (:func:`infer_placements`) is the primary signal; the
-    rest are grouped into ``Prefix*`` rules for review. A human reviews and
+    Signals, strongest first: the docs **service taxonomy**
+    (``{type_lower: service}`` + ``{service: module}``), then the reference graph
+    (:func:`infer_placements`), then ``Prefix*`` clusters. A human reviews and
     pastes the result — routing is never written automatically.
     """
+    services = services or {}
+    service_map = service_map or {}
     assigned = infer_placements(model, type_filter, registry, router)
     unrouted: dict[str, list[str]] = defaultdict(list)
     for name, schema in model.types.items():
@@ -253,25 +263,37 @@ def render_suggestions(model, type_filter, registry, router: Router) -> str:
             continue
         unrouted[name.rsplit(".", 1)[0]].append(name)
 
+    def service_module(name: str) -> Optional[str]:
+        service = service_map.get(name.rsplit(".", 1)[-1].lower())
+        return services.get(service) if service else None
+
     namespace_lines: list[str] = []
     for namespace, names in sorted(unrouted.items()):
         if namespace == "microsoft.graph":
             continue
+        by_service = [module for module in (service_module(n) for n in names) if module]
         siblings = [module for name, module in assigned.items() if name.rsplit(".", 1)[0] == namespace]
-        suggested = _majority(siblings) or f"office365.{_module_segment(namespace.rsplit('.', 1)[-1])}"
+        suggested = (
+            _majority(by_service) or _majority(siblings) or f"office365.{_module_segment(namespace.rsplit('.', 1)[-1])}"
+        )
         namespace_lines.append(f"  {namespace}: {suggested}   # {len(names)} type(s)")
 
-    # Bare ``microsoft.graph.*`` types: reference-inferred placements become exact
-    # entries; the rest are grouped into ``Prefix*`` rules.
+    # Bare ``microsoft.graph.*`` types: the service taxonomy wins, then the
+    # reference graph; the rest are grouped into ``Prefix*`` rules.
     exact_lines: list[str] = []
     by_prefix: dict[str, list[str]] = defaultdict(list)
     for name in unrouted.get("microsoft.graph", []):
-        if name in assigned:
+        short = name.rsplit(".", 1)[-1]
+        module = service_module(name)
+        if module:
+            service = service_map.get(short.lower())
+            exact_lines.append(f'  "{short}": {module}   # service: {service}')
+        elif name in assigned:
             anchor = model.anchors.get(name)
             note = f"   # anchor: {anchor}" if anchor else ""
-            exact_lines.append(f'  "{name.rsplit(".", 1)[-1]}": {assigned[name]}{note}')
+            exact_lines.append(f'  "{short}": {assigned[name]}{note}')
         else:
-            by_prefix[_first_word(name.rsplit(".", 1)[-1])].append(name)
+            by_prefix[_first_word(short)].append(name)
 
     type_lines: list[str] = []
     for prefix, names in sorted(by_prefix.items(), key=lambda item: -len(item[1])):

@@ -9,6 +9,7 @@ from typing import Optional, Sequence
 from generator.builders.resolution import TypeRegistry
 from generator.checkpoint import checkpoint_path
 from generator.config import ConfigError, GeneratorOptions
+from generator.documentation.subservices import fetch_service_map, load_service_map, write_service_map
 from generator.filters import TypeFilter
 from generator.manifest import Manifest, run_signature
 from generator.odata.reader import ODataReader
@@ -79,7 +80,21 @@ def suggest_routing(service: str) -> None:
     schema_filter = TypeFilter(
         exact_ignored=base.exact_ignored, prefix_ignored=base.prefix_ignored, include_base_types=set(), start_at=""
     )
-    print(render_suggestions(model, schema_filter, registry, router))
+    print(
+        render_suggestions(
+            model, schema_filter, registry, router, services=options.services, service_map=load_service_map()
+        )
+    )
+
+
+def fetch_services() -> None:
+    """Fetch the Graph docs service taxonomy and cache it for --suggest-routing."""
+    services = fetch_service_map()
+    if not services:
+        print("error: could not fetch the service taxonomy (network/rate limit?)")
+        return
+    path = write_service_map(services)
+    print(f"Fetched {len(services)} type->service mappings -> {path}")
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -127,7 +142,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="print a proposed routing block for unrouted types and exit",
     )
+    parser.add_argument(
+        "--fetch-services",
+        action="store_true",
+        help="fetch the Graph docs service taxonomy (for --suggest-routing) and exit",
+    )
     args = parser.parse_args(argv)
+    if args.fetch_services:
+        fetch_services()
+        return 0
     if args.suggest_routing:
         suggest_routing(args.service)
         return 0

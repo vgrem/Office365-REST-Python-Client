@@ -30,6 +30,7 @@ _KNOWN_KEYS = {
     "filters",
     "routing",
     "type_routing",
+    "services",
 }
 _KNOWN_FILTER_KEYS = {"ignored_types", "ignored_properties", "ignored_methods"}
 
@@ -97,6 +98,7 @@ class GeneratorOptions:
     start_at: str = ""
     routing: dict[str, str] = field(default_factory=dict)
     type_routing: dict[str, str] = field(default_factory=dict)
+    services: dict[str, str] = field(default_factory=dict)
     dry_run: bool = False
 
     @classmethod
@@ -148,6 +150,7 @@ class GeneratorOptions:
             start_at=str(data.get("start_at", "") or ""),
             routing=_mapping(data.get("routing"), f"{path}: 'routing'"),
             type_routing=_mapping(data.get("type_routing"), f"{path}: 'type_routing'"),
+            services=_mapping(data.get("services"), f"{path}: 'services'"),
             dry_run=dry_run,
         )
 
