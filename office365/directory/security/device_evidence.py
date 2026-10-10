@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from office365.directory.security.alerts.defenderavstatus import DefenderAvStatus
 from office365.directory.security.logged_on_user import LoggedOnUser
@@ -13,9 +12,6 @@ from office365.intune.devices.healthstatus import DeviceHealthStatus
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
-
-if TYPE_CHECKING:
-    from office365.directory.security.onboarding_status import OnboardingStatus
 
 
 @dataclass
@@ -49,5 +45,3 @@ class DeviceEvidence(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.DeviceEvidence"
-
-    onboardingStatus: OnboardingStatus = OnboardingStatus.insufficientInfo

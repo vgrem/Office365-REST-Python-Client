@@ -1,12 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 from office365.runtime.client_value import ClientValue
-
-if TYPE_CHECKING:
-    from office365.directory.security.service_principal_type import ServicePrincipalType
 
 
 @dataclass
@@ -20,5 +16,3 @@ class ServicePrincipalEvidence(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.ServicePrincipalEvidence"
-
-    servicePrincipalType: ServicePrincipalType = ServicePrincipalType.unknown

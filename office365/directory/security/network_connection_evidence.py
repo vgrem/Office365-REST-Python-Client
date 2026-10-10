@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
 from office365.directory.security.ip_evidence import IpEvidence
 from office365.runtime.client_value import ClientValue
-
-if TYPE_CHECKING:
-    from office365.directory.security.protocol_type import ProtocolType
 
 
 @dataclass
@@ -20,5 +16,3 @@ class NetworkConnectionEvidence(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.NetworkConnectionEvidence"
-
-    protocol: ProtocolType = ProtocolType.tcp

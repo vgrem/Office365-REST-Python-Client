@@ -12,5 +12,3 @@ class PersonType(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.PersonType"
-
-    class_: str | None = None
