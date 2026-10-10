@@ -1,8 +1,29 @@
-"""Offline tests for the layered router (namespace, exact type, prefix)."""
+"""Offline tests for the layered router (namespace, exact type, prefix, inference)."""
 
 from __future__ import annotations
 
-from generator.routing import Router, route_namespace
+from generator.builders.resolution import TypeRegistry
+from generator.filters import TypeFilter
+from generator.odata.model import ODataModel
+from generator.odata.property import PropertyInformation
+from generator.odata.type_information import TypeInformation
+from generator.routing import Router, infer_placements, route_namespace
+
+
+def test_infer_placements_propagates_from_routed_anchors():
+    """A routed type's module spreads to the types it references."""
+    model = ODataModel()
+    anchor = TypeInformation(BaseTypeFullName="EntityType", FullName="SP.A", IsValueObject=False)
+    anchor.add_property(PropertyInformation(Name="b", TypeName="SP.B"))
+    referenced = TypeInformation(BaseTypeFullName="ComplexType", FullName="SP.B", IsValueObject=True)
+    model.add_type(anchor)
+    model.add_type(referenced)
+    router = Router(types={"SP.A": "office365.a"})
+
+    assigned = infer_placements(model, TypeFilter(include_base_types=set()), TypeRegistry([]), router)
+
+    assert assigned["SP.A"] == "office365.a"
+    assert assigned["SP.B"] == "office365.a"  # inferred from its only referrer
 
 
 def test_route_namespace_sanitizes_non_identifier_segments():

@@ -18,6 +18,10 @@ _XML = """<?xml version="1.0"?>
       <ComplexType Name="Thing">
         <Property Name="owner" Type="graph.user" />
       </ComplexType>
+      <EntityContainer Name="GraphService">
+        <EntitySet Name="users" EntityType="graph.user" />
+        <Singleton Name="reports" Type="graph.reportRoot" />
+      </EntityContainer>
     </Schema>
   </edmx:DataServices>
 </edmx:Edmx>
@@ -57,3 +61,10 @@ def test_parse_parameters_qualifies_types() -> None:
     assert _document().parse_parameters(function_node) == [
         {"Name": "p", "Type": "microsoft.graph.User", "Nullable": True}
     ]
+
+
+def test_entity_anchors_map_root_types_to_container_names() -> None:
+    assert _document().entity_anchors() == {
+        "microsoft.graph.User": "users",
+        "microsoft.graph.ReportRoot": "reports",
+    }

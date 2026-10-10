@@ -39,6 +39,7 @@ class ODataReader(ABC):
         self._document = CsdlDocument.load(self._metadata_path, self.xml_namespaces)
         self._parse_types(model)
         self.process_operations(model)
+        model.anchors = self._document.entity_anchors()
         return model
 
     def _parse_types(self, model: ODataModel) -> None:

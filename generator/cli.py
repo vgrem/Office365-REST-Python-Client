@@ -73,7 +73,13 @@ def suggest_routing(service: str) -> None:
     model = definition.reader(options.metadata_path).read()
     registry = TypeRegistry(options.modules.split(","), namespace=options.namespace)
     router = Router.from_options(options.builder_context())
-    print(render_suggestions(model, TypeFilter.from_options(options), registry, router))
+    base = TypeFilter.from_options(options)
+    # Routing is independent of which kinds are generated: propose placements for
+    # every in-scope type, so enabling a new kind (e.g. EntityType) has routes.
+    schema_filter = TypeFilter(
+        exact_ignored=base.exact_ignored, prefix_ignored=base.prefix_ignored, include_base_types=set(), start_at=""
+    )
+    print(render_suggestions(model, schema_filter, registry, router))
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:

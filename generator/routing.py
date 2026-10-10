@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from typing import Iterable, Optional
 
 from generator.builders.naming import python_name, to_snake_case
+from generator.odata.type_system import strip_collection
 
 
 def _module_segment(segment: str) -> str:
@@ -76,8 +77,12 @@ class Router:
             types = {name: str(module).strip() for name, module in options.type_routing.items()}
         return cls(namespace, types)
 
-    def module_for(self, type_name: str) -> Optional[str]:
-        """The routed module for a type: exact name, then namespace, then prefix."""
+    def module_for(self, type_name: str, *, allow_fallback: bool = True) -> Optional[str]:
+        """The routed module for a type: exact name, then namespace, then prefix.
+
+        ``allow_fallback=False`` ignores the catch-all ``*`` rule, so callers can
+        tell a *specific* placement from the fallback bucket.
+        """
         if not type_name:
             return None
         exact = self.types.get(type_name)
@@ -95,6 +100,8 @@ class Router:
         if exact:
             return exact
         for pattern, target in self.types.items():
+            if pattern == "*" and not allow_fallback:
+                continue
             if pattern.endswith("*") and short.startswith(pattern[:-1]):
                 return target
         return None
@@ -177,46 +184,98 @@ def _majority(values: Iterable[str]) -> Optional[str]:
     return counts.most_common(1)[0][0] if counts else None
 
 
-def render_suggestions(model, type_filter, registry, router: Router) -> str:
-    """Paste-ready routing proposals for unrouted types.
+def infer_placements(model, type_filter, registry, router: Router, rounds: int = 6) -> dict[str, str]:
+    """Infer a module for every in-scope type, propagating from routed anchors.
 
-    Suggestions are inferred from the routing already in effect: an unrouted
-    namespace/prefix is proposed the module that the majority of its
-    **already-routed** siblings use, so no hint tables need maintaining.
+    Seeds are the types already routed (or attached); each round assigns an
+    unrouted type the majority module of the types that reference it (properties
+    and navigation), so product groupings spread across the reference graph.
+    Returns ``{odata_name: module}`` for every type it could place.
     """
-    routed: dict[str, str] = {}
+    assigned: dict[str, str] = {}
+    in_scope: list[str] = []
+    for name, schema in model.types.items():
+        if not type_filter.in_scope(name, schema):
+            continue
+        in_scope.append(name)
+        # A *directory* module: for an attached type drop the file segment.
+        module = registry.strict_module_for(name)
+        if module:
+            assigned[name] = module.rsplit(".", 1)[0]
+        else:
+            routed = router.module_for(name, allow_fallback=False)
+            if routed:
+                assigned[name] = routed
+
+    short = {name.rsplit(".", 1)[-1]: name for name in in_scope}
+
+    def target(type_name: str | None) -> Optional[str]:
+        base = strip_collection(type_name)
+        if not base:
+            return None
+        return short.get(base) or short.get(base.rsplit(".", 1)[-1])
+
+    referrers: dict[str, list[str]] = defaultdict(list)
+    for name in in_scope:
+        for prop in model.types[name].Properties.values():
+            referenced = target(prop.TypeName)
+            if referenced:
+                referrers[referenced].append(name)
+
+    pending = [name for name in in_scope if name not in assigned]
+    for _ in range(rounds):
+        changed = False
+        for name in pending:
+            if name in assigned:
+                continue
+            modules = Counter(assigned[r] for r in referrers.get(name, ()) if r in assigned)
+            if modules:
+                assigned[name] = modules.most_common(1)[0][0]
+                changed = True
+        if not changed:
+            break
+    return assigned
+
+
+def render_suggestions(model, type_filter, registry, router: Router) -> str:
+    """Paste-ready routing proposals for types without a *specific* route.
+
+    The reference graph (:func:`infer_placements`) is the primary signal; the
+    rest are grouped into ``Prefix*`` rules for review. A human reviews and
+    pastes the result — routing is never written automatically.
+    """
+    assigned = infer_placements(model, type_filter, registry, router)
     unrouted: dict[str, list[str]] = defaultdict(list)
     for name, schema in model.types.items():
         if not type_filter.in_scope(name, schema):
             continue
-        module = registry.strict_module_for(name) or router.module_for(name)
-        if module:
-            routed[name] = module
-        else:
-            unrouted[name.rsplit(".", 1)[0]].append(name)
+        if registry.strict_module_for(name) or router.module_for(name, allow_fallback=False):
+            continue
+        unrouted[name.rsplit(".", 1)[0]].append(name)
 
     namespace_lines: list[str] = []
     for namespace, names in sorted(unrouted.items()):
         if namespace == "microsoft.graph":
             continue
-        siblings = [module for name, module in routed.items() if name.rsplit(".", 1)[0] == namespace]
-        suggested = _majority(siblings) or f"office365.{namespace.rsplit('.', 1)[-1].lower()}"
+        siblings = [module for name, module in assigned.items() if name.rsplit(".", 1)[0] == namespace]
+        suggested = _majority(siblings) or f"office365.{_module_segment(namespace.rsplit('.', 1)[-1])}"
         namespace_lines.append(f"  {namespace}: {suggested}   # {len(names)} type(s)")
 
-    # Bare ``microsoft.graph.*`` types: propose by first word using routed peers.
-    prefix_modules: dict[str, Counter] = defaultdict(Counter)
-    for name, module in routed.items():
-        if name.rsplit(".", 1)[0] == "microsoft.graph":
-            prefix_modules[_first_word(name.rsplit(".", 1)[-1])][module] += 1
-
+    # Bare ``microsoft.graph.*`` types: reference-inferred placements become exact
+    # entries; the rest are grouped into ``Prefix*`` rules.
+    exact_lines: list[str] = []
     by_prefix: dict[str, list[str]] = defaultdict(list)
     for name in unrouted.get("microsoft.graph", []):
-        by_prefix[_first_word(name.rsplit(".", 1)[-1])].append(name)
+        if name in assigned:
+            anchor = model.anchors.get(name)
+            note = f"   # anchor: {anchor}" if anchor else ""
+            exact_lines.append(f'  "{name.rsplit(".", 1)[-1]}": {assigned[name]}{note}')
+        else:
+            by_prefix[_first_word(name.rsplit(".", 1)[-1])].append(name)
 
     type_lines: list[str] = []
     for prefix, names in sorted(by_prefix.items(), key=lambda item: -len(item[1])):
-        hint = _majority(prefix_modules.get(prefix, {})) or "<choose>"
         sample = ", ".join(n.rsplit(".", 1)[-1] for n in names[:3])
-        type_lines.append(f'  "{prefix}*": {hint}   # {len(names)}: {sample}...')
+        type_lines.append(f'  "{prefix}*": <choose>   # {len(names)}: {sample}...')
 
-    return "\n".join(["routing:", *namespace_lines, "type_routing:", *type_lines])
+    return "\n".join(["routing:", *namespace_lines, "type_routing:", *exact_lines, *type_lines])

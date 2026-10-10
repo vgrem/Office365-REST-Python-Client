@@ -82,3 +82,22 @@ class CsdlDocument:
             }
             for param in node.findall("xmlns:Parameter", self._namespaces)
         ]
+
+    def entity_anchors(self) -> dict[str, str]:
+        """The root container name (entity set / singleton) for each root type.
+
+        E.g. ``users -> microsoft.graph.User``, ``identityGovernance ->
+        microsoft.graph.identityGovernance``. These anchor otherwise-unreferenced
+        root types to a product area, for routing suggestions.
+        """
+        anchors: dict[str, str] = {}
+        for container in self.findall("edmx:DataServices/xmlns:Schema/xmlns:EntityContainer"):
+            for node in container.findall("xmlns:EntitySet", self._namespaces):
+                type_name = self.qualified_type_name(node.get("EntityType"))
+                if type_name:
+                    anchors.setdefault(type_name, node.get("Name") or "")
+            for node in container.findall("xmlns:Singleton", self._namespaces):
+                type_name = self.qualified_type_name(node.get("Type"))
+                if type_name:
+                    anchors.setdefault(type_name, node.get("Name") or "")
+        return anchors

@@ -13,6 +13,8 @@ class ODataModel:
 
     def __init__(self):
         self._types: Dict[str, TypeInformation] = {}
+        #: Root type name -> container name (entity set / singleton), if any.
+        self.anchors: Dict[str, str] = {}
 
     @property
     def types(self) -> Dict[str, TypeInformation]:
