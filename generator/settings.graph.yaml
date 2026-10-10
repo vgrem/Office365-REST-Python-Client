@@ -12,6 +12,7 @@ filters:
     - microsoft.graph.EntityType
     - microsoft.graph.Education*
     - microsoft.graph.SharepointIds
+    - microsoft.graph.Entity
   ignored_properties: []
 modules:
   - office365.admin
@@ -311,3 +312,126 @@ type_routing:
 
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common
+
+# Reference-based (2-stage) placements for bare Graph entity types.
+  "Note": office365.directory.users
+  "ItemInsights": office365.directory.users
+  "Partners": office365.reports
+  "ConditionalAccessTemplate": office365.directory.identities
+  "ActivityBasedTimeoutPolicy": office365.directory.policies
+  "FederatedTokenValidationPolicy": office365.directory.policies
+  "OwnerlessGroupPolicy": office365.directory.policies
+  "Bitlocker": office365.directory.protection
+  "BitlockerRecoveryKey": office365.directory.protection
+  "FraudProtectionProvider": office365.directory.authentication
+  "OnTokenIssuanceStartCustomExtension": office365.directory.identities
+  "OnVerifiedIdClaimValidationCustomExtension": office365.directory.identities
+  "WebApplicationFirewallProvider": office365.directory.identities
+  "AuthenticationEventsFlow": office365.directory.identities
+  "B2xIdentityUserFlow": office365.directory.identities
+  "RiskPreventionContainer": office365.directory.identities
+  "WebApplicationFirewallVerificationModel": office365.directory.identities
+  "SoftwareUpdateStatusSummary": office365.intune.devices.management
+  "OnPremisesConditionalAccessSettings": office365.intune.devices.management
+  "ApplePushNotificationCertificate": office365.intune.devices.management
+  "DetectedApp": office365.intune.devices.management
+  "ImportedWindowsAutopilotDeviceIdentity": office365.intune.devices.management
+  "NotificationMessageTemplate": office365.intune.devices.management
+  "ResourceOperation": office365.intune.devices.management
+  "RemoteAssistancePartner": office365.intune.devices.management
+  "AuthoredNote": office365.directory.security.subjectrightsrequests
+  "SecureScore": office365.directory.security
+  "LabelContentRight": office365.directory.security.datasecurity
+  "ActivitiesContainer": office365.directory.identitygovernance
+  "ContentActivity": office365.directory.identitygovernance
+  "UsageRightsIncluded": office365.directory.security.datasecurity
+  "UserProtectionScopeContainer": office365.directory.identitygovernance
+  "OnPremisesDirectorySynchronization": office365.directory
+  "RemoteTenantGroup": office365.directory
+  "TenantGovernance": office365.directory
+  "InheritablePermission": office365.directory
+  "AllowedValue": office365.directory
+  "ApprovedClientApp": office365.directory.serviceprincipals
+  "CertificateAuthorityDetail": office365.directory.certificates
+  "ServiceProviderConstraints": office365.directory
+  "InternalDomainFederation": office365.directory.domains
+  "OrganizationalBrandingLocalization": office365.intune.organizations
+  "TargetDeviceGroup": office365.directory.serviceprincipals
+  "Edge": office365.admin
+  "BrowserSharedCookie": office365.admin
+  "BrowserSite": office365.admin
+  "BrowserSiteList": office365.admin
+  "InternetExplorerMode": office365.admin
+  "BrowseSessionBase": office365.backuprestore
+  "ProtectionUnitBase": office365.backuprestore
+  "EmailNotificationsSetting": office365.backuprestore
+  "OneDriveForBusinessBrowseSession": office365.backuprestore
+  "OneDriveForBusinessRestoreSession": office365.backuprestore
+  "ServiceApp": office365.backuprestore
+  "SharePointBrowseSession": office365.backuprestore
+  "SharePointProtectionPolicy": office365.backuprestore
+  "SharePointRestoreSession": office365.backuprestore
+  "CheckInClaim": office365.outlook.calendar
+  "MessageTracingRoot": office365.admin
+  "InferenceClassificationOverride": office365.directory.users
+  "WorkHoursAndLocationsSetting": office365.directory.users
+  "CustomDataProvidedResourceUploadSession": office365.directory.identitygovernance.entitlementmanagement.accesspackage
+  "ExternalOriginResourceConnector": office365.directory.identitygovernance.entitlementmanagement
+  "AvailableAccessPackage": office365.directory.identitygovernance.entitlementmanagement
+  "ControlConfiguration": office365.directory.identitygovernance.entitlementmanagement
+  "GroupResource": office365.directory.identitygovernance.privilegedaccess
+  "CustomDataProvidedResourceFile": office365.directory.identitygovernance.entitlementmanagement.accesspackage
+  "MdmWindowsInformationProtectionPolicy": office365.intune.devices.management
+  "TargetedManagedAppConfiguration": office365.intune.devices.management
+  "EBookInstallSummary": office365.intune.devices.management.managed.ebook
+  "UserInstallStateSummary": office365.intune.devices.management.managed.ebook
+  "TermsAndConditionsAcceptanceStatus": office365.intune.devices.management
+  "TermsAndConditionsAssignment": office365.intune.devices.management
+  "SettingStateDeviceSummary": office365.intune.devices.compliance
+  "AppLogCollectionRequest": office365.intune
+  "MalwareStateForWindowsDevice": office365.intune
+  "TargetedManagedAppPolicyAssignment": office365.intune.devices.management.managed.app.protections
+  "LocalizedNotificationMessage": office365.intune.devices.management
+  "M365AppsInstallationOptions": office365.admin.microsoft365
+  "InsightsSettings": office365.admin.people
+  "ProfilePropertySetting": office365.admin.people
+  "ProfileSource": office365.admin.people
+  "PronounsSettings": office365.admin.people
+  "EndUserNotification": office365.directory.security
+  "LoginPage": office365.directory.security.attacksimulations
+  "Payload": office365.directory.security.attacksimulations
+  "EndUserNotificationDetail": office365.directory.security
+  "LandingPageDetail": office365.directory.security.attacksimulations
+  "AttendanceRecord": office365.communications.onlinemeetings
+  "AudioRoutingGroup": office365.communications.calls
+  "ContentSharingSession": office365.communications.calls
+  "MeetingAttendanceReport": office365.communications.onlinemeetings
+  "PlatformCredentialAuthenticationMethod": office365.directory.authentication
+  "TemporaryAccessPassAuthenticationMethod": office365.directory.authentication
+  "PinnedChatMessageInfo": office365.teams.chats
+  "TargetedChatMessage": office365.teams.chats
+  "TeamsAppSettings": office365.teams
+  "WorkforceIntegration": office365.teams
+  "DayNote": office365.teams.schedule
+  "OpenShift": office365.teams.schedule
+  "SwapShiftsChangeRequest": office365.teams.schedule
+  "TimeCard": office365.teams.schedule
+  "TimeOffRequest": office365.teams.schedule
+  "TimeOff": office365.teams.schedule
+  "WorkingTimeSchedule": office365.teams.teamwork.shiftmanagement
+  "B2bRegistrationMetrics": office365.directory
+  "GovernanceInvitation": office365.directory
+  "GovernanceRelationship": office365.directory
+  "GovernanceRequest": office365.directory
+  "TenantGovernancePolicyTemplate": office365.directory
+  "RelatedTenant": office365.directory
+  "TenantGovernanceSetting": office365.directory
+  "ThreatAssessmentResult": office365.directory.protection.threatassessment.requests
+  "AttachmentBase": office365.todo
+  "AttachmentSession": office365.todo
+  "ChecklistItem": office365.todo
+  "LinkedResource": office365.todo
+  "ServiceStorageQuotaBreakdown": office365.directory
+  "VerifiedIdProfile": office365.directory
+  "WorkPlanOccurrence": office365.directory.users
+  "WorkPlanRecurrence": office365.directory.users
