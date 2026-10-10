@@ -36,8 +36,13 @@ class SymbolIndex:
             for root in self._package_dirs(module_name):
                 self._scan_root(module_name, root)
 
-    def resolve_module(self, type_name: str | None) -> Optional[str]:
-        """The module that defines ``type_name`` (an OData name or bare class name)."""
+    def resolve_module(self, type_name: str | None, *, strict: bool = False) -> Optional[str]:
+        """The module that defines ``type_name`` (an OData name or bare class name).
+
+        ``strict`` restricts resolution to the authoritative OData name (and the
+        class name matching its short name); the bare-class-name fallback is only
+        for best-effort annotation/import hints, never for update decisions.
+        """
         if not type_name:
             return None
         key = ODataType.normalize_type_name(type_name) or type_name
@@ -48,6 +53,8 @@ class SymbolIndex:
                 return module
         if candidates:
             return candidates[0][1]
+        if strict:
+            return None
         modules = self._by_name.get(short, [])
         return modules[0] if modules else None
 

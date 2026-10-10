@@ -289,15 +289,15 @@ class TypeRegistry:
         return mod.__name__ if mod is not None else None
 
     def strict_module_for(self, type_name: str | None) -> Optional[str]:
-        """Like :meth:`module_for`, but without the import-based bare-name fallback.
+        """Like :meth:`module_for`, but without any bare-class-name fallback.
 
         Used for update decisions: a wrong match makes the generator write into a
-        file it does not own (e.g. an OData ``StringCollection`` resolving to a
-        hand-written runtime module).
+        file it does not own (e.g. a same-named OData type of a different kind,
+        or a hand-written runtime module).
         """
         if not type_name:
             return None
-        return self._index.resolve_module(type_name)
+        return self._index.resolve_module(type_name, strict=True)
 
     def members_of(self, type_name: str | None) -> set[str]:
         """Member names a class already has (incl. inherited), purely from AST."""

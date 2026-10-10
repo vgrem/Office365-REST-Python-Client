@@ -89,6 +89,15 @@ def test_static_members_include_inherited_members():
     assert {"name", "server_relative_url", "length", "versions"} <= members
 
 
+def test_strict_module_resolution_ignores_same_named_types():
+    """Two OData types sharing a short name must not resolve to each other's file."""
+    resolver = TypeRegistry(["office365.sharepoint"])
+    portal = resolver.strict_module_for("Microsoft.SharePoint.Portal.GroupCreationParams")
+    tenant = resolver.strict_module_for("Microsoft.Online.SharePoint.TenantManagement.GroupCreationParams")
+    assert portal == "office365.sharepoint.portal.groups.creation_params"
+    assert tenant is None
+
+
 def test_property_and_method_with_same_name_are_deduplicated(tmp_path: Path):
     """An OData property and bound function sharing a name generate one member."""
     schema = TypeInformation(BaseTypeFullName="EntityType", FullName="SP.TestThing", IsValueObject=False)

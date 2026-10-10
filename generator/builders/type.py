@@ -39,6 +39,21 @@ _RESERVED_PROPERTY_NAMES = {name for name in dir(ClientObject)} | {name for name
 _MAX_METHOD_PARAMS = 50
 
 
+#: Line length enforced by ruff; long import lines get an explicit ``# noqa``.
+_MAX_LINE = 121
+
+
+def _suppress_long_imports(source: str) -> str:
+    """Append ``# noqa: E501`` to import lines longer than the limit (applied last)."""
+    lines = [
+        line + "  # noqa: E501"
+        if len(line) > _MAX_LINE and line.lstrip().startswith(("from ", "import ")) and "noqa" not in line
+        else line
+        for line in source.splitlines()
+    ]
+    return "\n".join(lines) + ("\n" if source.endswith("\n") else "")
+
+
 def _is_type_checking(node: ast.If) -> bool:
     test = node.test
     return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
@@ -103,26 +118,31 @@ def _strip_module_names(imports: list[ast.stmt], names: set[str]) -> list[ast.st
 
 
 class _ModuleQualifier(ast.NodeTransformer):
-    """Qualify generated ``X`` references as ``X.X`` (module form)."""
+    """Qualify generated primitive references as ``<qualifier>.<name>``."""
 
-    def __init__(self, names: set[str]) -> None:
+    def __init__(self, names: set[str], qualifier: str) -> None:
         self._names = names
+        self._qualifier = qualifier
 
     def visit_Name(self, node: ast.Name):
         if isinstance(node.ctx, ast.Load) and node.id in self._names:
             return ast.copy_location(
-                ast.Attribute(value=ast.Name(id=node.id, ctx=ast.Load()), attr=node.id, ctx=ast.Load()),
+                ast.Attribute(
+                    value=ast.Name(id=self._qualifier, ctx=ast.Load()),
+                    attr=node.id,
+                    ctx=ast.Load(),
+                ),
                 node,
             )
         return node
 
 
-def _qualify_modules(node: ast.stmt, names: set[str]) -> ast.stmt:
-    return _ModuleQualifier(names).visit(copy.deepcopy(node))
+def _qualify_modules(node: ast.stmt, names: set[str], qualifier: str) -> ast.stmt:
+    return _ModuleQualifier(names, qualifier).visit(copy.deepcopy(node))
 
 
 def _qualify_datetime(node: ast.stmt) -> ast.stmt:
-    return _qualify_modules(node, {"datetime"})
+    return _qualify_modules(node, {"datetime"}, "datetime")
 
 
 class TypeBuilder(ast.NodeTransformer):
@@ -172,6 +192,11 @@ class TypeBuilder(ast.NodeTransformer):
         else:
             targets = classes[:1]
         node = targets[0]
+        if any(isinstance(base, ast.Name) and base.id == self.client_type_name for base in node.bases):
+            # e.g. a type named ``Entity`` inheriting the ``Entity`` base — invalid.
+            print(f"  Skipping {self.client_type_name}: class name collides with its base")
+            self._status = None
+            return
         node.name = self.client_type_name
         self._collect_schema_members()
         self._process_class(node)
@@ -179,15 +204,31 @@ class TypeBuilder(ast.NodeTransformer):
     def _process_class(self, node: ast.ClassDef) -> None:
         self.generic_visit(node)
 
-        if self._schema.BaseTypeFullName == "ComplexType":
+        kind = self._effective_kind(node)
+        if kind == "ComplexType":
             self._build_value_properties(node)
-        elif self._schema.BaseTypeFullName == "EnumType":
+        elif kind == "EnumType":
             self._build_members(node)
         else:
             self._build_object_properties(node)
 
         self._build_post(node)
         self._build_methods(node)
+
+    def _effective_kind(self, node: ast.ClassDef) -> str:
+        """The kind to build from, honouring the on-disk class's actual base.
+
+        SharePoint metadata sometimes marks a type ``EntityType`` while the model
+        (correctly) implements it as a ``ClientValue`` dataclass. Building entity
+        getters (``self.properties``) into a value type is invalid, so the class
+        base wins over the metadata kind.
+        """
+        bases = {base.id for base in node.bases if isinstance(base, ast.Name)}
+        if "ClientValue" in bases:
+            return "ComplexType"
+        if "Enum" in bases:
+            return "EnumType"
+        return self._schema.BaseTypeFullName
 
     def _collect_schema_members(self) -> None:
         """Collect the schema members that are missing from the class (once).
@@ -587,7 +628,7 @@ class TypeBuilder(ast.NodeTransformer):
             else:
                 ast.fix_missing_locations(self._source_tree)
                 source = normalize_quotes(ast.unparse(self._source_tree))
-            self._rendered = ruff_normalize(source, self.file)
+            self._rendered = _suppress_long_imports(ruff_normalize(source, self.file))
         return self._rendered
 
     def _render_update(self) -> str:
@@ -599,10 +640,15 @@ class TypeBuilder(ast.NodeTransformer):
 
         module_names = _module_bound_names(original_tree)
         if module_names:
-            # The file binds e.g. ``time``/``datetime`` to the module; keep that
-            # form and qualify generated references as ``<module>.<name>``.
+            # The file binds these names as modules (``import time``); drop the
+            # clashing ``from datetime import X`` and qualify generated refs.
             imports = _strip_module_names(imports, module_names)
-            members = [_qualify_modules(node, module_names) for node in members]
+            if "datetime" in module_names:
+                qualifier = "datetime"
+            else:
+                qualifier = "_dt"
+                imports = [*imports, ast.Import(names=[ast.alias(name="datetime", asname="_dt")])]
+            members = [_qualify_modules(node, module_names, qualifier) for node in members]
 
         runtime_lines: list[str] = []
         type_checking_lines: list[str] = []
