@@ -9,6 +9,16 @@ from generator.odata.member import MemberInformation
 if TYPE_CHECKING:
     from generator.builders.template_context import TemplateContext
 
+#: Names that are valid identifiers but trigger lint (``E741``) or are confusing.
+_AMBIGUOUS_NAMES = {"l", "I", "O"}
+
+
+def sanitize_member_name(name: str) -> str:
+    """A safe Python member name (keywords and ambiguous single letters get ``_``)."""
+    if keyword.iskeyword(name) or name in _AMBIGUOUS_NAMES:
+        return f"{name}_"
+    return name
+
 
 class MemberBuilder:
     def __init__(self, schema: MemberInformation, status="detached"):
@@ -33,9 +43,7 @@ class MemberBuilder:
 
     @property
     def name(self):
-        if keyword.iskeyword(self.schema.Name):
-            return f"{self.schema.Name}_"
-        return self.schema.Name
+        return sanitize_member_name(self.schema.Name)
 
     @property
     def value(self):

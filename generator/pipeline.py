@@ -9,6 +9,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
+from generator.builders.member import sanitize_member_name
 from generator.builders.render import ruff_binary
 from generator.builders.type import TypeBuilder
 from generator.builders.type_registry import TypeRegistry
@@ -124,6 +125,13 @@ class GeneratorPipeline:
         self._builder_options["known_types"] = known_types
         self._builder_options["type_modules"] = type_modules
         self._builder_options["cyclic_types"] = find_cyclic_types(model, known_types)
+        #: First member per in-scope enum, so enum-typed fields planned in this run
+        #: default to the first member rather than ``field(default_factory=Enum)``.
+        enum_defaults: dict[str, str] = {}
+        for name, schema in model.types.items():
+            if schema.BaseTypeFullName == "EnumType" and self._filter.in_scope(name, schema):
+                enum_defaults[name] = next((sanitize_member_name(m) for m in schema.Members), "")
+        self._builder_options["enum_defaults"] = enum_defaults
         self._checkpoint = Checkpoint(checkpoint_path(options.metadata_path, base_dir))
         self._output_root = Path(options.output_path).resolve()
 

@@ -40,7 +40,7 @@ _RESERVED_PROPERTY_NAMES = {name for name in dir(ClientObject)} | {name for name
 _MAX_METHOD_PARAMS = 50
 
 
-#: Line length enforced by ruff; long import lines get an explicit ``# noqa``.
+#: Line length enforced by ruff; long import lines get an explicit noqa comment.
 _MAX_LINE = 121
 
 
@@ -178,6 +178,8 @@ class TypeBuilder(ast.NodeTransformer):
         self._field_alias = "field"
         self._added_props: List[PropertyBuilder] = []
         self._cyclic_types: set[str] = set((options or {}).get("cyclic_types", ()))
+        #: OData enum name -> first member name (for defaults on planned enums).
+        self._enum_defaults: dict[str, str] = dict((options or {}).get("enum_defaults", {}))
         self._resolver = resolver or TypeRegistry(
             (options or {}).get("modules", "").split(","),
             namespace=(options or {}).get("namespace", ""),
@@ -489,17 +491,35 @@ class TypeBuilder(ast.NodeTransformer):
         existing_members = self._template.get_existing_members(class_node)
 
         insert_pos = self._last_stmt_index(class_node.body, (ast.Assign,))
+        existing_values = self._existing_member_values(class_node)
 
         for member_builder in self._members:
-            if member_builder.name not in existing_members:
-                assert self._template is not None
-                member_nodes = member_builder.build(self._template)
-                for node in member_nodes:
-                    class_node.body.insert(insert_pos, node)
-                    insert_pos += 1
-                self._added_members.extend(member_nodes)
-                self._changes.append(f"member: {member_builder.name}")
+            if member_builder.name in existing_members:
+                continue
+            value_key = str(member_builder.value)
+            if value_key in existing_values:
+                # A distinct name with an already-used value is a Python Enum alias;
+                # emitting it trips ruff PIE796, so keep the canonical member only.
                 existing_members.add(member_builder.name)
+                continue
+            assert self._template is not None
+            member_nodes = member_builder.build(self._template)
+            for node in member_nodes:
+                class_node.body.insert(insert_pos, node)
+                insert_pos += 1
+            self._added_members.extend(member_nodes)
+            self._changes.append(f"member: {member_builder.name}")
+            existing_members.add(member_builder.name)
+            existing_values.add(value_key)
+
+    @staticmethod
+    def _existing_member_values(class_node: ast.ClassDef) -> set[str]:
+        """String values already assigned in the class body (enum members)."""
+        values: set[str] = set()
+        for stmt in class_node.body:
+            if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and isinstance(stmt.value, ast.Constant):
+                values.add(str(stmt.value.value))
+        return values
 
     def _build_value_properties(self, class_node: ast.ClassDef):
         if not self._properties:
@@ -543,58 +563,21 @@ class TypeBuilder(ast.NodeTransformer):
         the snake_case Python name, matching the JSON serialization contract.
         """
         prop_type = prop.client_type_name
-        if prop_type in TypeReferenceCollector.OPTIONAL_TYPES:
-            annotation = ast.BinOp(
-                left=ast.Name(id=prop_type, ctx=ast.Load()),
-                op=ast.BitOr(),
-                right=ast.Constant(value=None),
-            )
-        else:
-            annotation = ast.Name(id=prop_type, ctx=ast.Load())
+        optional = prop_type in TypeReferenceCollector.OPTIONAL_TYPES
+        annotation = self._optional(prop_type) if optional else ast.Name(id=prop_type, ctx=ast.Load())
 
         if prop.is_object_type:
             # Navigation properties on ClientValue can't be instantiated
             # without context — use None as safe default
             default = ast.Constant(value=None)
-            if "Optional" not in str(annotation) and prop_type not in TypeReferenceCollector.OPTIONAL_TYPES:
-                # Make annotation Optional so None is valid
-                annotation = ast.BinOp(
-                    left=ast.Name(id=prop_type, ctx=ast.Load()),
-                    op=ast.BitOr(),
-                    right=ast.Constant(value=None),
-                )
+            if not optional:
+                annotation = self._optional(prop_type)
+        elif prop.cyclic:
+            # Cyclic reference: default to None (import under TYPE_CHECKING).
+            default = ast.Constant(value=None)
+            annotation = self._optional(prop_type)
         else:
-            default = prop.build_default_value()
-
-            if prop.cyclic:
-                # Cyclic reference: default to None (import under TYPE_CHECKING).
-                default = ast.Constant(value=None)
-                annotation = ast.BinOp(
-                    left=ast.Name(id=prop_type, ctx=ast.Load()),
-                    op=ast.BitOr(),
-                    right=ast.Constant(value=None),
-                )
-            elif self._options and not prop.is_collection_type:
-                # Resolve enum types to use first member as default instead of EnumType()
-                resolved = prop.resolve_client_type()
-                if resolved is not None and inspect.isclass(resolved):
-                    if issubclass(resolved, Enum):
-                        members = list(resolved)
-                        if members:
-                            default = ast.Attribute(
-                                value=ast.Name(id=prop_type, ctx=ast.Load()),
-                                attr=members[0].name,
-                                ctx=ast.Load(),
-                            )
-                    elif not issubclass(resolved, ClientValue):
-                        # An entity needs a context, so it cannot be a zero-arg
-                        # default_factory; default to None and make it optional.
-                        default = ast.Constant(value=None)
-                        annotation = ast.BinOp(
-                            left=ast.Name(id=prop_type, ctx=ast.Load()),
-                            op=ast.BitOr(),
-                            right=ast.Constant(value=None),
-                        )
+            default, annotation = self._value_default(prop, prop_type, annotation)
 
         if isinstance(default, ast.Call) and isinstance(default.func, ast.Name) and default.func.id == self._field_alias:
             self._uses_field = True
@@ -604,6 +587,54 @@ class TypeBuilder(ast.NodeTransformer):
             annotation=annotation,
             value=default,
             simple=1,
+        )
+
+    @staticmethod
+    def _optional(prop_type: str) -> ast.expr:
+        """The ``prop_type | None`` annotation."""
+        return ast.BinOp(
+            left=ast.Name(id=prop_type, ctx=ast.Load()),
+            op=ast.BitOr(),
+            right=ast.Constant(value=None),
+        )
+
+    def _value_default(self, prop: PropertyBuilder, prop_type: str, annotation: ast.expr) -> tuple[ast.expr, ast.expr]:
+        """The default value and annotation for a non-object ClientValue field.
+
+        Enums default to their first member (never ``field(default_factory=Enum)``),
+        entities to ``None``; an enum planned in this run is not importable yet, so
+        its first member is read from the metadata.
+        """
+        default: ast.expr = prop.build_default_value()
+        make_optional = False
+        if self._options and not prop.is_collection_type:
+            resolved = prop.resolve_client_type()
+            if resolved is not None and inspect.isclass(resolved):
+                if issubclass(resolved, Enum):
+                    members = list(resolved)
+                    if members:
+                        default = self._member_attr(prop_type, members[0].name)
+                    else:
+                        default, make_optional = ast.Constant(value=None), True
+                elif not issubclass(resolved, ClientValue):
+                    # An entity needs a context, so it cannot be a zero-arg default.
+                    default, make_optional = ast.Constant(value=None), True
+            else:
+                enum_name = ODataType.strip_collection(prop.schema.TypeName or "")
+                member = self._enum_defaults.get(enum_name)
+                if member:
+                    default = self._member_attr(prop_type, member)
+                elif enum_name in self._enum_defaults:
+                    default, make_optional = ast.Constant(value=None), True
+        return default, (self._optional(prop_type) if make_optional else annotation)
+
+    @staticmethod
+    def _member_attr(prop_type: str, member: str) -> ast.expr:
+        """The ``EnumType.member`` expression used as an enum default."""
+        return ast.Attribute(
+            value=ast.Name(id=prop_type, ctx=ast.Load()),
+            attr=member,
+            ctx=ast.Load(),
         )
 
     @staticmethod
