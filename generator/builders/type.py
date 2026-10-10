@@ -24,7 +24,7 @@ from generator.builders.template_context import TemplateContext
 from generator.builders.type_registry import TypeRegistry, python_name
 from generator.documentation.base import DocumentationProvider
 from generator.odata.type_information import TypeInformation
-from generator.routing import Router
+from generator.routing import Router, descend_module, module_directory
 from generator.validation import ValidationError
 
 # Base model members that generated operation methods must not shadow.
@@ -922,8 +922,8 @@ class TypeBuilder(ast.NodeTransformer):
             output_base = self._options.get("output_path", self._options.get("outputpath", ""))
             file_stem = self._to_snake_case(self.client_type_name)
             if module_path:
-                module_path, file_stem = self._descend_submodule(module_path, output_base, file_stem)
-                file_dir = self._module_dir(module_path, output_base)
+                module_path, file_stem = descend_module(module_path, self.client_type_name, output_base)
+                file_dir = module_directory(module_path, output_base)
             else:
                 file_dir = output_base
             file_path = abspath(os.path.join(file_dir, file_stem + ".py"))
@@ -945,55 +945,6 @@ class TypeBuilder(ast.NodeTransformer):
             else:
                 type_info["state"] = "detached"
         return type_info
-
-    def _descend_submodule(self, module_path: str, output_base: str, file_stem: str) -> tuple[str, str]:
-        """Place a new type in a matching subsystem package, stripping the prefix.
-
-        E.g. ``...identitygovernance`` + ``AccessReviewContextDataBase`` ->
-        ``...identitygovernance.accessreview`` + ``context_data_base.py`` when an
-        ``accessreview/`` package already exists under the routed directory. Only
-        applied to *new* files (attached types stay put: placement is sticky).
-        """
-        base = self._module_dir(module_path, output_base)
-        if not os.path.isdir(base):
-            return module_path, file_stem
-        words = file_stem.split("_")
-        best: tuple[int, int, str] | None = None
-        for entry in sorted(os.listdir(base)):
-            subdir = os.path.join(base, entry)
-            if entry.startswith("__") or not os.path.isdir(subdir):
-                continue
-            if not os.path.isfile(os.path.join(subdir, "__init__.py")):
-                continue
-            prefix = entry.lower().replace("_", "")
-            consumed = 0
-            acc = ""
-            for index, word in enumerate(words):
-                acc += word.lower().replace("_", "")
-                if acc == prefix:
-                    consumed = index + 1
-                    break
-                if not prefix.startswith(acc):
-                    break
-            if consumed and (best is None or len(prefix) > best[0]):
-                best = (len(prefix), consumed, entry)
-        if best is None:
-            return module_path, file_stem
-        _, consumed, dirname = best
-        remaining = "_".join(words[consumed:]) or file_stem
-        return f"{module_path}.{dirname}", remaining
-
-    @staticmethod
-    def _module_dir(module_path: str, output_base: str) -> str:
-        """The filesystem directory a routed module maps to."""
-        relative_path = module_path[len("office365.") :] if module_path.startswith("office365.") else module_path
-        sub_dir = relative_path.replace(".", "/")
-        parts = [output_base]
-        if sub_dir not in ("", "."):
-            base_suffix = output_base.rstrip("/").rsplit("/", 1)[-1]
-            if sub_dir != base_suffix:
-                parts.append(sub_dir)
-        return os.path.join(*parts)
 
     @staticmethod
     def _file_defines_class(path: str, class_name: str) -> bool:

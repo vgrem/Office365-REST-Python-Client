@@ -13,6 +13,7 @@ dumped at the package root.
 
 from __future__ import annotations
 
+import os
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -116,7 +117,60 @@ class Router:
         return None
 
 
-def planned_module(type_name: str, schema, registry, router: Router) -> Optional[str]:
+def module_directory(module_path: str, output_base: str) -> str:
+    """The filesystem directory a routed module maps to."""
+    relative = module_path[len("office365.") :] if module_path.startswith("office365.") else module_path
+    sub_dir = relative.replace(".", "/")
+    parts = [output_base]
+    if sub_dir not in ("", "."):
+        suffix = output_base.rstrip("/").rsplit("/", 1)[-1]
+        if sub_dir != suffix:
+            parts.append(sub_dir)
+    return os.path.join(*parts)
+
+
+def descend_module(module_path: str, class_name: str, output_base: str) -> tuple[str, str]:
+    """Descend into a matching subsystem package, stripping the class-name prefix.
+
+    E.g. ``...identitygovernance`` + ``AccessReviewContextDataBase`` ->
+    ``...identitygovernance.accessreview`` + ``context_data_base`` when an
+    ``accessreview/`` package exists under the routed directory. Only new files
+    descend (placed types stay put: placement is sticky).
+    """
+    file_stem = to_snake_case(class_name, avoid_keywords=False)
+    if not module_path or not output_base:
+        return module_path, file_stem
+    base = module_directory(module_path, output_base)
+    if not os.path.isdir(base):
+        return module_path, file_stem
+    words = file_stem.split("_")
+    best: tuple[int, int, str] | None = None
+    for entry in sorted(os.listdir(base)):
+        subdir = os.path.join(base, entry)
+        if entry.startswith("__") or not os.path.isdir(subdir):
+            continue
+        if not os.path.isfile(os.path.join(subdir, "__init__.py")):
+            continue
+        prefix = entry.lower().replace("_", "")
+        consumed = 0
+        acc = ""
+        for index, word in enumerate(words):
+            acc += word.lower().replace("_", "")
+            if acc == prefix:
+                consumed = index + 1
+                break
+            if not prefix.startswith(acc):
+                break
+        if consumed and (best is None or len(prefix) > best[0]):
+            best = (len(prefix), consumed, entry)
+    if best is None:
+        return module_path, file_stem
+    _, consumed, dirname = best
+    remaining = "_".join(words[consumed:]) or file_stem
+    return f"{module_path}.{dirname}", remaining
+
+
+def planned_module(type_name: str, schema, registry, router: Router, output_base: str = "") -> Optional[str]:
     """The **file** module a type will live in (attached), or ``None`` if unrouted.
 
     For a routed new type this is ``<target module>.<snake_class_name>`` — the
@@ -130,7 +184,8 @@ def planned_module(type_name: str, schema, registry, router: Router) -> Optional
     if not directory:
         return None
     class_name = python_name(type_name, bool(schema.IsValueObject))
-    return f"{directory}.{to_snake_case(class_name, avoid_keywords=False)}"
+    directory, file_stem = descend_module(directory, class_name, output_base)
+    return f"{directory}.{file_stem}"
 
 
 def render_suggestions(model, type_filter, registry, router: Router) -> str:
