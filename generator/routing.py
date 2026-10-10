@@ -18,6 +18,9 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Optional
 
+from generator.builders.naming import to_snake_case
+from generator.builders.type_registry import python_name
+
 #: Namespace -> module hints (used by ``--suggest-routing``).
 NAMESPACE_HINTS: dict[str, str] = {
     "microsoft.graph.callRecords": "office365.communications.callrecords",
@@ -113,12 +116,21 @@ class Router:
         return None
 
 
-def planned_module(type_name: str, registry, router: Router) -> Optional[str]:
-    """The module a type will live in: its existing module or a routed one."""
+def planned_module(type_name: str, schema, registry, router: Router) -> Optional[str]:
+    """The **file** module a type will live in (attached), or ``None`` if unrouted.
+
+    For a routed new type this is ``<target module>.<snake_class_name>`` — the
+    module of the file the generator will create (not the package), so imports
+    point at the file rather than the package ``__init__``.
+    """
     module = registry.strict_module_for(type_name)
     if module:
         return module
-    return router.module_for(type_name)
+    directory = router.module_for(type_name)
+    if not directory:
+        return None
+    class_name = python_name(type_name, bool(schema.IsValueObject))
+    return f"{directory}.{to_snake_case(class_name, avoid_keywords=False)}"
 
 
 def render_suggestions(model, type_filter, registry, router: Router) -> str:

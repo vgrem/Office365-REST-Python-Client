@@ -175,6 +175,7 @@ class TypeBuilder(ast.NodeTransformer):
         self._added_imports: List[ast.stmt] = []
         self._rendered: Optional[str] = None
         self._uses_field = False
+        self._added_props: List[PropertyBuilder] = []
         self._resolver = resolver or TypeRegistry(
             (options or {}).get("modules", "").split(","),
             namespace=(options or {}).get("namespace", ""),
@@ -284,9 +285,18 @@ class TypeBuilder(ast.NodeTransformer):
             return self._is_resolvable(ODataType.strip_collection(type_name))
         if ODataType.is_primitive_name(type_name):
             return True
-        if type_name in self._known_types:
-            return True
-        return self._resolver.module_for(type_name) is not None
+        module = self._resolver.module_for(type_name)
+        return module is not None and not self._is_shadowed(module)
+
+    @staticmethod
+    def _is_shadowed(module_name: str) -> bool:
+        """Whether ``module_name`` is shadowed by a same-named package.
+
+        ``a/b.py`` and ``a/b/__init__.py`` cannot coexist: imports resolve to the
+        package, so a class defined in the module is unreachable.
+        """
+        spec = importlib.util.find_spec(module_name)
+        return spec is not None and spec.submodule_search_locations is not None
 
     def _method_is_resolvable(self, method_schema) -> bool:
         if method_schema.ReturnTypeFullName and not self._is_resolvable(method_schema.ReturnTypeFullName):
@@ -381,10 +391,10 @@ class TypeBuilder(ast.NodeTransformer):
         assert self._template is not None
         assert self._options is not None
         collector = TypeReferenceCollector(self._resolver)
-        collector.needs_dataclass = self._schema.BaseTypeFullName == "ComplexType" and bool(self._properties)
+        collector.needs_dataclass = self._schema.BaseTypeFullName == "ComplexType" and bool(self._added_props)
         collector.needs_field = self._uses_field
 
-        for prop in self._properties:
+        for prop in self._added_props:
             prop_type = prop.client_type_name
             if prop_type in TypeReferenceCollector.OPTIONAL_TYPES and not collector.needs_dataclass:
                 # Getters use ``Optional[X]``; dataclass fields use ``X | None``.
@@ -397,7 +407,8 @@ class TypeBuilder(ast.NodeTransformer):
         context_type = self._options.get("context_type", "ClientContext")
         if self._generate_methods_enabled():
             for method in self._methods:
-                collector.add_method(method, context_type)
+                if method.status != "attached":
+                    collector.add_method(method, context_type)
 
         existing = self._existing_import_names(module)
         insert_index = len([n for n in module.body if isinstance(n, (ast.Import, ast.ImportFrom))])
@@ -513,6 +524,7 @@ class TypeBuilder(ast.NodeTransformer):
             class_node.body.insert(insert_pos, ann)
             insert_pos += 1
             self._added_members.append(ann)
+            self._added_props.append(prop)
             self._changes.append(f"property annotation: {prop.schema.Name}")
 
     def _build_value_annotation(self, prop: PropertyBuilder) -> ast.AnnAssign:
@@ -600,6 +612,7 @@ class TypeBuilder(ast.NodeTransformer):
                     class_node.body.insert(insert_pos, method)
                     insert_pos += 1
                 self._added_members.extend(property_methods)
+                self._added_props.append(prop)
                 self._changes.append(f"property: {prop.name}")
 
     def _generate_methods_enabled(self) -> bool:
@@ -814,9 +827,31 @@ class TypeBuilder(ast.NodeTransformer):
 
         if not self._entity_type_name_exists:
             entity_type_name_method = self._build_type_name_property(self._schema.FullName)
-            class_node.body.append(entity_type_name_method)
+            class_node.body.insert(self._type_name_property_index(class_node), entity_type_name_method)
             self._added_members.append(entity_type_name_method)
             self._changes.append("entity_type_name property")
+
+    @staticmethod
+    def _type_name_property_index(class_node: ast.ClassDef) -> int:
+        """Where to put ``entity_type_name`` — before a member named ``property``.
+
+        A dataclass field named ``property`` shadows the builtin decorator, so the
+        ``@property`` method must be defined first (kept after any docstring).
+        """
+        shadows = any(
+            (isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name) and stmt.target.id == "property")
+            or (
+                isinstance(stmt, ast.Assign)
+                and any(isinstance(target, ast.Name) and target.id == "property" for target in stmt.targets)
+            )
+            for stmt in class_node.body
+        )
+        if not shadows:
+            return len(class_node.body)
+        first = class_node.body[0] if class_node.body else None
+        if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant) and isinstance(first.value.value, str):
+            return 1
+        return 0
 
     @staticmethod
     def _last_stmt_index(nodes: list, types: tuple) -> int:

@@ -107,7 +107,7 @@ class GeneratorPipeline:
         for name, schema in model.types.items():
             if not self._filter.in_scope(name, schema):
                 continue
-            module = planned_module(name, registry, router)
+            module = planned_module(name, schema, registry, router)
             if module is not None:
                 known_types.add(name)
                 type_modules[name] = module
