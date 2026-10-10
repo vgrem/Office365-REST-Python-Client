@@ -6,7 +6,8 @@ import ast
 from pathlib import Path
 
 import pytest
-from generator.builders.type import TypeBuilder, _qualify_datetime
+from generator.builders.source_editor import qualify_datetime
+from generator.builders.type import TypeBuilder
 from generator.builders.type_registry import TypeRegistry
 from generator.odata.method import MethodInformation
 from generator.odata.property import PropertyInformation
@@ -189,7 +190,7 @@ def test_update_never_removes_or_reflows_existing_lines(tmp_path: Path, monkeypa
 def test_datetime_references_use_the_module_form():
     """When a file uses ``import datetime``, generated refs become ``datetime.datetime``."""
     node = ast.parse("def f(x: datetime) -> None: ...").body[0]
-    assert "datetime.datetime" in ast.unparse(_qualify_datetime(node))
+    assert "datetime.datetime" in ast.unparse(qualify_datetime(node))
 
 
 def test_update_targets_the_named_class_in_a_multi_class_module(tmp_path: Path, monkeypatch):
