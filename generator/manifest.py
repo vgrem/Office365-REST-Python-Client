@@ -13,9 +13,12 @@ import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from generator.odata.model import ODataModel
+
+if TYPE_CHECKING:
+    from generator.config import GeneratorOptions
 
 
 def manifest_path(metadata_path: str, base_dir: Path) -> Path:
@@ -26,6 +29,38 @@ def manifest_path(metadata_path: str, base_dir: Path) -> Path:
 def metadata_fingerprint(metadata_path: str) -> str:
     """A content hash of the metadata file (used for the no-op fast path)."""
     return hashlib.sha1(Path(metadata_path).read_bytes()).hexdigest()
+
+
+def run_signature(options: "GeneratorOptions") -> str:
+    """A hash of everything that changes generated output.
+
+    Covers the metadata, the effective options/flags and the template sources, so
+    an unchanged signature means a run would be a no-op (see the fast path).
+    """
+    digest = hashlib.sha1()
+    digest.update(metadata_fingerprint(options.metadata_path).encode())
+    payload = {
+        "output_path": options.output_path,
+        "template_path": options.template_path,
+        "context_type": options.context_type,
+        "generate_methods": options.generate_methods,
+        "modules": options.modules,
+        "namespace": options.namespace,
+        "ignored_types": options.ignored_types,
+        "ignored_properties": options.ignored_properties,
+        "ignored_methods": options.ignored_methods,
+        "include_base_types": options.include_base_types,
+        "start_at": options.start_at,
+        "routing": sorted(options.routing.items()),
+        "type_routing": sorted(options.type_routing.items()),
+    }
+    digest.update(json.dumps(payload, sort_keys=True).encode())
+    template_root = Path(options.template_path)
+    if template_root.is_dir():
+        for path in sorted(template_root.rglob("*.py")):
+            digest.update(path.relative_to(template_root).as_posix().encode())
+            digest.update(path.read_bytes())
+    return digest.hexdigest()
 
 
 def schema_members(model: ODataModel) -> dict[str, list[str]]:
@@ -66,6 +101,7 @@ class Manifest:
     path: Path
     fingerprint: str
     members: dict[str, list[str]]
+    signature: str = ""
 
     @classmethod
     def load(cls, metadata_path: str, base_dir: Path) -> Optional["Manifest"]:
@@ -78,9 +114,14 @@ class Manifest:
             return None
         if not isinstance(data, dict):
             return None
-        return cls(path, str(data.get("fingerprint", "")), data.get("members", {}))
+        return cls(
+            path,
+            str(data.get("fingerprint", "")),
+            data.get("members", {}),
+            str(data.get("signature", "")),
+        )
 
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"fingerprint": self.fingerprint, "members": self.members}
+        payload = {"fingerprint": self.fingerprint, "signature": self.signature, "members": self.members}
         self.path.write_text(json.dumps(payload, indent=1, sort_keys=True), encoding="utf-8")
