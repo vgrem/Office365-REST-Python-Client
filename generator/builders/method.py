@@ -6,6 +6,10 @@ from typing import TYPE_CHECKING, List, Optional
 from generator.builders.naming import to_snake_case
 from generator.builders.type_registry import ParameterType, ReturnType, TypeKind, item_name, python_name
 
+#: Max length of a docstring ``Args`` line's head, including the re-indentation
+#: applied after ``_docstring`` returns (ruff does not reflow docstring prose).
+_MAX_DOCSTRING_ARG = 105
+
 if TYPE_CHECKING:
     from generator.builders.type_registry import TypeRegistry
     from generator.odata.method import MethodInformation
@@ -113,7 +117,11 @@ class MethodBuilder:
             lines.append("")
             lines.append("Args:")
             for param in params:
-                lines.append(f"    {self._param_name(param)} ({self._param_type(param)}): {param.get('Name')} parameter")
+                # Keep each line short: the docstring is re-indented before emission,
+                # and ruff does not reflow docstring prose (see E501).
+                head = f"    {self._param_name(param)} ({self._param_type(param)}):"
+                lines.append(head if len(head) <= _MAX_DOCSTRING_ARG else f"    {self._param_name(param)}:")
+                lines.append(f"        {param.get('Name')} parameter")
         lines.append('"""')
         return "\n    ".join(lines)
 
@@ -126,10 +134,10 @@ class MethodBuilder:
 
     @property
     def name(self) -> str:
-        return to_snake_case(self.schema.Name or "")
+        return to_snake_case(self.schema.Name or "", avoid_builtins=True)
 
     def _param_name(self, param: dict) -> str:
-        return to_snake_case(param.get("Name") or "arg")
+        return to_snake_case(param.get("Name") or "arg", avoid_builtins=True)
 
     def _param_type(self, param: dict) -> str:
         type_name = param.get("Type")

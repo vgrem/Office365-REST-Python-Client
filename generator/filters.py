@@ -39,6 +39,12 @@ class TypeFilter:
             return True
         return False
 
+    def in_scope(self, name: str, schema: TypeInformation) -> bool:
+        """Whether ``name`` will be generated (no side effects; used for import planning)."""
+        if self.include_base_types and schema.BaseTypeFullName not in self.include_base_types:
+            return False
+        return not (name in self.exact_ignored or any(name.startswith(p) for p in self.prefix_ignored))
+
     def before_start(self, name: str) -> bool:
         """Name-based ``start_at``: skip every type until ``name`` matches the marker."""
         if not self.start_at or self.start_at.isdigit():

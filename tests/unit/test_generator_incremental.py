@@ -150,3 +150,30 @@ def test_datetime_references_use_the_module_form():
     """When a file uses ``import datetime``, generated refs become ``datetime.datetime``."""
     node = ast.parse("def f(x: datetime) -> None: ...").body[0]
     assert "datetime.datetime" in ast.unparse(_qualify_datetime(node))
+
+
+def test_update_targets_the_named_class_in_a_multi_class_module(tmp_path: Path, monkeypatch):
+    """A helper class declared before the target must not receive the new members."""
+    target = tmp_path / "multi.py"
+    target.write_text(
+        "from __future__ import annotations\n"
+        "\n"
+        "\n"
+        "class Helper:\n"
+        "    pass\n"
+        "\n"
+        "\n"
+        "class TestThing:\n"
+        "    def existing(self) -> None:\n"
+        "        pass\n",
+        encoding="utf8",
+    )
+    monkeypatch.setattr(TypeBuilder, "_module_file", staticmethod(lambda name: str(target)))
+    builder = TypeBuilder(_schema(), _options(tmp_path), resolver=_StubResolver())
+    builder.build()
+    tree = ast.parse(builder.render())
+    classes = {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
+    helper_members = [m.name for m in classes["Helper"].body if isinstance(m, ast.FunctionDef)]
+    target_members = [m.name for m in classes["TestThing"].body if isinstance(m, ast.FunctionDef)]
+    assert "title" in target_members
+    assert "title" not in helper_members

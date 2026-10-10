@@ -43,8 +43,11 @@ def test_to_snake_case(name: str, expected: str):
     assert to_snake_case(name) == expected
 
 
-def test_keywords_and_builtins_get_suffix():
-    assert to_snake_case("ID") == "id_"
-    assert to_snake_case("Type") == "type_"
+def test_keywords_get_suffix_builtins_do_not():
     assert to_snake_case("Class") == "class_"
+    assert to_snake_case("Import") == "import_"
+    # builtins are valid member names and are used across the codebase
+    assert to_snake_case("ID") == "id"
+    assert to_snake_case("Type") == "type"
+    assert to_snake_case("List") == "list"
     assert to_snake_case("ID", avoid_keywords=False) == "id"

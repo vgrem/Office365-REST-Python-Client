@@ -11,7 +11,13 @@ from __future__ import annotations
 import ast
 import io
 import json
+import shutil
+import subprocess
+import sys
 import tokenize
+from functools import lru_cache
+from pathlib import Path
+from typing import Optional
 
 _TRIPLE_QUOTES = ('"""', "'''")
 
@@ -57,3 +63,39 @@ def _split_prefix(literal: str) -> tuple[str, str]:
     while index < len(literal) and literal[index].isalpha():
         index += 1
     return literal[:index], literal[index:]
+
+
+@lru_cache(maxsize=1)
+def ruff_binary() -> Optional[str]:
+    """Locate ``ruff`` (on PATH or beside the running interpreter)."""
+    found = shutil.which("ruff")
+    if found:
+        return found
+    sibling = Path(sys.executable).with_name("ruff")
+    return str(sibling) if sibling.exists() else None
+
+
+def _ruff_stdin(ruff: str, args: list[str], source: str, filename: str) -> Optional[str]:
+    try:
+        proc = subprocess.run(
+            [ruff, *args, "--stdin-filename", filename, "-"],
+            input=source,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return proc.stdout or None
+
+
+def ruff_normalize(source: str, filename: str) -> str:
+    """Sort imports and format the source with ruff (repo style); best effort."""
+    ruff = ruff_binary()
+    if ruff is None:
+        return source
+    fixed = _ruff_stdin(ruff, ["check", "--isolated", "--select", "I001", "--fix"], source, filename)
+    if fixed:
+        source = fixed
+    formatted = _ruff_stdin(ruff, ["format"], source, filename)
+    return formatted or source

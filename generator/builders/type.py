@@ -11,6 +11,7 @@ from typing import Dict, List, Optional
 
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_value import ClientValue
+from office365.runtime.odata.type import ODataType
 from typing_extensions import Self
 
 from generator.builders.collector import TypeReferenceCollector
@@ -18,7 +19,7 @@ from generator.builders.member import MemberBuilder
 from generator.builders.method import MethodBuilder
 from generator.builders.naming import to_snake_case
 from generator.builders.property import PropertyBuilder
-from generator.builders.render import normalize_quotes
+from generator.builders.render import normalize_quotes, ruff_normalize
 from generator.builders.template_context import TemplateContext
 from generator.builders.type_registry import TypeRegistry, python_name
 from generator.documentation.base import DocumentationProvider
@@ -32,6 +33,10 @@ _RESERVED_METHOD_NAMES = (
 
 # Base model members that generated properties must not shadow (e.g. ``ResourcePath`` -> ``resource_path``).
 _RESERVED_PROPERTY_NAMES = {name for name in dir(ClientObject)} | {name for name in dir(ClientValue)}
+
+#: Bound operations with more parameters than this are skipped (unusable, and
+#: they exceed the linter's ``max-args``).
+_MAX_METHOD_PARAMS = 50
 
 
 def _is_type_checking(node: ast.If) -> bool:
@@ -88,9 +93,11 @@ class TypeBuilder(ast.NodeTransformer):
         self._changes: List[str] = []
         self._docstring: Optional[str] = None
         self._entity_type_name_exists: bool = False
+        self._known_types: set[str] = set((options or {}).get("known_types", ()))
         self._original_text: Optional[str] = None
         self._added_members: List[ast.stmt] = []
         self._added_imports: List[ast.stmt] = []
+        self._rendered: Optional[str] = None
         self._resolver = resolver or TypeRegistry(
             (options or {}).get("modules", "").split(","),
             namespace=(options or {}).get("namespace", ""),
@@ -143,6 +150,8 @@ class TypeBuilder(ast.NodeTransformer):
             snake = to_snake_case(name)
             if name in ignored_properties or snake in reserved_props or snake in seen_props:
                 continue
+            if not self._is_resolvable(prop_schema.TypeName):
+                continue
             self._properties.append(PropertyBuilder(prop_schema, resolver=self._resolver))
             seen_props.add(snake)
 
@@ -153,11 +162,37 @@ class TypeBuilder(ast.NodeTransformer):
         self._methods = []
         seen_methods: set[str] = set()
         for method_name, method_schema in self._schema.Methods.items():
-            snake = to_snake_case(method_name)
+            snake = to_snake_case(method_name, avoid_builtins=True)
             if method_name in ignored_methods or snake in reserved_methods or snake in seen_methods:
+                continue
+            if len(method_schema.Parameters or []) > _MAX_METHOD_PARAMS:
+                continue
+            if not self._method_is_resolvable(method_schema):
                 continue
             self._methods.append(MethodBuilder(method_schema, resolver=self._resolver))
             seen_methods.add(snake)
+
+    def _is_resolvable(self, type_name: Optional[str]) -> bool:
+        """Whether a referenced OData type can be imported.
+
+        A member is only generated when every type it names is a primitive, an
+        existing class, or a type this run will create. Otherwise the annotation
+        would reference an undefined name (e.g. an ``ignored_types`` namespace).
+        """
+        if not type_name:
+            return True
+        if ODataType.is_collection_name(type_name):
+            return self._is_resolvable(ODataType.strip_collection(type_name))
+        if ODataType.is_primitive_name(type_name):
+            return True
+        if type_name in self._known_types:
+            return True
+        return self._resolver.module_for(type_name) is not None
+
+    def _method_is_resolvable(self, method_schema) -> bool:
+        if method_schema.ReturnTypeFullName and not self._is_resolvable(method_schema.ReturnTypeFullName):
+            return False
+        return all(self._is_resolvable(param.get("Type")) for param in method_schema.Parameters or [])
 
         if self._docs_service:
             self._docs_service.build_documentation(self)
@@ -478,10 +513,14 @@ class TypeBuilder(ast.NodeTransformer):
         imports, so comments, ``# type: ignore`` and formatting survive.
         """
         assert self._source_tree is not None
-        if self._original_text is not None:
-            return self._render_update()
-        ast.fix_missing_locations(self._source_tree)
-        return normalize_quotes(ast.unparse(self._source_tree))
+        if self._rendered is None:
+            if self._original_text is not None:
+                source = self._render_update()
+            else:
+                ast.fix_missing_locations(self._source_tree)
+                source = normalize_quotes(ast.unparse(self._source_tree))
+            self._rendered = ruff_normalize(source, self.file)
+        return self._rendered
 
     def _render_update(self) -> str:
         """Splice the newly built members/imports into the original source text."""
@@ -505,7 +544,7 @@ class TypeBuilder(ast.NodeTransformer):
                 runtime_lines.append(ast.unparse(imp))
 
         lines = self._original_text.splitlines()
-        class_end = self._class_body_end_line(original_tree)
+        class_end = self._class_body_end_line(original_tree, self.client_type_name)
         runtime_insert = self._last_runtime_import_line(original_tree)
         tc_block = self._find_type_checking_block(original_tree)
 
@@ -534,11 +573,20 @@ class TypeBuilder(ast.NodeTransformer):
         return "\n".join("    " + line if line.strip() else line for line in code.splitlines())
 
     @staticmethod
-    def _class_body_end_line(tree: ast.Module) -> int:
+    def _class_body_end_line(tree: ast.Module, class_name: str) -> int:
+        """End line of the target class body (a module may hold several classes)."""
+        first: Optional[ast.ClassDef] = None
         for node in tree.body:
-            if isinstance(node, ast.ClassDef):
+            if not isinstance(node, ast.ClassDef):
+                continue
+            if first is None:
+                first = node
+            if node.name == class_name:
                 last = node.body[-1]
                 return last.end_lineno or last.lineno
+        if first is not None:
+            last = first.body[-1]
+            return last.end_lineno or last.lineno
         return len(tree.body)
 
     @staticmethod
