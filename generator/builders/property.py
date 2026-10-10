@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, List, Optional
 from office365.runtime.client_value import ClientValue
 
 from generator.builders.naming import item_name, python_name, to_snake_case
-from generator.odata.type_system import is_collection_name, is_primitive_name
 
 #: Python names that never need an import (builtins / stdlib shorthands).
 _SCALAR_TYPE_NAMES = {
@@ -75,11 +74,16 @@ class PropertyBuilder:
             annotation=(ast.Name(id=self.client_type_name, ctx=ast.Load()) if self.client_type_name else None),
         )
 
+    @property
+    def type_ref(self):
+        """The parsed type reference (cached on the schema)."""
+        return self.schema.type_ref
+
     def build_default_value(self) -> Constant | Call:
         """Build default value"""
         if self.is_collection_type:
             base_name = self.client_type_name.split("[")[0]
-            if is_primitive_name(self.schema.TypeName):
+            if self.type_ref.is_primitive:
                 return ast.Call(
                     func=ast.Name(id=self.field_alias, ctx=ast.Load()),
                     args=[],
@@ -109,7 +113,7 @@ class PropertyBuilder:
                         )
                     ],
                 )
-        elif is_primitive_name(self.schema.TypeName):
+        elif self.type_ref.is_primitive:
             if self.client_type_name == "datetime":
                 return ast.Call(
                     func=ast.Name(id=self.field_alias, ctx=ast.Load()),
@@ -173,7 +177,7 @@ class PropertyBuilder:
 
     @property
     def is_collection_type(self) -> bool:
-        return is_collection_name(self.schema.TypeName)
+        return self.type_ref.is_collection
 
     @property
     def is_object_type(self) -> bool:
@@ -191,8 +195,8 @@ class PropertyBuilder:
             # A cyclic reference must not be imported/constructed at module load.
             return False
         if self.is_collection_type:
-            return not is_primitive_name(self.schema.TypeName)
-        if is_primitive_name(self.schema.TypeName):
+            return not self.type_ref.is_primitive
+        if self.type_ref.is_primitive:
             return False
         resolved = self.resolve_client_type()
         if resolved is None or not inspect.isclass(resolved):

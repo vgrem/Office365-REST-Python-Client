@@ -30,7 +30,7 @@ from generator.builders.source_editor import SourceEditor, suppress_long_imports
 from generator.builders.template_context import TemplateContext
 from generator.documentation.base import DocumentationProvider
 from generator.odata.type_information import TypeInformation
-from generator.odata.type_system import is_collection_name, is_primitive_name, strip_collection
+from generator.odata.type_system import TypeRef
 from generator.routing import Router, descend_module, module_directory
 from generator.validation import ValidationError
 
@@ -161,7 +161,7 @@ class TypeBuilder(ast.NodeTransformer):
             if not self._is_resolvable(prop_schema.TypeName):
                 continue
             self._properties.append(PropertyBuilder(prop_schema, resolver=self._resolver))
-            self._properties[-1].cyclic = strip_collection(prop_schema.TypeName or "") in self._cyclic_types
+            self._properties[-1].cyclic = prop_schema.type_ref.text in self._cyclic_types
             self._properties[-1].field_alias = self._field_alias
             seen_props.add(snake)
 
@@ -191,9 +191,10 @@ class TypeBuilder(ast.NodeTransformer):
         """
         if not type_name:
             return True
-        if is_collection_name(type_name):
-            return self._is_resolvable(strip_collection(type_name))
-        if is_primitive_name(type_name):
+        ref = TypeRef.of(type_name)
+        if ref.is_collection:
+            return self._is_resolvable(ref.text)
+        if ref.is_primitive:
             return True
         module = self._resolver.module_for(type_name)
         return module is not None and not self._is_shadowed(module)
@@ -452,7 +453,7 @@ class TypeBuilder(ast.NodeTransformer):
                     # An entity needs a context, so it cannot be a zero-arg default.
                     default, make_optional = ast.Constant(value=None), True
             else:
-                enum_name = strip_collection(prop.schema.TypeName or "")
+                enum_name = prop.type_ref.text
                 member = self._enum_defaults.get(enum_name)
                 if member:
                     default = self._member_attr(prop_type, member)

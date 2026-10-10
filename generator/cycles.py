@@ -8,8 +8,6 @@ constructing the referenced type eagerly.
 
 from __future__ import annotations
 
-from generator.odata.type_system import strip_collection
-
 
 def find_cyclic_types(model, in_scope: set[str]) -> set[str]:
     """Types that participate in a reference cycle (strongly connected component).
@@ -26,7 +24,7 @@ def find_cyclic_types(model, in_scope: set[str]) -> set[str]:
         for prop in schema.Properties.values():
             if not prop.TypeName:
                 continue
-            item = strip_collection(prop.TypeName)
+            item = prop.type_ref.text
             if item in in_scope and item != name:
                 targets.add(item)
         edges[name] = targets

@@ -58,3 +58,22 @@ def test_type_ref_primitive_and_non_collection() -> None:
     assert ref.python_type is int
     assert not ref.is_collection
     assert ref.element.raw == "Edm.Int32"
+
+
+def test_property_information_caches_the_parsed_type_ref() -> None:
+    from generator.odata.property import PropertyInformation
+
+    prop = PropertyInformation(Name="members", TypeName="Collection(microsoft.graph.user)")
+
+    assert prop.type_ref.is_collection
+    assert prop.type_ref.text == "microsoft.graph.user"
+    assert prop.type_ref is prop.type_ref  # cached (parsed once)
+
+
+def test_method_information_exposes_return_type_ref() -> None:
+    from generator.odata.method import MethodInformation
+
+    method = MethodInformation(Name="getUser", ReturnTypeFullName="microsoft.graph.user")
+
+    assert method.return_type_ref.normalized == "microsoft.graph.User"
+    assert method.return_type_ref is method.return_type_ref

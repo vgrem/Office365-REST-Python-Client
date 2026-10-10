@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import Any, Dict, List, Optional
+
+from generator.odata.type_system import TypeRef
 
 
 @dataclass
@@ -29,3 +32,8 @@ class MethodInformation:
     IsComposable: Optional[bool] = None
     IsSideEffecting: Optional[bool] = None
     IsBeta: Optional[bool] = None
+
+    @cached_property
+    def return_type_ref(self) -> TypeRef:
+        """The parsed return-type reference (parsed once, then cached)."""
+        return TypeRef.of(self.ReturnTypeFullName)
