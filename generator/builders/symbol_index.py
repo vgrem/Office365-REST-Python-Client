@@ -19,6 +19,8 @@ from typing import Iterable, Optional
 
 from office365.runtime.odata.type import ODataType
 
+from generator.builders.naming import to_snake_case
+
 
 class SymbolIndex:
     """Maps OData type names (and bare class names) to their defining module.
@@ -39,24 +41,42 @@ class SymbolIndex:
     def resolve_module(self, type_name: str | None, *, strict: bool = False) -> Optional[str]:
         """The module that defines ``type_name`` (an OData name or bare class name).
 
-        ``strict`` restricts resolution to the authoritative OData name (and the
-        class name matching its short name); the bare-class-name fallback is only
-        for best-effort annotation/import hints, never for update decisions.
+        Resolution order: the authoritative OData name; then the bare class name.
+        Many older classes omit ``entity_type_name`` (keyed by the default
+        ``<namespace>.<ClassName>``), which misses nested OData namespaces, so the
+        bare name is accepted when it is unambiguous or its module path is
+        consistent with the type (a matching namespace segment, a parent segment
+        matching the class-name prefix, e.g. ``accessreview/error.py`` for
+        ``AccessReviewError``, or a hand-named module that is not the plain
+        snake_case form the generator itself would create).
         """
         if not type_name:
             return None
         key = ODataType.normalize_type_name(type_name) or type_name
         short = key.rsplit(".", 1)[-1]
+        return self._resolve_by_odata_name(key, short) or self._resolve_by_class_name(key, short, strict=strict)
+
+    def _resolve_by_odata_name(self, key: str, short: str) -> Optional[str]:
         candidates = self._by_odata.get(key, [])
         for class_name, module in candidates:
             if class_name == short:
                 return module
-        if candidates:
-            return candidates[0][1]
-        if strict:
-            return None
+        return candidates[0][1] if candidates else None
+
+    def _resolve_by_class_name(self, key: str, short: str, *, strict: bool) -> Optional[str]:
         modules = self._by_name.get(short, [])
-        return modules[0] if modules else None
+        if not modules:
+            return None
+        if len(modules) == 1:
+            # A bare ``microsoft.graph`` namespace has no signal, so accept it;
+            # otherwise require the module path to be consistent with the type.
+            if not strict or not _distinctive_segments(key) or _consistency_score(key, modules[0]) > 0:
+                return modules[0]
+            return None
+        scored = sorted(((_consistency_score(key, module), module) for module in modules), reverse=True)
+        if scored[0][0] > 0 and scored[0][0] > scored[1][0]:
+            return scored[0][1]
+        return None
 
     def class_members(self, type_name: str | None) -> set[str]:
         """Member names a class already has (incl. inherited), purely from AST."""
@@ -166,6 +186,31 @@ class SymbolIndex:
         except (ImportError, ValueError):
             return []
         return list(spec.submodule_search_locations or []) if spec is not None else []
+
+
+def _distinctive_segments(key: str) -> list[str]:
+    """OData namespace segments that carry product info (drops ``microsoft``/``graph``)."""
+    namespace = key.rsplit(".", 1)[0] if "." in key else ""
+    return [seg for seg in namespace.split(".") if seg and seg not in ("microsoft", "graph")]
+
+
+def _consistency_score(key: str, module: str) -> int:
+    """How plausibly ``module`` holds the type ``key`` (0 = unrelated).
+
+    Rewards a matching namespace segment and a parent directory matching the
+    class-name prefix; penalizes the plain ``snake_case`` module the generator
+    itself would create, so an existing hand-named module wins.
+    """
+    short = key.rsplit(".", 1)[-1].lower().replace("_", "")
+    module_lower = module.lower()
+    score = sum(2 for seg in _distinctive_segments(key) if seg.lower().replace("_", "") in module_lower)
+    for parent in module_lower.rsplit(".", 1)[0].split("."):
+        normalized = parent.replace("_", "")
+        if normalized not in ("office365", "microsoft", "graph") and normalized and short.startswith(normalized):
+            score += 3
+    if module_lower.rsplit(".", 1)[-1] == to_snake_case(key.rsplit(".", 1)[-1], avoid_keywords=False):
+        score -= 1
+    return score
 
 
 def _is_accessor(decorator: ast.expr) -> bool:

@@ -725,6 +725,10 @@ class TypeBuilder(ast.NodeTransformer):
                 class_end -= 1
             body = "\n\n".join(self._render_member(node) for node in members)
             lines[class_end:class_end] = ["", *body.splitlines()]
+            if self._schema.BaseTypeFullName == "ComplexType":
+                class_line = self._class_line(original_tree, self.client_type_name)
+                if class_line is not None and not self._has_dataclass_decorator(original_tree, self.client_type_name):
+                    lines.insert(class_line, "@dataclass")
 
         if type_checking_lines:
             if tc_block is not None:
@@ -748,6 +752,21 @@ class TypeBuilder(ast.NodeTransformer):
         ast.fix_missing_locations(module)
         code = normalize_quotes(ast.unparse(module))
         return "\n".join("    " + line if line.strip() else line for line in code.splitlines())
+
+    @staticmethod
+    def _class_line(tree: ast.Module, class_name: str) -> Optional[int]:
+        """0-based line index of the ``class <name>`` statement."""
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef) and node.name == class_name:
+                return node.lineno - 1
+        return None
+
+    @staticmethod
+    def _has_dataclass_decorator(tree: ast.Module, class_name: str) -> bool:
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef) and node.name == class_name:
+                return any(isinstance(d, ast.Name) and d.id == "dataclass" for d in node.decorator_list)
+        return False
 
     @staticmethod
     def _sole_pass_line(tree: ast.Module, class_name: str) -> Optional[int]:
