@@ -6,6 +6,8 @@ import ast
 from pathlib import Path
 
 import pytest
+from generator.builders import placement
+from generator.builders.placement import Placement
 from generator.builders.resolution import TypeRegistry
 from generator.builders.source_editor import qualify_datetime
 from generator.builders.type import TypeBuilder
@@ -47,11 +49,28 @@ def _options(tmp_path: Path) -> dict:
     return {"template_path": str(_TEMPLATES), "output_path": str(tmp_path), "modules": "office365.sharepoint"}
 
 
+def test_documentation_provider_injects_docstrings(tmp_path: Path):
+    """The docs provider runs after members are collected and before they are built."""
+
+    class _Docs:
+        def build_documentation(self, builder) -> None:
+            builder._docstring = "An example type."
+            for prop in builder.properties:
+                prop.docstring = "A property."
+
+    builder = TypeBuilder(_schema(), _options(tmp_path), _Docs(), resolver=_StubResolver())
+    builder.build()
+    source = builder.render()
+
+    assert "An example type." in source
+    assert "A property." in source
+
+
 def test_build_is_idempotent(tmp_path: Path, monkeypatch):
     """A second run over an already-generated class produces no change."""
     target = tmp_path / "test_thing.py"
     target.write_text("class TestThing:\n    pass\n", encoding="utf8")
-    monkeypatch.setattr(TypeBuilder, "_module_file", staticmethod(lambda name: str(target)))
+    monkeypatch.setattr(placement, "module_file", lambda name: str(target))
 
     first = TypeBuilder(_schema(), _options(tmp_path), resolver=_StubResolver())
     first.build()
@@ -68,7 +87,7 @@ def test_inherited_members_are_not_redeclared(tmp_path: Path, monkeypatch):
     """A property already present on the base class is skipped."""
     target = tmp_path / "test_thing.py"
     target.write_text("class TestThing:\n    pass\n", encoding="utf8")
-    monkeypatch.setattr(TypeBuilder, "_module_file", staticmethod(lambda name: str(target)))
+    monkeypatch.setattr(placement, "module_file", lambda name: str(target))
 
     # ``title`` is reported as already existing (e.g. inherited) -> not generated
     builder = TypeBuilder(_schema(), _options(tmp_path), resolver=_StubResolver(members={"title"}))
@@ -78,7 +97,7 @@ def test_inherited_members_are_not_redeclared(tmp_path: Path, monkeypatch):
 
 def test_rejects_duplicate_top_level_class():
     builder = TypeBuilder(_schema(), {"modules": "office365.sharepoint"}, resolver=_StubResolver())
-    builder._type_info = {"state": "attached", "file": "x.py"}
+    builder._placement = Placement(state="attached", file="x.py", routed=True)
     module = ast.parse("class TestThing:\n    pass\n\n\nclass TestThing:\n    pass\n")
     with pytest.raises(ValidationError):
         builder._process(module)
@@ -146,7 +165,7 @@ def test_update_preserves_existing_source(tmp_path: Path, monkeypatch):
         "        pass\n",
         encoding="utf8",
     )
-    monkeypatch.setattr(TypeBuilder, "_module_file", staticmethod(lambda name: str(target)))
+    monkeypatch.setattr(placement, "module_file", lambda name: str(target))
     builder = TypeBuilder(_schema(), _options(tmp_path), resolver=_StubResolver())
     builder.build()
     source = builder.render()
@@ -177,7 +196,7 @@ def test_update_never_removes_or_reflows_existing_lines(tmp_path: Path, monkeypa
         "        return 42\n"
     )
     target.write_text(original, encoding="utf8")
-    monkeypatch.setattr(TypeBuilder, "_module_file", staticmethod(lambda name: str(target)))
+    monkeypatch.setattr(placement, "module_file", lambda name: str(target))
     builder = TypeBuilder(_schema(), _options(tmp_path), resolver=_StubResolver())
     builder.build()
     source = builder.render()
@@ -209,7 +228,7 @@ def test_update_targets_the_named_class_in_a_multi_class_module(tmp_path: Path, 
         "        pass\n",
         encoding="utf8",
     )
-    monkeypatch.setattr(TypeBuilder, "_module_file", staticmethod(lambda name: str(target)))
+    monkeypatch.setattr(placement, "module_file", lambda name: str(target))
     builder = TypeBuilder(_schema(), _options(tmp_path), resolver=_StubResolver())
     builder.build()
     tree = ast.parse(builder.render())

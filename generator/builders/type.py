@@ -5,7 +5,6 @@ import keyword
 import os
 from _ast import Module
 from enum import Enum
-from os.path import abspath
 from typing import Dict, List, Optional
 
 from office365.runtime.client_object import ClientObject
@@ -23,6 +22,7 @@ from generator.builders.imports import (
 from generator.builders.member import MemberBuilder
 from generator.builders.method import MethodBuilder
 from generator.builders.naming import python_name, to_snake_case
+from generator.builders.placement import Placement, TypePlanner
 from generator.builders.property import PropertyBuilder
 from generator.builders.render import normalize_quotes, ruff_normalize
 from generator.builders.resolution import TypeRegistry
@@ -31,7 +31,6 @@ from generator.builders.template_context import TemplateContext
 from generator.documentation.base import DocumentationProvider
 from generator.odata.type_information import TypeInformation
 from generator.odata.type_system import TypeRef
-from generator.routing import Router, descend_module, module_directory
 from generator.validation import ValidationError
 
 # Base model members that generated operation methods must not shadow.
@@ -61,7 +60,7 @@ class TypeBuilder(ast.NodeTransformer):
         self._context = BuilderContext.from_options(options)
         self._docs_service = docs_service
         self._template: Optional[TemplateContext] = None
-        self._type_info: Optional[Dict] = None
+        self._placement: Optional[Placement] = None
         self._source_tree: Optional[Module] = None
         self._status: Optional[str] = None
         self._properties: List[PropertyBuilder] = []
@@ -86,6 +85,7 @@ class TypeBuilder(ast.NodeTransformer):
             namespace=self._context.namespace,
             type_modules=self._context.type_modules,
         )
+        self._planner = TypePlanner(self._context, self._resolver)
 
     def _process(self, module: ast.Module) -> None:
         """Process the single target class of the module (fail on ambiguity)."""
@@ -108,6 +108,8 @@ class TypeBuilder(ast.NodeTransformer):
             return
         node.name = self.client_type_name
         self._collect_schema_members()
+        if self._docs_service:
+            self._docs_service.build_documentation(self)
         self._process_class(node)
 
     def _process_class(self, node: ast.ClassDef) -> None:
@@ -213,9 +215,6 @@ class TypeBuilder(ast.NodeTransformer):
         if method_schema.ReturnTypeFullName and not self._is_resolvable(method_schema.ReturnTypeFullName):
             return False
         return all(self._is_resolvable(param.get("Type")) for param in method_schema.Parameters or [])
-
-        if self._docs_service:
-            self._docs_service.build_documentation(self)
 
     def _reserved_names(self, base: set[str]) -> set[str]:
         """Base names plus every member the generated class already declares (incl. inherited)."""
@@ -637,92 +636,28 @@ class TypeBuilder(ast.NodeTransformer):
                 pos = i + 1
         return pos
 
-    @staticmethod
-    def _to_snake_case(name: str) -> str:
-        """Convert PascalCase or UpperCamelCase to snake_case."""
-        return to_snake_case(name, avoid_keywords=False)
-
-    @staticmethod
-    def _module_file(module_name: str) -> Optional[str]:
-        """The source file for a module, resolved without executing it."""
-        try:
-            spec = importlib.util.find_spec(module_name)
-        except (ImportError, ValueError):
-            return None
-        origin = getattr(spec, "origin", None)
-        return origin if origin and origin.endswith(".py") else None
-
-    def _resolve_type(self) -> Dict[str, str]:
-        type_info: Dict[str, str] = {}
-
-        module_name = self._resolver.strict_module_for(self._schema.FullName)
-        origin = self._module_file(module_name) if module_name else None
-        if origin is not None:
-            type_info["state"] = "attached"
-            type_info["file"] = origin
-            type_info["routed"] = "1"
-        else:
-            namespace = ".".join(self._schema.FullName.split(".")[:-1])
-            module_path = Router.from_options(self._context).module_for(self._schema.FullName)
-            output_base = self._context.output_path
-            file_stem = self._to_snake_case(self.client_type_name)
-            if module_path:
-                module_path, file_stem = descend_module(module_path, self.client_type_name, output_base)
-                file_dir = module_directory(module_path, output_base)
-            else:
-                file_dir = output_base
-            file_path = abspath(os.path.join(file_dir, file_stem + ".py"))
-            type_info["file"] = file_path
-            type_info["routed"] = "1" if module_path else ""
-            if not module_path:
-                type_info["state"] = "detached"
-                type_info["reason"] = f"no routing entry for namespace '{namespace}'"
-            elif os.path.exists(file_path):
-                # The routed file already exists but strict name resolution missed it
-                # (metadata/model name drift). Update it in place when the class matches;
-                # never overwrite a foreign file.
-                if self._file_defines_class(file_path, self.client_type_name):
-                    type_info["state"] = "attached"
-                else:
-                    type_info["state"] = "detached"
-                    type_info["routed"] = ""
-                    type_info["reason"] = f"target file exists without class '{self.client_type_name}'"
-            else:
-                type_info["state"] = "detached"
-        return type_info
-
-    @staticmethod
-    def _file_defines_class(path: str, class_name: str) -> bool:
-        try:
-            with open(path, encoding="utf-8") as f:
-                tree = ast.parse(f.read())
-        except (OSError, SyntaxError):
-            return False
-        return any(isinstance(node, ast.ClassDef) and node.name == class_name for node in tree.body)
-
     @property
     def skip_reason(self) -> str:
         """Why this type cannot be generated, or ``""`` when it can."""
-        return self._ensure_type_info().get("reason", "")
+        return self._ensure_placement().reason
 
-    def _ensure_type_info(self):
-        if self._type_info is None:
-            self._type_info = self._resolve_type()
-        assert self._type_info is not None
-        return self._type_info
+    def _ensure_placement(self) -> Placement:
+        if self._placement is None:
+            self._placement = self._planner.plan(self._schema.FullName, self._schema.IsValueObject or False)
+        return self._placement
 
     @property
     def state(self):
-        return self._ensure_type_info()["state"]
+        return self._ensure_placement().state
 
     @property
     def routed(self) -> bool:
         """Whether a new (detached) type maps to a routed package (not the output root)."""
-        return bool(self._ensure_type_info().get("routed"))
+        return self._ensure_placement().routed
 
     @property
     def file(self):
-        return self._ensure_type_info()["file"]
+        return self._ensure_placement().file
 
     @property
     def status(self):
