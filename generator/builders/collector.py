@@ -5,6 +5,7 @@ import inspect
 from typing import TYPE_CHECKING, ClassVar
 
 from generator.builders.references import ParameterType
+from generator.odata.type_system import strip_collection
 
 if TYPE_CHECKING:
     from generator.builders.property import PropertyBuilder
@@ -142,14 +143,14 @@ class TypeReferenceCollector:
                 self._type_checking[context_type] = module
         self.add("FunctionQuery" if schema.Kind == "function" else "ServiceOperationQuery")
         if schema.ReturnTypeFullName:
-            self._add_python_type(method.return_annotation)
+            self._add_python_type(method.return_annotation, schema.ReturnTypeFullName)
         elif not schema.IsStatic:
             self.add("Self")
         for param in schema.Parameters or []:
             type_name = param.get("Type")
             if type_name:
                 param_type = ParameterType(str(type_name))
-                self._add_python_type(param_type.annotation)
+                self._add_python_type(param_type.annotation, str(type_name))
                 if param_type.wrapper:
                     self.add(param_type.wrapper)
 
@@ -162,15 +163,20 @@ class TypeReferenceCollector:
         mod = inspect.getmodule(cls) if cls is not None else None
         return mod.__name__ if mod is not None else None
 
-    def _add_python_type(self, type_name: str) -> None:
-        """Add an annotation type reference (custom types go under ``TYPE_CHECKING``)."""
+    def _add_python_type(self, type_name: str, odata_name: str | None = None) -> None:
+        """Add an annotation type reference (custom types go under ``TYPE_CHECKING``).
+
+        ``odata_name`` (when known) is what resolves the defining module: the
+        Python annotation has already lost the OData namespace, so a type planned
+        in this run could not be resolved from its short name alone.
+        """
         if "[" in type_name and type_name.endswith("]"):
-            self._add_python_type(type_name.split("[", 1)[1][:-1])
+            self._add_python_type(type_name.split("[", 1)[1][:-1], strip_collection(odata_name))
         base_name = type_name.split("[", maxsplit=1)[0]
         self.add(base_name)
         if base_name in self.KNOWN or base_name in self.OPTIONAL_TYPES:
             return
-        module = self._module_for(base_name, base_name)
+        module = self._module_for(odata_name or base_name, base_name)
         if module:
             self._type_checking[base_name] = module
 
