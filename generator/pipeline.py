@@ -115,8 +115,7 @@ class GeneratorPipeline:
                 if self._filter.should_skip(name, schema, self._checkpoint.processed):
                     continue
             builder = TypeBuilder(schema, self._builder_options, self._docs)
-            if not builder.routed:
-                # A new type with no routing entry would land at the output root.
+            if builder.skip_reason:
                 unrouted.append(name)
                 self._checkpoint.add(name, persist=False)
                 continue
@@ -189,6 +188,6 @@ class GeneratorPipeline:
             f"skipped: {skipped_new} new (update-only), {len(unrouted)} unrouted"
         )
         if unrouted:
-            print("  Unrouted types need a [routing] entry (first 15):")
+            print("  Skipped types (first 15):")
             for name in unrouted[:15]:
                 print(f"    {name}")

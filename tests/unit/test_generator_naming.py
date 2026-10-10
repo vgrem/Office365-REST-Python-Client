@@ -42,6 +42,8 @@ from generator.builders.naming import to_snake_case
         ("getSharePointUrl", "get_sharepoint_url"),
         ("OneDriveForBusiness", "onedrive_for_business"),
         ("enableOneNote", "enable_onenote"),
+        ("ExpirationDateTime", "expiration_datetime"),
+        ("CreatedDateTime", "created_datetime"),
     ],
 )
 def test_to_snake_case(name: str, expected: str):

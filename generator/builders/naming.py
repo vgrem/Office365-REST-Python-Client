@@ -4,8 +4,8 @@ import builtins
 import keyword
 import re
 
-#: Product names that are one word when snake-cased (``SharePoint`` -> ``sharepoint``).
-_COMPOUND_WORDS = ("SharePoint", "OneDrive", "OneNote")
+#: Product/compound names kept as one word when snake-cased (``SharePoint`` -> ``sharepoint``).
+_COMPOUND_WORDS = ("SharePoint", "OneDrive", "OneNote", "DateTime")
 
 
 def _protect_compounds(name: str) -> str:

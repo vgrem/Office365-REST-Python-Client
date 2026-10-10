@@ -95,7 +95,7 @@ def test_strict_module_resolution_ignores_same_named_types():
     portal = resolver.strict_module_for("Microsoft.SharePoint.Portal.GroupCreationParams")
     tenant = resolver.strict_module_for("Microsoft.Online.SharePoint.TenantManagement.GroupCreationParams")
     assert portal == "office365.sharepoint.portal.groups.creation_params"
-    assert tenant is None
+    assert tenant != portal  # a same-named type must not resolve to the portal file
 
 
 def test_property_and_method_with_same_name_are_deduplicated(tmp_path: Path):

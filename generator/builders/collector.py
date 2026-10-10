@@ -131,7 +131,12 @@ class TypeReferenceCollector:
         """Track imports required by a generated operation method."""
         schema = method.schema
         if schema.IsStatic:
-            self.add(context_type)
+            # The context type is only used in the annotation (the body uses the
+            # ``context`` parameter), so importing it must not run at module load
+            # — that would create client_context <-> utilities cycles.
+            module = self.KNOWN.get(context_type)
+            if module:
+                self._type_checking[context_type] = module
         self.add("FunctionQuery" if schema.Kind == "function" else "ServiceOperationQuery")
         if schema.ReturnTypeFullName:
             self._add_python_type(method.return_annotation)

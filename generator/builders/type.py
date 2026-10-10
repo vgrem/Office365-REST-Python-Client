@@ -835,11 +835,9 @@ class TypeBuilder(ast.NodeTransformer):
             type_info["file"] = origin
             type_info["routed"] = "1"
         else:
-            type_info["state"] = "detached"
             namespace = ".".join(self._schema.FullName.split(".")[:-1])
             module_path = self._route_to_namespace(namespace)
             output_base = self._options.get("output_path", self._options.get("outputpath", ""))
-            type_info["routed"] = "1" if module_path else ""
             if module_path:
                 if module_path.startswith("office365."):
                     relative_path = module_path[len("office365.") :]
@@ -852,12 +850,41 @@ class TypeBuilder(ast.NodeTransformer):
                     if sub_dir != base_suffix:
                         parts.append(sub_dir)
                 parts.append(self._to_snake_case(self.client_type_name) + ".py")
-                type_info["file"] = abspath(os.path.join(*parts))
+                file_path = abspath(os.path.join(*parts))
             else:
-                type_info["file"] = abspath(
-                    os.path.join(output_base, self._to_snake_case(self.client_type_name) + ".py")
-                )
+                file_path = abspath(os.path.join(output_base, self._to_snake_case(self.client_type_name) + ".py"))
+            type_info["file"] = file_path
+            type_info["routed"] = "1" if module_path else ""
+            if not module_path:
+                type_info["state"] = "detached"
+                type_info["reason"] = f"no routing entry for namespace '{namespace}'"
+            elif os.path.exists(file_path):
+                # The routed file already exists but strict name resolution missed it
+                # (metadata/model name drift). Update it in place when the class matches;
+                # never overwrite a foreign file.
+                if self._file_defines_class(file_path, self.client_type_name):
+                    type_info["state"] = "attached"
+                else:
+                    type_info["state"] = "detached"
+                    type_info["routed"] = ""
+                    type_info["reason"] = f"target file exists without class '{self.client_type_name}'"
+            else:
+                type_info["state"] = "detached"
         return type_info
+
+    @staticmethod
+    def _file_defines_class(path: str, class_name: str) -> bool:
+        try:
+            with open(path, encoding="utf-8") as f:
+                tree = ast.parse(f.read())
+        except (OSError, SyntaxError):
+            return False
+        return any(isinstance(node, ast.ClassDef) and node.name == class_name for node in tree.body)
+
+    @property
+    def skip_reason(self) -> str:
+        """Why this type cannot be generated, or ``""`` when it can."""
+        return self._ensure_type_info().get("reason", "")
 
     def _route_to_namespace(self, namespace: str) -> str:
         """Map OData namespace to Python module path using routing table.

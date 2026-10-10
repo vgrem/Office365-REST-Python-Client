@@ -27,6 +27,10 @@ class _FakeBuilder:
     def routed(self) -> bool:
         return True
 
+    @property
+    def skip_reason(self) -> str:
+        return ""
+
     def build(self) -> None:
         type(self).built.append(self._schema.FullName)
 
