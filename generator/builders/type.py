@@ -176,6 +176,7 @@ class TypeBuilder(ast.NodeTransformer):
         self._rendered: Optional[str] = None
         self._uses_field = False
         self._added_props: List[PropertyBuilder] = []
+        self._cyclic_types: set[str] = set((options or {}).get("cyclic_types", ()))
         self._resolver = resolver or TypeRegistry(
             (options or {}).get("modules", "").split(","),
             namespace=(options or {}).get("namespace", ""),
@@ -253,6 +254,7 @@ class TypeBuilder(ast.NodeTransformer):
             if not self._is_resolvable(prop_schema.TypeName):
                 continue
             self._properties.append(PropertyBuilder(prop_schema, resolver=self._resolver))
+            self._properties[-1].cyclic = ODataType.strip_collection(prop_schema.TypeName or "") in self._cyclic_types
             seen_props.add(snake)
 
         self._members = [MemberBuilder(member_schema) for _, member_schema in self._schema.Members.items()]
@@ -557,8 +559,16 @@ class TypeBuilder(ast.NodeTransformer):
         else:
             default = prop.build_default_value()
 
-            # Resolve enum types to use first member as default instead of EnumType()
-            if self._options and not prop.is_collection_type:
+            if prop.cyclic:
+                # Cyclic reference: default to None (import under TYPE_CHECKING).
+                default = ast.Constant(value=None)
+                annotation = ast.BinOp(
+                    left=ast.Name(id=prop_type, ctx=ast.Load()),
+                    op=ast.BitOr(),
+                    right=ast.Constant(value=None),
+                )
+            elif self._options and not prop.is_collection_type:
+                # Resolve enum types to use first member as default instead of EnumType()
                 resolved = prop.resolve_client_type()
                 if resolved is not None and inspect.isclass(resolved):
                     if issubclass(resolved, Enum):

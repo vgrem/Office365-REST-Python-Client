@@ -37,6 +37,7 @@ class PropertyBuilder:
         self.schema = schema
         self.status = status
         self.docstring: Optional[str] = None
+        self.cyclic = False
         self._resolver = resolver
 
     def build(self, template: TemplateContext) -> List[ast.stmt]:
@@ -178,18 +179,22 @@ class PropertyBuilder:
     def is_object_type(self) -> bool:
         return self.schema.IsNavigation or False
 
-    def uses_factory_default(self) -> bool:
-        """Whether a dataclass default constructs the property's type at runtime.
+    def needs_runtime_import(self) -> bool:
+        """Whether a dataclass field references its type at run time.
 
-        Complex values use ``field(default_factory=X)`` (and non-primitive
-        collections a wrapping lambda), so ``X`` must be imported at runtime.
-        Entities need a context and default to ``None`` instead.
+        Complex values use ``field(default_factory=X)`` and enums ``X.member``
+        (both evaluated when the class is built); entities default to ``None``.
         """
+        from enum import Enum
+
+        if self.cyclic:
+            # A cyclic reference must not be imported/constructed at module load.
+            return False
         if self.is_collection_type:
             return not ODataType.is_primitive_name(self.schema.TypeName)
         if ODataType.is_primitive_name(self.schema.TypeName):
             return False
         resolved = self.resolve_client_type()
-        if resolved is None:
+        if resolved is None or not inspect.isclass(resolved):
             return True  # unknown type is treated as a complex value -> factory default
-        return inspect.isclass(resolved) and issubclass(resolved, ClientValue)
+        return issubclass(resolved, (ClientValue, Enum))

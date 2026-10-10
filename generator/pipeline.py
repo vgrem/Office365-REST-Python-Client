@@ -12,6 +12,7 @@ from generator.builders.type import TypeBuilder
 from generator.builders.type_registry import TypeRegistry
 from generator.checkpoint import Checkpoint, checkpoint_path
 from generator.config import GeneratorOptions
+from generator.cycles import find_cyclic_types
 from generator.documentation.base import DocumentationProvider
 from generator.filters import TypeFilter
 from generator.manifest import (
@@ -113,6 +114,7 @@ class GeneratorPipeline:
                 type_modules[name] = module
         self._builder_options["known_types"] = known_types
         self._builder_options["type_modules"] = type_modules
+        self._builder_options["cyclic_types"] = find_cyclic_types(model, known_types)
         self._checkpoint = Checkpoint(checkpoint_path(options.metadata_path, base_dir))
         self._output_root = Path(options.output_path).resolve()
 

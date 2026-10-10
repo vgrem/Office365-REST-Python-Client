@@ -92,7 +92,7 @@ class TypeReferenceCollector:
         """
         if prop.is_object_type:
             return
-        runtime = self.needs_dataclass and prop.uses_factory_default()
+        runtime = self.needs_dataclass and prop.needs_runtime_import()
         if prop.is_collection_type:
             if prop.client_type_name.startswith("EntityCollection"):
                 self.add("EntityCollection")

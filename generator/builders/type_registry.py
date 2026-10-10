@@ -350,7 +350,7 @@ def _resolve_cached(target_name: str, modules: Tuple[str, ...]) -> Optional[Type
                     found = _search_module(module_name + "." + name)
                     if found:
                         return found
-        except (ImportError, AttributeError):
+        except Exception:  # a broken/cyclic module must not block resolution
             pass
         return None
 
