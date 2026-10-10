@@ -15,12 +15,18 @@ from typing_extensions import Self
 
 from generator.builders.collector import TypeReferenceCollector
 from generator.builders.context import BuilderContext
+from generator.builders.imports import (
+    class_name_collides_with_import,
+    drop_unused_type_checking,
+    existing_import_names,
+    install_imports,
+)
 from generator.builders.member import MemberBuilder
 from generator.builders.method import MethodBuilder
 from generator.builders.naming import to_snake_case
 from generator.builders.property import PropertyBuilder
 from generator.builders.render import normalize_quotes, ruff_normalize
-from generator.builders.source_editor import SourceEditor, is_type_checking, suppress_long_imports
+from generator.builders.source_editor import SourceEditor, suppress_long_imports
 from generator.builders.template_context import TemplateContext
 from generator.builders.type_registry import TypeRegistry, python_name
 from generator.documentation.base import DocumentationProvider
@@ -269,7 +275,9 @@ class TypeBuilder(ast.NodeTransformer):
         self._process(self._source_tree)
         self._build_imports(self._source_tree)
 
-        if self._status in {"created", "updated"} and self._class_name_collides_with_import(self._source_tree):
+        if self._status in {"created", "updated"} and class_name_collides_with_import(
+            self._source_tree, self.client_type_name
+        ):
             print(f"  Skipping {self.client_type_name}: name collides with an imported type")
             self._status = None
 
@@ -277,17 +285,8 @@ class TypeBuilder(ast.NodeTransformer):
             self._status = None
         return self
 
-    def _class_name_collides_with_import(self, module: ast.Module) -> bool:
-        """True when the class name shadows an imported name (e.g. ``StringCollection``)."""
-        for node in module.body:
-            if isinstance(node, (ast.Import, ast.ImportFrom)):
-                for alias in node.names:
-                    if alias.asname is None and alias.name == self.client_type_name:
-                        return True
-        return False
-
-    def _build_imports(self, module: ast.Module):
-        """Build missing imports using TypeReferenceCollector (deduplicated)."""
+    def _build_imports(self, module: ast.Module) -> None:
+        """Insert the imports the added members need (deduplicated)."""
         assert self._template is not None
         collector = TypeReferenceCollector(self._resolver)
         collector.needs_dataclass = self._schema.BaseTypeFullName == "ComplexType" and bool(self._added_props)
@@ -304,73 +303,17 @@ class TypeBuilder(ast.NodeTransformer):
             if prop.is_object_type:
                 collector.add_object_type(prop)
 
-        context_type = self._context.context_type
         if self._generate_methods_enabled():
             for method in self._methods:
                 if method.status != "attached":
-                    collector.add_method(method, context_type)
+                    collector.add_method(method, self._context.context_type)
 
-        existing = self._existing_import_names(module)
+        existing = existing_import_names(module)
         insert_index = len([n for n in module.body if isinstance(n, (ast.Import, ast.ImportFrom))])
-        for imp in self._template.build_references(collector):
-            if self._insert_import(module, imp, existing, insert_index):
-                insert_index += 1
-                self._added_imports.append(imp)
-        self._drop_unused_type_checking(module)
-
-    def _drop_unused_type_checking(self, module: ast.Module) -> None:
-        """Drop a ``TYPE_CHECKING`` import when its block was deduplicated away."""
-        if any(isinstance(n, ast.If) and is_type_checking(n) for n in module.body):
-            return
-        for node in module.body:
-            if isinstance(node, ast.ImportFrom) and node.module == "typing":
-                node.names = [alias for alias in node.names if alias.name != "TYPE_CHECKING"]
-        module.body = [
-            n for n in module.body if not (isinstance(n, ast.ImportFrom) and n.module == "typing" and not n.names)
-        ]
-        kept = {id(n) for n in module.body}
-        self._added_imports = [imp for imp in self._added_imports if id(imp) in kept]
-
-    def _insert_import(self, module: ast.Module, imp: ast.stmt, existing: set, index: int) -> bool:
-        """Insert an import (or ``TYPE_CHECKING`` block) with only the missing names."""
-        if isinstance(imp, ast.If):
-            body = []
-            for child in imp.body:
-                kept = [alias.name for alias in child.names if (child.module, alias.name) not in existing]
-                if kept:
-                    body.append(self._make_import(child.module, kept))
-                    existing.update((child.module, name) for name in kept)
-            if not body:
-                return False
-            imp.body = body
-        else:
-            kept_aliases = [alias for alias in imp.names if (imp.module, alias.asname or alias.name) not in existing]
-            if not kept_aliases:
-                return False
-            imp.names = [ast.alias(name=alias.name, asname=alias.asname) for alias in kept_aliases]
-            existing.update((imp.module, alias.asname or alias.name) for alias in kept_aliases)
-        module.body.insert(index, imp)
-        return True
-
-    @staticmethod
-    def _make_import(module_name: str, names: list) -> ast.ImportFrom:
-        return ast.ImportFrom(
-            module=module_name, names=[ast.alias(name=name, asname=None) for name in sorted(names)], level=0
+        self._added_imports.extend(
+            install_imports(module, self._template.build_references(collector), existing, insert_index)
         )
-
-    @staticmethod
-    def _existing_import_names(module: ast.Module) -> set:
-        names: set = set()
-        for node in module.body:
-            if isinstance(node, ast.ImportFrom):
-                names.update((node.module, alias.asname or alias.name) for alias in node.names)
-            elif isinstance(node, ast.Import):
-                names.update((alias.name, None) for alias in node.names)
-            elif isinstance(node, ast.If) and isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
-                for child in node.body:
-                    if isinstance(child, ast.ImportFrom):
-                        names.update((child.module, alias.asname or alias.name) for alias in child.names)
-        return names
+        self._added_imports = drop_unused_type_checking(module, self._added_imports)
 
     def _build_members(self, class_node: ast.ClassDef):
         if not self._members:
