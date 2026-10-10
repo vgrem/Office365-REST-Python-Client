@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from office365.directory.security.vulnerability_severity import VulnerabilitySeverity
 from office365.runtime.client_value import ClientValue
 
 
@@ -13,3 +14,5 @@ class CvssSummary(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.CvssSummary"
+
+    severity: VulnerabilitySeverity = VulnerabilitySeverity.none

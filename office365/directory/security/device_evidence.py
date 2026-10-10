@@ -5,6 +5,7 @@ from datetime import datetime
 
 from office365.directory.security.alerts.defenderavstatus import DefenderAvStatus
 from office365.directory.security.logged_on_user import LoggedOnUser
+from office365.directory.security.onboarding_status import OnboardingStatus
 from office365.directory.security.resource_access_event import ResourceAccessEvent
 from office365.directory.security.riskscore import DeviceRiskScore
 from office365.directory.security.vm_metadata import VmMetadata
@@ -45,3 +46,5 @@ class DeviceEvidence(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.DeviceEvidence"
+
+    onboardingStatus: OnboardingStatus = OnboardingStatus.insufficientInfo
