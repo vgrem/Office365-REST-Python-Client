@@ -12,3 +12,5 @@ class ErrorCorrectionLevel(Enum):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ErrorCorrectionLevel"
+
+    l_ = "1"

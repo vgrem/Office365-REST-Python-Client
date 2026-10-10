@@ -16,3 +16,5 @@ class ExchangeMessageTraceStatus(Enum):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ExchangeMessageTraceStatus"
+
+    recalled = "9"

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 
 
@@ -19,3 +21,5 @@ class DlpAction(Enum):
     @property
     def entity_type_name(self):
         return "microsoft.graph.DlpAction"
+
+    policyTip = "13"

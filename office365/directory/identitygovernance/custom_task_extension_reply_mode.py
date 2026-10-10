@@ -1,0 +1,14 @@
+from __future__ import annotations
+
+from enum import Enum
+
+
+class CustomTaskExtensionReplyMode(Enum):
+    none = "0"
+    callback = "1"
+    response = "2"
+    unknownFutureValue = "3"
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.identityGovernance.CustomTaskExtensionReplyMode"

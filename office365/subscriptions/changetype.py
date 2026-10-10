@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 
 
@@ -9,3 +11,5 @@ class ChangeType(Enum):
     @property
     def entity_type_name(self):
         return "microsoft.graph.ChangeType"
+
+    unknownFutureValue = "3"

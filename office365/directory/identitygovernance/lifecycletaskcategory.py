@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 
 
@@ -10,3 +12,5 @@ class LifecycleTaskCategory(Enum):
     @property
     def entity_type_name(self):
         return "microsoft.graph.identityGovernance.LifecycleTaskCategory"
+
+    extensibility = "16"

@@ -12,3 +12,5 @@ class RetrievalDataSource(Enum):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.RetrievalDataSource"
+
+    sharePointEmbedded = "4"

@@ -15,3 +15,5 @@ class FileStorageContainerTypeSettingsOverride(Enum):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.FileStorageContainerTypeSettingsOverride"
+
+    isOfficeRestricted = "7"

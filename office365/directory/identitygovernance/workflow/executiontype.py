@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 
 
@@ -11,3 +13,5 @@ class WorkflowExecutionType(Enum):
     @property
     def entity_type_name(self):
         return "microsoft.graph.identityGovernance.WorkflowExecutionType"
+
+    extensibilityOnDemand = "5"

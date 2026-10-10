@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from office365.directory.identitygovernance.entitlementmanagement.accesspackage.accesstype import (
     AccessType,
 )
+from office365.externalconnectors.acl_type import AclType
 from office365.runtime.client_value import ClientValue
 
 
@@ -16,3 +17,5 @@ class Acl(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.externalConnectors.Acl"
+
+    type: AclType = AclType.user

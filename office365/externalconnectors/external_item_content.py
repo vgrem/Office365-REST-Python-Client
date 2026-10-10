@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from office365.externalconnectors.external_item_content_type import (
+    ExternalItemContentType,
+)
 from office365.runtime.client_value import ClientValue
 
 
@@ -12,3 +15,5 @@ class ExternalItemContent(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.externalConnectors.ExternalItemContent"
+
+    type: ExternalItemContentType = ExternalItemContentType.text

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from office365.directory.identitygovernance.accessreview.reviewer_scope_type import (
+    AccessReviewReviewerScopeType,
+)
 from office365.runtime.client_value import ClientValue
 
 
@@ -15,3 +18,5 @@ class AccessReviewReviewerScope(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessReviewReviewerScope"
+
+    scopeType: AccessReviewReviewerScopeType = AccessReviewReviewerScopeType.user

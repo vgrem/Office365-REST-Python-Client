@@ -9,6 +9,8 @@ from office365.communications.callrecords.network_transport_protocol import (
     NetworkTransportProtocol,
 )
 from office365.communications.callrecords.trace_route_hop import TraceRouteHop
+from office365.communications.callrecords.wifi_band import WifiBand
+from office365.communications.callrecords.wifi_radio_type import WifiRadioType
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 
@@ -45,3 +47,7 @@ class NetworkInfo(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.callRecords.NetworkInfo"
+
+    wifiBand: WifiBand = WifiBand.unknown
+
+    wifiRadioType: WifiRadioType = WifiRadioType.unknown

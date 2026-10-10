@@ -6,6 +6,7 @@ context_type: GraphClient
 generate_methods: false
 include_base_types:
   - ComplexType
+  - EnumType
 filters:
   ignored_types:
     - microsoft.graph.EntityType
