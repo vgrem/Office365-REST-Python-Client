@@ -7,7 +7,8 @@ import re
 from generator.odata.type_system import is_collection_name, primitive_type_for, strip_collection
 
 #: Product/compound names kept as one word when snake-cased (``SharePoint`` -> ``sharepoint``).
-_COMPOUND_WORDS = ("SharePoint", "OneDrive", "OneNote", "DateTime")
+#: ``DateTime`` is *not* here: the library convention is ``created_date_time``.
+_COMPOUND_WORDS = ("SharePoint", "OneDrive", "OneNote")
 
 
 def _protect_compounds(name: str) -> str:
@@ -48,6 +49,15 @@ def to_snake_case(name: str, avoid_keywords: bool = True, avoid_builtins: bool =
     if avoid_builtins and hasattr(builtins, snake_case):
         return snake_case + "_"
     return snake_case
+
+
+def normalize_member_key(name: str) -> str:
+    """A separator-insensitive key for member de-duplication.
+
+    ``created_date_time`` and ``created_datetime`` share a key, while the leading
+    and trailing underscores of names like ``__class__`` are preserved.
+    """
+    return re.sub(r"(?<=\w)_(?=\w)", "", name)
 
 
 def python_name(type_name: str | None, is_object_type: bool = False) -> str:

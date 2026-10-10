@@ -134,7 +134,7 @@ class MethodBuilder:
 
     @property
     def name(self) -> str:
-        return to_snake_case(self.schema.Name or "", avoid_builtins=True)
+        return to_snake_case(self.schema.Name or "", avoid_builtins=False)
 
     def _param_name(self, param: dict) -> str:
         return to_snake_case(param.get("Name") or "arg", avoid_builtins=True)

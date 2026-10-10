@@ -21,7 +21,7 @@ from generator.builders.imports import (
 )
 from generator.builders.member import MemberBuilder
 from generator.builders.method import MethodBuilder
-from generator.builders.naming import python_name, to_snake_case
+from generator.builders.naming import normalize_member_key, python_name, to_snake_case
 from generator.builders.placement import Placement, TypePlanner
 from generator.builders.property import PropertyBuilder
 from generator.builders.render import normalize_quotes, ruff_normalize
@@ -40,6 +40,7 @@ _RESERVED_METHOD_NAMES = (
 
 # Base model members that generated properties must not shadow (e.g. ``ResourcePath`` -> ``resource_path``).
 _RESERVED_PROPERTY_NAMES = {name for name in dir(ClientObject)} | {name for name in dir(ClientValue)}
+
 
 #: Bound operations with more parameters than this are skipped (unusable, and
 #: they exceed the linter's ``max-args``).
@@ -63,6 +64,7 @@ class TypeBuilder(ast.NodeTransformer):
         self._placement: Optional[Placement] = None
         self._source_tree: Optional[Module] = None
         self._status: Optional[str] = None
+        self._kind: Optional[str] = None
         self._properties: List[PropertyBuilder] = []
         self._members: List[MemberBuilder] = []
         self._methods: List[MethodBuilder] = []
@@ -116,6 +118,7 @@ class TypeBuilder(ast.NodeTransformer):
         self.generic_visit(node)
 
         kind = self._effective_kind(node)
+        self._kind = kind
         if kind == "ComplexType":
             self._build_value_properties(node)
         elif kind == "EnumType":
@@ -148,7 +151,7 @@ class TypeBuilder(ast.NodeTransformer):
         can expose both a property and a bound function with the same name (e.g.
         ``Settings``), which would otherwise generate two identical members.
         """
-        reserved_props = self._reserved_names(_RESERVED_PROPERTY_NAMES)
+        reserved_props = {normalize_member_key(name) for name in self._reserved_names(_RESERVED_PROPERTY_NAMES)}
         ignored_properties = set(self._context.ignored_properties)
         self._properties = []
         seen_props: set[str] = set()
@@ -158,31 +161,35 @@ class TypeBuilder(ast.NodeTransformer):
             self._field_alias = "field_"
         for name, prop_schema in self._schema.Properties.items():
             snake = to_snake_case(name)
-            if name in ignored_properties or snake in reserved_props or snake in seen_props:
+            member_key = normalize_member_key(snake)
+            if name in ignored_properties or member_key in reserved_props or member_key in seen_props:
                 continue
             if not self._is_resolvable(prop_schema.TypeName):
                 continue
             self._properties.append(PropertyBuilder(prop_schema, resolver=self._resolver))
             self._properties[-1].cyclic = prop_schema.type_ref.text in self._cyclic_types
             self._properties[-1].field_alias = self._field_alias
-            seen_props.add(snake)
+            seen_props.add(member_key)
 
         self._members = [MemberBuilder(member_schema) for _, member_schema in self._schema.Members.items()]
 
         ignored_methods = set(self._context.ignored_methods)
-        reserved_methods = self._reserved_names(_RESERVED_METHOD_NAMES) | seen_props
+        reserved_methods = {
+            normalize_member_key(name) for name in self._reserved_names(_RESERVED_METHOD_NAMES)
+        } | seen_props
         self._methods = []
         seen_methods: set[str] = set()
         for method_name, method_schema in self._schema.Methods.items():
-            snake = to_snake_case(method_name, avoid_builtins=True)
-            if method_name in ignored_methods or snake in reserved_methods or snake in seen_methods:
+            snake = to_snake_case(method_name, avoid_builtins=False)
+            method_key = normalize_member_key(snake)
+            if method_name in ignored_methods or method_key in reserved_methods or method_key in seen_methods:
                 continue
             if len(method_schema.Parameters or []) > _MAX_METHOD_PARAMS:
                 continue
             if not self._method_is_resolvable(method_schema):
                 continue
             self._methods.append(MethodBuilder(method_schema, resolver=self._resolver))
-            seen_methods.add(snake)
+            seen_methods.add(method_key)
 
     def _is_resolvable(self, type_name: Optional[str]) -> bool:
         """Whether a referenced OData type can be imported.
@@ -296,7 +303,7 @@ class TypeBuilder(ast.NodeTransformer):
         """Insert the imports the added members need (deduplicated)."""
         assert self._template is not None
         collector = TypeReferenceCollector(self._resolver)
-        collector.needs_dataclass = self._schema.BaseTypeFullName == "ComplexType" and bool(self._added_props)
+        collector.needs_dataclass = self._kind == "ComplexType" and bool(self._added_props)
         collector.needs_field = self._uses_field
         collector.field_alias = self._field_alias
 

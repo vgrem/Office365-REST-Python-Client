@@ -59,6 +59,9 @@ class PropertyBuilder:
         """
         if self._resolver is None:
             return None
+        if not self.is_collection_type and self.type_ref.is_primitive:
+            # A primitive getter returns None; nothing is constructed at runtime.
+            return None
         name = self.client_item_type_name if self.is_collection_type else self.client_type_name
         if not name or name in _SCALAR_TYPE_NAMES:
             return None
