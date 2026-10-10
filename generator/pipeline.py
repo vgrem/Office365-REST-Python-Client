@@ -59,7 +59,12 @@ def semantic_issues(source: str, filename: str) -> list[str]:
 
 
 class GeneratorPipeline:
-    """Runs one generation pass over an :class:`ODataModel`."""
+    """Runs one generation pass over an :class:`ODataModel`.
+
+    The pass is *plan-then-commit*: every in-scope type is built and validated
+    in memory first, and files are written only after the whole pass succeeds.
+    A failure therefore never leaves a partially updated tree.
+    """
 
     def __init__(
         self,
@@ -82,17 +87,22 @@ class GeneratorPipeline:
             name for name, schema in model.types.items() if self._filter.in_scope(name, schema)
         }
         self._checkpoint = Checkpoint(checkpoint_path(options.metadata_path, base_dir))
+        self._output_root = Path(options.output_path).resolve()
 
     def run(self) -> None:
-        """Generate every in-scope type, then drop the checkpoint on success."""
+        """Build, validate and (unless dry-run) commit every in-scope type."""
         targeted = bool(self._only_types)
         total = len(self._only_types) if targeted else len(self._model.types)
         if not targeted:
             self._skip_start_at_count()
         else:
             self._warn_unknown_types()
+
         count = 0 if targeted else len(self._checkpoint.processed)
         skipped_new = 0
+        unrouted: list[str] = []
+        planned: list[tuple[str, TypeBuilder]] = []
+
         for name in self._model.types:
             schema = self._model.types[name]
             if targeted:
@@ -105,16 +115,25 @@ class GeneratorPipeline:
                 if self._filter.should_skip(name, schema, self._checkpoint.processed):
                     continue
             builder = TypeBuilder(schema, self._builder_options, self._docs)
+            if not builder.routed:
+                # A new type with no routing entry would land at the output root.
+                unrouted.append(name)
+                self._checkpoint.add(name, persist=False)
+                continue
             if self._update_only and builder.state != "attached":
                 skipped_new += 1
                 self._checkpoint.add(name, persist=False)
                 continue
             count += 1
             print(f"[{count}/{total}] Processing: {name}")
-            self._process(name, builder)
-        if skipped_new:
-            print(f"  Skipped {skipped_new} new type(s) (update-only)")
+            self._build(name, builder)
+            if builder.status in {"created", "updated"}:
+                planned.append((name, builder))
+            self._checkpoint.add(name, persist=False)
+
+        self._commit(planned)
         self._checkpoint.clear()
+        self._print_summary(planned, skipped_new, unrouted)
 
     def _warn_unknown_types(self) -> None:
         missing = [name for name in self._only_types if name not in self._model.types]
@@ -129,8 +148,8 @@ class GeneratorPipeline:
             self._checkpoint.processed.add(name)
         print(f"  Skipping first {start_at} types (start_at={start_at})")
 
-    def _process(self, name: str, builder: TypeBuilder) -> None:
-        """Build, validate (before writing) and checkpoint a single type."""
+    def _build(self, name: str, builder: TypeBuilder) -> None:
+        """Build and validate a single type in memory (no write)."""
         try:
             builder.build()
             if builder.status in {"created", "updated"}:
@@ -138,12 +157,38 @@ class GeneratorPipeline:
                 issues = validate_source(source, builder.file) + semantic_issues(source, builder.file)
                 if issues:
                     raise ValidationError(f"{name}: " + "; ".join(issues))
-                if self._options.dry_run:
-                    print(f"  [dry-run] {builder.status}: {builder.file}")
-                else:
-                    builder.save()
-            self._checkpoint.add(name, persist=not self._options.dry_run)
         except Exception as e:
             print(f"Failed on {name}: {e}")
-            print(f"Checkpoint saved. Resume will skip {len(self._checkpoint.processed)} processed types")
             raise
+
+    def _commit(self, planned: list[tuple[str, TypeBuilder]]) -> None:
+        if self._options.dry_run:
+            for _, builder in planned:
+                print(f"  [dry-run] {builder.status}: {builder.file}")
+            return
+        for name, builder in planned:
+            if not self._within_output(builder.file):
+                raise ValidationError(f"{name}: refusing to write outside the output tree: {builder.file}")
+        for name, builder in planned:
+            builder.save()
+            self._checkpoint.add(name, persist=True)
+
+    def _within_output(self, path: str) -> bool:
+        try:
+            Path(path).resolve().relative_to(self._output_root)
+        except ValueError:
+            return False
+        return True
+
+    def _print_summary(self, planned, skipped_new: int, unrouted: list[str]) -> None:
+        created = sum(1 for _, builder in planned if builder.status == "created")
+        updated = sum(1 for _, builder in planned if builder.status == "updated")
+        prefix = "[dry-run] " if self._options.dry_run else ""
+        print(
+            f"\n{prefix}planned: {created} created, {updated} updated; "
+            f"skipped: {skipped_new} new (update-only), {len(unrouted)} unrouted"
+        )
+        if unrouted:
+            print("  Unrouted types need a [routing] entry (first 15):")
+            for name in unrouted[:15]:
+                print(f"    {name}")

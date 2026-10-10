@@ -54,20 +54,65 @@ def _is_datetime_class_import(imp: ast.stmt) -> bool:
     )
 
 
-class _DatetimeQualifier(ast.NodeTransformer):
-    """Qualify generated ``datetime`` references as ``datetime.datetime`` (module form)."""
+def _is_datetime_class_import(imp: ast.stmt) -> bool:
+    return (
+        isinstance(imp, ast.ImportFrom)
+        and imp.module == "datetime"
+        and any(alias.name == "datetime" for alias in imp.names)
+    )
+
+
+#: Annotation names that may also be bound as a module in the target file.
+_MODULE_QUALIFIED = ("datetime", "date", "time")
+
+
+def _module_bound_names(tree: ast.Module) -> set[str]:
+    """Names in ``{datetime, date, time}`` that the file imports as a module."""
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                base = alias.name.split(".")[0]
+                if base in _MODULE_QUALIFIED:
+                    names.add(base)
+    return names
+
+
+def _strip_module_names(imports: list[ast.stmt], names: set[str]) -> list[ast.stmt]:
+    """Drop ``from datetime import X`` names the file already binds as a module."""
+    result: list[ast.stmt] = []
+    for node in imports:
+        stripped = node
+        if isinstance(node, ast.ImportFrom) and node.module == "datetime":
+            kept = [alias for alias in node.names if alias.name not in names]
+            if not kept:
+                continue
+            stripped = ast.ImportFrom(module=node.module, names=kept, level=0)
+        result.append(stripped)
+    return result
+
+
+class _ModuleQualifier(ast.NodeTransformer):
+    """Qualify generated ``X`` references as ``X.X`` (module form)."""
+
+    def __init__(self, names: set[str]) -> None:
+        self._names = names
 
     def visit_Name(self, node: ast.Name):
-        if isinstance(node.ctx, ast.Load) and node.id == "datetime":
+        if isinstance(node.ctx, ast.Load) and node.id in self._names:
             return ast.copy_location(
-                ast.Attribute(value=ast.Name(id="datetime", ctx=ast.Load()), attr="datetime", ctx=ast.Load()),
+                ast.Attribute(value=ast.Name(id=node.id, ctx=ast.Load()), attr=node.id, ctx=ast.Load()),
                 node,
             )
         return node
 
 
+def _qualify_modules(node: ast.stmt, names: set[str]) -> ast.stmt:
+    return _ModuleQualifier(names).visit(copy.deepcopy(node))
+
+
 def _qualify_datetime(node: ast.stmt) -> ast.stmt:
-    return _DatetimeQualifier().visit(copy.deepcopy(node))
+    return _qualify_modules(node, {"datetime"})
 
 
 class TypeBuilder(ast.NodeTransformer):
@@ -529,11 +574,12 @@ class TypeBuilder(ast.NodeTransformer):
         members = list(self._added_members)
         imports = list(self._added_imports)
 
-        if self._uses_module_datetime(original_tree):
-            # The file binds ``datetime`` to the module (``import datetime``); keep
-            # that form and qualify generated references as ``datetime.datetime``.
-            imports = [imp for imp in imports if not _is_datetime_class_import(imp)]
-            members = [_qualify_datetime(node) for node in members]
+        module_names = _module_bound_names(original_tree)
+        if module_names:
+            # The file binds e.g. ``time``/``datetime`` to the module; keep that
+            # form and qualify generated references as ``<module>.<name>``.
+            imports = _strip_module_names(imports, module_names)
+            members = [_qualify_modules(node, module_names) for node in members]
 
         runtime_lines: list[str] = []
         type_checking_lines: list[str] = []
@@ -606,10 +652,7 @@ class TypeBuilder(ast.NodeTransformer):
 
     @staticmethod
     def _uses_module_datetime(tree: ast.Module) -> bool:
-        return any(
-            isinstance(node, ast.Import) and any(alias.name == "datetime" for alias in node.names)
-            for node in ast.walk(tree)
-        )
+        return bool(_module_bound_names(tree))
 
     def save(self):
         code = self.render()
@@ -686,16 +729,18 @@ class TypeBuilder(ast.NodeTransformer):
         type_info: Dict[str, str] = {}
 
         assert self._options is not None
-        module_name = self._resolver.module_for(self._schema.FullName)
+        module_name = self._resolver.strict_module_for(self._schema.FullName)
         origin = self._module_file(module_name) if module_name else None
         if origin is not None:
             type_info["state"] = "attached"
             type_info["file"] = origin
+            type_info["routed"] = "1"
         else:
             type_info["state"] = "detached"
             namespace = ".".join(self._schema.FullName.split(".")[:-1])
             module_path = self._route_to_namespace(namespace)
             output_base = self._options.get("output_path", self._options.get("outputpath", ""))
+            type_info["routed"] = "1" if module_path else ""
             if module_path:
                 if module_path.startswith("office365."):
                     relative_path = module_path[len("office365.") :]
@@ -749,6 +794,11 @@ class TypeBuilder(ast.NodeTransformer):
     @property
     def state(self):
         return self._ensure_type_info()["state"]
+
+    @property
+    def routed(self) -> bool:
+        """Whether a new (detached) type maps to a routed package (not the output root)."""
+        return bool(self._ensure_type_info().get("routed"))
 
     @property
     def file(self):

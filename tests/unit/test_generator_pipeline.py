@@ -23,6 +23,10 @@ class _FakeBuilder:
     def state(self) -> str:
         return "attached" if self._schema.FullName.startswith("SP.Existing") else "detached"
 
+    @property
+    def routed(self) -> bool:
+        return True
+
     def build(self) -> None:
         type(self).built.append(self._schema.FullName)
 

@@ -288,6 +288,17 @@ class TypeRegistry:
         mod = inspect.getmodule(cls) if cls is not None else None
         return mod.__name__ if mod is not None else None
 
+    def strict_module_for(self, type_name: str | None) -> Optional[str]:
+        """Like :meth:`module_for`, but without the import-based bare-name fallback.
+
+        Used for update decisions: a wrong match makes the generator write into a
+        file it does not own (e.g. an OData ``StringCollection`` resolving to a
+        hand-written runtime module).
+        """
+        if not type_name:
+            return None
+        return self._index.resolve_module(type_name)
+
     def members_of(self, type_name: str | None) -> set[str]:
         """Member names a class already has (incl. inherited), purely from AST."""
         if not type_name:
