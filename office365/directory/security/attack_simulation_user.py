@@ -13,3 +13,5 @@ class AttackSimulationUser(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AttackSimulationUser"
+
+    email: str | None = None

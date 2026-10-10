@@ -12,3 +12,5 @@ class Identity(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.search.Identity"
+
+    id: str | None = None
