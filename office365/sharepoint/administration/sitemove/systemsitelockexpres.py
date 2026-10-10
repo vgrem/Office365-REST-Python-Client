@@ -10,3 +10,11 @@ from office365.runtime.client_value import ClientValue
 class SystemSiteLockExpirationResult(ClientValue):
     Error: int | None = None
     Expiration: datetime | None = field(default_factory=lambda: datetime.min)
+
+    DatabaseNowUtc: datetime | None = None
+
+    ExistingExpirationUtc: datetime | None = None
+
+    ExistingFirstAcquiredUtc: datetime | None = None
+
+    ExistingLockRequestor: str | None = None

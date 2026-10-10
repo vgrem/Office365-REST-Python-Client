@@ -20,3 +20,5 @@ class NavigationNodeCreationInformation(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "SP.NavigationNode"
+
+    ExpectedParentContainerId: int | None = None

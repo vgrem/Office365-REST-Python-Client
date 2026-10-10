@@ -29,3 +29,5 @@ class SPOM365AgentInsightsM365AgentsOnSitesDetails(ClientValue):
     @property
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.TenantAdministration.SPOM365AgentInsightsM365AgentsOnSitesDetails"
+
+    Operations: str | None = None

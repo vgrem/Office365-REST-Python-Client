@@ -214,6 +214,9 @@ if TYPE_CHECKING:
     from office365.sharepoint.tenant.administration.listitemcolumnvalue import (
         TenantAdminListItemColumnValue,
     )
+    from office365.sharepoint.tenant.administration.onedrives_summary_metrics import (
+        OneDrivesSummaryMetrics,
+    )
     from office365.sharepoint.tenant.administration.policies.list_parameters import (
         SPOListParameters,
     )
@@ -6902,3 +6905,8 @@ class Tenant(Entity):
         )
         self.context.add_query(qry)
         return self
+
+    @property
+    def onedrives_summary_metrics_data(self) -> Optional[OneDrivesSummaryMetrics]:
+        """Gets the OneDrivesSummaryMetricsData property"""
+        return self.properties.get("OneDrivesSummaryMetricsData", None)

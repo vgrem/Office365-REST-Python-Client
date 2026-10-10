@@ -6,6 +6,7 @@ context_type: ClientContext
 generate_methods: true
 include_base_types:
   - EntityType
+  - ComplexType
 namespace: SP
 filters:
   ignored_types:
@@ -40,3 +41,5 @@ routing:
   Microsoft.SharePoint.ContentSolution.API: office365.sharepoint.contentcenter
   Microsoft.SharePoint.Internal.ClientSideComponent: office365.sharepoint
   Microsoft.SharePoint.QuotaManagement.Consumer.Merlin.QuotaInfo: office365.sharepoint.tenant.administration
+  Microsoft.SharePoint.EmployeeEngagement: office365.sharepoint
+  Microsoft.SharePoint.Administration.TenantAdmin.OdbMetricsAggregation: office365.sharepoint.tenant.administration

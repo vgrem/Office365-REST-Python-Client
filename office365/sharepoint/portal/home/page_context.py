@@ -38,3 +38,5 @@ class SharePointHomePageContext(ClientValue):
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Portal.Home.SharePointHomePageContext"
+
+    CustomFormURL: str | None = None
