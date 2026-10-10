@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import ast
+import inspect
 from _ast import Assign, Call, Constant
 from typing import TYPE_CHECKING, List, Optional
 
+from office365.runtime.client_value import ClientValue
 from office365.runtime.odata.type import ODataType
 
 from generator.builders.naming import to_snake_case
@@ -175,3 +177,19 @@ class PropertyBuilder:
     @property
     def is_object_type(self) -> bool:
         return self.schema.IsNavigation or False
+
+    def uses_factory_default(self) -> bool:
+        """Whether a dataclass default constructs the property's type at runtime.
+
+        Complex values use ``field(default_factory=X)`` (and non-primitive
+        collections a wrapping lambda), so ``X`` must be imported at runtime.
+        Entities need a context and default to ``None`` instead.
+        """
+        if self.is_collection_type:
+            return not ODataType.is_primitive_name(self.schema.TypeName)
+        if ODataType.is_primitive_name(self.schema.TypeName):
+            return False
+        resolved = self.resolve_client_type()
+        if resolved is None:
+            return True  # unknown type is treated as a complex value -> factory default
+        return inspect.isclass(resolved) and issubclass(resolved, ClientValue)

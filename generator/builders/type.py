@@ -543,13 +543,23 @@ class TypeBuilder(ast.NodeTransformer):
             # Resolve enum types to use first member as default instead of EnumType()
             if self._options and not prop.is_collection_type:
                 resolved = prop.resolve_client_type()
-                if resolved is not None and inspect.isclass(resolved) and issubclass(resolved, Enum):
-                    members = list(resolved)
-                    if members:
-                        default = ast.Attribute(
-                            value=ast.Name(id=prop_type, ctx=ast.Load()),
-                            attr=members[0].name,
-                            ctx=ast.Load(),
+                if resolved is not None and inspect.isclass(resolved):
+                    if issubclass(resolved, Enum):
+                        members = list(resolved)
+                        if members:
+                            default = ast.Attribute(
+                                value=ast.Name(id=prop_type, ctx=ast.Load()),
+                                attr=members[0].name,
+                                ctx=ast.Load(),
+                            )
+                    elif not issubclass(resolved, ClientValue):
+                        # An entity needs a context, so it cannot be a zero-arg
+                        # default_factory; default to None and make it optional.
+                        default = ast.Constant(value=None)
+                        annotation = ast.BinOp(
+                            left=ast.Name(id=prop_type, ctx=ast.Load()),
+                            op=ast.BitOr(),
+                            right=ast.Constant(value=None),
                         )
 
         return ast.AnnAssign(

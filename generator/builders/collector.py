@@ -85,29 +85,28 @@ class TypeReferenceCollector:
 
         Collections contribute their wrapper (``ClientValueCollection``) plus the
         item type; scalars/custom types contribute the type itself. The item/type
-        import is emitted under ``TYPE_CHECKING`` and lazily inside the getter.
+        import is emitted under ``TYPE_CHECKING`` and lazily inside the getter —
+        except for dataclass fields whose default factory calls the type, which
+        need a real import.
         """
         if prop.is_object_type:
             return
+        runtime = self.needs_dataclass and prop.uses_factory_default()
         if prop.is_collection_type:
             if prop.client_type_name.startswith("EntityCollection"):
                 self.add("EntityCollection")
             elif prop.client_type_name.startswith("ClientValueCollection"):
                 self.add("ClientValueCollection")
-            self._add_annotation(prop.client_item_type_name, prop)
+            self._add_annotation(prop.client_item_type_name, prop, runtime=runtime)
             return
-        self._add_annotation(prop.client_type_name, prop)
+        self._add_annotation(prop.client_type_name, prop, runtime=runtime)
 
-    def _add_annotation(self, name: str, prop: PropertyBuilder) -> None:
+    def _add_annotation(self, name: str, prop: PropertyBuilder, *, runtime: bool = False) -> None:
         if not name or "[" in name or name in self.KNOWN or name in self.OPTIONAL_TYPES:
             return
         module = self._module_for(prop.schema.TypeName, name)
         if module:
-            # A ClientValue dataclass uses the type in ``field(default_factory=X)``
-            # at runtime, so it needs a real import; entity annotations can stay
-            # under TYPE_CHECKING (the getter imports lazily).
-            target = self._entries if self.needs_dataclass else self._type_checking
-            target[name] = module
+            (self._entries if runtime else self._type_checking)[name] = module
 
     def add_object_type(self, prop: PropertyBuilder) -> None:
         """Track type references for navigation properties.
@@ -115,7 +114,9 @@ class TypeReferenceCollector:
         The referenced entity/item type is imported under ``TYPE_CHECKING`` — the
         getter imports it lazily at runtime to avoid circular imports.
         """
-        self._entries["ResourcePath"] = self.KNOWN["ResourcePath"]
+        if not self.needs_dataclass:
+            # Getters construct children with a ResourcePath; dataclass fields do not.
+            self._entries["ResourcePath"] = self.KNOWN["ResourcePath"]
         prop_type = prop.client_type_name
         if prop.is_collection_type:
             if "ClientValueCollection" in prop_type or "ClientValue" in prop_type:
