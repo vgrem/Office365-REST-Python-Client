@@ -2,10 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.directory.identitygovernance.lifecycleworkflowprocessingstatus import (
-    LifecycleWorkflowProcessingStatus,
-)
-from office365.directory.identitygovernance.workflow_subject import WorkflowSubject
+from office365.directory.identitygovernance.lifecycleworkflowprocessingstatus import LifecycleWorkflowProcessingStatus
 from office365.runtime.client_value import ClientValue
 from office365.runtime.types.collections import StringCollection
 
@@ -18,5 +15,3 @@ class AwaitedWorkflowProcessingResult(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.identityGovernance.AwaitedWorkflowProcessingResult"
-
-    subject: WorkflowSubject = field(default_factory=WorkflowSubject)

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from office365.directory.security.vm_cloud_provider import VmCloudProvider
 from office365.runtime.client_value import ClientValue
 
 
@@ -15,5 +14,3 @@ class VmMetadata(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.VmMetadata"
-
-    cloudProvider: VmCloudProvider = VmCloudProvider.unknown

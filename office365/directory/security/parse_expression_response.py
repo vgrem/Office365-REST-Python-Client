@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 from office365.directory.security.attribute_mapping_source import AttributeMappingSource
 from office365.runtime.client_value import ClientValue
 from office365.runtime.types.collections import StringCollection
-from office365.runtime.types.public_error import PublicError
 
 
 @dataclass
@@ -18,5 +17,3 @@ class ParseExpressionResponse(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ParseExpressionResponse"
-
-    error: PublicError = field(default_factory=PublicError)

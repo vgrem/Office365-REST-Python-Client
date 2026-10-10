@@ -4,14 +4,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID
 
-from office365.directory.security.alerts.antispamteamsdirection import (
-    AntispamTeamsDirection,
-)
+from office365.directory.security.alerts.antispamteamsdirection import AntispamTeamsDirection
 from office365.directory.security.file_evidence import FileEvidence
-from office365.directory.security.teams_delivery_location import TeamsDeliveryLocation
-from office365.directory.security.teams_message_delivery_action import (
-    TeamsMessageDeliveryAction,
-)
 from office365.directory.security.url_evidence import UrlEvidence
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -46,7 +40,3 @@ class TeamsMessageEvidence(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.TeamsMessageEvidence"
-
-    deliveryAction: TeamsMessageDeliveryAction = TeamsMessageDeliveryAction.unknown
-
-    deliveryLocation: TeamsDeliveryLocation = TeamsDeliveryLocation.unknown

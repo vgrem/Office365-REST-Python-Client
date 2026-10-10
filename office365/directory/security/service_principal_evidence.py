@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from office365.directory.security.service_principal_type import ServicePrincipalType
 from office365.runtime.client_value import ClientValue
 
 
@@ -17,5 +16,3 @@ class ServicePrincipalEvidence(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.ServicePrincipalEvidence"
-
-    servicePrincipalType: ServicePrincipalType = ServicePrincipalType.unknown

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from office365.directory.security.ai_agent_platform import AiAgentPlatform
 from office365.runtime.client_value import ClientValue
 
 
@@ -15,5 +14,3 @@ class AiAgentEvidence(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.AiAgentEvidence"
-
-    hostingPlatformType: AiAgentPlatform = AiAgentPlatform.unknown
