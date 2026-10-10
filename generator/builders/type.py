@@ -26,7 +26,7 @@ from generator.builders.placement import Placement, TypePlanner
 from generator.builders.property import PropertyBuilder
 from generator.builders.render import normalize_quotes, ruff_normalize
 from generator.builders.resolution import TypeRegistry
-from generator.builders.source_editor import SourceEditor, suppress_long_imports
+from generator.builders.source_editor import SourceEditor, suppress_long_lines
 from generator.builders.template_context import TemplateContext
 from generator.documentation.base import DocumentationProvider
 from generator.odata.type_information import TypeInformation
@@ -217,7 +217,14 @@ class TypeBuilder(ast.NodeTransformer):
         return all(self._is_resolvable(param.get("Type")) for param in method_schema.Parameters or [])
 
     def _reserved_names(self, base: set[str]) -> set[str]:
-        """Base names plus every member the generated class already declares (incl. inherited)."""
+        """Base names plus every member the existing class already declares (incl. inherited).
+
+        Only for **attached** types: a new type has no existing class, and
+        resolving its members by bare name could pick a same-named unrelated
+        class and wrongly reserve its member names (a one-run convergence bug).
+        """
+        if not self._ensure_placement().is_attached:
+            return set(base)
         return set(base) | self._resolver.members_of(self._schema.FullName)
 
     def visit_FunctionDef(self, node):
@@ -295,7 +302,9 @@ class TypeBuilder(ast.NodeTransformer):
 
         for prop in self._added_props:
             prop_type = prop.client_type_name
-            if prop_type in TypeReferenceCollector.OPTIONAL_TYPES and not collector.needs_dataclass:
+            if (
+                prop_type in TypeReferenceCollector.OPTIONAL_TYPES or prop.has_optional_getter()
+            ) and not collector.needs_dataclass:
                 # Getters use ``Optional[X]``; dataclass fields use ``X | None``.
                 collector.add("Optional")
             collector.add(prop_type)
@@ -548,7 +557,7 @@ class TypeBuilder(ast.NodeTransformer):
             else:
                 ast.fix_missing_locations(self._source_tree)
                 source = normalize_quotes(ast.unparse(self._source_tree))
-            self._rendered = suppress_long_imports(ruff_normalize(source, self.file))
+            self._rendered = suppress_long_lines(ruff_normalize(source, self.file))
         return self._rendered
 
     def _render_update(self) -> str:

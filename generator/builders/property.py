@@ -62,6 +62,10 @@ class PropertyBuilder:
         name = self.client_item_type_name if self.is_collection_type else self.client_type_name
         if not name or name in _SCALAR_TYPE_NAMES:
             return None
+        if not self.is_object_type and not self.is_collection_type and self.resolve_client_type() is None:
+            # The getter defaults an unresolved value type to None, so the local
+            # import would be unused (the annotation import is under TYPE_CHECKING).
+            return None
         module = self._resolver.module_for(self.schema.TypeName)
         if not module:
             return None
@@ -182,6 +186,19 @@ class PropertyBuilder:
     @property
     def is_object_type(self) -> bool:
         return self.schema.IsNavigation or False
+
+    def has_optional_getter(self) -> bool:
+        """Whether an entity getter returns ``None`` by default.
+
+        True for primitive values and for value types planned in this run (not
+        resolvable yet); a resolved enum/value constructs a default instead, so
+        its annotation stays non-optional.
+        """
+        if self.is_object_type or self.is_collection_type:
+            return False
+        if self.type_ref.is_primitive:
+            return True
+        return self.resolve_client_type() is None
 
     def needs_runtime_import(self) -> bool:
         """Whether a dataclass field references its type at run time.

@@ -72,6 +72,8 @@ class TemplateContext:
             type_annotation = f"Optional[{prop_type_name}]"
         else:
             type_annotation = prop_type_name
+        if builder.has_optional_getter() and not type_annotation.startswith("Optional["):
+            type_annotation = f"Optional[{prop_type_name}]"
         default_value = "None"
         if builder.is_object_type:
             if builder.is_collection_type:

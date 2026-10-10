@@ -21,14 +21,20 @@ _MAX_LINE = 121
 _MODULE_QUALIFIED = ("datetime", "date", "time")
 
 
-def suppress_long_imports(source: str) -> str:
-    """Append ``# noqa: E501`` to import lines longer than the limit (applied last)."""
-    lines = [
-        line + "  # noqa: E501"
-        if len(line) > _MAX_LINE and line.lstrip().startswith(("from ", "import ")) and "noqa" not in line
-        else line
-        for line in source.splitlines()
-    ]
+def suppress_long_lines(source: str) -> str:
+    """Append ``# noqa: E501`` to over-long import lines and string returns.
+
+    Applied last: import lines and ``entity_type_name`` returns are single
+    literals/expressions that ruff cannot wrap on its own.
+    """
+    lines = []
+    for raw in source.splitlines():
+        stripped = raw.lstrip()
+        overlong = len(raw) > _MAX_LINE and "noqa" not in raw
+        if overlong and stripped.startswith(("from ", "import ", 'return "')):
+            lines.append(raw + "  # noqa: E501")
+        else:
+            lines.append(raw)
     return "\n".join(lines) + ("\n" if source.endswith("\n") else "")
 
 

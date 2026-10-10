@@ -11,7 +11,7 @@ from generator.builders.source_editor import (
     module_bound_names,
     qualify_datetime,
     strip_module_names,
-    suppress_long_imports,
+    suppress_long_lines,
 )
 
 
@@ -19,13 +19,17 @@ def _stmt(code: str) -> ast.stmt:
     return ast.parse(code).body[0]
 
 
-def test_suppress_long_imports_only_touches_long_import_lines() -> None:
-    source = "from a import b\n" + "from a_very_long_module_name_that_exceeds_the_limit import " + "x" * 120 + "\n"
+def test_suppress_long_lines_touches_imports_and_string_returns() -> None:
+    long_import = "from a_very_long_module_name_that_exceeds_the_limit import " + "x" * 120
+    long_return = '    return "' + "M" * 130 + '"'
+    docstring = '    """' + "D" * 130 + '"""'
 
-    out = suppress_long_imports(source).splitlines()
+    out = suppress_long_lines(f"from a import b\n{long_import}\n{long_return}\n{docstring}\n").splitlines()
 
     assert out[0] == "from a import b"
     assert out[1].endswith("# noqa: E501")
+    assert out[2].endswith("# noqa: E501")
+    assert not out[3].endswith("# noqa: E501")  # docstrings are left alone
 
 
 def test_is_type_checking_variants() -> None:
