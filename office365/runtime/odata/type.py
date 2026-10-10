@@ -7,7 +7,9 @@ from typing import Optional, Type
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import GuidCollection, StringCollection
 
-_PRIMITIVE_TYPES = {
+#: OData primitive type names -> Python types (shared by the runtime and the
+#: generator: serialization and code generation must agree on the grammar).
+PRIMITIVE_PY_TYPES = {
     "Edm.Boolean": bool,
     "Edm.Int32": int,
     "Edm.Int64": int,
@@ -99,7 +101,7 @@ class ODataType:
         except TypeError:
             pass
 
-        for odata_type, py_type in _PRIMITIVE_TYPES.items():
+        for odata_type, py_type in PRIMITIVE_PY_TYPES.items():
             if py_type == client_type:
                 return odata_type
         return None
@@ -107,9 +109,9 @@ class ODataType:
     @staticmethod
     def primitive_type_for(type_name: str | None) -> Optional[Type]:
         """Returns the Python type for a known OData primitive, if any."""
-        return _PRIMITIVE_TYPES.get(type_name) if type_name is not None else None
+        return PRIMITIVE_PY_TYPES.get(type_name) if type_name is not None else None
 
     @staticmethod
     def is_primitive_name(type_name: str | None) -> bool:
         """Whether the OData type name is a known primitive."""
-        return type_name in _PRIMITIVE_TYPES
+        return type_name in PRIMITIVE_PY_TYPES

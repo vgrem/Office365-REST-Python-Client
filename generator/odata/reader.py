@@ -5,13 +5,12 @@ from typing import Dict, Optional
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
-from office365.runtime.odata.type import ODataType
-
 from generator.odata.member import MemberInformation
 from generator.odata.method import MethodInformation
 from generator.odata.model import ODataModel
 from generator.odata.property import PropertyInformation
 from generator.odata.type_information import TypeInformation
+from generator.odata.type_system import is_collection_name, normalize_class_name, normalize_type_name, strip_collection
 
 _BASE_TYPES = ("ComplexType", "EntityType", "EnumType")
 
@@ -57,13 +56,13 @@ class ODataReader(ABC):
         """
         if not type_name:
             return type_name
-        if ODataType.is_collection_name(type_name):
-            return f"Collection({self._qualified_type_name(ODataType.strip_collection(type_name))})"
+        if is_collection_name(type_name):
+            return f"Collection({self._qualified_type_name(strip_collection(type_name))})"
         namespace, sep, class_name = type_name.rpartition(".")
         if not sep or namespace == "Edm":
             return type_name
         namespace = self._aliases.get(namespace, namespace)
-        return f"{namespace}.{ODataType.normalize_class_name(class_name)}"
+        return f"{namespace}.{normalize_class_name(class_name)}"
 
     def _parse_types(self, model: ODataModel) -> None:
         assert self._root is not None
@@ -94,9 +93,9 @@ class ODataReader(ABC):
         item entity and ``None`` is returned.
         """
         raw_type = parameter.get("Type")
-        if raw_type is None or ODataType.is_collection_name(raw_type):
+        if raw_type is None or is_collection_name(raw_type):
             return None
-        return ODataType.normalize_type_name(raw_type)
+        return normalize_type_name(raw_type)
 
     @staticmethod
     def _new_navigation(node: Element) -> PropertyInformation:
@@ -122,7 +121,7 @@ class ODataReader(ABC):
         type_name = type_node.get("Name")
         if type_name is None:
             raise ValueError("Type node missing 'Name' attribute")
-        type_schema.FullName = f"{schema_node.attrib['Namespace']}.{ODataType.normalize_class_name(type_name)}"
+        type_schema.FullName = f"{schema_node.attrib['Namespace']}.{normalize_class_name(type_name)}"
         type_schema.BaseTypeFullName = base_type
         type_schema.IsValueObject = base_type == "EntityType"
 

@@ -10,7 +10,6 @@ from typing import Dict, List, Optional
 
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.type import ODataType
 from typing_extensions import Self
 
 from generator.builders.collector import TypeReferenceCollector
@@ -31,6 +30,7 @@ from generator.builders.template_context import TemplateContext
 from generator.builders.type_registry import TypeRegistry, python_name
 from generator.documentation.base import DocumentationProvider
 from generator.odata.type_information import TypeInformation
+from generator.odata.type_system import is_collection_name, is_primitive_name, strip_collection
 from generator.routing import Router, descend_module, module_directory
 from generator.validation import ValidationError
 
@@ -161,7 +161,7 @@ class TypeBuilder(ast.NodeTransformer):
             if not self._is_resolvable(prop_schema.TypeName):
                 continue
             self._properties.append(PropertyBuilder(prop_schema, resolver=self._resolver))
-            self._properties[-1].cyclic = ODataType.strip_collection(prop_schema.TypeName or "") in self._cyclic_types
+            self._properties[-1].cyclic = strip_collection(prop_schema.TypeName or "") in self._cyclic_types
             self._properties[-1].field_alias = self._field_alias
             seen_props.add(snake)
 
@@ -191,9 +191,9 @@ class TypeBuilder(ast.NodeTransformer):
         """
         if not type_name:
             return True
-        if ODataType.is_collection_name(type_name):
-            return self._is_resolvable(ODataType.strip_collection(type_name))
-        if ODataType.is_primitive_name(type_name):
+        if is_collection_name(type_name):
+            return self._is_resolvable(strip_collection(type_name))
+        if is_primitive_name(type_name):
             return True
         module = self._resolver.module_for(type_name)
         return module is not None and not self._is_shadowed(module)
@@ -452,7 +452,7 @@ class TypeBuilder(ast.NodeTransformer):
                     # An entity needs a context, so it cannot be a zero-arg default.
                     default, make_optional = ast.Constant(value=None), True
             else:
-                enum_name = ODataType.strip_collection(prop.schema.TypeName or "")
+                enum_name = strip_collection(prop.schema.TypeName or "")
                 member = self._enum_defaults.get(enum_name)
                 if member:
                     default = self._member_attr(prop_type, member)

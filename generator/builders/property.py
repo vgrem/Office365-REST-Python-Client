@@ -6,10 +6,10 @@ from _ast import Assign, Call, Constant
 from typing import TYPE_CHECKING, List, Optional
 
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.type import ODataType
 
 from generator.builders.naming import to_snake_case
 from generator.builders.type_registry import item_name, python_name
+from generator.odata.type_system import is_collection_name, is_primitive_name
 
 #: Python names that never need an import (builtins / stdlib shorthands).
 _SCALAR_TYPE_NAMES = {
@@ -80,7 +80,7 @@ class PropertyBuilder:
         """Build default value"""
         if self.is_collection_type:
             base_name = self.client_type_name.split("[")[0]
-            if ODataType.is_primitive_name(self.schema.TypeName):
+            if is_primitive_name(self.schema.TypeName):
                 return ast.Call(
                     func=ast.Name(id=self.field_alias, ctx=ast.Load()),
                     args=[],
@@ -110,7 +110,7 @@ class PropertyBuilder:
                         )
                     ],
                 )
-        elif ODataType.is_primitive_name(self.schema.TypeName):
+        elif is_primitive_name(self.schema.TypeName):
             if self.client_type_name == "datetime":
                 return ast.Call(
                     func=ast.Name(id=self.field_alias, ctx=ast.Load()),
@@ -174,7 +174,7 @@ class PropertyBuilder:
 
     @property
     def is_collection_type(self) -> bool:
-        return ODataType.is_collection_name(self.schema.TypeName)
+        return is_collection_name(self.schema.TypeName)
 
     @property
     def is_object_type(self) -> bool:
@@ -192,8 +192,8 @@ class PropertyBuilder:
             # A cyclic reference must not be imported/constructed at module load.
             return False
         if self.is_collection_type:
-            return not ODataType.is_primitive_name(self.schema.TypeName)
-        if ODataType.is_primitive_name(self.schema.TypeName):
+            return not is_primitive_name(self.schema.TypeName)
+        if is_primitive_name(self.schema.TypeName):
             return False
         resolved = self.resolve_client_type()
         if resolved is None or not inspect.isclass(resolved):

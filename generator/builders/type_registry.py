@@ -19,9 +19,15 @@ from functools import lru_cache
 from typing import Optional, Sequence, Tuple, Type
 
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.type import ODataType
 
 from generator.builders.symbol_index import SymbolIndex
+from generator.odata.type_system import (
+    is_collection_name,
+    is_primitive_name,
+    normalize_type_name,
+    primitive_type_for,
+    strip_collection,
+)
 
 # --------------------------------------------------------------------------- #
 # Annotation formatting (pure functions)
@@ -37,14 +43,14 @@ def python_name(type_name: str | None, is_object_type: bool = False) -> str:
     """
     if type_name is None:
         return ""
-    primitive = ODataType.primitive_type_for(type_name)
+    primitive = primitive_type_for(type_name)
     if primitive is not None:
         return primitive.__name__
-    if ODataType.is_collection_name(type_name):
-        child = item_name(ODataType.strip_collection(type_name), is_object_type)
+    if is_collection_name(type_name):
+        child = item_name(strip_collection(type_name), is_object_type)
         return f"EntityCollection[{child}]" if is_object_type else f"ClientValueCollection[{child}]"
     if type_name.startswith("Edm."):
-        raise ValueError(f"Unmapped OData primitive '{type_name}'; add it to ODataType._PRIMITIVE_TYPES.")
+        raise ValueError(f"Unmapped OData primitive '{type_name}'; add it to PRIMITIVE_PY_TYPES.")
     cls_name = type_name.split(".")[-1]
     if cls_name and cls_name[0].islower():
         cls_name = cls_name[0].upper() + cls_name[1:]
@@ -53,7 +59,7 @@ def python_name(type_name: str | None, is_object_type: bool = False) -> str:
 
 def item_name(type_name: str | None, is_object_type: bool = False) -> str:
     """Format the item type of a collection (or the type itself) as a Python name."""
-    return python_name(ODataType.strip_collection(type_name), is_object_type)
+    return python_name(strip_collection(type_name), is_object_type)
 
 
 # --------------------------------------------------------------------------- #
@@ -150,17 +156,17 @@ class ReturnType:
         name = self._name
         if not name:
             return TypeKind.VOID
-        if ODataType.is_collection_name(name):
+        if is_collection_name(name):
             return self._classify_collection(name)
-        if ODataType.is_primitive_name(name):
+        if is_primitive_name(name):
             return TypeKind.PRIMITIVE
         if self._is_client_value(name):
             return TypeKind.CLIENT_VALUE
         return TypeKind.ENTITY
 
     def _classify_collection(self, name: str) -> TypeKind:
-        item_type = ODataType.strip_collection(name)
-        if ODataType.is_primitive_name(name) or ODataType.is_primitive_name(item_type):
+        item_type = strip_collection(name)
+        if is_primitive_name(name) or is_primitive_name(item_type):
             return TypeKind.PRIMITIVE_COLLECTION
         if self._is_client_value(item_type):
             return TypeKind.CLIENT_VALUE_COLLECTION
@@ -175,7 +181,7 @@ class ReturnType:
     @staticmethod
     def _collection_name(type_name: str) -> str:
         """Python annotation for a collection whose item type is primitive."""
-        mapped = ODataType.primitive_type_for(type_name) if ODataType.is_primitive_name(type_name) else None
+        mapped = primitive_type_for(type_name) if is_primitive_name(type_name) else None
         if mapped is None:
             return python_name(type_name)
         item_types = getattr(mapped, "__args__", None)
@@ -186,15 +192,15 @@ class ReturnType:
     @staticmethod
     def _collection_default(type_name: str) -> str:
         """Python default expression for a collection whose item type is primitive."""
-        if ODataType.is_primitive_name(type_name):
-            mapped = ODataType.primitive_type_for(type_name)
+        if is_primitive_name(type_name):
+            mapped = primitive_type_for(type_name)
             assert mapped is not None
             item_types = getattr(mapped, "__args__", None)
             if item_types:
                 return f"ClientValueCollection({item_types[0].__name__})"
             return f"{mapped.__name__}()"
-        item_type = ODataType.strip_collection(type_name)
-        primitive = ODataType.primitive_type_for(item_type)
+        item_type = strip_collection(type_name)
+        primitive = primitive_type_for(item_type)
         if primitive is not None:
             return f"ClientValueCollection({primitive.__name__})"
         return f"{python_name(type_name)}()"
@@ -202,7 +208,7 @@ class ReturnType:
 
 def _primitive_default(type_name: str | None) -> str:
     """Default expression for a primitive OData type (``Edm.Int32`` -> ``int()``)."""
-    return _PRIMITIVE_DEFAULTS.get(ODataType.primitive_type_for(type_name), "None")
+    return _PRIMITIVE_DEFAULTS.get(primitive_type_for(type_name), "None")
 
 
 class ParameterType:
@@ -215,15 +221,15 @@ class ParameterType:
 
     def __init__(self, type_name: str | None) -> None:
         self._type_name = type_name
-        self._item_type = ODataType.strip_collection(type_name)
+        self._item_type = strip_collection(type_name)
         self._python_item = self._resolve_python_item()
 
     def _resolve_python_item(self) -> Optional[type]:
-        if self._type_name is None or not ODataType.is_collection_name(self._type_name):
+        if self._type_name is None or not is_collection_name(self._type_name):
             return None
-        if not ODataType.is_primitive_name(self._item_type):
+        if not is_primitive_name(self._item_type):
             return None
-        return ODataType.primitive_type_for(self._item_type)
+        return primitive_type_for(self._item_type)
 
     @property
     def is_primitive_collection(self) -> bool:
@@ -271,7 +277,7 @@ class TypeRegistry:
         """Resolve an OData type name (``SP.Directory.User``) to its Python class."""
         if not type_name:
             return None
-        short = python_name(ODataType.strip_collection(type_name))
+        short = python_name(strip_collection(type_name))
         module_name = self._index.resolve_module(type_name)
         if module_name is not None:
             cls = _class_from_module(module_name, short)
@@ -283,7 +289,7 @@ class TypeRegistry:
         """The module defining the referenced class, resolved statically."""
         if not type_name:
             return None
-        key = ODataType.normalize_type_name(type_name) or type_name
+        key = normalize_type_name(type_name) or type_name
         planned = self._type_modules.get(key)
         if planned is not None:
             return planned

@@ -17,9 +17,8 @@ import importlib.util
 from pathlib import Path
 from typing import Iterable, Optional
 
-from office365.runtime.odata.type import ODataType
-
 from generator.builders.naming import to_snake_case
+from generator.odata.type_system import normalize_type_name
 
 
 class SymbolIndex:
@@ -52,7 +51,7 @@ class SymbolIndex:
         """
         if not type_name:
             return None
-        key = ODataType.normalize_type_name(type_name) or type_name
+        key = normalize_type_name(type_name) or type_name
         short = key.rsplit(".", 1)[-1]
         return self._resolve_by_odata_name(key, short) or self._resolve_by_class_name(key, short, strict=strict)
 
@@ -87,7 +86,7 @@ class SymbolIndex:
         module = self.resolve_module(type_name)
         if module is None:
             return set()
-        class_name = (ODataType.normalize_type_name(type_name) or type_name).rsplit(".", 1)[-1]
+        class_name = (normalize_type_name(type_name) or type_name).rsplit(".", 1)[-1]
         return self._members_of(module, class_name)
 
     def _members_of(self, module: str, class_name: str) -> set[str]:
@@ -120,7 +119,7 @@ class SymbolIndex:
             self._files[(module_path, node.name)] = str(path)
             odata_name = self._entity_type_name(node) or (f"{self._namespace}.{node.name}" if self._namespace else "")
             if odata_name:
-                key = ODataType.normalize_type_name(odata_name) or odata_name
+                key = normalize_type_name(odata_name) or odata_name
                 self._by_odata.setdefault(key, []).append((node.name, module_path))
 
     @staticmethod

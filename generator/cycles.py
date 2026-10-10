@@ -8,7 +8,7 @@ constructing the referenced type eagerly.
 
 from __future__ import annotations
 
-from office365.runtime.odata.type import ODataType
+from generator.odata.type_system import strip_collection
 
 
 def find_cyclic_types(model, in_scope: set[str]) -> set[str]:
@@ -26,7 +26,7 @@ def find_cyclic_types(model, in_scope: set[str]) -> set[str]:
         for prop in schema.Properties.values():
             if not prop.TypeName:
                 continue
-            item = ODataType.strip_collection(prop.TypeName)
+            item = strip_collection(prop.TypeName)
             if item in in_scope and item != name:
                 targets.add(item)
         edges[name] = targets
