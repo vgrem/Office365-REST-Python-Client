@@ -1,16 +1,43 @@
-"""Generator configuration: ``settings.<service>.cfg`` -> typed options."""
+"""Generator configuration: ``settings.<service>.yaml`` -> typed options."""
 
 from __future__ import annotations
 
 import os
-from configparser import ConfigParser
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
+
+import yaml
 
 
-def parse_list(raw: str) -> list[str]:
-    """Split a comma/newline separated config value into stripped items."""
-    return [item.strip() for item in raw.replace("\n", ",").split(",") if item.strip()]
+class ConfigError(Exception):
+    """Raised when a generator config file is missing, malformed or inconsistent."""
+
+
+#: Recognised top-level keys (anything else is almost certainly a typo).
+_KNOWN_KEYS = {
+    "metadata_path",
+    "output_path",
+    "template_path",
+    "context_type",
+    "generate_methods",
+    "modules",
+    "namespace",
+    "include_base_types",
+    "start_at",
+    "filters",
+    "routing",
+    "type_routing",
+}
+_KNOWN_FILTER_KEYS = {"ignored_types", "ignored_properties", "ignored_methods"}
+
+
+def parse_list(value: Any) -> list[str]:
+    """Normalize a config value (list, comma/newline string, or ``None``) to a list."""
+    if value is None:
+        return []
+    items = value if isinstance(value, (list, tuple)) else str(value).replace("\n", ",").split(",")
+    return [str(item).strip() for item in items if str(item).strip()]
 
 
 def split_ignored(patterns: list[str]) -> tuple[list[str], list[str]]:
@@ -28,6 +55,26 @@ def split_ignored(patterns: list[str]) -> tuple[list[str], list[str]]:
 def resolve_path(base_dir: Path, value: str) -> str:
     """Resolve a config path relative to the generator directory (not the CWD)."""
     return value if os.path.isabs(value) else str((base_dir / value).resolve())
+
+
+def _mapping(value: Any, where: str) -> dict[str, str]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise ConfigError(f"{where} must be a mapping, got {type(value).__name__}")
+    return {str(key): str(item) for key, item in value.items()}
+
+
+def _validate_modules(modules: list[str], output_root: str, where: str) -> None:
+    """Every scanned module must map to an existing package directory."""
+    package = Path(output_root).name
+    for module in modules:
+        parts = module.split(".")
+        if parts[0] != package:
+            continue
+        directory = Path(output_root, *parts[1:]) if len(parts) > 1 else Path(output_root)
+        if not directory.is_dir():
+            raise ConfigError(f"{where}: module '{module}' has no directory ({directory})")
 
 
 @dataclass
@@ -52,32 +99,53 @@ class GeneratorOptions:
 
     @classmethod
     def load(cls, service: str, base_dir: Path, *, dry_run: bool = False) -> "GeneratorOptions":
-        """Read ``settings.<service>.cfg`` (relative to ``base_dir``)."""
-        cfg = ConfigParser()
-        cfg.optionxform = str  # type names are case-sensitive
-        cfg.read(base_dir / f"settings.{service}.cfg")
+        """Read and validate ``settings.<service>.yaml`` (relative to ``base_dir``)."""
+        path = base_dir / f"settings.{service}.yaml"
+        if not path.is_file():
+            raise ConfigError(f"missing config: {path}")
+        try:
+            data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        except yaml.YAMLError as e:
+            raise ConfigError(f"{path}: invalid YAML: {e}") from e
+        if not isinstance(data, dict):
+            raise ConfigError(f"{path}: top level must be a mapping")
 
-        def section(name: str) -> dict[str, str]:
-            return dict(cfg.items(name)) if cfg.has_section(name) else {}
+        unknown = set(data) - _KNOWN_KEYS
+        if unknown:
+            raise ConfigError(f"{path}: unknown key(s): {', '.join(sorted(unknown))}")
+        for required in ("metadata_path", "output_path", "template_path"):
+            if required not in data:
+                raise ConfigError(f"{path}: missing required key '{required}'")
 
-        main = section(service)
-        filters = section("filters")
-        modules = section("modules")
+        filters = data.get("filters") or {}
+        if not isinstance(filters, dict):
+            raise ConfigError(f"{path}: 'filters' must be a mapping")
+        unknown_filters = set(filters) - _KNOWN_FILTER_KEYS
+        if unknown_filters:
+            raise ConfigError(f"{path}: unknown filter key(s): {', '.join(sorted(unknown_filters))}")
+
+        output_path = resolve_path(base_dir, data["output_path"])
+        template_path = resolve_path(base_dir, data["template_path"])
+        if not Path(template_path).is_dir():
+            raise ConfigError(f"{path}: template_path is not a directory ({template_path})")
+        modules = parse_list(data.get("modules"))
+        _validate_modules(modules, output_path, str(path))
+
         return cls(
-            metadata_path=resolve_path(base_dir, main["metadata_path"]),
-            output_path=resolve_path(base_dir, main["output_path"]),
-            template_path=resolve_path(base_dir, main["template_path"]),
-            context_type=main.get("context_type", "ClientContext"),
-            generate_methods=main.get("generate_methods", ""),
-            modules=",".join(modules.values()),
-            namespace=main.get("namespace", ""),
-            ignored_types=parse_list(filters.get("ignored_types", "")),
-            ignored_properties=parse_list(filters.get("ignored_properties", "")),
-            ignored_methods=parse_list(filters.get("ignored_methods", "")),
-            include_base_types=parse_list(main.get("include_base_types", "")),
-            start_at=main.get("start_at", ""),
-            routing=section("routing"),
-            type_routing=section("type_routing"),
+            metadata_path=resolve_path(base_dir, data["metadata_path"]),
+            output_path=output_path,
+            template_path=template_path,
+            context_type=str(data.get("context_type", "ClientContext")),
+            generate_methods=str(data.get("generate_methods", "")).strip().lower(),
+            modules=",".join(modules),
+            namespace=str(data.get("namespace", "") or ""),
+            ignored_types=parse_list(filters.get("ignored_types")),
+            ignored_properties=parse_list(filters.get("ignored_properties")),
+            ignored_methods=parse_list(filters.get("ignored_methods")),
+            include_base_types=parse_list(data.get("include_base_types")),
+            start_at=str(data.get("start_at", "") or ""),
+            routing=_mapping(data.get("routing"), f"{path}: 'routing'"),
+            type_routing=_mapping(data.get("type_routing"), f"{path}: 'type_routing'"),
             dry_run=dry_run,
         )
 

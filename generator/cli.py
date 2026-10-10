@@ -8,7 +8,7 @@ from typing import Optional, Sequence
 
 from generator.builders.type_registry import TypeRegistry
 from generator.checkpoint import checkpoint_path
-from generator.config import GeneratorOptions
+from generator.config import ConfigError, GeneratorOptions
 from generator.filters import TypeFilter
 from generator.manifest import Manifest, run_signature
 from generator.odata.reader import ODataReader
@@ -67,7 +67,7 @@ def generate(
 
 
 def suggest_routing(service: str) -> None:
-    """Print a proposed [routing]/[type_routing] block for unrouted types."""
+    """Print a proposed ``routing``/``type_routing`` YAML block for unrouted types."""
     definition = get_service(service)
     options = GeneratorOptions.load(service, GENERATOR_DIR)
     model = definition.reader(options.metadata_path).read()
@@ -138,5 +138,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     except ValidationError as e:
         print(f"error: {e}")
+        return 1
+    except ConfigError as e:
+        print(f"config error: {e}")
         return 1
     return 0

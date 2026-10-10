@@ -2205,6 +2205,7 @@ dev = [
     { name = "pyproject-fmt" },
     { name = "pyright" },
     { name = "pytest" },
+    { name = "pyyaml" },
     { name = "ruff" },
     { name = "types-requests" },
 ]
@@ -2252,6 +2253,7 @@ dev = [
     { name = "pyproject-fmt" },
     { name = "pyright", specifier = ">=1.1.408" },
     { name = "pytest" },
+    { name = "pyyaml", specifier = ">=6,<7" },
     { name = "ruff", specifier = "==0.16.10" },
     { name = "types-requests" },
 ]

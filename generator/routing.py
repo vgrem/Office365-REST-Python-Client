@@ -2,9 +2,9 @@
 
 Two rule sets, first match wins:
 
-* ``[routing]`` — a **namespace** prefix maps to a module; the remaining
+* ``routing`` — a **namespace** prefix maps to a module; the remaining
   namespace segments are appended, lowercased.
-* ``[type_routing]`` — an **exact** OData type name, or a ``Prefix*`` on the
+* ``type_routing`` — an **exact** OData type name, or a ``Prefix*`` on the
   type's short name, maps directly to a module.
 
 A type that matches no rule is *unrouted* and is skipped (reported) rather than
@@ -15,52 +15,12 @@ from __future__ import annotations
 
 import os
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Iterable, Optional
 
 from generator.builders.naming import to_snake_case
 from generator.builders.type_registry import python_name
-
-#: Namespace -> module hints (used by ``--suggest-routing``).
-NAMESPACE_HINTS: dict[str, str] = {
-    "microsoft.graph.callRecords": "office365.communications.callrecords",
-    "microsoft.graph.customDataProvidedResourcePayloads": "office365.directory.identitygovernance",
-    "microsoft.graph.entraRecoveryServices": "office365.directory",
-    "microsoft.graph.teamsAdministration": "office365.teams",
-    "microsoft.graph.termStore": "office365.directory.termstore",
-}
-
-#: Prefix -> product-module hints for bare ``microsoft.graph.*`` types.
-PREFIX_HINTS: dict[str, str] = {
-    "Education": "office365.education",
-    "Rubric": "office365.education",
-    "Challenging": "office365.education",
-    "Windows": "office365.intune",
-    "Win32": "office365.intune",
-    "Ios": "office365.intune",
-    "Android": "office365.intune",
-    "Oma": "office365.intune",
-    "Printer": "office365.intune",
-    "Print": "office365.intune",
-    "Device": "office365.intune",
-    "Mobile": "office365.intune",
-    "Mac": "office365.intune",
-    "Planner": "office365.planner",
-    "Booking": "office365.booking",
-    "Call": "office365.communications",
-    "Media": "office365.communications",
-    "Chat": "office365.communications",
-    "Communications": "office365.communications",
-    "Teleconference": "office365.communications",
-    "Virtual": "office365.communications",
-    "Search": "office365.search",
-    "Attack": "office365.directory.security",
-    "Simulation": "office365.directory.security",
-    "Cloud": "office365.directory.security",
-    "Access": "office365.directory.identitygovernance",
-    "Copilot": "office365.copilot",
-}
 
 
 def route_namespace(namespace: str, routing: dict[str, str]) -> str:
@@ -194,21 +154,43 @@ def planned_module(type_name: str, schema, registry, router: Router, output_base
     return f"{directory}.{file_stem}"
 
 
+def _majority(values: Iterable[str]) -> Optional[str]:
+    """The most common value, or ``None`` when there are none."""
+    counts = Counter(values)
+    return counts.most_common(1)[0][0] if counts else None
+
+
 def render_suggestions(model, type_filter, registry, router: Router) -> str:
-    """A paste-ready ``[routing]``/``[type_routing]`` block for unrouted types."""
+    """Paste-ready routing proposals for unrouted types.
+
+    Suggestions are inferred from the routing already in effect: an unrouted
+    namespace/prefix is proposed the module that the majority of its
+    **already-routed** siblings use, so no hint tables need maintaining.
+    """
+    routed: dict[str, str] = {}
     unrouted: dict[str, list[str]] = defaultdict(list)
     for name, schema in model.types.items():
         if not type_filter.in_scope(name, schema):
             continue
-        if registry.strict_module_for(name) or router.module_for(name):
-            continue
-        unrouted[name.rsplit(".", 1)[0]].append(name)
+        module = registry.strict_module_for(name) or router.module_for(name)
+        if module:
+            routed[name] = module
+        else:
+            unrouted[name.rsplit(".", 1)[0]].append(name)
 
     namespace_lines: list[str] = []
     for namespace, names in sorted(unrouted.items()):
-        if namespace != "microsoft.graph":
-            suggested = NAMESPACE_HINTS.get(namespace, f"office365.{namespace.rsplit('.', 1)[-1].lower()}")
-            namespace_lines.append(f"{namespace} = {suggested}   # {len(names)} type(s)")
+        if namespace == "microsoft.graph":
+            continue
+        siblings = [module for name, module in routed.items() if name.rsplit(".", 1)[0] == namespace]
+        suggested = _majority(siblings) or f"office365.{namespace.rsplit('.', 1)[-1].lower()}"
+        namespace_lines.append(f"  {namespace}: {suggested}   # {len(names)} type(s)")
+
+    # Bare ``microsoft.graph.*`` types: propose by first word using routed peers.
+    prefix_modules: dict[str, Counter] = defaultdict(Counter)
+    for name, module in routed.items():
+        if name.rsplit(".", 1)[0] == "microsoft.graph":
+            prefix_modules[_first_word(name.rsplit(".", 1)[-1])][module] += 1
 
     by_prefix: dict[str, list[str]] = defaultdict(list)
     for name in unrouted.get("microsoft.graph", []):
@@ -216,8 +198,8 @@ def render_suggestions(model, type_filter, registry, router: Router) -> str:
 
     type_lines: list[str] = []
     for prefix, names in sorted(by_prefix.items(), key=lambda item: -len(item[1])):
-        hint = PREFIX_HINTS.get(prefix, "<choose>")
+        hint = _majority(prefix_modules.get(prefix, {})) or "<choose>"
         sample = ", ".join(n.rsplit(".", 1)[-1] for n in names[:3])
-        type_lines.append(f"{prefix}* = {hint}   # {len(names)}: {sample}...")
+        type_lines.append(f'  "{prefix}*": {hint}   # {len(names)}: {sample}...')
 
-    return "\n".join(["[routing]", *namespace_lines, "", "[type_routing]", *type_lines])
+    return "\n".join(["routing:", *namespace_lines, "type_routing:", *type_lines])
