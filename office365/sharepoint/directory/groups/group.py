@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
+from uuid import UUID
 
 from typing_extensions import Self
 
@@ -148,5 +149,119 @@ class Group(Entity):
             owner_id (int): ownerId parameter
         """
         qry = ServiceOperationQuery(self, "SetUserAsOwner", None, {"ownerId": owner_id}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    @property
+    def alias(self) -> Optional[str]:
+        """Gets the alias property"""
+        return self.properties.get("alias", None)
+
+    @property
+    def allow_to_add_guests(self) -> Optional[bool]:
+        """Gets the allowToAddGuests property"""
+        return self.properties.get("allowToAddGuests", None)
+
+    @property
+    def assigned_labels(self) -> Optional[str]:
+        """Gets the assignedLabels property"""
+        return self.properties.get("assignedLabels", None)
+
+    @property
+    def calendar_url(self) -> Optional[str]:
+        """Gets the calendarUrl property"""
+        return self.properties.get("calendarUrl", None)
+
+    @property
+    def classification(self) -> Optional[str]:
+        """Gets the classification property"""
+        return self.properties.get("classification", None)
+
+    @property
+    def display_name(self) -> Optional[str]:
+        """Gets the displayName property"""
+        return self.properties.get("displayName", None)
+
+    @property
+    def documents_url(self) -> Optional[str]:
+        """Gets the documentsUrl property"""
+        return self.properties.get("documentsUrl", None)
+
+    @property
+    def edit_group_url(self) -> Optional[str]:
+        """Gets the editGroupUrl property"""
+        return self.properties.get("editGroupUrl", None)
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the id property"""
+        return self.properties.get("id", None)
+
+    @property
+    def inbox_url(self) -> Optional[str]:
+        """Gets the inboxUrl property"""
+        return self.properties.get("inboxUrl", None)
+
+    @property
+    def is_dynamic(self) -> Optional[bool]:
+        """Gets the isDynamic property"""
+        return self.properties.get("isDynamic", None)
+
+    @property
+    def is_public(self) -> Optional[bool]:
+        """Gets the isPublic property"""
+        return self.properties.get("isPublic", None)
+
+    @property
+    def mail(self) -> Optional[str]:
+        """Gets the mail property"""
+        return self.properties.get("mail", None)
+
+    @property
+    def notebook_url(self) -> Optional[str]:
+        """Gets the notebookUrl property"""
+        return self.properties.get("notebookUrl", None)
+
+    @property
+    def people_url(self) -> Optional[str]:
+        """Gets the peopleUrl property"""
+        return self.properties.get("peopleUrl", None)
+
+    @property
+    def picture_url(self) -> Optional[str]:
+        """Gets the pictureUrl property"""
+        return self.properties.get("pictureUrl", None)
+
+    @property
+    def principal_name(self) -> Optional[str]:
+        """Gets the principalName property"""
+        return self.properties.get("principalName", None)
+
+    @property
+    def site_url(self) -> Optional[str]:
+        """Gets the siteUrl property"""
+        return self.properties.get("siteUrl", None)
+
+    @property
+    def members(self) -> EntityCollection[User]:
+        """Gets the members property"""
+        from office365.sharepoint.directory.users.user import User
+
+        return self.properties.get(
+            "members", EntityCollection[User](self.context, User, ResourcePath("members", self.resource_path))
+        )
+
+    @property
+    def owners(self) -> EntityCollection[User]:
+        """Gets the owners property"""
+        from office365.sharepoint.directory.users.user import User
+
+        return self.properties.get(
+            "owners", EntityCollection[User](self.context, User, ResourcePath("owners", self.resource_path))
+        )
+
+    def delete(self) -> Self:
+        """Delete operation."""
+        qry = ServiceOperationQuery(self, "Delete", None, {}, None, None)
         self.context.add_query(qry)
         return self

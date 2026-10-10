@@ -103,3 +103,8 @@ class WorkflowAssociation(Entity):
     @property
     def entity_type_name(self):
         return "SP.Workflow.WorkflowAssociation"
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

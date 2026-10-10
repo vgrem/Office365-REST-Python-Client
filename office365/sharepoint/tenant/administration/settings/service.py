@@ -1,4 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
@@ -13,6 +18,59 @@ from office365.sharepoint.tenant.administration.types import (
     DisableSelfServiceSiteCreation,
     EnableAutoNewsDigest,
 )
+
+if TYPE_CHECKING:
+    from office365.sharepoint.tenant.administration.commentsonsitepagesdisabled import (
+        CommentsOnSitePagesDisabled,
+    )
+    from office365.sharepoint.tenant.administration.customformurl import CustomFormUrl
+    from office365.sharepoint.tenant.administration.includeataglanceinshareemails import (
+        IncludeAtAGlanceInShareEmails,
+    )
+    from office365.sharepoint.tenant.administration.mailfromaddress import (
+        MailFromAddress,
+    )
+    from office365.sharepoint.tenant.administration.mobilenotificationisenabledforsharepoint import (
+        MobileNotificationIsEnabledForSharepoint,
+    )
+    from office365.sharepoint.tenant.administration.newsitemanagedpath import (
+        NewSiteManagedPath,
+    )
+    from office365.sharepoint.tenant.administration.newsubsiteinmodernoffforall import (
+        NewSubsiteInModernOffForAll,
+    )
+    from office365.sharepoint.tenant.administration.newsubsiteinmodernoffformoderntemplates import (
+        NewSubsiteInModernOffForModernTemplates,
+    )
+    from office365.sharepoint.tenant.administration.newteamsitemanagedpath import (
+        NewTeamSiteManagedPath,
+    )
+    from office365.sharepoint.tenant.administration.parentsiteurl import ParentSiteUrl
+    from office365.sharepoint.tenant.administration.policyoption import PolicyOption
+    from office365.sharepoint.tenant.administration.requiresecondarycontact import (
+        RequireSecondaryContact,
+    )
+    from office365.sharepoint.tenant.administration.settings.dataproperty import (
+        SettingDataProperty,
+    )
+    from office365.sharepoint.tenant.administration.shownextgenerationsyncclientonteamsite import (
+        ShowNextGenerationSyncClientOnTeamSite,
+    )
+    from office365.sharepoint.tenant.administration.showselfservicesitecreation import (
+        ShowSelfServiceSiteCreation,
+    )
+    from office365.sharepoint.tenant.administration.sitecreationnewux import (
+        SiteCreationNewUX,
+    )
+    from office365.sharepoint.tenant.administration.sitepagesenabled import (
+        SitePagesEnabled,
+    )
+    from office365.sharepoint.tenant.administration.sites.creation_default_storage_quota import (
+        SiteCreationDefaultStorageQuota,
+    )
+    from office365.sharepoint.tenant.administration.splistmodernuxoff import (
+        SPListModernUXOff,
+    )
 
 
 class TenantAdminSettingsService(Entity):
@@ -90,3 +148,185 @@ class TenantAdminSettingsService(Entity):
             }
             default_value = property_mapping.get(name, None)
         return super().get_property(name, default_value)
+
+    @property
+    def comments_on_site_pages_disabled(self) -> CommentsOnSitePagesDisabled:
+        """Gets the CommentsOnSitePagesDisabled property"""
+        from office365.sharepoint.tenant.administration.commentsonsitepagesdisabled import (
+            CommentsOnSitePagesDisabled,
+        )
+
+        return self.properties.get("CommentsOnSitePagesDisabled", CommentsOnSitePagesDisabled())
+
+    @property
+    def custom_form_url(self) -> CustomFormUrl:
+        """Gets the CustomFormUrl property"""
+        from office365.sharepoint.tenant.administration.customformurl import (
+            CustomFormUrl,
+        )
+
+        return self.properties.get("CustomFormUrl", CustomFormUrl())
+
+    @property
+    def include_at_a_glance_in_share_emails(self) -> IncludeAtAGlanceInShareEmails:
+        """Gets the IncludeAtAGlanceInShareEmails property"""
+        from office365.sharepoint.tenant.administration.includeataglanceinshareemails import (
+            IncludeAtAGlanceInShareEmails,
+        )
+
+        return self.properties.get("IncludeAtAGlanceInShareEmails", IncludeAtAGlanceInShareEmails())
+
+    @property
+    def mail_from_address(self) -> MailFromAddress:
+        """Gets the MailFromAddress property"""
+        from office365.sharepoint.tenant.administration.mailfromaddress import (
+            MailFromAddress,
+        )
+
+        return self.properties.get("MailFromAddress", MailFromAddress())
+
+    @property
+    def mobile_notification_is_enabled_for_sharepoint(self) -> MobileNotificationIsEnabledForSharepoint:
+        """Gets the MobileNotificationIsEnabledForSharepoint property"""
+        from office365.sharepoint.tenant.administration.mobilenotificationisenabledforsharepoint import (
+            MobileNotificationIsEnabledForSharepoint,
+        )
+
+        return self.properties.get(
+            "MobileNotificationIsEnabledForSharepoint", MobileNotificationIsEnabledForSharepoint()
+        )
+
+    @property
+    def new_site_managed_path(self) -> NewSiteManagedPath:
+        """Gets the NewSiteManagedPath property"""
+        from office365.sharepoint.tenant.administration.newsitemanagedpath import (
+            NewSiteManagedPath,
+        )
+
+        return self.properties.get("NewSiteManagedPath", NewSiteManagedPath())
+
+    @property
+    def new_subsite_in_modern_off_for_all(self) -> NewSubsiteInModernOffForAll:
+        """Gets the NewSubsiteInModernOffForAll property"""
+        from office365.sharepoint.tenant.administration.newsubsiteinmodernoffforall import (
+            NewSubsiteInModernOffForAll,
+        )
+
+        return self.properties.get("NewSubsiteInModernOffForAll", NewSubsiteInModernOffForAll())
+
+    @property
+    def new_subsite_in_modern_off_for_modern_templates(self) -> NewSubsiteInModernOffForModernTemplates:
+        """Gets the NewSubsiteInModernOffForModernTemplates property"""
+        from office365.sharepoint.tenant.administration.newsubsiteinmodernoffformoderntemplates import (
+            NewSubsiteInModernOffForModernTemplates,
+        )
+
+        return self.properties.get("NewSubsiteInModernOffForModernTemplates", NewSubsiteInModernOffForModernTemplates())
+
+    @property
+    def new_team_site_managed_path(self) -> NewTeamSiteManagedPath:
+        """Gets the NewTeamSiteManagedPath property"""
+        from office365.sharepoint.tenant.administration.newteamsitemanagedpath import (
+            NewTeamSiteManagedPath,
+        )
+
+        return self.properties.get("NewTeamSiteManagedPath", NewTeamSiteManagedPath())
+
+    @property
+    def parent_site_url(self) -> ParentSiteUrl:
+        """Gets the ParentSiteUrl property"""
+        from office365.sharepoint.tenant.administration.parentsiteurl import (
+            ParentSiteUrl,
+        )
+
+        return self.properties.get("ParentSiteUrl", ParentSiteUrl())
+
+    @property
+    def policy_option(self) -> PolicyOption:
+        """Gets the PolicyOption property"""
+        from office365.sharepoint.tenant.administration.policyoption import PolicyOption
+
+        return self.properties.get("PolicyOption", PolicyOption())
+
+    @property
+    def require_secondary_contact(self) -> RequireSecondaryContact:
+        """Gets the RequireSecondaryContact property"""
+        from office365.sharepoint.tenant.administration.requiresecondarycontact import (
+            RequireSecondaryContact,
+        )
+
+        return self.properties.get("RequireSecondaryContact", RequireSecondaryContact())
+
+    @property
+    def show_next_generation_sync_client_on_team_site(self) -> ShowNextGenerationSyncClientOnTeamSite:
+        """Gets the ShowNextGenerationSyncClientOnTeamSite property"""
+        from office365.sharepoint.tenant.administration.shownextgenerationsyncclientonteamsite import (
+            ShowNextGenerationSyncClientOnTeamSite,
+        )
+
+        return self.properties.get("ShowNextGenerationSyncClientOnTeamSite", ShowNextGenerationSyncClientOnTeamSite())
+
+    @property
+    def show_self_service_site_creation(self) -> ShowSelfServiceSiteCreation:
+        """Gets the ShowSelfServiceSiteCreation property"""
+        from office365.sharepoint.tenant.administration.showselfservicesitecreation import (
+            ShowSelfServiceSiteCreation,
+        )
+
+        return self.properties.get("ShowSelfServiceSiteCreation", ShowSelfServiceSiteCreation())
+
+    @property
+    def site_creation_default_storage_quota(self) -> SiteCreationDefaultStorageQuota:
+        """Gets the SiteCreationDefaultStorageQuota property"""
+        from office365.sharepoint.tenant.administration.sites.creation_default_storage_quota import (
+            SiteCreationDefaultStorageQuota,
+        )
+
+        return self.properties.get("SiteCreationDefaultStorageQuota", SiteCreationDefaultStorageQuota())
+
+    @property
+    def site_creation_new_ux(self) -> SiteCreationNewUX:
+        """Gets the SiteCreationNewUX property"""
+        from office365.sharepoint.tenant.administration.sitecreationnewux import (
+            SiteCreationNewUX,
+        )
+
+        return self.properties.get("SiteCreationNewUX", SiteCreationNewUX())
+
+    @property
+    def site_pages_enabled(self) -> SitePagesEnabled:
+        """Gets the SitePagesEnabled property"""
+        from office365.sharepoint.tenant.administration.sitepagesenabled import (
+            SitePagesEnabled,
+        )
+
+        return self.properties.get("SitePagesEnabled", SitePagesEnabled())
+
+    @property
+    def sp_list_modern_ux_off(self) -> SPListModernUXOff:
+        """Gets the SPListModernUXOff property"""
+        from office365.sharepoint.tenant.administration.splistmodernuxoff import (
+            SPListModernUXOff,
+        )
+
+        return self.properties.get("SPListModernUXOff", SPListModernUXOff())
+
+    def get_tenant_admin_sharepoint_settings_data(
+        self, category: int
+    ) -> ClientResult[ClientValueCollection[SettingDataProperty]]:
+        """GetTenantAdminSharePointSettingsData operation.
+
+        Args:
+            category (int):
+                category parameter
+        """
+        from office365.sharepoint.tenant.administration.settings.dataproperty import (
+            SettingDataProperty,
+        )
+
+        return_type = ClientResult(self.context, ClientValueCollection[SettingDataProperty]())
+        qry = ServiceOperationQuery(
+            self, "GetTenantAdminSharePointSettingsData", None, {"category": category}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type

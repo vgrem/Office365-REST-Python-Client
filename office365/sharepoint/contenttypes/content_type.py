@@ -1,4 +1,6 @@
-from typing import Any, List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from typing_extensions import Self
 
@@ -9,8 +11,14 @@ from office365.runtime.types.odata_property import odata
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.contenttypes.fieldlinks.collection import FieldLinkCollection
 from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.fields.collection import FieldCollection
 from office365.sharepoint.translation.user_resource import UserResource
+
+if TYPE_CHECKING:
+    from office365.sharepoint.workflow.associations.association import (
+        WorkflowAssociation,
+    )
 
 
 class ContentType(Entity):
@@ -254,3 +262,67 @@ class ContentType(Entity):
     @property
     def property_ref_name(self):
         return "StringId"
+
+    @property
+    def display_form_target(self) -> Optional[int]:
+        """Gets the DisplayFormTarget property"""
+        return self.properties.get("DisplayFormTarget", None)
+
+    @property
+    def edit_form_target(self) -> Optional[int]:
+        """Gets the EditFormTarget property"""
+        return self.properties.get("EditFormTarget", None)
+
+    @property
+    def edit_form_template_name(self) -> Optional[str]:
+        """Gets the EditFormTemplateName property"""
+        return self.properties.get("EditFormTemplateName", None)
+
+    @property
+    def mobile_display_form_url(self) -> Optional[str]:
+        """Gets the MobileDisplayFormUrl property"""
+        return self.properties.get("MobileDisplayFormUrl", None)
+
+    @property
+    def mobile_edit_form_url(self) -> Optional[str]:
+        """Gets the MobileEditFormUrl property"""
+        return self.properties.get("MobileEditFormUrl", None)
+
+    @property
+    def mobile_new_form_url(self) -> Optional[str]:
+        """Gets the MobileNewFormUrl property"""
+        return self.properties.get("MobileNewFormUrl", None)
+
+    @property
+    def new_form_client_side_component_id(self) -> Optional[str]:
+        """Gets the NewFormClientSideComponentId property"""
+        return self.properties.get("NewFormClientSideComponentId", None)
+
+    @property
+    def new_form_target(self) -> Optional[int]:
+        """Gets the NewFormTarget property"""
+        return self.properties.get("NewFormTarget", None)
+
+    @property
+    def new_form_template_name(self) -> Optional[str]:
+        """Gets the NewFormTemplateName property"""
+        return self.properties.get("NewFormTemplateName", None)
+
+    @property
+    def schema_xml_with_resource_tokens(self) -> Optional[str]:
+        """Gets the SchemaXmlWithResourceTokens property"""
+        return self.properties.get("SchemaXmlWithResourceTokens", None)
+
+    @property
+    def workflow_associations(self) -> EntityCollection[WorkflowAssociation]:
+        """Gets the WorkflowAssociations property"""
+        from office365.sharepoint.workflow.associations.association import (
+            WorkflowAssociation,
+        )
+
+        return self.properties.get(
+            "WorkflowAssociations",
+            EntityCollection[WorkflowAssociation](
+                self.context, WorkflowAssociation, ResourcePath("WorkflowAssociations", self.resource_path)
+            ),
+        )

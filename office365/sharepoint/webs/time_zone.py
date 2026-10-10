@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 
 from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
@@ -47,6 +50,18 @@ class TimeZone(Entity):
     def information(self) -> TimeZoneInformation:
         """Gets information about the time zone."""
         return self.properties.get("Information", TimeZoneInformation())
+
+    def utc_to_local_time(self, date: datetime) -> ClientResult[datetime]:
+        """UTCToLocalTime operation.
+
+        Args:
+            date (datetime):
+                date parameter
+        """
+        return_type = ClientResult(self.context, datetime.min)
+        qry = FunctionQuery(self, "UTCToLocalTime", [date], return_type)
+        self.context.add_query(qry)
+        return return_type
 
 
 class TimeZoneCollection(EntityCollection[TimeZone]):

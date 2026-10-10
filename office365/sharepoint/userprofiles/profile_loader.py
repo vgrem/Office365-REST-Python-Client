@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.v3.static import StaticPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.userprofiles.user_profile import UserProfile
 
@@ -59,3 +61,17 @@ class ProfileLoader(Entity):
     @property
     def entity_type_name(self):
         return "SP.UserProfiles.ProfileLoader"
+
+    def create_personal_site_enqueue_bulk(self, email_ids: list[str]) -> ClientResult[StringCollection]:
+        """CreatePersonalSiteEnqueueBulk operation.
+
+        Args:
+            email_ids (list[str]):
+                emailIDs parameter
+        """
+        return_type = ClientResult(self.context, StringCollection())
+        qry = ServiceOperationQuery(
+            self, "CreatePersonalSiteEnqueueBulk", None, {"emailIDs": StringCollection(email_ids)}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type

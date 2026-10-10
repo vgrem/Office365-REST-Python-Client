@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.fields.field import Field
@@ -46,3 +48,13 @@ class FieldMultiLineText(Field):
         """Specifies whether an implementation-specific mechanism for linking wiki pages is supported.
         It MUST be "false" if RichText is "false"."""
         return self.properties.get("WikiLinking", None)
+
+    @property
+    def append_only(self) -> Optional[bool]:
+        """Gets the AppendOnly property"""
+        return self.properties.get("AppendOnly", None)
+
+    @property
+    def is_long_hyperlink(self) -> Optional[bool]:
+        """Gets the IsLongHyperlink property"""
+        return self.properties.get("IsLongHyperlink", None)

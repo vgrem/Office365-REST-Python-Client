@@ -8,7 +8,9 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.administration.sitemove.systemsitelockexpres import SystemSiteLockExpirationResult
+from office365.sharepoint.administration.sitemove.systemsitelockexpres import (
+    SystemSiteLockExpirationResult,
+)
 from office365.sharepoint.entity import Entity
 
 if TYPE_CHECKING:
@@ -842,5 +844,72 @@ class SiteMoveService(Entity):
         """VerifyReplicaSiteMapForMove operation."""
         return_type = ClientResult(self.context, int())
         qry = ServiceOperationQuery(self, "VerifyReplicaSiteMapForMove", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def delete_telemetry_only_work_item(self) -> ClientResult[bool]:
+        """DeleteTelemetryOnlyWorkItem operation."""
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "DeleteTelemetryOnlyWorkItem", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_perms_incremental_rows(self, serialized_scope_ids: str) -> ClientResult[str]:
+        """GetPermsIncrementalRows operation.
+
+        Args:
+            serialized_scope_ids (str):
+                serializedScopeIds parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self, "GetPermsIncrementalRows", None, {"serializedScopeIds": serialized_scope_ids}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_perms_incremental_rows_stream(self, serialized_scope_ids: str) -> ClientResult[bytes]:
+        """GetPermsIncrementalRowsStream operation.
+
+        Args:
+            serialized_scope_ids (str):
+                serializedScopeIds parameter
+        """
+        return_type = ClientResult(self.context, bytes())
+        qry = ServiceOperationQuery(
+            self, "GetPermsIncrementalRowsStream", None, {"serializedScopeIds": serialized_scope_ids}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_site_changes(
+        self, from_change_number: int, to_change_number: int, has_to_change_number: bool, max_changes: int
+    ) -> ClientResult[str]:
+        """GetSiteChanges operation.
+
+        Args:
+            from_change_number (int):
+                fromChangeNumber parameter
+            to_change_number (int):
+                toChangeNumber parameter
+            has_to_change_number (bool):
+                hasToChangeNumber parameter
+            max_changes (int):
+                maxChanges parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "GetSiteChanges",
+            None,
+            {
+                "fromChangeNumber": from_change_number,
+                "toChangeNumber": to_change_number,
+                "hasToChangeNumber": has_to_change_number,
+                "maxChanges": max_changes,
+            },
+            None,
+            return_type,
+        )
         self.context.add_query(qry)
         return return_type

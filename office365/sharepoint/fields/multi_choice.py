@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.types.collections import StringCollection
@@ -24,3 +26,8 @@ class FieldMultiChoice(Field):
     def choices(self) -> StringCollection:
         """Specifies values that are available for selection in the field"""
         return self.properties.get("Choices", StringCollection())
+
+    @property
+    def unlimited_length_in_document_library(self) -> Optional[bool]:
+        """Gets the UnlimitedLengthInDocumentLibrary property"""
+        return self.properties.get("UnlimitedLengthInDocumentLibrary", None)

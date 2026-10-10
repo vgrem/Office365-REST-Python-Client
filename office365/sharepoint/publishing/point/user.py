@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from typing_extensions import Self
@@ -71,3 +73,8 @@ class PointPublishingUser(Entity):
         qry = ServiceOperationQuery(self, "DeleteUserFromContainerGroup", None, {}, None, None)
         self.context.add_query(qry)
         return self
+
+    @property
+    def id(self) -> Optional[int]:
+        """Gets the ID property"""
+        return self.properties.get("ID", None)

@@ -1,4 +1,6 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
 from typing_extensions import Self
@@ -11,17 +13,34 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
 from office365.sharepoint.compliance.tags.tag import ComplianceTag
-from office365.sharepoint.contentcenter.defaultcontentcentersiteinfo import DefaultContentCenterSiteInfo
-from office365.sharepoint.contentcenter.machinelearning.enabled import SPMachineLearningEnabled
-from office365.sharepoint.contentcenter.machinelearning.models.collection import SPMachineLearningModelCollection
-from office365.sharepoint.contentcenter.machinelearning.publications.publication import SPMachineLearningPublication
-from office365.sharepoint.contentcenter.machinelearning.samples.collection import SPMachineLearningSampleCollection
-from office365.sharepoint.contentcenter.machinelearning.workitems.item import SPMachineLearningWorkItem
-from office365.sharepoint.contentcenter.syntex_models_landing_info import SyntexModelsLandingInfo
+from office365.sharepoint.contentcenter.defaultcontentcentersiteinfo import (
+    DefaultContentCenterSiteInfo,
+)
+from office365.sharepoint.contentcenter.machinelearning.enabled import (
+    SPMachineLearningEnabled,
+)
+from office365.sharepoint.contentcenter.machinelearning.models.collection import (
+    SPMachineLearningModelCollection,
+)
+from office365.sharepoint.contentcenter.machinelearning.publications.publication import (
+    SPMachineLearningPublication,
+)
+from office365.sharepoint.contentcenter.machinelearning.samples.collection import (
+    SPMachineLearningSampleCollection,
+)
+from office365.sharepoint.contentcenter.machinelearning.workitems.item import (
+    SPMachineLearningWorkItem,
+)
+from office365.sharepoint.contentcenter.syntex_models_landing_info import (
+    SyntexModelsLandingInfo,
+)
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.utilities.autofillcolumninfo import AutofillColumnInfo
 from office365.sharepoint.viva.syntexcontext import SyntexContext
+
+if TYPE_CHECKING:
+    from office365.sharepoint.utilities.llmcolumninfo import LLMColumnInfo
 
 
 class SPMachineLearningHub(Entity):
@@ -309,5 +328,35 @@ class SPMachineLearningHub(Entity):
         """
         return_type = ClientResult(self.context, str())
         qry = FunctionQuery(self, "VerifyModelUrlsAndGrantPAC", [urls], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_column_llm_info(self, doc_lib_id: UUID, column_id: UUID) -> ClientResult[LLMColumnInfo]:
+        """GetColumnLLMInfo operation.
+
+        Args:
+            doc_lib_id (UUID):
+                docLibId parameter
+            column_id (UUID):
+                columnId parameter
+        """
+        from office365.sharepoint.utilities.llmcolumninfo import LLMColumnInfo
+
+        return_type = ClientResult(self.context, LLMColumnInfo())
+        qry = FunctionQuery(self, "GetColumnLLMInfo", [doc_lib_id, column_id], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_retention_label(self, retention_label_id: UUID) -> ClientResult[ComplianceTag]:
+        """GetRetentionLabel operation.
+
+        Args:
+            retention_label_id (UUID):
+                retentionLabelId parameter
+        """
+        from office365.sharepoint.compliance.tags.tag import ComplianceTag
+
+        return_type = ClientResult(self.context, ComplianceTag())
+        qry = FunctionQuery(self, "GetRetentionLabel", [retention_label_id], return_type)
         self.context.add_query(qry)
         return return_type

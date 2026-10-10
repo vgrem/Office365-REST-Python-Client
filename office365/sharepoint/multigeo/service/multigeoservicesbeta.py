@@ -1,32 +1,65 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
-from office365.sharepoint.multigeo.service.alloweddatalocation import AllowedDataLocation
-from office365.sharepoint.multigeo.service.contentdbschemaversion import ContentDbSchemaVersion
-from office365.sharepoint.multigeo.service.crossfarmgroupmovejob import CrossFarmGroupMoveJob
-from office365.sharepoint.multigeo.service.crossfarmsitemovejob import CrossFarmSiteMoveJob
-from office365.sharepoint.multigeo.service.crossfarmusermovejob import CrossFarmUserMoveJob
+from office365.sharepoint.multigeo.service.alloweddatalocation import (
+    AllowedDataLocation,
+)
+from office365.sharepoint.multigeo.service.contentdbschemaversion import (
+    ContentDbSchemaVersion,
+)
+from office365.sharepoint.multigeo.service.crossfarmgroupmovejob import (
+    CrossFarmGroupMoveJob,
+)
+from office365.sharepoint.multigeo.service.crossfarmsitemovejob import (
+    CrossFarmSiteMoveJob,
+)
+from office365.sharepoint.multigeo.service.crossfarmusermovejob import (
+    CrossFarmUserMoveJob,
+)
 from office365.sharepoint.multigeo.service.crossgeotenantbyok import CrossGeoTenantBYOK
-from office365.sharepoint.multigeo.service.crossgeotenantcompatibility import CrossGeoTenantCompatibility
-from office365.sharepoint.multigeo.service.crossgeotenantproperty import CrossGeoTenantProperty
-from office365.sharepoint.multigeo.service.crossgeouserplacementjob import CrossGeoUserPlacementJob
-from office365.sharepoint.multigeo.service.dblevelworkitementitydata import DBLevelWorkItemEntityData
+from office365.sharepoint.multigeo.service.crossgeotenantcompatibility import (
+    CrossGeoTenantCompatibility,
+)
+from office365.sharepoint.multigeo.service.crossgeotenantproperty import (
+    CrossGeoTenantProperty,
+)
+from office365.sharepoint.multigeo.service.crossgeouserplacementjob import (
+    CrossGeoUserPlacementJob,
+)
+from office365.sharepoint.multigeo.service.dblevelworkitementitydata import (
+    DBLevelWorkItemEntityData,
+)
 from office365.sharepoint.multigeo.service.dfdeprecationjob import DfDeprecationJob
 from office365.sharepoint.multigeo.service.geoadministrator import GeoAdministrator
 from office365.sharepoint.multigeo.service.geoexperience import GeoExperience
 from office365.sharepoint.multigeo.service.geolocationdata import GeoLocationData
-from office365.sharepoint.multigeo.service.geotenantinstanceinformation import GeoTenantInstanceInformation
+from office365.sharepoint.multigeo.service.geotenantinstanceinformation import (
+    GeoTenantInstanceInformation,
+)
 from office365.sharepoint.multigeo.service.globaladmincheck import GlobalAdminCheck
 from office365.sharepoint.multigeo.service.groupmovejob import GroupMoveJob
 from office365.sharepoint.multigeo.service.movesiterostate import MoveSiteROState
-from office365.sharepoint.multigeo.service.siteattargetentitydata import SiteAtTargetEntityData
+from office365.sharepoint.multigeo.service.siteattargetentitydata import (
+    SiteAtTargetEntityData,
+)
 from office365.sharepoint.multigeo.service.sitemovejob import SiteMoveJob
 from office365.sharepoint.multigeo.service.storage_quota import StorageQuota
-from office365.sharepoint.multigeo.service.supportedgeolocationsfortenant import SupportedGeoLocationsForTenant
-from office365.sharepoint.multigeo.service.taxonomyreplicationparameters import TaxonomyReplicationParameters
+from office365.sharepoint.multigeo.service.supportedgeolocationsfortenant import (
+    SupportedGeoLocationsForTenant,
+)
+from office365.sharepoint.multigeo.service.taxonomyreplicationparameters import (
+    TaxonomyReplicationParameters,
+)
 from office365.sharepoint.multigeo.service.tenant_information import TenantInformation
 from office365.sharepoint.multigeo.service.unified_group import UnifiedGroup
 from office365.sharepoint.multigeo.service.usermovejob import UserMoveJob
+
+if TYPE_CHECKING:
+    from office365.sharepoint.multigeo.service.move_job_report import MoveJobReport
 
 
 class MultiGeoServicesBeta(Entity):
@@ -289,3 +322,12 @@ class MultiGeoServicesBeta(Entity):
     @property
     def entity_type_name(self) -> str:
         return "Microsoft.Online.SharePoint.MultiGeo.Service.MultiGeoServicesBeta"
+
+    @property
+    def move_job_reports(self) -> MoveJobReport:
+        """Gets the MoveJobReports property"""
+        from office365.sharepoint.multigeo.service.move_job_report import MoveJobReport
+
+        return self.properties.get(
+            "MoveJobReports", MoveJobReport(self.context, ResourcePath("MoveJobReports", self.resource_path))
+        )

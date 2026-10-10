@@ -12,32 +12,64 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
-from office365.sharepoint.publishing.amplify.clientamplifyanywhereresults import ClientAmplifyAnywhereResults
-from office365.sharepoint.publishing.amplify.clientamplifyresults import ClientAmplifyResults
+from office365.sharepoint.publishing.amplify.clientamplifyanywhereresults import (
+    ClientAmplifyAnywhereResults,
+)
+from office365.sharepoint.publishing.amplify.clientamplifyresults import (
+    ClientAmplifyResults,
+)
 from office365.sharepoint.publishing.amplify.history import AmplifyPublishingHistory
 from office365.sharepoint.publishing.amplify.requestparams import AmplifyRequestParams
-from office365.sharepoint.publishing.approval.requestcreationinfo import ApprovalRequestCreationInfo
-from office365.sharepoint.publishing.approval.requestresponse import ApprovalRequestResponse
+from office365.sharepoint.publishing.approval.requestcreationinfo import (
+    ApprovalRequestCreationInfo,
+)
+from office365.sharepoint.publishing.approval.requestresponse import (
+    ApprovalRequestResponse,
+)
 from office365.sharepoint.publishing.boostfieldsdata import BoostFieldsData
-from office365.sharepoint.publishing.campaign.loadmaildraftparam import CampaignPublicationLoadMailDraftParam
-from office365.sharepoint.publishing.campaign.resetendpointparam import CampaignPublicationResetEndpointParam
-from office365.sharepoint.publishing.campaign.savemaildraftparam import CampaignPublicationSaveMailDraftParam
+from office365.sharepoint.publishing.campaign.loadmaildraftparam import (
+    CampaignPublicationLoadMailDraftParam,
+)
+from office365.sharepoint.publishing.campaign.resetendpointparam import (
+    CampaignPublicationResetEndpointParam,
+)
+from office365.sharepoint.publishing.campaign.savemaildraftparam import (
+    CampaignPublicationSaveMailDraftParam,
+)
 from office365.sharepoint.publishing.highlights_info import HighlightsInfo
 from office365.sharepoint.publishing.missingsharepointdestinationwebidrepairitem import (
     MissingSharePointDestinationWebIdRepairItem,
 )
-from office365.sharepoint.publishing.pages.campaign.maildraftdata import CampaignPublicationMailDraftData
+from office365.sharepoint.publishing.pages.campaign.maildraftdata import (
+    CampaignPublicationMailDraftData,
+)
 from office365.sharepoint.publishing.pages.coauth_state import SitePageCoAuthState
-from office365.sharepoint.publishing.pages.dependency_metadata import SitePageDependencyMetadata
+from office365.sharepoint.publishing.pages.dependency_metadata import (
+    SitePageDependencyMetadata,
+)
 from office365.sharepoint.publishing.pages.page import SitePage
-from office365.sharepoint.publishing.pages.schedulepublicationresponse import SchedulePublicationResponse
-from office365.sharepoint.publishing.pages.sendtestemailresponse import SendTestEmailResponse
-from office365.sharepoint.publishing.pages.sendtestteamsmessageresponse import SendTestTeamsMessageResponse
-from office365.sharepoint.publishing.pages.versioninfocollection import SitePageVersionInfoCollection
-from office365.sharepoint.publishing.publishpublicationresponse import PublishPublicationResponse
-from office365.sharepoint.publishing.sitepageauthoringmetadata import SitePageAuthoringMetadata
+from office365.sharepoint.publishing.pages.schedulepublicationresponse import (
+    SchedulePublicationResponse,
+)
+from office365.sharepoint.publishing.pages.sendtestemailresponse import (
+    SendTestEmailResponse,
+)
+from office365.sharepoint.publishing.pages.sendtestteamsmessageresponse import (
+    SendTestTeamsMessageResponse,
+)
+from office365.sharepoint.publishing.pages.versioninfocollection import (
+    SitePageVersionInfoCollection,
+)
+from office365.sharepoint.publishing.publishpublicationresponse import (
+    PublishPublicationResponse,
+)
+from office365.sharepoint.publishing.sitepageauthoringmetadata import (
+    SitePageAuthoringMetadata,
+)
 from office365.sharepoint.publishing.statusresponse import PublishingStatusResponse
-from office365.sharepoint.publishing.validations.response import PrePublishValidationsResponse
+from office365.sharepoint.publishing.validations.response import (
+    PrePublishValidationsResponse,
+)
 
 
 class CampaignPublication(SitePage):
@@ -567,6 +599,62 @@ class CampaignPublication(SitePage):
                 "destinationUrl": destination_url,
                 "sharePointPublishingStatus": share_point_publishing_status,
                 "sharePointPublishingErrorCode": share_point_publishing_error_code,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    @property
+    def sharepoint_endpoint(self) -> Optional[str]:
+        """Gets the SharePointEndpoint property"""
+        return self.properties.get("SharePointEndpoint", None)
+
+    def repair_missing_sharepoint_destination_web_ids(
+        self, repair_items: ClientValueCollection[MissingSharePointDestinationWebIdRepairItem]
+    ) -> Self:
+        """RepairMissingSharePointDestinationWebIds operation.
+
+        Args:
+            repair_items (ClientValueCollection[MissingSharePointDestinationWebIdRepairItem]):
+                repairItems parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "RepairMissingSharePointDestinationWebIds", None, {"repairItems": repair_items}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def update_sharepoint_publishing_status(
+        self,
+        destination_site_id: str,
+        destination_url: str,
+        sharepoint_publishing_status: int,
+        sharepoint_publishing_error_code: int,
+    ) -> ClientResult[bool]:
+        """UpdateSharePointPublishingStatus operation.
+
+        Args:
+            destination_site_id (str):
+                destinationSiteId parameter
+            destination_url (str):
+                destinationUrl parameter
+            sharepoint_publishing_status (int):
+                sharePointPublishingStatus parameter
+            sharepoint_publishing_error_code (int):
+                sharePointPublishingErrorCode parameter
+        """
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(
+            self,
+            "UpdateSharePointPublishingStatus",
+            None,
+            {
+                "destinationSiteId": destination_site_id,
+                "destinationUrl": destination_url,
+                "sharePointPublishingStatus": sharepoint_publishing_status,
+                "sharePointPublishingErrorCode": sharepoint_publishing_error_code,
             },
             None,
             return_type,

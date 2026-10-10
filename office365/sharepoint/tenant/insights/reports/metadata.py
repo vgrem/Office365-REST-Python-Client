@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from office365.sharepoint.entity import Entity
 
@@ -30,3 +33,8 @@ class SPTenantIBInsightsReportMetadata(Entity):
     @property
     def entity_type_name(self):  # type: ignore[override]
         return "Microsoft.SharePoint.Insights.SPTenantIBInsightsReportMetadata"
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

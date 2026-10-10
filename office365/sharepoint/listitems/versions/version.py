@@ -3,8 +3,11 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional, cast
 
+from typing_extensions import Self
+
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.odata_property import odata
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.listitems.versions.change import SPListItemVersionChange
@@ -94,3 +97,9 @@ class ListItemVersion(Entity):
         )
 
         return cast(ListItemVersionCollection, self._parent_collection)
+
+    def recycle(self) -> Self:
+        """Recycle operation."""
+        qry = ServiceOperationQuery(self, "Recycle", None, {}, None, None)
+        self.context.add_query(qry)
+        return self

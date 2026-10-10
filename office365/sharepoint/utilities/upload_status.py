@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from datetime import datetime
 from typing import Optional
 
 from office365.sharepoint.entity import Entity
@@ -30,3 +33,8 @@ class UploadStatus(Entity):
     @property
     def entity_type_name(self):
         return "SP.Utilities.UploadStatus"
+
+    @property
+    def expiration_datetime(self) -> Optional[datetime]:
+        """Gets the ExpirationDateTime property"""
+        return self.properties.get("ExpirationDateTime", datetime.min)

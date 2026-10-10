@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from typing import Optional
+from uuid import UUID
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.service_operation import ServiceOperationPath
@@ -40,3 +43,58 @@ class ListTemplate(Entity):
                 assert self._parent_collection is not None
                 self._resource_path = ServiceOperationPath("GetByName", [value], self._parent_collection.resource_path)
         return self
+
+    @property
+    def allows_folder_creation(self) -> Optional[bool]:
+        """Gets the AllowsFolderCreation property"""
+        return self.properties.get("AllowsFolderCreation", None)
+
+    @property
+    def base_type(self) -> Optional[int]:
+        """Gets the BaseType property"""
+        return self.properties.get("BaseType", None)
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the Description property"""
+        return self.properties.get("Description", None)
+
+    @property
+    def feature_id(self) -> Optional[UUID]:
+        """Gets the FeatureId property"""
+        return self.properties.get("FeatureId", None)
+
+    @property
+    def hidden(self) -> Optional[bool]:
+        """Gets the Hidden property"""
+        return self.properties.get("Hidden", None)
+
+    @property
+    def image_url(self) -> Optional[str]:
+        """Gets the ImageUrl property"""
+        return self.properties.get("ImageUrl", None)
+
+    @property
+    def is_custom_template(self) -> Optional[bool]:
+        """Gets the IsCustomTemplate property"""
+        return self.properties.get("IsCustomTemplate", None)
+
+    @property
+    def name(self) -> Optional[str]:
+        """Gets the Name property"""
+        return self.properties.get("Name", None)
+
+    @property
+    def on_quick_launch(self) -> Optional[bool]:
+        """Gets the OnQuickLaunch property"""
+        return self.properties.get("OnQuickLaunch", None)
+
+    @property
+    def list_template_type_kind(self) -> Optional[int]:
+        """Gets the ListTemplateTypeKind property"""
+        return self.properties.get("ListTemplateTypeKind", None)
+
+    @property
+    def unique(self) -> Optional[bool]:
+        """Gets the Unique property"""
+        return self.properties.get("Unique", None)

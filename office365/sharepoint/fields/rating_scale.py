@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.fields.multi_choice import FieldMultiChoice
@@ -21,3 +23,28 @@ class FieldRatingScale(FieldMultiChoice):
     def range_count(self) -> Optional[int]:
         """Specifies the number of options in the rating scale."""
         return self.properties.get("RangeCount", None)
+
+    @property
+    def grid_end_number(self) -> Optional[int]:
+        """Gets the GridEndNumber property"""
+        return self.properties.get("GridEndNumber", None)
+
+    @property
+    def grid_na_option_text(self) -> Optional[str]:
+        """Gets the GridNAOptionText property"""
+        return self.properties.get("GridNAOptionText", None)
+
+    @property
+    def grid_text_range_average(self) -> Optional[str]:
+        """Gets the GridTextRangeAverage property"""
+        return self.properties.get("GridTextRangeAverage", None)
+
+    @property
+    def grid_text_range_high(self) -> Optional[str]:
+        """Gets the GridTextRangeHigh property"""
+        return self.properties.get("GridTextRangeHigh", None)
+
+    @property
+    def grid_text_range_low(self) -> Optional[str]:
+        """Gets the GridTextRangeLow property"""
+        return self.properties.get("GridTextRangeLow", None)

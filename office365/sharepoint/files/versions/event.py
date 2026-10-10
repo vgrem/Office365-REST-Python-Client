@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from datetime import datetime
 from typing import Optional
 
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -30,3 +33,13 @@ class FileVersionEvent(Entity):
     def shared_with_users(self) -> ClientValueCollection[SharedWithUser]:
         """Returns the array of users that have been shared in sharing action for the change log."""
         return self.properties.get("SharedWithUsers", ClientValueCollection(SharedWithUser))
+
+    @property
+    def editor_email(self) -> Optional[str]:
+        """Gets the EditorEmail property"""
+        return self.properties.get("EditorEmail", None)
+
+    @property
+    def time(self) -> Optional[datetime]:
+        """Gets the Time property"""
+        return self.properties.get("Time", datetime.min)

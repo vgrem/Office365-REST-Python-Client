@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from typing_extensions import Self
@@ -61,5 +63,38 @@ class SiteVersionPolicyManager(Entity):
             SiteVersionPolicyManager: The version policy manager instance
         """
         qry = ServiceOperationQuery(self, "SetAutoExpiration")
+        self.context.add_query(qry)
+        return self
+
+    def set_expire_after(self, major_version_limit: int, expire_after_days: int) -> Self:
+        """SetExpireAfter operation.
+
+        Args:
+            major_version_limit (int):
+                majorVersionLimit parameter
+            expire_after_days (int):
+                expireAfterDays parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "SetExpireAfter",
+            None,
+            {"majorVersionLimit": major_version_limit, "expireAfterDays": expire_after_days},
+            None,
+            None,
+        )
+        self.context.add_query(qry)
+        return self
+
+    def set_no_expiration(self, major_version_limit: int) -> Self:
+        """SetNoExpiration operation.
+
+        Args:
+            major_version_limit (int):
+                majorVersionLimit parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "SetNoExpiration", None, {"majorVersionLimit": major_version_limit}, None, None
+        )
         self.context.add_query(qry)
         return self

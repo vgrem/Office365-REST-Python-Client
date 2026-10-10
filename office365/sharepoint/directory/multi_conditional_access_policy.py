@@ -35,3 +35,8 @@ class MultiConditionalAccessPolicy(Entity):
     @property
     def entity_type_name(self) -> str:
         return "SP.Directory.MultiConditionalAccessPolicy"
+
+    @property
+    def id(self) -> Optional[str]:
+        """Gets the id property"""
+        return self.properties.get("id", None)

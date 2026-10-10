@@ -1,9 +1,20 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
-from office365.sharepoint.publishing.video.channel_collection import VideoChannelCollection
+from office365.sharepoint.entity_collection import EntityCollection
+from office365.sharepoint.publishing.video.channel_collection import (
+    VideoChannelCollection,
+)
+
+if TYPE_CHECKING:
+    from office365.sharepoint.publishing.search import Search
+    from office365.sharepoint.publishing.spotlightchannel import SpotlightChannel
+    from office365.sharepoint.publishing.spotlightvideo import SpotlightVideo
+    from office365.sharepoint.publishing.video.channel import VideoChannel
 
 
 class VideoServiceManager(Entity):
@@ -50,3 +61,56 @@ class VideoServiceManager(Entity):
     @property
     def entity_type_name(self):
         return "SP.Publishing.VideoServiceManager"
+
+    @property
+    def can_edit_channels(self) -> EntityCollection[VideoChannel]:
+        """Gets the CanEditChannels property"""
+        from office365.sharepoint.publishing.video.channel import VideoChannel
+
+        return self.properties.get(
+            "CanEditChannels",
+            EntityCollection[VideoChannel](
+                self.context, VideoChannel, ResourcePath("CanEditChannels", self.resource_path)
+            ),
+        )
+
+    @property
+    def channels(self) -> EntityCollection[VideoChannel]:
+        """Gets the Channels property"""
+        from office365.sharepoint.publishing.video.channel import VideoChannel
+
+        return self.properties.get(
+            "Channels",
+            EntityCollection[VideoChannel](self.context, VideoChannel, ResourcePath("Channels", self.resource_path)),
+        )
+
+    @property
+    def search(self) -> Search:
+        """Gets the Search property"""
+        from office365.sharepoint.publishing.search import Search
+
+        return self.properties.get("Search", Search(self.context, ResourcePath("Search", self.resource_path)))
+
+    @property
+    def spotlight_channels(self) -> EntityCollection[SpotlightChannel]:
+        """Gets the SpotlightChannels property"""
+        from office365.sharepoint.publishing.spotlightchannel import SpotlightChannel
+
+        return self.properties.get(
+            "SpotlightChannels",
+            EntityCollection[SpotlightChannel](
+                self.context, SpotlightChannel, ResourcePath("SpotlightChannels", self.resource_path)
+            ),
+        )
+
+    @property
+    def spotlight_videos(self) -> EntityCollection[SpotlightVideo]:
+        """Gets the SpotlightVideos property"""
+        from office365.sharepoint.publishing.spotlightvideo import SpotlightVideo
+
+        return self.properties.get(
+            "SpotlightVideos",
+            EntityCollection[SpotlightVideo](
+                self.context, SpotlightVideo, ResourcePath("SpotlightVideos", self.resource_path)
+            ),
+        )

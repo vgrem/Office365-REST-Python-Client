@@ -1,12 +1,20 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.utilities.jsontheme import JsonTheme
 from office365.sharepoint.utilities.themingoptions import ThemingOptions
+
+if TYPE_CHECKING:
+    from office365.sharepoint.portal.theme_manager import ThemeManager
 
 
 class ThemeManager(Entity):
@@ -151,3 +159,12 @@ class ThemeManager(Entity):
         )
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def context_theme_manager(self) -> ThemeManager:
+        """Gets the ContextThemeManager property"""
+        from office365.sharepoint.portal.theme_manager import ThemeManager
+
+        return self.properties.get(
+            "ContextThemeManager", ThemeManager(self.context, ResourcePath("ContextThemeManager", self.resource_path))
+        )

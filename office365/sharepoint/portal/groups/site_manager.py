@@ -15,17 +15,25 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.portal.channels.info_collection import ChannelInfoCollection
-from office365.sharepoint.portal.ensureteamforgroupexresponse import EnsureTeamForGroupExResponse
+from office365.sharepoint.portal.ensureteamforgroupexresponse import (
+    EnsureTeamForGroupExResponse,
+)
 from office365.sharepoint.portal.groups.creation_context import GroupCreationContext
-from office365.sharepoint.portal.groups.creation_information import GroupCreationInformation
+from office365.sharepoint.portal.groups.creation_information import (
+    GroupCreationInformation,
+)
 from office365.sharepoint.portal.groups.creation_params import GroupCreationParams
 from office365.sharepoint.portal.groups.site_info import GroupSiteInfo
-from office365.sharepoint.portal.groups.siteconversioninfo import GroupSiteConversionInfo
+from office365.sharepoint.portal.groups.siteconversioninfo import (
+    GroupSiteConversionInfo,
+)
 from office365.sharepoint.portal.orglabels.context_list import OrgLabelsContextList
 from office365.sharepoint.portal.parentgroup import ParentGroup
 from office365.sharepoint.portal.pintoteamparams import PinToTeamParams
 from office365.sharepoint.portal.pintoteamresponse import PinToTeamResponse
-from office365.sharepoint.portal.teams.recent_and_joined_response import RecentAndJoinedTeamsResponse
+from office365.sharepoint.portal.teams.recent_and_joined_response import (
+    RecentAndJoinedTeamsResponse,
+)
 
 if TYPE_CHECKING:
     from office365.sharepoint.sites.site import Site
@@ -488,5 +496,21 @@ class GroupSiteManager(ClientObject):
         """
         return_type = ClientResult(self.context, PinToTeamResponse())
         qry = ServiceOperationQuery(self, "PinToTeam", None, {"requestParams": request_params}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_shared_channel_sharepoint_url(self, tenant_id: str, group_id: UUID) -> ClientResult[str]:
+        """GetSharedChannelSharePointUrl operation.
+
+        Args:
+            tenant_id (str):
+                tenantId parameter
+            group_id (UUID):
+                groupId parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self, "GetSharedChannelSharePointUrl", None, {"tenantId": tenant_id, "groupId": group_id}, None, return_type
+        )
         self.context.add_query(qry)
         return return_type

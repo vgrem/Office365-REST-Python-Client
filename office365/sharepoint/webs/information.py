@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 
@@ -60,3 +62,8 @@ class WebInformation(Entity):
     def web_template_id(self) -> Optional[int]:
         """Specifies the identifier of the site template that was used to create the site"""
         return self.properties.get("WebTemplateId", None)
+
+    @property
+    def last_item_user_modified_date(self) -> Optional[datetime]:
+        """Gets the LastItemUserModifiedDate property"""
+        return self.properties.get("LastItemUserModifiedDate", datetime.min)

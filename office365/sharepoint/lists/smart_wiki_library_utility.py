@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity import Entity
@@ -54,5 +55,36 @@ class SmartWikiLibraryUtility(Entity):
     def ensure_smart_wiki_library_feature(self) -> Self:
         """EnsureSmartWikiLibraryFeature operation."""
         qry = ServiceOperationQuery(self, "EnsureSmartWikiLibraryFeature", None, {}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    @property
+    def entity_type_name(self) -> str:
+        return "Microsoft.SharePoint.SmartWikiLibrary.SmartWikiLibraryUtility"
+
+    def get_skill_status(self, list_id: str) -> ClientResult[str]:
+        """GetSkillStatus operation.
+
+        Args:
+            list_id (str):
+                listId parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = FunctionQuery(self, "GetSkillStatus", [list_id], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def set_skill_status(self, list_id: str, skill_status: str) -> Self:
+        """SetSkillStatus operation.
+
+        Args:
+            list_id (str):
+                listId parameter
+            skill_status (str):
+                skillStatus parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "SetSkillStatus", None, {"listId": list_id, "skillStatus": skill_status}, None, None
+        )
         self.context.add_query(qry)
         return self

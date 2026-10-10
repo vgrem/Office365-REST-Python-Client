@@ -4,6 +4,7 @@ import io
 from datetime import datetime
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Callable, Iterable, List, Optional, Tuple, Union
+from uuid import UUID
 
 from typing_extensions import Self
 
@@ -24,7 +25,9 @@ from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.sharing.document_manager import DocumentSharingManager
 from office365.sharepoint.sharing.links.share_response import ShareLinkResponse
-from office365.sharepoint.sharing.object_sharing_information import ObjectSharingInformation
+from office365.sharepoint.sharing.object_sharing_information import (
+    ObjectSharingInformation,
+)
 from office365.sharepoint.sharing.user_role_assignment import UserRoleAssignment
 from office365.sharepoint.sharing.user_sharing_result import UserSharingResult
 from office365.sharepoint.storagemetrics.storage_metrics import StorageMetrics
@@ -902,3 +905,58 @@ class Folder(Entity):
             elif name == "ServerRelativePath":
                 self._resource_path = self.context.web.get_folder_by_server_relative_path(value).resource_path
         return self
+
+    @property
+    def exists_allow_throw_for_policy_failures(self) -> Optional[bool]:
+        """Gets the ExistsAllowThrowForPolicyFailures property"""
+        return self.properties.get("ExistsAllowThrowForPolicyFailures", None)
+
+    @property
+    def exists_with_exception(self) -> Optional[bool]:
+        """Gets the ExistsWithException property"""
+        return self.properties.get("ExistsWithException", None)
+
+    @property
+    def item_count(self) -> Optional[int]:
+        """Gets the ItemCount property"""
+        return self.properties.get("ItemCount", None)
+
+    def add_sub_folder(self, leaf_name: str) -> Self:
+        """AddSubFolder operation.
+
+        Args:
+            leaf_name (str):
+                leafName parameter
+        """
+        qry = ServiceOperationQuery(self, "AddSubFolder", None, {"leafName": leaf_name}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def add_sub_folder_using_path(self, decoded_url: str) -> Self:
+        """AddSubFolderUsingPath operation.
+
+        Args:
+            decoded_url (str):
+                DecodedUrl parameter
+        """
+        qry = ServiceOperationQuery(self, "AddSubFolderUsingPath", None, {"DecodedUrl": decoded_url}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def delete_with_parameters(self, parameters: FolderDeleteParameters) -> Self:
+        """DeleteWithParameters operation.
+
+        Args:
+            parameters (FolderDeleteParameters):
+                parameters parameter
+        """
+        qry = ServiceOperationQuery(self, "DeleteWithParameters", None, {"parameters": parameters}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def start_delete(self) -> ClientResult[UUID]:
+        """StartDelete operation."""
+        return_type = ClientResult(self.context, UUID(int=0))
+        qry = ServiceOperationQuery(self, "StartDelete", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type

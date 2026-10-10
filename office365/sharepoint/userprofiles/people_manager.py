@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 from typing import Callable, List, Optional, Union
+from uuid import UUID
 
 from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.v3.static import StaticPath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity import Entity
@@ -319,3 +323,67 @@ class PeopleManager(Entity):
     @property
     def entity_type_name(self):
         return "SP.UserProfiles.PeopleManager"
+
+    @property
+    def edit_profile_link(self) -> Optional[str]:
+        """Gets the EditProfileLink property"""
+        return self.properties.get("EditProfileLink", None)
+
+    @property
+    def is_my_people_list_public(self) -> Optional[bool]:
+        """Gets the IsMyPeopleListPublic property"""
+        return self.properties.get("IsMyPeopleListPublic", None)
+
+    def am_i_followed_by(self, account_name: str) -> ClientResult[bool]:
+        """AmIFollowedBy operation.
+
+        Args:
+            account_name (str):
+                accountName parameter
+        """
+        return_type = ClientResult(self.context, bool())
+        qry = FunctionQuery(self, "AmIFollowedBy", [account_name], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_followed_tags(self, ctags_to_fetch: int) -> ClientResult[StringCollection]:
+        """GetFollowedTags operation.
+
+        Args:
+            ctags_to_fetch (int):
+                cTagsToFetch parameter
+        """
+        return_type = ClientResult(self.context, StringCollection())
+        qry = FunctionQuery(self, "GetFollowedTags", [ctags_to_fetch], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_user_profile_property_for(self, account_name: str, property_name: str) -> ClientResult[str]:
+        """GetUserProfilePropertyFor operation.
+
+        Args:
+            account_name (str):
+                accountName parameter
+            property_name (str):
+                propertyName parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = FunctionQuery(self, "GetUserProfilePropertyFor", [account_name, property_name], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def hard_delete_user_profile(self, account_name: str, user_id: UUID) -> ClientResult[bool]:
+        """HardDeleteUserProfile operation.
+
+        Args:
+            account_name (str):
+                accountName parameter
+            user_id (UUID):
+                userId parameter
+        """
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(
+            self, "HardDeleteUserProfile", None, {"accountName": account_name, "userId": user_id}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type

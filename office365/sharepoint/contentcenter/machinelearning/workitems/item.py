@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -72,5 +74,15 @@ class SPMachineLearningWorkItem(Entity):
 
     @property
     def type_(self) -> Optional[UUID]:
+        """Gets the Type property"""
+        return self.properties.get("Type", None)
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the ID property"""
+        return self.properties.get("ID", None)
+
+    @property
+    def type(self) -> Optional[UUID]:
         """Gets the Type property"""
         return self.properties.get("Type", None)

@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.sharing.object_sharing_information import (
@@ -107,3 +110,143 @@ class ObjectSharingSettings(Entity):
             "SharingPermissions",
             SharingPermissionInformation(self.context, ResourcePath("SharingPermissions", self.resource_path)),
         )
+
+    @property
+    def can_current_user_manage_read_write_link(self) -> Optional[bool]:
+        """Gets the CanCurrentUserManageReadWriteLink property"""
+        return self.properties.get("CanCurrentUserManageReadWriteLink", None)
+
+    @property
+    def can_current_user_retrieve_organization_readonly_link(self) -> Optional[bool]:
+        """Gets the CanCurrentUserRetrieveOrganizationReadonlyLink property"""
+        return self.properties.get("CanCurrentUserRetrieveOrganizationReadonlyLink", None)
+
+    @property
+    def can_current_user_retrieve_organization_read_write_link(self) -> Optional[bool]:
+        """Gets the CanCurrentUserRetrieveOrganizationReadWriteLink property"""
+        return self.properties.get("CanCurrentUserRetrieveOrganizationReadWriteLink", None)
+
+    @property
+    def can_current_user_retrieve_readonly_link(self) -> Optional[bool]:
+        """Gets the CanCurrentUserRetrieveReadonlyLink property"""
+        return self.properties.get("CanCurrentUserRetrieveReadonlyLink", None)
+
+    @property
+    def can_current_user_retrieve_read_write_link(self) -> Optional[bool]:
+        """Gets the CanCurrentUserRetrieveReadWriteLink property"""
+        return self.properties.get("CanCurrentUserRetrieveReadWriteLink", None)
+
+    @property
+    def can_current_user_share_externally(self) -> Optional[bool]:
+        """Gets the CanCurrentUserShareExternally property"""
+        return self.properties.get("CanCurrentUserShareExternally", None)
+
+    @property
+    def can_current_user_share_internally(self) -> Optional[bool]:
+        """Gets the CanCurrentUserShareInternally property"""
+        return self.properties.get("CanCurrentUserShareInternally", None)
+
+    @property
+    def can_current_user_share_to_existing_guests(self) -> Optional[bool]:
+        """Gets the CanCurrentUserShareToExistingGuests property"""
+        return self.properties.get("CanCurrentUserShareToExistingGuests", None)
+
+    @property
+    def can_share_folder(self) -> Optional[bool]:
+        """Gets the CanShareFolder property"""
+        return self.properties.get("CanShareFolder", None)
+
+    @property
+    def default_share_link_permission(self) -> Optional[int]:
+        """Gets the DefaultShareLinkPermission property"""
+        return self.properties.get("DefaultShareLinkPermission", None)
+
+    @property
+    def default_share_link_type(self) -> Optional[int]:
+        """Gets the DefaultShareLinkType property"""
+        return self.properties.get("DefaultShareLinkType", None)
+
+    @property
+    def enforce_ib_segment_filtering(self) -> Optional[bool]:
+        """Gets the EnforceIBSegmentFiltering property"""
+        return self.properties.get("EnforceIBSegmentFiltering", None)
+
+    @property
+    def enforce_spo_search(self) -> Optional[bool]:
+        """Gets the EnforceSPOSearch property"""
+        return self.properties.get("EnforceSPOSearch", None)
+
+    @property
+    def has_edit_role(self) -> Optional[bool]:
+        """Gets the HasEditRole property"""
+        return self.properties.get("HasEditRole", None)
+
+    @property
+    def has_read_role(self) -> Optional[bool]:
+        """Gets the HasReadRole property"""
+        return self.properties.get("HasReadRole", None)
+
+    @property
+    def inheriting_web_link(self) -> Optional[str]:
+        """Gets the InheritingWebLink property"""
+        return self.properties.get("InheritingWebLink", None)
+
+    @property
+    def is_guest_user(self) -> Optional[bool]:
+        """Gets the IsGuestUser property"""
+        return self.properties.get("IsGuestUser", None)
+
+    @property
+    def is_picture_library(self) -> Optional[bool]:
+        """Gets the IsPictureLibrary property"""
+        return self.properties.get("IsPictureLibrary", None)
+
+    @property
+    def item_id(self) -> Optional[str]:
+        """Gets the ItemId property"""
+        return self.properties.get("ItemId", None)
+
+    @property
+    def item_name(self) -> Optional[str]:
+        """Gets the ItemName property"""
+        return self.properties.get("ItemName", None)
+
+    @property
+    def item_url(self) -> Optional[str]:
+        """Gets the ItemUrl property"""
+        return self.properties.get("ItemUrl", None)
+
+    @property
+    def permissions_only_mode(self) -> Optional[bool]:
+        """Gets the PermissionsOnlyMode property"""
+        return self.properties.get("PermissionsOnlyMode", None)
+
+    @property
+    def required_anonymous_link_expiration_in_days(self) -> Optional[int]:
+        """Gets the RequiredAnonymousLinkExpirationInDays property"""
+        return self.properties.get("RequiredAnonymousLinkExpirationInDays", None)
+
+    @property
+    def share_by_email_enabled(self) -> Optional[bool]:
+        """Gets the ShareByEmailEnabled property"""
+        return self.properties.get("ShareByEmailEnabled", None)
+
+    @property
+    def show_external_sharing_warning(self) -> Optional[bool]:
+        """Gets the ShowExternalSharingWarning property"""
+        return self.properties.get("ShowExternalSharingWarning", None)
+
+    @property
+    def site_ib_mode(self) -> Optional[str]:
+        """Gets the SiteIBMode property"""
+        return self.properties.get("SiteIBMode", None)
+
+    @property
+    def site_ib_segment_ids(self) -> StringCollection:
+        """Gets the SiteIBSegmentIDs property"""
+        return self.properties.get("SiteIBSegmentIDs", StringCollection())
+
+    @property
+    def supports_acl_propagation(self) -> Optional[bool]:
+        """Gets the SupportsAclPropagation property"""
+        return self.properties.get("SupportsAclPropagation", None)

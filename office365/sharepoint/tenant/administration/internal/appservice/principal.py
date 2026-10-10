@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 from typing import Optional
+
+from typing_extensions import Self
 
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.types.collections import StringCollection
+from office365.runtime.types.collections import GuidCollection, StringCollection
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
-from office365.sharepoint.tenant.administration.internal.aad.collection import SPO3rdPartyAADPermissionGrantCollection
+from office365.sharepoint.tenant.administration.internal.aad.collection import (
+    SPO3rdPartyAADPermissionGrantCollection,
+)
 from office365.sharepoint.tenant.administration.internal.appservice.permission_grant import (
     SPOWebAppServicePrincipalPermissionGrant,
 )
@@ -95,3 +101,82 @@ class SPOWebAppServicePrincipal(Entity):
             }
             default_value = property_mapping.get(name, None)
         return super().get_property(name, default_value)
+
+    @property
+    def app_helper_id(self) -> Optional[str]:
+        """Gets the AppHelperId property"""
+        return self.properties.get("AppHelperId", None)
+
+    @property
+    def apps_to_delete(self) -> StringCollection:
+        """Gets the AppsToDelete property"""
+        return self.properties.get("AppsToDelete", StringCollection())
+
+    @property
+    def service_principal_object_ids(self) -> GuidCollection:
+        """Gets the ServicePrincipalObjectIds property"""
+        return self.properties.get("ServicePrincipalObjectIds", GuidCollection())
+
+    def remove_apps_to_delete(self, domains_to_delete: list[str]) -> Self:
+        """RemoveAppsToDelete operation.
+
+        Args:
+            domains_to_delete (list[str]):
+                domainsToDelete parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "RemoveAppsToDelete", None, {"domainsToDelete": StringCollection(domains_to_delete)}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def update_spfx_third_party_isolated_component_fields(
+        self, catalog_item_id: str, ap_app_object_id: str, sp_object_id: str, app_id: str
+    ) -> Self:
+        """UpdateSpfxThirdPartyIsolatedComponentFields operation.
+
+        Args:
+            catalog_item_id (str):
+                catalogItemId parameter
+            ap_app_object_id (str):
+                apAppObjectId parameter
+            sp_object_id (str):
+                spObjectId parameter
+            app_id (str):
+                appId parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "UpdateSpfxThirdPartyIsolatedComponentFields",
+            None,
+            {
+                "catalogItemId": catalog_item_id,
+                "apAppObjectId": ap_app_object_id,
+                "spObjectId": sp_object_id,
+                "appId": app_id,
+            },
+            None,
+            None,
+        )
+        self.context.add_query(qry)
+        return self
+
+    def update_spfx_third_party_isolated_secret(self, service_principal_id: str, secret_value: str) -> Self:
+        """UpdateSpfxThirdPartyIsolatedSecret operation.
+
+        Args:
+            service_principal_id (str):
+                servicePrincipalId parameter
+            secret_value (str):
+                secretValue parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "UpdateSpfxThirdPartyIsolatedSecret",
+            None,
+            {"servicePrincipalId": service_principal_id, "secretValue": secret_value},
+            None,
+            None,
+        )
+        self.context.add_query(qry)
+        return self

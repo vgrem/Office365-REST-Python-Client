@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import datetime
 from typing import TYPE_CHECKING, Optional, cast
+from uuid import UUID
 
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
 from office365.sharepoint.entity import Entity
@@ -117,3 +119,120 @@ class SitePageMetadata(Entity):
     @property
     def entity_type_name(self) -> str:
         return "SP.Publishing.SitePageMetadata"
+
+    @property
+    def asset_folder_id(self) -> Optional[int]:
+        """Gets the AssetFolderId property"""
+        return self.properties.get("AssetFolderId", None)
+
+    @property
+    def banner_thumbnail_url(self) -> Optional[str]:
+        """Gets the BannerThumbnailUrl property"""
+        return self.properties.get("BannerThumbnailUrl", None)
+
+    @property
+    def call_to_action(self) -> Optional[str]:
+        """Gets the CallToAction property"""
+        return self.properties.get("CallToAction", None)
+
+    @property
+    def categories(self) -> Optional[str]:
+        """Gets the Categories property"""
+        return self.properties.get("Categories", None)
+
+    @property
+    def comment_count(self) -> Optional[int]:
+        """Gets the CommentCount property"""
+        return self.properties.get("CommentCount", None)
+
+    @property
+    def created(self) -> Optional[datetime.datetime]:
+        """Gets the Created property"""
+        return self.properties.get("Created", datetime.datetime.min)
+
+    @property
+    def first_published_relative_time(self) -> Optional[str]:
+        """Gets the FirstPublishedRelativeTime property"""
+        return self.properties.get("FirstPublishedRelativeTime", None)
+
+    @property
+    def has_user_recently_modified(self) -> Optional[bool]:
+        """Gets the HasUserRecentlyModified property"""
+        return self.properties.get("HasUserRecentlyModified", None)
+
+    @property
+    def id(self) -> Optional[int]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)
+
+    @property
+    def is_web_welcome_page(self) -> Optional[bool]:
+        """Gets the IsWebWelcomePage property"""
+        return self.properties.get("IsWebWelcomePage", None)
+
+    @property
+    def like_count(self) -> Optional[int]:
+        """Gets the LikeCount property"""
+        return self.properties.get("LikeCount", None)
+
+    @property
+    def list_id(self) -> Optional[UUID]:
+        """Gets the ListId property"""
+        return self.properties.get("ListId", None)
+
+    @property
+    def modified(self) -> Optional[datetime.datetime]:
+        """Gets the Modified property"""
+        return self.properties.get("Modified", datetime.datetime.min)
+
+    @property
+    def modified_relative_time(self) -> Optional[str]:
+        """Gets the ModifiedRelativeTime property"""
+        return self.properties.get("ModifiedRelativeTime", None)
+
+    @property
+    def page_layout_type(self) -> Optional[str]:
+        """Gets the PageLayoutType property"""
+        return self.properties.get("PageLayoutType", None)
+
+    @property
+    def path(self) -> ResourcePath:
+        """Gets the Path property"""
+        from office365.sharepoint.types.resource_path import ResourcePath
+
+        return self.properties.get("Path", ResourcePath())
+
+    @property
+    def promoted_state(self) -> Optional[int]:
+        """Gets the PromotedState property"""
+        return self.properties.get("PromotedState", None)
+
+    @property
+    def publish_start_date(self) -> Optional[datetime.datetime]:
+        """Gets the PublishStartDate property"""
+        return self.properties.get("PublishStartDate", datetime.datetime.min)
+
+    @property
+    def social_bar_on_site_pages_disabled(self) -> Optional[bool]:
+        """Gets the SocialBarOnSitePagesDisabled property"""
+        return self.properties.get("SocialBarOnSitePagesDisabled", None)
+
+    @property
+    def title(self) -> Optional[str]:
+        """Gets the Title property"""
+        return self.properties.get("Title", None)
+
+    @property
+    def unique_id(self) -> Optional[UUID]:
+        """Gets the UniqueId property"""
+        return self.properties.get("UniqueId", None)
+
+    @property
+    def url(self) -> Optional[str]:
+        """Gets the Url property"""
+        return self.properties.get("Url", None)
+
+    @property
+    def version(self) -> Optional[str]:
+        """Gets the Version property"""
+        return self.properties.get("Version", None)

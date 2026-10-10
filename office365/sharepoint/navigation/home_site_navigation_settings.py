@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Self
 
@@ -33,3 +33,8 @@ class HomeSiteNavigationSettings(Entity):
     @property
     def entity_type_name(self) -> str:
         return "Microsoft.SharePoint.Navigation.REST.HomeSiteNavigationSettings"
+
+    @property
+    def is_enabled(self) -> Optional[bool]:
+        """Gets the IsEnabled property"""
+        return self.properties.get("IsEnabled", None)

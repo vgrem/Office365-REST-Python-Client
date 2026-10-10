@@ -60,3 +60,18 @@ class NamedLocationPolicy(Entity):
     @property
     def entity_type_name(self) -> str:
         return "SP.Directory.NamedLocationPolicy"
+
+    @property
+    def created_datetime(self) -> Optional[str]:
+        """Gets the createdDateTime property"""
+        return self.properties.get("createdDateTime", None)
+
+    @property
+    def id(self) -> Optional[str]:
+        """Gets the id property"""
+        return self.properties.get("id", None)
+
+    @property
+    def modified_datetime(self) -> Optional[str]:
+        """Gets the modifiedDateTime property"""
+        return self.properties.get("modifiedDateTime", None)

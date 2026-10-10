@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.fields.field import Field
@@ -31,3 +33,28 @@ class FieldNumber(Field):
     def show_as_percentage(self, value: bool) -> None:
         """Sets a Boolean value that specifies whether to render the field as a percentage."""
         self.set_property("ShowAsPercentage", value)
+
+    @property
+    def custom_unit_name(self) -> Optional[str]:
+        """Gets the CustomUnitName property"""
+        return self.properties.get("CustomUnitName", None)
+
+    @property
+    def custom_unit_on_right(self) -> Optional[bool]:
+        """Gets the CustomUnitOnRight property"""
+        return self.properties.get("CustomUnitOnRight", None)
+
+    @property
+    def maximum_value(self) -> Optional[float]:
+        """Gets the MaximumValue property"""
+        return self.properties.get("MaximumValue", None)
+
+    @property
+    def minimum_value(self) -> Optional[float]:
+        """Gets the MinimumValue property"""
+        return self.properties.get("MinimumValue", None)
+
+    @property
+    def unit(self) -> Optional[str]:
+        """Gets the Unit property"""
+        return self.properties.get("Unit", None)

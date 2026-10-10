@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Optional
 
 from office365.runtime.converters.keyvalue import parse_key_value_collection
@@ -90,3 +92,23 @@ class PersonProperties(Entity):
             v = parse_key_value_collection(v)
         super().set_property(k, v)
         return self
+
+    @property
+    def direct_reports(self) -> StringCollection:
+        """Gets the DirectReports property"""
+        return self.properties.get("DirectReports", StringCollection())
+
+    @property
+    def is_followed(self) -> Optional[bool]:
+        """Gets the IsFollowed property"""
+        return self.properties.get("IsFollowed", None)
+
+    @property
+    def personal_site_host_url(self) -> Optional[str]:
+        """Gets the PersonalSiteHostUrl property"""
+        return self.properties.get("PersonalSiteHostUrl", None)
+
+    @property
+    def title(self) -> Optional[str]:
+        """Gets the Title property"""
+        return self.properties.get("Title", None)

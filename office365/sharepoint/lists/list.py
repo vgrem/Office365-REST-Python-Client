@@ -4,6 +4,7 @@ import os
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import IO, TYPE_CHECKING, Any, AnyStr, Callable, Dict, Optional, Union, cast
+from uuid import UUID
 
 from typing_extensions import Self
 
@@ -11,7 +12,9 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+from office365.runtime.types.collections import GuidCollection
 from office365.runtime.types.odata_property import odata
 from office365.sharepoint.changes.collection import ChangeCollection
 from office365.sharepoint.changes.log_item_query import ChangeLogItemQuery
@@ -22,6 +25,7 @@ from office365.sharepoint.contenttypes.collection import ContentTypeCollection
 from office365.sharepoint.customactions.element_collection import (
     CustomActionElementCollection,
 )
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.eventreceivers.definition_collection import (
     EventReceiverDefinitionCollection,
 )
@@ -41,7 +45,9 @@ from office365.sharepoint.forms.collection import FormCollection
 from office365.sharepoint.listitems.caml.guard import warn_if_unpaged
 from office365.sharepoint.listitems.caml.query import CamlQuery
 from office365.sharepoint.listitems.collection import ListItemCollection
-from office365.sharepoint.listitems.collection_position import ListItemCollectionPosition
+from office365.sharepoint.listitems.collection_position import (
+    ListItemCollectionPosition,
+)
 from office365.sharepoint.listitems.creation_information import (
     ListItemCreationInformation,
 )
@@ -68,7 +74,12 @@ from office365.sharepoint.permissions.securable_object import SecurableObject
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.sharing.object_sharing_settings import ObjectSharingSettings
 from office365.sharepoint.sitescripts.utility import SiteScriptUtility
-from office365.sharepoint.thresholds import LIST_VIEW_THRESHOLD, SAFE_PAGE_SIZE, Limits, limit
+from office365.sharepoint.thresholds import (
+    LIST_VIEW_THRESHOLD,
+    SAFE_PAGE_SIZE,
+    Limits,
+    limit,
+)
 from office365.sharepoint.translation.user_resource import UserResource
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
 from office365.sharepoint.usercustomactions.collection import UserCustomActionCollection
@@ -79,12 +90,64 @@ from office365.sharepoint.webhooks.subscription_collection import SubscriptionCo
 
 if TYPE_CHECKING:
     from office365.runtime.converters.dataframe import DataFrameResult
-    from office365.runtime.imports import CheckpointStore, ImportCheckpoint, ImportResult
+    from office365.runtime.imports import (
+        CheckpointStore,
+        ImportCheckpoint,
+        ImportResult,
+    )
     from office365.runtime.operations import ProgressCallback
     from office365.runtime.record_collection import VerificationResult
     from office365.sharepoint.client_context import ClientContext
     from office365.sharepoint.documentmanagement.document_set import DocumentSet
+    from office365.sharepoint.documents.contentassemblyfileinfo import (
+        ContentAssemblyFileInfo,
+    )
+    from office365.sharepoint.documents.contentassemblyformanswer import (
+        ContentAssemblyFormAnswer,
+    )
+    from office365.sharepoint.documents.contentassemblymoderntemplatecolumnsmappinginfo import (
+        ContentAssemblyModernTemplateColumnsMappingInfo,
+    )
+    from office365.sharepoint.documents.createhvcsitemapprovalrequestparameters import (
+        CreateHVCSItemApprovalRequestParameters,
+    )
+    from office365.sharepoint.documents.documentgenerationinfo import (
+        DocumentGenerationInfo,
+    )
+    from office365.sharepoint.documents.fieldvalueswithurl import FieldValuesWithUrl
+    from office365.sharepoint.documents.itemorderupdatevalue import ItemOrderUpdateValue
+    from office365.sharepoint.documents.lockfiledata import LockFileData
+    from office365.sharepoint.documents.placeholderv2 import PlaceholderV2
+    from office365.sharepoint.documents.publishmoderntemplatepayload import (
+        PublishModernTemplatePayload,
+    )
+    from office365.sharepoint.documents.publishsnippetpayload import (
+        PublishSnippetPayload,
+    )
+    from office365.sharepoint.documents.publishtemplatev2payload import (
+        PublishTemplateV2Payload,
+    )
+    from office365.sharepoint.documents.templatemetadata import TemplateMetaData
+    from office365.sharepoint.documents.updatetemplateinfo import UpdateTemplateInfo
+    from office365.sharepoint.documents.updatetemplateinfov2 import UpdateTemplateInfoV2
+    from office365.sharepoint.files.versionbatchdeleteparameters import (
+        FileVersionBatchDeleteParameters,
+    )
+    from office365.sharepoint.lists.extended_share_point_permission_settings import (
+        ExtendedSharePointPermissionSettings,
+    )
+    from office365.sharepoint.lists.listform import ListForm
+    from office365.sharepoint.lists.rules.action import SPRuleAction
+    from office365.sharepoint.lists.templatization_metadata import (
+        TemplatizationMetaData,
+    )
+    from office365.sharepoint.permissions.irm.settings import (
+        InformationRightsManagementSettings,
+    )
     from office365.sharepoint.webs.web import Web
+    from office365.sharepoint.workflow.associations.association import (
+        WorkflowAssociation,
+    )
 
 
 class List(SecurableObject):
@@ -102,7 +165,9 @@ class List(SecurableObject):
         """Create an alert on this list for the current user."""
 
         def _add_alert(url: str | None) -> None:
-            from office365.sharepoint.alerts.creation_information import AlertCreationInformation
+            from office365.sharepoint.alerts.creation_information import (
+                AlertCreationInformation,
+            )
 
             assert url is not None
             params = AlertCreationInformation(
@@ -1982,4 +2047,1124 @@ class List(SecurableObject):
         if self._resource_path is None:
             if name == "Url":
                 self._resource_path = ServiceOperationPath("getList", [value], self.context.web.resource_path)
+        return self
+
+    @property
+    def color(self) -> Optional[str]:
+        """Gets the Color property"""
+        return self.properties.get("Color", None)
+
+    @property
+    def default_new_form_url(self) -> Optional[str]:
+        """Gets the DefaultNewFormUrl property"""
+        return self.properties.get("DefaultNewFormUrl", None)
+
+    @property
+    def direction(self) -> Optional[str]:
+        """Gets the Direction property"""
+        return self.properties.get("Direction", None)
+
+    @property
+    def document_read_security(self) -> Optional[bool]:
+        """Gets the DocumentReadSecurity property"""
+        return self.properties.get("DocumentReadSecurity", None)
+
+    @property
+    def draft_version_visibility(self) -> Optional[int]:
+        """Gets the DraftVersionVisibility property"""
+        return self.properties.get("DraftVersionVisibility", None)
+
+    @property
+    def enabled_queryable_columns_datetime(self) -> Optional[datetime]:
+        """Gets the EnabledQueryableColumnsDateTime property"""
+        return self.properties.get("EnabledQueryableColumnsDateTime", datetime.min)
+
+    @property
+    def exclude_from_offline_mode(self) -> Optional[bool]:
+        """Gets the ExcludeFromOfflineMode property"""
+        return self.properties.get("ExcludeFromOfflineMode", None)
+
+    @property
+    def extended_sharepoint_permission_offline_days_for_library(self) -> Optional[int]:
+        """Gets the ExtendedSharePointPermissionOfflineDaysForLibrary property"""
+        return self.properties.get("ExtendedSharePointPermissionOfflineDaysForLibrary", None)
+
+    @property
+    def has_copy_move_rules(self) -> Optional[bool]:
+        """Gets the HasCopyMoveRules property"""
+        return self.properties.get("HasCopyMoveRules", None)
+
+    @property
+    def has_list_bound_content_assembly_templates(self) -> Optional[bool]:
+        """Gets the HasListBoundContentAssemblyTemplates property"""
+        return self.properties.get("HasListBoundContentAssemblyTemplates", None)
+
+    @property
+    def high_priority_media_processing(self) -> Optional[bool]:
+        """Gets the HighPriorityMediaProcessing property"""
+        return self.properties.get("HighPriorityMediaProcessing", None)
+
+    @property
+    def icon(self) -> Optional[str]:
+        """Gets the Icon property"""
+        return self.properties.get("Icon", None)
+
+    @property
+    def image_path(self) -> ResourcePath:
+        """Gets the ImagePath property"""
+        from office365.sharepoint.types.resource_path import ResourcePath
+
+        return self.properties.get("ImagePath", ResourcePath())
+
+    @property
+    def image_url(self) -> Optional[str]:
+        """Gets the ImageUrl property"""
+        return self.properties.get("ImageUrl", None)
+
+    @property
+    def default_sensitivity_label_for_library(self) -> Optional[str]:
+        """Gets the DefaultSensitivityLabelForLibrary property"""
+        return self.properties.get("DefaultSensitivityLabelForLibrary", None)
+
+    @property
+    def sensitivity_label_to_encrypt_on_download_for_library(self) -> Optional[str]:
+        """Gets the SensitivityLabelToEncryptOnDownloadForLibrary property"""
+        return self.properties.get("SensitivityLabelToEncryptOnDownloadForLibrary", None)
+
+    @property
+    def irm_reject(self) -> Optional[bool]:
+        """Gets the IrmReject property"""
+        return self.properties.get("IrmReject", None)
+
+    @property
+    def is_application_list(self) -> Optional[bool]:
+        """Gets the IsApplicationList property"""
+        return self.properties.get("IsApplicationList", None)
+
+    @property
+    def is_catalog(self) -> Optional[bool]:
+        """Gets the IsCatalog property"""
+        return self.properties.get("IsCatalog", None)
+
+    @property
+    def is_contributor_owner_enabled(self) -> Optional[bool]:
+        """Gets the IsContributorOwnerEnabled property"""
+        return self.properties.get("IsContributorOwnerEnabled", None)
+
+    @property
+    def is_default_document_library(self) -> Optional[bool]:
+        """Gets the IsDefaultDocumentLibrary property"""
+        return self.properties.get("IsDefaultDocumentLibrary", None)
+
+    @property
+    def is_enterprise_gallery_library(self) -> Optional[bool]:
+        """Gets the IsEnterpriseGalleryLibrary property"""
+        return self.properties.get("IsEnterpriseGalleryLibrary", None)
+
+    @property
+    def is_prediction_model_applied(self) -> Optional[bool]:
+        """Gets the IsPredictionModelApplied property"""
+        return self.properties.get("IsPredictionModelApplied", None)
+
+    @property
+    def multiple_data_list(self) -> Optional[bool]:
+        """Gets the MultipleDataList property"""
+        return self.properties.get("MultipleDataList", None)
+
+    @property
+    def show_one_tab_only(self) -> Optional[bool]:
+        """Gets the ShowOneTabOnly property"""
+        return self.properties.get("ShowOneTabOnly", None)
+
+    @property
+    def template_type_id(self) -> Optional[str]:
+        """Gets the TemplateTypeId property"""
+        return self.properties.get("TemplateTypeId", None)
+
+    @property
+    def validation_message(self) -> Optional[str]:
+        """Gets the ValidationMessage property"""
+        return self.properties.get("ValidationMessage", None)
+
+    @property
+    def write_security(self) -> Optional[int]:
+        """Gets the WriteSecurity property"""
+        return self.properties.get("WriteSecurity", None)
+
+    @property
+    def extended_sharepoint_permission_settings(self) -> ExtendedSharePointPermissionSettings:
+        """Gets the ExtendedSharePointPermissionSettings property"""
+        from office365.sharepoint.lists.extended_share_point_permission_settings import (
+            ExtendedSharePointPermissionSettings,
+        )
+
+        return self.properties.get(
+            "ExtendedSharePointPermissionSettings",
+            ExtendedSharePointPermissionSettings(
+                self.context, ResourcePath("ExtendedSharePointPermissionSettings", self.resource_path)
+            ),
+        )
+
+    @property
+    def information_rights_management_settings(self) -> InformationRightsManagementSettings:
+        """Gets the InformationRightsManagementSettings property"""
+        from office365.sharepoint.permissions.irm.settings import (
+            InformationRightsManagementSettings,
+        )
+
+        return self.properties.get(
+            "InformationRightsManagementSettings",
+            InformationRightsManagementSettings(
+                self.context, ResourcePath("InformationRightsManagementSettings", self.resource_path)
+            ),
+        )
+
+    @property
+    def workflow_associations(self) -> EntityCollection[WorkflowAssociation]:
+        """Gets the WorkflowAssociations property"""
+        from office365.sharepoint.workflow.associations.association import (
+            WorkflowAssociation,
+        )
+
+        return self.properties.get(
+            "WorkflowAssociations",
+            EntityCollection[WorkflowAssociation](
+                self.context, WorkflowAssociation, ResourcePath("WorkflowAssociations", self.resource_path)
+            ),
+        )
+
+    def add_validate_update_item_using_path(
+        self,
+        list_item_create_info: ListItemCreationInformationUsingPath,
+        form_values: ClientValueCollection[ListItemFormUpdateValue],
+        bnew_document_update: bool,
+        check_in_comment: str,
+        dates_in_utc: bool,
+        number_in_invariant_culture: bool,
+    ) -> ClientResult[ClientValueCollection[ListItemFormUpdateValue]]:
+        """AddValidateUpdateItemUsingPath operation.
+
+        Args:
+            list_item_create_info (ListItemCreationInformationUsingPath):
+                listItemCreateInfo parameter
+            form_values (ClientValueCollection[ListItemFormUpdateValue]):
+                formValues parameter
+            bnew_document_update (bool):
+                bNewDocumentUpdate parameter
+            check_in_comment (str):
+                checkInComment parameter
+            dates_in_utc (bool):
+                datesInUTC parameter
+            number_in_invariant_culture (bool):
+                numberInInvariantCulture parameter
+        """
+        from office365.sharepoint.listitems.form_update_value import (
+            ListItemFormUpdateValue,
+        )
+
+        return_type = ClientResult(self.context, ClientValueCollection[ListItemFormUpdateValue]())
+        qry = ServiceOperationQuery(
+            self,
+            "AddValidateUpdateItemUsingPath",
+            None,
+            {
+                "listItemCreateInfo": list_item_create_info,
+                "formValues": form_values,
+                "bNewDocumentUpdate": bnew_document_update,
+                "checkInComment": check_in_comment,
+                "datesInUTC": dates_in_utc,
+                "numberInInvariantCulture": number_in_invariant_culture,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def caae_create_temp_folder(self) -> ClientResult[str]:
+        """CAAECreateTempFolder operation."""
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "CAAECreateTempFolder", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def caae_rename_file_in_temporary_folder(self, path: str, updated_name: str) -> ClientResult[str]:
+        """CAAERenameFileInTemporaryFolder operation.
+
+        Args:
+            path (str):
+                Path parameter
+            updated_name (str):
+                UpdatedName parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self, "CAAERenameFileInTemporaryFolder", None, {"Path": path, "UpdatedName": updated_name}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def cancel_delete_file_versions(self) -> Self:
+        """CancelDeleteFileVersions operation."""
+        qry = ServiceOperationQuery(self, "CancelDeleteFileVersions", None, {}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def clear_business_app_migration_interactive_data(self) -> Self:
+        """ClearBusinessAppMigrationInteractiveData operation."""
+        qry = ServiceOperationQuery(self, "ClearBusinessAppMigrationInteractiveData", None, {}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def copy_template_and_get_metadata(self, id_: str) -> ClientResult[TemplatizationMetaData]:
+        """CopyTemplateAndGetMetadata operation.
+
+        Args:
+            id_ (str):
+                Id parameter
+        """
+        from office365.sharepoint.lists.templatization_metadata import (
+            TemplatizationMetaData,
+        )
+
+        return_type = ClientResult(self.context, TemplatizationMetaData())
+        qry = ServiceOperationQuery(self, "CopyTemplateAndGetMetadata", None, {"Id": id_}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def create_document_from_caae_template(
+        self, content_type_name: str, document_generation_info: DocumentGenerationInfo
+    ) -> ClientResult[ContentAssemblyFileInfo]:
+        """CreateDocumentFromCAAETemplate operation.
+
+        Args:
+            content_type_name (str):
+                ContentTypeName parameter
+            document_generation_info (DocumentGenerationInfo):
+                documentGenerationInfo parameter
+        """
+        from office365.sharepoint.documents.contentassemblyfileinfo import (
+            ContentAssemblyFileInfo,
+        )
+
+        return_type = ClientResult(self.context, ContentAssemblyFileInfo())
+        qry = ServiceOperationQuery(
+            self,
+            "CreateDocumentFromCAAETemplate",
+            None,
+            {"ContentTypeName": content_type_name, "documentGenerationInfo": document_generation_info},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def create_document_from_caae_template_v2(
+        self, id_: str, document_generation_info: DocumentGenerationInfo
+    ) -> ClientResult[ContentAssemblyFileInfo]:
+        """CreateDocumentFromCAAETemplateV2 operation.
+
+        Args:
+            id_ (str):
+                Id parameter
+            document_generation_info (DocumentGenerationInfo):
+                documentGenerationInfo parameter
+        """
+        from office365.sharepoint.documents.contentassemblyfileinfo import (
+            ContentAssemblyFileInfo,
+        )
+
+        return_type = ClientResult(self.context, ContentAssemblyFileInfo())
+        qry = ServiceOperationQuery(
+            self,
+            "CreateDocumentFromCAAETemplateV2",
+            None,
+            {"Id": id_, "documentGenerationInfo": document_generation_info},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def create_document_from_content_assembly_template(
+        self, template_url: str, document_generation_info: DocumentGenerationInfo
+    ) -> ClientResult[ContentAssemblyFileInfo]:
+        """CreateDocumentFromContentAssemblyTemplate operation.
+
+        Args:
+            template_url (str):
+                TemplateUrl parameter
+            document_generation_info (DocumentGenerationInfo):
+                documentGenerationInfo parameter
+        """
+        from office365.sharepoint.documents.contentassemblyfileinfo import (
+            ContentAssemblyFileInfo,
+        )
+
+        return_type = ClientResult(self.context, ContentAssemblyFileInfo())
+        qry = ServiceOperationQuery(
+            self,
+            "CreateDocumentFromContentAssemblyTemplate",
+            None,
+            {"TemplateUrl": template_url, "documentGenerationInfo": document_generation_info},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def create_hvcs_item_approval_request(
+        self, create_item_request_payload: CreateHVCSItemApprovalRequestParameters
+    ) -> ClientResult[str]:
+        """CreateHVCSItemApprovalRequest operation.
+
+        Args:
+            create_item_request_payload (CreateHVCSItemApprovalRequestParameters):
+                createItemRequestPayload parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "CreateHVCSItemApprovalRequest",
+            None,
+            {"createItemRequestPayload": create_item_request_payload},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def create_list_form(self, parameters: ListForm) -> ClientResult[ListForm]:
+        """CreateListForm operation.
+
+        Args:
+            parameters (ListForm):
+                parameters parameter
+        """
+        from office365.sharepoint.lists.listform import ListForm
+
+        return_type = ClientResult(self.context, ListForm())
+        qry = ServiceOperationQuery(self, "CreateListForm", None, {"parameters": parameters}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def create_rule_ex(
+        self, condition: str, title: str, trigger_type: int, action: SPRuleAction, rule_template_id: str
+    ) -> ClientResult[UUID]:
+        """CreateRuleEx operation.
+
+        Args:
+            condition (str):
+                condition parameter
+            title (str):
+                title parameter
+            trigger_type (int):
+                triggerType parameter
+            action (SPRuleAction):
+                action parameter
+            rule_template_id (str):
+                ruleTemplateId parameter
+        """
+        return_type = ClientResult(self.context, UUID(int=0))
+        qry = ServiceOperationQuery(
+            self,
+            "CreateRuleEx",
+            None,
+            {
+                "condition": condition,
+                "title": title,
+                "triggerType": trigger_type,
+                "action": action,
+                "ruleTemplateId": rule_template_id,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def enable_queryable_columns(self) -> Self:
+        """EnableQueryableColumns operation."""
+        qry = ServiceOperationQuery(self, "EnableQueryableColumns", None, {}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def get_async_action_task_ids(self) -> ClientResult[GuidCollection]:
+        """GetAsyncActionTaskIds operation."""
+        return_type = ClientResult(self.context, GuidCollection())
+        qry = ServiceOperationQuery(self, "GetAsyncActionTaskIds", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_business_app_migration_interactive_data(self) -> ClientResult[str]:
+        """GetBusinessAppMigrationInteractiveData operation."""
+        return_type = ClientResult(self.context, str())
+        qry = FunctionQuery(self, "GetBusinessAppMigrationInteractiveData", [], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_caae_template_metadata(self, name: str, published: bool) -> ClientResult[TemplateMetaData]:
+        """GetCAAETemplateMetadata operation.
+
+        Args:
+            name (str):
+                Name parameter
+            published (bool):
+                Published parameter
+        """
+        from office365.sharepoint.documents.templatemetadata import TemplateMetaData
+
+        return_type = ClientResult(self.context, TemplateMetaData())
+        qry = FunctionQuery(self, "GetCAAETemplateMetadata", [name, published], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_caae_template_metadata_v2(self, id_: str) -> ClientResult[ClientValueCollection[PlaceholderV2]]:
+        """GetCAAETemplateMetadataV2 operation.
+
+        Args:
+            id_ (str):
+                Id parameter
+        """
+        from office365.sharepoint.documents.placeholderv2 import PlaceholderV2
+
+        return_type = ClientResult(self.context, ClientValueCollection[PlaceholderV2]())
+        qry = FunctionQuery(self, "GetCAAETemplateMetadataV2", [id_], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_content_assembly_document_field_values(self, document_url: str) -> ClientResult[FieldValuesWithUrl]:
+        """GetContentAssemblyDocumentFieldValues operation.
+
+        Args:
+            document_url (str):
+                DocumentUrl parameter
+        """
+        from office365.sharepoint.documents.fieldvalueswithurl import FieldValuesWithUrl
+
+        return_type = ClientResult(self.context, FieldValuesWithUrl())
+        qry = FunctionQuery(self, "GetContentAssemblyDocumentFieldValues", [document_url], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_content_assembly_template_fields(
+        self, template_url: str
+    ) -> ClientResult[ClientValueCollection[PlaceholderV2]]:
+        """GetContentAssemblyTemplateFields operation.
+
+        Args:
+            template_url (str):
+                TemplateUrl parameter
+        """
+        from office365.sharepoint.documents.placeholderv2 import PlaceholderV2
+
+        return_type = ClientResult(self.context, ClientValueCollection[PlaceholderV2]())
+        qry = FunctionQuery(self, "GetContentAssemblyTemplateFields", [template_url], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_list_forms(self, bsanitize: bool) -> ClientResult[ClientValueCollection[ListForm]]:
+        """GetListForms operation.
+
+        Args:
+            bsanitize (bool):
+                bSanitize parameter
+        """
+        from office365.sharepoint.lists.listform import ListForm
+
+        return_type = ClientResult(self.context, ClientValueCollection[ListForm]())
+        qry = FunctionQuery(self, "GetListForms", [bsanitize], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_progress_for_delete_file_versions(self) -> ClientResult[str]:
+        """GetProgressForDeleteFileVersions operation."""
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "GetProgressForDeleteFileVersions", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_progress_for_file_version_expiration_report(self, report_file_url: str) -> ClientResult[str]:
+        """GetProgressForFileVersionExpirationReport operation.
+
+        Args:
+            report_file_url (str):
+                reportFileUrl parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "GetProgressForFileVersionExpirationReport",
+            None,
+            {"reportFileUrl": report_file_url},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def is_syntex_ai_features_flight_enabled(self) -> ClientResult[bool]:
+        """IsSyntexAIFeaturesFlightEnabled operation."""
+        return_type = ClientResult(self.context, bool())
+        qry = FunctionQuery(self, "IsSyntexAIFeaturesFlightEnabled", [], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def lock_smart_template(self, id_: str) -> ClientResult[LockFileData]:
+        """LockSmartTemplate operation.
+
+        Args:
+            id_ (str):
+                Id parameter
+        """
+        from office365.sharepoint.documents.lockfiledata import LockFileData
+
+        return_type = ClientResult(self.context, LockFileData())
+        qry = ServiceOperationQuery(self, "LockSmartTemplate", None, {"Id": id_}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def map_fields_to_columns_for_modern_temlate(
+        self, payload: PublishModernTemplatePayload
+    ) -> ClientResult[ContentAssemblyModernTemplateColumnsMappingInfo]:
+        """MapFieldsToColumnsForModernTemlate operation.
+
+        Args:
+            payload (PublishModernTemplatePayload):
+                payload parameter
+        """
+        from office365.sharepoint.documents.contentassemblymoderntemplatecolumnsmappinginfo import (
+            ContentAssemblyModernTemplateColumnsMappingInfo,
+        )
+
+        return_type = ClientResult(self.context, ContentAssemblyModernTemplateColumnsMappingInfo())
+        qry = ServiceOperationQuery(
+            self, "MapFieldsToColumnsForModernTemlate", None, {"payload": payload}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def map_fields_to_columns_for_modern_template(
+        self, template_payload: PublishModernTemplatePayload
+    ) -> ClientResult[ContentAssemblyModernTemplateColumnsMappingInfo]:
+        """MapFieldsToColumnsForModernTemplate operation.
+
+        Args:
+            template_payload (PublishModernTemplatePayload):
+                templatePayload parameter
+        """
+        from office365.sharepoint.documents.contentassemblymoderntemplatecolumnsmappinginfo import (
+            ContentAssemblyModernTemplateColumnsMappingInfo,
+        )
+
+        return_type = ClientResult(self.context, ContentAssemblyModernTemplateColumnsMappingInfo())
+        qry = ServiceOperationQuery(
+            self, "MapFieldsToColumnsForModernTemplate", None, {"templatePayload": template_payload}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def parse_document_template(self, name: str) -> ClientResult[str]:
+        """ParseDocumentTemplate operation.
+
+        Args:
+            name (str):
+                Name parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "ParseDocumentTemplate", None, {"Name": name}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def publish_snippet(self, publish_snippet_payload: PublishSnippetPayload) -> Self:
+        """PublishSnippet operation.
+
+        Args:
+            publish_snippet_payload (PublishSnippetPayload):
+                publishSnippetPayload parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "PublishSnippet", None, {"publishSnippetPayload": publish_snippet_payload}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def publish_template_v2(self, payload: PublishTemplateV2Payload) -> Self:
+        """PublishTemplateV2 operation.
+
+        Args:
+            payload (PublishTemplateV2Payload):
+                payload parameter
+        """
+        qry = ServiceOperationQuery(self, "PublishTemplateV2", None, {"payload": payload}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def refresh_lock_smart_template(self, id_: str, lock_id: str) -> ClientResult[LockFileData]:
+        """RefreshLockSmartTemplate operation.
+
+        Args:
+            id_ (str):
+                Id parameter
+            lock_id (str):
+                LockId parameter
+        """
+        from office365.sharepoint.documents.lockfiledata import LockFileData
+
+        return_type = ClientResult(self.context, LockFileData())
+        qry = ServiceOperationQuery(
+            self, "RefreshLockSmartTemplate", None, {"Id": id_, "LockId": lock_id}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def render_extended_list_form_data(
+        self, item_id: int, form_id: str, mode: int, options: int, cutoff_version: int
+    ) -> ClientResult[str]:
+        """RenderExtendedListFormData operation.
+
+        Args:
+            item_id (int):
+                itemId parameter
+            form_id (str):
+                formId parameter
+            mode (int):
+                mode parameter
+            options (int):
+                options parameter
+            cutoff_version (int):
+                cutoffVersion parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "RenderExtendedListFormData",
+            None,
+            {"itemId": item_id, "formId": form_id, "mode": mode, "options": options, "cutoffVersion": cutoff_version},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def render_list_context_menu_data(
+        self,
+        casc_del_warn_message: str,
+        custom_action: str,
+        field: str,
+        id_: str,
+        inplace_full_list_search: str,
+        inplace_search_query: str,
+        is_csr: str,
+        is_xsl_view: str,
+        item_id: str,
+        list_view_page_url: str,
+        override_scope: str,
+        root_folder: str,
+        view: str,
+        view_count: str,
+    ) -> ClientResult[bytes]:
+        """RenderListContextMenuData operation.
+
+        Args:
+            casc_del_warn_message (str):
+                CascDelWarnMessage parameter
+            custom_action (str):
+                CustomAction parameter
+            field (str):
+                Field parameter
+            id_ (str):
+                ID parameter
+            inplace_full_list_search (str):
+                InplaceFullListSearch parameter
+            inplace_search_query (str):
+                InplaceSearchQuery parameter
+            is_csr (str):
+                IsCSR parameter
+            is_xsl_view (str):
+                IsXslView parameter
+            item_id (str):
+                ItemId parameter
+            list_view_page_url (str):
+                ListViewPageUrl parameter
+            override_scope (str):
+                OverrideScope parameter
+            root_folder (str):
+                RootFolder parameter
+            view (str):
+                View parameter
+            view_count (str):
+                ViewCount parameter
+        """
+        return_type = ClientResult(self.context, bytes())
+        qry = ServiceOperationQuery(
+            self,
+            "RenderListContextMenuData",
+            None,
+            {
+                "CascDelWarnMessage": casc_del_warn_message,
+                "CustomAction": custom_action,
+                "Field": field,
+                "ID": id_,
+                "InplaceFullListSearch": inplace_full_list_search,
+                "InplaceSearchQuery": inplace_search_query,
+                "IsCSR": is_csr,
+                "IsXslView": is_xsl_view,
+                "ItemId": item_id,
+                "ListViewPageUrl": list_view_page_url,
+                "OverrideScope": override_scope,
+                "RootFolder": root_folder,
+                "View": view,
+                "ViewCount": view_count,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def render_list_filter_data(
+        self,
+        exclude_field_filtering_html: bool,
+        field_internal_name: str,
+        override_scope: str,
+        process_q_string_to_caml: str,
+        view_id: str,
+        view_xml: str,
+    ) -> ClientResult[bytes]:
+        """RenderListFilterData operation.
+
+        Args:
+            exclude_field_filtering_html (bool):
+                ExcludeFieldFilteringHtml parameter
+            field_internal_name (str):
+                FieldInternalName parameter
+            override_scope (str):
+                OverrideScope parameter
+            process_q_string_to_caml (str):
+                ProcessQStringToCAML parameter
+            view_id (str):
+                ViewId parameter
+            view_xml (str):
+                ViewXml parameter
+        """
+        return_type = ClientResult(self.context, bytes())
+        qry = ServiceOperationQuery(
+            self,
+            "RenderListFilterData",
+            None,
+            {
+                "ExcludeFieldFilteringHtml": exclude_field_filtering_html,
+                "FieldInternalName": field_internal_name,
+                "OverrideScope": override_scope,
+                "ProcessQStringToCAML": process_q_string_to_caml,
+                "ViewId": view_id,
+                "ViewXml": view_xml,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def render_list_form_data(self, item_id: int, form_id: str, mode: int) -> ClientResult[str]:
+        """RenderListFormData operation.
+
+        Args:
+            item_id (int):
+                itemId parameter
+            form_id (str):
+                formId parameter
+            mode (int):
+                mode parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self, "RenderListFormData", None, {"itemId": item_id, "formId": form_id, "mode": mode}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def set_column_mapping(self, column_mapping: str) -> Self:
+        """SetColumnMapping operation.
+
+        Args:
+            column_mapping (str):
+                columnMapping parameter
+        """
+        qry = ServiceOperationQuery(self, "SetColumnMapping", None, {"columnMapping": column_mapping}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def set_content_assembly_template_read_only(self, id_: str) -> Self:
+        """SetContentAssemblyTemplateReadOnly operation.
+
+        Args:
+            id_ (str):
+                Id parameter
+        """
+        qry = ServiceOperationQuery(self, "SetContentAssemblyTemplateReadOnly", None, {"Id": id_}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def set_items_order(
+        self, item_ids: list[int], lower_order_item_id: int, higher_order_item_id: int, use_provided_order_item_id: bool
+    ) -> ClientResult[ClientValueCollection[ItemOrderUpdateValue]]:
+        """SetItemsOrder operation.
+
+        Args:
+            item_ids (list[int]):
+                itemIds parameter
+            lower_order_item_id (int):
+                lowerOrderItemId parameter
+            higher_order_item_id (int):
+                higherOrderItemId parameter
+            use_provided_order_item_id (bool):
+                useProvidedOrderItemId parameter
+        """
+        from office365.sharepoint.documents.itemorderupdatevalue import (
+            ItemOrderUpdateValue,
+        )
+
+        return_type = ClientResult(self.context, ClientValueCollection[ItemOrderUpdateValue]())
+        qry = ServiceOperationQuery(
+            self,
+            "SetItemsOrder",
+            None,
+            {
+                "itemIds": ClientValueCollection(int, item_ids),
+                "lowerOrderItemId": lower_order_item_id,
+                "higherOrderItemId": higher_order_item_id,
+                "useProvidedOrderItemId": use_provided_order_item_id,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def set_list_custom_order_flag(self, value: bool) -> Self:
+        """SetListCustomOrderFlag operation.
+
+        Args:
+            value (bool):
+                value parameter
+        """
+        qry = ServiceOperationQuery(self, "SetListCustomOrderFlag", None, {"value": value}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def set_quickstep_ordering(self, quickstep_ids: str) -> Self:
+        """SetQuickstepOrdering operation.
+
+        Args:
+            quickstep_ids (str):
+                quickstepIds parameter
+        """
+        qry = ServiceOperationQuery(self, "SetQuickstepOrdering", None, {"quickstepIds": quickstep_ids}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def start_delete_file_versions(self, delete_older_than_days: int) -> Self:
+        """StartDeleteFileVersions operation.
+
+        Args:
+            delete_older_than_days (int):
+                deleteOlderThanDays parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "StartDeleteFileVersions", None, {"deleteOlderThanDays": delete_older_than_days}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def start_delete_file_versions_by_mode(self, batch_delete_parameters: FileVersionBatchDeleteParameters) -> Self:
+        """StartDeleteFileVersionsByMode operation.
+
+        Args:
+            batch_delete_parameters (FileVersionBatchDeleteParameters):
+                batchDeleteParameters parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "StartDeleteFileVersionsByMode", None, {"batchDeleteParameters": batch_delete_parameters}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def start_file_version_expiration_report(self, report_file_url: str) -> Self:
+        """StartFileVersionExpirationReport operation.
+
+        Args:
+            report_file_url (str):
+                reportFileUrl parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "StartFileVersionExpirationReport", None, {"reportFileUrl": report_file_url}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def unlock_smart_template(self, id_: str, lock_id: str) -> Self:
+        """UnlockSmartTemplate operation.
+
+        Args:
+            id_ (str):
+                Id parameter
+            lock_id (str):
+                LockId parameter
+        """
+        qry = ServiceOperationQuery(self, "UnlockSmartTemplate", None, {"Id": id_, "LockId": lock_id}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def unset_content_assembly_template_read_only(self, id_: str) -> Self:
+        """UnsetContentAssemblyTemplateReadOnly operation.
+
+        Args:
+            id_ (str):
+                Id parameter
+        """
+        qry = ServiceOperationQuery(self, "UnsetContentAssemblyTemplateReadOnly", None, {"Id": id_}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def update_caae_template(self, name: str, update_template_info: UpdateTemplateInfo) -> Self:
+        """UpdateCAAETemplate operation.
+
+        Args:
+            name (str):
+                Name parameter
+            update_template_info (UpdateTemplateInfo):
+                updateTemplateInfo parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "UpdateCAAETemplate", None, {"Name": name, "updateTemplateInfo": update_template_info}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def update_caae_template_v2(self, id_: str, update_template_info: UpdateTemplateInfoV2) -> Self:
+        """UpdateCAAETemplateV2 operation.
+
+        Args:
+            id_ (str):
+                Id parameter
+            update_template_info (UpdateTemplateInfoV2):
+                updateTemplateInfo parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "UpdateCAAETemplateV2", None, {"Id": id_, "updateTemplateInfo": update_template_info}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def update_content_assembly_document(
+        self, template_url: str, content_assembly_form_answers: ClientValueCollection[ContentAssemblyFormAnswer]
+    ) -> ClientResult[ContentAssemblyFileInfo]:
+        """UpdateContentAssemblyDocument operation.
+
+        Args:
+            template_url (str):
+                TemplateUrl parameter
+            content_assembly_form_answers (ClientValueCollection[ContentAssemblyFormAnswer]):
+                contentAssemblyFormAnswers parameter
+        """
+        from office365.sharepoint.documents.contentassemblyfileinfo import (
+            ContentAssemblyFileInfo,
+        )
+
+        return_type = ClientResult(self.context, ContentAssemblyFileInfo())
+        qry = ServiceOperationQuery(
+            self,
+            "UpdateContentAssemblyDocument",
+            None,
+            {"TemplateUrl": template_url, "contentAssemblyFormAnswers": content_assembly_form_answers},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def update_form_processing_model_retention_label(self, retention_label: str) -> Self:
+        """UpdateFormProcessingModelRetentionLabel operation.
+
+        Args:
+            retention_label (str):
+                retentionLabel parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "UpdateFormProcessingModelRetentionLabel", None, {"retentionLabel": retention_label}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def update_form_processing_model_settings(self, retention_label: str, linked_list: str) -> Self:
+        """UpdateFormProcessingModelSettings operation.
+
+        Args:
+            retention_label (str):
+                retentionLabel parameter
+            linked_list (str):
+                linkedList parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "UpdateFormProcessingModelSettings",
+            None,
+            {"retentionLabel": retention_label, "linkedList": linked_list},
+            None,
+            None,
+        )
+        self.context.add_query(qry)
+        return self
+
+    def update_list_form(self, parameters: ListForm) -> ClientResult[ListForm]:
+        """UpdateListForm operation.
+
+        Args:
+            parameters (ListForm):
+                parameters parameter
+        """
+        from office365.sharepoint.lists.listform import ListForm
+
+        return_type = ClientResult(self.context, ListForm())
+        qry = ServiceOperationQuery(self, "UpdateListForm", None, {"parameters": parameters}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def update_rule_ex(
+        self, rule_id: str, condition: str, title: str, status: int, action: SPRuleAction, trigger_type: int
+    ) -> Self:
+        """UpdateRuleEx operation.
+
+        Args:
+            rule_id (str):
+                ruleId parameter
+            condition (str):
+                condition parameter
+            title (str):
+                title parameter
+            status (int):
+                status parameter
+            action (SPRuleAction):
+                action parameter
+            trigger_type (int):
+                triggerType parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "UpdateRuleEx",
+            None,
+            {
+                "ruleId": rule_id,
+                "condition": condition,
+                "title": title,
+                "status": status,
+                "action": action,
+                "triggerType": trigger_type,
+            },
+            None,
+            None,
+        )
+        self.context.add_query(qry)
         return self

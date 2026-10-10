@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 
@@ -79,3 +81,8 @@ class TenantRenameJob(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.Onboarding.RestService.TenantRename.TenantRenameJob"
+
+    @property
+    def datetime_format(self) -> Optional[str]:
+        """Gets the DateTimeFormat property"""
+        return self.properties.get("DateTimeFormat", None)

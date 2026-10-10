@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.fields.lookup import FieldLookup
@@ -40,3 +42,13 @@ class FieldUser(FieldLookup):
         values of the field.
         """
         self.properties.get("SelectionGroup", val)
+
+    @property
+    def selection_mode(self) -> Optional[int]:
+        """Gets the SelectionMode property"""
+        return self.properties.get("SelectionMode", None)
+
+    @property
+    def user_display_options(self) -> Optional[str]:
+        """Gets the UserDisplayOptions property"""
+        return self.properties.get("UserDisplayOptions", None)

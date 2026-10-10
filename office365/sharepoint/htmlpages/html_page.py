@@ -14,3 +14,8 @@ class HtmlPage(Entity):
     @property
     def entity_type_name(self) -> str:
         return "SP.HtmlPages.HtmlPage"
+
+    @property
+    def id(self) -> Optional[int]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

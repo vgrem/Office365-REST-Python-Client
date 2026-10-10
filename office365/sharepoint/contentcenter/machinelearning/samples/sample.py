@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -125,3 +127,8 @@ class SPMachineLearningSample(Entity):
     def unique_id(self) -> Optional[UUID]:
         """Gets the UniqueId property"""
         return self.properties.get("UniqueId", None)
+
+    @property
+    def id(self) -> Optional[int]:
+        """Gets the ID property"""
+        return self.properties.get("ID", None)

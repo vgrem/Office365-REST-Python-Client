@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from typing import Optional
 
+from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.fields.field import Field
 
 
@@ -54,3 +57,23 @@ class FieldLookup(Field):
         """Gets or sets a Boolean value that specifies whether to allow values with unlimited text
         in the lookup field."""
         return self.properties.get("UnlimitedLengthInDocumentLibrary", None)
+
+    @property
+    def dependent_lookup_internal_names(self) -> StringCollection:
+        """Gets the DependentLookupInternalNames property"""
+        return self.properties.get("DependentLookupInternalNames", StringCollection())
+
+    @property
+    def is_dependent_lookup(self) -> Optional[bool]:
+        """Gets the IsDependentLookup property"""
+        return self.properties.get("IsDependentLookup", None)
+
+    @property
+    def is_relationship(self) -> Optional[bool]:
+        """Gets the IsRelationship property"""
+        return self.properties.get("IsRelationship", None)
+
+    @property
+    def lookup_field(self) -> Optional[str]:
+        """Gets the LookupField property"""
+        return self.properties.get("LookupField", None)

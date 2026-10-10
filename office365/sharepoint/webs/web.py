@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Callable, Optional, Union
+from uuid import UUID
 
 from typing_extensions import Self
 
@@ -13,6 +14,7 @@ from office365.runtime.operations import Progress
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.client_query import ClientQuery
+from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
@@ -127,7 +129,38 @@ from office365.sharepoint.webs.templates.collection import WebTemplateCollection
 from office365.sharepoint.webs.theme_info import ThemeInfo
 
 if TYPE_CHECKING:
+    from office365.sharepoint.changes.token import ChangeToken
     from office365.sharepoint.client_context import ClientContext
+    from office365.sharepoint.clientsidecomponent.spteamsappcomponent import (
+        SPTeamsAppComponent,
+    )
+    from office365.sharepoint.documents.fontoption import FontOption
+    from office365.sharepoint.folders.coloring import FolderColoring
+    from office365.sharepoint.marketplace.corporatecuratedgallery.addins.permission_request import (
+        SPAddinPermissionRequest,
+    )
+    from office365.sharepoint.marketplace.corporatecuratedgallery.addins.permission_response import (
+        SPAddinPermissionResponse,
+    )
+    from office365.sharepoint.marketplace.corporatecuratedgallery.carddesigns.card_designs import (
+        CardDesigns,
+    )
+    from office365.sharepoint.marketplace.corporatecuratedgallery.spuninstalladdinjobdetail import (
+        SPUninstallAddinJobDetail,
+    )
+    from office365.sharepoint.marketplace.corporatecuratedgallery.spuninstalladdinrequest import (
+        SPUninstallAddinRequest,
+    )
+    from office365.sharepoint.marketplace.corporatecuratedgallery.spuninstalladdinresponse import (
+        SPUninstallAddinResponse,
+    )
+    from office365.sharepoint.webs.apptile import AppTile
+    from office365.sharepoint.webs.sp_focal_point import SPFocalPoint
+    from office365.sharepoint.webs.spimageitem import SPImageItem
+    from office365.sharepoint.workflow.associations.association import (
+        WorkflowAssociation,
+    )
+    from office365.sharepoint.workflow.template import WorkflowTemplate
 
 
 class Web(SecurableObject):
@@ -2617,3 +2650,1050 @@ class Web(SecurableObject):
         if self._web_url is not None:
             orig_resource_url = orig_resource_url.replace(self.context.service_root_url, self._web_url + "/_api")
         return orig_resource_url
+
+    @property
+    def access_request_site_description(self) -> Optional[str]:
+        """Gets the AccessRequestSiteDescription property"""
+        return self.properties.get("AccessRequestSiteDescription", None)
+
+    @property
+    def acronym(self) -> Optional[str]:
+        """Gets the Acronym property"""
+        return self.properties.get("Acronym", None)
+
+    @property
+    def allow_automatic_aspx_page_indexing(self) -> Optional[bool]:
+        """Gets the AllowAutomaticASPXPageIndexing property"""
+        return self.properties.get("AllowAutomaticASPXPageIndexing", None)
+
+    @property
+    def allow_create_declarative_workflow_for_current_user(self) -> Optional[bool]:
+        """Gets the AllowCreateDeclarativeWorkflowForCurrentUser property"""
+        return self.properties.get("AllowCreateDeclarativeWorkflowForCurrentUser", None)
+
+    @property
+    def allow_save_declarative_workflow_as_template_for_current_user(self) -> Optional[bool]:
+        """Gets the AllowSaveDeclarativeWorkflowAsTemplateForCurrentUser property"""
+        return self.properties.get("AllowSaveDeclarativeWorkflowAsTemplateForCurrentUser", None)
+
+    @property
+    def allow_save_publish_declarative_workflow_for_current_user(self) -> Optional[bool]:
+        """Gets the AllowSavePublishDeclarativeWorkflowForCurrentUser property"""
+        return self.properties.get("AllowSavePublishDeclarativeWorkflowForCurrentUser", None)
+
+    @property
+    def classic_welcome_page(self) -> Optional[str]:
+        """Gets the ClassicWelcomePage property"""
+        return self.properties.get("ClassicWelcomePage", None)
+
+    @property
+    def comments_on_site_pages_disabled(self) -> Optional[bool]:
+        """Gets the CommentsOnSitePagesDisabled property"""
+        return self.properties.get("CommentsOnSitePagesDisabled", None)
+
+    @property
+    def contains_confidential_info(self) -> Optional[bool]:
+        """Gets the ContainsConfidentialInfo property"""
+        return self.properties.get("ContainsConfidentialInfo", None)
+
+    @property
+    def current_change_token(self) -> ChangeToken:
+        """Gets the CurrentChangeToken property"""
+        from office365.sharepoint.changes.token import ChangeToken
+
+        return self.properties.get("CurrentChangeToken", ChangeToken())
+
+    @property
+    def default_new_page_template_id(self) -> Optional[UUID]:
+        """Gets the DefaultNewPageTemplateId property"""
+        return self.properties.get("DefaultNewPageTemplateId", None)
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the Description property"""
+        return self.properties.get("Description", None)
+
+    @property
+    def description_for_existing_language(self) -> Optional[str]:
+        """Gets the DescriptionForExistingLanguage property"""
+        return self.properties.get("DescriptionForExistingLanguage", None)
+
+    @property
+    def designer_download_url_for_current_user(self) -> Optional[str]:
+        """Gets the DesignerDownloadUrlForCurrentUser property"""
+        return self.properties.get("DesignerDownloadUrlForCurrentUser", None)
+
+    @property
+    def disable_recommended_items(self) -> Optional[bool]:
+        """Gets the DisableRecommendedItems property"""
+        return self.properties.get("DisableRecommendedItems", None)
+
+    @property
+    def document_library_callout_office_web_app_previewers_disabled(self) -> Optional[bool]:
+        """Gets the DocumentLibraryCalloutOfficeWebAppPreviewersDisabled property"""
+        return self.properties.get("DocumentLibraryCalloutOfficeWebAppPreviewersDisabled", None)
+
+    @property
+    def exclude_from_offline_client(self) -> Optional[bool]:
+        """Gets the ExcludeFromOfflineClient property"""
+        return self.properties.get("ExcludeFromOfflineClient", None)
+
+    @property
+    def font_option_for_site_footer_nav(self) -> FontOption:
+        """Gets the FontOptionForSiteFooterNav property"""
+        from office365.sharepoint.documents.fontoption import FontOption
+
+        return self.properties.get("FontOptionForSiteFooterNav", FontOption())
+
+    @property
+    def font_option_for_site_footer_title(self) -> FontOption:
+        """Gets the FontOptionForSiteFooterTitle property"""
+        from office365.sharepoint.documents.fontoption import FontOption
+
+        return self.properties.get("FontOptionForSiteFooterTitle", FontOption())
+
+    @property
+    def font_option_for_site_nav(self) -> FontOption:
+        """Gets the FontOptionForSiteNav property"""
+        from office365.sharepoint.documents.fontoption import FontOption
+
+        return self.properties.get("FontOptionForSiteNav", FontOption())
+
+    @property
+    def font_option_for_site_title(self) -> FontOption:
+        """Gets the FontOptionForSiteTitle property"""
+        from office365.sharepoint.documents.fontoption import FontOption
+
+        return self.properties.get("FontOptionForSiteTitle", FontOption())
+
+    @property
+    def footer_alignment(self) -> Optional[int]:
+        """Gets the FooterAlignment property"""
+        return self.properties.get("FooterAlignment", None)
+
+    @property
+    def footer_background_focal_point(self) -> SPFocalPoint:
+        """Gets the FooterBackgroundFocalPoint property"""
+        from office365.sharepoint.webs.sp_focal_point import SPFocalPoint
+
+        return self.properties.get("FooterBackgroundFocalPoint", SPFocalPoint())
+
+    @property
+    def footer_blur(self) -> Optional[int]:
+        """Gets the FooterBlur property"""
+        return self.properties.get("FooterBlur", None)
+
+    @property
+    def footer_color_index_in_dark_mode(self) -> Optional[int]:
+        """Gets the FooterColorIndexInDarkMode property"""
+        return self.properties.get("FooterColorIndexInDarkMode", None)
+
+    @property
+    def footer_color_index_in_light_mode(self) -> Optional[int]:
+        """Gets the FooterColorIndexInLightMode property"""
+        return self.properties.get("FooterColorIndexInLightMode", None)
+
+    @property
+    def footer_emphasis(self) -> Optional[int]:
+        """Gets the FooterEmphasis property"""
+        return self.properties.get("FooterEmphasis", None)
+
+    @property
+    def footer_enabled(self) -> Optional[bool]:
+        """Gets the FooterEnabled property"""
+        return self.properties.get("FooterEnabled", None)
+
+    @property
+    def footer_layout(self) -> Optional[int]:
+        """Gets the FooterLayout property"""
+        return self.properties.get("FooterLayout", None)
+
+    @property
+    def footer_overlay_color(self) -> Optional[int]:
+        """Gets the FooterOverlayColor property"""
+        return self.properties.get("FooterOverlayColor", None)
+
+    @property
+    def footer_overlay_gradient_direction(self) -> Optional[int]:
+        """Gets the FooterOverlayGradientDirection property"""
+        return self.properties.get("FooterOverlayGradientDirection", None)
+
+    @property
+    def footer_overlay_opacity(self) -> Optional[int]:
+        """Gets the FooterOverlayOpacity property"""
+        return self.properties.get("FooterOverlayOpacity", None)
+
+    @property
+    def has_footer_background_image(self) -> Optional[bool]:
+        """Gets the HasFooterBackgroundImage property"""
+        return self.properties.get("HasFooterBackgroundImage", None)
+
+    @property
+    def has_header_background_image(self) -> Optional[bool]:
+        """Gets the HasHeaderBackgroundImage property"""
+        return self.properties.get("HasHeaderBackgroundImage", None)
+
+    @property
+    def has_web_template_extension(self) -> Optional[bool]:
+        """Gets the HasWebTemplateExtension property"""
+        return self.properties.get("HasWebTemplateExtension", None)
+
+    @property
+    def header_color_index_in_dark_mode(self) -> Optional[int]:
+        """Gets the HeaderColorIndexInDarkMode property"""
+        return self.properties.get("HeaderColorIndexInDarkMode", None)
+
+    @property
+    def header_color_index_in_light_mode(self) -> Optional[int]:
+        """Gets the HeaderColorIndexInLightMode property"""
+        return self.properties.get("HeaderColorIndexInLightMode", None)
+
+    @property
+    def header_emphasis(self) -> Optional[int]:
+        """Gets the HeaderEmphasis property"""
+        return self.properties.get("HeaderEmphasis", None)
+
+    @property
+    def header_layout(self) -> Optional[int]:
+        """Gets the HeaderLayout property"""
+        return self.properties.get("HeaderLayout", None)
+
+    @property
+    def header_overlay_color(self) -> Optional[int]:
+        """Gets the HeaderOverlayColor property"""
+        return self.properties.get("HeaderOverlayColor", None)
+
+    @property
+    def header_overlay_gradient_direction(self) -> Optional[int]:
+        """Gets the HeaderOverlayGradientDirection property"""
+        return self.properties.get("HeaderOverlayGradientDirection", None)
+
+    @property
+    def header_overlay_opacity(self) -> Optional[int]:
+        """Gets the HeaderOverlayOpacity property"""
+        return self.properties.get("HeaderOverlayOpacity", None)
+
+    @property
+    def hide_title_in_header(self) -> Optional[bool]:
+        """Gets the HideTitleInHeader property"""
+        return self.properties.get("HideTitleInHeader", None)
+
+    @property
+    def horizontal_quick_launch(self) -> Optional[bool]:
+        """Gets the HorizontalQuickLaunch property"""
+        return self.properties.get("HorizontalQuickLaunch", None)
+
+    @property
+    def is_edu_class(self) -> Optional[bool]:
+        """Gets the IsEduClass property"""
+        return self.properties.get("IsEduClass", None)
+
+    @property
+    def is_edu_class_provision_checked(self) -> Optional[bool]:
+        """Gets the IsEduClassProvisionChecked property"""
+        return self.properties.get("IsEduClassProvisionChecked", None)
+
+    @property
+    def is_edu_class_provision_pending(self) -> Optional[bool]:
+        """Gets the IsEduClassProvisionPending property"""
+        return self.properties.get("IsEduClassProvisionPending", None)
+
+    @property
+    def is_homepage_modernized(self) -> Optional[bool]:
+        """Gets the IsHomepageModernized property"""
+        return self.properties.get("IsHomepageModernized", None)
+
+    @property
+    def is_provisioning_complete(self) -> Optional[bool]:
+        """Gets the IsProvisioningComplete property"""
+        return self.properties.get("IsProvisioningComplete", None)
+
+    @property
+    def is_revert_homepage_link_hidden(self) -> Optional[bool]:
+        """Gets the IsRevertHomepageLinkHidden property"""
+        return self.properties.get("IsRevertHomepageLinkHidden", None)
+
+    @property
+    def last_item_user_modified_date(self) -> Optional[datetime]:
+        """Gets the LastItemUserModifiedDate property"""
+        return self.properties.get("LastItemUserModifiedDate", datetime.min)
+
+    @property
+    def logo_alignment(self) -> Optional[int]:
+        """Gets the LogoAlignment property"""
+        return self.properties.get("LogoAlignment", None)
+
+    @property
+    def master_url(self) -> Optional[str]:
+        """Gets the MasterUrl property"""
+        return self.properties.get("MasterUrl", None)
+
+    @property
+    def members_can_share(self) -> Optional[bool]:
+        """Gets the MembersCanShare property"""
+        return self.properties.get("MembersCanShare", None)
+
+    @property
+    def nav_audience_targeting_enabled(self) -> Optional[bool]:
+        """Gets the NavAudienceTargetingEnabled property"""
+        return self.properties.get("NavAudienceTargetingEnabled", None)
+
+    @property
+    def next_steps_first_run_enabled(self) -> Optional[bool]:
+        """Gets the NextStepsFirstRunEnabled property"""
+        return self.properties.get("NextStepsFirstRunEnabled", None)
+
+    @property
+    def no_crawl(self) -> Optional[bool]:
+        """Gets the NoCrawl property"""
+        return self.properties.get("NoCrawl", None)
+
+    @property
+    def notifications_in_onedrive_for_business_enabled(self) -> Optional[bool]:
+        """Gets the NotificationsInOneDriveForBusinessEnabled property"""
+        return self.properties.get("NotificationsInOneDriveForBusinessEnabled", None)
+
+    @property
+    def notifications_in_sharepoint_enabled(self) -> Optional[bool]:
+        """Gets the NotificationsInSharePointEnabled property"""
+        return self.properties.get("NotificationsInSharePointEnabled", None)
+
+    @property
+    def object_cache_enabled(self) -> Optional[bool]:
+        """Gets the ObjectCacheEnabled property"""
+        return self.properties.get("ObjectCacheEnabled", None)
+
+    @property
+    def overwrite_translations_on_change(self) -> Optional[bool]:
+        """Gets the OverwriteTranslationsOnChange property"""
+        return self.properties.get("OverwriteTranslationsOnChange", None)
+
+    @property
+    def preview_features_enabled(self) -> Optional[bool]:
+        """Gets the PreviewFeaturesEnabled property"""
+        return self.properties.get("PreviewFeaturesEnabled", None)
+
+    @property
+    def primary_color(self) -> Optional[str]:
+        """Gets the PrimaryColor property"""
+        return self.properties.get("PrimaryColor", None)
+
+    @property
+    def search_box_in_nav_bar(self) -> Optional[int]:
+        """Gets the SearchBoxInNavBar property"""
+        return self.properties.get("SearchBoxInNavBar", None)
+
+    @property
+    def search_scope(self) -> Optional[int]:
+        """Gets the SearchScope property"""
+        return self.properties.get("SearchScope", None)
+
+    @property
+    def server_relative_url(self) -> Optional[str]:
+        """Gets the ServerRelativeUrl property"""
+        return self.properties.get("ServerRelativeUrl", None)
+
+    @property
+    def should_extend_header_bg_image_to_nav(self) -> Optional[str]:
+        """Gets the ShouldExtendHeaderBgImageToNav property"""
+        return self.properties.get("ShouldExtendHeaderBgImageToNav", None)
+
+    @property
+    def show_url_structure_for_current_user(self) -> Optional[bool]:
+        """Gets the ShowUrlStructureForCurrentUser property"""
+        return self.properties.get("ShowUrlStructureForCurrentUser", None)
+
+    @property
+    def site_logo_description(self) -> Optional[str]:
+        """Gets the SiteLogoDescription property"""
+        return self.properties.get("SiteLogoDescription", None)
+
+    @property
+    def tenant_admin_members_can_share(self) -> Optional[int]:
+        """Gets the TenantAdminMembersCanShare property"""
+        return self.properties.get("TenantAdminMembersCanShare", None)
+
+    @property
+    def tenant_tag_policy_enabled(self) -> Optional[bool]:
+        """Gets the TenantTagPolicyEnabled property"""
+        return self.properties.get("TenantTagPolicyEnabled", None)
+
+    @property
+    def theme_application_action_history(self) -> Optional[str]:
+        """Gets the ThemeApplicationActionHistory property"""
+        return self.properties.get("ThemeApplicationActionHistory", None)
+
+    @property
+    def theme_data(self) -> Optional[str]:
+        """Gets the ThemeData property"""
+        return self.properties.get("ThemeData", None)
+
+    @property
+    def themed_css_folder_url(self) -> Optional[str]:
+        """Gets the ThemedCssFolderUrl property"""
+        return self.properties.get("ThemedCssFolderUrl", None)
+
+    @property
+    def third_party_mdm_enabled(self) -> Optional[bool]:
+        """Gets the ThirdPartyMdmEnabled property"""
+        return self.properties.get("ThirdPartyMdmEnabled", None)
+
+    @property
+    def title_for_existing_language(self) -> Optional[str]:
+        """Gets the TitleForExistingLanguage property"""
+        return self.properties.get("TitleForExistingLanguage", None)
+
+    @property
+    def title_translations(self) -> ClientValueCollection[SPResourceEntry]:
+        """Gets the TitleTranslations property"""
+        from office365.sharepoint.translation.resource_entry import SPResourceEntry
+
+        return self.properties.get("TitleTranslations", ClientValueCollection[SPResourceEntry](SPResourceEntry))
+
+    @property
+    def tree_view_enabled(self) -> Optional[bool]:
+        """Gets the TreeViewEnabled property"""
+        return self.properties.get("TreeViewEnabled", None)
+
+    @property
+    def ui_version_configuration_enabled(self) -> Optional[bool]:
+        """Gets the UIVersionConfigurationEnabled property"""
+        return self.properties.get("UIVersionConfigurationEnabled", None)
+
+    @property
+    def use_access_request_default(self) -> Optional[bool]:
+        """Gets the UseAccessRequestDefault property"""
+        return self.properties.get("UseAccessRequestDefault", None)
+
+    @property
+    def web_template_configuration(self) -> Optional[str]:
+        """Gets the WebTemplateConfiguration property"""
+        return self.properties.get("WebTemplateConfiguration", None)
+
+    @property
+    def web_templates_gallery_first_run_enabled(self) -> Optional[bool]:
+        """Gets the WebTemplatesGalleryFirstRunEnabled property"""
+        return self.properties.get("WebTemplatesGalleryFirstRunEnabled", None)
+
+    @property
+    def app_tiles(self) -> EntityCollection[AppTile]:
+        """Gets the AppTiles property"""
+        from office365.sharepoint.webs.apptile import AppTile
+
+        return self.properties.get(
+            "AppTiles", EntityCollection[AppTile](self.context, AppTile, ResourcePath("AppTiles", self.resource_path))
+        )
+
+    @property
+    def card_designs(self) -> CardDesigns:
+        """Gets the CardDesigns property"""
+        from office365.sharepoint.marketplace.corporatecuratedgallery.carddesigns.card_designs import (
+            CardDesigns,
+        )
+
+        return self.properties.get(
+            "CardDesigns", CardDesigns(self.context, ResourcePath("CardDesigns", self.resource_path))
+        )
+
+    @property
+    def folder_coloring(self) -> FolderColoring:
+        """Gets the FolderColoring property"""
+        from office365.sharepoint.folders.coloring import FolderColoring
+
+        return self.properties.get(
+            "FolderColoring", FolderColoring(self.context, ResourcePath("FolderColoring", self.resource_path))
+        )
+
+    @property
+    def workflow_associations(self) -> EntityCollection[WorkflowAssociation]:
+        """Gets the WorkflowAssociations property"""
+        from office365.sharepoint.workflow.associations.association import (
+            WorkflowAssociation,
+        )
+
+        return self.properties.get(
+            "WorkflowAssociations",
+            EntityCollection[WorkflowAssociation](
+                self.context, WorkflowAssociation, ResourcePath("WorkflowAssociations", self.resource_path)
+            ),
+        )
+
+    @property
+    def workflow_templates(self) -> EntityCollection[WorkflowTemplate]:
+        """Gets the WorkflowTemplates property"""
+        from office365.sharepoint.workflow.template import WorkflowTemplate
+
+        return self.properties.get(
+            "WorkflowTemplates",
+            EntityCollection[WorkflowTemplate](
+                self.context, WorkflowTemplate, ResourcePath("WorkflowTemplates", self.resource_path)
+            ),
+        )
+
+    def addin_permissions(
+        self, addins: ClientValueCollection[SPAddinPermissionRequest]
+    ) -> ClientResult[SPAddinPermissionResponse]:
+        """AddinPermissions operation.
+
+        Args:
+            addins (ClientValueCollection[SPAddinPermissionRequest]):
+                addins parameter
+        """
+        from office365.sharepoint.marketplace.corporatecuratedgallery.addins.permission_response import (
+            SPAddinPermissionResponse,
+        )
+
+        return_type = ClientResult(self.context, SPAddinPermissionResponse())
+        qry = ServiceOperationQuery(self, "AddinPermissions", None, {"addins": addins}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def add_placeholder_user(self, list_id: str, placeholder_text: str) -> ClientResult[UUID]:
+        """AddPlaceholderUser operation.
+
+        Args:
+            list_id (str):
+                listId parameter
+            placeholder_text (str):
+                placeholderText parameter
+        """
+        return_type = ClientResult(self.context, UUID(int=0))
+        qry = ServiceOperationQuery(
+            self, "AddPlaceholderUser", None, {"listId": list_id, "placeholderText": placeholder_text}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def apply_theme(
+        self, color_palette_url: str, font_scheme_url: str, background_image_url: str, share_generated: bool
+    ) -> Self:
+        """ApplyTheme operation.
+
+        Args:
+            color_palette_url (str):
+                colorPaletteUrl parameter
+            font_scheme_url (str):
+                fontSchemeUrl parameter
+            background_image_url (str):
+                backgroundImageUrl parameter
+            share_generated (bool):
+                shareGenerated parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "ApplyTheme",
+            None,
+            {
+                "colorPaletteUrl": color_palette_url,
+                "fontSchemeUrl": font_scheme_url,
+                "backgroundImageUrl": background_image_url,
+                "shareGenerated": share_generated,
+            },
+            None,
+            None,
+        )
+        self.context.add_query(qry)
+        return self
+
+    def content_by_query_replay(
+        self, webs: str, lists: str, caml_query: str, view_fields: str, row_limit: int
+    ) -> ClientResult[str]:
+        """ContentByQueryReplay operation.
+
+        Args:
+            webs (str):
+                webs parameter
+            lists (str):
+                lists parameter
+            caml_query (str):
+                camlQuery parameter
+            view_fields (str):
+                viewFields parameter
+            row_limit (int):
+                rowLimit parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = FunctionQuery(self, "ContentByQueryReplay", [webs, lists, caml_query, view_fields, row_limit], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def convert_html_to_email_safe_html(
+        self, html_body: str, remove_embedded_images: bool, feedback_source_url: str
+    ) -> ClientResult[str]:
+        """ConvertHtmlToEmailSafeHtml operation.
+
+        Args:
+            html_body (str):
+                htmlBody parameter
+            remove_embedded_images (bool):
+                removeEmbeddedImages parameter
+            feedback_source_url (str):
+                feedbackSourceUrl parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "ConvertHtmlToEmailSafeHtml",
+            None,
+            {
+                "htmlBody": html_body,
+                "removeEmbeddedImages": remove_embedded_images,
+                "feedbackSourceUrl": feedback_source_url,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def execute_remote_lob(self, input_stream: bytes) -> ClientResult[bytes]:
+        """ExecuteRemoteLOB operation.
+
+        Args:
+            input_stream (bytes):
+                inputStream parameter
+        """
+        return_type = ClientResult(self.context, bytes())
+        qry = ServiceOperationQuery(self, "ExecuteRemoteLOB", None, {"inputStream": input_stream}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_addin_uninstall_job_detail(
+        self, job_id: UUID, server_relative_url: str, url: str
+    ) -> ClientResult[SPUninstallAddinJobDetail]:
+        """GetAddinUninstallJobDetail operation.
+
+        Args:
+            job_id (UUID):
+                jobId parameter
+            server_relative_url (str):
+                serverRelativeUrl parameter
+            url (str):
+                url parameter
+        """
+        from office365.sharepoint.marketplace.corporatecuratedgallery.spuninstalladdinjobdetail import (
+            SPUninstallAddinJobDetail,
+        )
+
+        return_type = ClientResult(self.context, SPUninstallAddinJobDetail())
+        qry = ServiceOperationQuery(
+            self,
+            "GetAddinUninstallJobDetail",
+            None,
+            {"jobId": job_id, "serverRelativeUrl": server_relative_url, "url": url},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_sp_app_context_as_stream(self) -> ClientResult[bytes]:
+        """GetSPAppContextAsStream operation."""
+        return_type = ClientResult(self.context, bytes())
+        qry = FunctionQuery(self, "GetSPAppContextAsStream", [], return_type, return_raw_content=True)
+        self.context.add_query(qry)
+        return return_type
+
+    def hub_site_data_as_stream(self, force_refresh: bool) -> ClientResult[bytes]:
+        """HubSiteDataAsStream operation.
+
+        Args:
+            force_refresh (bool):
+                forceRefresh parameter
+        """
+        return_type = ClientResult(self.context, bytes())
+        qry = FunctionQuery(self, "HubSiteDataAsStream", [force_refresh], return_type, return_raw_content=True)
+        self.context.add_query(qry)
+        return return_type
+
+    def map_to_icon(self, file_name: str, prog_id: str, size: int) -> ClientResult[str]:
+        """MapToIcon operation.
+
+        Args:
+            file_name (str):
+                fileName parameter
+            prog_id (str):
+                progId parameter
+            size (int):
+                size parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = FunctionQuery(self, "MapToIcon", [file_name, prog_id, size], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def mark_reply_uris_updated(self) -> Self:
+        """MarkReplyUrisUpdated operation."""
+        qry = ServiceOperationQuery(self, "MarkReplyUrisUpdated", None, {}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def page_context_core(self) -> ClientResult[bytes]:
+        """PageContextCore operation."""
+        return_type = ClientResult(self.context, bytes())
+        qry = FunctionQuery(self, "PageContextCore", [], return_type, return_raw_content=True)
+        self.context.add_query(qry)
+        return return_type
+
+    def process_external_notification(self, stream: bytes) -> ClientResult[str]:
+        """ProcessExternalNotification operation.
+
+        Args:
+            stream (bytes):
+                stream parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "ProcessExternalNotification", None, {"stream": stream}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def recycle(self) -> Self:
+        """Recycle operation."""
+        qry = ServiceOperationQuery(self, "Recycle", None, {}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def send_notification_tool(
+        self,
+        recipients: list[str],
+        cc_recipients: list[str],
+        bcc_recipients: list[str],
+        html_body: str,
+        subject: str,
+        skip_html_conversion: bool,
+        feedback_source_url: str,
+    ) -> ClientResult[str]:
+        """SendNotificationTool operation.
+
+        Args:
+            recipients (list[str]):
+                recipients parameter
+            cc_recipients (list[str]):
+                ccRecipients parameter
+            bcc_recipients (list[str]):
+                bccRecipients parameter
+            html_body (str):
+                htmlBody parameter
+            subject (str):
+                subject parameter
+            skip_html_conversion (bool):
+                skipHtmlConversion parameter
+            feedback_source_url (str):
+                feedbackSourceUrl parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "SendNotificationTool",
+            None,
+            {
+                "recipients": StringCollection(recipients),
+                "ccRecipients": StringCollection(cc_recipients),
+                "bccRecipients": StringCollection(bcc_recipients),
+                "htmlBody": html_body,
+                "subject": subject,
+                "skipHtmlConversion": skip_html_conversion,
+                "feedbackSourceUrl": feedback_source_url,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def set_chrome_options(
+        self,
+        header_layout: int,
+        header_emphasis: int,
+        mega_menu_enabled: bool,
+        footer_enabled: bool,
+        footer_layout: int,
+        footer_emphasis: int,
+        hide_title_in_header: bool,
+        logo_alignment: int,
+        horizontal_quick_launch: bool,
+        header_color_index_in_light_mode: int,
+        header_color_index_in_dark_mode: int,
+        footer_color_index_in_light_mode: int,
+        footer_color_index_in_dark_mode: int,
+        footer_alignment: int,
+        footer_blur: int,
+        header_overlay_color: int,
+        header_overlay_gradient_direction: int,
+        header_overlay_opacity: int,
+        footer_overlay_color: int,
+        footer_overlay_gradient_direction: int,
+        footer_overlay_opacity: int,
+        font_option_for_site_title: FontOption,
+        font_option_for_site_nav: FontOption,
+        font_option_for_site_footer_title: FontOption,
+        font_option_for_site_footer_nav: FontOption,
+        should_extend_header_bg_image_to_nav: str,
+    ) -> ClientResult[str]:
+        """SetChromeOptions operation.
+
+        Args:
+            header_layout (int):
+                headerLayout parameter
+            header_emphasis (int):
+                headerEmphasis parameter
+            mega_menu_enabled (bool):
+                megaMenuEnabled parameter
+            footer_enabled (bool):
+                footerEnabled parameter
+            footer_layout (int):
+                footerLayout parameter
+            footer_emphasis (int):
+                footerEmphasis parameter
+            hide_title_in_header (bool):
+                hideTitleInHeader parameter
+            logo_alignment (int):
+                logoAlignment parameter
+            horizontal_quick_launch (bool):
+                horizontalQuickLaunch parameter
+            header_color_index_in_light_mode (int):
+                headerColorIndexInLightMode parameter
+            header_color_index_in_dark_mode (int):
+                headerColorIndexInDarkMode parameter
+            footer_color_index_in_light_mode (int):
+                footerColorIndexInLightMode parameter
+            footer_color_index_in_dark_mode (int):
+                footerColorIndexInDarkMode parameter
+            footer_alignment (int):
+                footerAlignment parameter
+            footer_blur (int):
+                footerBlur parameter
+            header_overlay_color (int):
+                headerOverlayColor parameter
+            header_overlay_gradient_direction (int):
+                headerOverlayGradientDirection parameter
+            header_overlay_opacity (int):
+                headerOverlayOpacity parameter
+            footer_overlay_color (int):
+                footerOverlayColor parameter
+            footer_overlay_gradient_direction (int):
+                footerOverlayGradientDirection parameter
+            footer_overlay_opacity (int):
+                footerOverlayOpacity parameter
+            font_option_for_site_title (FontOption):
+                fontOptionForSiteTitle parameter
+            font_option_for_site_nav (FontOption):
+                fontOptionForSiteNav parameter
+            font_option_for_site_footer_title (FontOption):
+                fontOptionForSiteFooterTitle parameter
+            font_option_for_site_footer_nav (FontOption):
+                fontOptionForSiteFooterNav parameter
+            should_extend_header_bg_image_to_nav (str):
+                shouldExtendHeaderBgImageToNav parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "SetChromeOptions",
+            None,
+            {
+                "headerLayout": header_layout,
+                "headerEmphasis": header_emphasis,
+                "megaMenuEnabled": mega_menu_enabled,
+                "footerEnabled": footer_enabled,
+                "footerLayout": footer_layout,
+                "footerEmphasis": footer_emphasis,
+                "hideTitleInHeader": hide_title_in_header,
+                "logoAlignment": logo_alignment,
+                "horizontalQuickLaunch": horizontal_quick_launch,
+                "headerColorIndexInLightMode": header_color_index_in_light_mode,
+                "headerColorIndexInDarkMode": header_color_index_in_dark_mode,
+                "footerColorIndexInLightMode": footer_color_index_in_light_mode,
+                "footerColorIndexInDarkMode": footer_color_index_in_dark_mode,
+                "footerAlignment": footer_alignment,
+                "footerBlur": footer_blur,
+                "headerOverlayColor": header_overlay_color,
+                "headerOverlayGradientDirection": header_overlay_gradient_direction,
+                "headerOverlayOpacity": header_overlay_opacity,
+                "footerOverlayColor": footer_overlay_color,
+                "footerOverlayGradientDirection": footer_overlay_gradient_direction,
+                "footerOverlayOpacity": footer_overlay_opacity,
+                "fontOptionForSiteTitle": font_option_for_site_title,
+                "fontOptionForSiteNav": font_option_for_site_nav,
+                "fontOptionForSiteFooterTitle": font_option_for_site_footer_title,
+                "fontOptionForSiteFooterNav": font_option_for_site_footer_nav,
+                "shouldExtendHeaderBgImageToNav": should_extend_header_bg_image_to_nav,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def set_default_new_page_template_id(self, default_new_page_template_id: UUID) -> Self:
+        """SetDefaultNewPageTemplateId operation.
+
+        Args:
+            default_new_page_template_id (UUID):
+                defaultNewPageTemplateId parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "SetDefaultNewPageTemplateId",
+            None,
+            {"defaultNewPageTemplateId": default_new_page_template_id},
+            None,
+            None,
+        )
+        self.context.add_query(qry)
+        return self
+
+    def set_theme_application_action_history(self, theme_application_action_history: str) -> Self:
+        """SetThemeApplicationActionHistory operation.
+
+        Args:
+            theme_application_action_history (str):
+                themeApplicationActionHistory parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "SetThemeApplicationActionHistory",
+            None,
+            {"themeApplicationActionHistory": theme_application_action_history},
+            None,
+            None,
+        )
+        self.context.add_query(qry)
+        return self
+
+    def set_use_access_request_default_and_update(self, use_access_request_default: bool) -> Self:
+        """SetUseAccessRequestDefaultAndUpdate operation.
+
+        Args:
+            use_access_request_default (bool):
+                useAccessRequestDefault parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "SetUseAccessRequestDefaultAndUpdate",
+            None,
+            {"useAccessRequestDefault": use_access_request_default},
+            None,
+            None,
+        )
+        self.context.add_query(qry)
+        return self
+
+    def sync_teams_component(
+        self, teams_component: SPTeamsAppComponent
+    ) -> ClientResult[SPClientSideComponentQueryResult]:
+        """SyncTeamsComponent operation.
+
+        Args:
+            teams_component (SPTeamsAppComponent):
+                teamsComponent parameter
+        """
+        from office365.sharepoint.clientsidecomponent.query_result import (
+            SPClientSideComponentQueryResult,
+        )
+
+        return_type = ClientResult(self.context, SPClientSideComponentQueryResult())
+        qry = ServiceOperationQuery(
+            self, "SyncTeamsComponent", None, {"teamsComponent": teams_component}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def uninstall_addins(
+        self, uninstall_addins: ClientValueCollection[SPUninstallAddinRequest]
+    ) -> ClientResult[SPUninstallAddinResponse]:
+        """UninstallAddins operation.
+
+        Args:
+            uninstall_addins (ClientValueCollection[SPUninstallAddinRequest]):
+                uninstallAddins parameter
+        """
+        from office365.sharepoint.marketplace.corporatecuratedgallery.spuninstalladdinresponse import (
+            SPUninstallAddinResponse,
+        )
+
+        return_type = ClientResult(self.context, SPUninstallAddinResponse())
+        qry = ServiceOperationQuery(
+            self, "UninstallAddins", None, {"uninstallAddins": uninstall_addins}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def unset_is_edu_class_provision_pending(self) -> Self:
+        """UnsetIsEduClassProvisionPending operation."""
+        qry = ServiceOperationQuery(self, "UnsetIsEduClassProvisionPending", None, {}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def upgrade_prefab_app_instance(
+        self, prefab_item_id: int, has_custom_upgrade_configuration: bool
+    ) -> ClientResult[bool]:
+        """UpgradePrefabAppInstance operation.
+
+        Args:
+            prefab_item_id (int):
+                prefabItemId parameter
+            has_custom_upgrade_configuration (bool):
+                hasCustomUpgradeConfiguration parameter
+        """
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(
+            self,
+            "UpgradePrefabAppInstance",
+            None,
+            {"prefabItemId": prefab_item_id, "hasCustomUpgradeConfiguration": has_custom_upgrade_configuration},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def upload_image(
+        self,
+        list_title: str,
+        image_name: str,
+        content_stream: bytes,
+        list_id: str,
+        item_id: int,
+        field_id: str,
+        overwrite: bool,
+    ) -> ClientResult[SPImageItem]:
+        """UploadImage operation.
+
+        Args:
+            list_title (str):
+                listTitle parameter
+            image_name (str):
+                imageName parameter
+            content_stream (bytes):
+                contentStream parameter
+            list_id (str):
+                listId parameter
+            item_id (int):
+                itemId parameter
+            field_id (str):
+                fieldId parameter
+            overwrite (bool):
+                overwrite parameter
+        """
+        from office365.sharepoint.webs.spimageitem import SPImageItem
+
+        return_type = ClientResult(self.context, SPImageItem())
+        qry = ServiceOperationQuery(
+            self,
+            "UploadImage",
+            None,
+            {
+                "listTitle": list_title,
+                "imageName": image_name,
+                "contentStream": content_stream,
+                "listId": list_id,
+                "itemId": item_id,
+                "fieldId": field_id,
+                "overwrite": overwrite,
+            },
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type

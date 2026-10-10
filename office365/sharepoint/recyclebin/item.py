@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from typing_extensions import Self
 
@@ -130,3 +131,18 @@ class RecycleBinItem(Entity):
     def deleted_date(self) -> datetime:
         """Gets a value that specifies when the Recycle Bin item was moved to the Recycle Bin."""
         return self.properties.get("DeletedDate", datetime.min)
+
+    @property
+    def archived_file_size(self) -> Optional[int]:
+        """Gets the ArchivedFileSize property"""
+        return self.properties.get("ArchivedFileSize", None)
+
+    @property
+    def unique_id(self) -> Optional[UUID]:
+        """Gets the UniqueId property"""
+        return self.properties.get("UniqueId", None)
+
+    @property
+    def recycle_bin_list_id(self) -> Optional[UUID]:
+        """Gets the RecycleBinListId property"""
+        return self.properties.get("RecycleBinListId", None)

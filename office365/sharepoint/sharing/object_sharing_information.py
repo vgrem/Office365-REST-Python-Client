@@ -261,3 +261,38 @@ class ObjectSharingInformation(Entity):
         if name == "AnonymousEditLink" and self._resource_path is None:
             self._resource_path = None
         return self
+
+    @property
+    def is_folder(self) -> Optional[bool]:
+        """Gets the IsFolder property"""
+        return self.properties.get("IsFolder", None)
+
+    @property
+    def is_shared_with_current_user(self) -> Optional[bool]:
+        """Gets the IsSharedWithCurrentUser property"""
+        return self.properties.get("IsSharedWithCurrentUser", None)
+
+    @property
+    def is_shared_with_guest(self) -> Optional[bool]:
+        """Gets the IsSharedWithGuest property"""
+        return self.properties.get("IsSharedWithGuest", None)
+
+    @property
+    def is_shared_with_many(self) -> Optional[bool]:
+        """Gets the IsSharedWithMany property"""
+        return self.properties.get("IsSharedWithMany", None)
+
+    @property
+    def is_shared_with_security_group(self) -> Optional[bool]:
+        """Gets the IsSharedWithSecurityGroup property"""
+        return self.properties.get("IsSharedWithSecurityGroup", None)
+
+    @property
+    def pending_access_requests_link(self) -> Optional[str]:
+        """Gets the PendingAccessRequestsLink property"""
+        return self.properties.get("PendingAccessRequestsLink", None)
+
+    @property
+    def total_file_count(self) -> Optional[int]:
+        """Gets the TotalFileCount property"""
+        return self.properties.get("TotalFileCount", None)

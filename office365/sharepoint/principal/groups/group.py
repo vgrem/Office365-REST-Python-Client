@@ -136,3 +136,13 @@ class Group(Principal):
             "Users",
             UserCollection(self.context, ResourcePath("Users", self.resource_path)),
         )
+
+    @property
+    def contains_current_user(self) -> Optional[bool]:
+        """Gets the ContainsCurrentUser property"""
+        return self.properties.get("ContainsCurrentUser", None)
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the Description property"""
+        return self.properties.get("Description", None)

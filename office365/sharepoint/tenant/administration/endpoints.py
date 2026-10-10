@@ -55,3 +55,8 @@ class TenantAdminEndpoints(Entity):
     @property
     def entity_type_name(self):  # type: ignore[override]
         return "Microsoft.Online.SharePoint.TenantAdministration.TenantAdminEndpoints"
+
+    @property
+    def microsoft_graph_endpoint(self) -> Optional[str]:
+        """Gets the MicrosoftGraphEndpoint property"""
+        return self.properties.get("MicrosoftGraphEndpoint", None)

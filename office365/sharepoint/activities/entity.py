@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from office365.sharepoint.activities.action_facet import ActionFacet
 from office365.sharepoint.activities.facets.activity_time import ActivityTimeFacet
 from office365.sharepoint.activities.facets.coalesced import CoalescedFacet
@@ -47,3 +51,8 @@ class SPActivityEntity(Entity):
         if name == self.property_ref_name:
             self._resource_path.set_segment(value)
         return self
+
+    @property
+    def id(self) -> Optional[str]:
+        """Gets the id property"""
+        return self.properties.get("id", None)

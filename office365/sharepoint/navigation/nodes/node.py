@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import GuidCollection
 from office365.runtime.types.odata_property import odata
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.translation.user_resource import UserResource
@@ -79,3 +80,23 @@ class NavigationNode(Entity):
             "TitleResource",
             UserResource(self.context, ResourcePath("TitleResource", self.resource_path)),
         )
+
+    @property
+    def audience_ids(self) -> GuidCollection:
+        """Gets the AudienceIds property"""
+        return self.properties.get("AudienceIds", GuidCollection())
+
+    @property
+    def current_lcid(self) -> Optional[int]:
+        """Gets the CurrentLCID property"""
+        return self.properties.get("CurrentLCID", None)
+
+    @property
+    def is_doc_lib(self) -> Optional[bool]:
+        """Gets the IsDocLib property"""
+        return self.properties.get("IsDocLib", None)
+
+    @property
+    def list_template_type(self) -> Optional[int]:
+        """Gets the ListTemplateType property"""
+        return self.properties.get("ListTemplateType", None)

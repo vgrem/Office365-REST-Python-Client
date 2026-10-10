@@ -15,8 +15,12 @@ from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.principal.users.user import User
-from office365.sharepoint.publishing.itemviewsanalyticsdata import ItemViewsAnalyticsData
-from office365.sharepoint.publishing.viewprogressanalyticsdata import ViewProgressAnalyticsData
+from office365.sharepoint.publishing.itemviewsanalyticsdata import (
+    ItemViewsAnalyticsData,
+)
+from office365.sharepoint.publishing.viewprogressanalyticsdata import (
+    ViewProgressAnalyticsData,
+)
 
 
 class VideoItem(Entity):
@@ -267,3 +271,8 @@ class VideoItem(Entity):
         )
         self.context.add_query(qry)
         return self
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the ID property"""
+        return self.properties.get("ID", None)

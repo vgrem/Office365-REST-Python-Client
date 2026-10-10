@@ -1,4 +1,6 @@
-from typing import List
+from __future__ import annotations
+
+from typing import List, Optional
 
 from typing_extensions import Self
 
@@ -44,3 +46,19 @@ class MultilingualSettings(Entity):
                 ResourcePath("Recipients", self.resource_path),
             ),
         )
+
+    @property
+    def follow_lang_preference(self) -> Optional[bool]:
+        """Gets the FollowLangPreference property"""
+        return self.properties.get("FollowLangPreference", None)
+
+    def set_follow_lang_preference(self, request: bool) -> Self:
+        """SetFollowLangPreference operation.
+
+        Args:
+            request (bool):
+                request parameter
+        """
+        qry = ServiceOperationQuery(self, "SetFollowLangPreference", None, {"request": request}, None, None)
+        self.context.add_query(qry)
+        return self

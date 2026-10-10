@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -173,3 +175,8 @@ class SPMachineLearningPublication(Entity):
         qry = ServiceOperationQuery(self, "Delete")
         self.context.add_query(qry)
         return self
+
+    @property
+    def id(self) -> Optional[int]:
+        """Gets the ID property"""
+        return self.properties.get("ID", None)

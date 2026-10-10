@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -105,3 +107,8 @@ class RecentList(Entity):
     def web_template_configuration(self) -> Optional[str]:
         """Gets the webTemplateConfiguration property"""
         return self.properties.get("webTemplateConfiguration", None)
+
+    @property
+    def lastview_datetime(self) -> Optional[str]:
+        """Gets the lastviewDateTime property"""
+        return self.properties.get("lastviewDateTime", None)

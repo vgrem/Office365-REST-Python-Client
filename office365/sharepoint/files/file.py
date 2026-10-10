@@ -3,8 +3,19 @@ from __future__ import annotations
 from datetime import datetime
 from http import HTTPStatus
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, AnyStr, AsyncIterator, Callable, Optional, Union, cast, overload
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    AnyStr,
+    AsyncIterator,
+    Callable,
+    Optional,
+    Union,
+    cast,
+    overload,
+)
 from urllib.parse import quote, unquote
+from uuid import UUID
 
 import requests
 from requests import Response
@@ -12,6 +23,7 @@ from typing_extensions import Self
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.operations import Progress, ProgressCallback
@@ -52,8 +64,18 @@ from office365.sharepoint.webparts.personalization_scope import PersonalizationS
 
 if TYPE_CHECKING:
     from office365.runtime.converters.dataframe import DataFrameResult
+    from office365.sharepoint.activities.client_response import ActivityClientResponse
+    from office365.sharepoint.activities.officefileuservalueresponse import (
+        OfficeFileUserValueResponse,
+    )
+    from office365.sharepoint.approvals.mediaserviceupdateparameters import (
+        MediaServiceUpdateParameters,
+    )
     from office365.sharepoint.client_context import ClientContext
+    from office365.sharepoint.files.deleteparameters import FileDeleteParameters
     from office365.sharepoint.files.download_operation import DownloadOperation
+    from office365.sharepoint.listitems.compliance_info import ListItemComplianceInfo
+    from office365.sharepoint.webs.web import Web
 
 
 class AbstractFile(Entity):
@@ -190,7 +212,10 @@ class File(AbstractFile):
 
             >>> df = file.read_dataframe().execute_query().value
         """
-        from office365.runtime.converters.dataframe import DataFrameResult, dataframe_from_bytes
+        from office365.runtime.converters.dataframe import (
+            DataFrameResult,
+            dataframe_from_bytes,
+        )
 
         result = DataFrameResult(self.context)
 
@@ -1324,4 +1349,396 @@ class File(AbstractFile):
                 self._resource_path = self.context.web.get_file_by_server_relative_url(value).resource_path
             elif name == "ServerRelativePath":
                 self._resource_path = self.context.web.get_file_by_server_relative_path(value).resource_path
+        return self
+
+    @property
+    def archived(self) -> Optional[bool]:
+        """Gets the Archived property"""
+        return self.properties.get("Archived", None)
+
+    @property
+    def check_in_comment(self) -> Optional[str]:
+        """Gets the CheckInComment property"""
+        return self.properties.get("CheckInComment", None)
+
+    @property
+    def compliance_info(self) -> ListItemComplianceInfo:
+        """Gets the ComplianceInfo property"""
+        from office365.sharepoint.listitems.compliance_info import (
+            ListItemComplianceInfo,
+        )
+
+        return self.properties.get("ComplianceInfo", ListItemComplianceInfo())
+
+    @property
+    def e_tag(self) -> Optional[str]:
+        """Gets the ETag property"""
+        return self.properties.get("ETag", None)
+
+    @property
+    def exists_allow_throw_for_policy_failures(self) -> Optional[bool]:
+        """Gets the ExistsAllowThrowForPolicyFailures property"""
+        return self.properties.get("ExistsAllowThrowForPolicyFailures", None)
+
+    @property
+    def exists_with_exception(self) -> Optional[bool]:
+        """Gets the ExistsWithException property"""
+        return self.properties.get("ExistsWithException", None)
+
+    @property
+    def has_alternate_content_streams(self) -> Optional[bool]:
+        """Gets the HasAlternateContentStreams property"""
+        return self.properties.get("HasAlternateContentStreams", None)
+
+    @property
+    def linking_url(self) -> Optional[str]:
+        """Gets the LinkingUrl property"""
+        return self.properties.get("LinkingUrl", None)
+
+    @property
+    def page_render_type(self) -> Optional[int]:
+        """Gets the PageRenderType property"""
+        return self.properties.get("PageRenderType", None)
+
+    @property
+    def server_redirected_url(self) -> Optional[str]:
+        """Gets the ServerRedirectedUrl property"""
+        return self.properties.get("ServerRedirectedUrl", None)
+
+    @property
+    def suppress_expiration_notification(self) -> Optional[bool]:
+        """Gets the SuppressExpirationNotification property"""
+        return self.properties.get("SuppressExpirationNotification", None)
+
+    @property
+    def title(self) -> Optional[str]:
+        """Gets the Title property"""
+        return self.properties.get("Title", None)
+
+    @property
+    def ui_version(self) -> Optional[int]:
+        """Gets the UIVersion property"""
+        return self.properties.get("UIVersion", None)
+
+    @property
+    def ui_version_label(self) -> Optional[str]:
+        """Gets the UIVersionLabel property"""
+        return self.properties.get("UIVersionLabel", None)
+
+    @property
+    def vroom_drive_id(self) -> Optional[str]:
+        """Gets the VroomDriveID property"""
+        return self.properties.get("VroomDriveID", None)
+
+    @property
+    def vroom_item_id(self) -> Optional[str]:
+        """Gets the VroomItemID property"""
+        return self.properties.get("VroomItemID", None)
+
+    @property
+    def list_item_all_fields(self) -> ListItem:
+        """Gets the ListItemAllFields property"""
+        from office365.sharepoint.listitems.listitem import ListItem
+
+        return self.properties.get(
+            "ListItemAllFields", ListItem(self.context, ResourcePath("ListItemAllFields", self.resource_path))
+        )
+
+    @property
+    def web(self) -> Web:
+        """Gets the Web property"""
+        from office365.sharepoint.webs.web import Web
+
+        return self.properties.get("Web", Web(self.context, ResourcePath("Web", self.resource_path)))
+
+    def add_client_activities(
+        self, activities_stream: bytes
+    ) -> ClientResult[ClientValueCollection[ActivityClientResponse]]:
+        """AddClientActivities operation.
+
+        Args:
+            activities_stream (bytes):
+                activitiesStream parameter
+        """
+        from office365.sharepoint.activities.client_response import (
+            ActivityClientResponse,
+        )
+
+        return_type = ClientResult(self.context, ClientValueCollection[ActivityClientResponse]())
+        qry = ServiceOperationQuery(
+            self, "AddClientActivities", None, {"activitiesStream": activities_stream}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def change_content_storage_schema(self, desired_schema: str) -> ClientResult[bool]:
+        """ChangeContentStorageSchema operation.
+
+        Args:
+            desired_schema (str):
+                desiredSchema parameter
+        """
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(
+            self, "ChangeContentStorageSchema", None, {"desiredSchema": desired_schema}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def check_in(self, comment: str, check_in_type: int) -> Self:
+        """CheckIn operation.
+
+        Args:
+            comment (str):
+                comment parameter
+            check_in_type (int):
+                checkInType parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "CheckIn", None, {"comment": comment, "checkInType": check_in_type}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def check_out(self) -> Self:
+        """CheckOut operation."""
+        qry = ServiceOperationQuery(self, "CheckOut", None, {}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def copy_to(self, str_new_url: str, bover_write: bool) -> Self:
+        """CopyTo operation.
+
+        Args:
+            str_new_url (str):
+                strNewUrl parameter
+            bover_write (bool):
+                bOverWrite parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "CopyTo", None, {"strNewUrl": str_new_url, "bOverWrite": bover_write}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def copy_to_using_path(self, decoded_url: str, bover_write: bool) -> Self:
+        """CopyToUsingPath operation.
+
+        Args:
+            decoded_url (str):
+                DecodedUrl parameter
+            bover_write (bool):
+                bOverWrite parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "CopyToUsingPath", None, {"DecodedUrl": decoded_url, "bOverWrite": bover_write}, None, None
+        )
+        self.context.add_query(qry)
+        return self
+
+    def delete_with_parameters(self, parameters: FileDeleteParameters) -> Self:
+        """DeleteWithParameters operation.
+
+        Args:
+            parameters (FileDeleteParameters):
+                parameters parameter
+        """
+        qry = ServiceOperationQuery(self, "DeleteWithParameters", None, {"parameters": parameters}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def execute_cobalt_request(self, input_stream: bytes) -> ClientResult[bytes]:
+        """ExecuteCobaltRequest operation.
+
+        Args:
+            input_stream (bytes):
+                inputStream parameter
+        """
+        return_type = ClientResult(self.context, bytes())
+        qry = ServiceOperationQuery(self, "ExecuteCobaltRequest", None, {"inputStream": input_stream}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    @staticmethod
+    def get_content_ver_from_tag(context: ClientContext, content_tag: str) -> ClientResult[int]:
+        """GetContentVerFromTag operation.
+
+        Args:
+            content_tag (str):
+                contentTag parameter
+        """
+        from office365.sharepoint.files.file import File
+
+        return_type = ClientResult(context, int())
+        qry = FunctionQuery(File(context), "GetContentVerFromTag", [content_tag], return_type)
+        context.add_query(qry)
+        return return_type
+
+    def get_file_user_value(self, key: str) -> ClientResult[OfficeFileUserValueResponse]:
+        """GetFileUserValue operation.
+
+        Args:
+            key (str):
+                key parameter
+        """
+        from office365.sharepoint.activities.officefileuservalueresponse import (
+            OfficeFileUserValueResponse,
+        )
+
+        return_type = ClientResult(self.context, OfficeFileUserValueResponse())
+        qry = ServiceOperationQuery(self, "GetFileUserValue", None, {"key": key}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_media_service_metadata(self) -> ClientResult[MediaServiceUpdateParameters]:
+        """GetMediaServiceMetadata operation."""
+        from office365.sharepoint.approvals.mediaserviceupdateparameters import (
+            MediaServiceUpdateParameters,
+        )
+
+        return_type = ClientResult(self.context, MediaServiceUpdateParameters())
+        qry = ServiceOperationQuery(self, "GetMediaServiceMetadata", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_pre_authorized_access_url2(self, expiration_hours: int, expiration_minuites: int) -> ClientResult[str]:
+        """GetPreAuthorizedAccessUrl2 operation.
+
+        Args:
+            expiration_hours (int):
+                expirationHours parameter
+            expiration_minuites (int):
+                expirationMinuites parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = FunctionQuery(self, "GetPreAuthorizedAccessUrl2", [expiration_hours, expiration_minuites], return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def move_to(self, new_url: str, flags: int) -> Self:
+        """MoveTo operation.
+
+        Args:
+            new_url (str):
+                newUrl parameter
+            flags (int):
+                flags parameter
+        """
+        qry = ServiceOperationQuery(self, "MoveTo", None, {"newUrl": new_url, "flags": flags}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def open_binary_stream_with_options(self, open_options: int) -> ClientResult[bytes]:
+        """OpenBinaryStreamWithOptions operation.
+
+        Args:
+            open_options (int):
+                openOptions parameter
+        """
+        return_type = ClientResult(self.context, bytes())
+        qry = FunctionQuery(self, "OpenBinaryStreamWithOptions", [open_options], return_type, return_raw_content=True)
+        self.context.add_query(qry)
+        return return_type
+
+    def recycle_with_e_tag(self, etag_match: str) -> ClientResult[UUID]:
+        """RecycleWithETag operation.
+
+        Args:
+            etag_match (str):
+                etagMatch parameter
+        """
+        return_type = ClientResult(self.context, UUID(int=0))
+        qry = ServiceOperationQuery(self, "RecycleWithETag", None, {"etagMatch": etag_match}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def recycle_with_parameters(self, parameters: FileDeleteParameters) -> ClientResult[UUID]:
+        """RecycleWithParameters operation.
+
+        Args:
+            parameters (FileDeleteParameters):
+                parameters parameter
+        """
+        return_type = ClientResult(self.context, UUID(int=0))
+        qry = ServiceOperationQuery(self, "RecycleWithParameters", None, {"parameters": parameters}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def set_expiration_date(self, expiration_date: datetime) -> Self:
+        """SetExpirationDate operation.
+
+        Args:
+            expiration_date (datetime):
+                expirationDate parameter
+        """
+        qry = ServiceOperationQuery(self, "SetExpirationDate", None, {"expirationDate": expiration_date}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def set_file_user_value(self, key: str, value: str) -> ClientResult[OfficeFileUserValueResponse]:
+        """SetFileUserValue operation.
+
+        Args:
+            key (str):
+                key parameter
+            value (str):
+                value parameter
+        """
+        from office365.sharepoint.activities.officefileuservalueresponse import (
+            OfficeFileUserValueResponse,
+        )
+
+        return_type = ClientResult(self.context, OfficeFileUserValueResponse())
+        qry = ServiceOperationQuery(self, "SetFileUserValue", None, {"key": key, "value": value}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def set_media_service_metadata(self, parameters: MediaServiceUpdateParameters) -> Self:
+        """SetMediaServiceMetadata operation.
+
+        Args:
+            parameters (MediaServiceUpdateParameters):
+                parameters parameter
+        """
+        qry = ServiceOperationQuery(self, "SetMediaServiceMetadata", None, {"parameters": parameters}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def undo_check_out(self) -> Self:
+        """UndoCheckOut operation."""
+        qry = ServiceOperationQuery(self, "UndoCheckOut", None, {}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def un_publish(self, comment: str) -> Self:
+        """UnPublish operation.
+
+        Args:
+            comment (str):
+                comment parameter
+        """
+        qry = ServiceOperationQuery(self, "UnPublish", None, {"comment": comment}, None, None)
+        self.context.add_query(qry)
+        return self
+
+    def update_virus_info(self, virus_status: int, virus_message: str, etag_to_check: str) -> Self:
+        """UpdateVirusInfo operation.
+
+        Args:
+            virus_status (int):
+                virusStatus parameter
+            virus_message (str):
+                virusMessage parameter
+            etag_to_check (str):
+                etagToCheck parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "UpdateVirusInfo",
+            None,
+            {"virusStatus": virus_status, "virusMessage": virus_message, "etagToCheck": etag_to_check},
+            None,
+            None,
+        )
+        self.context.add_query(qry)
         return self

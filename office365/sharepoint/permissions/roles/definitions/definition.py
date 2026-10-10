@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.paths.service_operation import ServiceOperationPath
@@ -60,3 +62,13 @@ class RoleDefinition(Entity):
             if name == "Id" and self.parent_collection is not None:
                 self._resource_path = ServiceOperationPath("GetById", [value], self.parent_collection.resource_path)
         return super().set_property(name, value, persist_changes)
+
+    @property
+    def hidden(self) -> Optional[bool]:
+        """Gets the Hidden property"""
+        return self.properties.get("Hidden", None)
+
+    @property
+    def order(self) -> Optional[int]:
+        """Gets the Order property"""
+        return self.properties.get("Order", None)

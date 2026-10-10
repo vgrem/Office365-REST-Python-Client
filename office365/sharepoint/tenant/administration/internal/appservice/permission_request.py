@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -88,3 +90,8 @@ class SPOWebAppServicePrincipalPermissionRequest(Entity):
         qry = ServiceOperationQuery(self, "Deny", None, {}, None, None)
         self.context.add_query(qry)
         return self
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

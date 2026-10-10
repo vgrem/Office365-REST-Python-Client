@@ -12,20 +12,36 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.v3.static import StaticPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import GuidCollection, StringCollection
-from office365.sharepoint.administration.custom_fonts_resource import CustomFontsResource
+from office365.sharepoint.administration.custom_fonts_resource import (
+    CustomFontsResource,
+)
 from office365.sharepoint.administration.orgassets.org_assets import OrgAssets
 from office365.sharepoint.authpolicy.spjitdlppolicydata import SPJitDlpPolicyData
-from office365.sharepoint.brandcenter.orgassetslibraryconfigparam import OrgAssetsLibraryConfigParam
+from office365.sharepoint.brandcenter.orgassetslibraryconfigparam import (
+    OrgAssetsLibraryConfigParam,
+)
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.principal.users.user import User
-from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import SiteInfoForSitePicker
-from office365.sharepoint.tenant.administration.syntex.billing_context import SyntexBillingContext
-from office365.sharepoint.tenant.administration.syntex.power_apps import SyntexPowerAppsEnvironmentsContext
-from office365.sharepoint.tenant.administration.syntex.premiumfeaturesettings import SyntexPremiumFeatureSettings
+from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import (
+    SiteInfoForSitePicker,
+)
+from office365.sharepoint.tenant.administration.syntex.billing_context import (
+    SyntexBillingContext,
+)
+from office365.sharepoint.tenant.administration.syntex.power_apps import (
+    SyntexPowerAppsEnvironmentsContext,
+)
+from office365.sharepoint.tenant.administration.syntex.premiumfeaturesettings import (
+    SyntexPremiumFeatureSettings,
+)
 from office365.sharepoint.tenant.administration.theme_properties import ThemeProperties
-from office365.sharepoint.tenant.management.externalusers.results.get import GetExternalUsersResults
-from office365.sharepoint.tenant.management.externalusers.results.remove import RemoveExternalUsersResults
+from office365.sharepoint.tenant.management.externalusers.results.get import (
+    GetExternalUsersResults,
+)
+from office365.sharepoint.tenant.management.externalusers.results.remove import (
+    RemoveExternalUsersResults,
+)
 from office365.sharepoint.tenant.management.externalusers.results.session_revocation import (
     SPOUserSessionRevocationResult,
 )
@@ -1686,3 +1702,78 @@ class Office365Tenant(Entity):
         )
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def block_user_info_visibility_in_onedrive(self) -> Optional[int]:
+        """Gets the BlockUserInfoVisibilityInOneDrive property"""
+        return self.properties.get("BlockUserInfoVisibilityInOneDrive", None)
+
+    @property
+    def block_user_info_visibility_in_sharepoint(self) -> Optional[int]:
+        """Gets the BlockUserInfoVisibilityInSharePoint property"""
+        return self.properties.get("BlockUserInfoVisibilityInSharePoint", None)
+
+    @property
+    def disable_add_to_onedrive(self) -> Optional[bool]:
+        """Gets the DisableAddToOneDrive property"""
+        return self.properties.get("DisableAddToOneDrive", None)
+
+    @property
+    def notifications_in_onedrive_for_business_enabled(self) -> Optional[bool]:
+        """Gets the NotificationsInOneDriveForBusinessEnabled property"""
+        return self.properties.get("NotificationsInOneDriveForBusinessEnabled", None)
+
+    @property
+    def notifications_in_sharepoint_enabled(self) -> Optional[bool]:
+        """Gets the NotificationsInSharePointEnabled property"""
+        return self.properties.get("NotificationsInSharePointEnabled", None)
+
+    @property
+    def onedrive_block_guests_as_site_admin(self) -> Optional[int]:
+        """Gets the OneDriveBlockGuestsAsSiteAdmin property"""
+        return self.properties.get("OneDriveBlockGuestsAsSiteAdmin", None)
+
+    @property
+    def onedrive_default_link_to_existing_access(self) -> Optional[bool]:
+        """Gets the OneDriveDefaultLinkToExistingAccess property"""
+        return self.properties.get("OneDriveDefaultLinkToExistingAccess", None)
+
+    @property
+    def onedrive_default_share_link_role(self) -> Optional[int]:
+        """Gets the OneDriveDefaultShareLinkRole property"""
+        return self.properties.get("OneDriveDefaultShareLinkRole", None)
+
+    @property
+    def onedrive_default_share_link_scope(self) -> Optional[int]:
+        """Gets the OneDriveDefaultShareLinkScope property"""
+        return self.properties.get("OneDriveDefaultShareLinkScope", None)
+
+    @property
+    def onedrive_for_guests_enabled(self) -> Optional[bool]:
+        """Gets the OneDriveForGuestsEnabled property"""
+        return self.properties.get("OneDriveForGuestsEnabled", None)
+
+    @property
+    def onedrive_loop_default_sharing_link_role(self) -> Optional[int]:
+        """Gets the OneDriveLoopDefaultSharingLinkRole property"""
+        return self.properties.get("OneDriveLoopDefaultSharingLinkRole", None)
+
+    @property
+    def onedrive_loop_default_sharing_link_scope(self) -> Optional[int]:
+        """Gets the OneDriveLoopDefaultSharingLinkScope property"""
+        return self.properties.get("OneDriveLoopDefaultSharingLinkScope", None)
+
+    @property
+    def onedrive_request_files_link_enabled(self) -> Optional[bool]:
+        """Gets the OneDriveRequestFilesLinkEnabled property"""
+        return self.properties.get("OneDriveRequestFilesLinkEnabled", None)
+
+    @property
+    def onedrive_request_files_link_expiration_in_days(self) -> Optional[int]:
+        """Gets the OneDriveRequestFilesLinkExpirationInDays property"""
+        return self.properties.get("OneDriveRequestFilesLinkExpirationInDays", None)
+
+    @property
+    def restricted_access_control_for_onedrive_error_help_link(self) -> Optional[str]:
+        """Gets the RestrictedAccessControlForOneDriveErrorHelpLink property"""
+        return self.properties.get("RestrictedAccessControlForOneDriveErrorHelpLink", None)

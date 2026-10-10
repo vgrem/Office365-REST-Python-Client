@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -16,3 +18,9 @@ class UserInfo(ClientValue):
     @property
     def entity_type_name(self):
         return "SP.Publishing.UserInfo"
+
+    AccountName: str | None = None
+
+    Acronym: str | None = None
+
+    Color: str | None = None

@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from typing import Optional
+from uuid import UUID
 
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.permissions.base_permissions import BasePermissions
@@ -50,3 +53,8 @@ class WorkflowTemplate(Entity):
     @property
     def entity_type_name(self):
         return "SP.Workflow.WorkflowTemplate"
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

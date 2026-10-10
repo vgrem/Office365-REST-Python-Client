@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.entity import Entity
@@ -33,3 +35,23 @@ class SharingPermissionInformation(Entity):
     @property
     def entity_type_name(self):
         return "SP.SharingPermissionInformation"
+
+    @property
+    def permission_description(self) -> Optional[str]:
+        """Gets the PermissionDescription property"""
+        return self.properties.get("PermissionDescription", None)
+
+    @property
+    def permission_kind(self) -> Optional[int]:
+        """Gets the PermissionKind property"""
+        return self.properties.get("PermissionKind", None)
+
+    @property
+    def permission_name(self) -> Optional[str]:
+        """Gets the PermissionName property"""
+        return self.properties.get("PermissionName", None)
+
+    @property
+    def permission_role_type(self) -> Optional[int]:
+        """Gets the PermissionRoleType property"""
+        return self.properties.get("PermissionRoleType", None)

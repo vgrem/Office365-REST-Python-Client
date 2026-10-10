@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
@@ -30,3 +34,18 @@ class TargetApplicationField(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.Office.SecureStoreService.Server.TargetApplicationField"
+
+    @property
+    def credential_type(self) -> Optional[int]:
+        """Gets the CredentialType property"""
+        return self.properties.get("CredentialType", None)
+
+    @property
+    def is_masked(self) -> Optional[bool]:
+        """Gets the IsMasked property"""
+        return self.properties.get("IsMasked", None)
+
+    @property
+    def name(self) -> Optional[str]:
+        """Gets the Name property"""
+        return self.properties.get("Name", None)

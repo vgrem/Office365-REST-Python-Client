@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.entity import Entity
@@ -34,3 +36,8 @@ class UserEntity(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Likes.UserEntity"
+
+    @property
+    def id(self) -> Optional[int]:
+        """Gets the id property"""
+        return self.properties.get("id", None)

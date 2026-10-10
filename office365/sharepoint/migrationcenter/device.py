@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -104,3 +106,8 @@ class Device(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.MigrationCenter.Service.Device"
+
+    @property
+    def up_datetimestamp(self) -> Optional[str]:
+        """Gets the UpdateTimestamp property"""
+        return self.properties.get("UpdateTimestamp", None)

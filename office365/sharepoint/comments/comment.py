@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
 from typing_extensions import Self
@@ -14,6 +16,9 @@ from office365.sharepoint.entity import Entity
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.likes.user_entity import UserEntity
 from office365.sharepoint.sharing.principal import Principal
+
+if TYPE_CHECKING:
+    from office365.sharepoint.comments.comment import Comment
 
 
 class Comment(Entity):
@@ -122,3 +127,17 @@ class Comment(Entity):
     def text(self) -> Optional[str]:
         """Gets the text property"""
         return self.properties.get("text", None)
+
+    @property
+    def id(self) -> Optional[str]:
+        """Gets the id property"""
+        return self.properties.get("id", None)
+
+    @property
+    def replies(self) -> EntityCollection[Comment]:
+        """Gets the replies property"""
+        from office365.sharepoint.comments.comment import Comment
+
+        return self.properties.get(
+            "replies", EntityCollection[Comment](self.context, Comment, ResourcePath("replies", self.resource_path))
+        )

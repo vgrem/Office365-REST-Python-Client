@@ -1,4 +1,6 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -6,6 +8,9 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.social.actor import SocialActor
+
+if TYPE_CHECKING:
+    from office365.sharepoint.social.actor_info import SocialActorInfo
 
 
 class SocialFollowingManager(Entity):
@@ -46,3 +51,79 @@ class SocialFollowingManager(Entity):
     @property
     def entity_type_name(self):
         return "SP.Social.SocialFollowingManager"
+
+    def follow(self, actor: SocialActorInfo) -> ClientResult[int]:
+        """Follow operation.
+
+        Args:
+            actor (SocialActorInfo):
+                actor parameter
+        """
+        return_type = ClientResult(self.context, int())
+        qry = ServiceOperationQuery(self, "Follow", None, {"actor": actor}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_followed(self, types: int) -> ClientResult[ClientValueCollection[SocialActor]]:
+        """GetFollowed operation.
+
+        Args:
+            types (int):
+                types parameter
+        """
+        from office365.sharepoint.social.actor import SocialActor
+
+        return_type = ClientResult(self.context, ClientValueCollection[SocialActor]())
+        qry = ServiceOperationQuery(self, "GetFollowed", None, {"types": types}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_followed_count(self, types: int) -> ClientResult[int]:
+        """GetFollowedCount operation.
+
+        Args:
+            types (int):
+                types parameter
+        """
+        return_type = ClientResult(self.context, int())
+        qry = ServiceOperationQuery(self, "GetFollowedCount", None, {"types": types}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def is_followed(self, actor: SocialActorInfo) -> ClientResult[bool]:
+        """IsFollowed operation.
+
+        Args:
+            actor (SocialActorInfo):
+                actor parameter
+        """
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "IsFollowed", None, {"actor": actor}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def merge_followed_sites(self, followed_sites: str) -> ClientResult[str]:
+        """MergeFollowedSites operation.
+
+        Args:
+            followed_sites (str):
+                followedSites parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self, "MergeFollowedSites", None, {"followedSites": followed_sites}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def stop_following(self, actor: SocialActorInfo) -> ClientResult[bool]:
+        """StopFollowing operation.
+
+        Args:
+            actor (SocialActorInfo):
+                actor parameter
+        """
+        return_type = ClientResult(self.context, bool())
+        qry = ServiceOperationQuery(self, "StopFollowing", None, {"actor": actor}, None, return_type)
+        self.context.add_query(qry)
+        return return_type

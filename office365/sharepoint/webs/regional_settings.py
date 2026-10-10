@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.paths.resource_path import ResourcePath
@@ -177,3 +179,28 @@ class RegionalSettings(Entity):
             "InstalledLanguages",
             LanguageCollection(self.context, ResourcePath("InstalledLanguages", self.resource_path)),
         )
+
+    @property
+    def time24(self) -> Optional[bool]:
+        """Gets the Time24 property"""
+        return self.properties.get("Time24", None)
+
+    @property
+    def time_marker_position(self) -> Optional[int]:
+        """Gets the TimeMarkerPosition property"""
+        return self.properties.get("TimeMarkerPosition", None)
+
+    @property
+    def time_separator(self) -> Optional[str]:
+        """Gets the TimeSeparator property"""
+        return self.properties.get("TimeSeparator", None)
+
+    @property
+    def work_day_end_hour(self) -> Optional[int]:
+        """Gets the WorkDayEndHour property"""
+        return self.properties.get("WorkDayEndHour", None)
+
+    @property
+    def work_day_start_hour(self) -> Optional[int]:
+        """Gets the WorkDayStartHour property"""
+        return self.properties.get("WorkDayStartHour", None)

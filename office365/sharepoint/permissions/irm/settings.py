@@ -1,6 +1,11 @@
+from __future__ import annotations
+
 import datetime
 from typing import Optional
 
+from typing_extensions import Self
+
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 
 
@@ -87,3 +92,14 @@ class InformationRightsManagementSettings(Entity):
     def template_id(self) -> Optional[str]:
         """Gets or sets the ID of the RMS template that will be applied to the file or library."""
         return self.properties.get("TemplateId", None)
+
+    @property
+    def enable_document_browser_publishing_view(self) -> Optional[bool]:
+        """Gets the EnableDocumentBrowserPublishingView property"""
+        return self.properties.get("EnableDocumentBrowserPublishingView", None)
+
+    def reset(self) -> Self:
+        """Reset operation."""
+        qry = ServiceOperationQuery(self, "Reset", None, {}, None, None)
+        self.context.add_query(qry)
+        return self

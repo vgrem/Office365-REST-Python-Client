@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.client_result import ClientResult
@@ -31,3 +33,15 @@ class ThemeInfo(Entity):
     def theme_background_image_uri(self) -> Optional[str]:
         """Specifies the URI of the background image for this theme."""
         return self.properties.get("ThemeBackgroundImageUri", None)
+
+    def get_theme_shade_by_name(self, name: str) -> ClientResult[str]:
+        """GetThemeShadeByName operation.
+
+        Args:
+            name (str):
+                name parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(self, "GetThemeShadeByName", None, {"name": name}, None, return_type)
+        self.context.add_query(qry)
+        return return_type

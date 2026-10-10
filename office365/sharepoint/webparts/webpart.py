@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.entity import Entity
@@ -64,3 +66,13 @@ class WebPart(Entity):
     @property
     def entity_type_name(self):
         return "SP.WebParts.WebPart"
+
+    @property
+    def is_closed(self) -> Optional[bool]:
+        """Gets the IsClosed property"""
+        return self.properties.get("IsClosed", None)
+
+    @property
+    def subtitle(self) -> Optional[str]:
+        """Gets the Subtitle property"""
+        return self.properties.get("Subtitle", None)

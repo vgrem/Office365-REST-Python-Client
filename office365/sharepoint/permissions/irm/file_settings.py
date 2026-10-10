@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from typing_extensions import Self
@@ -73,3 +75,48 @@ class InformationRightsManagementFileSettings(Entity):
         Specifies whether the downloaded document will expire.
         """
         return self.properties.get("EnableDocumentAccessExpire", None)
+
+    @property
+    def enable_document_browser_publishing_view(self) -> Optional[bool]:
+        """Gets the EnableDocumentBrowserPublishingView property"""
+        return self.properties.get("EnableDocumentBrowserPublishingView", None)
+
+    @property
+    def enable_group_protection(self) -> Optional[bool]:
+        """Gets the EnableGroupProtection property"""
+        return self.properties.get("EnableGroupProtection", None)
+
+    @property
+    def enable_license_cache_expire(self) -> Optional[bool]:
+        """Gets the EnableLicenseCacheExpire property"""
+        return self.properties.get("EnableLicenseCacheExpire", None)
+
+    @property
+    def group_name(self) -> Optional[str]:
+        """Gets the GroupName property"""
+        return self.properties.get("GroupName", None)
+
+    @property
+    def irm_enabled(self) -> Optional[bool]:
+        """Gets the IrmEnabled property"""
+        return self.properties.get("IrmEnabled", None)
+
+    @property
+    def license_cache_expire_days(self) -> Optional[int]:
+        """Gets the LicenseCacheExpireDays property"""
+        return self.properties.get("LicenseCacheExpireDays", None)
+
+    @property
+    def policy_description(self) -> Optional[str]:
+        """Gets the PolicyDescription property"""
+        return self.properties.get("PolicyDescription", None)
+
+    @property
+    def policy_title(self) -> Optional[str]:
+        """Gets the PolicyTitle property"""
+        return self.properties.get("PolicyTitle", None)
+
+    @property
+    def template_id(self) -> Optional[str]:
+        """Gets the TemplateId property"""
+        return self.properties.get("TemplateId", None)

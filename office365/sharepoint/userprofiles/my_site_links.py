@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -41,3 +43,23 @@ class MySiteLinks(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Portal.UserProfiles.MySiteLinks"
+
+    @property
+    def all_documents_link_href(self) -> Optional[str]:
+        """Gets the AllDocumentsLinkHref property"""
+        return self.properties.get("AllDocumentsLinkHref", None)
+
+    @property
+    def all_documents_link_target(self) -> Optional[str]:
+        """Gets the AllDocumentsLinkTarget property"""
+        return self.properties.get("AllDocumentsLinkTarget", None)
+
+    @property
+    def all_sites_link_href(self) -> Optional[str]:
+        """Gets the AllSitesLinkHref property"""
+        return self.properties.get("AllSitesLinkHref", None)
+
+    @property
+    def all_sites_link_target(self) -> Optional[str]:
+        """Gets the AllSitesLinkTarget property"""
+        return self.properties.get("AllSitesLinkTarget", None)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 
@@ -84,3 +86,10 @@ class Campaign(Entity):
         qry = FunctionQuery(self, "Publications", [offset, limit], return_type)
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def sharepoint_ids(self) -> SharePointIds:
+        """Gets the sharePointIds property"""
+        from office365.sharepoint.publishing.sharepointids import SharePointIds
+
+        return self.properties.get("sharePointIds", SharePointIds())

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -100,3 +102,13 @@ class AppTile(Entity):
     def version(self) -> Optional[str]:
         """Gets the Version property"""
         return self.properties.get("Version", None)
+
+    @property
+    def version_count(self) -> Optional[int]:
+        """Gets the VersionCount property"""
+        return self.properties.get("VersionCount", None)
+
+    @property
+    def version_size(self) -> Optional[int]:
+        """Gets the VersionSize property"""
+        return self.properties.get("VersionSize", None)

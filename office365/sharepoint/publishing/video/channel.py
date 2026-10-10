@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 from uuid import UUID
 
@@ -125,3 +127,8 @@ class VideoChannel(Entity):
         qry = FunctionQuery(self, "GetChannelPageUrl", [view_mode], return_type)
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

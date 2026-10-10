@@ -18,6 +18,7 @@ from office365.sharepoint.views.visualization.visualization import Visualization
 
 if TYPE_CHECKING:
     from office365.sharepoint.client_context import ClientContext
+    from office365.sharepoint.documents.gridinitinfotype import GridInitInfoType
     from office365.sharepoint.lists.list import List
     from office365.sharepoint.views.collection import ViewCollection
 
@@ -270,3 +271,115 @@ class View(Entity):
     def ordered_view(self) -> Optional[bool]:
         """Gets whether the view is ordered."""
         return self.properties.get("OrderedView", None)
+
+    @property
+    def grid_init_info(self) -> GridInitInfoType:
+        """Gets the GridInitInfo property"""
+        from office365.sharepoint.documents.gridinitinfotype import GridInitInfoType
+
+        return self.properties.get("GridInitInfo", GridInitInfoType())
+
+    @property
+    def grid_layout(self) -> Optional[str]:
+        """Gets the GridLayout property"""
+        return self.properties.get("GridLayout", None)
+
+    @property
+    def html_schema_xml(self) -> Optional[str]:
+        """Gets the HtmlSchemaXml property"""
+        return self.properties.get("HtmlSchemaXml", None)
+
+    @property
+    def image_url(self) -> Optional[str]:
+        """Gets the ImageUrl property"""
+        return self.properties.get("ImageUrl", None)
+
+    @property
+    def include_root_folder(self) -> Optional[bool]:
+        """Gets the IncludeRootFolder property"""
+        return self.properties.get("IncludeRootFolder", None)
+
+    @property
+    def list_view_xml(self) -> Optional[str]:
+        """Gets the ListViewXml property"""
+        return self.properties.get("ListViewXml", None)
+
+    @property
+    def method(self) -> Optional[str]:
+        """Gets the Method property"""
+        return self.properties.get("Method", None)
+
+    @property
+    def mobile_default_view(self) -> Optional[bool]:
+        """Gets the MobileDefaultView property"""
+        return self.properties.get("MobileDefaultView", None)
+
+    @property
+    def mobile_view(self) -> Optional[bool]:
+        """Gets the MobileView property"""
+        return self.properties.get("MobileView", None)
+
+    @property
+    def moderation_type(self) -> Optional[str]:
+        """Gets the ModerationType property"""
+        return self.properties.get("ModerationType", None)
+
+    @property
+    def new_document_templates(self) -> Optional[str]:
+        """Gets the NewDocumentTemplates property"""
+        return self.properties.get("NewDocumentTemplates", None)
+
+    @property
+    def page_render_type(self) -> Optional[int]:
+        """Gets the PageRenderType property"""
+        return self.properties.get("PageRenderType", None)
+
+    @property
+    def view_projected_fields(self) -> Optional[str]:
+        """Gets the ViewProjectedFields property"""
+        return self.properties.get("ViewProjectedFields", None)
+
+    @property
+    def requires_client_integration(self) -> Optional[bool]:
+        """Gets the RequiresClientIntegration property"""
+        return self.properties.get("RequiresClientIntegration", None)
+
+    @property
+    def scope(self) -> Optional[int]:
+        """Gets the Scope property"""
+        return self.properties.get("Scope", None)
+
+    @property
+    def style_id(self) -> Optional[str]:
+        """Gets the StyleId property"""
+        return self.properties.get("StyleId", None)
+
+    @property
+    def tabular_view(self) -> Optional[bool]:
+        """Gets the TabularView property"""
+        return self.properties.get("TabularView", None)
+
+    @property
+    def threaded(self) -> Optional[bool]:
+        """Gets the Threaded property"""
+        return self.properties.get("Threaded", None)
+
+    @property
+    def toolbar(self) -> Optional[str]:
+        """Gets the Toolbar property"""
+        return self.properties.get("Toolbar", None)
+
+    @property
+    def toolbar_template_name(self) -> Optional[str]:
+        """Gets the ToolbarTemplateName property"""
+        return self.properties.get("ToolbarTemplateName", None)
+
+    @property
+    def view_data(self) -> Optional[str]:
+        """Gets the ViewData property"""
+        return self.properties.get("ViewData", None)
+
+    @property
+    def view_type2(self) -> Optional[str]:
+        """Gets the ViewType2 property"""
+        return self.properties.get("ViewType2", None)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.entity import Entity
@@ -69,3 +71,8 @@ class WebTemplate(Entity):
     def title(self) -> Optional[str]:
         """Specifies the display name for the site definition configuration or site template."""
         return self.properties.get("Title", None)
+
+    @property
+    def id(self) -> Optional[int]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

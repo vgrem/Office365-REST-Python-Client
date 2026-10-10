@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from office365.onedrive.lists.list import List
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -42,3 +46,18 @@ class RemoteWeb(Entity):
     def web(self):
         """Gets the SPWeb."""
         return self.properties.get("Web", Web(self.context, ResourcePath("Web", self.resource_path)))
+
+    @property
+    def can_send_email(self) -> Optional[bool]:
+        """Gets the CanSendEmail property"""
+        return self.properties.get("CanSendEmail", None)
+
+    @property
+    def share_by_email_enabled(self) -> Optional[bool]:
+        """Gets the ShareByEmailEnabled property"""
+        return self.properties.get("ShareByEmailEnabled", None)
+
+    @property
+    def share_by_link_enabled(self) -> Optional[bool]:
+        """Gets the ShareByLinkEnabled property"""
+        return self.properties.get("ShareByLinkEnabled", None)

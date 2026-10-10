@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Optional, cast
 
 from office365.sharepoint.fields.lookup import FieldLookup
 from office365.sharepoint.fields.multi_line_text import FieldMultiLineText
@@ -205,3 +205,8 @@ class TaxonomyField(FieldLookup):
     @property
     def entity_type_name(self) -> str:
         return "SP.Taxonomy.TaxonomyField"
+
+    @property
+    def is_enhanced_image_tagging_enabled(self) -> Optional[bool]:
+        """Gets the IsEnhancedImageTaggingEnabled property"""
+        return self.properties.get("IsEnhancedImageTaggingEnabled", None)

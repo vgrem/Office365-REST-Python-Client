@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 
@@ -38,3 +40,8 @@ class RecentDocument(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.Portal.WebControls.RecentDocument"
+
+    @property
+    def id(self) -> Optional[int]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

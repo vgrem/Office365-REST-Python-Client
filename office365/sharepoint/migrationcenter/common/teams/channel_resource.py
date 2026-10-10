@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -41,3 +43,8 @@ class ChannelResource(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.MigrationCenter.Common.Teams.ChannelResource"
+
+    @property
+    def id(self) -> Optional[str]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

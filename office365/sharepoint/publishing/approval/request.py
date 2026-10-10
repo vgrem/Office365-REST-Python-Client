@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.entity import Entity
@@ -73,3 +75,8 @@ class ApprovalRequest(Entity):
     def title(self) -> Optional[str]:
         """Gets the Title property"""
         return self.properties.get("Title", None)
+
+    @property
+    def id(self) -> Optional[str]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

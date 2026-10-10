@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
@@ -194,3 +197,42 @@ class UserProfile(Entity):
     @property
     def entity_type_name(self):
         return "SP.UserProfiles.UserProfile"
+
+    @property
+    def personal_site_instantiation_state(self) -> Optional[int]:
+        """Gets the PersonalSiteInstantiationState property"""
+        return self.properties.get("PersonalSiteInstantiationState", None)
+
+    @property
+    def personal_site_last_creation_time(self) -> Optional[datetime]:
+        """Gets the PersonalSiteLastCreationTime property"""
+        return self.properties.get("PersonalSiteLastCreationTime", datetime.min)
+
+    @property
+    def personal_site_number_of_retries(self) -> Optional[int]:
+        """Gets the PersonalSiteNumberOfRetries property"""
+        return self.properties.get("PersonalSiteNumberOfRetries", None)
+
+    @property
+    def picture_import_enabled(self) -> Optional[bool]:
+        """Gets the PictureImportEnabled property"""
+        return self.properties.get("PictureImportEnabled", None)
+
+    @property
+    def sip_address(self) -> Optional[str]:
+        """Gets the SipAddress property"""
+        return self.properties.get("SipAddress", None)
+
+    def create_personal_site_from_work_item(self, work_item_type: UUID) -> ClientResult[int]:
+        """CreatePersonalSiteFromWorkItem operation.
+
+        Args:
+            work_item_type (UUID):
+                workItemType parameter
+        """
+        return_type = ClientResult(self.context, int())
+        qry = ServiceOperationQuery(
+            self, "CreatePersonalSiteFromWorkItem", None, {"workItemType": work_item_type}, None, return_type
+        )
+        self.context.add_query(qry)
+        return return_type

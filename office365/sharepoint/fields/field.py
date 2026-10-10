@@ -331,3 +331,93 @@ class Field(Entity):
             # (e.g. "TaxonomyFieldType") is the reliable signal
             self.__class__ = self.resolve_field_type(value)  # type: ignore[reportAttributeAccessIssue]
         return self
+
+    @property
+    def autofill_info(self) -> Optional[str]:
+        """Gets the AutofillInfo property"""
+        return self.properties.get("AutofillInfo", None)
+
+    @property
+    def client_validation_message(self) -> Optional[str]:
+        """Gets the ClientValidationMessage property"""
+        return self.properties.get("ClientValidationMessage", None)
+
+    @property
+    def custom_formatter(self) -> Optional[str]:
+        """Gets the CustomFormatter property"""
+        return self.properties.get("CustomFormatter", None)
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the Description property"""
+        return self.properties.get("Description", None)
+
+    @property
+    def direction(self) -> Optional[str]:
+        """Gets the Direction property"""
+        return self.properties.get("Direction", None)
+
+    @property
+    def entity_property_name(self) -> Optional[str]:
+        """Gets the EntityPropertyName property"""
+        return self.properties.get("EntityPropertyName", None)
+
+    @property
+    def index_status(self) -> Optional[int]:
+        """Gets the IndexStatus property"""
+        return self.properties.get("IndexStatus", None)
+
+    @property
+    def is_modern(self) -> Optional[bool]:
+        """Gets the IsModern property"""
+        return self.properties.get("IsModern", None)
+
+    @property
+    def pinned_to_filters_pane(self) -> Optional[bool]:
+        """Gets the PinnedToFiltersPane property"""
+        return self.properties.get("PinnedToFiltersPane", None)
+
+    @property
+    def required(self) -> Optional[bool]:
+        """Gets the Required property"""
+        return self.properties.get("Required", None)
+
+    @property
+    def schema_xml_with_resource_tokens(self) -> Optional[str]:
+        """Gets the SchemaXmlWithResourceTokens property"""
+        return self.properties.get("SchemaXmlWithResourceTokens", None)
+
+    @property
+    def scope(self) -> Optional[str]:
+        """Gets the Scope property"""
+        return self.properties.get("Scope", None)
+
+    @property
+    def sealed(self) -> Optional[bool]:
+        """Gets the Sealed property"""
+        return self.properties.get("Sealed", None)
+
+    @property
+    def show_in_filters_pane(self) -> Optional[int]:
+        """Gets the ShowInFiltersPane property"""
+        return self.properties.get("ShowInFiltersPane", None)
+
+    @property
+    def sortable(self) -> Optional[bool]:
+        """Gets the Sortable property"""
+        return self.properties.get("Sortable", None)
+
+    @property
+    def static_name(self) -> Optional[str]:
+        """Gets the StaticName property"""
+        return self.properties.get("StaticName", None)
+
+    @property
+    def validation_formula(self) -> Optional[str]:
+        """Gets the ValidationFormula property"""
+        return self.properties.get("ValidationFormula", None)
+
+    @property
+    def validation_message(self) -> Optional[str]:
+        """Gets the ValidationMessage property"""
+        return self.properties.get("ValidationMessage", None)

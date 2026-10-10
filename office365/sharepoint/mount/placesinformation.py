@@ -1,7 +1,14 @@
-from typing import Optional
+from __future__ import annotations
 
+from typing import TYPE_CHECKING, Optional
+
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.entity import Entity
+from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.mount.placesuserentity import PlacesUserEntity
+
+if TYPE_CHECKING:
+    from office365.sharepoint.mount.placesentity import PlacesEntity
 
 
 class PlacesInformation(Entity):
@@ -43,3 +50,13 @@ class PlacesInformation(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.AddToOneDrive.PlacesInformation"
+
+    @property
+    def places(self) -> EntityCollection[PlacesEntity]:
+        """Gets the places property"""
+        from office365.sharepoint.mount.placesentity import PlacesEntity
+
+        return self.properties.get(
+            "places",
+            EntityCollection[PlacesEntity](self.context, PlacesEntity, ResourcePath("places", self.resource_path)),
+        )

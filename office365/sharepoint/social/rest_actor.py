@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import Optional
+
+from office365.runtime.client_result import ClientResult
+from office365.runtime.queries.function import FunctionQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.social.actor import SocialActor
 
@@ -16,3 +22,22 @@ class SocialRestActor(Entity):
     @property
     def entity_type_name(self):
         return "SP.Social.SocialRestActor"
+
+    @property
+    def followable_item(self) -> Optional[str]:
+        """Gets the FollowableItem property"""
+        return self.properties.get("FollowableItem", None)
+
+    @property
+    def followable_item_actor(self) -> SocialActor:
+        """Gets the FollowableItemActor property"""
+        from office365.sharepoint.social.actor import SocialActor
+
+        return self.properties.get("FollowableItemActor", SocialActor())
+
+    def unread_mention_count(self) -> ClientResult[int]:
+        """UnreadMentionCount operation."""
+        return_type = ClientResult(self.context, int())
+        qry = FunctionQuery(self, "UnreadMentionCount", [], return_type)
+        self.context.add_query(qry)
+        return return_type

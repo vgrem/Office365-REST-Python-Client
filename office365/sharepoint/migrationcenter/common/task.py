@@ -5,7 +5,9 @@ from typing import Optional
 from uuid import UUID
 
 from office365.runtime.paths.v3.static import StaticPath
-from office365.sharepoint.migrationcenter.common.task_entity_data import MigrationTaskEntityData
+from office365.sharepoint.migrationcenter.common.task_entity_data import (
+    MigrationTaskEntityData,
+)
 
 
 class MigrationTask(MigrationTaskEntityData):
@@ -201,3 +203,8 @@ class MigrationTask(MigrationTaskEntityData):
     def workflow_id(self) -> Optional[UUID]:
         """Gets the WorkflowId property"""
         return self.properties.get("WorkflowId", None)
+
+    @property
+    def up_datetimestamp(self) -> Optional[str]:
+        """Gets the UpdateTimestamp property"""
+        return self.properties.get("UpdateTimestamp", None)

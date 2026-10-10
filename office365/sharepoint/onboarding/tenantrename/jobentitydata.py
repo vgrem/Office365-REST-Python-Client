@@ -76,3 +76,13 @@ class TenantRenameJobEntityData(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.Online.SharePoint.Onboarding.RestService.TenantRename.TenantRenameJobEntityData"
+
+    @property
+    def is_vanity(self) -> Optional[bool]:
+        """Gets the IsVanity property"""
+        return self.properties.get("IsVanity", None)
+
+    @property
+    def scheduled_datetime_in_utc(self) -> Optional[datetime]:
+        """Gets the ScheduledDateTimeInUtc property"""
+        return self.properties.get("ScheduledDateTimeInUtc", datetime.min)

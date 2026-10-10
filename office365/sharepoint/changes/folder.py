@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.changes.change import Change
@@ -15,3 +17,8 @@ class ChangeFolder(Change):
     def web_id(self) -> Optional[str]:
         """Identifies the site that contains the changed folder."""
         return self.properties.get("WebId", None)
+
+    @property
+    def is_recycle_bin_operation(self) -> Optional[bool]:
+        """Gets the IsRecycleBinOperation property"""
+        return self.properties.get("IsRecycleBinOperation", None)

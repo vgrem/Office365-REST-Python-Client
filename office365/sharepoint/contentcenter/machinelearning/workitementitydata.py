@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 from uuid import UUID
 
@@ -63,3 +65,8 @@ class SPMachineLearningWorkItemEntityData(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.Office.Server.ContentCenter.SPMachineLearningWorkItemEntityData"
+
+    @property
+    def type(self) -> Optional[UUID]:
+        """Gets the Type property"""
+        return self.properties.get("Type", None)

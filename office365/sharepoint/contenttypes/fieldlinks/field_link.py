@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.sharepoint.entity import Entity
@@ -35,3 +37,13 @@ class FieldLink(Entity):
     def show_in_display_form(self) -> Optional[bool]:
         """A Boolean value that indicates whether this field is shown in the display form."""
         return self.properties.get("ShowInDisplayForm", None)
+
+    @property
+    def display_name(self) -> Optional[str]:
+        """Gets the DisplayName property"""
+        return self.properties.get("DisplayName", None)
+
+    @property
+    def name(self) -> Optional[str]:
+        """Gets the Name property"""
+        return self.properties.get("Name", None)

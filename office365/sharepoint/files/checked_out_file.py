@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from typing_extensions import Self
@@ -35,3 +37,16 @@ class CheckedOutFile(Entity):
     @property
     def property_ref_name(self) -> str:
         return "CheckedOutById"
+
+    @property
+    def server_relative_path(self) -> ResourcePath:
+        """Gets the ServerRelativePath property"""
+        from office365.sharepoint.types.resource_path import ResourcePath
+
+        return self.properties.get("ServerRelativePath", ResourcePath())
+
+    def take_over_check_out(self) -> Self:
+        """TakeOverCheckOut operation."""
+        qry = ServiceOperationQuery(self, "TakeOverCheckOut", None, {}, None, None)
+        self.context.add_query(qry)
+        return self

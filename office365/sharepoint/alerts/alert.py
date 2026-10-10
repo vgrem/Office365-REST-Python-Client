@@ -133,3 +133,13 @@ class Alert(Entity):
         qry = ServiceOperationQuery(self, "UpdateAlert", None, {}, None, None)
         self.context.add_query(qry)
         return self
+
+    @property
+    def filter(self) -> Optional[str]:
+        """Gets the Filter property"""
+        return self.properties.get("Filter", None)
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the ID property"""
+        return self.properties.get("ID", None)

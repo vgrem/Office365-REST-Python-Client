@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from typing import Optional
+from uuid import UUID
 
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.types.resource_path import ResourcePath as SPResPath
@@ -27,3 +30,8 @@ class Form(Entity):
         Gets the Web site–relative Path of the form
         """
         return self.properties.get("ResourcePath", SPResPath())
+
+    @property
+    def id(self) -> Optional[UUID]:
+        """Gets the Id property"""
+        return self.properties.get("Id", None)

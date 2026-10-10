@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.queries.service_operation import ServiceOperationQuery
@@ -34,3 +36,18 @@ class TargetApplication(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.Office.SecureStoreService.Server.TargetApplication"
+
+    @property
+    def contact_email(self) -> Optional[str]:
+        """Gets the ContactEmail property"""
+        return self.properties.get("ContactEmail", None)
+
+    @property
+    def friendly_name(self) -> Optional[str]:
+        """Gets the FriendlyName property"""
+        return self.properties.get("FriendlyName", None)
+
+    @property
+    def target_app_type(self) -> Optional[int]:
+        """Gets the TargetAppType property"""
+        return self.properties.get("TargetAppType", None)

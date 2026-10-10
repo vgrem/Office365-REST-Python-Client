@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from typing import Optional
 
@@ -44,3 +46,8 @@ class PushNotificationSubscriber(Entity):
         from office365.sharepoint.principal.users.user import User
 
         return self.properties.get("User", User(self.context, ResourcePath("user", self.resource_path)))
+
+    @property
+    def subscriber_type(self) -> Optional[str]:
+        """Gets the SubscriberType property"""
+        return self.properties.get("SubscriberType", None)

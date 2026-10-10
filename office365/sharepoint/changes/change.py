@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 
@@ -48,3 +50,8 @@ class Change(Entity):
         Gets a value that specifies the time that the object was modified.
         """
         return self.properties.get("Time", datetime.min)
+
+    @property
+    def relative_time(self) -> Optional[str]:
+        """Gets the RelativeTime property"""
+        return self.properties.get("RelativeTime", None)

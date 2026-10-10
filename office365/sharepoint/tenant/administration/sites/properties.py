@@ -9,9 +9,13 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import GuidCollection, StringCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.entity import Entity
-from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_status import DenyAddAndCustomizePagesStatus
+from office365.sharepoint.tenant.administration.deny_add_and_customize_pages_status import (
+    DenyAddAndCustomizePagesStatus,
+)
 from office365.sharepoint.tenant.administration.jobs.spo_operation import SpoOperation
-from office365.sharepoint.tenant.administration.sharing_capabilities import SharingCapabilities
+from office365.sharepoint.tenant.administration.sharing_capabilities import (
+    SharingCapabilities,
+)
 from office365.sharepoint.tenant.administration.spofileversionfiletypepolicysettings import (
     SPOFileVersionFileTypePolicySettings,
 )
@@ -763,3 +767,18 @@ class SiteProperties(Entity):
             }
             default_value = property_mapping.get(name, None)
         return super().get_property(name, default_value)
+
+    @property
+    def exclude_block_download_sharepoint_groups(self) -> StringCollection:
+        """Gets the ExcludeBlockDownloadSharePointGroups property"""
+        return self.properties.get("ExcludeBlockDownloadSharePointGroups", StringCollection())
+
+    @property
+    def file_anonymous_link_type(self) -> Optional[int]:
+        """Gets the FileAnonymousLinkType property"""
+        return self.properties.get("FileAnonymousLinkType", None)
+
+    @property
+    def folder_anonymous_link_type(self) -> Optional[int]:
+        """Gets the FolderAnonymousLinkType property"""
+        return self.properties.get("FolderAnonymousLinkType", None)

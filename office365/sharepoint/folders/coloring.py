@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 from typing import Optional
+from uuid import UUID
 
 from typing_extensions import Self
 
+from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.sharepoint.entity import Entity
 from office365.sharepoint.folders.coloring_information import FolderColoringInformation
@@ -46,3 +50,28 @@ class FolderColoring(Entity):
         qry = ServiceOperationQuery(self, "StampColor", parameters_type=payload)
         self.context.add_query(qry)
         return self
+
+    def rename_folder(
+        self, decoded_url: str, new_name: str, coloring_information: FolderColoringInformation
+    ) -> ClientResult[UUID]:
+        """RenameFolder operation.
+
+        Args:
+            decoded_url (str):
+                DecodedUrl parameter
+            new_name (str):
+                newName parameter
+            coloring_information (FolderColoringInformation):
+                coloringInformation parameter
+        """
+        return_type = ClientResult(self.context, UUID(int=0))
+        qry = ServiceOperationQuery(
+            self,
+            "RenameFolder",
+            None,
+            {"DecodedUrl": decoded_url, "newName": new_name, "coloringInformation": coloring_information},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type

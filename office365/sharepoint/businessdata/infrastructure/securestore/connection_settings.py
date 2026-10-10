@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.paths.v3.static import StaticPath
@@ -25,3 +27,43 @@ class ConnectionSettings(Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.BusinessData.Infrastructure.SecureStore.ConnectionSettings"
+
+    @property
+    def connection_settings_type(self) -> Optional[int]:
+        """Gets the ConnectionSettingsType property"""
+        return self.properties.get("ConnectionSettingsType", None)
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the Description property"""
+        return self.properties.get("Description", None)
+
+    @property
+    def name(self) -> Optional[str]:
+        """Gets the Name property"""
+        return self.properties.get("Name", None)
+
+    @property
+    def proxy_sso_application_id(self) -> Optional[str]:
+        """Gets the ProxySSOApplicationId property"""
+        return self.properties.get("ProxySSOApplicationId", None)
+
+    @property
+    def proxy_target(self) -> Optional[str]:
+        """Gets the ProxyTarget property"""
+        return self.properties.get("ProxyTarget", None)
+
+    @property
+    def sso_application_id(self) -> Optional[str]:
+        """Gets the SSOApplicationId property"""
+        return self.properties.get("SSOApplicationId", None)
+
+    @property
+    def sso_provider_impl_id(self) -> Optional[str]:
+        """Gets the SSOProviderImplId property"""
+        return self.properties.get("SSOProviderImplId", None)
+
+    @property
+    def target(self) -> Optional[str]:
+        """Gets the Target property"""
+        return self.properties.get("Target", None)

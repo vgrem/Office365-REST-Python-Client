@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -6,8 +8,12 @@ from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.sharepoint.contentcenter.machinelearning.modeldependencies import SPModelDependencies
-from office365.sharepoint.contentcenter.machinelearning.modelpublishconfig import SPModelPublishConfig
+from office365.sharepoint.contentcenter.machinelearning.modeldependencies import (
+    SPModelDependencies,
+)
+from office365.sharepoint.contentcenter.machinelearning.modelpublishconfig import (
+    SPModelPublishConfig,
+)
 from office365.sharepoint.entity import Entity
 
 
@@ -238,3 +244,15 @@ class SPMachineLearningModel(Entity):
         qry = ServiceOperationQuery(self, "UpdateModelTypeSpecificSettings", None, {"Settings": settings}, None)
         self.context.add_query(qry)
         return self
+
+    @property
+    def id(self) -> Optional[int]:
+        """Gets the ID property"""
+        return self.properties.get("ID", None)
+
+    def invoke_connector_query(self) -> ClientResult[bytes]:
+        """InvokeConnectorQuery operation."""
+        return_type = ClientResult(self.context, bytes())
+        qry = ServiceOperationQuery(self, "InvokeConnectorQuery", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
