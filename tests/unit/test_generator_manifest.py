@@ -75,6 +75,25 @@ def test_run_signature_tracks_metadata_config_and_templates(tmp_path):
     assert run_signature(options) != after_routing
 
 
+def test_run_signature_includes_the_generator_source(tmp_path):
+    metadata = tmp_path / "graph.xml"
+    metadata.write_text("<a/>", encoding="utf-8")
+    templates = tmp_path / "templates"
+    templates.mkdir()
+    source = tmp_path / "src"
+    source.mkdir()
+    (source / "mod.py").write_text("x = 1\n", encoding="utf-8")
+    options = GeneratorOptions(
+        metadata_path=str(metadata), output_path=str(tmp_path / "out"), template_path=str(templates)
+    )
+
+    first = run_signature(options, source_root=source)
+    assert run_signature(options, source_root=source) == first  # stable
+
+    (source / "mod.py").write_text("x = 2\n", encoding="utf-8")
+    assert run_signature(options, source_root=source) != first  # generator upgrade invalidates
+
+
 def test_manifest_round_trip_includes_signature(tmp_path):
     manifest = Manifest(tmp_path / ".state" / "graph.json", "abc123", {"microsoft.graph.Thing": ["a"]}, "sig-1")
     manifest.save()

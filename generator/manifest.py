@@ -31,11 +31,23 @@ def metadata_fingerprint(metadata_path: str) -> str:
     return hashlib.sha1(Path(metadata_path).read_bytes()).hexdigest()
 
 
-def run_signature(options: "GeneratorOptions") -> str:
+def _hash_files(digest: "hashlib._Hash", root: Path) -> None:
+    """Fold every ``*.py`` file under ``root`` (path + content) into ``digest``."""
+    if not root.is_dir():
+        return
+    for path in sorted(root.rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        digest.update(path.relative_to(root).as_posix().encode())
+        digest.update(path.read_bytes())
+
+
+def run_signature(options: "GeneratorOptions", source_root: Optional[Path] = None) -> str:
     """A hash of everything that changes generated output.
 
-    Covers the metadata, the effective options/flags and the template sources, so
-    an unchanged signature means a run would be a no-op (see the fast path).
+    Covers the metadata, the effective options/flags, the template sources **and
+    the generator's own source**, so an unchanged signature means a run would be a
+    no-op (see the fast path) and a generator upgrade always invalidates it.
     """
     digest = hashlib.sha1()
     digest.update(metadata_fingerprint(options.metadata_path).encode())
@@ -55,11 +67,8 @@ def run_signature(options: "GeneratorOptions") -> str:
         "type_routing": sorted(options.type_routing.items()),
     }
     digest.update(json.dumps(payload, sort_keys=True).encode())
-    template_root = Path(options.template_path)
-    if template_root.is_dir():
-        for path in sorted(template_root.rglob("*.py")):
-            digest.update(path.relative_to(template_root).as_posix().encode())
-            digest.update(path.read_bytes())
+    _hash_files(digest, Path(options.template_path))
+    _hash_files(digest, source_root or Path(__file__).parent)
     return digest.hexdigest()
 
 
