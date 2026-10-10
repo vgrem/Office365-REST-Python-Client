@@ -158,6 +158,34 @@ def test_update_preserves_existing_source(tmp_path: Path, monkeypatch):
     assert source == builder.render()
 
 
+def _is_subsequence(needle: list[str], haystack: list[str]) -> bool:
+    remaining = iter(haystack)
+    return all(any(candidate == line for candidate in remaining) for line in needle)
+
+
+def test_update_never_removes_or_reflows_existing_lines(tmp_path: Path, monkeypatch):
+    """Additions-only guarantee: every original line survives verbatim, in order."""
+    target = tmp_path / "test_thing.py"
+    original = (
+        "from __future__ import annotations\n"
+        "\n"
+        "\n"
+        "class TestThing:\n"
+        "    # custom logic below (not in metadata)\n"
+        "    def custom(self) -> int:  # type: ignore[override]\n"
+        "        return 42\n"
+    )
+    target.write_text(original, encoding="utf8")
+    monkeypatch.setattr(TypeBuilder, "_module_file", staticmethod(lambda name: str(target)))
+    builder = TypeBuilder(_schema(), _options(tmp_path), resolver=_StubResolver())
+    builder.build()
+    source = builder.render()
+
+    assert _is_subsequence(original.splitlines(), source.splitlines())
+    assert "return 42" in source
+    assert "def title" in source
+
+
 def test_datetime_references_use_the_module_form():
     """When a file uses ``import datetime``, generated refs become ``datetime.datetime``."""
     node = ast.parse("def f(x: datetime) -> None: ...").body[0]

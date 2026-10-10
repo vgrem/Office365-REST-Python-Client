@@ -20,6 +20,9 @@ tests/selfsigncert.pem
 # Generator run checkpoints
 generator/.checkpoints/
 
+# Generator run manifest (last synced metadata snapshot)
+generator/.state/
+
 # Generator documentation cache (regenerated from graphopenapi.yaml)
 generator/documentation/graphopenapi.cache.json
 

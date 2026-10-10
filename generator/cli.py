@@ -21,6 +21,7 @@ def generate(
     dry_run: bool = False,
     update_only: bool = False,
     only_types: Optional[Sequence[str]] = None,
+    report_path: Optional[str] = None,
 ) -> None:
     """Read the service metadata and generate/update the corresponding model files."""
     definition = get_service(service)
@@ -34,6 +35,7 @@ def generate(
         base_dir=GENERATOR_DIR,
         update_only=update_only,
         only_types=list(only_types) if only_types else None,
+        report_path=report_path,
     ).run()
 
 
@@ -60,6 +62,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         metavar="ODATA_TYPE",
         help="only process this OData type (e.g. SP.File); repeatable",
     )
+    parser.add_argument("--report", dest="report_path", help="write a JSON run report to this path")
     args = parser.parse_args(argv)
-    generate(args.service, dry_run=args.dry_run, update_only=args.update_only, only_types=args.types)
+    generate(
+        args.service,
+        dry_run=args.dry_run,
+        update_only=args.update_only,
+        only_types=args.types,
+        report_path=args.report_path,
+    )
     return 0

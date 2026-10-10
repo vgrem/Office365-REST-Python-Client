@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -13,6 +14,14 @@ from generator.checkpoint import Checkpoint, checkpoint_path
 from generator.config import GeneratorOptions
 from generator.documentation.base import DocumentationProvider
 from generator.filters import TypeFilter
+from generator.manifest import (
+    Manifest,
+    MetadataChanges,
+    diff_members,
+    manifest_path,
+    metadata_fingerprint,
+    schema_members,
+)
 from generator.odata.model import ODataModel
 from generator.routing import planned_module, routing_from_options
 from generator.validation import ValidationError, validate_source
@@ -76,12 +85,17 @@ class GeneratorPipeline:
         base_dir: Path = Path("."),
         update_only: bool = False,
         only_types: Optional[list[str]] = None,
+        report_path: Optional[str] = None,
     ) -> None:
         self._model = model
         self._options = options
         self._docs = docs_service
         self._update_only = update_only
         self._only_types = tuple(only_types or ())
+        self._metadata_path = options.metadata_path
+        self._base_dir = base_dir
+        self._report_path = report_path
+        self._previous = Manifest.load(options.metadata_path, base_dir)
         self._builder_options = options.builder_options()
         self._filter = TypeFilter.from_options(options)
         # Only types this run will actually generate (attached or routed) are
@@ -143,9 +157,20 @@ class GeneratorPipeline:
                 planned.append((name, builder))
             self._checkpoint.add(name, persist=False)
 
+        current_members = schema_members(self._model)
+        changes = diff_members(self._previous.members, current_members) if self._previous else MetadataChanges([], {})
+
         self._commit(planned)
         self._checkpoint.clear()
         self._print_summary(planned, skipped_new, unrouted)
+        self._report_metadata_changes(changes)
+        if not self._options.dry_run:
+            Manifest(
+                manifest_path(self._metadata_path, self._base_dir),
+                metadata_fingerprint(self._metadata_path),
+                current_members,
+            ).save()
+        self._write_report(planned, unrouted, changes)
 
     def _warn_unknown_types(self) -> None:
         missing = [name for name in self._only_types if name not in self._model.types]
@@ -204,3 +229,31 @@ class GeneratorPipeline:
             print("  Skipped types (first 15):")
             for name in unrouted[:15]:
                 print(f"    {name}")
+
+    def _report_metadata_changes(self, changes: MetadataChanges) -> None:
+        """Report metadata deletions (kept in code — never auto-removed)."""
+        if changes.is_empty:
+            return
+        print("\nMetadata removed since the last sync (kept in code):")
+        if changes.removed_types:
+            shown = ", ".join(changes.removed_types[:10])
+            print(f"  {len(changes.removed_types)} type(s): {shown}")
+        if changes.removed_members:
+            total = sum(len(members) for members in changes.removed_members.values())
+            print(f"  {total} member(s) across {len(changes.removed_members)} type(s):")
+            for name, members in list(changes.removed_members.items())[:15]:
+                print(f"    {name}: {', '.join(members)}")
+
+    def _write_report(self, planned, unrouted: list[str], changes: MetadataChanges) -> None:
+        if not self._report_path:
+            return
+        payload = {
+            "metadata": self._metadata_path,
+            "created": [name for name, builder in planned if builder.status == "created"],
+            "updated": [name for name, builder in planned if builder.status == "updated"],
+            "skipped_unrouted": unrouted,
+            "removed_types": changes.removed_types,
+            "removed_members": changes.removed_members,
+        }
+        Path(self._report_path).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        print(f"\nReport written to {self._report_path}")
