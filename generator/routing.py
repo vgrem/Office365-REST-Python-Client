@@ -111,6 +111,12 @@ class Router:
         if module:
             return module
         short = type_name.rsplit(".", 1)[-1]
+        # Short-name exact rule (used for bare ``microsoft.graph.*`` types, where
+        # no namespace route applies). Checked after the namespace so it never
+        # overrides a namespace-scoped type.
+        exact = self.types.get(short)
+        if exact:
+            return exact
         for pattern, target in self.types.items():
             if pattern.endswith("*") and short.startswith(pattern[:-1]):
                 return target

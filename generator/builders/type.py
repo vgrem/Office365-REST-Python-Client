@@ -175,6 +175,7 @@ class TypeBuilder(ast.NodeTransformer):
         self._added_imports: List[ast.stmt] = []
         self._rendered: Optional[str] = None
         self._uses_field = False
+        self._field_alias = "field"
         self._added_props: List[PropertyBuilder] = []
         self._cyclic_types: set[str] = set((options or {}).get("cyclic_types", ()))
         self._resolver = resolver or TypeRegistry(
@@ -247,6 +248,10 @@ class TypeBuilder(ast.NodeTransformer):
         ignored_properties = set(options.get("ignored_properties", []))
         self._properties = []
         seen_props: set[str] = set()
+        if any(name == "field" for name in self._schema.Properties):
+            # A dataclass field named ``field`` would shadow ``dataclasses.field``
+            # used by later fields, so import it under an alias instead.
+            self._field_alias = "field_"
         for name, prop_schema in self._schema.Properties.items():
             snake = to_snake_case(name)
             if name in ignored_properties or snake in reserved_props or snake in seen_props:
@@ -255,6 +260,7 @@ class TypeBuilder(ast.NodeTransformer):
                 continue
             self._properties.append(PropertyBuilder(prop_schema, resolver=self._resolver))
             self._properties[-1].cyclic = ODataType.strip_collection(prop_schema.TypeName or "") in self._cyclic_types
+            self._properties[-1].field_alias = self._field_alias
             seen_props.add(snake)
 
         self._members = [MemberBuilder(member_schema) for _, member_schema in self._schema.Members.items()]
@@ -395,6 +401,7 @@ class TypeBuilder(ast.NodeTransformer):
         collector = TypeReferenceCollector(self._resolver)
         collector.needs_dataclass = self._schema.BaseTypeFullName == "ComplexType" and bool(self._added_props)
         collector.needs_field = self._uses_field
+        collector.field_alias = self._field_alias
 
         for prop in self._added_props:
             prop_type = prop.client_type_name
@@ -446,11 +453,11 @@ class TypeBuilder(ast.NodeTransformer):
                 return False
             imp.body = body
         else:
-            kept = [alias.name for alias in imp.names if (imp.module, alias.name) not in existing]
-            if not kept:
+            kept_aliases = [alias for alias in imp.names if (imp.module, alias.asname or alias.name) not in existing]
+            if not kept_aliases:
                 return False
-            imp.names = [ast.alias(name=name, asname=None) for name in kept]
-            existing.update((imp.module, name) for name in kept)
+            imp.names = [ast.alias(name=alias.name, asname=alias.asname) for alias in kept_aliases]
+            existing.update((imp.module, alias.asname or alias.name) for alias in kept_aliases)
         module.body.insert(index, imp)
         return True
 
@@ -465,13 +472,13 @@ class TypeBuilder(ast.NodeTransformer):
         names: set = set()
         for node in module.body:
             if isinstance(node, ast.ImportFrom):
-                names.update((node.module, alias.name) for alias in node.names)
+                names.update((node.module, alias.asname or alias.name) for alias in node.names)
             elif isinstance(node, ast.Import):
                 names.update((alias.name, None) for alias in node.names)
             elif isinstance(node, ast.If) and isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
                 for child in node.body:
                     if isinstance(child, ast.ImportFrom):
-                        names.update((child.module, alias.name) for alias in child.names)
+                        names.update((child.module, alias.asname or alias.name) for alias in child.names)
         return names
 
     def _build_members(self, class_node: ast.ClassDef):
@@ -589,7 +596,7 @@ class TypeBuilder(ast.NodeTransformer):
                             right=ast.Constant(value=None),
                         )
 
-        if isinstance(default, ast.Call) and isinstance(default.func, ast.Name) and default.func.id == "field":
+        if isinstance(default, ast.Call) and isinstance(default.func, ast.Name) and default.func.id == self._field_alias:
             self._uses_field = True
 
         return ast.AnnAssign(

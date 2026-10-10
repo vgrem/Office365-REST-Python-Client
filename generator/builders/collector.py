@@ -65,6 +65,7 @@ class TypeReferenceCollector:
         self._type_checking: dict[str, str] = {}
         self.needs_dataclass = False
         self.needs_field = False
+        self.field_alias = "field"
 
     def add(self, type_name: str) -> None:
         """Track a known runtime type reference.
@@ -180,7 +181,8 @@ class TypeReferenceCollector:
         if self.needs_dataclass:
             names = [ast.alias(name="dataclass", asname=None)]
             if self.needs_field:
-                names.append(ast.alias(name="field", asname=None))
+                asname = None if self.field_alias == "field" else self.field_alias
+                names.append(ast.alias(name="field", asname=asname))
             imports.append(ast.ImportFrom(module="dataclasses", names=names, level=0))
 
         if self._type_checking:

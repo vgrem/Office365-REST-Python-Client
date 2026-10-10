@@ -90,6 +90,22 @@ def test_client_value_field_type_is_a_runtime_import(tmp_path: Path):
     assert runtime_index < type_checking_index  # module-level, before the TYPE_CHECKING block
 
 
+def test_dataclass_member_named_field_aliases_the_dataclasses_field_import(tmp_path: Path):
+    """A member named ``field`` must not shadow ``dataclasses.field`` used by later fields."""
+    schema = TypeInformation(BaseTypeFullName="ComplexType", FullName="microsoft.graph.TestOption", IsValueObject=True)
+    schema.add_property(PropertyInformation(Name="field", TypeName="Edm.String"))
+    schema.add_property(PropertyInformation(Name="bucket", TypeName="microsoft.graph.Bucket"))
+    options = {"template_path": str(_TEMPLATES_GRAPH), "output_path": str(tmp_path), "modules": "office365"}
+    builder = TypeBuilder(schema, options, resolver=_FixedResolver("office365.bucket"))
+    builder.build()
+    source = builder.render()
+    ast.parse(source)
+
+    assert "from dataclasses import field as field_" in source
+    assert "field_(default_factory=Bucket)" in source
+    assert "field: str | None = None" in source
+
+
 def test_method_entity_return_is_imported_lazily(tmp_path: Path):
     """A bound function returning an entity imports it under TYPE_CHECKING + locally."""
     schema = TypeInformation(BaseTypeFullName="EntityType", FullName="SP.TestThing", IsValueObject=False)

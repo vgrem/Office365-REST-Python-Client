@@ -38,6 +38,7 @@ class PropertyBuilder:
         self.status = status
         self.docstring: Optional[str] = None
         self.cyclic = False
+        self.field_alias = "field"
         self._resolver = resolver
 
     def build(self, template: TemplateContext) -> List[ast.stmt]:
@@ -81,7 +82,7 @@ class PropertyBuilder:
             base_name = self.client_type_name.split("[")[0]
             if ODataType.is_primitive_name(self.schema.TypeName):
                 return ast.Call(
-                    func=ast.Name(id="field", ctx=ast.Load()),
+                    func=ast.Name(id=self.field_alias, ctx=ast.Load()),
                     args=[],
                     keywords=[
                         ast.keyword(
@@ -93,7 +94,7 @@ class PropertyBuilder:
             else:
                 item_name = self.client_item_type_name
                 return ast.Call(
-                    func=ast.Name(id="field", ctx=ast.Load()),
+                    func=ast.Name(id=self.field_alias, ctx=ast.Load()),
                     args=[],
                     keywords=[
                         ast.keyword(
@@ -112,7 +113,7 @@ class PropertyBuilder:
         elif ODataType.is_primitive_name(self.schema.TypeName):
             if self.client_type_name == "datetime":
                 return ast.Call(
-                    func=ast.Name(id="field", ctx=ast.Load()),
+                    func=ast.Name(id=self.field_alias, ctx=ast.Load()),
                     args=[],
                     keywords=[
                         ast.keyword(
@@ -131,7 +132,7 @@ class PropertyBuilder:
             return ast.Constant(value=None)
         else:
             return ast.Call(
-                func=ast.Name(id="field", ctx=ast.Load()),
+                func=ast.Name(id=self.field_alias, ctx=ast.Load()),
                 args=[],
                 keywords=[
                     ast.keyword(
