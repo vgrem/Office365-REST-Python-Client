@@ -5,12 +5,12 @@ from dataclasses import dataclass, field
 from office365.intune.print.colormode import PrintColorMode
 from office365.intune.print.duplexmode import PrintDuplexMode
 from office365.intune.print.finishing import PrintFinishing
+from office365.intune.print.margin import PrintMargin
 from office365.intune.print.multipagelayout import PrintMultipageLayout
 from office365.intune.print.orientation import PrintOrientation
 from office365.intune.print.printers.feedorientation import PrinterFeedOrientation
 from office365.intune.print.quality import PrintQuality
 from office365.intune.print.scaling import PrintScaling
-from office365.intune.print_margin import PrintMargin
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
 
