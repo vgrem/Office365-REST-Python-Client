@@ -260,10 +260,12 @@ class ParameterType:
 class TypeRegistry:
     """Maps OData type references to Python classes, modules and member names."""
 
-    def __init__(self, modules: Sequence[str], namespace: str = "") -> None:
+    def __init__(self, modules: Sequence[str], namespace: str = "", type_modules: Optional[dict] = None) -> None:
         self.modules = tuple(sorted(m.strip() for m in modules if m and m.strip()))
         self.namespace = namespace
         self._index = _get_index(self.modules, namespace)
+        #: Planned module for types this run will generate (attached or routed).
+        self._type_modules = dict(type_modules or {})
 
     def resolve(self, type_name: str | None) -> Optional[Type]:
         """Resolve an OData type name (``SP.Directory.User``) to its Python class."""
@@ -281,6 +283,10 @@ class TypeRegistry:
         """The module defining the referenced class, resolved statically."""
         if not type_name:
             return None
+        key = ODataType.normalize_type_name(type_name) or type_name
+        planned = self._type_modules.get(key)
+        if planned is not None:
+            return planned
         module = self._index.resolve_module(type_name)
         if module is not None:
             return module

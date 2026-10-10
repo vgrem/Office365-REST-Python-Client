@@ -12,7 +12,7 @@ class ODataV4Reader(ODataReader):
 
     def process_navigation_property_node(self, node: Element) -> Optional[PropertyInformation]:
         schema = self._new_navigation(node)
-        schema.TypeName = node.get("Type")
+        schema.TypeName = self._qualified_type_name(node.get("Type"))
         schema.IsBeta = False
         return schema
 
@@ -22,7 +22,7 @@ class ODataV4Reader(ODataReader):
         nodes += self._root.findall(".//xmlns:Function", self.xml_namespaces)
         for node in nodes:
             name = node.get("Name")
-            params = self.parse_parameters(node, self.xml_namespaces)
+            params = self.parse_parameters(node)
             if not name or node.get("IsBound") != "true" or not params:
                 continue  # unbound operations can't be attached to a generated type
             binding_param = params[0]
@@ -39,7 +39,9 @@ class ODataV4Reader(ODataReader):
                 MethodInformation(
                     Name=name,
                     Parameters=params[1:],
-                    ReturnTypeFullName=return_node.get("Type") if return_node is not None else None,
+                    ReturnTypeFullName=self._qualified_type_name(return_node.get("Type"))
+                    if return_node is not None
+                    else None,
                     BindingTypeFullName=binding_type,
                     IsBound=True,
                     IsStatic=False,

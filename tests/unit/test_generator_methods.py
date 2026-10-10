@@ -111,10 +111,35 @@ def test_v4_parses_bound_actions_and_functions(tmp_path: Path):
     assert activate.ReturnTypeFullName is None
 
     quarantine = schema.Methods["clearQuarantine"]
-    assert quarantine.ReturnTypeFullName == "microsoft.graph.identityGovernance.workflow"
+    assert quarantine.ReturnTypeFullName == "microsoft.graph.identityGovernance.Workflow"
 
     # collection-bound functions belong to the hand-written <Item>Collection class and are skipped
     assert "summary" not in schema.Methods
+
+
+_ALIASED_METADATA = """<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:DataServices>
+    <Schema Namespace="microsoft.graph" Alias="graph" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <ComplexType Name="emailAddress">
+        <Property Name="address" Type="Edm.String"/>
+      </ComplexType>
+    </Schema>
+    <Schema Namespace="microsoft.graph.security" Alias="self" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <ComplexType Name="alertEvidence">
+        <Property Name="email" Type="graph.emailAddress"/>
+      </ComplexType>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
+"""
+
+
+def test_v4_expands_schema_aliases(tmp_path: Path):
+    """A ``graph.emailAddress`` reference resolves to ``microsoft.graph.EmailAddress``."""
+    model = ODataV4Reader(_write(tmp_path, "aliased.xml", _ALIASED_METADATA)).read()
+    evidence = model.types["microsoft.graph.security.AlertEvidence"]
+    assert evidence.Properties["email"].TypeName == "microsoft.graph.EmailAddress"
 
 
 def _build_static_method_type(tmp_path: Path, generate_methods: str) -> str:

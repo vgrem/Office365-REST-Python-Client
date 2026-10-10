@@ -32,9 +32,9 @@ class ODataV3Reader(ODataReader):
             return None
 
         if end_node.get("Multiplicity") == "*":
-            schema.TypeName = f"Collection({end_node.get('Type')})"
+            schema.TypeName = self._qualified_type_name(f"Collection({end_node.get('Type')})")
         else:
-            schema.TypeName = end_node.get("Type")
+            schema.TypeName = self._qualified_type_name(end_node.get("Type"))
 
         return schema
 
@@ -45,7 +45,7 @@ class ODataV3Reader(ODataReader):
             if not name or node.get("EntitySet") is not None:
                 continue  # entity-set accessor -> navigation property
 
-            params = self.parse_parameters(node, self.xml_namespaces)
+            params = self.parse_parameters(node)
             is_bindable = node.get("IsBindable") == "true" or any(p.get("Name") == "this" for p in params)
 
             if is_bindable:
@@ -75,7 +75,7 @@ class ODataV3Reader(ODataReader):
                 MethodInformation(
                     Name=method_name,
                     Parameters=remaining,
-                    ReturnTypeFullName=node.get("ReturnType"),
+                    ReturnTypeFullName=self._qualified_type_name(node.get("ReturnType")),
                     BindingTypeFullName=binding_type,
                     IsBound=is_bindable,
                     IsStatic=is_static,

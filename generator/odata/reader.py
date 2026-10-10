@@ -32,9 +32,38 @@ class ODataReader(ABC):
         """Parses the metadata file and returns the populated model."""
         model = ODataModel()
         self._root = ET.parse(self._metadata_path).getroot()
+        self._aliases = self._load_aliases()
         self._parse_types(model)
         self.process_operations(model)
         return model
+
+    def _load_aliases(self) -> Dict[str, str]:
+        """The ``Alias -> Namespace`` map declared by the schemas (e.g. ``graph``)."""
+        assert self._root is not None
+        aliases: Dict[str, str] = {}
+        for schema_node in self._root.findall("edmx:DataServices/xmlns:Schema", self.xml_namespaces):
+            namespace = schema_node.get("Namespace")
+            alias = schema_node.get("Alias")
+            if namespace and alias:
+                aliases[alias] = namespace
+        return aliases
+
+    def _qualified_type_name(self, type_name: Optional[str]) -> Optional[str]:
+        """Expand a schema alias to its namespace and normalize the class name.
+
+        Graph metadata refers to types with aliases (``graph.user``,
+        ``self.alertEvidence``); normalizing here keeps every ``TypeName``
+        fully-qualified, so resolution and routing are unambiguous.
+        """
+        if not type_name:
+            return type_name
+        if ODataType.is_collection_name(type_name):
+            return f"Collection({self._qualified_type_name(ODataType.strip_collection(type_name))})"
+        namespace, sep, class_name = type_name.rpartition(".")
+        if not sep or namespace == "Edm":
+            return type_name
+        namespace = self._aliases.get(namespace, namespace)
+        return f"{namespace}.{ODataType.normalize_class_name(class_name)}"
 
     def _parse_types(self, model: ODataModel) -> None:
         assert self._root is not None
@@ -77,16 +106,15 @@ class ODataReader(ABC):
         schema.IsNavigation = True
         return schema
 
-    @staticmethod
-    def parse_parameters(node: Element, namespaces: Dict[str, str]) -> list:
-        """Extracts ``<Parameter>`` children into plain dicts."""
+    def parse_parameters(self, node: Element) -> list:
+        """Extracts ``<Parameter>`` children into plain dicts (types qualified)."""
         return [
             {
                 "Name": param.get("Name"),
-                "Type": param.get("Type"),
+                "Type": self._qualified_type_name(param.get("Type")),
                 "Nullable": param.get("Nullable") != "false",
             }
-            for param in node.findall("xmlns:Parameter", namespaces)
+            for param in node.findall("xmlns:Parameter", self.xml_namespaces)
         ]
 
     def process_type_node(self, type_node: Element, schema_node: Element, base_type: str) -> TypeInformation:
@@ -119,7 +147,7 @@ class ODataReader(ABC):
     def process_property_node(self, node: Element) -> PropertyInformation:
         schema = PropertyInformation()
         schema.Name = node.get("Name") or ""
-        schema.TypeName = node.get("Type")
+        schema.TypeName = self._qualified_type_name(node.get("Type"))
         return schema
 
     def process_member_node(self, node: Element) -> MemberInformation:

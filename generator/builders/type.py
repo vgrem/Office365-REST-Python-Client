@@ -24,6 +24,7 @@ from generator.builders.template_context import TemplateContext
 from generator.builders.type_registry import TypeRegistry, python_name
 from generator.documentation.base import DocumentationProvider
 from generator.odata.type_information import TypeInformation
+from generator.routing import route_namespace, routing_from_options
 from generator.validation import ValidationError
 
 # Base model members that generated operation methods must not shadow.
@@ -177,6 +178,7 @@ class TypeBuilder(ast.NodeTransformer):
         self._resolver = resolver or TypeRegistry(
             (options or {}).get("modules", "").split(","),
             namespace=(options or {}).get("namespace", ""),
+            type_modules=(options or {}).get("type_modules"),
         )
 
     def _process(self, module: ast.Module) -> None:
@@ -903,29 +905,10 @@ class TypeBuilder(ast.NodeTransformer):
         return self._ensure_type_info().get("reason", "")
 
     def _route_to_namespace(self, namespace: str) -> str:
-        """Map OData namespace to Python module path using routing table.
-
-        Routing entries are stored as "routing_" prefixed options (from [routing] section).
-        Longest prefix match wins, remainder is lowercased.
-        """
+        """Map an OData namespace to a Python module via the routing table."""
         if self._options is None:
             return ""
-        entries = [(k[len("routing_") :], v.strip()) for k, v in self._options.items() if k.startswith("routing_")]
-
-        if not entries:
-            return ""
-
-        entries.sort(key=lambda x: len(x[0]), reverse=True)
-
-        namespace_lower = namespace.lower()
-        for prefix, module in entries:
-            prefix_lower = prefix.lower()
-            if namespace_lower == prefix_lower or namespace_lower.startswith(prefix_lower + "."):
-                remainder = namespace[len(prefix) :].lstrip(".")
-                if remainder:
-                    return f"{module}.{remainder.lower()}"
-                return module
-        return ""
+        return route_namespace(namespace, routing_from_options(self._options))
 
     def _ensure_type_info(self):
         if self._type_info is None:

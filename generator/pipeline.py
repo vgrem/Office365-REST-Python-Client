@@ -8,11 +8,13 @@ from typing import Optional
 
 from generator.builders.render import ruff_binary
 from generator.builders.type import TypeBuilder
+from generator.builders.type_registry import TypeRegistry
 from generator.checkpoint import Checkpoint, checkpoint_path
 from generator.config import GeneratorOptions
 from generator.documentation.base import DocumentationProvider
 from generator.filters import TypeFilter
 from generator.odata.model import ODataModel
+from generator.routing import planned_module, routing_from_options
 from generator.validation import ValidationError, validate_source
 
 
@@ -82,10 +84,21 @@ class GeneratorPipeline:
         self._only_types = tuple(only_types or ())
         self._builder_options = options.builder_options()
         self._filter = TypeFilter.from_options(options)
-        # Only types this run will actually generate are importable by name.
-        self._builder_options["known_types"] = {
-            name for name, schema in model.types.items() if self._filter.in_scope(name, schema)
-        }
+        # Only types this run will actually generate (attached or routed) are
+        # importable by name; members referencing the rest are skipped.
+        routing = routing_from_options(self._builder_options)
+        registry = TypeRegistry(options.modules.split(","), namespace=options.namespace)
+        known_types: set[str] = set()
+        type_modules: dict[str, str] = {}
+        for name, schema in model.types.items():
+            if not self._filter.in_scope(name, schema):
+                continue
+            module = planned_module(name, registry, routing)
+            if module is not None:
+                known_types.add(name)
+                type_modules[name] = module
+        self._builder_options["known_types"] = known_types
+        self._builder_options["type_modules"] = type_modules
         self._checkpoint = Checkpoint(checkpoint_path(options.metadata_path, base_dir))
         self._output_root = Path(options.output_path).resolve()
 
