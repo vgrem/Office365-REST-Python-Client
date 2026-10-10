@@ -6,8 +6,9 @@ import datetime
 
 import pytest
 from generator.builders.collector import TypeReferenceCollector
+from generator.builders.naming import item_name, python_name
 from generator.builders.property import PropertyBuilder
-from generator.builders.type_registry import TypeRegistry, item_name, python_name
+from generator.builders.resolution import TypeRegistry
 from generator.odata.property import PropertyInformation
 from office365.runtime.odata.type import ODataType
 

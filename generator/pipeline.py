@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Optional
 
 from generator.builders.member import sanitize_member_name
+from generator.builders.resolution import TypeRegistry
 from generator.builders.type import TypeBuilder
-from generator.builders.type_registry import TypeRegistry
 from generator.checkpoint import Checkpoint, checkpoint_path
 from generator.config import GeneratorOptions
 from generator.cycles import find_cyclic_types

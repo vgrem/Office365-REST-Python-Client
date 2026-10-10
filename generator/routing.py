@@ -19,8 +19,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from typing import Iterable, Optional
 
-from generator.builders.naming import to_snake_case
-from generator.builders.type_registry import python_name
+from generator.builders.naming import python_name, to_snake_case
 
 
 def route_namespace(namespace: str, routing: dict[str, str]) -> str:

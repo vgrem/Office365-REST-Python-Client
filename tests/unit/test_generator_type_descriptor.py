@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from generator.builders.type_registry import ReturnType, TypeKind, TypeRegistry
+from generator.builders.references import ReturnType, TypeKind
+from generator.builders.resolution import TypeRegistry
 
 
 def _resolver() -> TypeRegistry:

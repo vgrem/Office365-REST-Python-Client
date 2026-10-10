@@ -22,12 +22,12 @@ from generator.builders.imports import (
 )
 from generator.builders.member import MemberBuilder
 from generator.builders.method import MethodBuilder
-from generator.builders.naming import to_snake_case
+from generator.builders.naming import python_name, to_snake_case
 from generator.builders.property import PropertyBuilder
 from generator.builders.render import normalize_quotes, ruff_normalize
+from generator.builders.resolution import TypeRegistry
 from generator.builders.source_editor import SourceEditor, suppress_long_imports
 from generator.builders.template_context import TemplateContext
-from generator.builders.type_registry import TypeRegistry, python_name
 from generator.documentation.base import DocumentationProvider
 from generator.odata.type_information import TypeInformation
 from generator.odata.type_system import is_collection_name, is_primitive_name, strip_collection

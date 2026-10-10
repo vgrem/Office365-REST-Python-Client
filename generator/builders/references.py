@@ -1,70 +1,30 @@
-"""Single registry for OData <-> Python type mapping and code-generation metadata.
+"""Classify OData type references and render their Python annotations/defaults.
 
-Consolidates what used to be three modules — annotation formatting
-(``type_mapping``), return/parameter descriptors (``type_descriptor``) and class
-resolution (``type_resolver``). A :class:`TypeRegistry` owns the static source
-index, so resolution, module lookup and member lookup never import a module
-(cycle-safe and deterministic).
+Covers operation return types (:class:`ReturnType`) and parameters
+(:class:`ParameterType`), plus the :class:`TypeKind` shape enum. Resolution is
+delegated to a :class:`~generator.builders.resolution.TypeRegistry` (only used to
+tell client values from entities).
 """
 
 from __future__ import annotations
 
 import datetime
-import importlib
-import inspect
-import pkgutil
 import uuid
 from enum import Enum
-from functools import lru_cache
-from typing import Optional, Sequence, Tuple, Type
+from typing import TYPE_CHECKING, Optional
 
 from office365.runtime.client_value import ClientValue
 
-from generator.builders.symbol_index import SymbolIndex
+from generator.builders.naming import item_name, python_name
 from generator.odata.type_system import (
     is_collection_name,
     is_primitive_name,
-    normalize_type_name,
     primitive_type_for,
     strip_collection,
 )
 
-# --------------------------------------------------------------------------- #
-# Annotation formatting (pure functions)
-# --------------------------------------------------------------------------- #
-
-
-def python_name(type_name: str | None, is_object_type: bool = False) -> str:
-    """Format an OData type name as the Python annotation name.
-
-    ``Edm.Int32`` -> ``int``; ``Collection(Edm.String)`` ->
-    ``ClientValueCollection[str]``; ``SP.Web`` -> ``Web``;
-    ``Collection(SP.Web)`` -> ``EntityCollection[Web]`` when ``is_object_type``.
-    """
-    if type_name is None:
-        return ""
-    primitive = primitive_type_for(type_name)
-    if primitive is not None:
-        return primitive.__name__
-    if is_collection_name(type_name):
-        child = item_name(strip_collection(type_name), is_object_type)
-        return f"EntityCollection[{child}]" if is_object_type else f"ClientValueCollection[{child}]"
-    if type_name.startswith("Edm."):
-        raise ValueError(f"Unmapped OData primitive '{type_name}'; add it to PRIMITIVE_PY_TYPES.")
-    cls_name = type_name.split(".")[-1]
-    if cls_name and cls_name[0].islower():
-        cls_name = cls_name[0].upper() + cls_name[1:]
-    return cls_name
-
-
-def item_name(type_name: str | None, is_object_type: bool = False) -> str:
-    """Format the item type of a collection (or the type itself) as a Python name."""
-    return python_name(strip_collection(type_name), is_object_type)
-
-
-# --------------------------------------------------------------------------- #
-# Descriptors
-# --------------------------------------------------------------------------- #
+if TYPE_CHECKING:
+    from generator.builders.resolution import TypeRegistry
 
 _PRIMITIVE_DEFAULTS = {
     bool: "bool()",
@@ -110,7 +70,7 @@ class TypeKind(Enum):
 class ReturnType:
     """Classifies a type name once and renders its annotation and default value."""
 
-    def __init__(self, type_name: str | None, registry: Optional[TypeRegistry] = None) -> None:
+    def __init__(self, type_name: str | None, registry: Optional["TypeRegistry"] = None) -> None:
         self._name = type_name or ""
         self._registry = registry
         self.kind = self._classify()
@@ -256,112 +216,3 @@ class ParameterType:
         if wrapper == "ClientValueCollection":
             return f"ClientValueCollection({_PYTHON_TYPE_NAMES[self._python_item]}, {expression})"
         return f"{wrapper}({expression})"
-
-
-# --------------------------------------------------------------------------- #
-# Class resolution (static index + lazy import)
-# --------------------------------------------------------------------------- #
-
-
-class TypeRegistry:
-    """Maps OData type references to Python classes, modules and member names."""
-
-    def __init__(self, modules: Sequence[str], namespace: str = "", type_modules: Optional[dict] = None) -> None:
-        self.modules = tuple(sorted(m.strip() for m in modules if m and m.strip()))
-        self.namespace = namespace
-        self._index = _get_index(self.modules, namespace)
-        #: Planned module for types this run will generate (attached or routed).
-        self._type_modules = dict(type_modules or {})
-
-    def resolve(self, type_name: str | None) -> Optional[Type]:
-        """Resolve an OData type name (``SP.Directory.User``) to its Python class."""
-        if not type_name:
-            return None
-        short = python_name(strip_collection(type_name))
-        module_name = self._index.resolve_module(type_name)
-        if module_name is not None:
-            cls = _class_from_module(module_name, short)
-            if cls is not None:
-                return cls
-        return _resolve_cached(short, self.modules)
-
-    def module_for(self, type_name: str | None) -> Optional[str]:
-        """The module defining the referenced class, resolved statically."""
-        if not type_name:
-            return None
-        key = normalize_type_name(type_name) or type_name
-        planned = self._type_modules.get(key)
-        if planned is not None:
-            return planned
-        module = self._index.resolve_module(type_name)
-        if module is not None:
-            return module
-        cls = self.resolve(type_name)
-        mod = inspect.getmodule(cls) if cls is not None else None
-        return mod.__name__ if mod is not None else None
-
-    def strict_module_for(self, type_name: str | None) -> Optional[str]:
-        """Like :meth:`module_for`, but without any bare-class-name fallback.
-
-        Used for update decisions: a wrong match makes the generator write into a
-        file it does not own (e.g. a same-named OData type of a different kind,
-        or a hand-written runtime module).
-        """
-        if not type_name:
-            return None
-        return self._index.resolve_module(type_name, strict=True)
-
-    def members_of(self, type_name: str | None) -> set[str]:
-        """Member names a class already has (incl. inherited), purely from AST."""
-        if not type_name:
-            return set()
-        return self._index.class_members(type_name)
-
-    def return_type(self, type_name: str | None) -> ReturnType:
-        return ReturnType(type_name, self)
-
-    @staticmethod
-    def cache_clear() -> None:
-        _resolve_cached.cache_clear()
-        _get_index.cache_clear()
-
-
-@lru_cache(maxsize=8)
-def _get_index(modules: Tuple[str, ...], namespace: str) -> SymbolIndex:
-    return SymbolIndex(modules, namespace)
-
-
-def _class_from_module(module_name: str, class_name: str) -> Optional[Type]:
-    try:
-        module = importlib.import_module(module_name)
-    except ImportError:
-        return None
-    cls = getattr(module, class_name, None)
-    return cls if inspect.isclass(cls) else None
-
-
-@lru_cache(maxsize=1024)
-def _resolve_cached(target_name: str, modules: Tuple[str, ...]) -> Optional[Type]:
-    """Searches the configured module roots for a class named ``target_name``."""
-
-    def _search_module(module_name: str) -> Optional[Type]:
-        try:
-            module = importlib.import_module(module_name)
-            if hasattr(module, target_name):
-                cls = getattr(module, target_name)
-                if inspect.isclass(cls):
-                    return cls
-            if hasattr(module, "__path__"):
-                for _, name, _ in pkgutil.iter_modules(module.__path__):
-                    found = _search_module(module_name + "." + name)
-                    if found:
-                        return found
-        except Exception:  # a broken/cyclic module must not block resolution
-            pass
-        return None
-
-    for module_name in modules:
-        result = _search_module(module_name)
-        if result:
-            return result
-    return None

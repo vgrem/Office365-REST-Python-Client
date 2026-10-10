@@ -7,8 +7,8 @@ import textwrap
 from pathlib import Path
 
 from generator.builders.method import MethodBuilder
+from generator.builders.resolution import TypeRegistry
 from generator.builders.type import TypeBuilder
-from generator.builders.type_registry import TypeRegistry
 from generator.odata.method import MethodInformation
 from generator.odata.property import PropertyInformation
 from generator.odata.type_information import TypeInformation

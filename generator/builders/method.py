@@ -3,15 +3,15 @@ from __future__ import annotations
 import ast
 from typing import TYPE_CHECKING, List, Optional
 
-from generator.builders.naming import to_snake_case
-from generator.builders.type_registry import ParameterType, ReturnType, TypeKind, item_name, python_name
+from generator.builders.naming import item_name, python_name, to_snake_case
+from generator.builders.references import ParameterType, ReturnType, TypeKind
 
 #: Max length of a docstring ``Args`` line's head, including the re-indentation
 #: applied after ``_docstring`` returns (ruff does not reflow docstring prose).
 _MAX_DOCSTRING_ARG = 105
 
 if TYPE_CHECKING:
-    from generator.builders.type_registry import TypeRegistry
+    from generator.builders.resolution import TypeRegistry
     from generator.odata.method import MethodInformation
 
 

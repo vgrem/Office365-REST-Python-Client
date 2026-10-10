@@ -4,11 +4,11 @@ import ast
 import inspect
 from typing import TYPE_CHECKING, ClassVar
 
-from generator.builders.type_registry import ParameterType
+from generator.builders.references import ParameterType
 
 if TYPE_CHECKING:
     from generator.builders.property import PropertyBuilder
-    from generator.builders.type_registry import TypeRegistry
+    from generator.builders.resolution import TypeRegistry
 
 
 class TypeReferenceCollector:

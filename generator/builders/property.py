@@ -7,8 +7,7 @@ from typing import TYPE_CHECKING, List, Optional
 
 from office365.runtime.client_value import ClientValue
 
-from generator.builders.naming import to_snake_case
-from generator.builders.type_registry import item_name, python_name
+from generator.builders.naming import item_name, python_name, to_snake_case
 from generator.odata.type_system import is_collection_name, is_primitive_name
 
 #: Python names that never need an import (builtins / stdlib shorthands).
@@ -27,8 +26,8 @@ _SCALAR_TYPE_NAMES = {
 }
 
 if TYPE_CHECKING:
+    from generator.builders.resolution import TypeRegistry
     from generator.builders.template_context import TemplateContext
-    from generator.builders.type_registry import TypeRegistry
     from generator.odata.property import PropertyInformation
 
 

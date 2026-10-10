@@ -4,6 +4,8 @@ import builtins
 import keyword
 import re
 
+from generator.odata.type_system import is_collection_name, primitive_type_for, strip_collection
+
 #: Product/compound names kept as one word when snake-cased (``SharePoint`` -> ``sharepoint``).
 _COMPOUND_WORDS = ("SharePoint", "OneDrive", "OneNote", "DateTime")
 
@@ -46,3 +48,31 @@ def to_snake_case(name: str, avoid_keywords: bool = True, avoid_builtins: bool =
     if avoid_builtins and hasattr(builtins, snake_case):
         return snake_case + "_"
     return snake_case
+
+
+def python_name(type_name: str | None, is_object_type: bool = False) -> str:
+    """Format an OData type name as the Python annotation name.
+
+    ``Edm.Int32`` -> ``int``; ``Collection(Edm.String)`` ->
+    ``ClientValueCollection[str]``; ``SP.Web`` -> ``Web``;
+    ``Collection(SP.Web)`` -> ``EntityCollection[Web]`` when ``is_object_type``.
+    """
+    if type_name is None:
+        return ""
+    primitive = primitive_type_for(type_name)
+    if primitive is not None:
+        return primitive.__name__
+    if is_collection_name(type_name):
+        child = item_name(strip_collection(type_name), is_object_type)
+        return f"EntityCollection[{child}]" if is_object_type else f"ClientValueCollection[{child}]"
+    if type_name.startswith("Edm."):
+        raise ValueError(f"Unmapped OData primitive '{type_name}'; add it to PRIMITIVE_PY_TYPES.")
+    cls_name = type_name.split(".")[-1]
+    if cls_name and cls_name[0].islower():
+        cls_name = cls_name[0].upper() + cls_name[1:]
+    return cls_name
+
+
+def item_name(type_name: str | None, is_object_type: bool = False) -> str:
+    """Format the item type of a collection (or the type itself) as a Python name."""
+    return python_name(strip_collection(type_name), is_object_type)

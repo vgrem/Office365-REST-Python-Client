@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 from typing import Optional, Sequence
 
-from generator.builders.type_registry import TypeRegistry
+from generator.builders.resolution import TypeRegistry
 from generator.checkpoint import checkpoint_path
 from generator.config import ConfigError, GeneratorOptions
 from generator.filters import TypeFilter
