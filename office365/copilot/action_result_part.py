@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from office365.runtime.client_value import ClientValue
+from office365.runtime.types.public_error import PublicError
 
 
 @dataclass
@@ -10,3 +11,5 @@ class ActionResultPart(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ActionResultPart"
+
+    error: PublicError = field(default_factory=PublicError)

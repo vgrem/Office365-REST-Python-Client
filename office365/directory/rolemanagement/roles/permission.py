@@ -14,3 +14,7 @@ class RolePermission(ClientValue):
     resourceActions: ClientValueCollection[ResourceAction] = field(
         default_factory=lambda: ClientValueCollection(ResourceAction)
     )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.RolePermission"

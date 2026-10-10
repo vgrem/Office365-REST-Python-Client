@@ -25,3 +25,7 @@ class SharingDetail(ClientValue):
     sharingReference: ResourceReference = field(default_factory=ResourceReference)
     sharingSubject: str | None = None
     sharingType: str | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SharingDetail"

@@ -4,6 +4,9 @@ from dataclasses import dataclass, field
 
 from office365.directory.security.attribute_mapping import AttributeMapping
 from office365.directory.security.filter import Filter
+from office365.directory.security.object_mapping_metadata_entry import (
+    ObjectMappingMetadataEntry,
+)
 from office365.directory.synchronization.objectflowtypes import ObjectFlowTypes
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
@@ -24,3 +27,7 @@ class ObjectMapping(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ObjectMapping"
+
+    metadata: ClientValueCollection[ObjectMappingMetadataEntry] = field(
+        default_factory=lambda: ClientValueCollection(ObjectMappingMetadataEntry)
+    )

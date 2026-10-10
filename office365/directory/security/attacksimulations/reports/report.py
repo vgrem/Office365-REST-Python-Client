@@ -23,3 +23,7 @@ class SimulationReport(ClientValue):
     simulationUsers: ClientValueCollection[UserSimulationDetails] = field(
         default_factory=lambda: ClientValueCollection(UserSimulationDetails)
     )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SimulationReport"

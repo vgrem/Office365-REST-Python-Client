@@ -24,3 +24,7 @@ class ResourceReference(ClientValue):
 
     def __repr__(self):
         return f"{self.type}:{self.webUrl}"
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ResourceReference"

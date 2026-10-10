@@ -12,3 +12,7 @@ class ResourceAction(ClientValue):
 
     allowedResourceActions: StringCollection = field(default_factory=StringCollection)
     notAllowedResourceActions: StringCollection = field(default_factory=StringCollection)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ResourceAction"

@@ -23,3 +23,13 @@ class SearchHit(ClientValue):
     summary: str | None = None
     resource: Entity | None = None
     resultTemplateId: str | None = None
+
+    hitId: str | None = None
+
+    isCollapsed: bool | None = None
+
+    rank: int | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SearchHit"

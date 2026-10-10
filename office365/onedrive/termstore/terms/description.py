@@ -11,3 +11,7 @@ class LocalizedDescription(ClientValue):
 
     languageTag: str | None = None
     description: str | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.termStore.LocalizedDescription"

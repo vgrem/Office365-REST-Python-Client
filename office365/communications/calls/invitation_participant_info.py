@@ -24,3 +24,7 @@ class InvitationParticipantInfo(ClientValue):
     participantId: str | None = None
     removeFromDefaultAudioRoutingGroup: bool | None = None
     replacesCallId: str | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.InvitationParticipantInfo"

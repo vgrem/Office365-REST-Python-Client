@@ -15,3 +15,7 @@ class LocalizedLabel(ClientValue):
     name: str | None = None
     languageTag: str = "en-US"
     isDefault: bool = True
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.termStore.LocalizedLabel"

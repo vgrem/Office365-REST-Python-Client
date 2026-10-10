@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
 
 from office365.directory.security.attacksimulations.user import AttackSimulationUser
 from office365.runtime.client_value import ClientValue
@@ -18,3 +19,17 @@ class UserSimulationDetails(ClientValue):
 
     assignedTrainingsCount: int | None = None
     simulationUser: AttackSimulationUser = field(default_factory=AttackSimulationUser)
+
+    completedTrainingsCount: int | None = None
+
+    compromisedDateTime: datetime | None = None
+
+    inProgressTrainingsCount: int | None = None
+
+    isCompromised: bool | None = None
+
+    reportedPhishDateTime: datetime | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.UserSimulationDetails"

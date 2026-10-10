@@ -18,3 +18,7 @@ class UsageDetails(ClientValue):
 
     lastAccessedDateTime: datetime | None = None
     lastModifiedDateTime: datetime | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.UsageDetails"

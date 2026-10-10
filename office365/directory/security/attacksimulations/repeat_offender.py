@@ -15,3 +15,7 @@ class AttackSimulationRepeatOffender(ClientValue):
 
     attackSimulationUser: AttackSimulationUser = field(default_factory=AttackSimulationUser)
     repeatOffenceCount: str | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.AttackSimulationRepeatOffender"

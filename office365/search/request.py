@@ -9,6 +9,7 @@ from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.types.collections import StringCollection
 from office365.search.aggregation_option import AggregationOption
 from office365.search.query import SearchQuery
+from office365.search.search_alteration_options import SearchAlterationOptions
 from office365.search.sharepoint_onedrive_options import SharePointOneDriveOptions
 from office365.search.sort_property import SortProperty
 
@@ -38,3 +39,11 @@ class SearchRequest(ClientValue):
         json_value = cast(Dict, super().to_json(json_format))
         json_value["from"] = json_value.pop("page_from", None)
         return json_value
+
+    from_: int | None = None
+
+    queryAlterationOptions: SearchAlterationOptions = field(default_factory=SearchAlterationOptions)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SearchRequest"

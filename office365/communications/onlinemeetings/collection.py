@@ -13,7 +13,15 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 @dataclass
 class ChatInfo(ClientValue):
-    pass
+    messageId: str | None = None
+
+    replyChainMessageId: str | None = None
+
+    threadId: str | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ChatInfo"
 
 
 class OnlineMeetingCollection(EntityCollection[OnlineMeeting]):

@@ -13,3 +13,5 @@ class FileStorageContainerCustomPropertyValue(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.FileStorageContainerCustomPropertyValue"
+
+    isPatternToken: bool | None = None

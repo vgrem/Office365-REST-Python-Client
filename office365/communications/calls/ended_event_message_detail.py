@@ -3,8 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import timedelta
 
+from office365.communications.call_participant_info import CallParticipantInfo
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.teams.teamwork.calleventtype import TeamworkCallEventType
 
 
@@ -18,3 +20,7 @@ class CallEndedEventMessageDetail(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.CallEndedEventMessageDetail"
+
+    callParticipants: ClientValueCollection[CallParticipantInfo] = field(
+        default_factory=lambda: ClientValueCollection(CallParticipantInfo)
+    )

@@ -16,3 +16,7 @@ class SearchResponse(ClientValue):
     hitsContainers: ClientValueCollection[SearchHitsContainer] = field(
         default_factory=lambda: ClientValueCollection(SearchHitsContainer)
     )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SearchResponse"

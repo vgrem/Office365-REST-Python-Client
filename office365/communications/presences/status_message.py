@@ -22,3 +22,7 @@ class PresenceStatusMessage(ClientValue):
     expiryDateTime: DateTimeTimeZone = field(default_factory=DateTimeTimeZone)
     message: ItemBody = field(default_factory=ItemBody)
     publishedDateTime: datetime | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.PresenceStatusMessage"

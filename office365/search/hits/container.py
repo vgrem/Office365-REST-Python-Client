@@ -18,3 +18,7 @@ class SearchHitsContainer(ClientValue):
     aggregations: ClientValueCollection[SearchAggregation] = field(
         default_factory=lambda: ClientValueCollection(SearchAggregation)
     )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SearchHitsContainer"

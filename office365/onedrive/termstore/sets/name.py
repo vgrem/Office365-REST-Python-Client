@@ -18,3 +18,7 @@ class LocalizedName(ClientValue):
 
     def __repr__(self):
         return json.dumps(self.to_json())
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.termStore.LocalizedName"

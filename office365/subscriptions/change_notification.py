@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
+from uuid import UUID
 
 from office365.runtime.client_value import ClientValue
 from office365.subscriptions.encrypted_content import ChangeNotificationEncryptedContent
+from office365.subscriptions.lifecycleeventtype import LifecycleEventType
 from office365.subscriptions.resource_data import ResourceData
 
 
@@ -31,3 +34,17 @@ class ChangeNotification(ClientValue):
     encryptedContent: ChangeNotificationEncryptedContent = field(default_factory=ChangeNotificationEncryptedContent)
     resource: str | None = None
     resourceData: ResourceData = field(default_factory=ResourceData)
+
+    id: str | None = None
+
+    lifecycleEvent: LifecycleEventType = LifecycleEventType.missed
+
+    subscriptionExpirationDateTime: datetime | None = None
+
+    subscriptionId: UUID | None = None
+
+    tenantId: UUID | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ChangeNotification"

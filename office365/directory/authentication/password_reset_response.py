@@ -14,3 +14,7 @@ class PasswordResetResponse(ClientValue):
     """
 
     newPassword: str | None = None
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.PasswordResetResponse"

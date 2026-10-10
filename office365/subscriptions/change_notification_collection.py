@@ -14,3 +14,7 @@ class ChangeNotificationCollection(ClientValue):
 
     validationTokens: StringCollection = field(default_factory=StringCollection)
     value: ClientValueCollection = field(default_factory=lambda: ClientValueCollection(ChangeNotification))
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ChangeNotificationCollection"

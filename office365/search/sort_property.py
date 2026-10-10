@@ -20,3 +20,7 @@ class SortProperty(ClientValue):
 
     def __repr__(self):
         return f"{self.name} {'DESC' if self.isDescending else 'ASC'}"
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SortProperty"

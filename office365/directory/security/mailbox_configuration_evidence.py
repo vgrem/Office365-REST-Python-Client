@@ -3,6 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
+from office365.directory.security.mailbox_configuration_type import (
+    MailboxConfigurationType,
+)
 from office365.runtime.client_value import ClientValue
 
 
@@ -17,3 +20,5 @@ class MailboxConfigurationEvidence(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.MailboxConfigurationEvidence"
+
+    configurationType: MailboxConfigurationType = MailboxConfigurationType.mailForwardingRule
