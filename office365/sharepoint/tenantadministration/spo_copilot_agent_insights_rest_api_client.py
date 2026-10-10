@@ -155,3 +155,16 @@ class SPOCopilotAgentInsightsRestApiClient(Entity):
         )
         self.context.add_query(qry)
         return return_type
+
+    def get_all_copilot_agent_insights_reports_metadata(
+        self,
+    ) -> ClientResult[ClientValueCollection[SPOCopilotAgentInsightsReportMetadata]]:
+        """GetAllCopilotAgentInsightsReportsMetadata operation."""
+        from office365.sharepoint.tenant.administration.copilot.agentinsights.report_metadata import (
+            SPOCopilotAgentInsightsReportMetadata,
+        )
+
+        return_type = ClientResult(self.context, ClientValueCollection[SPOCopilotAgentInsightsReportMetadata]())
+        qry = ServiceOperationQuery(self, "GetAllCopilotAgentInsightsReportsMetadata", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
