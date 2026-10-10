@@ -76,7 +76,9 @@ class SymbolIndex:
         scored = sorted(((_consistency_score(key, module), module) for module in modules), reverse=True)
         if scored[0][0] > 0 and scored[0][0] > scored[1][0]:
             return scored[0][1]
-        return None
+        # Ambiguous: strict callers must not guess; best-effort callers (member
+        # lookup, annotation hints) keep the first candidate.
+        return None if strict else modules[0]
 
     def class_members(self, type_name: str | None) -> set[str]:
         """Member names a class already has (incl. inherited), purely from AST."""
