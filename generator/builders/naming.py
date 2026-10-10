@@ -4,6 +4,16 @@ import builtins
 import keyword
 import re
 
+#: Product names that are one word when snake-cased (``SharePoint`` -> ``sharepoint``).
+_COMPOUND_WORDS = ("SharePoint", "OneDrive", "OneNote")
+
+
+def _protect_compounds(name: str) -> str:
+    """Collapse multi-word product names so the camel split keeps them whole."""
+    for word in _COMPOUND_WORDS:
+        name = re.sub(word, word.lower().capitalize(), name, flags=re.IGNORECASE)
+    return name
+
 
 def to_snake_case(name: str, avoid_keywords: bool = True, avoid_builtins: bool = False) -> str:
     """Converts a PascalCase/camelCase identifier to snake_case.
@@ -23,7 +33,7 @@ def to_snake_case(name: str, avoid_keywords: bool = True, avoid_builtins: bool =
             ``flake8-builtins`` (A002).
     """
     # lower -> upper boundary (emailIDs -> email_IDs)
-    s1 = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
+    s1 = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", _protect_compounds(name))
     # single capital followed by a word (ASite -> A_Site, IFollowed -> I_Followed)
     s2 = re.sub(r"([A-Z])([A-Z][a-z]{2,})", r"\1_\2", s1)
     # acronym followed by a short word (UTCTo -> UTC_To); 's' is excluded so that

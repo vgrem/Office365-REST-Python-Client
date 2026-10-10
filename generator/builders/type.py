@@ -46,6 +46,16 @@ def _is_type_checking(node: ast.If) -> bool:
     )
 
 
+def _has_future_annotations(tree: ast.Module) -> bool:
+    """Whether the module already imports ``from __future__ import annotations``."""
+    return any(
+        isinstance(node, ast.ImportFrom)
+        and node.module == "__future__"
+        and any(alias.name == "annotations" for alias in node.names)
+        for node in tree.body
+    )
+
+
 def _is_datetime_class_import(imp: ast.stmt) -> bool:
     return (
         isinstance(imp, ast.ImportFrom)
@@ -336,6 +346,20 @@ class TypeBuilder(ast.NodeTransformer):
             if self._insert_import(module, imp, existing, insert_index):
                 insert_index += 1
                 self._added_imports.append(imp)
+        self._drop_unused_type_checking(module)
+
+    def _drop_unused_type_checking(self, module: ast.Module) -> None:
+        """Drop a ``TYPE_CHECKING`` import when its block was deduplicated away."""
+        if any(isinstance(n, ast.If) and _is_type_checking(n) for n in module.body):
+            return
+        for node in module.body:
+            if isinstance(node, ast.ImportFrom) and node.module == "typing":
+                node.names = [alias for alias in node.names if alias.name != "TYPE_CHECKING"]
+        module.body = [
+            n for n in module.body if not (isinstance(n, ast.ImportFrom) and n.module == "typing" and not n.names)
+        ]
+        kept = {id(n) for n in module.body}
+        self._added_imports = [imp for imp in self._added_imports if id(imp) in kept]
 
     def _insert_import(self, module: ast.Module, imp: ast.stmt, existing: set, index: int) -> bool:
         """Insert an import (or ``TYPE_CHECKING`` block) with only the missing names."""
@@ -543,9 +567,8 @@ class TypeBuilder(ast.NodeTransformer):
             else:
                 class_node.body.insert(0, new_stmt)
 
-        if len(self._properties) == 0 and len(self._members) == 0:
+        if not (self._properties or self._members or self._methods):
             return
-
         class_node.body = [stmt for stmt in class_node.body if not isinstance(stmt, ast.Pass)]
 
         self._ensure_entity_type_name(class_node)
@@ -596,6 +619,10 @@ class TypeBuilder(ast.NodeTransformer):
 
         # Insert from the bottom up so earlier line numbers stay valid.
         if members:
+            pass_line = self._sole_pass_line(original_tree, self.client_type_name)
+            if pass_line is not None:
+                del lines[pass_line - 1]
+                class_end -= 1
             body = "\n\n".join(self._render_member(node) for node in members)
             lines[class_end:class_end] = ["", *body.splitlines()]
 
@@ -609,6 +636,10 @@ class TypeBuilder(ast.NodeTransformer):
         if runtime_lines:
             lines[runtime_insert:runtime_insert] = runtime_lines
 
+        if members and not _has_future_annotations(original_tree):
+            # PEP 585 annotations (list[X]) need the future import on the py38 target.
+            lines[0:0] = ["from __future__ import annotations", ""]
+
         return "\n".join(lines) + ("\n" if self._original_text.endswith("\n") else "")
 
     @staticmethod
@@ -617,6 +648,15 @@ class TypeBuilder(ast.NodeTransformer):
         ast.fix_missing_locations(module)
         code = normalize_quotes(ast.unparse(module))
         return "\n".join("    " + line if line.strip() else line for line in code.splitlines())
+
+    @staticmethod
+    def _sole_pass_line(tree: ast.Module, class_name: str) -> Optional[int]:
+        """Line of a ``pass`` that is the only statement in the target class body."""
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef) and node.name == class_name:
+                if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
+                    return node.body[0].lineno
+        return None
 
     @staticmethod
     def _class_body_end_line(tree: ast.Module, class_name: str) -> int:

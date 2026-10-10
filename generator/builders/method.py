@@ -87,8 +87,8 @@ class MethodBuilder:
     def _body(self, receiver: str, context_expr: str, params: list, is_static: bool) -> str:
         if self._return_type.is_void:
             query = self._query(receiver, params, is_static, "None")
-            result = "None" if is_static else "self"
-            return f"qry = {query}\n{context_expr}.add_query(qry)\nreturn {result}"
+            body = f"qry = {query}\n{context_expr}.add_query(qry)"
+            return body if is_static else f"{body}\nreturn self"
         default = self._return_type.default(context_expr)
         query = self._query(receiver, params, is_static, "return_type")
         return f"return_type = {default}\nqry = {query}\n{context_expr}.add_query(qry)\nreturn return_type"

@@ -37,6 +37,11 @@ from generator.builders.naming import to_snake_case
         ("iOS", "ios"),
         ("ASite", "a_site"),
         ("allowedPolicyOIDs", "allowed_policy_oids"),
+        ("IsSharePointOnline", "is_sharepoint_online"),
+        ("SharePointIds", "sharepoint_ids"),
+        ("getSharePointUrl", "get_sharepoint_url"),
+        ("OneDriveForBusiness", "onedrive_for_business"),
+        ("enableOneNote", "enable_onenote"),
     ],
 )
 def test_to_snake_case(name: str, expected: str):
