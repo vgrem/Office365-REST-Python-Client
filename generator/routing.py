@@ -13,6 +13,7 @@ dumped at the package root.
 
 from __future__ import annotations
 
+import keyword
 import os
 import re
 from collections import Counter, defaultdict
@@ -20,6 +21,18 @@ from dataclasses import dataclass, field
 from typing import Iterable, Optional
 
 from generator.builders.naming import python_name, to_snake_case
+
+
+def _module_segment(segment: str) -> str:
+    """A valid Python package name for one namespace segment.
+
+    Namespace segments may be numbers or keywords (``...Windows.10...``,
+    ``...class...``), which cannot appear in an ``import``; prefix a ``_``.
+    """
+    text = segment.lower()
+    if not text.isidentifier() or keyword.iskeyword(text):
+        text = f"_{text}"
+    return text
 
 
 def route_namespace(namespace: str, routing: dict[str, str]) -> str:
@@ -33,7 +46,8 @@ def route_namespace(namespace: str, routing: dict[str, str]) -> str:
         if namespace_lower == prefix_lower or namespace_lower.startswith(prefix_lower + "."):
             remainder = namespace[len(prefix) :].lstrip(".")
             if remainder:
-                return f"{module}.{remainder.lower()}"
+                parts = [_module_segment(part) for part in remainder.split(".")]
+                return f"{module}.{'.'.join(parts)}"
             return module
     return ""
 

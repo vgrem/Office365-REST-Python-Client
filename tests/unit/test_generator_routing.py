@@ -5,6 +5,13 @@ from __future__ import annotations
 from generator.routing import Router, route_namespace
 
 
+def test_route_namespace_sanitizes_non_identifier_segments():
+    routing = {"microsoft.graph.deviceManagement": "office365.intune"}
+
+    assert route_namespace("microsoft.graph.deviceManagement.windows.10", routing) == "office365.intune.windows._10"
+    assert route_namespace("microsoft.graph.deviceManagement.class", routing) == "office365.intune._class"
+
+
 def test_route_namespace_longest_prefix_wins():
     routing = {"SP": "office365.sharepoint", "SP.Directory": "office365.sharepoint.directory"}
     assert route_namespace("SP.Directory.Provider", routing) == "office365.sharepoint.directory.provider"
