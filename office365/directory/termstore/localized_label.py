@@ -13,5 +13,3 @@ class LocalizedLabel(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.termStore.LocalizedLabel"
-
-    name: str | None = None

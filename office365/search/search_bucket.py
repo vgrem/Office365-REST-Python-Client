@@ -12,7 +12,3 @@ class SearchBucket(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.SearchBucket"
-
-    count: int | None = None
-
-    key: str | None = None

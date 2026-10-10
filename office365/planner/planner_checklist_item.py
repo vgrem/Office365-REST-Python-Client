@@ -17,5 +17,3 @@ class PlannerChecklistItem(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.PlannerChecklistItem"
-
-    title: str | None = None

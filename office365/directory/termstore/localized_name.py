@@ -12,5 +12,3 @@ class LocalizedName(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.termStore.LocalizedName"
-
-    name: str | None = None
