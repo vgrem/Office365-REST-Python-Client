@@ -23,7 +23,7 @@ from generator.manifest import (
     schema_members,
 )
 from generator.odata.model import ODataModel
-from generator.routing import planned_module, routing_from_options
+from generator.routing import Router, planned_module
 from generator.validation import ValidationError, validate_source
 
 
@@ -100,14 +100,14 @@ class GeneratorPipeline:
         self._filter = TypeFilter.from_options(options)
         # Only types this run will actually generate (attached or routed) are
         # importable by name; members referencing the rest are skipped.
-        routing = routing_from_options(self._builder_options)
+        router = Router.from_options(self._builder_options)
         registry = TypeRegistry(options.modules.split(","), namespace=options.namespace)
         known_types: set[str] = set()
         type_modules: dict[str, str] = {}
         for name, schema in model.types.items():
             if not self._filter.in_scope(name, schema):
                 continue
-            module = planned_module(name, registry, routing)
+            module = planned_module(name, registry, router)
             if module is not None:
                 known_types.add(name)
                 type_modules[name] = module

@@ -6,9 +6,12 @@ import argparse
 from pathlib import Path
 from typing import Optional, Sequence
 
+from generator.builders.type_registry import TypeRegistry
 from generator.config import GeneratorOptions
+from generator.filters import TypeFilter
 from generator.odata.reader import ODataReader
 from generator.pipeline import GeneratorPipeline
+from generator.routing import Router, render_suggestions
 from generator.services import get_service, service_names
 
 #: Config/paths are resolved relative to this directory, not the CWD.
@@ -39,6 +42,16 @@ def generate(
     ).run()
 
 
+def suggest_routing(service: str) -> None:
+    """Print a proposed [routing]/[type_routing] block for unrouted types."""
+    definition = get_service(service)
+    options = GeneratorOptions.load(service, GENERATOR_DIR)
+    model = definition.reader(options.metadata_path).read()
+    registry = TypeRegistry(options.modules.split(","), namespace=options.namespace)
+    router = Router.from_options(options.builder_options())
+    print(render_suggestions(model, TypeFilter.from_options(options), registry, router))
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Generate entity model files from OData metadata")
     parser.add_argument(
@@ -63,7 +76,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="only process this OData type (e.g. SP.File); repeatable",
     )
     parser.add_argument("--report", dest="report_path", help="write a JSON run report to this path")
+    parser.add_argument(
+        "--suggest-routing",
+        action="store_true",
+        help="print a proposed routing block for unrouted types and exit",
+    )
     args = parser.parse_args(argv)
+    if args.suggest_routing:
+        suggest_routing(args.service)
+        return 0
     generate(
         args.service,
         dry_run=args.dry_run,

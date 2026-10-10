@@ -47,12 +47,14 @@ class GeneratorOptions:
     include_base_types: list[str] = field(default_factory=list)
     start_at: str = ""
     routing: dict[str, str] = field(default_factory=dict)
+    type_routing: dict[str, str] = field(default_factory=dict)
     dry_run: bool = False
 
     @classmethod
     def load(cls, service: str, base_dir: Path, *, dry_run: bool = False) -> "GeneratorOptions":
         """Read ``settings.<service>.cfg`` (relative to ``base_dir``)."""
         cfg = ConfigParser()
+        cfg.optionxform = str  # type names are case-sensitive
         cfg.read(base_dir / f"settings.{service}.cfg")
 
         def section(name: str) -> dict[str, str]:
@@ -75,6 +77,7 @@ class GeneratorOptions:
             include_base_types=parse_list(main.get("include_base_types", "")),
             start_at=main.get("start_at", ""),
             routing=section("routing"),
+            type_routing=section("type_routing"),
             dry_run=dry_run,
         )
 
@@ -89,6 +92,7 @@ class GeneratorOptions:
             "namespace": self.namespace,
             "ignored_properties": self.ignored_properties,
             "ignored_methods": self.ignored_methods,
+            "type_routing": self.type_routing,
             "dry_run": self.dry_run,
         }
         for namespace, module in self.routing.items():

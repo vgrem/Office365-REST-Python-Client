@@ -24,7 +24,7 @@ from generator.builders.template_context import TemplateContext
 from generator.builders.type_registry import TypeRegistry, python_name
 from generator.documentation.base import DocumentationProvider
 from generator.odata.type_information import TypeInformation
-from generator.routing import route_namespace, routing_from_options
+from generator.routing import Router
 from generator.validation import ValidationError
 
 # Base model members that generated operation methods must not shadow.
@@ -854,7 +854,7 @@ class TypeBuilder(ast.NodeTransformer):
             type_info["routed"] = "1"
         else:
             namespace = ".".join(self._schema.FullName.split(".")[:-1])
-            module_path = self._route_to_namespace(namespace)
+            module_path = Router.from_options(self._options).module_for(self._schema.FullName)
             output_base = self._options.get("output_path", self._options.get("outputpath", ""))
             if module_path:
                 if module_path.startswith("office365."):
@@ -903,12 +903,6 @@ class TypeBuilder(ast.NodeTransformer):
     def skip_reason(self) -> str:
         """Why this type cannot be generated, or ``""`` when it can."""
         return self._ensure_type_info().get("reason", "")
-
-    def _route_to_namespace(self, namespace: str) -> str:
-        """Map an OData namespace to a Python module via the routing table."""
-        if self._options is None:
-            return ""
-        return route_namespace(namespace, routing_from_options(self._options))
 
     def _ensure_type_info(self):
         if self._type_info is None:
