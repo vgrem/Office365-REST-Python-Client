@@ -7,8 +7,8 @@ from office365.directory.identitygovernance.quarantine_details import Quarantine
 from office365.directory.identitygovernance.run import Run
 from office365.directory.identitygovernance.task_report import TaskReport
 from office365.directory.identitygovernance.user_processing_result import UserProcessingResult
-from office365.directory.identitygovernance.workflow_setting import WorkflowSetting
-from office365.directory.identitygovernance.workflow_version import WorkflowVersion
+from office365.directory.identitygovernance.workflow.setting import WorkflowSetting
+from office365.directory.identitygovernance.workflow.version import WorkflowVersion
 from office365.directory.objects.object import DirectoryObject
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection

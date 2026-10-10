@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from office365.directory.identitygovernance.workflow.customtaskextensionoperationstatus import (
     CustomTaskExtensionOperationStatus,
 )
-from office365.directory.identitygovernance.workflow_subject import WorkflowSubject
+from office365.directory.identitygovernance.workflow.subject import WorkflowSubject
 from office365.runtime.client_value import ClientValue
 from office365.runtime.types.collections import StringCollection
 

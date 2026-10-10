@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from office365.directory.identitygovernance.task import Task
 from office365.directory.identitygovernance.task_processing_result import (
     TaskProcessingResult,
 )
-from office365.directory.identitygovernance.workflow_subject import WorkflowSubject
+from office365.directory.identitygovernance.workflow.subject import WorkflowSubject
 from office365.directory.users.user import User
 from office365.runtime.client_value import ClientValue
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.workflow.workflow import Workflow
 
 
 @dataclass
@@ -22,3 +26,5 @@ class CustomTaskExtensionCalloutData(ClientValue):
         return "microsoft.graph.identityGovernance.CustomTaskExtensionCalloutData"
 
     targetSubject: WorkflowSubject = field(default_factory=WorkflowSubject)
+
+    workflow: Workflow | None = None
