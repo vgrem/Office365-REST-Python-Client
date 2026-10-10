@@ -274,3 +274,40 @@ type_routing:
   Status: office365.directory
   SystemBrowserEnabledOn: office365.intune
   WellknownListName: office365.onedrive
+
+# Graph entity types (bare microsoft.graph.*), clustered by name.
+  Managed*: office365.intune
+  Configuration*: office365.intune
+  Workbook*: office365.onedrive
+  Todo*: office365.todo
+  Engagement*: office365.teams
+  Ai*: office365.copilot
+  Agent*: office365.directory
+  Cross*: office365.directory
+  Identity*: office365.directory
+  Domain*: office365.directory
+  Role*: office365.directory
+  B2B*: office365.directory
+  Qr*: office365.directory
+  OnAttributeCollection*: office365.directory
+  OnOtpSend*: office365.directory
+  OnPasswordSubmit*: office365.directory
+  CustomAuthentication*: office365.directory
+  ExternalAuthentication*: office365.directory
+  MicrosoftAuthenticator*: office365.directory
+  SoftwareOath*: office365.directory
+  AppleManagedIdentityProvider: office365.directory
+  Exchange*: office365.admin
+  Billing*: office365.admin
+  ServiceAnnouncement*: office365.admin
+  Mailbox*: office365.directory.security
+  SiteProtection*: office365.directory.security
+  SiteRestore*: office365.directory.security
+  DriveProtection*: office365.directory.security
+  DriveRestore*: office365.directory.security
+  Granular*: office365.directory.security
+  Restore*: office365.directory.security
+  TenantProtection*: office365.directory.security
+
+# Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
+  "*": office365.common
