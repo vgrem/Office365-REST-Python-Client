@@ -3,7 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from office365.directory.security.attacksimulations.user import AttackSimulationUser
+from office365.directory.security.user_training_status_info import (
+    UserTrainingStatusInfo,
+)
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 @dataclass
@@ -13,3 +17,7 @@ class AttackSimulationTrainingUserCoverage(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AttackSimulationTrainingUserCoverage"
+
+    userTrainings: ClientValueCollection[UserTrainingStatusInfo] = field(
+        default_factory=lambda: ClientValueCollection(UserTrainingStatusInfo)
+    )

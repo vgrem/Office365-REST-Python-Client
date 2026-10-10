@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from office365.communications.broadcast_meeting_caption_settings import (
+    BroadcastMeetingCaptionSettings,
+)
 from office365.communications.broadcastmeetingaudience import BroadcastMeetingAudience
 from office365.runtime.client_value import ClientValue
 
@@ -27,3 +30,5 @@ class BroadcastMeetingSettings(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.BroadcastMeetingSettings"
+
+    captions: BroadcastMeetingCaptionSettings = field(default_factory=BroadcastMeetingCaptionSettings)

@@ -7,6 +7,8 @@ from office365.directory.security.simulation_events_content import (
     SimulationEventsContent,
 )
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
+from office365.search.recommended_action import RecommendedAction
 
 
 @dataclass
@@ -22,3 +24,7 @@ class SimulationReportOverview(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.SimulationReportOverview"
+
+    recommendedActions: ClientValueCollection[RecommendedAction] = field(
+        default_factory=lambda: ClientValueCollection(RecommendedAction)
+    )

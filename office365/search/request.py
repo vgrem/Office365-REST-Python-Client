@@ -8,7 +8,9 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.types.collections import StringCollection
 from office365.search.aggregation_option import AggregationOption
+from office365.search.collapse_property import CollapseProperty
 from office365.search.query import SearchQuery
+from office365.search.result_template_option import ResultTemplateOption
 from office365.search.search_alteration_options import SearchAlterationOptions
 from office365.search.sharepoint_onedrive_options import SharePointOneDriveOptions
 from office365.search.sort_property import SortProperty
@@ -47,3 +49,9 @@ class SearchRequest(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.SearchRequest"
+
+    collapseProperties: ClientValueCollection[CollapseProperty] = field(
+        default_factory=lambda: ClientValueCollection(CollapseProperty)
+    )
+
+    resultTemplateOptions: ResultTemplateOption = field(default_factory=ResultTemplateOption)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from office365.intune.integer_range import IntegerRange
 from office365.intune.print.colormode import PrintColorMode
 from office365.intune.print.duplexmode import PrintDuplexMode
 from office365.intune.print.finishing import PrintFinishing
@@ -41,3 +42,5 @@ class PrintJobConfiguration(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.PrintJobConfiguration"
+
+    pageRanges: ClientValueCollection[IntegerRange] = field(default_factory=lambda: ClientValueCollection(IntegerRange))

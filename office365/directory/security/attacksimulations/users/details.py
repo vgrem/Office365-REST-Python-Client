@@ -4,7 +4,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from office365.directory.security.attacksimulations.user import AttackSimulationUser
+from office365.directory.security.user_training_event_info import UserTrainingEventInfo
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 @dataclass
@@ -33,3 +35,7 @@ class UserSimulationDetails(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.UserSimulationDetails"
+
+    trainingEvents: ClientValueCollection[UserTrainingEventInfo] = field(
+        default_factory=lambda: ClientValueCollection(UserTrainingEventInfo)
+    )

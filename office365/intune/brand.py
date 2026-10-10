@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
+from office365.intune.rgb_color import RgbColor
 from office365.runtime.client_value import ClientValue
 
 
+@dataclass
 class IntuneBrand(ClientValue):
     contactITEmailAddress: str | None = None
     contactITName: str | None = None
@@ -19,3 +23,5 @@ class IntuneBrand(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.IntuneBrand"
+
+    themeColor: RgbColor = field(default_factory=RgbColor)

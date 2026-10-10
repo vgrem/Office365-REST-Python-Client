@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from office365.intune.integer_range import IntegerRange
 from office365.intune.print.colormode import PrintColorMode
 from office365.intune.print.duplexmode import PrintDuplexMode
 from office365.intune.print.finishing import PrintFinishing
@@ -82,3 +83,5 @@ class PrinterCapabilities(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.PrinterCapabilities"
+
+    copiesPerJob: IntegerRange = field(default_factory=IntegerRange)

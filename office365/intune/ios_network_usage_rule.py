@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from office365.intune.app_list_item import AppListItem
 from office365.runtime.client_value import ClientValue
+from office365.runtime.client_value_collection import ClientValueCollection
 
 
 @dataclass
@@ -13,3 +15,5 @@ class IosNetworkUsageRule(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.IosNetworkUsageRule"
+
+    managedApps: ClientValueCollection[AppListItem] = field(default_factory=lambda: ClientValueCollection(AppListItem))

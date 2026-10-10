@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from dataclasses import field as field_
 
 from office365.runtime.client_value import ClientValue
+from office365.search.bucket_aggregation_definition import BucketAggregationDefinition
 
 
 @dataclass
@@ -17,3 +19,5 @@ class AggregationOption(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AggregationOption"
+
+    bucketDefinition: BucketAggregationDefinition = field_(default_factory=BucketAggregationDefinition)
