@@ -3,9 +3,9 @@ from __future__ import annotations
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.partners.billing.azure_usage import AzureUsage
-from office365.partners.billing.billing_reconciliation import BillingReconciliation
 from office365.partners.billing.manifest import Manifest
 from office365.partners.billing.operation import Operation
+from office365.partners.billing.reconciliation import BillingReconciliation
 from office365.runtime.paths.resource_path import ResourcePath
 
 

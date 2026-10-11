@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from office365.externalconnectors.external_item_content_type import (
+from office365.externalconnectors.itemcontenttype import (
     ExternalItemContentType,
 )
 from office365.runtime.client_value import ClientValue
