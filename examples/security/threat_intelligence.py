@@ -73,13 +73,23 @@ def main():
 
     _enrich_host(ti, args.host)
 
-    profiles = ti.intel_profiles.get().execute_query()
+    # Defender Threat Intelligence needs a license; degrade gracefully if absent.
+    try:
+        profiles = ti.intel_profiles.get().execute_query()
+    except ClientRequestException as ex:
+        print(f"\nThreat-actor intel profiles: unavailable ({ex.code})")
+        print("  this tenant may lack the Microsoft Defender Threat Intelligence license.")
+        return
     print(f"\nThreat-actor intel profiles ({len(profiles)}):")
     for profile in profiles:
         targets = ", ".join(profile.targets) if profile.targets else "?"
         print(f"  {profile.title}  severity={profile.properties.get('severity', '?')}  targets=[{targets}]")
 
-    articles = ti.articles.top(args.articles).get().execute_query()
+    try:
+        articles = ti.articles.top(args.articles).get().execute_query()
+    except ClientRequestException as ex:
+        print(f"\nLatest threat intel articles: unavailable ({ex.code})")
+        return
     print(f"\nLatest threat intel articles ({len(articles)}):")
     for article in articles:
         print(f"  {article.title}")

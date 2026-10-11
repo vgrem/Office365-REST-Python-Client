@@ -8,18 +8,25 @@ Security operations teams use this to:
   - Update alert classification, determination, and status
   - Automate triage (e.g. auto-resolve low-severity known issues)
 
+Writes are **opt-in**: without ``--apply`` it only lists alerts.
+
 Requires delegated permission ``SecurityAlert.ReadWrite.All``.
 
 https://learn.microsoft.com/en-us/graph/api/resources/alert
 """
 
+import argparse
 from datetime import datetime
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
 
 
-def main():
+def main() -> None:
+    parser = argparse.ArgumentParser(description="List and triage Microsoft Defender alerts")
+    parser.add_argument("--apply", action="store_true", help="triage the newest active alert")
+    args = parser.parse_args()
+
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
 
     alerts = client.security.alerts_v2
@@ -58,8 +65,8 @@ def main():
             print(f"    tags: {', '.join(tags)}")
         print()
 
-    # -- Step 2: update an alert (triage) --
-    if active:
+    # -- Step 2: triage an alert (write; opt-in) --
+    if active and args.apply:
         target = active[0]
         alert_id = target.id
         title = target.properties.get("title", "(untitled)")
@@ -82,6 +89,8 @@ def main():
         target.set_property("comment", "Reviewed — security testing, investigating")
         target.update().execute_query()
         print(f"  ✓ Updated: classification/status modified for {title}")
+    elif active:
+        print(f"\nDry run — re-run with --apply to triage {active[0].properties.get('title', '(untitled)')}")
 
     # -- Step 3: create a custom alert (for security workflows) --
     # Alerts can also be created, for example from a SOAR playbook:

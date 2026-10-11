@@ -55,8 +55,8 @@ def main():
                 f"start={_fmt(r.properties.get('startDateTime'))}"
             )
 
-    # -- Landing pages --
-    items = sim.landing_pages.get().execute_query()
+    # -- Landing pages (the endpoint requires a filter; `source` is tenant|builtIn) --
+    items = sim.landing_pages.filter("source eq 'tenant'").get().execute_query()
     print(f"\nLanding pages: {len(items)}")
     for p in items:
         print(f"  locale={p.properties.get('locale', '?'):10s}  status={p.properties.get('status', '?')}")
