@@ -100,9 +100,16 @@ def declared_type(cls: type, name: str) -> Any:
 
 def _resolve_declared_type(cls: type, name: str) -> Any:
     meta = getattr(cls, "_odata_meta", {}).get(name)
-    attr = meta.attr if meta is not None else to_snake_case(name)
-    member = getattr(cls, attr, None)
-    if member is not None:
+    if meta is not None:
+        attrs = (meta.attr,)
+    else:
+        # Generated getters rename reserved words with a trailing underscore
+        # (``type`` -> ``type_``), a rename ``to_snake_case`` cannot express.
+        attrs = (to_snake_case(name), to_snake_case(name) + "_")
+    for attr in attrs:
+        member = getattr(cls, attr, None)
+        if member is None:
+            continue
         target = member.fget if isinstance(member, property) else member
         try:
             declared = get_type_hints(target).get("return")

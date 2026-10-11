@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import unittest
+from datetime import datetime, timezone
+from enum import Enum
 from unittest import mock
 
 from office365.delta_collection import DeltaCollection
@@ -29,6 +31,7 @@ from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.exceptions import SPQueryThrottledException
@@ -488,3 +491,40 @@ class TestRequireDelegatedPermission(unittest.TestCase):
         )
         with self.assertRaises(SystemExit):
             client.require_delegated_permission("User.Read")
+
+
+class _MeetingMode(Enum):
+    enabled = "enabled"
+    disabled = "disabled"
+
+
+class TestQueryPayloadSerialization(unittest.TestCase):
+    """A query payload holding scalars must already be JSON-ready."""
+
+    def test_datetime_and_enum_are_serialized_in_nested_payload(self):
+        """Regression: a raw ``datetime`` in a service-operation payload used to reach
+        ``json.dumps`` unchanged (``create_or_get`` on online meetings failed with
+        "Object of type datetime is not JSON serializable")."""
+        ctx = ClientContext(test_site_url)
+        start = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+        query = ServiceOperationQuery(
+            ctx.web,
+            "createOrGet",
+            None,
+            {
+                "startDateTime": start,
+                "mode": _MeetingMode.disabled,
+                "nested": {"endDateTime": start},
+                "items": [start],
+                "absent": None,
+            },
+        )
+
+        payload = ODataRequest(test_site_url, JsonLightFormat())._build_payload(query)
+
+        json.dumps(payload)  # must not raise
+        self.assertEqual(payload["startDateTime"], start.isoformat())
+        self.assertEqual(payload["mode"], "disabled")
+        self.assertEqual(payload["nested"]["endDateTime"], start.isoformat())
+        self.assertEqual(payload["items"], [start.isoformat()])
+        self.assertNotIn("absent", payload)

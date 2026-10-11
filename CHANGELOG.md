@@ -15,6 +15,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   becomes `from office365.security.alerts... import ...`. `client.security` is
   unchanged.
 
+### Fixed
+- **Request payload scalars are serialized:** a body built from a dictionary or
+  list now serializes `datetime` / `date`, `Enum` and `UUID` values instead of
+  handing them to the JSON encoder unchanged — `OnlineMeetingCollection.create_or_get(...)`
+  no longer fails with `TypeError: Object of type datetime is not JSON
+  serializable`. Raw binary bodies (file-upload content) are passed through
+  untouched, as before.
+- **Declared types of reserved-word properties:** the value converter resolves a
+  getter renamed to dodge a builtin (`CallRecord.type` is exposed as `type_`) as
+  well as the plain snake-case name, so such a property deserializes to its
+  declared type — `CallRecord.type` is a `CallType` member, not the raw JSON
+  string.
+
 ### Added
 - **Sharing-link updates:** `ListItem.share_link` / `File.share_link` /
   `Folder.share_link` accept an optional `share_id` (the `ShareId` returned when a

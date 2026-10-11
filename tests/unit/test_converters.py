@@ -9,6 +9,8 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import cast
 
+from office365.communications.callrecords.call_record import CallRecord
+from office365.communications.callrecords.type import CallType
 from office365.directory.users.password_profile import PasswordProfile
 from office365.directory.users.profile import UserProfile
 from office365.directory.users.user import User
@@ -134,6 +136,14 @@ class TestDeclaredType(unittest.TestCase):
         self.assertEqual(declared_type(UserProfile, "userPrincipalName"), str)
         self.assertEqual(declared_type(UserProfile, "accountEnabled"), bool)
         self.assertEqual(declared_type(PasswordProfile, "forceChangePasswordNextSignIn"), bool)
+
+    def test_entity_reserved_word_getter(self):
+        # ``CallRecord.type`` is exposed as ``type_`` (a reserved word), which
+        # ``to_snake_case`` cannot derive — the trailing-underscore fallback must.
+        self.assertIs(declared_type(CallRecord, "type"), CallType)
+        record = CallRecord(cast(ClientRuntimeContext, None))
+        record.set_property("type", "groupCall")
+        self.assertIs(record.type_, CallType.groupCall)
 
 
 class TestCoerceValue(unittest.TestCase):
