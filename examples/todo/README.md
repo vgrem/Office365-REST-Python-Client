@@ -1,86 +1,98 @@
-# Microsoft To-Do
+# Microsoft To Do
 
-Manage Microsoft To-Do tasks and task lists via the Graph API —
-CRUD, due-date lookahead, and cleanup of completed tasks.
+Tasks, checklists, reminders, and recurring to-dos for the signed-in user.
+Microsoft To Do is exposed through Microsoft Graph at `/me/todo`, and this
+folder shows how to drive it end to end with the library.
 
 ---
 
-## Tasks & Task Lists
+## How To Do maps to the API
 
-### [Manage tasks](manage.py)
+```mermaid
+flowchart LR
+    U[me.todo] --> L[todoTaskList]
+    L --> T[todoTask]
+    T --> C[checklistItem]
+    T --> A[taskFileAttachment]
+    T --> R[linkedResource]
+    T --> E[open extension]
+```
 
-Microsoft To-Do — manage task lists, tasks, and checklist items.
+A **task list** (`todoTaskList`) holds **tasks** (`todoTask`). Each task can carry
+a body, importance, start due dates, categories, a reminder, a recurrence, a
+checklist of **subtasks** (`checklistItem`), **file attachments**, **linked
+resources** (the email or chat it came from), and **open extensions** for custom
+data.
+
+The whole API hangs off the signed-in user:
 
 ```python
-# Task lists
-lists = client.me.todo.lists.get().execute_query()
-
-# Create a task list
-task_list = client.me.todo.lists.add("Demo").execute_query()
-
-# Add a task with a due date and importance
+task_list = client.me.todo.lists.ensure("Groceries").execute_query()
 task = task_list.tasks.add(
-    title="Write docs",
-    due_date_time=datetime.now(timezone.utc) + timedelta(days=3),
+    "Buy milk",
+    due_date_time=datetime.now(timezone.utc) + timedelta(days=1),
     importance=Importance.high,
+    body="Two litres, semi-skimmed",
 ).execute_query()
+```
 
-# Mark it completed
+!!! note "Addressing a task list"
+    `client.me.todo.lists["<id>"]` is lazy, but the list **id** is an opaque
+    mailbox-style string. Prefer `lists.ensure(name)` (create-or-get by display
+    name) or `lists.filter("displayName eq '…'")`, exactly like the SharePoint and
+    OneDrive tours address objects by a natural key.
+
+---
+
+## Start here
+
+### [Quickstart — a task from creation to completion](quickstart.py)
+
+Ensure a list, add a task that is due in two days, break it into checklist
+subtasks, complete it, and clean up. The shortest end-to-end path.
+
+```python
 task.status = TaskStatus.completed
+task.set_property("completedDateTime", DateTimeTimeZone.parse(datetime.now(timezone.utc)))
 task.update().execute_query()
 ```
 
+### [Overview — a dashboard across every list](overview.py)
 
-### [List task lists](list_task_lists.py)
-
-List all task lists with their task counts.
-
-```python
-lists = client.me.todo.lists.get().execute_query()
-for lst in lists:
-    tasks = lst.tasks.get().execute_query()
-    print(f"{lst.display_name}  ({len(tasks)} tasks)")
-```
-
-
-### [Tasks due soon](tasks_due_soon.py)
-
-Find tasks due within a specified number of days.
+A read-only pass over all lists reporting open, completed, and overdue counts.
 
 ```python
-cutoff = (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-for lst in client.me.todo.lists.get().execute_query():
-    for task in lst.tasks.filter(f"dueDateTime/dateTime le '{cutoff}'").get().execute_query():
-        print(f"[{lst.display_name}]  {task.title}  due={task.due_date_time}")
+for task_list in client.me.todo.lists.get().execute_query():
+    tasks = list(task_list.tasks.get().execute_query())
 ```
-
-
-### [Clean up completed tasks](cleanup_completed.py)
-
-Delete completed tasks older than a specified number of days.
-
-```python
-cutoff = datetime.now(timezone.utc) - timedelta(days=30)
-
-for lst in client.me.todo.lists.get().execute_query():
-    for task in lst.tasks.get().execute_query():
-        if task.status == TaskStatus.completed and task.last_modified_date_time < cutoff:
-            print(f"[{lst.display_name}]  {task.title}")
-            task.delete_object().execute_query()
-```
-
-
-### [Attach a file](attachments.py)
-
-Attach a file to a task — small files are posted directly, larger ones use an
-upload session with chunked uploads.
-
-```python
-task = client.me.todo.lists[list_id].tasks[task_id].get().execute_query()
-attachment = task.upload_attachment("./report.pdf", progress=lambda p: print(p.done, p.total))
-print(attachment.name, attachment.size)
-```
-
 
 ---
+
+## The examples, by area
+
+| Folder | What it answers |
+| --- | --- |
+| [lists](lists/README.md) | Create, rename, inspect, and delete task lists |
+| [tasks](tasks/README.md) | Create rich tasks, update them, search them, add subtasks |
+| [attachments](attachments/README.md) | Attach files and link back to source emails or chats |
+| [maintenance](maintenance/README.md) | Bulk-remove old completed tasks |
+
+---
+
+## Permissions
+
+Microsoft To Do is a **delegated** API — it acts on the signed-in user's own
+lists. The scripts authenticate with the username/password (ROPC) flow and need:
+
+| Scenario | Permission |
+| --- | --- |
+| Read lists and tasks | `Tasks.Read` |
+| Create, update, delete | `Tasks.ReadWrite` |
+
+The examples request `Tasks.ReadWrite`. If it is not granted, a script prints the
+missing-permission hint and exits cleanly instead of failing.
+
+!!! note "Inline attachments only"
+    Graph accepts simple To Do attachments up to **3 MB**. Upload sessions for
+    larger files are not currently supported by the service, so
+    [`attachments/file.py`](attachments/file.py) refuses files above that limit.

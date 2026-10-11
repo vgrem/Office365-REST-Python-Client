@@ -419,6 +419,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   report CSV with `utf-8-sig` (Graph prepends a BOM), target the correct
   report/columns, keep outputs in the temp directory, and handle throttling and
   concealed report data gracefully.
+- **Microsoft To Do guided tour:** `examples/todo/` is reorganised by resource
+  (`lists/`, `tasks/`, `attachments/`, `maintenance/`) around a new `quickstart.py`
+  and a read-only `overview.py`, with a README per folder. The scripts cover task
+  lifecycle (due dates, importance, recurrence, complete/reopen), server-side
+  filtering, checklist items, file attachments, linked resources and bulk cleanup
+  of old completed tasks. Every script runs end to end with argparse defaults,
+  keeps output in the temp directory, and turns missing-scope errors into a
+  one-line hint.
 
 ### Fixed
 - **Sharing-link expiration rejected as an invalid date:** `ListItem.share_link`
