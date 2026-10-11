@@ -69,7 +69,7 @@ async def main() -> None:
     async with client:
         token = ContinuationToken.from_json(read_token(token_path))
         print(f"Resumed at status={token.status!r}; polling {token.poll_url}")
-        poller = OperationPoller.from_continuation_token(client, token, interval=2, timeout=300, authenticate=True)
+        poller = OperationPoller.from_continuation_token(client, token, interval=2, timeout=300)
         status = await poller.wait_async(on_progress=report)
         print(f"\nTerminal: {status.status} (resource_id={status.resource_id})")
 

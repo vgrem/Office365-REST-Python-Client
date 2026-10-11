@@ -193,7 +193,6 @@ class CopyQueue:
                 ContinuationToken.from_json(token_json),
                 interval=self._interval,
                 timeout=self._timeout,
-                authenticate=True,
             )
             return poller, True
 

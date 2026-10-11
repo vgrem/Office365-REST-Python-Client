@@ -72,9 +72,7 @@ def main() -> int:
     # Graph monitor URLs are absolute and may live on another host, so attach the
     # client's credentials while polling.
     client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
-    poller = OperationPoller.from_continuation_token(
-        client, token, interval=args.interval, timeout=args.timeout, authenticate=True
-    )
+    poller = OperationPoller.from_continuation_token(client, token, interval=args.interval, timeout=args.timeout)
 
     try:
         status = poller.wait(on_progress=on_progress)
