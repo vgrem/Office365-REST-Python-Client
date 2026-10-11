@@ -10,5 +10,7 @@ product folders (`onedrive/`, `teams/`, `outlook/`, …) which are organized by
 | [`lro/`](./lro/) | **Long-running operations** — wait (sync/async), resume from a token, a monitor CLI |
 | [`async/`](./async/) | Async twins, concurrency, batching, streaming exports, credentials, transports |
 | [`large-data/`](./large-data/) | Resumable chunked uploads, concurrent downloads, streamed exports |
+| [`odata-query/`](./odata-query/) | `$select` / `$filter` / `$orderby` / `$top` / `$expand` on any collection |
+| [`reliability/`](./reliability/) | Error responses, throttling, retries |
 
 Each folder has its own `README.md` with a "which example to use" guide.

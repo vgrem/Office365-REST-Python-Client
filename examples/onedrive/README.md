@@ -79,7 +79,7 @@ drive.special["Documents"]  # a special folder by name
 |---|---|---|
 | Follow a path | `get_by_path` | [`sites/get_site_by_path.py`](./sites/get_site_by_path.py) |
 | Address by id | `items[id]` | [`files/manage.py`](./files/manage.py) |
-| Listed/app folders | `drive.special` | *(app folder: coming in `appfolder/`)* |
+| Listed/app folders | `drive.special` | [`appfolder/app_folder.py`](./appfolder/app_folder.py) |
 | A different user's drive | `client.users[id].drive` | [`drives/user_drive.py`](./drives/user_drive.py) |
 | A site's drive | `client.sites[id].drive` | [`lists/library.py`](./lists/library.py) |
 
@@ -105,6 +105,9 @@ resumable session. → [`files/upload_download.py`](./files/upload_download.py),
 
 **Versions & checkout.** Keep history, edit with check-out/check-in. →
 [`files/lifecycle.py`](./files/lifecycle.py)
+
+**Custom metadata.** Tag files with your own columns. →
+[`files/custom_metadata.py`](./files/custom_metadata.py)
 
 **Search & discover.** Keyword search, largest files, what's shared. →
 [`files/search.py`](./files/search.py),
