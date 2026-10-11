@@ -78,6 +78,72 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.user_experience_analytics_settings import (
         UserExperienceAnalyticsSettings,
     )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_app_performance_by_app_version_details import (  # noqa: E501
+        UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_app_performance_by_app_version_device_id import (  # noqa: E501
+        UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_app_performance_by_os_version import (  # noqa: E501
+        UserExperienceAnalyticsAppHealthAppPerformanceByOSVersion,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_application_performance import (  # noqa: E501
+        UserExperienceAnalyticsAppHealthApplicationPerformance,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_device_model_performance import (  # noqa: E501
+        UserExperienceAnalyticsAppHealthDeviceModelPerformance,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_device_performance import (  # noqa: E501
+        UserExperienceAnalyticsAppHealthDevicePerformance,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_device_performance_details import (  # noqa: E501
+        UserExperienceAnalyticsAppHealthDevicePerformanceDetails,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_os_version_performance import (  # noqa: E501
+        UserExperienceAnalyticsAppHealthOSVersionPerformance,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_baseline import (
+        UserExperienceAnalyticsBaseline,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
+        UserExperienceAnalyticsCategory,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_performance import (  # noqa: E501
+        UserExperienceAnalyticsDevicePerformance,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_scores import (
+        UserExperienceAnalyticsDeviceScores,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_startup_history import (  # noqa: E501
+        UserExperienceAnalyticsDeviceStartupHistory,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_startup_process import (  # noqa: E501
+        UserExperienceAnalyticsDeviceStartupProcess,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_startup_process_performance import (  # noqa: E501
+        UserExperienceAnalyticsDeviceStartupProcessPerformance,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_metric_history import (
+        UserExperienceAnalyticsMetricHistory,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_model_scores import (
+        UserExperienceAnalyticsModelScores,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_overview import (
+        UserExperienceAnalyticsOverview,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_score_history import (
+        UserExperienceAnalyticsScoreHistory,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_work_from_anywhere_hardware_readiness_metric import (  # noqa: E501
+        UserExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_work_from_anywhere_metric import (  # noqa: E501
+        UserExperienceAnalyticsWorkFromAnywhereMetric,
+    )
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_work_from_anywhere_model_performance import (  # noqa: E501
+        UserExperienceAnalyticsWorkFromAnywhereModelPerformance,
+    )
     from office365.intune.devices.management.windows_autopilot_device_identity import (
         WindowsAutopilotDeviceIdentity,
     )
@@ -104,72 +170,6 @@ if TYPE_CHECKING:
     )
     from office365.intune.mobile_threat_defense_connector import (
         MobileThreatDefenseConnector,
-    )
-    from office365.intune.user_experience_analytics_app_health_app_performance_by_app_version_details import (
-        UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails,
-    )
-    from office365.intune.user_experience_analytics_app_health_app_performance_by_app_version_device_id import (
-        UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId,
-    )
-    from office365.intune.user_experience_analytics_app_health_app_performance_by_os_version import (
-        UserExperienceAnalyticsAppHealthAppPerformanceByOSVersion,
-    )
-    from office365.intune.user_experience_analytics_app_health_application_performance import (
-        UserExperienceAnalyticsAppHealthApplicationPerformance,
-    )
-    from office365.intune.user_experience_analytics_app_health_device_model_performance import (
-        UserExperienceAnalyticsAppHealthDeviceModelPerformance,
-    )
-    from office365.intune.user_experience_analytics_app_health_device_performance import (
-        UserExperienceAnalyticsAppHealthDevicePerformance,
-    )
-    from office365.intune.user_experience_analytics_app_health_device_performance_details import (
-        UserExperienceAnalyticsAppHealthDevicePerformanceDetails,
-    )
-    from office365.intune.user_experience_analytics_app_health_os_version_performance import (
-        UserExperienceAnalyticsAppHealthOSVersionPerformance,
-    )
-    from office365.intune.user_experience_analytics_baseline import (
-        UserExperienceAnalyticsBaseline,
-    )
-    from office365.intune.user_experience_analytics_category import (
-        UserExperienceAnalyticsCategory,
-    )
-    from office365.intune.user_experience_analytics_device_performance import (
-        UserExperienceAnalyticsDevicePerformance,
-    )
-    from office365.intune.user_experience_analytics_device_scores import (
-        UserExperienceAnalyticsDeviceScores,
-    )
-    from office365.intune.user_experience_analytics_device_startup_history import (
-        UserExperienceAnalyticsDeviceStartupHistory,
-    )
-    from office365.intune.user_experience_analytics_device_startup_process import (
-        UserExperienceAnalyticsDeviceStartupProcess,
-    )
-    from office365.intune.user_experience_analytics_device_startup_process_performance import (
-        UserExperienceAnalyticsDeviceStartupProcessPerformance,
-    )
-    from office365.intune.user_experience_analytics_metric_history import (
-        UserExperienceAnalyticsMetricHistory,
-    )
-    from office365.intune.user_experience_analytics_model_scores import (
-        UserExperienceAnalyticsModelScores,
-    )
-    from office365.intune.user_experience_analytics_overview import (
-        UserExperienceAnalyticsOverview,
-    )
-    from office365.intune.user_experience_analytics_score_history import (
-        UserExperienceAnalyticsScoreHistory,
-    )
-    from office365.intune.user_experience_analytics_work_from_anywhere_hardware_readiness_metric import (
-        UserExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric,
-    )
-    from office365.intune.user_experience_analytics_work_from_anywhere_metric import (
-        UserExperienceAnalyticsWorkFromAnywhereMetric,
-    )
-    from office365.intune.user_experience_analytics_work_from_anywhere_model_performance import (
-        UserExperienceAnalyticsWorkFromAnywhereModelPerformance,
     )
 
 
@@ -543,7 +543,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsAppHealthApplicationPerformance]:
         """Gets the userExperienceAnalyticsAppHealthApplicationPerformance property"""
-        from office365.intune.user_experience_analytics_app_health_application_performance import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_application_performance import (  # noqa: E501
             UserExperienceAnalyticsAppHealthApplicationPerformance,
         )
 
@@ -561,7 +561,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails]:
         """Gets the userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDetails property"""
-        from office365.intune.user_experience_analytics_app_health_app_performance_by_app_version_details import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_app_performance_by_app_version_details import (  # noqa: E501
             UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails,
         )
 
@@ -581,7 +581,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId]:
         """Gets the userExperienceAnalyticsAppHealthApplicationPerformanceByAppVersionDeviceId property"""
-        from office365.intune.user_experience_analytics_app_health_app_performance_by_app_version_device_id import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_app_performance_by_app_version_device_id import (  # noqa: E501
             UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId,
         )
 
@@ -601,7 +601,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsAppHealthAppPerformanceByOSVersion]:
         """Gets the userExperienceAnalyticsAppHealthApplicationPerformanceByOSVersion property"""
-        from office365.intune.user_experience_analytics_app_health_app_performance_by_os_version import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_app_performance_by_os_version import (  # noqa: E501
             UserExperienceAnalyticsAppHealthAppPerformanceByOSVersion,
         )
 
@@ -619,7 +619,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsAppHealthDeviceModelPerformance]:
         """Gets the userExperienceAnalyticsAppHealthDeviceModelPerformance property"""
-        from office365.intune.user_experience_analytics_app_health_device_model_performance import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_device_model_performance import (  # noqa: E501
             UserExperienceAnalyticsAppHealthDeviceModelPerformance,
         )
 
@@ -637,7 +637,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsAppHealthDevicePerformance]:
         """Gets the userExperienceAnalyticsAppHealthDevicePerformance property"""
-        from office365.intune.user_experience_analytics_app_health_device_performance import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_device_performance import (  # noqa: E501
             UserExperienceAnalyticsAppHealthDevicePerformance,
         )
 
@@ -655,7 +655,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsAppHealthDevicePerformanceDetails]:
         """Gets the userExperienceAnalyticsAppHealthDevicePerformanceDetails property"""
-        from office365.intune.user_experience_analytics_app_health_device_performance_details import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_device_performance_details import (  # noqa: E501
             UserExperienceAnalyticsAppHealthDevicePerformanceDetails,
         )
 
@@ -673,7 +673,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsAppHealthOSVersionPerformance]:
         """Gets the userExperienceAnalyticsAppHealthOSVersionPerformance property"""
-        from office365.intune.user_experience_analytics_app_health_os_version_performance import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_app_health_os_version_performance import (  # noqa: E501
             UserExperienceAnalyticsAppHealthOSVersionPerformance,
         )
 
@@ -689,7 +689,7 @@ class DeviceManagement(Entity):
     @property
     def user_experience_analytics_app_health_overview(self) -> UserExperienceAnalyticsCategory:
         """Gets the userExperienceAnalyticsAppHealthOverview property"""
-        from office365.intune.user_experience_analytics_category import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
             UserExperienceAnalyticsCategory,
         )
 
@@ -703,7 +703,7 @@ class DeviceManagement(Entity):
     @property
     def user_experience_analytics_baselines(self) -> EntityCollection[UserExperienceAnalyticsBaseline]:
         """Gets the userExperienceAnalyticsBaselines property"""
-        from office365.intune.user_experience_analytics_baseline import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_baseline import (
             UserExperienceAnalyticsBaseline,
         )
 
@@ -719,7 +719,7 @@ class DeviceManagement(Entity):
     @property
     def user_experience_analytics_categories(self) -> EntityCollection[UserExperienceAnalyticsCategory]:
         """Gets the userExperienceAnalyticsCategories property"""
-        from office365.intune.user_experience_analytics_category import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
             UserExperienceAnalyticsCategory,
         )
 
@@ -735,7 +735,7 @@ class DeviceManagement(Entity):
     @property
     def user_experience_analytics_device_performance(self) -> EntityCollection[UserExperienceAnalyticsDevicePerformance]:
         """Gets the userExperienceAnalyticsDevicePerformance property"""
-        from office365.intune.user_experience_analytics_device_performance import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_performance import (  # noqa: E501
             UserExperienceAnalyticsDevicePerformance,
         )
 
@@ -751,7 +751,7 @@ class DeviceManagement(Entity):
     @property
     def user_experience_analytics_device_scores(self) -> EntityCollection[UserExperienceAnalyticsDeviceScores]:
         """Gets the userExperienceAnalyticsDeviceScores property"""
-        from office365.intune.user_experience_analytics_device_scores import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_scores import (
             UserExperienceAnalyticsDeviceScores,
         )
 
@@ -769,7 +769,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsDeviceStartupHistory]:
         """Gets the userExperienceAnalyticsDeviceStartupHistory property"""
-        from office365.intune.user_experience_analytics_device_startup_history import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_startup_history import (  # noqa: E501
             UserExperienceAnalyticsDeviceStartupHistory,
         )
 
@@ -787,7 +787,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsDeviceStartupProcess]:
         """Gets the userExperienceAnalyticsDeviceStartupProcesses property"""
-        from office365.intune.user_experience_analytics_device_startup_process import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_startup_process import (  # noqa: E501
             UserExperienceAnalyticsDeviceStartupProcess,
         )
 
@@ -805,7 +805,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsDeviceStartupProcessPerformance]:
         """Gets the userExperienceAnalyticsDeviceStartupProcessPerformance property"""
-        from office365.intune.user_experience_analytics_device_startup_process_performance import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_device_startup_process_performance import (  # noqa: E501
             UserExperienceAnalyticsDeviceStartupProcessPerformance,
         )
 
@@ -821,7 +821,7 @@ class DeviceManagement(Entity):
     @property
     def user_experience_analytics_metric_history(self) -> EntityCollection[UserExperienceAnalyticsMetricHistory]:
         """Gets the userExperienceAnalyticsMetricHistory property"""
-        from office365.intune.user_experience_analytics_metric_history import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_metric_history import (  # noqa: E501
             UserExperienceAnalyticsMetricHistory,
         )
 
@@ -837,7 +837,7 @@ class DeviceManagement(Entity):
     @property
     def user_experience_analytics_model_scores(self) -> EntityCollection[UserExperienceAnalyticsModelScores]:
         """Gets the userExperienceAnalyticsModelScores property"""
-        from office365.intune.user_experience_analytics_model_scores import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_model_scores import (
             UserExperienceAnalyticsModelScores,
         )
 
@@ -853,7 +853,7 @@ class DeviceManagement(Entity):
     @property
     def user_experience_analytics_overview(self) -> UserExperienceAnalyticsOverview:
         """Gets the userExperienceAnalyticsOverview property"""
-        from office365.intune.user_experience_analytics_overview import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_overview import (
             UserExperienceAnalyticsOverview,
         )
 
@@ -867,7 +867,7 @@ class DeviceManagement(Entity):
     @property
     def user_experience_analytics_score_history(self) -> EntityCollection[UserExperienceAnalyticsScoreHistory]:
         """Gets the userExperienceAnalyticsScoreHistory property"""
-        from office365.intune.user_experience_analytics_score_history import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_score_history import (
             UserExperienceAnalyticsScoreHistory,
         )
 
@@ -885,7 +885,7 @@ class DeviceManagement(Entity):
         self,
     ) -> UserExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric:
         """Gets the userExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric property"""
-        from office365.intune.user_experience_analytics_work_from_anywhere_hardware_readiness_metric import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_work_from_anywhere_hardware_readiness_metric import (  # noqa: E501
             UserExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric,
         )
 
@@ -902,7 +902,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsWorkFromAnywhereMetric]:
         """Gets the userExperienceAnalyticsWorkFromAnywhereMetrics property"""
-        from office365.intune.user_experience_analytics_work_from_anywhere_metric import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_work_from_anywhere_metric import (  # noqa: E501
             UserExperienceAnalyticsWorkFromAnywhereMetric,
         )
 
@@ -920,7 +920,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[UserExperienceAnalyticsWorkFromAnywhereModelPerformance]:
         """Gets the userExperienceAnalyticsWorkFromAnywhereModelPerformance property"""
-        from office365.intune.user_experience_analytics_work_from_anywhere_model_performance import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_work_from_anywhere_model_performance import (  # noqa: E501
             UserExperienceAnalyticsWorkFromAnywhereModelPerformance,
         )
 

@@ -2,16 +2,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.intune.user_experience_analytics_autopilot_devices_summary import (
+from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_autopilot_devices_summary import (  # noqa: E501
     UserExperienceAnalyticsAutopilotDevicesSummary,
 )
-from office365.intune.user_experience_analytics_cloud_identity_devices_summary import (
+from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_cloud_identity_devices_summary import (  # noqa: E501
     UserExperienceAnalyticsCloudIdentityDevicesSummary,
 )
-from office365.intune.user_experience_analytics_cloud_management_devices_summary import (
+from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_cloud_management_devices_summary import (  # noqa: E501
     UserExperienceAnalyticsCloudManagementDevicesSummary,
 )
-from office365.intune.user_experience_analytics_windows10_devices_summary import (
+from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_windows10_devices_summary import (  # noqa: E501
     UserExperienceAnalyticsWindows10DevicesSummary,
 )
 from office365.runtime.client_value import ClientValue

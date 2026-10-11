@@ -8,10 +8,10 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.intune.user_experience_analytics_insight import (
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_insight import (
         UserExperienceAnalyticsInsight,
     )
-    from office365.intune.user_experience_analytics_metric import (
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_metric import (
         UserExperienceAnalyticsMetric,
     )
 
@@ -20,7 +20,7 @@ class UserExperienceAnalyticsCategory(Entity):
     @property
     def insights(self) -> ClientValueCollection[UserExperienceAnalyticsInsight]:
         """Gets the insights property"""
-        from office365.intune.user_experience_analytics_insight import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_insight import (
             UserExperienceAnalyticsInsight,
         )
 
@@ -31,7 +31,7 @@ class UserExperienceAnalyticsCategory(Entity):
     @property
     def metric_values(self) -> EntityCollection[UserExperienceAnalyticsMetric]:
         """Gets the metricValues property"""
-        from office365.intune.user_experience_analytics_metric import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_metric import (
             UserExperienceAnalyticsMetric,
         )
 

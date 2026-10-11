@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from office365.intune.devices.management.userexperienceanalytics.insightseverity import (
     UserExperienceAnalyticsInsightSeverity,
 )
-from office365.intune.user_experience_analytics_insight_value import (
+from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_insight_value import (
     UserExperienceAnalyticsInsightValue,
 )
 from office365.runtime.client_value import ClientValue

@@ -409,6 +409,39 @@ type_routing:
   WindowsAutopilotDeploymentProfileAssignment: office365.intune.devices.management
   WindowsAutopilotDeviceIdentity: office365.intune.devices.management
 
+# User Experience Analytics cluster.
+  UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDetails: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsAppHealthAppPerformanceByAppVersionDeviceId: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsAppHealthAppPerformanceByOSVersion: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsAppHealthApplicationPerformance: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsAppHealthDeviceModelPerformance: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsAppHealthDevicePerformance: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsAppHealthDevicePerformanceDetails: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsAppHealthOSVersionPerformance: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsAutopilotDevicesSummary: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsBaseline: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsCategory: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsCloudIdentityDevicesSummary: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsCloudManagementDevicesSummary: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsDevicePerformance: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsDeviceScores: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsDeviceStartupHistory: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsDeviceStartupProcess: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsDeviceStartupProcessPerformance: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsInsight: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsInsightValue: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsMetric: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsMetricHistory: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsModelScores: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsOverview: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsScoreHistory: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsWindows10DevicesSummary: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsWorkFromAnywhereDevice: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsWorkFromAnywhereDevicesSummary: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsWorkFromAnywhereMetric: office365.intune.devices.management.userexperienceanalytics
+  UserExperienceAnalyticsWorkFromAnywhereModelPerformance: office365.intune.devices.management.userexperienceanalytics
+
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common
 

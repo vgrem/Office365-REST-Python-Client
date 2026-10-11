@@ -7,7 +7,7 @@ from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.intune.user_experience_analytics_category import (
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
         UserExperienceAnalyticsCategory,
     )
 
@@ -31,7 +31,7 @@ class UserExperienceAnalyticsBaseline(Entity):
     @property
     def app_health_metrics(self) -> UserExperienceAnalyticsCategory:
         """Gets the appHealthMetrics property"""
-        from office365.intune.user_experience_analytics_category import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
             UserExperienceAnalyticsCategory,
         )
 
@@ -43,7 +43,7 @@ class UserExperienceAnalyticsBaseline(Entity):
     @property
     def battery_health_metrics(self) -> UserExperienceAnalyticsCategory:
         """Gets the batteryHealthMetrics property"""
-        from office365.intune.user_experience_analytics_category import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
             UserExperienceAnalyticsCategory,
         )
 
@@ -55,7 +55,7 @@ class UserExperienceAnalyticsBaseline(Entity):
     @property
     def best_practices_metrics(self) -> UserExperienceAnalyticsCategory:
         """Gets the bestPracticesMetrics property"""
-        from office365.intune.user_experience_analytics_category import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
             UserExperienceAnalyticsCategory,
         )
 
@@ -67,7 +67,7 @@ class UserExperienceAnalyticsBaseline(Entity):
     @property
     def device_boot_performance_metrics(self) -> UserExperienceAnalyticsCategory:
         """Gets the deviceBootPerformanceMetrics property"""
-        from office365.intune.user_experience_analytics_category import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
             UserExperienceAnalyticsCategory,
         )
 
@@ -81,7 +81,7 @@ class UserExperienceAnalyticsBaseline(Entity):
     @property
     def reboot_analytics_metrics(self) -> UserExperienceAnalyticsCategory:
         """Gets the rebootAnalyticsMetrics property"""
-        from office365.intune.user_experience_analytics_category import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
             UserExperienceAnalyticsCategory,
         )
 
@@ -93,7 +93,7 @@ class UserExperienceAnalyticsBaseline(Entity):
     @property
     def resource_performance_metrics(self) -> UserExperienceAnalyticsCategory:
         """Gets the resourcePerformanceMetrics property"""
-        from office365.intune.user_experience_analytics_category import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
             UserExperienceAnalyticsCategory,
         )
 
@@ -107,7 +107,7 @@ class UserExperienceAnalyticsBaseline(Entity):
     @property
     def work_from_anywhere_metrics(self) -> UserExperienceAnalyticsCategory:
         """Gets the workFromAnywhereMetrics property"""
-        from office365.intune.user_experience_analytics_category import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_category import (
             UserExperienceAnalyticsCategory,
         )
 

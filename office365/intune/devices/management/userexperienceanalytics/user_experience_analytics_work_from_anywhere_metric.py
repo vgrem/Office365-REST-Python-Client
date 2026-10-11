@@ -7,7 +7,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.intune.user_experience_analytics_work_from_anywhere_device import (
+    from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_work_from_anywhere_device import (  # noqa: E501
         UserExperienceAnalyticsWorkFromAnywhereDevice,
     )
 
@@ -16,7 +16,7 @@ class UserExperienceAnalyticsWorkFromAnywhereMetric(Entity):
     @property
     def metric_devices(self) -> EntityCollection[UserExperienceAnalyticsWorkFromAnywhereDevice]:
         """Gets the metricDevices property"""
-        from office365.intune.user_experience_analytics_work_from_anywhere_device import (
+        from office365.intune.devices.management.userexperienceanalytics.user_experience_analytics_work_from_anywhere_device import (  # noqa: E501
             UserExperienceAnalyticsWorkFromAnywhereDevice,
         )
 
