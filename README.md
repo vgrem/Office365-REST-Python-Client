@@ -432,6 +432,15 @@ items = (
 )
 ```
 
+**Addressing resources.** Entities are addressed by the key you already know, so you rarely need an opaque id: user principal name, site path or URL, file path, list title. `get_by_url`/`get_by_path` on `client.sites` fetch when you call `execute_query()`; keyed/UPN forms and `driveItem.get_by_path` are lazy, so chain `.get()` first.
+
+```python
+user = client.users["ada@contoso.com"].get().execute_query()  # a user, by UPN
+site = client.sites.get_by_url("https://contoso.sharepoint.com/sites/marketing").execute_query()
+file = client.me.drive.root.get_by_path("Reports/Q1.xlsx").get().execute_query()
+items = ctx.web.lists.get_by_title("Tasks").items.get().execute_query()
+```
+
 **Reading large collections.** Use `get_all()` to follow paging automatically, and `page_size` to stay under server limits.
 
 ```python

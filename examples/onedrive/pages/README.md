@@ -8,7 +8,7 @@ up after themselves. Requires `Sites.ReadWrite.All` (`Sites.Read.All` to read).
 ## The page lifecycle
 
 ```python
-site = client.sites.get_by_path("/sites/marketing").get().execute_query()
+site = client.sites.get_by_path("/sites/marketing").execute_query()
 page = site.pages.add("Announcement", "hello world").execute_query()
 page.publish().execute_query()
 page.delete_object().execute_query()

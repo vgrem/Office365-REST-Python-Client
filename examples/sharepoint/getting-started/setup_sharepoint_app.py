@@ -131,7 +131,7 @@ def main() -> int:
     print(f"Ensured '{scope}' with admin consent.")
     if args.scope == "selected":
         for site_url in args.site:
-            site = client.sites.get_by_url(site_url).get().execute_query()
+            site = client.sites.get_by_url(site_url).execute_query()
             site.grant_app_access(app, args.role).execute_query()
             print(f"Granted '{args.role}' to the app on {site_url}.")
 

@@ -64,6 +64,27 @@ See [`auth/`](./auth/) for all supported authentication flows, and
 
 ---
 
+## Addressing resources
+
+You rarely need an opaque id: entities are addressed by the key you already know
+— user principal name, site path or URL, file path, list title.
+
+```python
+client.users["ada@contoso.com"]  # a user, by UPN
+client.users.get_by_principal_name("ada@contoso.com")  # equivalent named helper
+client.sites.get_by_path("/sites/marketing")  # a site, by server-relative path
+client.sites.get_by_url("https://contoso.sharepoint.com/sites/marketing")  # by URL
+client.me.drive.root.get_by_path("Reports/Q1.xlsx")  # a file/folder, by path
+ctx.web.lists.get_by_title("Tasks")  # a SharePoint list, by title
+```
+
+`client.sites.get_by_url`/`get_by_path` and `lists.get_by_title` fetch when you
+call `execute_query()`; keyed/UPN forms and `driveItem.get_by_path` are lazy, so
+chain `.get()` first. Compare the different styles in
+[`onedrive/files/addressing.py`](./onedrive/files/addressing.py).
+
+---
+
 ## Related
 
 - [Microsoft Graph API documentation](https://learn.microsoft.com/en-us/graph/api/overview)

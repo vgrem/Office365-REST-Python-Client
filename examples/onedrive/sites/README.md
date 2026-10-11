@@ -7,18 +7,25 @@ Requires `Sites.Read.All` to read, `Sites.ReadWrite.All` to change.
 
 ## Get a site
 
+Sites are addressed by **URL or server-relative path**, so you can use what you
+already have instead of looking up an id:
+
 ```python
-client.sites.root  # the tenant root site
-client.sites["contoso.sharepoint.com:/sites/marketing"]  # by host + path
-client.sites.get_by_path("/sites/marketing").get().execute_query()
+client.sites.root  # the tenant root site (lazy — chain .get())
+client.sites.get_by_url("https://contoso.sharepoint.com/sites/marketing")  # by URL
+client.sites.get_by_path("/sites/marketing")  # by server-relative path
+client.sites["contoso.sharepoint.com:/sites/marketing"]  # by host + path key
 ```
+
+`get_by_url` and `get_by_path` queue the read for you — just call
+`execute_query()` (no trailing `.get()`).
 
 → [`get_site.py`](./get_site.py) · [`get_site_by_path.py`](./get_site_by_path.py) · [`list_all.py`](./list_all.py) · [`subsites.py`](./subsites.py)
 
 ## Permissions & sharing
 
 ```python
-site = client.sites.get_by_path("/sites/marketing").get().execute_query()
+site = client.sites.get_by_path("/sites/marketing").execute_query()
 site.add_permission(...).execute_query()  # grant access
 site.share("organization").execute_query()  # sharing link
 ```

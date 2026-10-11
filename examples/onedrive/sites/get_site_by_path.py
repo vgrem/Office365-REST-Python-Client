@@ -24,7 +24,7 @@ def main():
     )
 
     path = args.path.strip()
-    site = client.sites.get_by_path(path).get().execute_query()
+    site = client.sites.get_by_path(path).execute_query()
     print(f"Site: {site.display_name}  ({site.web_url})")
 
 

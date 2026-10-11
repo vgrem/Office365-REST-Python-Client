@@ -7,10 +7,14 @@ site drives).
 
 ## Reach a drive
 
+A drive is reached through its owner, so you address people by **user principal
+name** and sites by **server-relative path** or **URL** — no opaque ids needed:
+
 ```python
 client.me.drive  # the signed-in user's OneDrive
-client.users["id"].drive  # another user's drive
-client.sites["id"].drive  # a site's default document library
+client.users["ada@contoso.com"].drive  # another user's drive, by UPN
+client.sites.get_by_path("/sites/marketing").drive  # a site's library, by path
+client.sites.get_by_url("https://contoso.sharepoint.com/sites/marketing").drive  # by URL
 ```
 
 → [`user_drive.py`](./user_drive.py)

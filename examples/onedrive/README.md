@@ -59,25 +59,35 @@ sequenceDiagram
 
 ## Addressing items
 
-Four ways to name a `DriveItem`. Names are **case-preserving but matched
-case-insensitively** (the OneDrive rule); ids are stable, so prefer them.
+The client addresses entities by **natural keys**, not just opaque ids: people
+by user principal name, sites by path or URL, files and folders by path, lists by
+title. Names are **case-preserving but matched case-insensitively** (the OneDrive
+rule); ids are stable, so keep one around when you need a durable reference.
 
 ```python
 drive = client.me.drive
 
 drive.root  # the drive root
-drive.get_by_path("Reports/2024/Q1.xlsx")  # by path from the root
+drive.root.get_by_path("Reports/2024/Q1.xlsx")  # a file/folder by path
 drive.items[item_id]  # by id (stable, shareable)
 drive.special["Documents"]  # a special folder by name
 ```
 
+Reaching *another* owner's drive follows the same idea — no ids required:
+
+```python
+client.users["ada@contoso.com"].drive  # a user's drive, by UPN
+client.sites.get_by_path("/sites/marketing").drive  # a site's library, by path
+client.sites.get_by_url("https://contoso.sharepoint.com/sites/marketing").drive  # by URL
+```
+
 | Want | Reach for | Example |
 |---|---|---|
-| Follow a path | `get_by_path` | [`files/addressing.py`](./files/addressing.py) |
-| Address by id | `items[id]` | [`files/manage.py`](./files/manage.py) |
+| Follow a path | `drive.root.get_by_path` | [`files/addressing.py`](./files/addressing.py) |
+| Address by id | `drive.items[id]` | [`files/manage.py`](./files/manage.py) |
 | A special / app folder | `drive.special` | [`appfolder/app_folder.py`](./appfolder/app_folder.py) |
-| Another user's drive | `client.users[id].drive` | [`drives/user_drive.py`](./drives/user_drive.py) |
-| A site's drive | `client.sites[id].drive` | [`lists/library.py`](./lists/library.py) |
+| Another user's drive | `client.users["upn"].drive` | [`drives/user_drive.py`](./drives/user_drive.py) |
+| A site's drive | `client.sites.get_by_path(...).drive` | [`lists/library.py`](./lists/library.py) |
 
 ---
 
@@ -253,8 +263,9 @@ credential (see the `auth/` examples).
 - **Copy is long-running.** A `copy()` answers `202`; await it (or poll the
   monitor URL). Never fire-and-forget — and never batch it (the monitor URL is
   lost). → [`patterns/lro/lro_in_batch_guard.py`](../patterns/lro/lro_in_batch_guard.py)
-- **Names are case-preserving but matched case-insensitively**; ids are stable —
-  prefer ids for anything durable. → [`files/addressing.py`](./files/addressing.py)
+- **Address by natural key** (UPN, path, URL, title) for readable code; names are
+  case-preserving but matched case-insensitively. Keep an id only when you need a
+  durable reference. → [`files/addressing.py`](./files/addressing.py)
 - **`parentReference` before copy/move**: load the destination
   (`dest.get().execute_query()`) so the payload carries the drive id.
 - **Delta tokens are opaque** — persist and replay the returned link.
