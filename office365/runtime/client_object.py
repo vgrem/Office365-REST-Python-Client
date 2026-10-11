@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -416,9 +417,13 @@ class ClientObject:
             return self
         if persist_changes:
             self._changes.add(name)
-        self._properties[name] = deserialize_value(
-            declared_type(type(self), name), value, self.get_property(name), persist_changes
-        )
+        current = self.get_property(name)
+        # A getter can return a default enum when nothing is stored yet; that
+        # fallback must not drive enum coercion (an unrecognized server value
+        # would otherwise be discarded).
+        if isinstance(current, Enum) and name not in self._properties:
+            current = None
+        self._properties[name] = deserialize_value(declared_type(type(self), name), value, current, persist_changes)
         return self
 
     def ensure_property(self, name: str) -> Self:

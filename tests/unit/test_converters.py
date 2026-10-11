@@ -12,6 +12,7 @@ from typing import cast
 from office365.directory.users.password_profile import PasswordProfile
 from office365.directory.users.profile import UserProfile
 from office365.directory.users.user import User
+from office365.runtime.client_object import ClientObject
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_runtime_context import ClientRuntimeContext
@@ -162,6 +163,19 @@ class TestClientResultCoercion(unittest.TestCase):
         result = ClientResult(cast(ClientRuntimeContext, None), value__Level.Standard)
         result.set_property("__value", "premium")
         self.assertIs(result.value, value__Level.Premium)
+
+    def test_enum_getter_default_does_not_discard_unknown(self):
+        class _Widget(ClientObject):
+            @property
+            def level(self):
+                # A getter default (like a generated enum property whose
+                # annotation is TYPE_CHECKING-only) must not drive enum
+                # coercion for an unrecognized server value.
+                return self.properties.get("level", value__Level.Standard)
+
+        widget = _Widget(cast(ClientRuntimeContext, None))
+        widget.set_property("level", "mystery")
+        self.assertEqual(widget.properties.get("level"), "mystery")
 
     def test_datetime_keep_on_fail(self):
         result = ClientResult(cast(ClientRuntimeContext, None), datetime(2020, 1, 1))
