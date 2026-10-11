@@ -1,16 +1,29 @@
-# Application folder
+# Working with the application folder
 
-A private, app-scoped sandbox inside a user's drive — the least-privilege way for
-an app to store its own files (`Files.ReadWrite.AppFolder`).
+An app that only needs to keep *its own* files shouldn't ask for the user's whole
+drive. OneDrive reserves a private **`approot`** special folder for exactly this:
+with the `Files.ReadWrite.AppFolder` scope the app sees only that folder, and the
+user sees it under *Apps*. Least privilege in practice.
 
-| Scenario | File | Permission |
-|---|---|---|
-| Use the `approot` special folder | [`app_folder.py`](./app_folder.py) | `Files.ReadWrite.AppFolder` |
+## Reach the app folder
 
-Reach the folder through the `special` collection:
+Special folders are named, not pathed — reach them through the `special` collection.
 
 ```python
 app_folder = client.me.drive.special["approot"].get().execute_query()
+print(app_folder.name, app_folder.web_url)
 ```
+
+→ [`app_folder.py`](./app_folder.py)
+
+## Store app state in it
+
+Everything under `approot` is scoped to your app.
+
+```python
+app_folder.upload("state.json", b'{"enabled": true}').execute_query()
+```
+
+> Requires the delegated `Files.ReadWrite.AppFolder` scope (not `Files.ReadWrite`).
 
 https://learn.microsoft.com/en-us/onedrive/developer/rest-api/concepts/special-folders-appfolder

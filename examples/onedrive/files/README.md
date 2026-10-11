@@ -1,86 +1,77 @@
-# OneDrive Files
+# Working with files
 
-Upload, download, share, manage, and track files in OneDrive for Business — the
-most common file operations, shown end-to-end on throwaway files so each example
-is safe to re-run.
+A file is a `DriveItem` with a `file` facet. You upload bytes into it, download
+bytes out of it, and change its *metadata* (name, parent, permissions) without
+touching the content. The scripts here run on throwaway files and clean up, so
+they're safe to re-run. Requires `Files.ReadWrite` (some readers need `Files.Read`).
 
----
+## Upload and download
 
-## Prerequisites
+Upload small files in one call; the round-trip below is the base pattern every
+other operation builds on. Large files use a resumable session — see
+[`../patterns/large-data/upload_large.py`](../../patterns/large-data/upload_large.py).
 
-| Permission | Description | Reference |
-|---|---|---|
-| `Files.Read` | Read files, search, delta, analytics | [Files permissions](https://learn.microsoft.com/en-us/graph/permissions-reference#files-permissions) |
-| `Files.ReadWrite` | Upload, download, manage, share files | [Files permissions](https://learn.microsoft.com/en-us/graph/permissions-reference#files-permissions) |
-| `Files.ReadWrite.All` | Recycle bin access | [Files permissions](https://learn.microsoft.com/en-us/graph/permissions-reference#files-permissions) |
-| `Analytics.Read` | File analytics | [Analytics permissions](https://learn.microsoft.com/en-us/graph/permissions-reference#analytics-permissions) |
-
-Most examples authenticate with username/password (`client_id`, `username`,
-`password` from `tests.settings`); a few use client secret.
-
----
-
-## How the file operations fit together
-
-```mermaid
-graph TD
-    subgraph "Upload & download"
-        U["upload_download /<br/>ensure_file /<br/>upload_large /<br/>download_json"]
-    end
-
-    subgraph "Lifecycle"
-        M["manage<br/>(copy / rename / move /<br/>versions / delete)"]
-        L["lifecycle<br/>(checkout → edit → checkin)"]
-        R["recycle_bin<br/>(restore / purge)"]
-    end
-
-    subgraph "Discover & collaborate"
-        S["search / delta_query / analytics"]
-        SH["sharing<br/>(links / invitations)"]
-    end
-
-    U --> M
-    M --> L
-    M --> R
-    S --> U
-    SH --> M
+```python
+uploaded = client.me.drive.root.upload_file("report.txt").execute_query()
+with open("download.txt", "wb") as f:
+    uploaded.download(f).execute_query()
 ```
 
-**Which example to use:** upload a file the first time (`upload_download.py`),
-provision one idempotently (`ensure_file.py`), large files via resumable
-sessions (`../../patterns/large-data/upload_large.py`), reading structured data back
-(`download_json.py`), then manage it (`manage.py`), publish versions with
-check-out/check-in (`lifecycle.py`), recover deletions (`recycle_bin.py`),
-share it (`sharing.py`), and keep a local cache in sync (`delta_query.py`).
+→ [`upload_download.py`](./upload_download.py) · [`download_json.py`](./download_json.py)
 
-For async applications, [`upload_large_file_async.py`](../../patterns/async/upload_large_file_async.py)
-is the event-loop-friendly twin of `../../patterns/large-data/upload_large.py`.
+## Ensure a file exists (idempotent)
 
----
+Get-or-create without racing the server — handy in provisioning code.
 
-## Examples
+```python
+item = client.me.drive.root.get_by_path("config/settings.json").get().execute_query()
+```
 
-| Operation | File | Permission | API |
-|---|---|---|---|
-| Upload and download a file (round-trip) | [`upload_download.py`](./upload_download.py) | `Files.ReadWrite` | [put content](https://learn.microsoft.com/en-us/graph/api/driveitem-put-content) |
-| Ensure a file exists (idempotent get-or-upload) | [`ensure_file.py`](./ensure_file.py) | `Files.ReadWrite` | [put content](https://learn.microsoft.com/en-us/graph/api/driveitem-put-content) |
-| Download and read a JSON file | [`download_json.py`](./download_json.py) | `Files.ReadWrite` | [get content](https://learn.microsoft.com/en-us/graph/api/driveitem-get-content) |
-| Upload a large file (resumable session) | [`upload_large.py`](../../patterns/large-data/upload_large.py) | `Files.ReadWrite` | [create upload session](https://learn.microsoft.com/en-us/graph/api/driveitem-createuploadsession) |
-| Copy, rename, move, versions, delete | [`manage.py`](./manage.py) | `Files.ReadWrite` | [copy](https://learn.microsoft.com/en-us/graph/api/driveitem-copy) |
-| Copy a large file and wait for the server-side copy | [`copy_and_wait.py`](../../patterns/lro/copy_and_wait.py) | `Files.ReadWrite` | [copy](https://learn.microsoft.com/en-us/graph/api/driveitem-copy) |
-| Check out, edit, check in (versioning) | [`lifecycle.py`](./lifecycle.py) | `Files.ReadWrite` | [checkout](https://learn.microsoft.com/en-us/graph/api/driveitem-checkout) |
-| Recycle bin — restore and purge | [`recycle_bin.py`](./recycle_bin.py) | `Files.ReadWrite.All` | [recycleBin](https://learn.microsoft.com/en-us/graph/api/resources/recyclebin) |
-| Sharing links and invitations | [`sharing.py`](./sharing.py) | `Files.ReadWrite` | [create link](https://learn.microsoft.com/en-us/graph/api/driveitem-createlink) |
-| Search files by keyword | [`search.py`](./search.py) | `Files.Read` | [search](https://learn.microsoft.com/en-us/graph/api/driveitem-search) |
-| Delta query with resume token | [`delta_query.py`](./delta_query.py) | `Files.Read` | [delta](https://learn.microsoft.com/en-us/graph/api/driveitem-delta) |
-| Largest files report | [`largest_files.py`](./largest_files.py) | `Files.Read` | [list children](https://learn.microsoft.com/en-us/graph/api/driveitem-list-children) |
-| Sharing audit — files with links | [`find_shared.py`](./find_shared.py) | `Files.Read.All` | [permission list](https://learn.microsoft.com/en-us/graph/api/permission-list) |
-| File analytics and activity | [`analytics.py`](./analytics.py) | `Files.Read`, `Analytics.Read` | [analytics](https://learn.microsoft.com/en-us/graph/api/driveitem-get-analytics) |
+→ [`ensure_file.py`](./ensure_file.py)
 
----
+## Copy, move, rename, version, delete
 
-## API reference
+Copy is a **long-running** operation (see [patterns/lro](../../patterns/lro/));
+move/rename are a single `parentReference` patch.
 
-- [DriveItem resource](https://learn.microsoft.com/en-us/graph/api/resources/driveitem)
-- [RecycleBin resource](https://learn.microsoft.com/en-us/graph/api/resources/recyclebin)
-- [ItemAnalytics resource](https://learn.microsoft.com/en-us/graph/api/resources/itemanalytics)
+```python
+copied = item.copy(name="report (copy).txt", parent=folder).execute_query().wait_for_item()
+item.move(folder)  # or rename via .set_property("name", ...).update()
+item.delete_object().execute_query()
+```
+
+→ [`manage.py`](./manage.py) · [`lifecycle.py`](./lifecycle.py) (check-out/in) · [`recycle_bin.py`](./recycle_bin.py)
+
+## Share
+
+Create a link, or invite people by email. Manage or delete links later.
+
+```python
+link = item.create_link("view", "organization").execute_query()
+```
+
+→ [`sharing.py`](./sharing.py) · more under [`../../sharepoint/sharing/`](../../sharepoint/sharing/)
+
+## Custom metadata
+
+Tag a file with your own columns through its backing `listItem`.
+
+```python
+fields = item.list_item.fields.get().execute_query()
+fields.set_property("Category", "Finance")
+fields.update().execute_query()
+```
+
+→ [`custom_metadata.py`](./custom_metadata.py)
+
+## Search, discover, sync
+
+Keyword search, largest files, what's shared, and a **delta** feed to keep a
+local cache in sync.
+
+```python
+for item in root.children.select(["id", "name"]).filter("size gt 0").top(50).get().execute_query():
+    ...
+```
+
+→ [`search.py`](./search.py) · [`largest_files.py`](./largest_files.py) · [`find_shared.py`](./find_shared.py) · [`delta_query.py`](./delta_query.py) · [`analytics.py`](./analytics.py)

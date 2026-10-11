@@ -1,33 +1,37 @@
-# Term Store (Managed Metadata)
+# Working with the term store
 
-Work with the term store — the managed metadata service for consistent tagging
-across SharePoint and OneDrive: create taxonomy, export/import it, search, and
-clean up.
+The **term store** is the managed-metadata service: a hierarchy of
+**groups → sets → terms** shared across SharePoint and OneDrive for consistent
+tagging. These examples build taxonomy, search it, export/import it, and clean
+up. Requires `TermStore.ReadWrite.All` (`TermStore.Read.All` to read).
 
----
+## Walk and create taxonomy
 
-## Prerequisites
+```python
+store = client.term_store.get().execute_query()
+group = store.groups.add("Departments").execute_query()
+term_set = store.sets.add("Geography", group.id).execute_query()
+term = store.sets.get_by_id(term_set.id).children.add("EMEA").execute_query()
+```
 
-| Permission | Description | Reference |
-|---|---|---|
-| `Sites.ReadWrite.All` (delegated) | Create/search/delete terms | [Sites permissions](https://learn.microsoft.com/en-us/graph/permissions-reference#sites-permissions) |
-| `TermStore.Read.All` / `TermStore.ReadWrite.All` (app) | Export / import the store | [TermStore permissions](https://learn.microsoft.com/en-us/graph/permissions-reference#term-store-permissions) |
+→ [`create_terms.py`](./create_terms.py) · [`search_term.py`](./search_term.py)
 
----
+## Export / import the hierarchy
 
-## Examples
+Round-trip the whole taxonomy to JSON — a backup, or a promotion between tenants.
 
-| Operation | File | API |
-|---|---|---|
-| Create groups, sets, terms | [`create_terms.py`](./create_terms.py) | [termStore group create](https://learn.microsoft.com/en-us/graph/api/termstore-group-post) |
-| Search the store by term label | [`search_term.py`](./search_term.py) | [store search](https://learn.microsoft.com/en-us/graph/api/termstore-store-search) |
-| Export the full hierarchy to CSV/JSON | [`export_store.py`](./export_store.py) | [group list](https://learn.microsoft.com/en-us/graph/api/termstore-store-list-groups) |
-| Import a hierarchy from JSON | [`import_store.py`](./import_store.py) | [set create](https://learn.microsoft.com/en-us/graph/api/termstore-set-post) |
-| Delete groups (clean up taxonomy) | [`clear_store.py`](./clear_store.py) | [group delete](https://learn.microsoft.com/en-us/graph/api/termstore-group-delete) |
+```python
+tree = store.export()  # serialize groups → sets → terms
+store.import_hierarchy(tree).execute_query()  # recreate it
+```
 
----
+→ [`export_store.py`](./export_store.py) · [`export_tree.py`](./export_tree.py) · [`import_store.py`](./import_store.py)
 
-## API reference
+## Clean up
 
-- [Term store](https://learn.microsoft.com/en-us/graph/api/resources/termstore-store)
-- [Term](https://learn.microsoft.com/en-us/graph/api/resources/termstore-term)
+```python
+for group in store.groups.get().execute_query():
+    group.delete_object().execute_query()
+```
+
+→ [`clear_store.py`](./clear_store.py)

@@ -1,65 +1,42 @@
-# Excel (Workbooks)
+# Working with Excel workbooks
 
-Read, write, and analyze Excel workbooks in OneDrive / SharePoint via the Graph
-workbook API — tables, worksheets, ranges, named items, formulas, and sessions.
-Every example uploads the bundled sample workbook and cleans up afterwards, so
-it is safe to re-run.
+An `.xlsx` in a drive is a **workbook** you can drive server-side — read and write
+tables, ranges and formulas without downloading it. Workbook work is
+session-oriented and, for some operations, asynchronous. Requires
+`Files.ReadWrite`.
 
----
+## Read data
 
-## Prerequisites
-
-| Permission | Description | Reference |
-|---|---|---|
-| `Files.ReadWrite` | All workbook operations (sessions, tables, ranges, formulas) | [Files permissions](https://learn.microsoft.com/en-us/graph/permissions-reference#files-permissions) |
-
-All examples authenticate with username/password (`client_id`, `username`,
-`password` from `tests.settings`) and default to the sample workbook at
-`examples/data/Financial Sample.xlsx`.
-
----
-
-## How the workbook API fits together
-
-```mermaid
-graph TD
-    WB["DriveItem<br/>(.xlsx)"] --> W["Workbook"]
-    W --> S["Sessions<br/>(consistent view)"]
-    W --> WS["Worksheets"]
-    W --> T["Tables"]
-    W --> R["Ranges"]
-    W --> N["Named items"]
-    W --> F["Functions"]
-
-    WS --> T
-    WS --> R
-    R --> N
+```python
+book = client.me.drive.root.get_by_path("report.xlsx").get().execute_query()
+worksheet = book.workbook.worksheets["Sheet1"]
+table = worksheet.tables["Revenue"].get().execute_query()
+rows = table.rows.get().execute_query()
 ```
 
-**Which example to use:** start a session for any multi-step automation
-(`workbook_sessions.py`), read tables and data (`read_table.py`), manage
-tables (`tables.py`), work with worksheets (`worksheets.py`), read/write cell
-ranges and named items (`ranges.py`), or compute with Excel formulas
-(`formulas.py`).
+→ [`read_table.py`](./read_table.py) · [`worksheets.py`](./worksheets.py)
 
----
+## Write data
 
-## Examples
+```python
+worksheet.range("A1:B2").set(...).execute_query()  # or add a table/row
+worksheet.tables.add("Revenue", "A1:C10").execute_query()
+```
 
-| Operation | File | API |
-|---|---|---|
-| Read workbook tables and data | [`read_table.py`](./read_table.py) | [table list](https://learn.microsoft.com/en-us/graph/api/workbook-list-tables) |
-| Workbook sessions (create/refresh/close) | [`workbook_sessions.py`](./workbook_sessions.py) | [create session](https://learn.microsoft.com/en-us/graph/api/workbook-createsession) |
-| Manage tables (add, rows, sort) | [`tables.py`](./tables.py) | [table add](https://learn.microsoft.com/en-us/graph/api/workbook-table-add) |
-| Worksheets (add, protect, delete) | [`worksheets.py`](./worksheets.py) | [worksheet list](https://learn.microsoft.com/en-us/graph/api/worksheet-list) |
-| Ranges and named items | [`ranges.py`](./ranges.py) | [range update](https://learn.microsoft.com/en-us/graph/api/range-update) |
-| Excel functions (ABS, POWER, DAYS) | [`formulas.py`](./formulas.py) | [functions resource](https://learn.microsoft.com/en-us/graph/api/resources/functions) |
+→ [`tables.py`](./tables.py) · [`ranges.py`](./ranges.py) · [`formulas.py`](./formulas.py)
 
----
+## Workbook sessions
 
-## API reference
+Group edits into a session so the file isn't saved after every change (and to
+avoid conflicts). Close the session to persist.
 
-- [Excel resource types](https://learn.microsoft.com/en-us/graph/api/resources/excel)
-- [Workbook resource](https://learn.microsoft.com/en-us/graph/api/resources/workbook)
-- [WorkbookRange](https://learn.microsoft.com/en-us/graph/api/resources/range)
-- [WorkbookTable](https://learn.microsoft.com/en-us/graph/api/resources/table)
+```python
+session = book.workbook.create_session().execute_query()
+# ... many edits ...
+book.workbook.close_session(session.id).execute_query()
+```
+
+→ [`workbook_sessions.py`](./workbook_sessions.py)
+
+> Some workbook actions are long-running — poll them like any other operation
+> ([patterns/lro](../../patterns/lro/)).

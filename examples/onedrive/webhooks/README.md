@@ -1,18 +1,43 @@
-# Webhooks & change notifications
+# Working with change notifications
 
-Push instead of poll: Graph POSTs an HTTPS notification when drive content
-changes. Use this for near-real-time sync; use
-[delta query](../files/delta_query.py) to reconcile after downtime.
+Instead of polling a drive, have Graph **push** an HTTPS notification when
+something changes. Use this for near-real-time sync, and [delta
+query](../files/delta_query.py) to reconcile after downtime. Requires permission
+for the watched resource (e.g. `Files.Read.All`) and a **publicly reachable HTTPS**
+endpoint.
 
-| Scenario | File | Permission |
-|---|---|---|
-| Subscribe a webhook to drive changes, renew, remove | [`subscribe_to_drive.py`](./subscribe_to_drive.py) | `Files.Read.All` |
+## Subscribe
 
-Your endpoint must answer the **validation handshake** (echo `validationToken`)
-synchronously, then respond `202` to real notifications. Pass a `clientState`
-secret and reject notifications whose value doesn't match.
+Name a `clientState` secret — Graph echoes it back, so you can reject spoofed
+calls. Set an expiry: Graph expires subscriptions.
 
-The same pattern works for other resources: [`entraid/governance/change_notifications.py`](../../entraid/governance/change_notifications.py).
+```python
+sub = client.subscriptions.add(
+    changeType="updated",
+    notificationUrl="https://contoso.example/hooks/drive",
+    resource="me/drive/root",
+    expirationDateTime=expiry,
+    clientState="verify-me",
+).execute_query()
+```
+
+→ [`subscribe_to_drive.py`](./subscribe_to_drive.py)
+
+## Renew and remove
+
+```python
+sub.set_property("expirationDateTime", new_expiry)
+sub.update().execute_query()
+sub.delete_object().execute_query()
+```
+
+## On your endpoint
+
+Answer the **validation handshake** synchronously (echo `validationToken`), then
+return `202` to real notifications and verify `clientState`.
+
+> The same pattern works for other resources — see
+> [`../../entraid/governance/change_notifications.py`](../../entraid/governance/change_notifications.py).
 
 https://learn.microsoft.com/en-us/graph/change-notifications-overview
 https://learn.microsoft.com/en-us/onedrive/developer/rest-api/concepts/webhooks
