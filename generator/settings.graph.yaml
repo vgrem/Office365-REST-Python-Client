@@ -452,6 +452,33 @@ type_routing:
   ServiceHealthIssuePost: office365.intune.servicecommunications
   ServiceUpdateMessageViewpoint: office365.intune.servicecommunications
 
+# Win32 LOB apps and macOS configuration/app clusters.
+  Win32LobApp: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppAssignmentSettings: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppAutoUpdateSettings: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppFileSystemRule: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppInstallExperience: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppMsiInformation: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppPowerShellScriptRule: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppProductCodeRule: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppRegistryRule: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppRestartSettings: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppReturnCode: office365.intune.devices.management.mobileapps.win32
+  Win32LobAppRule: office365.intune.devices.management.mobileapps.win32
+  MacOSCompliancePolicy: office365.intune.devices.compliance
+  MacOSCustomConfiguration: office365.intune.devices.configurations.macos
+  MacOSDeviceFeaturesConfiguration: office365.intune.devices.configurations.macos
+  MacOSGeneralDeviceConfiguration: office365.intune.devices.configurations.macos
+  MacOSMinimumOperatingSystem: office365.intune.devices.configurations.macos
+  MacOSDmgApp: office365.intune.devices.management.mobileapps.macos
+  MacOSIncludedApp: office365.intune.devices.management.mobileapps.macos
+  MacOSLobApp: office365.intune.devices.management.mobileapps.macos
+  MacOsLobAppAssignmentSettings: office365.intune.devices.management.mobileapps.macos
+  MacOSLobChildApp: office365.intune.devices.management.mobileapps.macos
+  MacOSMicrosoftDefenderApp: office365.intune.devices.management.mobileapps.macos
+  MacOSMicrosoftEdgeApp: office365.intune.devices.management.mobileapps.macos
+  MacOSOfficeSuiteApp: office365.intune.devices.management.mobileapps.macos
+
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common
 

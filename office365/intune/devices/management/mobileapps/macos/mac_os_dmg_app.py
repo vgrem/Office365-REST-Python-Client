@@ -6,9 +6,11 @@ from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
 if TYPE_CHECKING:
-    from office365.intune.mac_os_included_app import MacOSIncludedApp
-    from office365.intune.mac_os_minimum_operating_system import (
+    from office365.intune.devices.configurations.macos.mac_os_minimum_operating_system import (
         MacOSMinimumOperatingSystem,
+    )
+    from office365.intune.devices.management.mobileapps.macos.mac_os_included_app import (
+        MacOSIncludedApp,
     )
 
 
@@ -21,18 +23,16 @@ class MacOSDmgApp(Entity):
     @property
     def included_apps(self) -> ClientValueCollection[MacOSIncludedApp]:
         """Gets the includedApps property"""
-        from office365.intune.mac_os_included_app import MacOSIncludedApp
+        from office365.intune.devices.management.mobileapps.macos.mac_os_included_app import (
+            MacOSIncludedApp,
+        )
 
         return self.properties.get("includedApps", ClientValueCollection[MacOSIncludedApp](MacOSIncludedApp))
 
     @property
-    def minimum_supported_operating_system(self) -> MacOSMinimumOperatingSystem:
+    def minimum_supported_operating_system(self) -> Optional[MacOSMinimumOperatingSystem]:
         """Gets the minimumSupportedOperatingSystem property"""
-        from office365.intune.mac_os_minimum_operating_system import (
-            MacOSMinimumOperatingSystem,
-        )
-
-        return self.properties.get("minimumSupportedOperatingSystem", MacOSMinimumOperatingSystem())
+        return self.properties.get("minimumSupportedOperatingSystem", None)
 
     @property
     def primary_bundle_id(self) -> Optional[str]:

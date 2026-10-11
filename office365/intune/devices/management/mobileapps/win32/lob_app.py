@@ -6,15 +6,21 @@ from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
 if TYPE_CHECKING:
+    from office365.intune.devices.management.mobileapps.win32.lob_app_install_experience import (
+        Win32LobAppInstallExperience,
+    )
+    from office365.intune.devices.management.mobileapps.win32.lob_app_msi_information import (
+        Win32LobAppMsiInformation,
+    )
+    from office365.intune.devices.management.mobileapps.win32.lob_app_return_code import (
+        Win32LobAppReturnCode,
+    )
+    from office365.intune.devices.management.mobileapps.win32.lob_app_rule import (
+        Win32LobAppRule,
+    )
     from office365.intune.devices.management.mobileapps.windows.architecture import (
         WindowsArchitecture,
     )
-    from office365.intune.win32_lob_app_install_experience import (
-        Win32LobAppInstallExperience,
-    )
-    from office365.intune.win32_lob_app_msi_information import Win32LobAppMsiInformation
-    from office365.intune.win32_lob_app_return_code import Win32LobAppReturnCode
-    from office365.intune.win32_lob_app_rule import Win32LobAppRule
 
 
 class Win32LobApp(Entity):
@@ -42,13 +48,9 @@ class Win32LobApp(Entity):
         return self.properties.get("installCommandLine", None)
 
     @property
-    def install_experience(self) -> Win32LobAppInstallExperience:
+    def install_experience(self) -> Optional[Win32LobAppInstallExperience]:
         """Gets the installExperience property"""
-        from office365.intune.win32_lob_app_install_experience import (
-            Win32LobAppInstallExperience,
-        )
-
-        return self.properties.get("installExperience", Win32LobAppInstallExperience())
+        return self.properties.get("installExperience", None)
 
     @property
     def minimum_cpu_speed_in_mhz(self) -> Optional[int]:
@@ -76,25 +78,25 @@ class Win32LobApp(Entity):
         return self.properties.get("minimumSupportedWindowsRelease", None)
 
     @property
-    def msi_information(self) -> Win32LobAppMsiInformation:
+    def msi_information(self) -> Optional[Win32LobAppMsiInformation]:
         """Gets the msiInformation property"""
-        from office365.intune.win32_lob_app_msi_information import (
-            Win32LobAppMsiInformation,
-        )
-
-        return self.properties.get("msiInformation", Win32LobAppMsiInformation())
+        return self.properties.get("msiInformation", None)
 
     @property
     def return_codes(self) -> ClientValueCollection[Win32LobAppReturnCode]:
         """Gets the returnCodes property"""
-        from office365.intune.win32_lob_app_return_code import Win32LobAppReturnCode
+        from office365.intune.devices.management.mobileapps.win32.lob_app_return_code import (
+            Win32LobAppReturnCode,
+        )
 
         return self.properties.get("returnCodes", ClientValueCollection[Win32LobAppReturnCode](Win32LobAppReturnCode))
 
     @property
     def rules(self) -> ClientValueCollection[Win32LobAppRule]:
         """Gets the rules property"""
-        from office365.intune.win32_lob_app_rule import Win32LobAppRule
+        from office365.intune.devices.management.mobileapps.win32.lob_app_rule import (
+            Win32LobAppRule,
+        )
 
         return self.properties.get("rules", ClientValueCollection[Win32LobAppRule](Win32LobAppRule))
 

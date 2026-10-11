@@ -7,9 +7,11 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
 
 if TYPE_CHECKING:
-    from office365.intune.mac_os_lob_child_app import MacOSLobChildApp
-    from office365.intune.mac_os_minimum_operating_system import (
+    from office365.intune.devices.configurations.macos.mac_os_minimum_operating_system import (
         MacOSMinimumOperatingSystem,
+    )
+    from office365.intune.devices.management.mobileapps.macos.mac_os_lob_child_app import (
+        MacOSLobChildApp,
     )
 
 
@@ -27,7 +29,9 @@ class MacOSLobApp(Entity):
     @property
     def child_apps(self) -> ClientValueCollection[MacOSLobChildApp]:
         """Gets the childApps property"""
-        from office365.intune.mac_os_lob_child_app import MacOSLobChildApp
+        from office365.intune.devices.management.mobileapps.macos.mac_os_lob_child_app import (
+            MacOSLobChildApp,
+        )
 
         return self.properties.get("childApps", ClientValueCollection[MacOSLobChildApp](MacOSLobChildApp))
 
@@ -52,13 +56,9 @@ class MacOSLobApp(Entity):
         return self.properties.get("md5HashChunkSize", None)
 
     @property
-    def minimum_supported_operating_system(self) -> MacOSMinimumOperatingSystem:
+    def minimum_supported_operating_system(self) -> Optional[MacOSMinimumOperatingSystem]:
         """Gets the minimumSupportedOperatingSystem property"""
-        from office365.intune.mac_os_minimum_operating_system import (
-            MacOSMinimumOperatingSystem,
-        )
-
-        return self.properties.get("minimumSupportedOperatingSystem", MacOSMinimumOperatingSystem())
+        return self.properties.get("minimumSupportedOperatingSystem", None)
 
     @property
     def version_number(self) -> Optional[str]:
