@@ -19,8 +19,10 @@ from __future__ import annotations
 import argparse
 import csv
 import re
+import tempfile
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from urllib.parse import urlparse
 
 from office365.sharepoint.client_context import ClientContext
@@ -62,7 +64,9 @@ def site_from_url(url: str) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export a SharePoint content inventory from a search query")
     parser.add_argument("--query", default="IsDocument:1", help="KQL query")
-    parser.add_argument("--output", default="content_inventory.csv", help="output CSV path")
+    parser.add_argument(
+        "--output", default=str(Path(tempfile.gettempdir()) / "content_inventory.csv"), help="output CSV path"
+    )
     parser.add_argument("--limit", type=int, default=1000, help="maximum documents to collect")
     parser.add_argument("--page-size", type=int, default=100, help="results per search page")
     parser.add_argument("--stale-days", type=int, default=365, help="flag documents older than this many days")

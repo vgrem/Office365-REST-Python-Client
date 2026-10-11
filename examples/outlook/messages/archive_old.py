@@ -1,36 +1,53 @@
 """
-Archive old messages — move messages older than X days to an archive folder.
+Archive old messages — move messages older than N days into an "Archive" folder.
 
-Typical retention workflow: find messages in inbox older than a
-cutoff date and move them to an "Archive" folder.
+A typical retention workflow: find inbox messages past a cutoff and move them to
+a dedicated folder (created on first run). Dry-run by default.
 
 Requires delegated permission ``Mail.ReadWrite``.
 
 https://learn.microsoft.com/en-us/graph/api/message-move
 """
 
+from __future__ import annotations
+
+import argparse
 from datetime import datetime, timedelta, timezone
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, password, tenant, username
 
-client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
-cutoff_days = int(input("Archive messages older than (days): ") or "30")
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Archive messages older than N days")
+    parser.add_argument("--days", type=int, default=365, help="age threshold in days (default: 365)")
+    parser.add_argument("--folder", default="inbox", help="source folder (default: inbox)")
+    parser.add_argument("--apply", action="store_true", help="actually move the messages")
+    args = parser.parse_args()
 
-# Ensure archive folder exists
-inbox = client.me.mail_folders["inbox"]
-archive = next((f for f in inbox.child_folders.get().execute_query() if f.display_name == "Archive"), None)
-if archive is None:
-    archive = inbox.child_folders.add("Archive").execute_query()
-    print("Created 'Archive' folder")
+    client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
+    folder = client.me.mail_folders[args.folder]
 
-cutoff = datetime.now(timezone.utc) - timedelta(days=cutoff_days)
-messages = inbox.messages.filter(f"receivedDateTime lt '{cutoff.isoformat()}Z'").get().execute_query()
+    cutoff = datetime.now(timezone.utc) - timedelta(days=args.days)
+    cutoff_literal = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
+    messages = folder.messages.filter(f"receivedDateTime lt {cutoff_literal}").get().execute_query()
+    print(f"Found {len(messages)} message(s) older than {args.days} days")
 
-count = 0
-for m in messages:
-    m.move(archive.id).execute_query()
-    count += 1
+    if not args.apply:
+        for message in list(messages)[:5]:
+            print(f"  would archive: {message.subject}")
+        print("Dry run — re-run with --apply to archive.")
+        return
 
-print(f"Moved {count} messages to Archive")
+    archive = next((f for f in folder.child_folders.get().execute_query() if f.display_name == "Archive"), None)
+    if archive is None:
+        archive = folder.child_folders.add("Archive").execute_query()
+        print("Created 'Archive' folder")
+
+    for message in messages:
+        message.move(archive.id).execute_query()
+    print(f"Moved {len(messages)} message(s) to Archive")
+
+
+if __name__ == "__main__":
+    main()

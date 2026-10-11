@@ -5,6 +5,8 @@ https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/list-i
 """
 
 import argparse
+import tempfile
+from pathlib import Path
 
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import client_id, password, site_url, tenant, username
@@ -13,7 +15,7 @@ from tests.settings import client_id, password, site_url, tenant, username
 def main():
     parser = argparse.ArgumentParser(description="Export list items to CSV")
     parser.add_argument("--list-title", default="Documents", help="list title")
-    parser.add_argument("--output", default="list_items.csv", help="output CSV file")
+    parser.add_argument("--output", default=str(Path(tempfile.gettempdir()) / "list_items.csv"), help="output CSV file")
     args = parser.parse_args()
 
     ctx = ClientContext(site_url).with_username_and_password(

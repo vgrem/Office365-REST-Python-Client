@@ -22,7 +22,8 @@ class DuplicatedObjectException(ClientRequestException):
     """Raised when creating an object that already exists (HTTP 400 + ConflictingObjects)."""
 
     MATCH_PRIORITY = 10
-    _CODES = frozenset({"nameAlreadyExists", "ErrorFolderExists", "-2130575342"})
+    # Lower-case: ``matches`` compares against ``payload.code.lower()``.
+    _CODES = frozenset({"namealreadyexists", "errorfolderexists", "-2130575342"})
 
     @classmethod
     def matches(cls, payload: ErrorPayload) -> bool:

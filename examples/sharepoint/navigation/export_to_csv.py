@@ -12,6 +12,8 @@ https://learn.microsoft.com/en-us/sharepoint/dev/apis/navigation-api-reference
 
 import argparse
 import csv
+import tempfile
+from pathlib import Path
 
 from office365.runtime.progress import progress_bar
 from office365.sharepoint.client_context import ClientContext
@@ -30,7 +32,7 @@ def export_bar(collection: NavigationNodeCollection, writer, no_progress: bool) 
 def main():
     parser = argparse.ArgumentParser(description="Export SharePoint navigation to CSV")
     parser.add_argument("--site-url", default=site_url, help="site URL")
-    parser.add_argument("--output", default="nav_export.csv", help="output CSV file")
+    parser.add_argument("--output", default=str(Path(tempfile.gettempdir()) / "nav_export.csv"), help="output CSV file")
     parser.add_argument("--no-progress", action="store_true", help="do not show tqdm progress bars")
     args = parser.parse_args()
 

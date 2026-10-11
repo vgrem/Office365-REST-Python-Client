@@ -14,6 +14,8 @@ https://learn.microsoft.com/en-us/sharepoint/dev/apis/navigation-api-reference
 
 import argparse
 import json
+import tempfile
+from pathlib import Path
 
 from office365.runtime.progress import progress_bar
 from office365.sharepoint.client_context import ClientContext
@@ -23,7 +25,9 @@ from tests.settings import cert_path, cert_thumbprint, client_id, site_url, tena
 def main():
     parser = argparse.ArgumentParser(description="Export the top navigation bar to JSON")
     parser.add_argument("--site-url", default=site_url, help="site URL")
-    parser.add_argument("--output", default="top_navigation.json", help="output JSON file")
+    parser.add_argument(
+        "--output", default=str(Path(tempfile.gettempdir()) / "top_navigation.json"), help="output JSON file"
+    )
     parser.add_argument("--no-progress", action="store_true", help="do not show a tqdm progress bar")
     args = parser.parse_args()
 

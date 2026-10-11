@@ -31,19 +31,17 @@ class ClientValue:
         setattr(self, k, deserialize_value(declared_type(type(self), k), v, getattr(self, k, None), persist_changes))
         return self
 
-    def get_property(self, name: str) -> Any:
-        """Gets a property value.
+    def get_property(self, name: str, default_value: Any = None) -> Any:
+        """Gets a property value, or ``default_value`` when the property is unset.
+
+        Mirrors :meth:`ClientObject.get_property` so the same call works on a
+        ClientValue (e.g. ``draft.body.get_property("content", "")``).
 
         Args:
             name: Name of the property to retrieve
-
-        Returns:
-            The property value
-
-        Raises:
-            AttributeError: If property doesn't exist
+            default_value: Value to return when the property is missing
         """
-        return getattr(self, name)
+        return getattr(self, name, default_value)
 
     def __iter__(self) -> Iterator[Tuple[str, Any]]:
         for n, v in vars(self).items():

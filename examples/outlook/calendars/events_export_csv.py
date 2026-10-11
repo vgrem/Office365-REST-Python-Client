@@ -1,43 +1,64 @@
 """
 Export calendar events to CSV — subject, organizer, attendees, time, recurrence.
 
-Useful for auditing, reporting, or migrating calendar data.
+Useful for auditing, reporting, or migrating calendar data. Reads the signed-in
+user's calendar, so it needs **delegated** auth (``/me`` is invalid for app-only).
 
 Requires delegated permission ``Calendars.Read``.
 
 https://learn.microsoft.com/en-us/graph/api/user-list-events
 """
 
+from __future__ import annotations
+
+import argparse
 import csv
-from datetime import datetime, timedelta
+import tempfile
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from office365.graph_client import GraphClient
-from tests.settings import client_id, client_secret, tenant
+from tests.settings import client_id, password, tenant, username
 
-client = (
-    GraphClient(tenant=tenant)
-    .with_client_secret(client_id, client_secret)
-    .require_application_permission("Calendars.Read")
-)
 
-end = datetime.utcnow()
-start = end - timedelta(days=90)
-
-events = (
-    client.me.calendar.events.filter(
-        f"start/dateTime ge '{start.isoformat()}Z' and end/dateTime le '{end.isoformat()}Z'"
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Export calendar events to CSV")
+    parser.add_argument("--days", type=int, default=90, help="look back this many days (default: 90)")
+    parser.add_argument(
+        "--output", default=str(Path(tempfile.gettempdir()) / "calendar_export.csv"), help="CSV output path"
     )
-    .get()
-    .execute_query()
-)
+    args = parser.parse_args()
 
-with open("calendar_export.csv", "w", newline="") as f:
-    w = csv.writer(f)
-    w.writerow(["Subject", "Organizer", "Start", "End", "Attendees", "Recurrence"])
-    for e in events:
-        organizer = e.organizer.emailAddress.name if e.organizer else ""
-        attendees = "; ".join(a.emailAddress.name for a in e.attendees) if e.attendees else ""
-        recurrence = str(e.recurrence.pattern.type if e.recurrence else "")
-        w.writerow([e.subject, organizer, e.start, e.end, attendees, recurrence])
+    client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
-print(f"Exported {len(events)} events to calendar_export.csv")
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(days=args.days)
+    start_literal = start.strftime("%Y-%m-%dT%H:%M:%SZ")
+    end_literal = end.strftime("%Y-%m-%dT%H:%M:%SZ")
+    events = (
+        client.me.calendar.events.filter(f"start/dateTime ge '{start_literal}' and end/dateTime le '{end_literal}'")
+        .get()
+        .execute_query()
+    )
+
+    with open(args.output, "w", newline="", encoding="utf-8") as stream:
+        writer = csv.writer(stream)
+        writer.writerow(["subject", "organizer", "start", "end", "attendees", "recurrence"])
+        for event in events:
+            attendees = "; ".join(a.emailAddress.address or "" for a in (event.attendees or []))
+            writer.writerow(
+                [
+                    event.subject or "",
+                    event.organizer.emailAddress.address if event.organizer else "",
+                    event.start,
+                    event.end,
+                    attendees,
+                    event.recurrence.pattern.type if event.recurrence and event.recurrence.pattern else "",
+                ]
+            )
+
+    print(f"Exported {len(events)} event(s) to {args.output}")
+
+
+if __name__ == "__main__":
+    main()

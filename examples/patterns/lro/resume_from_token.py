@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
+import tempfile
 from pathlib import Path
 
 from office365.graph_client import GraphClient
@@ -45,7 +46,11 @@ def remove_token(token_path: Path) -> None:
 
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Resume a long-running operation from a token")
-    parser.add_argument("--token-file", default="lro_continuation.json", help="where to persist the token")
+    parser.add_argument(
+        "--token-file",
+        default=str(Path(tempfile.gettempdir()) / "lro_continuation.json"),
+        help="where to persist the token",
+    )
     parser.add_argument("--keep", action="store_true", help="keep the sample files")
     args = parser.parse_args()
     token_path = Path(args.token_file)

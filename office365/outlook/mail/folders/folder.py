@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from office365.outlook.mail.folders.collection import MailFolderCollection
 
 from office365.directory.extensions.extended_property import (
     MultiValueLegacyExtendedProperty,
@@ -113,10 +116,12 @@ class MailFolder(Entity):
 
     @odata(name="childFolders")
     @property
-    def child_folders(self) -> EntityCollection[MailFolder]:
+    def child_folders(self) -> MailFolderCollection:
         """The collection of child folders in the mailFolder."""
+        from office365.outlook.mail.folders.collection import MailFolderCollection
+
         return self.properties.get(
-            "childFolders", EntityCollection(self.context, MailFolder, ResourcePath("childFolders", self.resource_path))
+            "childFolders", MailFolderCollection(self.context, ResourcePath("childFolders", self.resource_path))
         )
 
     @odata(name="messageRules")

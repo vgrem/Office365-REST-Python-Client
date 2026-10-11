@@ -5,6 +5,8 @@ https://learn.microsoft.com/en-us/sharepoint/dev/apis/people-rest-api
 
 import argparse
 import csv
+import tempfile
+from pathlib import Path
 
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import cert_path, cert_thumbprint, client_id, site_url, tenant
@@ -15,7 +17,11 @@ PROFILE_KEYS = ["PreferredName", "Department", "JobTitle", "Office", "Manager", 
 
 def main():
     parser = argparse.ArgumentParser(description="Export user profile properties to CSV")
-    parser.add_argument("--output", default="profile_export.csv", help="output CSV path (default: profile_export.csv)")
+    parser.add_argument(
+        "--output",
+        default=str(Path(tempfile.gettempdir()) / "profile_export.csv"),
+        help="output CSV path (default: profile_export.csv)",
+    )
     parser.add_argument("--limit", type=int, default=0, help="max users to export, 0 = all (default: 0)")
     args = parser.parse_args()
 

@@ -24,6 +24,8 @@ import argparse
 import asyncio
 import os
 import re
+import tempfile
+from pathlib import Path
 
 from office365.graph_client import GraphClient
 from office365.outlook.mail.messages.message import Message
@@ -85,7 +87,7 @@ async def export_message(
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Export messages and attachments asynchronously")
     parser.add_argument("--folder", default="inbox", help="mail folder name or id")
-    parser.add_argument("--output", default="mail-export", help="output directory")
+    parser.add_argument("--output", default=str(Path(tempfile.gettempdir()) / "mail-export"), help="output directory")
     parser.add_argument("--limit", type=int, default=0, help="max messages to export (0 = all)")
     parser.add_argument("--page-size", type=int, default=25, help="messages per page (default: 25)")
     parser.add_argument("--concurrency", type=int, default=4, help="concurrent downloads (default: 4)")

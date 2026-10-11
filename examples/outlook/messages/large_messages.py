@@ -1,33 +1,54 @@
 """
-Find large messages — messages over a specified size threshold.
+Find messages with large attachments — over a size threshold.
 
-Useful for mailbox cleanup and storage management. Sorted by size
-(descending) so the biggest offenders appear first.
+Exchange's ``message`` has no ``size`` property; size lives on the **attachments**.
+This expands them, sums the bytes and reports the biggest storage consumers in a
+folder, largest first.
 
 Requires delegated permission ``Mail.Read``.
 
-https://learn.microsoft.com/en-us/graph/api/user-list-messages
+https://learn.microsoft.com/en-us/graph/api/message-list-attachments
 """
+
+from __future__ import annotations
+
+import argparse
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, password, tenant, username
 
-client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
-min_mb = int(input("Minimum size in MB (e.g. 5): ") or "5")
-min_bytes = min_mb * 1024 * 1024
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Find messages whose attachments exceed a size")
+    parser.add_argument("--min-mb", type=float, default=1.0, help="threshold in MB (default: 1)")
+    parser.add_argument("--folder", default="inbox", help="mail folder name or id (default: inbox)")
+    parser.add_argument("--scan", type=int, default=200, help="how many recent messages to scan (default: 200)")
+    args = parser.parse_args()
 
-messages = (
-    client.me.mail_folders["inbox"]
-    .messages.filter(f"size ge {min_bytes}")
-    .select(["subject", "from", "size", "receivedDateTime"])
-    .order_by("size desc")
-    .get()
-    .execute_query()
-)
+    min_bytes = int(args.min_mb * 1024 * 1024)
+    client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
+    messages = (
+        client.me.mail_folders[args.folder]
+        .messages.filter("hasAttachments eq true")
+        .expand(["attachments"])
+        .select(["subject", "from", "receivedDateTime"])
+        .top(args.scan)
+        .get()
+        .execute_query()
+    )
 
-print(f"\nMessages over {min_mb} MB in inbox ({len(messages)}):\n")
-for m in messages:
-    sender = m.from_recipient.emailAddress.address if m.from_recipient else ""
-    size_mb = (m.size or 0) / (1024 * 1024)
-    print(f"  {size_mb:6.1f} MB  {m.subject:40s}  {sender:30s}  {m.receivedDateTime}")
+    rows = []
+    for message in messages:
+        total = sum(attachment.size or 0 for attachment in message.attachments)
+        if total >= min_bytes:
+            rows.append((total, message))
+    rows.sort(key=lambda row: row[0], reverse=True)
+
+    print(f"Messages with attachments over {args.min_mb:g} MB ({len(rows)}):\n")
+    for total, message in rows:
+        sender = message.from_recipient.emailAddress.address if message.from_recipient else ""
+        print(f"  {total / (1024 * 1024):6.1f} MB  {message.subject or '':40s}  {sender}")
+
+
+if __name__ == "__main__":
+    main()

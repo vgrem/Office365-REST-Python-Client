@@ -42,6 +42,11 @@ class Message(OutlookItem):
         return self
 
     @require_permission(delegated=["Mail.ReadWrite"], application=["Mail.ReadWrite"])
+    def _sibling_path(self) -> ResourcePath:
+        """Path of a message in the same collection as this one (for create/move/copy results)."""
+        parent = self.resource_path.parent if self.resource_path is not None else None
+        return ResourcePath(None, parent)
+
     def create_forward(
         self,
         to_recipients: Optional[List[Recipient]] = None,
@@ -55,7 +60,9 @@ class Message(OutlookItem):
             message (Message):
             comment (str):
         """
-        return_type = Message(self.context)
+        # The new draft lives in the same ``messages`` collection as this one;
+        # without the parent path its URL would be built from the root.
+        return_type = Message(self.context, self._sibling_path())
         payload = {
             "ToRecipients": ClientValueCollection(Recipient, to_recipients),
             "Message": message,
@@ -63,7 +70,7 @@ class Message(OutlookItem):
         }
         qry = ServiceOperationQuery(self, "createForward", None, payload, None, return_type)
         self.context.add_query(qry)
-        return self
+        return return_type
 
     def download(self, file_object: IO) -> Self:
         """Download MIME content of a message into a file"""
@@ -171,25 +178,26 @@ class Message(OutlookItem):
         Args:
             comment (str):
         """
-        return_type = Message(self.context)
+        return_type = Message(self.context, self._sibling_path())
         payload = {"comment": comment}
         qry = ServiceOperationQuery(self, "createReply", None, payload, None, return_type)
         self.context.add_query(qry)
-        return self
+        return return_type
 
     @require_permission(delegated=["Mail.ReadWrite"], application=["Mail.ReadWrite"])
-    def create_reply_all(self) -> Self:
+    def create_reply_all(self) -> "Message":
         """
         Create a draft to reply to the sender and all the recipients of the specified message.
         You can then update the draft to add reply content to the body or change other message properties, or,
         simply send the draft.
         """
-        qry = ServiceOperationQuery(self, "createReplyAll")
+        return_type = Message(self.context, self._sibling_path())
+        qry = ServiceOperationQuery(self, "createReplyAll", None, None, None, return_type)
         self.context.add_query(qry)
-        return self
+        return return_type
 
     @require_permission(delegated=["Mail.ReadWrite"], application=["Mail.ReadWrite"])
-    def copy(self, destination: Union[str, MailFolder]) -> Self:
+    def copy(self, destination: Union[str, MailFolder]) -> "Message":
         """Copy a message to another folder within the specified user's mailbox.
         This creates a new copy of the message in the destination folder.
 
@@ -199,20 +207,22 @@ class Message(OutlookItem):
         """
         from office365.outlook.mail.folders.folder import MailFolder
 
+        return_type = Message(self.context, self._sibling_path())
+
         def _copy(destination_id: str | None) -> None:
             assert destination_id is not None
             payload = {"DestinationId": destination_id}
-            qry = ServiceOperationQuery(self, "copy", None, payload, None, None)
+            qry = ServiceOperationQuery(self, "copy", None, payload, None, return_type)
             self.context.add_query(qry)
 
         if isinstance(destination, MailFolder):
             destination.ensure_property("id").after_execute(lambda _: _copy(destination.id))
         else:
             _copy(destination)
-        return self
+        return return_type
 
     @require_permission(delegated=["Mail.ReadWrite"], application=["Mail.ReadWrite"])
-    def move(self, destination: Union[str, MailFolder]) -> Self:
+    def move(self, destination: Union[str, MailFolder]) -> "Message":
         """Move a message to another folder within the specified user's mailbox.
         This creates a new copy of the message in the destination folder and removes the original message.
 
@@ -222,17 +232,19 @@ class Message(OutlookItem):
         """
         from office365.outlook.mail.folders.folder import MailFolder
 
+        return_type = Message(self.context, self._sibling_path())
+
         def _move(destination_id: str | None) -> None:
             assert destination_id is not None
             payload = {"DestinationId": destination_id}
-            qry = ServiceOperationQuery(self, "move", None, payload, None, None)
+            qry = ServiceOperationQuery(self, "move", None, payload, None, return_type)
             self.context.add_query(qry)
 
         if isinstance(destination, MailFolder):
             destination.ensure_property("id").after_execute(lambda _: _move(destination.id))
         else:
             _move(destination)
-        return self
+        return return_type
 
     @require_permission(delegated=["Mail.Send"], application=["Mail.Send"])
     def forward(self, to_recipients: List[str], comment: str = "") -> Self:

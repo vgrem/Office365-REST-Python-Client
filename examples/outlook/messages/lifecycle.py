@@ -18,9 +18,11 @@ https://learn.microsoft.com/en-us/graph/api/message-copy
 """
 
 import sys
+import time
 
 from office365.graph_client import GraphClient
-from tests.settings import client_id, password, tenant, username
+from office365.runtime.client_request_exception import ClientRequestException
+from tests.settings import client_id, password, tenant, user_principal, username
 
 
 def get_latest_inbox_message(client: GraphClient):
@@ -51,13 +53,13 @@ def main():
     print("✓ Reply sent (with appended signature).")
 
     # -- Step 3: forward --
-    forward_to = "meganb@contoso.onmicrosoft.com"
+    forward_to = user_principal
     message.forward(to_recipients=[forward_to], comment="FYI — see below.").execute_query()
     print(f"✓ Forwarded to {forward_to}.")
 
     # -- Step 4: move to a subfolder --
     # Ensure a subfolder exists
-    inbox = client.me.mail_folders["inbox"]
+    inbox = client.me.mail_folders["inbox"].get().execute_query()
     child_folders = inbox.child_folders.get().execute_query()
     archive_folder = next((f for f in child_folders if f.display_name == "Archive"), None)
 
@@ -69,9 +71,16 @@ def main():
     print(f"✓ Moved to '{archive_folder.display_name}' (new id: {moved.id})")
 
     # -- Step 5: copy back to inbox --
-    inbox = client.me.mail_folders["inbox"]
-    # Refresh the message reference from its new location
-    client.me.messages[moved.id].copy(inbox.id).execute_query()
+    # A move is eventually consistent, so the new id may 404 for a moment.
+    inbox = client.me.mail_folders["inbox"].get().execute_query()
+    copy_source = client.me.messages[moved.id]
+    for _ in range(5):
+        try:
+            copy_source.get().execute_query()
+            break
+        except ClientRequestException:
+            time.sleep(2)
+    copy_source.copy(inbox.id).execute_query()
     print("✓ Copied back to Inbox.")
 
 

@@ -21,7 +21,9 @@ import argparse
 import asyncio
 import contextlib
 import sys
+import tempfile
 import time
+from pathlib import Path
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
@@ -40,7 +42,7 @@ async def heartbeat(stop: asyncio.Event) -> None:
 
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Stream a Graph collection to CSV asynchronously")
-    parser.add_argument("--output", default="users.csv", help="output CSV path")
+    parser.add_argument("--output", default=str(Path(tempfile.gettempdir()) / "users.csv"), help="output CSV path")
     parser.add_argument("--page-size", type=int, default=500, help="rows fetched per request")
     args = parser.parse_args()
 

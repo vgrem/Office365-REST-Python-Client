@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
+import tempfile
 from pathlib import Path
 
 from office365.graph_client import GraphClient
@@ -35,7 +36,9 @@ def save_token(token_path: Path, token: str) -> None:
 
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Incremental OneDrive sync with delta tokens")
-    parser.add_argument("--token-file", default="delta_token.txt", help="where the cursor is kept")
+    parser.add_argument(
+        "--token-file", default=str(Path(tempfile.gettempdir()) / "delta_token.txt"), help="where the cursor is kept"
+    )
     args = parser.parse_args()
     token_path = Path(args.token_file)
     saved = load_token(token_path)

@@ -11,17 +11,21 @@ https://learn.microsoft.com/en-us/graph/api/user-list-messages
 """
 
 import argparse
+import tempfile
+from pathlib import Path
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, password, tenant, username
 
-COLUMNS = ["subject", "from", "toRecipients", "sentDateTime", "receivedDateTime", "hasAttachments", "size"]
+COLUMNS = ["subject", "from", "toRecipients", "sentDateTime", "receivedDateTime", "hasAttachments"]
 
 
 def main():
     parser = argparse.ArgumentParser(description="Export messages to JSON via the data pipeline")
     parser.add_argument("--folder", default="inbox", help="folder path or id")
-    parser.add_argument("--output", default="mail_export.json", help="output JSON file")
+    parser.add_argument(
+        "--output", default=str(Path(tempfile.gettempdir()) / "mail_export.json"), help="output JSON file"
+    )
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)

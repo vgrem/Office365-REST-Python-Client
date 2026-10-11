@@ -11,6 +11,8 @@ https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/tenant/administra
 """
 
 import argparse
+import tempfile
+from pathlib import Path
 from urllib.parse import urlparse
 
 from office365.runtime.converters.csv_writer import write_records
@@ -29,7 +31,9 @@ def is_onedrive_url(url: str) -> bool:
 
 def main():
     parser = argparse.ArgumentParser(description="Export OneDrive site collection admins to CSV")
-    parser.add_argument("--output", default="onedrive_admins.csv", help="output CSV file")
+    parser.add_argument(
+        "--output", default=str(Path(tempfile.gettempdir()) / "onedrive_admins.csv"), help="output CSV file"
+    )
     args = parser.parse_args()
 
     ctx = ClientContext(admin_site_url).with_username_and_password(

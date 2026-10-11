@@ -18,7 +18,9 @@ import argparse
 import asyncio
 import contextlib
 import sys
+import tempfile
 import time
+from pathlib import Path
 
 from office365.graph_client import GraphClient
 from office365.runtime.operations import Progress
@@ -42,7 +44,7 @@ async def main() -> None:
     parser = argparse.ArgumentParser(description="Stream a Graph usage report to CSV asynchronously")
     parser.add_argument("--report", default="getTeamsUserActivityUserDetail", help="Graph report function name")
     parser.add_argument("--period", default="D30", help="D7/D30/D90/D180 (UserDetail reports)")
-    parser.add_argument("--output", default="report.csv", help="output CSV path")
+    parser.add_argument("--output", default=str(Path(tempfile.gettempdir()) / "report.csv"), help="output CSV path")
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)

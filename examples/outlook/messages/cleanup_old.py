@@ -1,42 +1,52 @@
 """
-Clean up old messages — dry-run, then delete or archive.
+Clean up old messages — dry-run, then delete.
 
-Finds messages older than a specified number of days in a folder
-and optionally deletes them. Useful for mailbox retention policies.
+Finds messages older than N days in a folder and, with ``--apply``, deletes them.
+Dry-run by default, so it is safe to try.
 
 Requires delegated permission ``Mail.ReadWrite``.
 
 https://learn.microsoft.com/en-us/graph/api/message-delete
 """
 
+from __future__ import annotations
+
+import argparse
 from datetime import datetime, timedelta, timezone
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, password, tenant, username
 
-client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
-
 PREVIEW_LIMIT = 5
 
-folder_path = input("Folder (e.g. inbox): ").strip() or "inbox"
-cutoff_days = int(input("Delete messages older than (days): ") or "180")
-msg = f"Delete messages older than {cutoff_days}d from '{folder_path}'? (dry-run / yes / no): "
-confirm = input(msg).strip().lower()
 
-cutoff = datetime.now(timezone.utc) - timedelta(days=cutoff_days)
-folder = client.me.mail_folders[folder_path]
-messages = folder.messages.filter(f"receivedDateTime lt '{cutoff.isoformat()}Z'").get().execute_query()
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Delete messages older than N days (dry-run unless --apply)")
+    parser.add_argument("--days", type=int, default=180, help="age threshold in days (default: 180)")
+    parser.add_argument("--folder", default="inbox", help="mail folder name or id (default: inbox)")
+    parser.add_argument("--apply", action="store_true", help="actually delete the messages")
+    args = parser.parse_args()
 
-print(f"Found {len(messages)} messages older than {cutoff_days} days")
+    client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
+    folder = client.me.mail_folders[args.folder]
 
-if confirm == "yes":
-    for m in messages:
-        m.delete_object().execute_query()
-    print(f"Deleted {len(messages)} messages")
-elif confirm == "dry-run":
-    for m in messages[:PREVIEW_LIMIT]:
-        print(f"  {m.subject:40s}  {m.receivedDateTime}")
-    if len(messages) > PREVIEW_LIMIT:
-        print(f"  ... and {len(messages) - PREVIEW_LIMIT} more")
-else:
-    print("Cancelled.")
+    cutoff = datetime.now(timezone.utc) - timedelta(days=args.days)
+    cutoff_literal = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
+    messages = folder.messages.filter(f"receivedDateTime lt {cutoff_literal}").get().execute_query()
+    print(f"Found {len(messages)} message(s) older than {args.days} days")
+
+    if not args.apply:
+        for message in list(messages)[:PREVIEW_LIMIT]:
+            print(f"  {message.subject or '':40s}  {message.received_date_time}")
+        if len(messages) > PREVIEW_LIMIT:
+            print(f"  ... and {len(messages) - PREVIEW_LIMIT} more")
+        print("Dry run — re-run with --apply to delete.")
+        return
+
+    for message in messages:
+        message.delete_object().execute_query()
+    print(f"Deleted {len(messages)} message(s)")
+
+
+if __name__ == "__main__":
+    main()

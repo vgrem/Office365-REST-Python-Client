@@ -10,6 +10,8 @@ https://learn.microsoft.com/en-us/graph/api/user-list-contacts
 """
 
 import argparse
+import tempfile
+from pathlib import Path
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, password, tenant, username
@@ -19,7 +21,9 @@ COLUMNS = ["displayName", "givenName", "surname", "companyName", "jobTitle", "mo
 
 def main():
     parser = argparse.ArgumentParser(description="Export contacts to CSV via the data pipeline")
-    parser.add_argument("--output", default="contacts_export.csv", help="output CSV file")
+    parser.add_argument(
+        "--output", default=str(Path(tempfile.gettempdir()) / "contacts_export.csv"), help="output CSV file"
+    )
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)

@@ -34,6 +34,7 @@ import argparse
 import asyncio
 import json
 import sys
+import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -228,8 +229,16 @@ class CopyQueue:
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Run a durable, resumable copy queue")
     parser.add_argument("--manifest", help="JSON list of copy jobs; samples are generated when omitted")
-    parser.add_argument("--state", default="copy_queue_state.json", help="where the resumable state lives")
-    parser.add_argument("--default-manifest", default="copy_queue_jobs.json", help="manifest written for samples")
+    parser.add_argument(
+        "--state",
+        default=str(Path(tempfile.gettempdir()) / "copy_queue_state.json"),
+        help="where the resumable state lives",
+    )
+    parser.add_argument(
+        "--default-manifest",
+        default=str(Path(tempfile.gettempdir()) / "copy_queue_jobs.json"),
+        help="manifest written for samples",
+    )
     parser.add_argument("--concurrency", type=int, default=3, help="copies in flight (default: 3)")
     parser.add_argument("--interval", type=float, default=5, help="seconds between polls (default: 5)")
     parser.add_argument("--timeout", type=float, default=1800, help="per-copy timeout in seconds")

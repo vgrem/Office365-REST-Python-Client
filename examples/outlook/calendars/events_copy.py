@@ -1,44 +1,58 @@
 """
 Copy events between calendars — for migration, backup, or reorganization.
 
-Selects events from a source calendar and creates them in a target
-calendar. Useful when moving events between shared and personal
-calendars, or during user offboarding.
+Selects events from the signed-in user's default calendar and recreates them in
+a target calendar (default: the same calendar, so nothing is lost). Useful when
+moving events between personal and shared calendars, or during offboarding.
 
 Requires delegated permission ``Calendars.ReadWrite``.
 
 https://learn.microsoft.com/en-us/graph/api/user-post-events
 """
 
-from datetime import datetime, timedelta
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timedelta, timezone
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, password, tenant, username
 
-client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
-target_calendar_id = input("Target calendar ID (leave empty for default): ").strip() or None
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Copy recent events to another calendar")
+    parser.add_argument("--days", type=int, default=30, help="copy events from the last N days (default: 30)")
+    parser.add_argument("--calendar-id", help="target calendar id (default: the signed-in user's calendar)")
+    parser.add_argument("--apply", action="store_true", help="actually create the copies")
+    args = parser.parse_args()
 
-end = datetime.utcnow()
-start = end - timedelta(days=30)
+    client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
-events = (
-    client.me.calendar.events.filter(
-        f"start/dateTime ge '{start.isoformat()}Z' and end/dateTime le '{end.isoformat()}Z'"
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(days=args.days)
+    start_literal = start.strftime("%Y-%m-%dT%H:%M:%SZ")
+    end_literal = end.strftime("%Y-%m-%dT%H:%M:%SZ")
+    events = (
+        client.me.calendar.events.filter(f"start/dateTime ge '{start_literal}' and end/dateTime le '{end_literal}'")
+        .get()
+        .execute_query()
     )
-    .get()
-    .execute_query()
-)
+    print(f"Found {len(events)} event(s) in the last {args.days} days")
 
-print(f"Found {len(events)} events to copy\n")
-for e in events:
-    target = client.me.calendars[target_calendar_id] if target_calendar_id else client.me.calendar
-    target.events.add(
-        subject=e.subject,
-        body=e.bodyPreview or "",
-        start=e.start,
-        end=e.end,
-    ).execute_query()
-    print(f"  Copied: {e.subject}")
+    if not args.apply:
+        for event in list(events)[:5]:
+            print(f"  would copy: {event.subject}")
+        print("Dry run — re-run with --apply to copy.")
+        return
 
-print(f"\nCopied {len(events)} events to target calendar")
+    target = client.me.calendars[args.calendar_id] if args.calendar_id else client.me.calendar
+    for event in events:
+        target.events.add(
+            subject=event.subject, body=event.body_preview or "", start=event.start, end=event.end
+        ).execute_query()
+        print(f"  Copied: {event.subject}")
+    print(f"\nCopied {len(events)} event(s)")
+
+
+if __name__ == "__main__":
+    main()

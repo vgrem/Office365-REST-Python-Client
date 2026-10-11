@@ -26,6 +26,7 @@ Requires: pip install office365-rest-python-client[pandas]
 from __future__ import annotations
 
 import argparse
+import tempfile
 import time
 from pathlib import Path
 
@@ -87,7 +88,9 @@ def main():
     p.add_argument("--rows", type=int, default=40000, help="rows to import (0 = all)")
     p.add_argument("--chunk", type=int, default=2000, help="rows per memory slice")
     p.add_argument("--concurrency", type=int, default=5, help="parallel batch requests")
-    p.add_argument("--checkpoint", default="stocks.checkpoint.json", help="'' disables resume")
+    p.add_argument(
+        "--checkpoint", default=str(Path(tempfile.gettempdir()) / "stocks.checkpoint.json"), help="'' disables resume"
+    )
     p.add_argument("--reset-checkpoint", action="store_true", help="delete the checkpoint and start fresh")
     p.add_argument("--no-progress", action="store_true", help="disable the live progress bar")
     args = p.parse_args()

@@ -10,6 +10,8 @@ https://learn.microsoft.com/en-us/graph/api/team-list-members
 """
 
 import argparse
+import tempfile
+from pathlib import Path
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
@@ -17,7 +19,9 @@ from tests.settings import client_id, client_secret, tenant
 
 def main():
     parser = argparse.ArgumentParser(description="Export all team memberships to CSV")
-    parser.add_argument("--output", default="teams_membership.csv", help="output CSV file")
+    parser.add_argument(
+        "--output", default=str(Path(tempfile.gettempdir()) / "teams_membership.csv"), help="output CSV file"
+    )
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
