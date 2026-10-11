@@ -214,7 +214,7 @@ from office365.sharepoint.exceptions import (
     SPListDataValidationException,
     SPQueryThrottledException,
 )
-from office365.runtime.exceptions import FileLockedException
+from office365.runtime.exceptions import AccessDeniedException, FileLockedException
 
 try:
     ctx.web.lists.get_by_title("Tasks").add_item({"Title": "x"}).execute_query()
@@ -225,8 +225,10 @@ except SharePointException as exc:  # any other SharePoint error
 ```
 
 - `DuplicatedObjectException` (HTTP 400 / `ConflictingObjects`),
-  `ObjectNotFoundException` (404 / `ResourceNotFound`) and `FileLockedException`
-  (shared coauthoring lock, HTTP 423) are runtime-level and shared with Graph.
+  `ObjectNotFoundException` (404 / `ResourceNotFound`), `FileLockedException`
+  (shared coauthoring lock, HTTP 423) and `AccessDeniedException` (401/403, or
+  Graph ``accessDenied``/``Authorization_RequestDenied`` / SharePoint
+  ``E_ACCESSDENIED``) are runtime-level and shared with Graph.
 - `SharePointException` is the catch-all base for product-specific errors; every
   `SP*` type subclasses it, so `except SharePointException` catches them all.
 - HTTP 423 is disambiguated: `SPFileCheckOutException` (an explicit check-out,

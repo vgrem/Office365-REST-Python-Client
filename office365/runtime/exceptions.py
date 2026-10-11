@@ -104,3 +104,31 @@ class FileLockedException(ClientRequestException):
 
 
 register_error_type(FileLockedException)
+
+
+class AccessDeniedException(ClientRequestException):
+    """Raised when the caller is not permitted to perform the request (HTTP 401/403).
+
+    This is a **product-agnostic** type: it covers Microsoft Graph symbolic
+    codes (``accessDenied``, ``Authorization_RequestDenied``,
+    ``ErrorAccessDenied``), SharePoint's ``System.UnauthorizedAccessException``
+    HRESULT, and any status-only 401/403 response (including throttling and
+    conditional-access rejections that carry no JSON body).
+
+    It tells apart *not allowed* from *not found* (:class:`ObjectNotFoundException`)
+    and *not now* (:class:`FileLockedException`), so callers can react to a denied
+    permission instead of parsing error strings.
+    """
+
+    MATCH_PRIORITY = 5  # above the base catch-alls (0), below specific typed errors (10/15)
+    # Lower-case: ``matches`` compares against ``payload.code.lower()``.
+    _CODES = frozenset({"accessdenied", "authorization_requestdenied", "erroraccessdenied", "forbidden"})
+    # E_ACCESSDENIED (0x80070005), as emitted by SharePoint/OneDrive.
+    _HRESULTS = frozenset({"-2147024891"})
+
+    @classmethod
+    def matches(cls, payload: ErrorPayload) -> bool:
+        return payload.status in (401, 403) or payload.code.lower() in cls._CODES or payload.hresult in cls._HRESULTS
+
+
+register_error_type(AccessDeniedException)

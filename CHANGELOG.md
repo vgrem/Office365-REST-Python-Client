@@ -368,6 +368,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (`office365.runtime.http.prefer.prefer_include_unknown_enum_members`): opt a
   request into future enum members — e.g. `ChannelMembershipType` for shared
   channels reads `shared` instead of `unknownFutureValue`.
+- **Denied-request error type:** `AccessDeniedException` (HTTP 401/403) joins
+  `DuplicatedObjectException` / `ObjectNotFoundException` / `FileLockedException`
+  as a typed runtime error, so callers can `except AccessDeniedException` instead
+  of matching Graph codes (`accessDenied`, `Authorization_RequestDenied`) or
+  SharePoint's `System.UnauthorizedAccessException` HRESULT by hand. It also
+  claims status-only 401/403 responses that carry no JSON body.
 
 ### Deprecated
 - **Resolver `get_by_<key>` names:** the collection-resolving `get_by_name` /
