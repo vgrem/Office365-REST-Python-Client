@@ -5,6 +5,22 @@ bytes out of it, and change its *metadata* (name, parent, permissions) without
 touching the content. The scripts here run on throwaway files and clean up, so
 they're safe to re-run. Requires `Files.ReadWrite` (some readers need `Files.Read`).
 
+## Address a file
+
+Four ways to name a `DriveItem` — by path, by id, by enumerating the parent, or
+through a special folder. Names are **case-preserving but matched
+case-insensitively**; ids are stable.
+
+```python
+drive = client.me.drive
+drive.root.get_by_path("Reports/Q1.txt").get().execute_query()  # by path
+drive.items[item_id].get().execute_query()  # by id
+drive.root.children.get().execute_query()  # enumerate
+drive.special["Documents"].get().execute_query()  # special folder
+```
+
+→ [`addressing.py`](./addressing.py)
+
 ## Upload and download
 
 Upload small files in one call; the round-trip below is the base pattern every
@@ -42,15 +58,20 @@ item.delete_object().execute_query()
 
 → [`manage.py`](./manage.py) · [`lifecycle.py`](./lifecycle.py) (check-out/in) · [`recycle_bin.py`](./recycle_bin.py)
 
-## Share
+## Share: links vs invitations
 
-Create a link, or invite people by email. Manage or delete links later.
+A **sharing link** grants access to whoever holds the URL (audience: `anonymous`
+or `organization`); an **invitation** grants access to named people and can email
+them. Use a link when you don't know the recipients, an invitation when you do.
 
 ```python
-link = item.create_link("view", "organization").execute_query()
+shared = item.create_link("view", "organization").execute_query()  # link
+print(shared.link.webUrl)
+
+item.invite(["someone@contoso.com"], roles=["read"], send_invitation=True).execute_query()
 ```
 
-→ [`sharing.py`](./sharing.py) · more under [`../../sharepoint/sharing/`](../../sharepoint/sharing/)
+→ [`sharing_links.py`](./sharing_links.py) · [`sharing_invitations.py`](./sharing_invitations.py) · advanced lifecycle under [`../../sharepoint/sharing/`](../../sharepoint/sharing/)
 
 ## Custom metadata
 
@@ -74,4 +95,4 @@ for item in root.children.select(["id", "name"]).filter("size gt 0").top(50).get
     ...
 ```
 
-→ [`search.py`](./search.py) · [`largest_files.py`](./largest_files.py) · [`find_shared.py`](./find_shared.py) · [`delta_query.py`](./delta_query.py) · [`analytics.py`](./analytics.py)
+→ [`search.py`](./search.py) · [`largest_files.py`](./largest_files.py) · [`find_shared.py`](./find_shared.py) · [`delta_sync.py`](../../patterns/discovery/delta_sync.py) · [`analytics.py`](./analytics.py)

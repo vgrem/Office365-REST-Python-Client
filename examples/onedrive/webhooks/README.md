@@ -2,7 +2,7 @@
 
 Instead of polling a drive, have Graph **push** an HTTPS notification when
 something changes. Use this for near-real-time sync, and [delta
-query](../files/delta_query.py) to reconcile after downtime. Requires permission
+query](../../patterns/discovery/delta_sync.py) to reconcile after downtime. Requires permission
 for the watched resource (e.g. `Files.Read.All`) and a **publicly reachable HTTPS**
 endpoint.
 

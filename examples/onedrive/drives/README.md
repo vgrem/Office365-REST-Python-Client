@@ -23,7 +23,7 @@ recent = root.recent().execute_query()
 hits = root.search("quarterly").execute_query()
 ```
 
-→ [`explore.py`](./explore.py) · [`search_all.py`](./search_all.py) (across all drives) · [`export_user_drive.py`](./export_user_drive.py)
+→ [`explore.py`](./explore.py) · [`search_across_drives.py`](../../patterns/discovery/search_across_drives.py) (across all drives) · [`export_user_drive.py`](./export_user_drive.py)
 
 ## Storage & reporting
 

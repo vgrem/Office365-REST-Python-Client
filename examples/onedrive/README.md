@@ -59,7 +59,8 @@ sequenceDiagram
 
 ## Addressing items
 
-Four ways to name a `DriveItem`. **Paths are case-sensitive**; ids are not.
+Four ways to name a `DriveItem`. Names are **case-preserving but matched
+case-insensitively** (the OneDrive rule); ids are stable, so prefer them.
 
 ```python
 drive = client.me.drive
@@ -72,7 +73,7 @@ drive.special["Documents"]  # a special folder by name
 
 | Want | Reach for | Example |
 |---|---|---|
-| Follow a path | `get_by_path` | [`sites/get_site_by_path.py`](./sites/get_site_by_path.py) |
+| Follow a path | `get_by_path` | [`files/addressing.py`](./files/addressing.py) |
 | Address by id | `items[id]` | [`files/manage.py`](./files/manage.py) |
 | A special / app folder | `drive.special` | [`appfolder/app_folder.py`](./appfolder/app_folder.py) |
 | Another user's drive | `client.users[id].drive` | [`drives/user_drive.py`](./drives/user_drive.py) |
@@ -123,7 +124,7 @@ governance and reporting.
 | Operation | Example |
 |---|---|
 | Recent, shared-with-me, followed | [`drives/explore.py`](./drives/explore.py) |
-| Search a keyword across all drives | [`drives/search_all.py`](./drives/search_all.py) |
+| Search a keyword across all drives | [`../patterns/discovery/search_across_drives.py`](../patterns/discovery/search_across_drives.py) |
 | Tenant-wide storage report | [`drives/storage_report.py`](./drives/storage_report.py) |
 | A user's drive and quota | [`drives/user_drive.py`](./drives/user_drive.py) |
 
@@ -209,7 +210,7 @@ something changes.
 | Operation | Example |
 |---|---|
 | Subscribe, renew, remove | [`webhooks/subscribe_to_drive.py`](./webhooks/subscribe_to_drive.py) |
-| Reconcile after downtime (delta) | [`files/delta_query.py`](./files/delta_query.py) |
+| Reconcile after downtime (delta) | [`../patterns/discovery/delta_sync.py`](../patterns/discovery/delta_sync.py) |
 
 → Guide: [`webhooks/README.md`](./webhooks/README.md)
 
@@ -252,7 +253,8 @@ credential (see the `auth/` examples).
 - **Copy is long-running.** A `copy()` answers `202`; await it (or poll the
   monitor URL). Never fire-and-forget — and never batch it (the monitor URL is
   lost). → [`patterns/lro/lro_in_batch_guard.py`](../patterns/lro/lro_in_batch_guard.py)
-- **Paths are case-sensitive**; ids are not. Prefer ids for anything durable.
+- **Names are case-preserving but matched case-insensitively**; ids are stable —
+  prefer ids for anything durable. → [`files/addressing.py`](./files/addressing.py)
 - **`parentReference` before copy/move**: load the destination
   (`dest.get().execute_query()`) so the payload carries the drive id.
 - **Delta tokens are opaque** — persist and replay the returned link.
