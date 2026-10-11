@@ -36,7 +36,6 @@ if TYPE_CHECKING:
     from office365.intune.configuration_manager_client_enabled_features import (
         ConfigurationManagerClientEnabledFeatures,
     )
-    from office365.intune.device_action_result import DeviceActionResult
     from office365.intune.device_health_attestation_state import (
         DeviceHealthAttestationState,
     )
@@ -44,6 +43,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.log_collection_response import (
         DeviceLogCollectionResponse,
     )
+    from office365.intune.devices.management.action_result import DeviceActionResult
     from office365.intune.devices.management.windows_protection_state import WindowsProtectionState
 
 
@@ -453,7 +453,7 @@ class ManagedDevice(Entity):
     @property
     def device_action_results(self) -> ClientValueCollection[DeviceActionResult]:
         """Gets the deviceActionResults property"""
-        from office365.intune.device_action_result import DeviceActionResult
+        from office365.intune.devices.management.action_result import DeviceActionResult
 
         return self.properties.get("deviceActionResults", ClientValueCollection[DeviceActionResult](DeviceActionResult))
 

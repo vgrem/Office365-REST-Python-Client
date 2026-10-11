@@ -131,11 +131,6 @@ type_routing:
   GroupPeerOutlierRecommendationInsightSettings: office365.intune
   RgbColor: office365.intune
   IntegerRange: office365.intune
-  LocateDeviceActionResult: office365.intune
-  RemoteLockActionResult: office365.intune
-  ResetPasscodeActionResult: office365.intune
-  RotateBitLockerKeysDeviceActionResult: office365.intune
-  DeleteUserFromSharedAppleDeviceActionResult: office365.intune
   MediaConfig: office365.communications
   MediaInfo: office365.communications
   MediaPrompt: office365.communications
@@ -478,6 +473,32 @@ type_routing:
   MacOSMicrosoftDefenderApp: office365.intune.devices.management.mobileapps.macos
   MacOSMicrosoftEdgeApp: office365.intune.devices.management.mobileapps.macos
   MacOSOfficeSuiteApp: office365.intune.devices.management.mobileapps.macos
+
+# OMA settings, media content ratings and device action results.
+  OmaSetting: office365.intune.devices.configurations
+  OmaSettingBase64: office365.intune.devices.configurations
+  OmaSettingBoolean: office365.intune.devices.configurations
+  OmaSettingDateTime: office365.intune.devices.configurations
+  OmaSettingFloatingPoint: office365.intune.devices.configurations
+  OmaSettingInteger: office365.intune.devices.configurations
+  OmaSettingString: office365.intune.devices.configurations
+  OmaSettingStringXml: office365.intune.devices.configurations
+  MediaContentRatingAustralia: office365.intune.devices.configurations
+  MediaContentRatingCanada: office365.intune.devices.configurations
+  MediaContentRatingFrance: office365.intune.devices.configurations
+  MediaContentRatingGermany: office365.intune.devices.configurations
+  MediaContentRatingIreland: office365.intune.devices.configurations
+  MediaContentRatingJapan: office365.intune.devices.configurations
+  MediaContentRatingNewZealand: office365.intune.devices.configurations
+  MediaContentRatingUnitedKingdom: office365.intune.devices.configurations
+  MediaContentRatingUnitedStates: office365.intune.devices.configurations
+  DeleteUserFromSharedAppleDeviceActionResult: office365.intune.devices.management
+  DeviceActionResult: office365.intune.devices.management
+  LocateDeviceActionResult: office365.intune.devices.management
+  RemoteLockActionResult: office365.intune.devices.management
+  ResetPasscodeActionResult: office365.intune.devices.management
+  RotateBitLockerKeysDeviceActionResult: office365.intune.devices.management
+  WindowsDefenderScanActionResult: office365.intune.devices.management
 
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common

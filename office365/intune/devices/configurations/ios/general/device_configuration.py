@@ -18,25 +18,25 @@ if TYPE_CHECKING:
     from office365.intune.devices.configurations.ios.network_usage_rule import (
         IosNetworkUsageRule,
     )
-    from office365.intune.devices.configurations.webbrowsercookiesettings import (
-        WebBrowserCookieSettings,
-    )
-    from office365.intune.media_content_rating_australia import (
+    from office365.intune.devices.configurations.media_content_rating_australia import (
         MediaContentRatingAustralia,
     )
-    from office365.intune.media_content_rating_canada import MediaContentRatingCanada
-    from office365.intune.media_content_rating_france import MediaContentRatingFrance
-    from office365.intune.media_content_rating_germany import MediaContentRatingGermany
-    from office365.intune.media_content_rating_ireland import MediaContentRatingIreland
-    from office365.intune.media_content_rating_japan import MediaContentRatingJapan
-    from office365.intune.media_content_rating_new_zealand import (
+    from office365.intune.devices.configurations.media_content_rating_canada import MediaContentRatingCanada
+    from office365.intune.devices.configurations.media_content_rating_france import MediaContentRatingFrance
+    from office365.intune.devices.configurations.media_content_rating_germany import MediaContentRatingGermany
+    from office365.intune.devices.configurations.media_content_rating_ireland import MediaContentRatingIreland
+    from office365.intune.devices.configurations.media_content_rating_japan import MediaContentRatingJapan
+    from office365.intune.devices.configurations.media_content_rating_new_zealand import (
         MediaContentRatingNewZealand,
     )
-    from office365.intune.media_content_rating_united_kingdom import (
+    from office365.intune.devices.configurations.media_content_rating_united_kingdom import (
         MediaContentRatingUnitedKingdom,
     )
-    from office365.intune.media_content_rating_united_states import (
+    from office365.intune.devices.configurations.media_content_rating_united_states import (
         MediaContentRatingUnitedStates,
+    )
+    from office365.intune.devices.configurations.webbrowsercookiesettings import (
+        WebBrowserCookieSettings,
     )
 
 
@@ -498,7 +498,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def media_content_rating_australia(self) -> MediaContentRatingAustralia:
         """Gets the mediaContentRatingAustralia property"""
-        from office365.intune.media_content_rating_australia import (
+        from office365.intune.devices.configurations.media_content_rating_australia import (
             MediaContentRatingAustralia,
         )
 
@@ -507,7 +507,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def media_content_rating_canada(self) -> MediaContentRatingCanada:
         """Gets the mediaContentRatingCanada property"""
-        from office365.intune.media_content_rating_canada import (
+        from office365.intune.devices.configurations.media_content_rating_canada import (
             MediaContentRatingCanada,
         )
 
@@ -516,7 +516,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def media_content_rating_france(self) -> MediaContentRatingFrance:
         """Gets the mediaContentRatingFrance property"""
-        from office365.intune.media_content_rating_france import (
+        from office365.intune.devices.configurations.media_content_rating_france import (
             MediaContentRatingFrance,
         )
 
@@ -525,7 +525,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def media_content_rating_germany(self) -> MediaContentRatingGermany:
         """Gets the mediaContentRatingGermany property"""
-        from office365.intune.media_content_rating_germany import (
+        from office365.intune.devices.configurations.media_content_rating_germany import (
             MediaContentRatingGermany,
         )
 
@@ -534,7 +534,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def media_content_rating_ireland(self) -> MediaContentRatingIreland:
         """Gets the mediaContentRatingIreland property"""
-        from office365.intune.media_content_rating_ireland import (
+        from office365.intune.devices.configurations.media_content_rating_ireland import (
             MediaContentRatingIreland,
         )
 
@@ -543,14 +543,14 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def media_content_rating_japan(self) -> MediaContentRatingJapan:
         """Gets the mediaContentRatingJapan property"""
-        from office365.intune.media_content_rating_japan import MediaContentRatingJapan
+        from office365.intune.devices.configurations.media_content_rating_japan import MediaContentRatingJapan
 
         return self.properties.get("mediaContentRatingJapan", MediaContentRatingJapan())
 
     @property
     def media_content_rating_new_zealand(self) -> MediaContentRatingNewZealand:
         """Gets the mediaContentRatingNewZealand property"""
-        from office365.intune.media_content_rating_new_zealand import (
+        from office365.intune.devices.configurations.media_content_rating_new_zealand import (
             MediaContentRatingNewZealand,
         )
 
@@ -559,7 +559,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def media_content_rating_united_kingdom(self) -> MediaContentRatingUnitedKingdom:
         """Gets the mediaContentRatingUnitedKingdom property"""
-        from office365.intune.media_content_rating_united_kingdom import (
+        from office365.intune.devices.configurations.media_content_rating_united_kingdom import (
             MediaContentRatingUnitedKingdom,
         )
 
@@ -568,7 +568,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def media_content_rating_united_states(self) -> MediaContentRatingUnitedStates:
         """Gets the mediaContentRatingUnitedStates property"""
-        from office365.intune.media_content_rating_united_states import (
+        from office365.intune.devices.configurations.media_content_rating_united_states import (
             MediaContentRatingUnitedStates,
         )
 
