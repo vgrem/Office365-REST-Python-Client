@@ -380,6 +380,20 @@ type_routing:
   IosiPadOSWebClip: office365.intune.devices.management.mobileapps.ios
   IosManagedAppRegistration: office365.intune.devices.management
 
+# Windows information-protection cluster (peer: MdmWindowsInformationProtectionPolicy).
+  WindowsInformationProtectionResourceCollection: office365.intune.devices.management
+  WindowsInformationProtectionStoreApp: office365.intune.devices.management
+  WindowsInformationProtectionNetworkLearningSummary: office365.intune.devices.management
+  WindowsInformationProtectionIPRangeCollection: office365.intune.devices.management
+  WindowsInformationProtectionDataRecoveryCertificate: office365.intune.devices.management
+  WindowsInformationProtectionProxiedDomainCollection: office365.intune.devices.management
+  WindowsInformationProtectionPolicy: office365.intune.devices.management
+  WindowsInformationProtectionAppLockerFile: office365.intune.devices.management
+  WindowsInformationProtectionApp: office365.intune.devices.management
+  WindowsInformationProtectionDesktopApp: office365.intune.devices.management
+  WindowsInformationProtectionAppLearningSummary: office365.intune.devices.management
+  WindowsInformationProtectionPinCharacterRequirements: office365.intune.devices.management
+
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common
 

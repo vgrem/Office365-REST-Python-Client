@@ -10,11 +10,10 @@ from office365.runtime.client_value_collection import ClientValueCollection
 @dataclass
 class WindowsInformationProtectionProxiedDomainCollection(ClientValue):
     displayName: str | None = None
+    proxiedDomains: ClientValueCollection[ProxiedDomain] = field(
+        default_factory=lambda: ClientValueCollection(ProxiedDomain)
+    )
 
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.WindowsInformationProtectionProxiedDomainCollection"
-
-    proxiedDomains: ClientValueCollection[ProxiedDomain] = field(
-        default_factory=lambda: ClientValueCollection(ProxiedDomain)
-    )

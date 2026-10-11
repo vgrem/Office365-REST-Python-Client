@@ -15,22 +15,22 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.managed.windows.information_protection_enforcement_level import (
         WindowsInformationProtectionEnforcementLevel,
     )
-    from office365.intune.windows_information_protection_app import (
+    from office365.intune.devices.management.windows_information_protection_app import (
         WindowsInformationProtectionApp,
     )
-    from office365.intune.windows_information_protection_app_locker_file import (
+    from office365.intune.devices.management.windows_information_protection_app_locker_file import (
         WindowsInformationProtectionAppLockerFile,
     )
-    from office365.intune.windows_information_protection_data_recovery_certificate import (
+    from office365.intune.devices.management.windows_information_protection_data_recovery_certificate import (
         WindowsInformationProtectionDataRecoveryCertificate,
     )
-    from office365.intune.windows_information_protection_ip_range_collection import (
+    from office365.intune.devices.management.windows_information_protection_ip_range_collection import (
         WindowsInformationProtectionIPRangeCollection,
     )
-    from office365.intune.windows_information_protection_proxied_domain_collection import (
+    from office365.intune.devices.management.windows_information_protection_proxied_domain_collection import (
         WindowsInformationProtectionProxiedDomainCollection,
     )
-    from office365.intune.windows_information_protection_resource_collection import (
+    from office365.intune.devices.management.windows_information_protection_resource_collection import (
         WindowsInformationProtectionResourceCollection,
     )
 
@@ -93,7 +93,7 @@ class WindowsInformationProtection(Entity):
     @property
     def data_recovery_certificate(self) -> WindowsInformationProtectionDataRecoveryCertificate:
         """Gets the dataRecoveryCertificate property"""
-        from office365.intune.windows_information_protection_data_recovery_certificate import (
+        from office365.intune.devices.management.windows_information_protection_data_recovery_certificate import (
             WindowsInformationProtectionDataRecoveryCertificate,
         )
 
@@ -111,7 +111,7 @@ class WindowsInformationProtection(Entity):
     @property
     def enterprise_internal_proxy_servers(self) -> ClientValueCollection[WindowsInformationProtectionResourceCollection]:
         """Gets the enterpriseInternalProxyServers property"""
-        from office365.intune.windows_information_protection_resource_collection import (
+        from office365.intune.devices.management.windows_information_protection_resource_collection import (
             WindowsInformationProtectionResourceCollection,
         )
 
@@ -125,7 +125,7 @@ class WindowsInformationProtection(Entity):
     @property
     def enterprise_ip_ranges(self) -> ClientValueCollection[WindowsInformationProtectionIPRangeCollection]:
         """Gets the enterpriseIPRanges property"""
-        from office365.intune.windows_information_protection_ip_range_collection import (
+        from office365.intune.devices.management.windows_information_protection_ip_range_collection import (
             WindowsInformationProtectionIPRangeCollection,
         )
 
@@ -139,7 +139,7 @@ class WindowsInformationProtection(Entity):
     @property
     def enterprise_network_domain_names(self) -> ClientValueCollection[WindowsInformationProtectionResourceCollection]:
         """Gets the enterpriseNetworkDomainNames property"""
-        from office365.intune.windows_information_protection_resource_collection import (
+        from office365.intune.devices.management.windows_information_protection_resource_collection import (
             WindowsInformationProtectionResourceCollection,
         )
 
@@ -153,7 +153,7 @@ class WindowsInformationProtection(Entity):
     @property
     def enterprise_protected_domain_names(self) -> ClientValueCollection[WindowsInformationProtectionResourceCollection]:
         """Gets the enterpriseProtectedDomainNames property"""
-        from office365.intune.windows_information_protection_resource_collection import (
+        from office365.intune.devices.management.windows_information_protection_resource_collection import (
             WindowsInformationProtectionResourceCollection,
         )
 
@@ -167,7 +167,7 @@ class WindowsInformationProtection(Entity):
     @property
     def enterprise_proxied_domains(self) -> ClientValueCollection[WindowsInformationProtectionProxiedDomainCollection]:
         """Gets the enterpriseProxiedDomains property"""
-        from office365.intune.windows_information_protection_proxied_domain_collection import (
+        from office365.intune.devices.management.windows_information_protection_proxied_domain_collection import (
             WindowsInformationProtectionProxiedDomainCollection,
         )
 
@@ -181,7 +181,7 @@ class WindowsInformationProtection(Entity):
     @property
     def enterprise_proxy_servers(self) -> ClientValueCollection[WindowsInformationProtectionResourceCollection]:
         """Gets the enterpriseProxyServers property"""
-        from office365.intune.windows_information_protection_resource_collection import (
+        from office365.intune.devices.management.windows_information_protection_resource_collection import (
             WindowsInformationProtectionResourceCollection,
         )
 
@@ -195,7 +195,7 @@ class WindowsInformationProtection(Entity):
     @property
     def exempt_apps(self) -> ClientValueCollection[WindowsInformationProtectionApp]:
         """Gets the exemptApps property"""
-        from office365.intune.windows_information_protection_app import (
+        from office365.intune.devices.management.windows_information_protection_app import (
             WindowsInformationProtectionApp,
         )
 
@@ -206,7 +206,7 @@ class WindowsInformationProtection(Entity):
     @property
     def neutral_domain_resources(self) -> ClientValueCollection[WindowsInformationProtectionResourceCollection]:
         """Gets the neutralDomainResources property"""
-        from office365.intune.windows_information_protection_resource_collection import (
+        from office365.intune.devices.management.windows_information_protection_resource_collection import (
             WindowsInformationProtectionResourceCollection,
         )
 
@@ -220,7 +220,7 @@ class WindowsInformationProtection(Entity):
     @property
     def protected_apps(self) -> ClientValueCollection[WindowsInformationProtectionApp]:
         """Gets the protectedApps property"""
-        from office365.intune.windows_information_protection_app import (
+        from office365.intune.devices.management.windows_information_protection_app import (
             WindowsInformationProtectionApp,
         )
 
@@ -233,7 +233,7 @@ class WindowsInformationProtection(Entity):
         self,
     ) -> ClientValueCollection[WindowsInformationProtectionResourceCollection]:
         """Gets the smbAutoEncryptedFileExtensions property"""
-        from office365.intune.windows_information_protection_resource_collection import (
+        from office365.intune.devices.management.windows_information_protection_resource_collection import (
             WindowsInformationProtectionResourceCollection,
         )
 
@@ -261,7 +261,7 @@ class WindowsInformationProtection(Entity):
     @property
     def exempt_app_locker_files(self) -> EntityCollection[WindowsInformationProtectionAppLockerFile]:
         """Gets the exemptAppLockerFiles property"""
-        from office365.intune.windows_information_protection_app_locker_file import (
+        from office365.intune.devices.management.windows_information_protection_app_locker_file import (
             WindowsInformationProtectionAppLockerFile,
         )
 
@@ -277,7 +277,7 @@ class WindowsInformationProtection(Entity):
     @property
     def protected_app_locker_files(self) -> EntityCollection[WindowsInformationProtectionAppLockerFile]:
         """Gets the protectedAppLockerFiles property"""
-        from office365.intune.windows_information_protection_app_locker_file import (
+        from office365.intune.devices.management.windows_information_protection_app_locker_file import (
             WindowsInformationProtectionAppLockerFile,
         )
 

@@ -78,6 +78,12 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.user_experience_analytics_settings import (
         UserExperienceAnalyticsSettings,
     )
+    from office365.intune.devices.management.windows_information_protection_app_learning_summary import (
+        WindowsInformationProtectionAppLearningSummary,
+    )
+    from office365.intune.devices.management.windows_information_protection_network_learning_summary import (
+        WindowsInformationProtectionNetworkLearningSummary,
+    )
     from office365.intune.devices.management.windows_malware_overview import (
         WindowsMalwareOverview,
     )
@@ -163,12 +169,6 @@ if TYPE_CHECKING:
     )
     from office365.intune.windows_autopilot_device_identity import (
         WindowsAutopilotDeviceIdentity,
-    )
-    from office365.intune.windows_information_protection_app_learning_summary import (
-        WindowsInformationProtectionAppLearningSummary,
-    )
-    from office365.intune.windows_information_protection_network_learning_summary import (
-        WindowsInformationProtectionNetworkLearningSummary,
     )
     from office365.intune.windows_malware_information import WindowsMalwareInformation
 
@@ -1070,7 +1070,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[WindowsInformationProtectionAppLearningSummary]:
         """Gets the windowsInformationProtectionAppLearningSummaries property"""
-        from office365.intune.windows_information_protection_app_learning_summary import (
+        from office365.intune.devices.management.windows_information_protection_app_learning_summary import (
             WindowsInformationProtectionAppLearningSummary,
         )
 
@@ -1088,7 +1088,7 @@ class DeviceManagement(Entity):
         self,
     ) -> EntityCollection[WindowsInformationProtectionNetworkLearningSummary]:
         """Gets the windowsInformationProtectionNetworkLearningSummaries property"""
-        from office365.intune.windows_information_protection_network_learning_summary import (
+        from office365.intune.devices.management.windows_information_protection_network_learning_summary import (
             WindowsInformationProtectionNetworkLearningSummary,
         )
 

@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.targeted_managed_app_configuration import (
         TargetedManagedAppConfiguration,
     )
-    from office365.intune.windows_information_protection_policy import (
+    from office365.intune.devices.management.windows_information_protection_policy import (
         WindowsInformationProtectionPolicy,
     )
 
@@ -249,7 +249,7 @@ class DeviceAppManagement(Entity):
     @property
     def windows_information_protection_policies(self) -> EntityCollection[WindowsInformationProtectionPolicy]:
         """Gets the windowsInformationProtectionPolicies property"""
-        from office365.intune.windows_information_protection_policy import (
+        from office365.intune.devices.management.windows_information_protection_policy import (
             WindowsInformationProtectionPolicy,
         )
 

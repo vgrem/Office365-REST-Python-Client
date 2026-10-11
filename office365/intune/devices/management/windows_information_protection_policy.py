@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.intune.windows_information_protection_pin_character_requirements import (
+    from office365.intune.devices.management.windows_information_protection_pin_character_requirements import (
         WindowsInformationProtectionPinCharacterRequirements,
     )
 
@@ -42,13 +42,9 @@ class WindowsInformationProtectionPolicy(Entity):
         return self.properties.get("pinExpirationDays", None)
 
     @property
-    def pin_lowercase_letters(self) -> WindowsInformationProtectionPinCharacterRequirements:
+    def pin_lowercase_letters(self) -> Optional[WindowsInformationProtectionPinCharacterRequirements]:
         """Gets the pinLowercaseLetters property"""
-        from office365.intune.windows_information_protection_pin_character_requirements import (
-            WindowsInformationProtectionPinCharacterRequirements,
-        )
-
-        return self.properties.get("pinLowercaseLetters", WindowsInformationProtectionPinCharacterRequirements.notAllow)
+        return self.properties.get("pinLowercaseLetters", None)
 
     @property
     def pin_minimum_length(self) -> Optional[int]:
@@ -56,22 +52,14 @@ class WindowsInformationProtectionPolicy(Entity):
         return self.properties.get("pinMinimumLength", None)
 
     @property
-    def pin_special_characters(self) -> WindowsInformationProtectionPinCharacterRequirements:
+    def pin_special_characters(self) -> Optional[WindowsInformationProtectionPinCharacterRequirements]:
         """Gets the pinSpecialCharacters property"""
-        from office365.intune.windows_information_protection_pin_character_requirements import (
-            WindowsInformationProtectionPinCharacterRequirements,
-        )
-
-        return self.properties.get("pinSpecialCharacters", WindowsInformationProtectionPinCharacterRequirements.notAllow)
+        return self.properties.get("pinSpecialCharacters", None)
 
     @property
-    def pin_uppercase_letters(self) -> WindowsInformationProtectionPinCharacterRequirements:
+    def pin_uppercase_letters(self) -> Optional[WindowsInformationProtectionPinCharacterRequirements]:
         """Gets the pinUppercaseLetters property"""
-        from office365.intune.windows_information_protection_pin_character_requirements import (
-            WindowsInformationProtectionPinCharacterRequirements,
-        )
-
-        return self.properties.get("pinUppercaseLetters", WindowsInformationProtectionPinCharacterRequirements.notAllow)
+        return self.properties.get("pinUppercaseLetters", None)
 
     @property
     def revoke_on_mdm_handoff_disabled(self) -> Optional[bool]:
