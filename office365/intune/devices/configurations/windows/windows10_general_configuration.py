@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.compliance.requiredpasswordtype import (
         RequiredPasswordType,
     )
+    from office365.intune.devices.configurations.edge_search_engine_base import EdgeSearchEngineBase
     from office365.intune.devices.configurations.windows.general.defendercloudblockleveltype import (
         DefenderCloudBlockLevelType,
     )
@@ -55,7 +56,6 @@ if TYPE_CHECKING:
     from office365.intune.devices.configurations.windows.windows10_network_proxy_server import (
         Windows10NetworkProxyServer,
     )
-    from office365.intune.edge_search_engine_base import EdgeSearchEngineBase
 
 
 class Windows10GeneralConfiguration(Entity):
@@ -452,7 +452,7 @@ class Windows10GeneralConfiguration(Entity):
     @property
     def edge_search_engine(self) -> EdgeSearchEngineBase:
         """Gets the edgeSearchEngine property"""
-        from office365.intune.edge_search_engine_base import EdgeSearchEngineBase
+        from office365.intune.devices.configurations.edge_search_engine_base import EdgeSearchEngineBase
 
         return self.properties.get("edgeSearchEngine", EdgeSearchEngineBase())
 

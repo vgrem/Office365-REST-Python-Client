@@ -6,20 +6,16 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.intune.m365_capability_inbound_access import (
+    from office365.intune.devices.management.m365_capability_inbound_access import (
         M365CapabilityInboundAccess,
     )
 
 
 class M365CapabilityBase(Entity):
     @property
-    def inbound_access(self) -> M365CapabilityInboundAccess:
+    def inbound_access(self) -> Optional[M365CapabilityInboundAccess]:
         """Gets the inboundAccess property"""
-        from office365.intune.m365_capability_inbound_access import (
-            M365CapabilityInboundAccess,
-        )
-
-        return self.properties.get("inboundAccess", M365CapabilityInboundAccess())
+        return self.properties.get("inboundAccess", None)
 
     @property
     def last_modified_date_time(self) -> Optional[datetime]:

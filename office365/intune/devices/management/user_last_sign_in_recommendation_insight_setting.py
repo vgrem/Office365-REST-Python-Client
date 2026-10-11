@@ -9,7 +9,7 @@ from office365.directory.audit.usersigninrecommendationscope import (
 from office365.runtime.client_value import ClientValue
 
 if TYPE_CHECKING:
-    from datetime import timedelta
+    from office365.runtime.types.duration import timedelta
 
 
 @dataclass

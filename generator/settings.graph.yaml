@@ -105,7 +105,6 @@ type_routing:
   Access*: office365.directory.identitygovernance
   Copilot*: office365.copilot
   UserExperienceAnalytics*: office365.intune
-  UserLastSignInRecommendationInsightSetting: office365.intune
   ImportedWindowsAutopilotDeviceIdentityState: office365.intune
   ConfigurationManager*: office365.intune
   Compliance*: office365.intune
@@ -128,7 +127,6 @@ type_routing:
   EdgeSearchEngine*: office365.intune
   MediaContentRating*: office365.intune
   InsightValue*: office365.intune
-  GroupPeerOutlierRecommendationInsightSettings: office365.intune
   RgbColor: office365.intune
   IntegerRange: office365.intune
   MediaConfig: office365.communications
@@ -269,7 +267,6 @@ type_routing:
   CustomCalloutExtensionType: office365.directory.identitygovernance
   CustomExtensionResourceType: office365.directory.identitygovernance
   EvaluationOutcome: office365.directory.security
-  M365ResourceType: office365.intune
   MaxWorkLocationDetails: office365.communications
   MigrationMode: office365.teams
   MonitorMode: office365.directory.security
@@ -499,6 +496,20 @@ type_routing:
   ResetPasscodeActionResult: office365.intune.devices.management
   RotateBitLockerKeysDeviceActionResult: office365.intune.devices.management
   WindowsDefenderScanActionResult: office365.intune.devices.management
+
+# Edge search engines and M365 capability / insight value clusters.
+  EdgeSearchEngine: office365.intune.devices.configurations
+  EdgeSearchEngineBase: office365.intune.devices.configurations
+  EdgeSearchEngineCustom: office365.intune.devices.configurations
+  M365CapabilityBase: office365.intune.devices.management
+  M365CapabilityInboundAccess: office365.intune.devices.management
+  M365CapabilityResourceScope: office365.intune.devices.management
+  M365CapabilityResourceScopes: office365.intune.devices.management
+  M365ResourceType: office365.intune.devices.management
+  InsightValueDouble: office365.intune.devices.management
+  InsightValueInt: office365.intune.devices.management
+  GroupPeerOutlierRecommendationInsightSettings: office365.intune.devices.management
+  UserLastSignInRecommendationInsightSetting: office365.intune.devices.management
 
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common

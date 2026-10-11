@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from office365.directory.policies.inbound_outbound_policy_configuration import (
         InboundOutboundPolicyConfiguration,
     )
-    from office365.intune.m365_capability_base import M365CapabilityBase
+    from office365.intune.devices.management.m365_capability_base import M365CapabilityBase
 
 
 class CrossTenantAccessPolicyConfigurationDefault(Entity):
@@ -149,7 +149,7 @@ class CrossTenantAccessPolicyConfigurationDefault(Entity):
     @property
     def m365_capabilities(self) -> EntityCollection[M365CapabilityBase]:
         """Gets the m365Capabilities property"""
-        from office365.intune.m365_capability_base import M365CapabilityBase
+        from office365.intune.devices.management.m365_capability_base import M365CapabilityBase
 
         return self.properties.get(
             "m365Capabilities",
