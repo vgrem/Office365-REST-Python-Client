@@ -23,17 +23,19 @@ def class_name_collides_with_import(module: ast.Module, class_name: str) -> bool
 
 
 def existing_import_names(module: ast.Module) -> set:
-    """The set of ``(module, bound_name)`` pairs already imported in ``module``."""
+    """The set of names already bound by imports in ``module``.
+
+    Keyed by bound name (not module) so a second import of the same name from a
+    different module is never added (a name binds to one module).
+    """
     names: set = set()
     for node in module.body:
-        if isinstance(node, ast.ImportFrom):
-            names.update((node.module, alias.asname or alias.name) for alias in node.names)
-        elif isinstance(node, ast.Import):
-            names.update((alias.name, None) for alias in node.names)
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            names.update(alias.asname or alias.name for alias in node.names)
         elif isinstance(node, ast.If) and isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
             for child in node.body:
-                if isinstance(child, ast.ImportFrom):
-                    names.update((child.module, alias.asname or alias.name) for alias in child.names)
+                if isinstance(child, (ast.Import, ast.ImportFrom)):
+                    names.update(alias.asname or alias.name for alias in child.names)
     return names
 
 
@@ -45,29 +47,29 @@ def make_import(module_name: str, names: list) -> ast.ImportFrom:
 
 
 def insert_import(module: ast.Module, imp: ast.stmt, existing: set, index: int) -> bool:
-    """Insert an import (or ``TYPE_CHECKING`` block) with only the missing names."""
+    """Insert an import (or ``TYPE_CHECKING`` block) with only the unbound names."""
     if isinstance(imp, ast.If):
         body = []
         for child in imp.body:
-            kept = [alias.name for alias in child.names if (child.module, alias.name) not in existing]
+            kept = [alias.name for alias in child.names if (alias.asname or alias.name) not in existing]
             if kept:
                 body.append(make_import(child.module, kept))
-                existing.update((child.module, name) for name in kept)
+                existing.update(kept)
         if not body:
             return False
         imp.body = body
     elif isinstance(imp, ast.Import):
-        kept_imports = [alias for alias in imp.names if (alias.name, None) not in existing]
+        kept_imports = [alias for alias in imp.names if (alias.asname or alias.name) not in existing]
         if not kept_imports:
             return False
         imp.names = [ast.alias(name=alias.name, asname=alias.asname) for alias in kept_imports]
-        existing.update((alias.name, None) for alias in kept_imports)
+        existing.update(alias.asname or alias.name for alias in kept_imports)
     else:
-        kept_aliases = [alias for alias in imp.names if (imp.module, alias.asname or alias.name) not in existing]
+        kept_aliases = [alias for alias in imp.names if (alias.asname or alias.name) not in existing]
         if not kept_aliases:
             return False
         imp.names = [ast.alias(name=alias.name, asname=alias.asname) for alias in kept_aliases]
-        existing.update((imp.module, alias.asname or alias.name) for alias in kept_aliases)
+        existing.update(alias.asname or alias.name for alias in kept_aliases)
     module.body.insert(index, imp)
     return True
 

@@ -17,7 +17,7 @@ from generator.builders.imports import (
 def test_existing_import_names_includes_type_checking_block() -> None:
     tree = ast.parse("from a import A\nimport b\nif TYPE_CHECKING:\n    from c import C\n")
 
-    assert existing_import_names(tree) == {("a", "A"), ("b", None), ("c", "C")}
+    assert existing_import_names(tree) == {"A", "b", "C"}
 
 
 def test_insert_import_keeps_only_missing_names() -> None:

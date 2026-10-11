@@ -108,6 +108,14 @@ class TypeBuilder(ast.NodeTransformer):
             print(f"  Skipping {self.client_type_name}: class name collides with its base")
             self._status = None
             return
+        foreign = self._foreign_service_base(node)
+        if foreign is not None:
+            # An attached entity whose base comes from *another* service (e.g. a Graph
+            # type extending the SharePoint ``Entity``) has a different client context;
+            # appending members would generate code that assumes the wrong context.
+            print(f"  Skipping {self.client_type_name}: base imported from another service ({foreign})")
+            self._status = None
+            return
         node.name = self.client_type_name
         self._collect_schema_members()
         if self._docs_service:
@@ -669,6 +677,28 @@ class TypeBuilder(ast.NodeTransformer):
     def skip_reason(self) -> str:
         """Why this type cannot be generated, or ``""`` when it can."""
         return self._ensure_placement().reason
+
+    def _foreign_service_base(self, node: ast.ClassDef) -> Optional[str]:
+        """The module of a base class imported from another service, or ``None``."""
+        if self._source_tree is None:
+            return None
+        imports: dict[str, str] = {}
+        for stmt in self._source_tree.body:
+            if isinstance(stmt, ast.ImportFrom) and stmt.module:
+                for alias in stmt.names:
+                    imports[alias.asname or alias.name] = stmt.module
+        for base in node.bases:
+            name = base.id if isinstance(base, ast.Name) else base.attr if isinstance(base, ast.Attribute) else None
+            module = imports.get(name) if name else None
+            if module and self._is_foreign_module(module):
+                return module
+        return None
+
+    def _is_foreign_module(self, module: str) -> bool:
+        """Whether a base module belongs to the other service than this run."""
+        if self._context.context_type == "GraphClient":
+            return module.startswith("office365.sharepoint.")
+        return module == "office365.entity"
 
     def _ensure_placement(self) -> Placement:
         if self._placement is None:
