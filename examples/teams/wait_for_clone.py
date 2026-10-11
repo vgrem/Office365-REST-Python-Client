@@ -6,7 +6,7 @@ Cloning a team is asynchronous: Graph accepts the request and returns a
 ``clone_and_wait()`` chains the submission, the poll and a final ``GET`` so a
 single ``execute_query()`` returns the provisioned team. For the explicit
 ``clone()`` + ``poll_for_status()`` form, or an awaitable version, see
-``examples/async/wait_team_clone_async.py``.
+``examples/patterns/lro/wait_team_clone_async.py``.
 
 A temporary source team is created first when ``--team-id`` is omitted, so the
 example is self-contained; pass ``--team-id`` to clone an existing team instead.

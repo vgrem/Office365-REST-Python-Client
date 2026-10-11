@@ -16,7 +16,7 @@ this folder and follow console-print style.
 | [`teams_lifecycle.py`](./teams_lifecycle.py) | Create, update settings, archive/unarchive, and delete a team |
 | [`prune_inactive_teams.py`](./prune_inactive_teams.py) | Report, archive, or delete teams idle >= `--days` (default 180); dry-run by default (`--apply`) |
 | [`import_teams.py`](./import_teams.py) | Bulk-provision teams from a CSV (`name,description?,template?`) via `create_and_wait` |
-| [`../async/provision_teams_async.py`](../async/provision_teams_async.py) | Provision many teams concurrently (create/clone, bounded parallel polling) — async twin of `import_teams.py` |
+| [`../patterns/async/provision_teams_async.py`](../patterns/async/provision_teams_async.py) | Provision many teams concurrently (create/clone, bounded parallel polling) — async twin of `import_teams.py` |
 | [`wait_for_clone.py`](./wait_for_clone.py) | Clone a team and wait for the `teamsAsyncOperation` to finish |
 | [`export_teams.py`](./export_teams.py) | Export the tenant Teams inventory to CSV/JSON (owners/members/guests counts) |
 | [`members_lifecycle.py`](./members_lifecycle.py) | Add/remove team members and owners |

@@ -35,15 +35,40 @@ flowchart LR
 
 ---
 
-## Basic usage
+## Start here
 
-| Scenario | File | Permission |
-|---|---|---|
-| Upload and download a file | [`files/upload_download.py`](./files/upload_download.py) | `Files.ReadWrite` |
+Run [`quickstart.py`](./quickstart.py) — one script that uploads a file, lists
+the folder, reads it back, copies it (a long-running action) and cleans up.
 
-> See [`files/README.md`](./files/README.md) for the full set of file examples
-> (upload, download, manage, lifecycle, recycle bin, sharing, search, delta,
-> analytics).
+```bash
+cp .env.example .env
+uv run python examples/onedrive/quickstart.py
+```
+
+---
+
+## Learning path
+
+Read top to bottom; each row links to a runnable example.
+
+| Level | Scenario | File | Permission |
+|---|---|---|---|
+| **Basic** | Upload → list → read → copy → clean up | [`quickstart.py`](./quickstart.py) | `Files.ReadWrite` |
+| **Basic** | Upload and download a file (round-trip) | [`files/upload_download.py`](./files/upload_download.py) | `Files.ReadWrite` |
+| **Common** | Ensure a file exists (idempotent) | [`files/ensure_file.py`](./files/ensure_file.py) | `Files.ReadWrite` |
+| **Common** | Create, rename, move, delete files and folders | [`files/manage.py`](./files/manage.py), [`folders/manage.py`](./folders/manage.py) | `Files.ReadWrite` |
+| **Common** | Share a file or folder | [`files/sharing.py`](./files/sharing.py) | `Files.ReadWrite` |
+| **Common** | Search and page through a drive | [`files/search.py`](./files/search.py), [`drives/explore.py`](./drives/explore.py) | `Files.Read` |
+| **Advanced** | Large resumable upload | [`../patterns/large-data/`](../patterns/large-data/) | `Files.ReadWrite` |
+| **Advanced** | Copy a large file and await it | [`../patterns/lro/copy_and_wait.py`](../patterns/lro/copy_and_wait.py) | `Files.ReadWrite` |
+| **Advanced** | Durable copy queue | [`../patterns/lro/copy_queue_worker_async.py`](../patterns/lro/copy_queue_worker_async.py) | `Files.ReadWrite` |
+| **Advanced** | Monitor an operation from the shell | [`../patterns/lro/monitor_cli.py`](../patterns/lro/monitor_cli.py) | `Files.ReadWrite` |
+| **Advanced** | Keep a local cache in sync (delta) | [`files/delta_query.py`](./files/delta_query.py) | `Files.Read` |
+
+See [`files/README.md`](./files/README.md) for the full set of file examples
+(upload, download, manage, lifecycle, recycle bin, sharing, search, delta,
+analytics), and [`../patterns/`](../patterns/) for the cross-cutting advanced
+scenarios (long-running operations, async, large data).
 
 ---
 
@@ -55,12 +80,12 @@ flowchart LR
 |---|---|---|
 | Upload and download a file (round-trip) | [`files/upload_download.py`](./files/upload_download.py) | `Files.ReadWrite` |
 | Ensure a file exists (idempotent get-or-upload) | [`files/ensure_file.py`](./files/ensure_file.py) | `Files.ReadWrite` |
-| Upload a large file (resumable session) | [`files/upload_large.py`](./files/upload_large.py) | `Files.ReadWrite` |
+| Upload a large file (resumable session) | [`upload_large.py`](../patterns/large-data/upload_large.py) | `Files.ReadWrite` |
 | Download and read a JSON file | [`files/download_json.py`](./files/download_json.py) | `Files.ReadWrite` |
 | Copy, rename, move, versions, delete | [`files/manage.py`](./files/manage.py) | `Files.ReadWrite` |
-| Copy a large file and wait for the server-side copy | [`files/copy_and_wait.py`](./files/copy_and_wait.py) | `Files.ReadWrite` |
-| Copy a large batch durably (resumable queue, async) | [`../async/copy_queue_worker_async.py`](../async/copy_queue_worker_async.py) | `Files.ReadWrite` |
-| Archive files past a retention window (copy → verify → delete, async) | [`../async/archive_old_files_async.py`](../async/archive_old_files_async.py) | `Files.ReadWrite` |
+| Copy a large file and wait for the server-side copy | [`patterns/lro/copy_and_wait.py`](../patterns/lro/copy_and_wait.py) | `Files.ReadWrite` |
+| Copy a large batch durably (resumable queue, async) | [`../patterns/lro/copy_queue_worker_async.py`](../patterns/lro/copy_queue_worker_async.py) | `Files.ReadWrite` |
+| Archive files past a retention window (copy → verify → delete, async) | [`../patterns/async/archive_old_files_async.py`](../patterns/async/archive_old_files_async.py) | `Files.ReadWrite` |
 | Check out, edit, check in (versioning) | [`files/lifecycle.py`](./files/lifecycle.py) | `Files.ReadWrite` |
 | Sharing links and invitations | [`files/sharing.py`](./files/sharing.py) | `Files.ReadWrite` |
 | Recycle bin — restore and purge | [`files/recycle_bin.py`](./files/recycle_bin.py) | `Files.ReadWrite.All` |
@@ -128,10 +153,10 @@ flowchart LR
 
 | Scenario | File | Permission |
 |---|---|---|
-| Page lifecycle (create/update/publish/delete) | [`sitepages/manage.py`](./sitepages/manage.py) | `Sites.ReadWrite.All` |
-| List pages with publishing state | [`sitepages/list_pages.py`](./sitepages/list_pages.py) | `Sites.Read.All` |
-| Check in and publish workflow | [`sitepages/publish_flow.py`](./sitepages/publish_flow.py) | `Sites.ReadWrite.All` |
-| Inspect web parts and positions | [`sitepages/webparts.py`](./sitepages/webparts.py) | `Sites.Read.All` |
+| Page lifecycle (create/update/publish/delete) | [`pages/manage.py`](./pages/manage.py) | `Sites.ReadWrite.All` |
+| List pages with publishing state | [`pages/list_pages.py`](./pages/list_pages.py) | `Sites.Read.All` |
+| Check in and publish workflow | [`pages/publish_flow.py`](./pages/publish_flow.py) | `Sites.ReadWrite.All` |
+| Inspect web parts and positions | [`pages/webparts.py`](./pages/webparts.py) | `Sites.Read.All` |
 
 ### Term store
 
@@ -157,7 +182,7 @@ flowchart LR
 > Each folder has its own README with prerequisites, a flow diagram, and API
 > references: [`files/`](./files/README.md), [`folders/`](./folders/README.md),
 > [`drives/`](./drives/README.md), [`sites/`](./sites/README.md),
-> [`lists/`](./lists/README.md), [`sitepages/`](./sitepages/README.md),
+> [`lists/`](./lists/README.md), [`pages/`](./pages/README.md),
 > [`termstore/`](./termstore/README.md), [`excel/`](./excel/README.md).
 
 ---

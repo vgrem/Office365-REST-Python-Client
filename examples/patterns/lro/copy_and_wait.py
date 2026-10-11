@@ -6,7 +6,7 @@ Copy a OneDrive file and block until the server-side copy finishes.
 ``DriveItemCopyResult`` returned by ``copy()`` captures that URL when the query
 runs; ``wait_for_item()`` then polls it (honoring ``Retry-After``) and returns the
 new item. Use this when a synchronous script is fine; see
-``examples/async/copy_drive_item_async.py`` for the non-blocking twin.
+``examples/patterns/lro/copy_drive_item_async.py`` for the non-blocking twin.
 
 Requires delegated permission ``Files.ReadWrite``.
 

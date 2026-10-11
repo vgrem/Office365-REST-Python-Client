@@ -9,9 +9,9 @@ available.
 
 ## Query
 
-### [Show the current user asynchronously](../sharepoint/users/whoami_async.py)
+### [Show the current user asynchronously](../../sharepoint/users/whoami_async.py)
 
-Same builder as the synchronous [whoami.py](../sharepoint/users/whoami.py) —
+Same builder as the synchronous [whoami.py](../../sharepoint/users/whoami.py) —
 only the terminal call is awaited:
 
 ```python
@@ -204,7 +204,7 @@ an async twin that yields to the loop between polls, so a copy or a team clone
 never freezes concurrent tasks. See the **Long-running operations** page under
 Guides for the full story.
 
-### [Copy a large file and await it](copy_drive_item_async.py)
+### [Copy a large file and await it](../lro/copy_drive_item_async.py)
 
 `copy()` returns a result that captures the monitor URL; `wait_for_item_async()`
 polls it and resolves the new item:
@@ -215,7 +215,7 @@ await result.execute_query_async()
 copied = await result.wait_for_item_async(on_progress=lambda status: print(status.percentage_complete))
 ```
 
-### [Clone a team and await provisioning](wait_team_clone_async.py)
+### [Clone a team and await provisioning](../lro/wait_team_clone_async.py)
 
 `clone()` returns a `teamsAsyncOperation`; poll it off the loop, treating a
 transient `404` as "not ready yet":
@@ -230,7 +230,7 @@ operation = await source.clone(
 await operation.poll_for_status_async(timeout_sec=600, polling_interval=15)
 ```
 
-### [Poll a workbook operation](workbook_operation_async.py)
+### [Poll a workbook operation](../lro/workbook_operation_async.py)
 
 Opt into the async pattern with `Prefer: respond-async`; when the service accepts,
 the result is awaitable, otherwise the query holds the synchronous answer:
@@ -241,7 +241,7 @@ if operation is not None:
     await operation.wait_async()
 ```
 
-### [Resume an operation from a continuation token](resume_operation_async.py)
+### [Resume an operation from a continuation token](../lro/resume_from_token.py)
 
 The monitor URL is the only state needed to resume, so persist it and pick the
 operation back up in a later process:
@@ -254,13 +254,13 @@ poller = OperationPoller.from_continuation_token(client, ContinuationToken.from_
 await poller.wait_async()
 ```
 
-### [Guard against batching an LRO](lro_in_batch_guard.py)
+### [Guard against batching an LRO](../lro/lro_in_batch_guard.py)
 
 Batching is for many short requests. A batched long-running operation loses its
 monitor URL in the batch envelope, so this guard fails loudly instead of letting
 the caller poll nothing — keep LROs out of a batch and await them individually.
 
-### [Run a durable, resumable copy queue](copy_queue_worker_async.py)
+### [Run a durable, resumable copy queue](../lro/copy_queue_worker_async.py)
 
 The worker pattern behind "copy these 10,000 files": a bounded pool of copies
 whose per-job continuation tokens are written to a JSON state file *before*
@@ -298,7 +298,7 @@ if copied.size == item.size:  # verify before deleting the original
     await item.delete_object().execute_query_async()
 ```
 
-### [Monitor migration jobs concurrently](../sharepoint/migration/monitor/monitor_async.py)
+### [Monitor migration jobs concurrently](../../sharepoint/migration/monitor/monitor_async.py)
 
 The awaitable twin of the SharePoint migration monitor: each job gets its own
 cloned context, and `monitor_async()` polls the progress API off the loop:

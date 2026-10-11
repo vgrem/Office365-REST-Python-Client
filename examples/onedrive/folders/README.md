@@ -52,7 +52,7 @@ tree down as a zip (`download_folder.py`), or reorganize and clean up
 | Recursively list all files/folders | [`list_recursive.py`](./list_recursive.py) | `Files.Read` | [list children](https://learn.microsoft.com/en-us/graph/api/driveitem-list-children) |
 | Upload a local folder tree | [`upload_folder.py`](./upload_folder.py) | `Files.ReadWrite` | [put content](https://learn.microsoft.com/en-us/graph/api/driveitem-put-content) |
 | Download a folder as a zip | [`download_folder.py`](./download_folder.py) | `Files.ReadWrite` | [get content](https://learn.microsoft.com/en-us/graph/api/driveitem-get-content) |
-| Download every file concurrently (large folders) | [`download_files_parallel.py`](./download_files_parallel.py) | `Files.ReadWrite` | [get content](https://learn.microsoft.com/en-us/graph/api/driveitem-get-content) |
+| Download every file concurrently (large folders) | [`download_parallel.py`](../../patterns/large-data/download_parallel.py) | `Files.ReadWrite` | [get content](https://learn.microsoft.com/en-us/graph/api/driveitem-get-content) |
 | Rename, move, delete folders | [`move_delete.py`](./move_delete.py) | `Files.ReadWrite` | [update](https://learn.microsoft.com/en-us/graph/api/driveitem-update) |
 
 ---

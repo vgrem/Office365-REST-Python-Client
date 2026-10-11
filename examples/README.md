@@ -10,7 +10,9 @@ library across Microsoft 365 and Entra ID services.
 | Directory | Product / API | Covers |
 |---|---|---|
 | [`auth/`](./auth/) | Graph authentication | Client secret, certificate, interactive, device code, ROPC, GCC High |
-| [`async/`](./async/) | **Async / await** | Async twins, concurrency, batching, streaming export, credentials, transports |
+| [`patterns/`](./patterns/) | **Cross-cutting patterns** | Long-running operations, async, large data, reliability — mechanism-first, reused across products |
+| [`patterns/lro/`](./patterns/lro/) | **Long-running operations** | Wait (sync/async), resume from a token, a monitor CLI — the Graph async pattern |
+| [`patterns/async/`](./patterns/async/) | **Async / await** | Async twins, concurrency, batching, streaming export, credentials, transports |
 | [`admin/`](./admin/) | **Microsoft 365 Admin** | Service health, tenant settings, profile cards |
 | [`sharepoint/`](./sharepoint/) | **Microsoft SharePoint** | Lists, items, files, folders, search, permissions, sites, taxonomy, webhooks |
 | [`onedrive/`](./onedrive/) | **Microsoft OneDrive** | Files, folders, drives, sharing, search, Excel workbooks |

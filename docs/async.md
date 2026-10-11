@@ -251,11 +251,11 @@ await folder.files.create_upload_session_async(
 
 End-to-end examples that show where async pays off:
 
-- [Audit every site collection concurrently](products/async/tenant_site_audit.md) —
+- [Audit every site collection concurrently](products/patterns/async/tenant_site_audit.md) —
   bounded fan-out over a tenant, replacing an N+1 sequential loop.
-- [Download a library concurrently](products/async/download_library_async.md) —
+- [Download a library concurrently](products/patterns/async/download_library_async.md) —
   progress as each file finishes, per-file retry.
-- [Bulk-update list items](products/async/bulk_update_async.md) —
+- [Bulk-update list items](products/patterns/async/bulk_update_async.md) —
   `execute_batch_async` sends the batches in parallel.
 - [Show the current user](products/sharepoint/users/whoami_async.md) — the
   minimal async query, the `await` twin of `whoami.py`.
@@ -556,4 +556,4 @@ ctx.with_transport(pool_connections=10, pool_maxsize=32)
   `with_transport(...)` uses that single session as-is, making its thread safety
   the caller's responsibility.
 
-See the runnable [async examples](products/async/index.md).
+See the runnable [async examples](products/patterns/async/index.md).

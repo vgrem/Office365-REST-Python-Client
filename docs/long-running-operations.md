@@ -69,9 +69,9 @@ print(copied.web_url)
 Graph hands back authenticated monitor URLs (often on the SharePoint host) for
 these actions. The raw `OperationPoller` does **not** — see below.
 
-- [Copy a large file and await it](products/async/copy_drive_item_async.md) —
+- [Copy a large file and await it](products/patterns/lro/copy_drive_item_async.md) —
   `wait_for_item_async()` with a live percentage.
-- [Copy and wait (synchronous)](products/onedrive/files/copy_and_wait.md) — the
+- [Copy and wait (synchronous)](products/patterns/lro/copy_and_wait.md) — the
   blocking twin.
 
 ## Operation entities
@@ -112,7 +112,7 @@ cloned = target_team.clone_and_wait(
 keeps polling; a `succeeded`/`failed` status ends it. `wait()` uses
 `next_poll_delay()` (honoring `Retry-After`).
 
-- [Clone a team asynchronously](products/async/wait_team_clone_async.md)
+- [Clone a team asynchronously](products/patterns/lro/wait_team_clone_async.md)
 - [Wait for a team clone (synchronous)](products/teams/wait_for_clone.md)
 
 **Workbook** — `workbook.operations` is an `EntityCollection[WorkbookOperation]`;
@@ -220,7 +220,7 @@ status = await poller.wait_async()
 > token for the duration of the operation, not indefinitely, and re-submit the
 > action if the service has already expired it.
 
-- [Resume an operation from a continuation token](products/async/resume_operation_async.md)
+- [Resume an operation from a continuation token](products/patterns/lro/resume_from_token.md)
 
 ## `Prefer: respond-async` submissions
 
@@ -240,7 +240,7 @@ if operation is not None:
 
 This is the mechanism behind long-running workbook operations.
 
-- [Poll a workbook operation](products/async/workbook_operation_async.md)
+- [Poll a workbook operation](products/patterns/lro/workbook_operation_async.md)
 
 ## Batch vs long-running operations
 
@@ -271,7 +271,7 @@ results = [f.copy(name=f"archived-{f.name}").execute_query() for f in files]
 await asyncio.gather(*(r.wait_async() for r in results))
 ```
 
-- [Guard against batching an LRO](products/async/lro_in_batch_guard.md) — a small
+- [Guard against batching an LRO](products/patterns/lro/lro_in_batch_guard.md) — a small
   helper that detects a `LongRunningOperationResult` in a batch's results and
   fails loudly instead of silently polling nothing.
 
@@ -303,24 +303,24 @@ model (`checkpoint`, `on_error`) that complements this pattern.
 
 End-to-end scripts for the whole surface:
 
-- **Graph LROs** — [copy a drive item](products/async/copy_drive_item_async.md),
-  [clone a team](products/async/wait_team_clone_async.md),
-  [workbook operation](products/async/workbook_operation_async.md),
-  [resume from a token](products/async/resume_operation_async.md),
-  [durable copy queue](products/async/copy_queue_worker_async.md),
-  [concurrent team provisioning](products/async/provision_teams_async.md),
-  [archive past a retention window](products/async/archive_old_files_async.md),
-  [sync copy & wait](products/onedrive/files/copy_and_wait.md),
+- **Graph LROs** — [copy a drive item](products/patterns/lro/copy_drive_item_async.md),
+  [clone a team](products/patterns/lro/wait_team_clone_async.md),
+  [workbook operation](products/patterns/lro/workbook_operation_async.md),
+  [resume from a token](products/patterns/lro/resume_from_token.md),
+  [durable copy queue](products/patterns/lro/copy_queue_worker_async.md),
+  [concurrent team provisioning](products/patterns/async/provision_teams_async.md),
+  [archive past a retention window](products/patterns/async/archive_old_files_async.md),
+  [sync copy & wait](products/patterns/lro/copy_and_wait.md),
   [sync team clone](products/teams/wait_for_clone.md),
-  [LRO-in-batch guard](products/async/lro_in_batch_guard.md).
+  [LRO-in-batch guard](products/patterns/lro/lro_in_batch_guard.md).
 - **SharePoint migration** (poll a server-side ingestion job) —
   [monitor migration jobs concurrently](products/sharepoint/migration/monitor/monitor_async.md).
-- **Reports** (streamed export) — [async export](products/async/export_report_async.md),
+- **Reports** (streamed export) — [async export](products/patterns/async/export_report_async.md),
   [usage export](products/reports/export_usage_async.md).
-- **Ergonomics** — [client lifecycle](products/async/client_lifecycle_async.md),
-  [tune the offload executor](products/async/tune_offload_executor.md),
-  [retry](products/async/retry_async.md),
-  [paging](products/async/page_users_async.md),
-  [delta sync](products/async/delta_sync_async.md),
-  [large SharePoint upload](products/async/upload_large_file_sp_async.md),
-  [token cache](products/async/entra_token_cache_async.md).
+- **Ergonomics** — [client lifecycle](products/patterns/async/client_lifecycle_async.md),
+  [tune the offload executor](products/patterns/async/tune_offload_executor.md),
+  [retry](products/patterns/async/retry_async.md),
+  [paging](products/patterns/async/page_users_async.md),
+  [delta sync](products/patterns/async/delta_sync_async.md),
+  [large SharePoint upload](products/patterns/async/upload_large_file_sp_async.md),
+  [token cache](products/patterns/async/entra_token_cache_async.md).

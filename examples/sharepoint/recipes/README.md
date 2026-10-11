@@ -45,4 +45,4 @@ Every recipe supports `--help`; the ones that change content support `--dry-run`
 
 - [Getting started](../getting-started/) — one-time certificate and site access.
 - [Domain folders](../README.md) — the full catalog, by area.
-- [Async examples](../../async/) — awaitable twins for keeping an event loop free.
+- [Async examples](../../patterns/async/) — awaitable twins for keeping an event loop free.
