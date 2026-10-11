@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.communications.virtual_event_presenter_details import (
+from office365.communications.virtualevents.presenter_details import (
     VirtualEventPresenterDetails,
 )
 from office365.runtime.client_value import ClientValue
