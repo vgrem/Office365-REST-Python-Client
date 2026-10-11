@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from datetime import datetime
 from typing import Optional
 
 from office365.directory.permissions.require_permission import require_permission
@@ -70,3 +73,32 @@ class OnenotePage(OnenoteEntitySchemaObjectModel):
             "parentSection",
             OnenoteSection(self.context, ResourcePath("parentSection", self.resource_path)),
         )
+
+    @property
+    def content(self) -> Optional[bytes]:
+        """Gets the content property"""
+        return self.properties.get("content", None)
+
+    @property
+    def created_by_app_id(self) -> Optional[str]:
+        """Gets the createdByAppId property"""
+        return self.properties.get("createdByAppId", None)
+
+    @property
+    def last_modified_date_time(self) -> Optional[datetime]:
+        """Gets the lastModifiedDateTime property"""
+        return self.properties.get("lastModifiedDateTime", datetime.min)
+
+    @property
+    def level(self) -> Optional[int]:
+        """Gets the level property"""
+        return self.properties.get("level", None)
+
+    @property
+    def order(self) -> Optional[int]:
+        """Gets the order property"""
+        return self.properties.get("order", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.OnenotePage"

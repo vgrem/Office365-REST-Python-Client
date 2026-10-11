@@ -1,9 +1,14 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.identitygovernance.emailsettings import EmailSettings
 from office365.entity import Entity
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.quarantine_configuration import (
+        QuarantineConfiguration,
+    )
 
 
 class LifecycleManagementSettings(Entity):
@@ -20,3 +25,12 @@ class LifecycleManagementSettings(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.identityGovernance.LifecycleManagementSettings"
+
+    @property
+    def quarantine_configuration(self) -> QuarantineConfiguration:
+        """Gets the quarantineConfiguration property"""
+        from office365.directory.identitygovernance.quarantine_configuration import (
+            QuarantineConfiguration,
+        )
+
+        return self.properties.get("quarantineConfiguration", QuarantineConfiguration())

@@ -1,11 +1,16 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.communications.onlinemeetings.online_meeting import OnlineMeeting
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
-from office365.teams.viva.engagement.conversationmoderationstate import EngagementConversationModerationState
+from office365.teams.viva.engagement.conversationmoderationstate import (
+    EngagementConversationModerationState,
+)
+
+if TYPE_CHECKING:
+    from office365.communications.engagement_identity_set import EngagementIdentitySet
 
 
 class OnlineMeetingEngagementConversation(Entity):
@@ -34,3 +39,12 @@ class OnlineMeetingEngagementConversation(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.OnlineMeetingEngagementConversation"
+
+    @property
+    def organizer(self) -> EngagementIdentitySet:
+        """Gets the organizer property"""
+        from office365.communications.engagement_identity_set import (
+            EngagementIdentitySet,
+        )
+
+        return self.properties.get("organizer", EngagementIdentitySet())

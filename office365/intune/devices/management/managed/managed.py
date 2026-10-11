@@ -10,22 +10,41 @@ from office365.entity_collection import EntityCollection
 from office365.intune.devices.category import DeviceCategory
 from office365.intune.devices.compliance.policy_state import DeviceCompliancePolicyState
 from office365.intune.devices.enrollment.type import DeviceEnrollmentType
-from office365.intune.devices.management.exchangeaccessstate import DeviceManagementExchangeAccessState
-from office365.intune.devices.management.exchangeaccessstatereason import DeviceManagementExchangeAccessStateReason
+from office365.intune.devices.management.exchangeaccessstate import (
+    DeviceManagementExchangeAccessState,
+)
+from office365.intune.devices.management.exchangeaccessstatereason import (
+    DeviceManagementExchangeAccessStateReason,
+)
 from office365.intune.devices.management.managed.compliancestate import ComplianceState
-from office365.intune.devices.management.managed.managementagenttype import ManagementAgentType
+from office365.intune.devices.management.managed.managementagenttype import (
+    ManagementAgentType,
+)
 from office365.intune.devices.management.managed.managementstate import ManagementState
 from office365.intune.devices.management.managed.ownertype import ManagedDeviceOwnerType
 from office365.intune.devices.management.managed.partnerreportedhealthstate import (
     ManagedDevicePartnerReportedHealthState,
 )
 from office365.intune.devices.registrationstate import DeviceRegistrationState
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
     from office365.directory.users.collection import UserCollection
+    from office365.intune.configuration_manager_client_enabled_features import (
+        ConfigurationManagerClientEnabledFeatures,
+    )
+    from office365.intune.device_action_result import DeviceActionResult
+    from office365.intune.device_health_attestation_state import (
+        DeviceHealthAttestationState,
+    )
+    from office365.intune.devices.configuration_state import DeviceConfigurationState
+    from office365.intune.devices.log_collection_response import (
+        DeviceLogCollectionResponse,
+    )
+    from office365.intune.windows_protection_state import WindowsProtectionState
 
 
 class ManagedDevice(Entity):
@@ -419,3 +438,68 @@ class ManagedDevice(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ManagedDevice"
+
+    @property
+    def configuration_manager_client_enabled_features(self) -> ConfigurationManagerClientEnabledFeatures:
+        """Gets the configurationManagerClientEnabledFeatures property"""
+        from office365.intune.configuration_manager_client_enabled_features import (
+            ConfigurationManagerClientEnabledFeatures,
+        )
+
+        return self.properties.get(
+            "configurationManagerClientEnabledFeatures", ConfigurationManagerClientEnabledFeatures()
+        )
+
+    @property
+    def device_action_results(self) -> ClientValueCollection[DeviceActionResult]:
+        """Gets the deviceActionResults property"""
+        from office365.intune.device_action_result import DeviceActionResult
+
+        return self.properties.get("deviceActionResults", ClientValueCollection[DeviceActionResult](DeviceActionResult))
+
+    @property
+    def device_health_attestation_state(self) -> DeviceHealthAttestationState:
+        """Gets the deviceHealthAttestationState property"""
+        from office365.intune.device_health_attestation_state import (
+            DeviceHealthAttestationState,
+        )
+
+        return self.properties.get("deviceHealthAttestationState", DeviceHealthAttestationState())
+
+    @property
+    def device_configuration_states(self) -> EntityCollection[DeviceConfigurationState]:
+        """Gets the deviceConfigurationStates property"""
+        from office365.intune.devices.configuration_state import (
+            DeviceConfigurationState,
+        )
+
+        return self.properties.get(
+            "deviceConfigurationStates",
+            EntityCollection[DeviceConfigurationState](
+                self.context, DeviceConfigurationState, ResourcePath("deviceConfigurationStates", self.resource_path)
+            ),
+        )
+
+    @property
+    def log_collection_requests(self) -> EntityCollection[DeviceLogCollectionResponse]:
+        """Gets the logCollectionRequests property"""
+        from office365.intune.devices.log_collection_response import (
+            DeviceLogCollectionResponse,
+        )
+
+        return self.properties.get(
+            "logCollectionRequests",
+            EntityCollection[DeviceLogCollectionResponse](
+                self.context, DeviceLogCollectionResponse, ResourcePath("logCollectionRequests", self.resource_path)
+            ),
+        )
+
+    @property
+    def windows_protection_state(self) -> WindowsProtectionState:
+        """Gets the windowsProtectionState property"""
+        from office365.intune.windows_protection_state import WindowsProtectionState
+
+        return self.properties.get(
+            "windowsProtectionState",
+            WindowsProtectionState(self.context, ResourcePath("windowsProtectionState", self.resource_path)),
+        )

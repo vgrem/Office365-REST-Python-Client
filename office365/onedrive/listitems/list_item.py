@@ -20,6 +20,7 @@ from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
     from office365.onedrive.driveitems.driveItem import DriveItem
+    from office365.onedrive.permissions.permission import Permission
 
 
 class ListItem(BaseItem):
@@ -109,3 +110,13 @@ class ListItem(BaseItem):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.listItem"
+
+    @property
+    def permissions(self) -> EntityCollection[Permission]:
+        """Gets the permissions property"""
+        from office365.onedrive.permissions.permission import Permission
+
+        return self.properties.get(
+            "permissions",
+            EntityCollection[Permission](self.context, Permission, ResourcePath("permissions", self.resource_path)),
+        )

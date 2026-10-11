@@ -1,17 +1,29 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.directory.security.cases.operation import CaseOperation
 from office365.directory.security.ediscovery.case_member import EdiscoveryCaseMember
 from office365.directory.security.ediscovery.custodian import EdiscoveryCustodian
-from office365.directory.security.ediscovery.noncustodial_data_source import EdiscoveryNoncustodialDataSource
+from office365.directory.security.ediscovery.noncustodial_data_source import (
+    EdiscoveryNoncustodialDataSource,
+)
 from office365.directory.security.ediscovery.review_set import EdiscoveryReviewSet
 from office365.directory.security.ediscovery.search import EdiscoverySearch
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.security.ediscovery.ediscovery_case_settings import (
+        EdiscoveryCaseSettings,
+    )
+    from office365.directory.security.ediscovery.ediscovery_review_tag import (
+        EdiscoveryReviewTag,
+    )
 
 
 class EdiscoveryCase(Entity):
@@ -97,3 +109,28 @@ class EdiscoveryCase(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.EdiscoveryCase"
+
+    @property
+    def settings(self) -> EdiscoveryCaseSettings:
+        """Gets the settings property"""
+        from office365.directory.security.ediscovery.ediscovery_case_settings import (
+            EdiscoveryCaseSettings,
+        )
+
+        return self.properties.get(
+            "settings", EdiscoveryCaseSettings(self.context, ResourcePath("settings", self.resource_path))
+        )
+
+    @property
+    def tags(self) -> EntityCollection[EdiscoveryReviewTag]:
+        """Gets the tags property"""
+        from office365.directory.security.ediscovery.ediscovery_review_tag import (
+            EdiscoveryReviewTag,
+        )
+
+        return self.properties.get(
+            "tags",
+            EntityCollection[EdiscoveryReviewTag](
+                self.context, EdiscoveryReviewTag, ResourcePath("tags", self.resource_path)
+            ),
+        )

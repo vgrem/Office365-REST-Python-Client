@@ -1,7 +1,22 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
+from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.common.managed_e_book_assignment import ManagedEBookAssignment
+    from office365.common.mime_content import MimeContent
+    from office365.intune.devices.install_state import DeviceInstallState
+    from office365.intune.devices.management.managed.ebook.install_summary import (
+        EBookInstallSummary,
+    )
+    from office365.intune.devices.management.managed.ebook.user_install_state_summary import (
+        UserInstallStateSummary,
+    )
 
 
 class ManagedEBook(Entity):
@@ -50,3 +65,59 @@ class ManagedEBook(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ManagedEBook"
+
+    @property
+    def large_cover(self) -> MimeContent:
+        """Gets the largeCover property"""
+        from office365.common.mime_content import MimeContent
+
+        return self.properties.get("largeCover", MimeContent())
+
+    @property
+    def assignments(self) -> EntityCollection[ManagedEBookAssignment]:
+        """Gets the assignments property"""
+        from office365.common.managed_e_book_assignment import ManagedEBookAssignment
+
+        return self.properties.get(
+            "assignments",
+            EntityCollection[ManagedEBookAssignment](
+                self.context, ManagedEBookAssignment, ResourcePath("assignments", self.resource_path)
+            ),
+        )
+
+    @property
+    def device_states(self) -> EntityCollection[DeviceInstallState]:
+        """Gets the deviceStates property"""
+        from office365.intune.devices.install_state import DeviceInstallState
+
+        return self.properties.get(
+            "deviceStates",
+            EntityCollection[DeviceInstallState](
+                self.context, DeviceInstallState, ResourcePath("deviceStates", self.resource_path)
+            ),
+        )
+
+    @property
+    def install_summary(self) -> EBookInstallSummary:
+        """Gets the installSummary property"""
+        from office365.intune.devices.management.managed.ebook.install_summary import (
+            EBookInstallSummary,
+        )
+
+        return self.properties.get(
+            "installSummary", EBookInstallSummary(self.context, ResourcePath("installSummary", self.resource_path))
+        )
+
+    @property
+    def user_state_summary(self) -> EntityCollection[UserInstallStateSummary]:
+        """Gets the userStateSummary property"""
+        from office365.intune.devices.management.managed.ebook.user_install_state_summary import (
+            UserInstallStateSummary,
+        )
+
+        return self.properties.get(
+            "userStateSummary",
+            EntityCollection[UserInstallStateSummary](
+                self.context, UserInstallStateSummary, ResourcePath("userStateSummary", self.resource_path)
+            ),
+        )

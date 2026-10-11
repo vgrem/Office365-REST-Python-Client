@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.users.activities.activity import UserActivity
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.status import Status
 
 
 class ActivityHistoryItem(Entity):
@@ -35,3 +40,39 @@ class ActivityHistoryItem(Entity):
             "activity",
             UserActivity(self.context, ResourcePath("activity", self.resource_path)),
         )
+
+    @property
+    def expiration_date_time(self) -> Optional[datetime.datetime]:
+        """Gets the expirationDateTime property"""
+        return self.properties.get("expirationDateTime", datetime.datetime.min)
+
+    @property
+    def last_active_date_time(self) -> Optional[datetime.datetime]:
+        """Gets the lastActiveDateTime property"""
+        return self.properties.get("lastActiveDateTime", datetime.datetime.min)
+
+    @property
+    def last_modified_date_time(self) -> Optional[datetime.datetime]:
+        """Gets the lastModifiedDateTime property"""
+        return self.properties.get("lastModifiedDateTime", datetime.datetime.min)
+
+    @property
+    def started_date_time(self) -> Optional[datetime.datetime]:
+        """Gets the startedDateTime property"""
+        return self.properties.get("startedDateTime", datetime.datetime.min)
+
+    @property
+    def status(self) -> Status:
+        """Gets the status property"""
+        from office365.directory.status import Status
+
+        return self.properties.get("status", Status.active)
+
+    @property
+    def user_timezone(self) -> Optional[str]:
+        """Gets the userTimezone property"""
+        return self.properties.get("userTimezone", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ActivityHistoryItem"

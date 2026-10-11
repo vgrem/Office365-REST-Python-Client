@@ -103,3 +103,8 @@ class OnenoteSection(OnenoteEntityHierarchyModel):
     @property
     def entity_type_name(self) -> str:
         return None  # type: ignore
+
+    @property
+    def pages_url(self) -> Optional[str]:
+        """Gets the pagesUrl property"""
+        return self.properties.get("pagesUrl", None)

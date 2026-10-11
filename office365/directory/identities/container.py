@@ -1,19 +1,41 @@
-from office365.directory.authentication.conditions.event_listener import AuthenticationEventListener
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from office365.directory.authentication.conditions.event_listener import (
+    AuthenticationEventListener,
+)
 from office365.directory.identities.api_connector import IdentityApiConnector
 from office365.directory.identities.conditional_access_root import ConditionalAccessRoot
-from office365.directory.identities.providers.base_collection import IdentityProviderBaseCollection
+from office365.directory.identities.providers.base_collection import (
+    IdentityProviderBaseCollection,
+)
 from office365.directory.identities.userflows.attribute import IdentityUserFlowAttribute
 from office365.directory.identities.userflows.b2x.user_flow import B2XIdentityUserFlow
 from office365.directory.security.health_issue import HealthIssue
 from office365.directory.security.identity_accounts import IdentityAccounts
 from office365.directory.security.sensor import Sensor
 from office365.directory.security.sensor_candidate import SensorCandidate
-from office365.directory.security.sensor_candidate_activation_configuration import SensorCandidateActivationConfiguration
+from office365.directory.security.sensor_candidate_activation_configuration import (
+    SensorCandidateActivationConfiguration,
+)
 from office365.directory.security.settings_container import SettingsContainer
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.common.custom_authentication_extension import (
+        CustomAuthenticationExtension,
+    )
+    from office365.common.identity_verified_id_root import IdentityVerifiedIdRoot
+    from office365.directory.identities.authentication_events_flow import (
+        AuthenticationEventsFlow,
+    )
+    from office365.directory.identities.riskPrevention.container import (
+        RiskPreventionContainer,
+    )
 
 
 class IdentityContainer(Entity):
@@ -137,3 +159,53 @@ class IdentityContainer(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.IdentityContainer"
+
+    @property
+    def authentication_events_flows(self) -> EntityCollection[AuthenticationEventsFlow]:
+        """Gets the authenticationEventsFlows property"""
+        from office365.directory.identities.authentication_events_flow import (
+            AuthenticationEventsFlow,
+        )
+
+        return self.properties.get(
+            "authenticationEventsFlows",
+            EntityCollection[AuthenticationEventsFlow](
+                self.context, AuthenticationEventsFlow, ResourcePath("authenticationEventsFlows", self.resource_path)
+            ),
+        )
+
+    @property
+    def custom_authentication_extensions(self) -> EntityCollection[CustomAuthenticationExtension]:
+        """Gets the customAuthenticationExtensions property"""
+        from office365.common.custom_authentication_extension import (
+            CustomAuthenticationExtension,
+        )
+
+        return self.properties.get(
+            "customAuthenticationExtensions",
+            EntityCollection[CustomAuthenticationExtension](
+                self.context,
+                CustomAuthenticationExtension,
+                ResourcePath("customAuthenticationExtensions", self.resource_path),
+            ),
+        )
+
+    @property
+    def risk_prevention(self) -> RiskPreventionContainer:
+        """Gets the riskPrevention property"""
+        from office365.directory.identities.riskPrevention.container import (
+            RiskPreventionContainer,
+        )
+
+        return self.properties.get(
+            "riskPrevention", RiskPreventionContainer(self.context, ResourcePath("riskPrevention", self.resource_path))
+        )
+
+    @property
+    def verified_id(self) -> IdentityVerifiedIdRoot:
+        """Gets the verifiedId property"""
+        from office365.common.identity_verified_id_root import IdentityVerifiedIdRoot
+
+        return self.properties.get(
+            "verifiedId", IdentityVerifiedIdRoot(self.context, ResourcePath("verifiedId", self.resource_path))
+        )

@@ -1,11 +1,26 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.authentication.strength.root import AuthenticationStrengthRoot
 from office365.directory.identities.named_location import NamedLocation
-from office365.directory.policies.authentication_context_class_reference import AuthenticationContextClassReference
-from office365.directory.policies.ca_policies_deletable_root import CaPoliciesDeletableRoot
-from office365.directory.policies.conditionalaccess.conditional_access import ConditionalAccessPolicy
+from office365.directory.policies.authentication_context_class_reference import (
+    AuthenticationContextClassReference,
+)
+from office365.directory.policies.ca_policies_deletable_root import (
+    CaPoliciesDeletableRoot,
+)
+from office365.directory.policies.conditionalaccess.conditional_access import (
+    ConditionalAccessPolicy,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identities.conditional_access_template import (
+        ConditionalAccessTemplate,
+    )
 
 
 class ConditionalAccessRoot(Entity):
@@ -60,3 +75,17 @@ class ConditionalAccessRoot(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ConditionalAccessRoot"
+
+    @property
+    def templates(self) -> EntityCollection[ConditionalAccessTemplate]:
+        """Gets the templates property"""
+        from office365.directory.identities.conditional_access_template import (
+            ConditionalAccessTemplate,
+        )
+
+        return self.properties.get(
+            "templates",
+            EntityCollection[ConditionalAccessTemplate](
+                self.context, ConditionalAccessTemplate, ResourcePath("templates", self.resource_path)
+            ),
+        )

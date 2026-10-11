@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+from uuid import UUID
 
 from typing_extensions import Self
 
@@ -16,9 +17,12 @@ from office365.directory.objects.collection import DirectoryObjectCollection
 from office365.directory.objects.object import DirectoryObject
 from office365.directory.password_credential import PasswordCredential
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
-from office365.directory.permissions.grants.oauth2_collection import OAuth2PermissionGrantCollection
+from office365.directory.permissions.grants.oauth2_collection import (
+    OAuth2PermissionGrantCollection,
+)
 from office365.directory.permissions.scope import PermissionScope
 from office365.directory.synchronization.synchronization import Synchronization
+from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.appid import AppIdPath
@@ -26,6 +30,37 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.common.endpoint import Endpoint
+    from office365.directory.applications.verifiedpublisher import VerifiedPublisher
+    from office365.directory.objects.addin import AddIn
+    from office365.directory.objects.customsecurityattributevalue import (
+        CustomSecurityAttributeValue,
+    )
+    from office365.directory.objects.informationalurl import InformationalUrl
+    from office365.directory.permissions.grants.resourcespecificpermission import (
+        ResourceSpecificPermission,
+    )
+    from office365.directory.policies.app_management import AppManagementPolicy
+    from office365.directory.policies.claims_mapping_policy import ClaimsMappingPolicy
+    from office365.directory.policies.home_realm_discovery import (
+        HomeRealmDiscoveryPolicy,
+    )
+    from office365.directory.policies.token_issuance import TokenIssuancePolicy
+    from office365.directory.policies.token_lifetime import TokenLifetimePolicy
+    from office365.directory.serviceprincipals.delegated_permission_classification import (
+        DelegatedPermissionClassification,
+    )
+    from office365.directory.serviceprincipals.federated_identity_credential import (
+        FederatedIdentityCredential,
+    )
+    from office365.directory.serviceprincipals.remote_desktop_security_configuration import (
+        RemoteDesktopSecurityConfiguration,
+    )
+    from office365.directory.serviceprincipals.samlsinglesignonsettings import (
+        SamlSingleSignOnSettings,
+    )
 
 
 class ServicePrincipal(DirectoryObject):
@@ -492,3 +527,263 @@ class ServicePrincipal(DirectoryObject):
     @property
     def entity_type_name(self):
         return "microsoft.graph.ServicePrincipal"
+
+    @property
+    def add_ins(self) -> ClientValueCollection[AddIn]:
+        """Gets the addIns property"""
+        from office365.directory.objects.addin import AddIn
+
+        return self.properties.get("addIns", ClientValueCollection[AddIn](AddIn))
+
+    @property
+    def application_template_id(self) -> Optional[str]:
+        """Gets the applicationTemplateId property"""
+        return self.properties.get("applicationTemplateId", None)
+
+    @property
+    def app_owner_organization_id(self) -> Optional[UUID]:
+        """Gets the appOwnerOrganizationId property"""
+        return self.properties.get("appOwnerOrganizationId", None)
+
+    @property
+    def created_by_app_id(self) -> Optional[str]:
+        """Gets the createdByAppId property"""
+        return self.properties.get("createdByAppId", None)
+
+    @property
+    def custom_security_attributes(self) -> CustomSecurityAttributeValue:
+        """Gets the customSecurityAttributes property"""
+        from office365.directory.objects.customsecurityattributevalue import (
+            CustomSecurityAttributeValue,
+        )
+
+        return self.properties.get("customSecurityAttributes", CustomSecurityAttributeValue())
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the description property"""
+        return self.properties.get("description", None)
+
+    @property
+    def disabled_by_microsoft_status(self) -> Optional[str]:
+        """Gets the disabledByMicrosoftStatus property"""
+        return self.properties.get("disabledByMicrosoftStatus", None)
+
+    @property
+    def info(self) -> InformationalUrl:
+        """Gets the info property"""
+        from office365.directory.objects.informationalurl import InformationalUrl
+
+        return self.properties.get("info", InformationalUrl())
+
+    @property
+    def is_disabled(self) -> Optional[bool]:
+        """Gets the isDisabled property"""
+        return self.properties.get("isDisabled", None)
+
+    @property
+    def notes(self) -> Optional[str]:
+        """Gets the notes property"""
+        return self.properties.get("notes", None)
+
+    @property
+    def preferred_single_sign_on_mode(self) -> Optional[str]:
+        """Gets the preferredSingleSignOnMode property"""
+        return self.properties.get("preferredSingleSignOnMode", None)
+
+    @property
+    def preferred_token_signing_key_thumbprint(self) -> Optional[str]:
+        """Gets the preferredTokenSigningKeyThumbprint property"""
+        return self.properties.get("preferredTokenSigningKeyThumbprint", None)
+
+    @property
+    def reply_urls(self) -> StringCollection:
+        """Gets the replyUrls property"""
+        return self.properties.get("replyUrls", StringCollection())
+
+    @property
+    def resource_specific_application_permissions(self) -> ClientValueCollection[ResourceSpecificPermission]:
+        """Gets the resourceSpecificApplicationPermissions property"""
+        from office365.directory.permissions.grants.resourcespecificpermission import (
+            ResourceSpecificPermission,
+        )
+
+        return self.properties.get(
+            "resourceSpecificApplicationPermissions",
+            ClientValueCollection[ResourceSpecificPermission](ResourceSpecificPermission),
+        )
+
+    @property
+    def saml_single_sign_on_settings(self) -> SamlSingleSignOnSettings:
+        """Gets the samlSingleSignOnSettings property"""
+        from office365.directory.serviceprincipals.samlsinglesignonsettings import (
+            SamlSingleSignOnSettings,
+        )
+
+        return self.properties.get("samlSingleSignOnSettings", SamlSingleSignOnSettings())
+
+    @property
+    def service_principal_names(self) -> StringCollection:
+        """Gets the servicePrincipalNames property"""
+        return self.properties.get("servicePrincipalNames", StringCollection())
+
+    @property
+    def sign_in_audience(self) -> Optional[str]:
+        """Gets the signInAudience property"""
+        return self.properties.get("signInAudience", None)
+
+    @property
+    def tags(self) -> StringCollection:
+        """Gets the tags property"""
+        return self.properties.get("tags", StringCollection())
+
+    @property
+    def verified_publisher(self) -> VerifiedPublisher:
+        """Gets the verifiedPublisher property"""
+        from office365.directory.applications.verifiedpublisher import VerifiedPublisher
+
+        return self.properties.get("verifiedPublisher", VerifiedPublisher())
+
+    @property
+    def app_management_policies(self) -> EntityCollection[AppManagementPolicy]:
+        """Gets the appManagementPolicies property"""
+        from office365.directory.policies.app_management import AppManagementPolicy
+
+        return self.properties.get(
+            "appManagementPolicies",
+            EntityCollection[AppManagementPolicy](
+                self.context, AppManagementPolicy, ResourcePath("appManagementPolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def claims_mapping_policies(self) -> EntityCollection[ClaimsMappingPolicy]:
+        """Gets the claimsMappingPolicies property"""
+        from office365.directory.policies.claims_mapping_policy import (
+            ClaimsMappingPolicy,
+        )
+
+        return self.properties.get(
+            "claimsMappingPolicies",
+            EntityCollection[ClaimsMappingPolicy](
+                self.context, ClaimsMappingPolicy, ResourcePath("claimsMappingPolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def delegated_permission_classifications(self) -> EntityCollection[DelegatedPermissionClassification]:
+        """Gets the delegatedPermissionClassifications property"""
+        from office365.directory.serviceprincipals.delegated_permission_classification import (
+            DelegatedPermissionClassification,
+        )
+
+        return self.properties.get(
+            "delegatedPermissionClassifications",
+            EntityCollection[DelegatedPermissionClassification](
+                self.context,
+                DelegatedPermissionClassification,
+                ResourcePath("delegatedPermissionClassifications", self.resource_path),
+            ),
+        )
+
+    @property
+    def endpoints(self) -> EntityCollection[Endpoint]:
+        """Gets the endpoints property"""
+        from office365.common.endpoint import Endpoint
+
+        return self.properties.get(
+            "endpoints",
+            EntityCollection[Endpoint](self.context, Endpoint, ResourcePath("endpoints", self.resource_path)),
+        )
+
+    @property
+    def federated_identity_credentials(self) -> EntityCollection[FederatedIdentityCredential]:
+        """Gets the federatedIdentityCredentials property"""
+        from office365.directory.serviceprincipals.federated_identity_credential import (
+            FederatedIdentityCredential,
+        )
+
+        return self.properties.get(
+            "federatedIdentityCredentials",
+            EntityCollection[FederatedIdentityCredential](
+                self.context,
+                FederatedIdentityCredential,
+                ResourcePath("federatedIdentityCredentials", self.resource_path),
+            ),
+        )
+
+    @property
+    def home_realm_discovery_policies(self) -> EntityCollection[HomeRealmDiscoveryPolicy]:
+        """Gets the homeRealmDiscoveryPolicies property"""
+        from office365.directory.policies.home_realm_discovery import (
+            HomeRealmDiscoveryPolicy,
+        )
+
+        return self.properties.get(
+            "homeRealmDiscoveryPolicies",
+            EntityCollection[HomeRealmDiscoveryPolicy](
+                self.context, HomeRealmDiscoveryPolicy, ResourcePath("homeRealmDiscoveryPolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def member_of(self) -> EntityCollection[DirectoryObject]:
+        """Gets the memberOf property"""
+        from office365.directory.objects.object import DirectoryObject
+
+        return self.properties.get(
+            "memberOf",
+            EntityCollection[DirectoryObject](
+                self.context, DirectoryObject, ResourcePath("memberOf", self.resource_path)
+            ),
+        )
+
+    @property
+    def remote_desktop_security_configuration(self) -> RemoteDesktopSecurityConfiguration:
+        """Gets the remoteDesktopSecurityConfiguration property"""
+        from office365.directory.serviceprincipals.remote_desktop_security_configuration import (
+            RemoteDesktopSecurityConfiguration,
+        )
+
+        return self.properties.get(
+            "remoteDesktopSecurityConfiguration",
+            RemoteDesktopSecurityConfiguration(
+                self.context, ResourcePath("remoteDesktopSecurityConfiguration", self.resource_path)
+            ),
+        )
+
+    @property
+    def token_issuance_policies(self) -> EntityCollection[TokenIssuancePolicy]:
+        """Gets the tokenIssuancePolicies property"""
+        from office365.directory.policies.token_issuance import TokenIssuancePolicy
+
+        return self.properties.get(
+            "tokenIssuancePolicies",
+            EntityCollection[TokenIssuancePolicy](
+                self.context, TokenIssuancePolicy, ResourcePath("tokenIssuancePolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def token_lifetime_policies(self) -> EntityCollection[TokenLifetimePolicy]:
+        """Gets the tokenLifetimePolicies property"""
+        from office365.directory.policies.token_lifetime import TokenLifetimePolicy
+
+        return self.properties.get(
+            "tokenLifetimePolicies",
+            EntityCollection[TokenLifetimePolicy](
+                self.context, TokenLifetimePolicy, ResourcePath("tokenLifetimePolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def transitive_member_of(self) -> EntityCollection[DirectoryObject]:
+        """Gets the transitiveMemberOf property"""
+        from office365.directory.objects.object import DirectoryObject
+
+        return self.properties.get(
+            "transitiveMemberOf",
+            EntityCollection[DirectoryObject](
+                self.context, DirectoryObject, ResourcePath("transitiveMemberOf", self.resource_path)
+            ),
+        )

@@ -1,6 +1,17 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from office365.entity_collection import EntityCollection
 from office365.intune.organizations.branding_properties import (
     OrganizationalBrandingProperties,
 )
+from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.intune.organizations.organizational_branding_localization import (
+        OrganizationalBrandingLocalization,
+    )
 
 
 class OrganizationalBranding(OrganizationalBrandingProperties):
@@ -15,3 +26,21 @@ class OrganizationalBranding(OrganizationalBrandingProperties):
     You can't change your original configuration's language. However, companies can add different branding based on
     locale. For language-specific branding, see the organizationalBrandingLocalization object.
     """
+
+    @property
+    def localizations(self) -> EntityCollection[OrganizationalBrandingLocalization]:
+        """Gets the localizations property"""
+        from office365.intune.organizations.organizational_branding_localization import (
+            OrganizationalBrandingLocalization,
+        )
+
+        return self.properties.get(
+            "localizations",
+            EntityCollection[OrganizationalBrandingLocalization](
+                self.context, OrganizationalBrandingLocalization, ResourcePath("localizations", self.resource_path)
+            ),
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.OrganizationalBranding"

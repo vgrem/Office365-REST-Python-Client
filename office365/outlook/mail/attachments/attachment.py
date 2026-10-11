@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import IO, AnyStr, Optional
 
@@ -60,3 +62,12 @@ class Attachment(Entity):
     def last_modified_datetime(self) -> Optional[datetime]:
         """The Timestamp type represents date and time information using ISO 8601 format and is always in UTC time."""
         return self.properties.get("lastModifiedDateTime", datetime.min)
+
+    @property
+    def is_inline(self) -> Optional[bool]:
+        """Gets the isInline property"""
+        return self.properties.get("isInline", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.Attachment"

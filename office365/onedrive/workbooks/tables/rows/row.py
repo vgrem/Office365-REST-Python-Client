@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List, Optional
 
 from office365.entity import Entity
@@ -18,3 +20,7 @@ class WorkbookTableRow(Entity):
         or a boolean. Cell that contain an error will return the error string.
         """
         return self.properties.get("values", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookTableRow"

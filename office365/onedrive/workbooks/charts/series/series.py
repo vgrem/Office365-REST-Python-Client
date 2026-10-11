@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.onedrive.workbooks.charts.point import WorkbookChartPoint
@@ -27,3 +31,12 @@ class WorkbookChartSeries(Entity):
                 ResourcePath("points", self.resource_path),
             ),
         )
+
+    @property
+    def name(self) -> Optional[str]:
+        """Gets the name property"""
+        return self.properties.get("name", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookChartSeries"

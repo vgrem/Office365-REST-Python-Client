@@ -1,11 +1,19 @@
-from typing import Optional
+from __future__ import annotations
 
-from office365.directory.synchronization.attribute_mapping_function_schema import AttributeMappingFunctionSchema
+from typing import TYPE_CHECKING, Optional
+
+from office365.directory.synchronization.attribute_mapping_function_schema import (
+    AttributeMappingFunctionSchema,
+)
 from office365.directory.synchronization.directory_definition import DirectoryDefinition
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
+
+if TYPE_CHECKING:
+    from office365.directory.synchronization.rule import SynchronizationRule
 
 
 class SynchronizationSchema(Entity):
@@ -40,3 +48,12 @@ class SynchronizationSchema(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.SynchronizationSchema"
+
+    @property
+    def synchronization_rules(self) -> ClientValueCollection[SynchronizationRule]:
+        """Gets the synchronizationRules property"""
+        from office365.directory.synchronization.rule import SynchronizationRule
+
+        return self.properties.get(
+            "synchronizationRules", ClientValueCollection[SynchronizationRule](SynchronizationRule)
+        )

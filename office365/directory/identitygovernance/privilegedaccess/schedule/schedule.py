@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+
+if TYPE_CHECKING:
+    from office365.directory.request_schedule import RequestSchedule
 
 
 class PrivilegedAccessSchedule(Entity):
@@ -31,3 +36,10 @@ class PrivilegedAccessSchedule(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.PrivilegedAccessSchedule"
+
+    @property
+    def schedule_info(self) -> RequestSchedule:
+        """Gets the scheduleInfo property"""
+        from office365.directory.request_schedule import RequestSchedule
+
+        return self.properties.get("scheduleInfo", RequestSchedule())

@@ -1,16 +1,21 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.backuprestore.service_status import ServiceStatus
 from office365.directory.security.health_issue import HealthIssue
 from office365.directory.security.healthissues.deploymentstatus import DeploymentStatus
-from office365.directory.security.healthissues.sensorhealthstatus import SensorHealthStatus
+from office365.directory.security.healthissues.sensorhealthstatus import (
+    SensorHealthStatus,
+)
 from office365.directory.security.healthissues.sensortype import SensorType
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.security.sensor_settings import SensorSettings
 
 
 class Sensor(Entity):
@@ -70,3 +75,10 @@ class Sensor(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.Sensor"
+
+    @property
+    def settings(self) -> SensorSettings:
+        """Gets the settings property"""
+        from office365.directory.security.sensor_settings import SensorSettings
+
+        return self.properties.get("settings", SensorSettings())

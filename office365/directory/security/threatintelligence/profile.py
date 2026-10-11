@@ -1,11 +1,25 @@
-from datetime import datetime
-from typing import Optional
+from __future__ import annotations
 
-from office365.directory.security.intelligence_profile_indicator import IntelligenceProfileIndicator
+from datetime import datetime
+from typing import TYPE_CHECKING, Optional
+
+from office365.directory.security.intelligence_profile_indicator import (
+    IntelligenceProfileIndicator,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
+
+if TYPE_CHECKING:
+    from office365.directory.security.formatted_content import FormattedContent
+    from office365.directory.security.intelligence_profile_country_or_region_of_origin import (
+        IntelligenceProfileCountryOrRegionOfOrigin,
+    )
+    from office365.directory.security.intelligence_profile_kind import (
+        IntelligenceProfileKind,
+    )
 
 
 class IntelligenceProfile(Entity):
@@ -54,3 +68,47 @@ class IntelligenceProfile(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.IntelligenceProfile"
+
+    @property
+    def countries_or_regions_of_origin(self) -> ClientValueCollection[IntelligenceProfileCountryOrRegionOfOrigin]:
+        """Gets the countriesOrRegionsOfOrigin property"""
+        from office365.directory.security.intelligence_profile_country_or_region_of_origin import (
+            IntelligenceProfileCountryOrRegionOfOrigin,
+        )
+
+        return self.properties.get(
+            "countriesOrRegionsOfOrigin",
+            ClientValueCollection[IntelligenceProfileCountryOrRegionOfOrigin](
+                IntelligenceProfileCountryOrRegionOfOrigin
+            ),
+        )
+
+    @property
+    def description(self) -> FormattedContent:
+        """Gets the description property"""
+        from office365.directory.security.formatted_content import FormattedContent
+
+        return self.properties.get("description", FormattedContent())
+
+    @property
+    def kind(self) -> IntelligenceProfileKind:
+        """Gets the kind property"""
+        from office365.directory.security.intelligence_profile_kind import (
+            IntelligenceProfileKind,
+        )
+
+        return self.properties.get("kind", IntelligenceProfileKind.actor)
+
+    @property
+    def summary(self) -> FormattedContent:
+        """Gets the summary property"""
+        from office365.directory.security.formatted_content import FormattedContent
+
+        return self.properties.get("summary", FormattedContent())
+
+    @property
+    def tradecraft(self) -> FormattedContent:
+        """Gets the tradecraft property"""
+        from office365.directory.security.formatted_content import FormattedContent
+
+        return self.properties.get("tradecraft", FormattedContent())

@@ -1,11 +1,20 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.identitygovernance.entitlementmanagement.accesspackage.subjecttype import (
     AccessPackageSubjectType,
 )
 from office365.entity import Entity
+from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.subject_lifecycle import (
+        AccessPackageSubjectLifecycle,
+    )
+    from office365.directory.identitygovernance.entitlementmanagement.connected_organization import (
+        ConnectedOrganization,
+    )
 
 
 class AccessPackageSubject(Entity):
@@ -42,3 +51,24 @@ class AccessPackageSubject(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessPackageSubject"
+
+    @property
+    def subject_lifecycle(self) -> AccessPackageSubjectLifecycle:
+        """Gets the subjectLifecycle property"""
+        from office365.directory.identitygovernance.entitlementmanagement.accesspackage.subject_lifecycle import (
+            AccessPackageSubjectLifecycle,
+        )
+
+        return self.properties.get("subjectLifecycle", AccessPackageSubjectLifecycle.notDefined)
+
+    @property
+    def connected_organization(self) -> ConnectedOrganization:
+        """Gets the connectedOrganization property"""
+        from office365.directory.identitygovernance.entitlementmanagement.connected_organization import (
+            ConnectedOrganization,
+        )
+
+        return self.properties.get(
+            "connectedOrganization",
+            ConnectedOrganization(self.context, ResourcePath("connectedOrganization", self.resource_path)),
+        )

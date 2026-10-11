@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+
+if TYPE_CHECKING:
+    from office365.directory.security.autonomous_system import AutonomousSystem
 
 
 class IpAddress(Entity):
@@ -24,3 +27,10 @@ class IpAddress(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.IpAddress"
+
+    @property
+    def autonomous_system(self) -> AutonomousSystem:
+        """Gets the autonomousSystem property"""
+        from office365.directory.security.autonomous_system import AutonomousSystem
+
+        return self.properties.get("autonomousSystem", AutonomousSystem())

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from typing_extensions import Self
@@ -133,3 +135,17 @@ class WorkbookTable(Entity):
             "worksheet",
             WorkbookWorksheet(self.context, ResourcePath("worksheet", self.resource_path)),
         )
+
+    @property
+    def show_totals(self) -> Optional[bool]:
+        """Gets the showTotals property"""
+        return self.properties.get("showTotals", None)
+
+    @property
+    def style(self) -> Optional[str]:
+        """Gets the style property"""
+        return self.properties.get("style", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookTable"

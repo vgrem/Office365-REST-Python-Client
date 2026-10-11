@@ -1,7 +1,12 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.runtime.types.collections import StringCollection
+
+if TYPE_CHECKING:
+    from office365.directory.applications.permissiontype import PermissionType
 
 
 class PermissionGrantConditionSet(Entity):
@@ -56,3 +61,24 @@ class PermissionGrantConditionSet(Entity):
         with any resource application or API. Default is any.
         """
         return self.properties.get("resourceApplication", None)
+
+    @property
+    def client_application_tenant_ids(self) -> StringCollection:
+        """Gets the clientApplicationTenantIds property"""
+        return self.properties.get("clientApplicationTenantIds", StringCollection())
+
+    @property
+    def permission_classification(self) -> Optional[str]:
+        """Gets the permissionClassification property"""
+        return self.properties.get("permissionClassification", None)
+
+    @property
+    def permission_type(self) -> PermissionType:
+        """Gets the permissionType property"""
+        from office365.directory.applications.permissiontype import PermissionType
+
+        return self.properties.get("permissionType", PermissionType.application)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.PermissionGrantConditionSet"

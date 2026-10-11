@@ -9,12 +9,20 @@ from uuid import UUID
 from typing_extensions import Self
 
 from office365.directory.applications.api import ApiApplication
-from office365.directory.applications.nativeauthenticationapisenabled import NativeAuthenticationApisEnabled
+from office365.directory.applications.nativeauthenticationapisenabled import (
+    NativeAuthenticationApisEnabled,
+)
 from office365.directory.applications.optional_claims import OptionalClaims
-from office365.directory.applications.parentalcontrolsettings import ParentalControlSettings
+from office365.directory.applications.parentalcontrolsettings import (
+    ParentalControlSettings,
+)
 from office365.directory.applications.public_client import PublicClientApplication
-from office365.directory.applications.requestsignatureverification import RequestSignatureVerification
-from office365.directory.applications.required_resource_access import RequiredResourceAccess
+from office365.directory.applications.requestsignatureverification import (
+    RequestSignatureVerification,
+)
+from office365.directory.applications.required_resource_access import (
+    RequiredResourceAccess,
+)
 from office365.directory.applications.roles.role import AppRole
 from office365.directory.applications.spa import SpaApplication
 from office365.directory.applications.verifiedpublisher import VerifiedPublisher
@@ -31,11 +39,15 @@ from office365.directory.password_credential import PasswordCredential
 from office365.directory.permissions.require_permission import require_permission
 from office365.directory.permissions.resource_name import ResourceName
 from office365.directory.policies.token_issuance import TokenIssuancePolicy
-from office365.directory.serviceprincipals.lockconfiguration import ServicePrincipalLockConfiguration
+from office365.directory.serviceprincipals.lockconfiguration import (
+    ServicePrincipalLockConfiguration,
+)
 from office365.directory.synchronization.synchronization import Synchronization
 from office365.entity_collection import EntityCollection
 from office365.runtime.auth.certificate import certificate_der as _certificate_der
-from office365.runtime.auth.certificate import certificate_thumbprint as _certificate_thumbprint
+from office365.runtime.auth.certificate import (
+    certificate_thumbprint as _certificate_thumbprint,
+)
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -45,6 +57,14 @@ from office365.runtime.types.collections import GuidCollection, StringCollection
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
+    from office365.directory.policies.app_management import AppManagementPolicy
+    from office365.directory.policies.home_realm_discovery import (
+        HomeRealmDiscoveryPolicy,
+    )
+    from office365.directory.policies.token_lifetime import TokenLifetimePolicy
+    from office365.directory.serviceprincipals.federated_identity_credential import (
+        FederatedIdentityCredential,
+    )
     from office365.directory.serviceprincipals.service_principal import ServicePrincipal
 
 
@@ -621,3 +641,57 @@ class Application(DirectoryObject):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Application"
+
+    @property
+    def app_management_policies(self) -> EntityCollection[AppManagementPolicy]:
+        """Gets the appManagementPolicies property"""
+        from office365.directory.policies.app_management import AppManagementPolicy
+
+        return self.properties.get(
+            "appManagementPolicies",
+            EntityCollection[AppManagementPolicy](
+                self.context, AppManagementPolicy, ResourcePath("appManagementPolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def federated_identity_credentials(self) -> EntityCollection[FederatedIdentityCredential]:
+        """Gets the federatedIdentityCredentials property"""
+        from office365.directory.serviceprincipals.federated_identity_credential import (
+            FederatedIdentityCredential,
+        )
+
+        return self.properties.get(
+            "federatedIdentityCredentials",
+            EntityCollection[FederatedIdentityCredential](
+                self.context,
+                FederatedIdentityCredential,
+                ResourcePath("federatedIdentityCredentials", self.resource_path),
+            ),
+        )
+
+    @property
+    def home_realm_discovery_policies(self) -> EntityCollection[HomeRealmDiscoveryPolicy]:
+        """Gets the homeRealmDiscoveryPolicies property"""
+        from office365.directory.policies.home_realm_discovery import (
+            HomeRealmDiscoveryPolicy,
+        )
+
+        return self.properties.get(
+            "homeRealmDiscoveryPolicies",
+            EntityCollection[HomeRealmDiscoveryPolicy](
+                self.context, HomeRealmDiscoveryPolicy, ResourcePath("homeRealmDiscoveryPolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def token_lifetime_policies(self) -> EntityCollection[TokenLifetimePolicy]:
+        """Gets the tokenLifetimePolicies property"""
+        from office365.directory.policies.token_lifetime import TokenLifetimePolicy
+
+        return self.properties.get(
+            "tokenLifetimePolicies",
+            EntityCollection[TokenLifetimePolicy](
+                self.context, TokenLifetimePolicy, ResourcePath("tokenLifetimePolicies", self.resource_path)
+            ),
+        )

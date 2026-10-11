@@ -6,7 +6,7 @@ from functools import partial
 from io import IOBase
 from os import PathLike
 from os.path import isfile, join
-from typing import IO, AnyStr, AsyncIterator, Callable, Optional
+from typing import IO, TYPE_CHECKING, AnyStr, AsyncIterator, Callable, Optional
 
 import requests
 from requests import Response
@@ -71,6 +71,14 @@ from office365.runtime.transport.base import HeadersCallback
 from office365.runtime.transport.offload import get_offload_executor, run_offloaded
 from office365.runtime.types.odata_property import odata
 from office365.subscriptions.collection import SubscriptionCollection
+
+if TYPE_CHECKING:
+    from office365.onedrive.driveitems.bundle import Bundle
+    from office365.onedrive.driveitems.malware import Malware
+    from office365.onedrive.driveitems.package import Package
+    from office365.onedrive.driveitems.video import Video
+    from office365.onedrive.root import Root
+    from office365.search.search_result import SearchResult
 
 
 class DriveItem(BaseItem):
@@ -1454,3 +1462,66 @@ class DriveItem(BaseItem):
     @property
     def property_ref_name(self) -> str:
         return "id"
+
+    @property
+    def bundle(self) -> Bundle:
+        """Gets the bundle property"""
+        from office365.onedrive.driveitems.bundle import Bundle
+
+        return self.properties.get("bundle", Bundle())
+
+    @property
+    def content(self) -> Optional[bytes]:
+        """Gets the content property"""
+        return self.properties.get("content", None)
+
+    @property
+    def ctag(self) -> Optional[str]:
+        """Gets the cTag property"""
+        return self.properties.get("cTag", None)
+
+    @property
+    def malware(self) -> Malware:
+        """Gets the malware property"""
+        from office365.onedrive.driveitems.malware import Malware
+
+        return self.properties.get("malware", Malware())
+
+    @property
+    def package(self) -> Package:
+        """Gets the package property"""
+        from office365.onedrive.driveitems.package import Package
+
+        return self.properties.get("package", Package())
+
+    @property
+    def root(self) -> Root:
+        """Gets the root property"""
+        from office365.onedrive.root import Root
+
+        return self.properties.get("root", Root())
+
+    @property
+    def search_result(self) -> SearchResult:
+        """Gets the searchResult property"""
+        from office365.search.search_result import SearchResult
+
+        return self.properties.get("searchResult", SearchResult())
+
+    @property
+    def video(self) -> Video:
+        """Gets the video property"""
+        from office365.onedrive.driveitems.video import Video
+
+        return self.properties.get("video", Video())
+
+    @property
+    def list_item(self) -> ListItem:
+        """Gets the listItem property"""
+        from office365.onedrive.listitems.list_item import ListItem
+
+        return self.properties.get("listItem", ListItem(self.context, ResourcePath("listItem", self.resource_path)))
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.DriveItem"

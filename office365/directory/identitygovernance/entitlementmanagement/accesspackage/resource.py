@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource_environment import (
     AccessPackageResourceEnvironment,
@@ -14,7 +14,19 @@ from office365.directory.identitygovernance.entitlementmanagement.accesspackage.
 )
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.custom_data_provided_resource_upload_session import (  # noqa: E501
+        CustomDataProvidedResourceUploadSession,
+    )
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource_attribute import (
+        AccessPackageResourceAttribute,
+    )
+    from office365.directory.identitygovernance.entitlementmanagement.external_origin_resource_connector import (
+        ExternalOriginResourceConnector,
+    )
 
 
 class AccessPackageResource(Entity):
@@ -79,3 +91,42 @@ class AccessPackageResource(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessPackageResource"
+
+    @property
+    def attributes(self) -> ClientValueCollection[AccessPackageResourceAttribute]:
+        """Gets the attributes property"""
+        from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource_attribute import (
+            AccessPackageResourceAttribute,
+        )
+
+        return self.properties.get(
+            "attributes", ClientValueCollection[AccessPackageResourceAttribute](AccessPackageResourceAttribute)
+        )
+
+    @property
+    def upload_sessions(self) -> EntityCollection[CustomDataProvidedResourceUploadSession]:
+        """Gets the uploadSessions property"""
+        from office365.directory.identitygovernance.entitlementmanagement.accesspackage.custom_data_provided_resource_upload_session import (  # noqa: E501
+            CustomDataProvidedResourceUploadSession,
+        )
+
+        return self.properties.get(
+            "uploadSessions",
+            EntityCollection[CustomDataProvidedResourceUploadSession](
+                self.context, CustomDataProvidedResourceUploadSession, ResourcePath("uploadSessions", self.resource_path)
+            ),
+        )
+
+    @property
+    def external_origin_resource_connector(self) -> ExternalOriginResourceConnector:
+        """Gets the externalOriginResourceConnector property"""
+        from office365.directory.identitygovernance.entitlementmanagement.external_origin_resource_connector import (
+            ExternalOriginResourceConnector,
+        )
+
+        return self.properties.get(
+            "externalOriginResourceConnector",
+            ExternalOriginResourceConnector(
+                self.context, ResourcePath("externalOriginResourceConnector", self.resource_path)
+            ),
+        )

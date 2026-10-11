@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from office365.directory.security.search.data_source import DataSource
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.security.ediscovery.ediscovery_index_operation import (
+        EdiscoveryIndexOperation,
+    )
 
 
 class EdiscoveryNoncustodialDataSource(Entity):
@@ -16,3 +23,15 @@ class EdiscoveryNoncustodialDataSource(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.EdiscoveryNoncustodialDataSource"
+
+    @property
+    def last_index_operation(self) -> EdiscoveryIndexOperation:
+        """Gets the lastIndexOperation property"""
+        from office365.directory.security.ediscovery.ediscovery_index_operation import (
+            EdiscoveryIndexOperation,
+        )
+
+        return self.properties.get(
+            "lastIndexOperation",
+            EdiscoveryIndexOperation(self.context, ResourcePath("lastIndexOperation", self.resource_path)),
+        )

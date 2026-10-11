@@ -1,9 +1,13 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.communications.callrecords.modality import Modality
 from office365.communications.calls.direction import CallDirection
 from office365.communications.calls.incoming_context import IncomingContext
-from office365.communications.calls.invitation_participant_info import InvitationParticipantInfo
+from office365.communications.calls.invitation_participant_info import (
+    InvitationParticipantInfo,
+)
 from office365.communications.calls.options import CallOptions
 from office365.communications.calls.participant import Participant
 from office365.communications.calls.participant_info import ParticipantInfo
@@ -11,10 +15,16 @@ from office365.communications.calls.route import CallRoute
 from office365.communications.calls.state import CallState
 from office365.communications.meetings.info import MeetingInfo
 from office365.communications.onlinemeetings.collection import ChatInfo
-from office365.communications.operations.cancel_media_processing import CancelMediaProcessingOperation
+from office365.communications.operations.cancel_media_processing import (
+    CancelMediaProcessingOperation,
+)
 from office365.communications.operations.comms import CommsOperation
-from office365.communications.operations.unmute_participant import UnmuteParticipantOperation
-from office365.communications.operations.update_recording_status import UpdateRecordingStatusOperation
+from office365.communications.operations.unmute_participant import (
+    UnmuteParticipantOperation,
+)
+from office365.communications.operations.update_recording_status import (
+    UpdateRecordingStatusOperation,
+)
 from office365.communications.quotas import CALL_QUOTAS
 from office365.communications.result_info import ResultInfo
 from office365.entity import Entity
@@ -23,6 +33,16 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.limits import limit
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+
+if TYPE_CHECKING:
+    from office365.communications.calls.audio_routing_group import AudioRoutingGroup
+    from office365.communications.calls.content_sharing_session import (
+        ContentSharingSession,
+    )
+    from office365.communications.calls.media_state import CallMediaState
+    from office365.communications.calls.transcription_info import CallTranscriptionInfo
+    from office365.communications.media_config import MediaConfig
+    from office365.communications.tone_info import ToneInfo
 
 
 @limit(*CALL_QUOTAS)
@@ -209,3 +229,59 @@ class Call(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Call"
+
+    @property
+    def media_config(self) -> MediaConfig:
+        """Gets the mediaConfig property"""
+        from office365.communications.media_config import MediaConfig
+
+        return self.properties.get("mediaConfig", MediaConfig())
+
+    @property
+    def media_state(self) -> CallMediaState:
+        """Gets the mediaState property"""
+        from office365.communications.calls.media_state import CallMediaState
+
+        return self.properties.get("mediaState", CallMediaState())
+
+    @property
+    def tone_info(self) -> ToneInfo:
+        """Gets the toneInfo property"""
+        from office365.communications.tone_info import ToneInfo
+
+        return self.properties.get("toneInfo", ToneInfo())
+
+    @property
+    def transcription(self) -> CallTranscriptionInfo:
+        """Gets the transcription property"""
+        from office365.communications.calls.transcription_info import (
+            CallTranscriptionInfo,
+        )
+
+        return self.properties.get("transcription", CallTranscriptionInfo())
+
+    @property
+    def audio_routing_groups(self) -> EntityCollection[AudioRoutingGroup]:
+        """Gets the audioRoutingGroups property"""
+        from office365.communications.calls.audio_routing_group import AudioRoutingGroup
+
+        return self.properties.get(
+            "audioRoutingGroups",
+            EntityCollection[AudioRoutingGroup](
+                self.context, AudioRoutingGroup, ResourcePath("audioRoutingGroups", self.resource_path)
+            ),
+        )
+
+    @property
+    def content_sharing_sessions(self) -> EntityCollection[ContentSharingSession]:
+        """Gets the contentSharingSessions property"""
+        from office365.communications.calls.content_sharing_session import (
+            ContentSharingSession,
+        )
+
+        return self.properties.get(
+            "contentSharingSessions",
+            EntityCollection[ContentSharingSession](
+                self.context, ContentSharingSession, ResourcePath("contentSharingSessions", self.resource_path)
+            ),
+        )

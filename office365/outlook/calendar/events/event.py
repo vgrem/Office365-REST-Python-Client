@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Self
 
-from office365.communications.onlinemeetings.provider_type import OnlineMeetingProviderType
+from office365.communications.onlinemeetings.provider_type import (
+    OnlineMeetingProviderType,
+)
 from office365.directory.extensions.extended_property import (
     MultiValueLegacyExtendedProperty,
     SingleValueLegacyExtendedProperty,
@@ -35,6 +37,12 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.communications.onlinemeetings.online_meeting_info import (
+        OnlineMeetingInfo,
+    )
+    from office365.outlook.calendar.events.event import Event
 
 
 class Event(OutlookItem):
@@ -467,3 +475,22 @@ class Event(OutlookItem):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Event"
+
+    @property
+    def online_meeting(self) -> OnlineMeetingInfo:
+        """Gets the onlineMeeting property"""
+        from office365.communications.onlinemeetings.online_meeting_info import (
+            OnlineMeetingInfo,
+        )
+
+        return self.properties.get("onlineMeeting", OnlineMeetingInfo())
+
+    @property
+    def exception_occurrences(self) -> EntityCollection[Event]:
+        """Gets the exceptionOccurrences property"""
+        from office365.outlook.calendar.events.event import Event
+
+        return self.properties.get(
+            "exceptionOccurrences",
+            EntityCollection[Event](self.context, Event, ResourcePath("exceptionOccurrences", self.resource_path)),
+        )

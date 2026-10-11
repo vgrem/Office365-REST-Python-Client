@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.communications.callrecords.session import Session
 from office365.communications.callrecords.type import CallType
@@ -11,6 +13,9 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.limits import Limit, LimitKind, limit
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.communications.callrecords.modality import Modality
 
 _DOC = "https://learn.microsoft.com/en-us/graph/throttling-limits"
 
@@ -104,3 +109,10 @@ class CallRecord(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.callRecords.CallRecord"
+
+    @property
+    def modalities(self) -> ClientValueCollection[Modality]:
+        """Gets the modalities property"""
+        from office365.communications.callrecords.modality import Modality
+
+        return self.properties.get("modalities", ClientValueCollection[Modality](Modality))

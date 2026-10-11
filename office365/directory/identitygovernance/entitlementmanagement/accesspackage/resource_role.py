@@ -6,7 +6,10 @@ from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource import AccessPackageResource
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource import (
+        AccessPackageResource,
+    )
+    from office365.directory.role_type import RoleType
 
 
 class AccessPackageResourceRole(Entity):
@@ -40,3 +43,10 @@ class AccessPackageResourceRole(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessPackageResourceRole"
+
+    @property
+    def type(self) -> RoleType:
+        """Gets the type property"""
+        from office365.directory.role_type import RoleType
+
+        return self.properties.get("type", RoleType.active)

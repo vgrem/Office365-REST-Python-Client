@@ -8,6 +8,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
+    from office365.directory.security.ssl_certificate_entity import SslCertificateEntity
     from office365.directory.security.threatintelligence.host import Host
 
 
@@ -57,3 +58,21 @@ class SslCertificate(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.SslCertificate"
+
+    @property
+    def issuer(self) -> SslCertificateEntity:
+        """Gets the issuer property"""
+        from office365.directory.security.ssl_certificate_entity import (
+            SslCertificateEntity,
+        )
+
+        return self.properties.get("issuer", SslCertificateEntity())
+
+    @property
+    def subject(self) -> SslCertificateEntity:
+        """Gets the subject property"""
+        from office365.directory.security.ssl_certificate_entity import (
+            SslCertificateEntity,
+        )
+
+        return self.properties.get("subject", SslCertificateEntity())

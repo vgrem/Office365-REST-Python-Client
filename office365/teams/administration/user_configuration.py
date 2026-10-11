@@ -1,15 +1,22 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.users.user import User
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
-from office365.teams.administration.assigned_telephone_number import AssignedTelephoneNumber
-from office365.teams.administration.effective_policy_assignment import EffectivePolicyAssignment
+from office365.teams.administration.assigned_telephone_number import (
+    AssignedTelephoneNumber,
+)
+from office365.teams.administration.effective_policy_assignment import (
+    EffectivePolicyAssignment,
+)
+
+if TYPE_CHECKING:
+    from office365.teams.administration.account_type import AccountType
 
 
 class TeamsUserConfiguration(Entity):
@@ -65,3 +72,10 @@ class TeamsUserConfiguration(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.teamsAdministration.TeamsUserConfiguration"
+
+    @property
+    def account_type(self) -> AccountType:
+        """Gets the accountType property"""
+        from office365.teams.administration.account_type import AccountType
+
+        return self.properties.get("accountType", AccountType.user)

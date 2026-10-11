@@ -1,11 +1,19 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from office365.directory.extensions.custom.callbackconfiguration import CustomExtensionCallbackConfiguration
+from office365.directory.extensions.custom.callbackconfiguration import (
+    CustomExtensionCallbackConfiguration,
+)
 from office365.directory.users.user import User
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.custom_task_extension_reply_mode import (
+        CustomTaskExtensionReplyMode,
+    )
 
 
 class CustomTaskExtension(Entity):
@@ -39,3 +47,12 @@ class CustomTaskExtension(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.identityGovernance.CustomTaskExtension"
+
+    @property
+    def reply_mode(self) -> CustomTaskExtensionReplyMode:
+        """Gets the replyMode property"""
+        from office365.directory.identitygovernance.custom_task_extension_reply_mode import (
+            CustomTaskExtensionReplyMode,
+        )
+
+        return self.properties.get("replyMode", CustomTaskExtensionReplyMode.none)

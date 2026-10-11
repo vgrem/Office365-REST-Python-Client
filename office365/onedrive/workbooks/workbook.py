@@ -159,3 +159,7 @@ class Workbook(Entity):
             "worksheets",
             WorkbookWorksheetCollection(self.context, ResourcePath("worksheets", self.resource_path)),
         )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.Workbook"

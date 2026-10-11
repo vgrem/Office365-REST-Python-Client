@@ -1,9 +1,16 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.objects.collection import DirectoryObjectCollection
 from office365.directory.policies.base import PolicyBase
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.policies.custom_app_management_configuration import (
+        CustomAppManagementConfiguration,
+    )
 
 
 class AppManagementPolicy(PolicyBase):
@@ -29,3 +36,12 @@ class AppManagementPolicy(PolicyBase):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AppManagementPolicy"
+
+    @property
+    def restrictions(self) -> CustomAppManagementConfiguration:
+        """Gets the restrictions property"""
+        from office365.directory.policies.custom_app_management_configuration import (
+            CustomAppManagementConfiguration,
+        )
+
+        return self.properties.get("restrictions", CustomAppManagementConfiguration())

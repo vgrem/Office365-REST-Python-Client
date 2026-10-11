@@ -1,4 +1,6 @@
-from typing import List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List
 
 from office365.communications.callrecords.collection import CallRecordCollection
 from office365.communications.calls.collection import CallCollection
@@ -9,6 +11,12 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.communications.adhoc_call import AdhocCall
+    from office365.communications.onlinemeetings.engagement_conversation import (
+        OnlineMeetingEngagementConversation,
+    )
 
 
 class CloudCommunications(Entity):
@@ -56,3 +64,29 @@ class CloudCommunications(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.CloudCommunications"
+
+    @property
+    def adhoc_calls(self) -> EntityCollection[AdhocCall]:
+        """Gets the adhocCalls property"""
+        from office365.communications.adhoc_call import AdhocCall
+
+        return self.properties.get(
+            "adhocCalls",
+            EntityCollection[AdhocCall](self.context, AdhocCall, ResourcePath("adhocCalls", self.resource_path)),
+        )
+
+    @property
+    def online_meeting_conversations(self) -> EntityCollection[OnlineMeetingEngagementConversation]:
+        """Gets the onlineMeetingConversations property"""
+        from office365.communications.onlinemeetings.engagement_conversation import (
+            OnlineMeetingEngagementConversation,
+        )
+
+        return self.properties.get(
+            "onlineMeetingConversations",
+            EntityCollection[OnlineMeetingEngagementConversation](
+                self.context,
+                OnlineMeetingEngagementConversation,
+                ResourcePath("onlineMeetingConversations", self.resource_path),
+            ),
+        )

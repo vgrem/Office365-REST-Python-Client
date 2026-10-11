@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.json import Json
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.status import Status
+    from office365.directory.visual_info import VisualInfo
 
 
 class UserActivity(Entity):
@@ -66,7 +72,9 @@ class UserActivity(Entity):
     @property
     def history_items(self):
         """NavigationProperty/Containment; navigation property to the associated activity."""
-        from office365.directory.users.activities.history_item import ActivityHistoryItem
+        from office365.directory.users.activities.history_item import (
+            ActivityHistoryItem,
+        )
 
         return self.properties.get(
             "historyItems",
@@ -111,3 +119,17 @@ class UserActivity(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.UserActivity"
+
+    @property
+    def status(self) -> Status:
+        """Gets the status property"""
+        from office365.directory.status import Status
+
+        return self.properties.get("status", Status.active)
+
+    @property
+    def visual_elements(self) -> VisualInfo:
+        """Gets the visualElements property"""
+        from office365.directory.visual_info import VisualInfo
+
+        return self.properties.get("visualElements", VisualInfo())

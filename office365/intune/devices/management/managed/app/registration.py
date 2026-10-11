@@ -1,12 +1,20 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.intune.devices.management.managed.app.flaggedreason import ManagedAppFlaggedReason
+from office365.intune.devices.management.managed.app.flaggedreason import (
+    ManagedAppFlaggedReason,
+)
 from office365.intune.policies.managed_app import ManagedAppPolicy
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.common.managed_app_operation import ManagedAppOperation
+    from office365.intune.mobile_app_identifier import MobileAppIdentifier
 
 
 class ManagedAppRegistration(Entity):
@@ -96,3 +104,22 @@ class ManagedAppRegistration(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.ManagedAppRegistration"
+
+    @property
+    def app_identifier(self) -> MobileAppIdentifier:
+        """Gets the appIdentifier property"""
+        from office365.intune.mobile_app_identifier import MobileAppIdentifier
+
+        return self.properties.get("appIdentifier", MobileAppIdentifier())
+
+    @property
+    def operations(self) -> EntityCollection[ManagedAppOperation]:
+        """Gets the operations property"""
+        from office365.common.managed_app_operation import ManagedAppOperation
+
+        return self.properties.get(
+            "operations",
+            EntityCollection[ManagedAppOperation](
+                self.context, ManagedAppOperation, ResourcePath("operations", self.resource_path)
+            ),
+        )

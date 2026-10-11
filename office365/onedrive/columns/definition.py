@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.onedrive.base_item import BaseItem
@@ -192,3 +194,12 @@ class ColumnDefinition(BaseItem):
     def type(self) -> Optional[str]:
         """For site columns, the type of column."""
         return self.properties.get("type", None)
+
+    @property
+    def required(self) -> Optional[bool]:
+        """Gets the required property"""
+        return self.properties.get("required", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ColumnDefinition"

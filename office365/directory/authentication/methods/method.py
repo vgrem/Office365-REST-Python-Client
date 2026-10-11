@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from datetime import datetime
 from typing import Optional
 
 from office365.directory.authentication.password_reset_response import (
@@ -40,3 +43,12 @@ class AuthenticationMethod(Entity):
         qry = ServiceOperationQuery(self, "resetPassword", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def created_date_time(self) -> Optional[datetime]:
+        """Gets the createdDateTime property"""
+        return self.properties.get("createdDateTime", datetime.min)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.AuthenticationMethod"

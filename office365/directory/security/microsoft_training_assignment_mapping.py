@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from office365.directory.security.attacksimulations.trainingassignedto import (
     TrainingAssignedTo,
 )
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
+
+if TYPE_CHECKING:
+    from office365.directory.security.training import Training
 
 
 @dataclass
@@ -18,3 +22,5 @@ class MicrosoftTrainingAssignmentMapping(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.MicrosoftTrainingAssignmentMapping"
+
+    training: Training | None = None

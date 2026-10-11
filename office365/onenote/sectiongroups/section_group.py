@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity_collection import EntityCollection
 from office365.onenote.entity_hierarchy_model import OnenoteEntityHierarchyModel
@@ -8,6 +8,9 @@ from office365.onenote.notebooks.notebook import Notebook
 from office365.onenote.sections.section import OnenoteSection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.onenote.sectiongroups.section_group import SectionGroup
 
 
 class SectionGroup(OnenoteEntityHierarchyModel):
@@ -58,3 +61,16 @@ class SectionGroup(OnenoteEntityHierarchyModel):
                 ResourcePath("sectionGroups", self.resource_path),
             ),
         )
+
+    @property
+    def parent_section_group(self) -> SectionGroup:
+        """Gets the parentSectionGroup property"""
+        from office365.onenote.sectiongroups.section_group import SectionGroup
+
+        return self.properties.get(
+            "parentSectionGroup", SectionGroup(self.context, ResourcePath("parentSectionGroup", self.resource_path))
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SectionGroup"

@@ -1,4 +1,6 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Optional
 
 from office365.communications.calls.invitation_participant_info import (
     InvitationParticipantInfo,
@@ -13,6 +15,11 @@ from office365.communications.operations.stop_hold_music import StopHoldMusicOpe
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+
+if TYPE_CHECKING:
+    from office365.communications.callrecords.media_stream import MediaStream
+    from office365.communications.recording_info import RecordingInfo
+    from office365.communications.removed_state import RemovedState
 
 
 class Participant(Entity):
@@ -75,3 +82,43 @@ class Participant(Entity):
     def restricted_experience(self):
         """Information about the reason or reasons media content from a participant is restricted."""
         return self.properties.get("restrictedExperience", OnlineMeetingRestricted())
+
+    @property
+    def is_in_lobby(self) -> Optional[bool]:
+        """Gets the isInLobby property"""
+        return self.properties.get("isInLobby", None)
+
+    @property
+    def is_muted(self) -> Optional[bool]:
+        """Gets the isMuted property"""
+        return self.properties.get("isMuted", None)
+
+    @property
+    def media_streams(self) -> ClientValueCollection[MediaStream]:
+        """Gets the mediaStreams property"""
+        from office365.communications.callrecords.media_stream import MediaStream
+
+        return self.properties.get("mediaStreams", ClientValueCollection[MediaStream](MediaStream))
+
+    @property
+    def recording_info(self) -> RecordingInfo:
+        """Gets the recordingInfo property"""
+        from office365.communications.recording_info import RecordingInfo
+
+        return self.properties.get("recordingInfo", RecordingInfo())
+
+    @property
+    def removed_state(self) -> RemovedState:
+        """Gets the removedState property"""
+        from office365.communications.removed_state import RemovedState
+
+        return self.properties.get("removedState", RemovedState())
+
+    @property
+    def roster_sequence_number(self) -> Optional[int]:
+        """Gets the rosterSequenceNumber property"""
+        return self.properties.get("rosterSequenceNumber", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.Participant"

@@ -100,3 +100,7 @@ class AttachmentSession(Entity):
             for key, value in payload.items():
                 attachment.set_property(key, value, False)
         return attachment
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.AttachmentSession"

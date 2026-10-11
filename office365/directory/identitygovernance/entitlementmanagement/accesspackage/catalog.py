@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.identitygovernance.entitlementmanagement.accesspackage.catalogstate import (
     AccessPackageCatalogState,
@@ -9,10 +9,26 @@ from office365.directory.identitygovernance.entitlementmanagement.accesspackage.
 from office365.directory.identitygovernance.entitlementmanagement.accesspackage.catalogtype import (
     AccessPackageCatalogType,
 )
-from office365.directory.identitygovernance.workflow.custom_callout_extension import CustomCalloutExtension
+from office365.directory.identitygovernance.workflow.custom_callout_extension import (
+    CustomCalloutExtension,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.package import (
+        AccessPackage,
+    )
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource import (
+        AccessPackageResource,
+    )
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource_role import (
+        AccessPackageResourceRole,
+    )
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource_scope import (
+        AccessPackageResourceScope,
+    )
 
 
 class AccessPackageCatalog(Entity):
@@ -71,3 +87,59 @@ class AccessPackageCatalog(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessPackageCatalog"
+
+    @property
+    def access_packages(self) -> EntityCollection[AccessPackage]:
+        """Gets the accessPackages property"""
+        from office365.directory.identitygovernance.entitlementmanagement.accesspackage.package import (
+            AccessPackage,
+        )
+
+        return self.properties.get(
+            "accessPackages",
+            EntityCollection[AccessPackage](
+                self.context, AccessPackage, ResourcePath("accessPackages", self.resource_path)
+            ),
+        )
+
+    @property
+    def resource_roles(self) -> EntityCollection[AccessPackageResourceRole]:
+        """Gets the resourceRoles property"""
+        from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource_role import (
+            AccessPackageResourceRole,
+        )
+
+        return self.properties.get(
+            "resourceRoles",
+            EntityCollection[AccessPackageResourceRole](
+                self.context, AccessPackageResourceRole, ResourcePath("resourceRoles", self.resource_path)
+            ),
+        )
+
+    @property
+    def resources(self) -> EntityCollection[AccessPackageResource]:
+        """Gets the resources property"""
+        from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource import (
+            AccessPackageResource,
+        )
+
+        return self.properties.get(
+            "resources",
+            EntityCollection[AccessPackageResource](
+                self.context, AccessPackageResource, ResourcePath("resources", self.resource_path)
+            ),
+        )
+
+    @property
+    def resource_scopes(self) -> EntityCollection[AccessPackageResourceScope]:
+        """Gets the resourceScopes property"""
+        from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource_scope import (
+            AccessPackageResourceScope,
+        )
+
+        return self.properties.get(
+            "resourceScopes",
+            EntityCollection[AccessPackageResourceScope](
+                self.context, AccessPackageResourceScope, ResourcePath("resourceScopes", self.resource_path)
+            ),
+        )

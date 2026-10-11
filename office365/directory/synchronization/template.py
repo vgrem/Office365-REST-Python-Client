@@ -1,9 +1,17 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
 from office365.directory.synchronization.schema import SynchronizationSchema
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.synchronization.metadata_entry import (
+        SynchronizationMetadataEntry,
+    )
 
 
 class SynchronizationTemplate(Entity):
@@ -52,3 +60,14 @@ class SynchronizationTemplate(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.SynchronizationTemplate"
+
+    @property
+    def metadata(self) -> ClientValueCollection[SynchronizationMetadataEntry]:
+        """Gets the metadata property"""
+        from office365.directory.synchronization.metadata_entry import (
+            SynchronizationMetadataEntry,
+        )
+
+        return self.properties.get(
+            "metadata", ClientValueCollection[SynchronizationMetadataEntry](SynchronizationMetadataEntry)
+        )

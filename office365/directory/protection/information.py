@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.protection.threatassessment.requests.request import (
     ThreatAssessmentRequest,
 )
@@ -6,6 +10,9 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
+
+if TYPE_CHECKING:
+    from office365.directory.protection.bitlocker import Bitlocker
 
 
 class InformationProtection(Entity):
@@ -116,3 +123,14 @@ class InformationProtection(Entity):
                 ResourcePath("threatAssessmentRequests", self.resource_path),
             ),
         )
+
+    @property
+    def bitlocker(self) -> Bitlocker:
+        """Gets the bitlocker property"""
+        from office365.directory.protection.bitlocker import Bitlocker
+
+        return self.properties.get("bitlocker", Bitlocker(self.context, ResourcePath("bitlocker", self.resource_path)))
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.InformationProtection"

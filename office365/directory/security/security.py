@@ -1,8 +1,14 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.security.alerts.alert import Alert
 from office365.directory.security.alerts.collection import AlertCollection
 from office365.directory.security.attacksimulations.root import AttackSimulationRoot
 from office365.directory.security.cases.root import CasesRoot
-from office365.directory.security.datasecurity.governance import TenantDataSecurityAndGovernance
+from office365.directory.security.datasecurity.governance import (
+    TenantDataSecurityAndGovernance,
+)
 from office365.directory.security.hunting_query_results import HuntingQueryResults
 from office365.directory.security.incidents.incident import Incident
 from office365.directory.security.labels.root import LabelsRoot
@@ -21,6 +27,14 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.identities.container import IdentityContainer
+    from office365.directory.security.audit.core_root import AuditCoreRoot
+    from office365.directory.security.collaboration.collaboration_root import (
+        CollaborationRoot,
+    )
+    from office365.directory.security.securescores.secure_score import SecureScore
 
 
 class Security(Entity):
@@ -155,3 +169,40 @@ class Security(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.alert"
+
+    @property
+    def identities(self) -> IdentityContainer:
+        """Gets the identities property"""
+        from office365.directory.identities.container import IdentityContainer
+
+        return self.properties.get(
+            "identities", IdentityContainer(self.context, ResourcePath("identities", self.resource_path))
+        )
+
+    @property
+    def audit_log(self) -> AuditCoreRoot:
+        """Gets the auditLog property"""
+        from office365.directory.security.audit.core_root import AuditCoreRoot
+
+        return self.properties.get("auditLog", AuditCoreRoot(self.context, ResourcePath("auditLog", self.resource_path)))
+
+    @property
+    def collaboration(self) -> CollaborationRoot:
+        """Gets the collaboration property"""
+        from office365.directory.security.collaboration.collaboration_root import (
+            CollaborationRoot,
+        )
+
+        return self.properties.get(
+            "collaboration", CollaborationRoot(self.context, ResourcePath("collaboration", self.resource_path))
+        )
+
+    @property
+    def secure_scores(self) -> EntityCollection[SecureScore]:
+        """Gets the secureScores property"""
+        from office365.directory.security.securescores.secure_score import SecureScore
+
+        return self.properties.get(
+            "secureScores",
+            EntityCollection[SecureScore](self.context, SecureScore, ResourcePath("secureScores", self.resource_path)),
+        )

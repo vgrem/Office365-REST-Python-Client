@@ -1,9 +1,16 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.viva.engagement.creationmode import EngagementCreationMode
+
+if TYPE_CHECKING:
+    from office365.common.engagement_conversation_message import (
+        EngagementConversationMessage,
+    )
 
 
 class EngagementConversation(Entity):
@@ -20,3 +27,28 @@ class EngagementConversation(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.EngagementConversation"
+
+    @property
+    def messages(self) -> EntityCollection[EngagementConversationMessage]:
+        """Gets the messages property"""
+        from office365.common.engagement_conversation_message import (
+            EngagementConversationMessage,
+        )
+
+        return self.properties.get(
+            "messages",
+            EntityCollection[EngagementConversationMessage](
+                self.context, EngagementConversationMessage, ResourcePath("messages", self.resource_path)
+            ),
+        )
+
+    @property
+    def starter(self) -> EngagementConversationMessage:
+        """Gets the starter property"""
+        from office365.common.engagement_conversation_message import (
+            EngagementConversationMessage,
+        )
+
+        return self.properties.get(
+            "starter", EngagementConversationMessage(self.context, ResourcePath("starter", self.resource_path))
+        )

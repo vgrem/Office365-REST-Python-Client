@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from office365.entity import Entity
 from office365.onedrive.workbooks.filter import WorkbookFilter
 from office365.onedrive.workbooks.ranges.range import WorkbookRange
@@ -41,3 +45,17 @@ class WorkbookTableColumn(Entity):
             "filter",
             WorkbookFilter(self.context, ResourcePath("filter", self.resource_path)),
         )
+
+    @property
+    def index(self) -> Optional[int]:
+        """Gets the index property"""
+        return self.properties.get("index", None)
+
+    @property
+    def name(self) -> Optional[str]:
+        """Gets the name property"""
+        return self.properties.get("name", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookTableColumn"

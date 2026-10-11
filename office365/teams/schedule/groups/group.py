@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.runtime.types.collections import StringCollection
@@ -16,3 +18,17 @@ class SchedulingGroup(ChangeTrackedEntity):
     def user_ids(self) -> StringCollection:
         """The list of user IDs that are a member of the schedulingGroup."""
         return self.properties.get("userIds", StringCollection())
+
+    @property
+    def code(self) -> Optional[str]:
+        """Gets the code property"""
+        return self.properties.get("code", None)
+
+    @property
+    def display_name(self) -> Optional[str]:
+        """Gets the displayName property"""
+        return self.properties.get("displayName", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SchedulingGroup"

@@ -1,8 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 from office365.teams.apps.app import TeamsApp
 from office365.teams.apps.definition import TeamsAppDefinition
+
+if TYPE_CHECKING:
+    from office365.teams.apps.permission_set import TeamsAppPermissionSet
 
 
 class TeamsAppInstallation(Entity):
@@ -28,3 +35,14 @@ class TeamsAppInstallation(Entity):
             "teamsAppDefinition",
             TeamsAppDefinition(self.context, ResourcePath("teamsAppDefinition", self.resource_path)),
         )
+
+    @property
+    def consented_permission_set(self) -> TeamsAppPermissionSet:
+        """Gets the consentedPermissionSet property"""
+        from office365.teams.apps.permission_set import TeamsAppPermissionSet
+
+        return self.properties.get("consentedPermissionSet", TeamsAppPermissionSet())
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.TeamsAppInstallation"

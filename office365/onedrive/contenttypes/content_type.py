@@ -201,3 +201,27 @@ class ContentType(BaseItem):
     def order(self) -> ContentTypeOrder:
         """Specifies the order in which the content type appears in the selection UI."""
         return self.properties.get("order", ContentTypeOrder())
+
+    @property
+    def group(self) -> Optional[str]:
+        """Gets the group property"""
+        return self.properties.get("group", None)
+
+    @property
+    def hidden(self) -> Optional[bool]:
+        """Gets the hidden property"""
+        return self.properties.get("hidden", None)
+
+    @property
+    def is_built_in(self) -> Optional[bool]:
+        """Gets the isBuiltIn property"""
+        return self.properties.get("isBuiltIn", None)
+
+    @property
+    def sealed(self) -> Optional[bool]:
+        """Gets the sealed property"""
+        return self.properties.get("sealed", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ContentType"

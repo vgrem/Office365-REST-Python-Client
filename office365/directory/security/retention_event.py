@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.directory.security.triggertypes.event_type import RetentionEventType
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.security.event_propagation_result import (
+        EventPropagationResult,
+    )
+    from office365.directory.security.event_query import EventQuery
+    from office365.directory.security.retention_event_status import RetentionEventStatus
 
 
 class RetentionEvent(Entity):
@@ -61,3 +69,30 @@ class RetentionEvent(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.RetentionEvent"
+
+    @property
+    def event_propagation_results(self) -> ClientValueCollection[EventPropagationResult]:
+        """Gets the eventPropagationResults property"""
+        from office365.directory.security.event_propagation_result import (
+            EventPropagationResult,
+        )
+
+        return self.properties.get(
+            "eventPropagationResults", ClientValueCollection[EventPropagationResult](EventPropagationResult)
+        )
+
+    @property
+    def event_queries(self) -> ClientValueCollection[EventQuery]:
+        """Gets the eventQueries property"""
+        from office365.directory.security.event_query import EventQuery
+
+        return self.properties.get("eventQueries", ClientValueCollection[EventQuery](EventQuery))
+
+    @property
+    def event_status(self) -> RetentionEventStatus:
+        """Gets the eventStatus property"""
+        from office365.directory.security.retention_event_status import (
+            RetentionEventStatus,
+        )
+
+        return self.properties.get("eventStatus", RetentionEventStatus())

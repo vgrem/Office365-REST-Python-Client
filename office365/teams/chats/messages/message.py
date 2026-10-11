@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
@@ -16,6 +16,12 @@ from office365.teams.chats.messages.body import ChatMessageBody
 from office365.teams.chats.messages.hosted_content import ChatMessageHostedContent
 from office365.teams.chats.messages.mention import ChatMessageMention
 from office365.teams.chats.messages.reaction import ChatMessageReaction
+
+if TYPE_CHECKING:
+    from office365.teams.chats.messages.history_item import ChatMessageHistoryItem
+    from office365.teams.chats.messages.policy_violation import (
+        ChatMessagePolicyViolation,
+    )
 
 
 class ChatMessage(Entity):
@@ -171,3 +177,35 @@ class ChatMessage(Entity):
         The importance of the chat message. The possible values are: normal, high, urgent.
         """
         return self.properties.get("importance", None)
+
+    @property
+    def last_edited_date_time(self) -> Optional[datetime]:
+        """Gets the lastEditedDateTime property"""
+        return self.properties.get("lastEditedDateTime", datetime.min)
+
+    @property
+    def locale(self) -> Optional[str]:
+        """Gets the locale property"""
+        return self.properties.get("locale", None)
+
+    @property
+    def message_history(self) -> ClientValueCollection[ChatMessageHistoryItem]:
+        """Gets the messageHistory property"""
+        from office365.teams.chats.messages.history_item import ChatMessageHistoryItem
+
+        return self.properties.get(
+            "messageHistory", ClientValueCollection[ChatMessageHistoryItem](ChatMessageHistoryItem)
+        )
+
+    @property
+    def policy_violation(self) -> ChatMessagePolicyViolation:
+        """Gets the policyViolation property"""
+        from office365.teams.chats.messages.policy_violation import (
+            ChatMessagePolicyViolation,
+        )
+
+        return self.properties.get("policyViolation", ChatMessagePolicyViolation())
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ChatMessage"

@@ -1,9 +1,16 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.extensions.extension import Extension
 from office365.directory.objects.object import DirectoryObject
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.permissions.scoped_role_membership import (
+        ScopedRoleMembership,
+    )
 
 
 class AdministrativeUnit(DirectoryObject):
@@ -48,3 +55,46 @@ class AdministrativeUnit(DirectoryObject):
             "extensions",
             EntityCollection(self.context, Extension, ResourcePath("extensions", self.resource_path)),
         )
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the description property"""
+        return self.properties.get("description", None)
+
+    @property
+    def is_member_management_restricted(self) -> Optional[bool]:
+        """Gets the isMemberManagementRestricted property"""
+        return self.properties.get("isMemberManagementRestricted", None)
+
+    @property
+    def membership_rule(self) -> Optional[str]:
+        """Gets the membershipRule property"""
+        return self.properties.get("membershipRule", None)
+
+    @property
+    def membership_rule_processing_state(self) -> Optional[str]:
+        """Gets the membershipRuleProcessingState property"""
+        return self.properties.get("membershipRuleProcessingState", None)
+
+    @property
+    def membership_type(self) -> Optional[str]:
+        """Gets the membershipType property"""
+        return self.properties.get("membershipType", None)
+
+    @property
+    def scoped_role_members(self) -> EntityCollection[ScopedRoleMembership]:
+        """Gets the scopedRoleMembers property"""
+        from office365.directory.permissions.scoped_role_membership import (
+            ScopedRoleMembership,
+        )
+
+        return self.properties.get(
+            "scopedRoleMembers",
+            EntityCollection[ScopedRoleMembership](
+                self.context, ScopedRoleMembership, ResourcePath("scopedRoleMembers", self.resource_path)
+            ),
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.AdministrativeUnit"

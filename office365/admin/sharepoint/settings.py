@@ -1,9 +1,14 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Optional
 
 from office365.admin.sharepoint.idle_session_signout import IdleSessionSignOut
 from office365.entity import Entity
 from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.admin.sharepoint.imagetaggingchoice import ImageTaggingChoice
 
 
 class SharepointSettings(Entity):
@@ -106,3 +111,85 @@ class SharepointSettings(Entity):
     @property
     def entity_type_name(self) -> str:
         return None  # type: ignore
+
+    @property
+    def deleted_user_personal_site_retention_period_in_days(self) -> Optional[int]:
+        """Gets the deletedUserPersonalSiteRetentionPeriodInDays property"""
+        return self.properties.get("deletedUserPersonalSiteRetentionPeriodInDays", None)
+
+    @property
+    def image_tagging_option(self) -> ImageTaggingChoice:
+        """Gets the imageTaggingOption property"""
+        from office365.admin.sharepoint.imagetaggingchoice import ImageTaggingChoice
+
+        return self.properties.get("imageTaggingOption", ImageTaggingChoice.disabled)
+
+    @property
+    def is_file_activity_notification_enabled(self) -> Optional[bool]:
+        """Gets the isFileActivityNotificationEnabled property"""
+        return self.properties.get("isFileActivityNotificationEnabled", None)
+
+    @property
+    def is_loop_enabled(self) -> Optional[bool]:
+        """Gets the isLoopEnabled property"""
+        return self.properties.get("isLoopEnabled", None)
+
+    @property
+    def is_mac_sync_app_enabled(self) -> Optional[bool]:
+        """Gets the isMacSyncAppEnabled property"""
+        return self.properties.get("isMacSyncAppEnabled", None)
+
+    @property
+    def is_require_accepting_user_to_match_invited_user_enabled(self) -> Optional[bool]:
+        """Gets the isRequireAcceptingUserToMatchInvitedUserEnabled property"""
+        return self.properties.get("isRequireAcceptingUserToMatchInvitedUserEnabled", None)
+
+    @property
+    def is_resharing_by_external_users_enabled(self) -> Optional[bool]:
+        """Gets the isResharingByExternalUsersEnabled property"""
+        return self.properties.get("isResharingByExternalUsersEnabled", None)
+
+    @property
+    def is_sharepoint_mobile_notification_enabled(self) -> Optional[bool]:
+        """Gets the isSharePointMobileNotificationEnabled property"""
+        return self.properties.get("isSharePointMobileNotificationEnabled", None)
+
+    @property
+    def is_sharepoint_newsfeed_enabled(self) -> Optional[bool]:
+        """Gets the isSharePointNewsfeedEnabled property"""
+        return self.properties.get("isSharePointNewsfeedEnabled", None)
+
+    @property
+    def is_site_creation_enabled(self) -> Optional[bool]:
+        """Gets the isSiteCreationEnabled property"""
+        return self.properties.get("isSiteCreationEnabled", None)
+
+    @property
+    def is_site_creation_ui_enabled(self) -> Optional[bool]:
+        """Gets the isSiteCreationUIEnabled property"""
+        return self.properties.get("isSiteCreationUIEnabled", None)
+
+    @property
+    def is_site_pages_creation_enabled(self) -> Optional[bool]:
+        """Gets the isSitePagesCreationEnabled property"""
+        return self.properties.get("isSitePagesCreationEnabled", None)
+
+    @property
+    def is_sites_storage_limit_automatic(self) -> Optional[bool]:
+        """Gets the isSitesStorageLimitAutomatic property"""
+        return self.properties.get("isSitesStorageLimitAutomatic", None)
+
+    @property
+    def is_sync_button_hidden_on_personal_site(self) -> Optional[bool]:
+        """Gets the isSyncButtonHiddenOnPersonalSite property"""
+        return self.properties.get("isSyncButtonHiddenOnPersonalSite", None)
+
+    @property
+    def is_unmanaged_sync_app_for_tenant_restricted(self) -> Optional[bool]:
+        """Gets the isUnmanagedSyncAppForTenantRestricted property"""
+        return self.properties.get("isUnmanagedSyncAppForTenantRestricted", None)
+
+    @property
+    def personal_site_default_storage_limit_in_mb(self) -> Optional[int]:
+        """Gets the personalSiteDefaultStorageLimitInMB property"""
+        return self.properties.get("personalSiteDefaultStorageLimitInMB", None)

@@ -1,8 +1,18 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.synchronization.job import SynchronizationJob
 from office365.directory.synchronization.template import SynchronizationTemplate
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.synchronization.secret_key_string_value_pair import (
+        SynchronizationSecretKeyStringValuePair,
+    )
 
 
 class Synchronization(Entity):
@@ -38,3 +48,15 @@ class Synchronization(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Synchronization"
+
+    @property
+    def secrets(self) -> ClientValueCollection[SynchronizationSecretKeyStringValuePair]:
+        """Gets the secrets property"""
+        from office365.directory.synchronization.secret_key_string_value_pair import (
+            SynchronizationSecretKeyStringValuePair,
+        )
+
+        return self.properties.get(
+            "secrets",
+            ClientValueCollection[SynchronizationSecretKeyStringValuePair](SynchronizationSecretKeyStringValuePair),
+        )

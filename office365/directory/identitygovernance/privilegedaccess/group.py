@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.identitygovernance.privilegedaccess.approval import Approval
 from office365.directory.identitygovernance.privilegedaccess.group_assignment_schedule import (
     PrivilegedAccessGroupAssignmentSchedule,
@@ -20,6 +24,11 @@ from office365.directory.identitygovernance.privilegedaccess.schedule.group_assi
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.privilegedaccess.group_resource import (
+        GroupResource,
+    )
 
 
 class PrivilegedAccessGroup(Entity):
@@ -108,3 +117,15 @@ class PrivilegedAccessGroup(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.PrivilegedAccessGroup"
+
+    @property
+    def resources(self) -> EntityCollection[GroupResource]:
+        """Gets the resources property"""
+        from office365.directory.identitygovernance.privilegedaccess.group_resource import (
+            GroupResource,
+        )
+
+        return self.properties.get(
+            "resources",
+            EntityCollection[GroupResource](self.context, GroupResource, ResourcePath("resources", self.resource_path)),
+        )

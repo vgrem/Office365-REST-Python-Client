@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from typing_extensions import Self
 
 from office365.directory.authentication.configuration.base import (
@@ -38,3 +42,17 @@ class IdentityApiConnector(Entity):
         """The object which describes the authentication configuration details for calling the API.
         Basic and PKCS 12 client certificate are supported."""
         return self.properties.get("authenticationConfiguration", ApiAuthenticationConfigurationBase())
+
+    @property
+    def display_name(self) -> Optional[str]:
+        """Gets the displayName property"""
+        return self.properties.get("displayName", None)
+
+    @property
+    def target_url(self) -> Optional[str]:
+        """Gets the targetUrl property"""
+        return self.properties.get("targetUrl", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.IdentityApiConnector"

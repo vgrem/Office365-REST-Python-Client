@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict
+from typing import TYPE_CHECKING, Dict, Optional
 
 from typing_extensions import Self
 
@@ -16,6 +16,9 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.onedrive.workbooks.charts.area_format import WorkbookChartAreaFormat
 
 
 class WorkbookChart(Entity):
@@ -114,3 +117,43 @@ class WorkbookChart(Entity):
             "worksheet",
             WorkbookWorksheet(self.context, ResourcePath("worksheet", self.resource_path)),
         )
+
+    @property
+    def height(self) -> Optional[float]:
+        """Gets the height property"""
+        return self.properties.get("height", None)
+
+    @property
+    def left(self) -> Optional[float]:
+        """Gets the left property"""
+        return self.properties.get("left", None)
+
+    @property
+    def name(self) -> Optional[str]:
+        """Gets the name property"""
+        return self.properties.get("name", None)
+
+    @property
+    def top(self) -> Optional[float]:
+        """Gets the top property"""
+        return self.properties.get("top", None)
+
+    @property
+    def width(self) -> Optional[float]:
+        """Gets the width property"""
+        return self.properties.get("width", None)
+
+    @property
+    def format(self) -> WorkbookChartAreaFormat:
+        """Gets the format property"""
+        from office365.onedrive.workbooks.charts.area_format import (
+            WorkbookChartAreaFormat,
+        )
+
+        return self.properties.get(
+            "format", WorkbookChartAreaFormat(self.context, ResourcePath("format", self.resource_path))
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookChart"

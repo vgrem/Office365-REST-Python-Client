@@ -1,9 +1,16 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.booking.phone import Phone
 from office365.entity import Entity
 from office365.outlook.mail.location import Location
 from office365.runtime.client_value_collection import ClientValueCollection
+
+if TYPE_CHECKING:
+    from office365.onedrive.sites.website import Website
+    from office365.outlook.people.person_type import PersonType
+    from office365.outlook.scored_email_address import ScoredEmailAddress
 
 
 class Person(Entity):
@@ -94,3 +101,24 @@ class Person(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Person"
+
+    @property
+    def person_type(self) -> PersonType:
+        """Gets the personType property"""
+        from office365.outlook.people.person_type import PersonType
+
+        return self.properties.get("personType", PersonType())
+
+    @property
+    def scored_email_addresses(self) -> ClientValueCollection[ScoredEmailAddress]:
+        """Gets the scoredEmailAddresses property"""
+        from office365.outlook.scored_email_address import ScoredEmailAddress
+
+        return self.properties.get("scoredEmailAddresses", ClientValueCollection[ScoredEmailAddress](ScoredEmailAddress))
+
+    @property
+    def websites(self) -> ClientValueCollection[Website]:
+        """Gets the websites property"""
+        from office365.onedrive.sites.website import Website
+
+        return self.properties.get("websites", ClientValueCollection[Website](Website))

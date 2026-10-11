@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 
@@ -131,3 +133,32 @@ class Subscription(Entity):
         each supported resource.
         """
         return self.properties.get("resource", None)
+
+    @property
+    def notification_query_options(self) -> Optional[str]:
+        """Gets the notificationQueryOptions property"""
+        return self.properties.get("notificationQueryOptions", None)
+
+    @property
+    def notification_url_app_id(self) -> Optional[str]:
+        """Gets the notificationUrlAppId property"""
+        return self.properties.get("notificationUrlAppId", None)
+
+    @property
+    def vapid_public_key(self) -> Optional[str]:
+        """Gets the vapidPublicKey property"""
+        return self.properties.get("vapidPublicKey", None)
+
+    @property
+    def web_push_encryption_p256dh_public_key(self) -> Optional[str]:
+        """Gets the webPushEncryptionP256dhPublicKey property"""
+        return self.properties.get("webPushEncryptionP256dhPublicKey", None)
+
+    @property
+    def web_push_encryption_secret(self) -> Optional[str]:
+        """Gets the webPushEncryptionSecret property"""
+        return self.properties.get("webPushEncryptionSecret", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.Subscription"

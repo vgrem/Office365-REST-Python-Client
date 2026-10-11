@@ -5,11 +5,24 @@ from typing import TYPE_CHECKING, Optional
 
 from office365.directory.security.ssl_certificate import SslCertificate
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
     from office365.directory.security.threatintelligence.host import Host
+    from office365.directory.security.threatintelligence.host_port_banner import (
+        HostPortBanner,
+    )
+    from office365.directory.security.threatintelligence.host_port_component import (
+        HostPortComponent,
+    )
+    from office365.directory.security.threatintelligence.host_port_protocol import (
+        HostPortProtocol,
+    )
+    from office365.directory.security.threatintelligence.host_port_status import (
+        HostPortStatus,
+    )
 
 
 class HostPort(Entity):
@@ -55,3 +68,39 @@ class HostPort(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.HostPort"
+
+    @property
+    def banners(self) -> ClientValueCollection[HostPortBanner]:
+        """Gets the banners property"""
+        from office365.directory.security.threatintelligence.host_port_banner import (
+            HostPortBanner,
+        )
+
+        return self.properties.get("banners", ClientValueCollection[HostPortBanner](HostPortBanner))
+
+    @property
+    def protocol(self) -> HostPortProtocol:
+        """Gets the protocol property"""
+        from office365.directory.security.threatintelligence.host_port_protocol import (
+            HostPortProtocol,
+        )
+
+        return self.properties.get("protocol", HostPortProtocol.tcp)
+
+    @property
+    def services(self) -> ClientValueCollection[HostPortComponent]:
+        """Gets the services property"""
+        from office365.directory.security.threatintelligence.host_port_component import (
+            HostPortComponent,
+        )
+
+        return self.properties.get("services", ClientValueCollection[HostPortComponent](HostPortComponent))
+
+    @property
+    def status(self) -> HostPortStatus:
+        """Gets the status property"""
+        from office365.directory.security.threatintelligence.host_port_status import (
+            HostPortStatus,
+        )
+
+        return self.properties.get("status", HostPortStatus.open)

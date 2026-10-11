@@ -1,17 +1,47 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.intune.devices.management.managed.app.registration import ManagedAppRegistration
+from office365.intune.devices.management.managed.app.registration import (
+    ManagedAppRegistration,
+)
 from office365.intune.devices.management.managed.ebook.ebook import ManagedEBook
 from office365.intune.devices.management.mobileapps.category import MobileAppCategory
 from office365.intune.devices.management.mobileapps.mobile_app import MobileApp
-from office365.intune.devices.management.mobileapps.relationship import MobileAppRelationship
+from office365.intune.devices.management.mobileapps.relationship import (
+    MobileAppRelationship,
+)
 from office365.intune.devices.management.vpptokens.vpp_token import VppToken
 from office365.intune.policies.managed_app import ManagedAppPolicy
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.common.managed_device_mobile_app_configuration import (
+        ManagedDeviceMobileAppConfiguration,
+    )
+    from office365.intune.devices.management.managed.app.protections.android import (
+        AndroidManagedAppProtection,
+    )
+    from office365.intune.devices.management.managed.app.protections.default import (
+        DefaultManagedAppProtection,
+    )
+    from office365.intune.devices.management.managed.app.protections.ios import (
+        IosManagedAppProtection,
+    )
+    from office365.intune.devices.management.managed.app.status import ManagedAppStatus
+    from office365.intune.devices.management.mdm_windows_information_protection_policy import (
+        MdmWindowsInformationProtectionPolicy,
+    )
+    from office365.intune.devices.management.targeted_managed_app_configuration import (
+        TargetedManagedAppConfiguration,
+    )
+    from office365.intune.windows_information_protection_policy import (
+        WindowsInformationProtectionPolicy,
+    )
 
 
 class DeviceAppManagement(Entity):
@@ -107,3 +137,127 @@ class DeviceAppManagement(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.DeviceAppManagement"
+
+    @property
+    def mobile_app_configurations(self) -> EntityCollection[ManagedDeviceMobileAppConfiguration]:
+        """Gets the mobileAppConfigurations property"""
+        from office365.common.managed_device_mobile_app_configuration import (
+            ManagedDeviceMobileAppConfiguration,
+        )
+
+        return self.properties.get(
+            "mobileAppConfigurations",
+            EntityCollection[ManagedDeviceMobileAppConfiguration](
+                self.context,
+                ManagedDeviceMobileAppConfiguration,
+                ResourcePath("mobileAppConfigurations", self.resource_path),
+            ),
+        )
+
+    @property
+    def android_managed_app_protections(self) -> EntityCollection[AndroidManagedAppProtection]:
+        """Gets the androidManagedAppProtections property"""
+        from office365.intune.devices.management.managed.app.protections.android import (
+            AndroidManagedAppProtection,
+        )
+
+        return self.properties.get(
+            "androidManagedAppProtections",
+            EntityCollection[AndroidManagedAppProtection](
+                self.context,
+                AndroidManagedAppProtection,
+                ResourcePath("androidManagedAppProtections", self.resource_path),
+            ),
+        )
+
+    @property
+    def default_managed_app_protections(self) -> EntityCollection[DefaultManagedAppProtection]:
+        """Gets the defaultManagedAppProtections property"""
+        from office365.intune.devices.management.managed.app.protections.default import (
+            DefaultManagedAppProtection,
+        )
+
+        return self.properties.get(
+            "defaultManagedAppProtections",
+            EntityCollection[DefaultManagedAppProtection](
+                self.context,
+                DefaultManagedAppProtection,
+                ResourcePath("defaultManagedAppProtections", self.resource_path),
+            ),
+        )
+
+    @property
+    def ios_managed_app_protections(self) -> EntityCollection[IosManagedAppProtection]:
+        """Gets the iosManagedAppProtections property"""
+        from office365.intune.devices.management.managed.app.protections.ios import (
+            IosManagedAppProtection,
+        )
+
+        return self.properties.get(
+            "iosManagedAppProtections",
+            EntityCollection[IosManagedAppProtection](
+                self.context, IosManagedAppProtection, ResourcePath("iosManagedAppProtections", self.resource_path)
+            ),
+        )
+
+    @property
+    def managed_app_statuses(self) -> EntityCollection[ManagedAppStatus]:
+        """Gets the managedAppStatuses property"""
+        from office365.intune.devices.management.managed.app.status import (
+            ManagedAppStatus,
+        )
+
+        return self.properties.get(
+            "managedAppStatuses",
+            EntityCollection[ManagedAppStatus](
+                self.context, ManagedAppStatus, ResourcePath("managedAppStatuses", self.resource_path)
+            ),
+        )
+
+    @property
+    def mdm_windows_information_protection_policies(self) -> EntityCollection[MdmWindowsInformationProtectionPolicy]:
+        """Gets the mdmWindowsInformationProtectionPolicies property"""
+        from office365.intune.devices.management.mdm_windows_information_protection_policy import (
+            MdmWindowsInformationProtectionPolicy,
+        )
+
+        return self.properties.get(
+            "mdmWindowsInformationProtectionPolicies",
+            EntityCollection[MdmWindowsInformationProtectionPolicy](
+                self.context,
+                MdmWindowsInformationProtectionPolicy,
+                ResourcePath("mdmWindowsInformationProtectionPolicies", self.resource_path),
+            ),
+        )
+
+    @property
+    def targeted_managed_app_configurations(self) -> EntityCollection[TargetedManagedAppConfiguration]:
+        """Gets the targetedManagedAppConfigurations property"""
+        from office365.intune.devices.management.targeted_managed_app_configuration import (
+            TargetedManagedAppConfiguration,
+        )
+
+        return self.properties.get(
+            "targetedManagedAppConfigurations",
+            EntityCollection[TargetedManagedAppConfiguration](
+                self.context,
+                TargetedManagedAppConfiguration,
+                ResourcePath("targetedManagedAppConfigurations", self.resource_path),
+            ),
+        )
+
+    @property
+    def windows_information_protection_policies(self) -> EntityCollection[WindowsInformationProtectionPolicy]:
+        """Gets the windowsInformationProtectionPolicies property"""
+        from office365.intune.windows_information_protection_policy import (
+            WindowsInformationProtectionPolicy,
+        )
+
+        return self.properties.get(
+            "windowsInformationProtectionPolicies",
+            EntityCollection[WindowsInformationProtectionPolicy](
+                self.context,
+                WindowsInformationProtectionPolicy,
+                ResourcePath("windowsInformationProtectionPolicies", self.resource_path),
+            ),
+        )

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from typing_extensions import Self
 
 from office365.entity import Entity
@@ -28,3 +30,12 @@ class WorkbookWorksheetProtection(Entity):
     def options(self) -> WorkbookWorksheetProtectionOptions:
         """ """
         return self.properties.get("options", WorkbookWorksheetProtectionOptions())
+
+    @property
+    def protected(self) -> Optional[bool]:
+        """Gets the protected property"""
+        return self.properties.get("protected", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookWorksheetProtection"

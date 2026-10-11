@@ -4,15 +4,26 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 from office365.directory.identitygovernance.activationscope import ActivationScope
-from office365.directory.identitygovernance.lifecycleworkflowprocessingstatus import LifecycleWorkflowProcessingStatus
-from office365.directory.identitygovernance.task_processing_result import TaskProcessingResult
-from office365.directory.identitygovernance.workflow.executiontype import WorkflowExecutionType
+from office365.directory.identitygovernance.lifecycleworkflowprocessingstatus import (
+    LifecycleWorkflowProcessingStatus,
+)
+from office365.directory.identitygovernance.task_processing_result import (
+    TaskProcessingResult,
+)
+from office365.directory.identitygovernance.workflow.executiontype import (
+    WorkflowExecutionType,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.directory.identitygovernance.user_processing_result import UserProcessingResult
+    from office365.directory.identitygovernance.subject_processing_result import (
+        SubjectProcessingResult,
+    )
+    from office365.directory.identitygovernance.user_processing_result import (
+        UserProcessingResult,
+    )
 
 
 class Run(Entity):
@@ -102,7 +113,9 @@ class Run(Entity):
     @property
     def user_processing_results(self) -> EntityCollection[UserProcessingResult]:
         """Gets the userProcessingResults property"""
-        from office365.directory.identitygovernance.user_processing_result import UserProcessingResult
+        from office365.directory.identitygovernance.user_processing_result import (
+            UserProcessingResult,
+        )
 
         return self.properties.get(
             "userProcessingResults",
@@ -114,3 +127,17 @@ class Run(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.identityGovernance.Run"
+
+    @property
+    def subject_processing_results(self) -> EntityCollection[SubjectProcessingResult]:
+        """Gets the subjectProcessingResults property"""
+        from office365.directory.identitygovernance.subject_processing_result import (
+            SubjectProcessingResult,
+        )
+
+        return self.properties.get(
+            "subjectProcessingResults",
+            EntityCollection[SubjectProcessingResult](
+                self.context, SubjectProcessingResult, ResourcePath("subjectProcessingResults", self.resource_path)
+            ),
+        )

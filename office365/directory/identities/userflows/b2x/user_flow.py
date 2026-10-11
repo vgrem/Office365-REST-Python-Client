@@ -1,5 +1,3 @@
-from typing import Optional
-
 from office365.directory.identities.provider import IdentityProvider
 from office365.directory.identities.userflows.language_configuration import (
     UserFlowLanguageConfiguration,
@@ -62,11 +60,3 @@ class B2XIdentityUserFlow(IdentityUserFlow):
                 ResourcePath("userAttributeAssignments", self.resource_path),
             ),
         )
-
-    @property
-    def user_flow_type(self) -> Optional[str]:
-        """
-        The type of user flow. For self-service sign-up user flows,
-        the value can only be signUpOrSignIn and cannot be modified after creation.
-        """
-        return self.properties.get("userFlowType", None)

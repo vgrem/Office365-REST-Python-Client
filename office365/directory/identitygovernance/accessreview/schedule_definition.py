@@ -1,15 +1,31 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from office365.directory.identitygovernance.accessreview.instance import AccessReviewInstance
-from office365.directory.identitygovernance.accessreview.schedule.settings import AccessReviewScheduleSettings
+from office365.directory.identitygovernance.accessreview.instance import (
+    AccessReviewInstance,
+)
+from office365.directory.identitygovernance.accessreview.schedule.settings import (
+    AccessReviewScheduleSettings,
+)
 from office365.directory.identitygovernance.accessreview.scope import AccessReviewScope
 from office365.directory.users.identity import UserIdentity
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.accessreview.notification_recipient_item import (
+        AccessReviewNotificationRecipientItem,
+    )
+    from office365.directory.identitygovernance.accessreview.reviewer_scope import (
+        AccessReviewReviewerScope,
+    )
+    from office365.directory.identitygovernance.accessreview.stage_settings import (
+        AccessReviewStageSettings,
+    )
 
 
 class AccessReviewScheduleDefinition(Entity):
@@ -76,3 +92,48 @@ class AccessReviewScheduleDefinition(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessReviewScheduleDefinition"
+
+    @property
+    def additional_notification_recipients(self) -> ClientValueCollection[AccessReviewNotificationRecipientItem]:
+        """Gets the additionalNotificationRecipients property"""
+        from office365.directory.identitygovernance.accessreview.notification_recipient_item import (
+            AccessReviewNotificationRecipientItem,
+        )
+
+        return self.properties.get(
+            "additionalNotificationRecipients",
+            ClientValueCollection[AccessReviewNotificationRecipientItem](AccessReviewNotificationRecipientItem),
+        )
+
+    @property
+    def fallback_reviewers(self) -> ClientValueCollection[AccessReviewReviewerScope]:
+        """Gets the fallbackReviewers property"""
+        from office365.directory.identitygovernance.accessreview.reviewer_scope import (
+            AccessReviewReviewerScope,
+        )
+
+        return self.properties.get(
+            "fallbackReviewers", ClientValueCollection[AccessReviewReviewerScope](AccessReviewReviewerScope)
+        )
+
+    @property
+    def reviewers(self) -> ClientValueCollection[AccessReviewReviewerScope]:
+        """Gets the reviewers property"""
+        from office365.directory.identitygovernance.accessreview.reviewer_scope import (
+            AccessReviewReviewerScope,
+        )
+
+        return self.properties.get(
+            "reviewers", ClientValueCollection[AccessReviewReviewerScope](AccessReviewReviewerScope)
+        )
+
+    @property
+    def stage_settings(self) -> ClientValueCollection[AccessReviewStageSettings]:
+        """Gets the stageSettings property"""
+        from office365.directory.identitygovernance.accessreview.stage_settings import (
+            AccessReviewStageSettings,
+        )
+
+        return self.properties.get(
+            "stageSettings", ClientValueCollection[AccessReviewStageSettings](AccessReviewStageSettings)
+        )

@@ -1,11 +1,31 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.identitygovernance.accessreview.set import AccessReviewSet
-from office365.directory.identitygovernance.appconsent.approval_route import AppConsentApprovalRoute
-from office365.directory.identitygovernance.entitlementmanagement.entitlement_management import EntitlementManagement
-from office365.directory.identitygovernance.lifecycle_workflows_container import LifecycleWorkflowsContainer
-from office365.directory.identitygovernance.privilegedaccess.root import PrivilegedAccessRoot
-from office365.directory.identitygovernance.termsofuse.container import TermsOfUseContainer
+from office365.directory.identitygovernance.appconsent.approval_route import (
+    AppConsentApprovalRoute,
+)
+from office365.directory.identitygovernance.entitlementmanagement.entitlement_management import (
+    EntitlementManagement,
+)
+from office365.directory.identitygovernance.lifecycle_workflows_container import (
+    LifecycleWorkflowsContainer,
+)
+from office365.directory.identitygovernance.privilegedaccess.root import (
+    PrivilegedAccessRoot,
+)
+from office365.directory.identitygovernance.termsofuse.container import (
+    TermsOfUseContainer,
+)
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.catalog import (
+        AccessPackageCatalog,
+    )
 
 
 class IdentityGovernance(Entity):
@@ -75,3 +95,17 @@ class IdentityGovernance(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.IdentityGovernance"
+
+    @property
+    def catalogs(self) -> EntityCollection[AccessPackageCatalog]:
+        """Gets the catalogs property"""
+        from office365.directory.identitygovernance.entitlementmanagement.accesspackage.catalog import (
+            AccessPackageCatalog,
+        )
+
+        return self.properties.get(
+            "catalogs",
+            EntityCollection[AccessPackageCatalog](
+                self.context, AccessPackageCatalog, ResourcePath("catalogs", self.resource_path)
+            ),
+        )

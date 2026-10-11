@@ -1,12 +1,25 @@
-from datetime import timedelta
-from typing import Optional
+from __future__ import annotations
 
-from office365.directory.identitygovernance.termsofuse.agreement_acceptance import AgreementAcceptance
-from office365.directory.identitygovernance.termsofuse.agreement_file import AgreementFile
-from office365.directory.identitygovernance.termsofuse.agreement_file_localization import AgreementFileLocalization
+from datetime import timedelta
+from typing import TYPE_CHECKING, Optional
+
+from office365.directory.identitygovernance.termsofuse.agreement_acceptance import (
+    AgreementAcceptance,
+)
+from office365.directory.identitygovernance.termsofuse.agreement_file import (
+    AgreementFile,
+)
+from office365.directory.identitygovernance.termsofuse.agreement_file_localization import (
+    AgreementFileLocalization,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.termsofuse.terms_expiration import (
+        TermsExpiration,
+    )
 
 
 class Agreement(Entity):
@@ -64,3 +77,12 @@ class Agreement(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Agreement"
+
+    @property
+    def terms_expiration(self) -> TermsExpiration:
+        """Gets the termsExpiration property"""
+        from office365.directory.identitygovernance.termsofuse.terms_expiration import (
+            TermsExpiration,
+        )
+
+        return self.properties.get("termsExpiration", TermsExpiration())

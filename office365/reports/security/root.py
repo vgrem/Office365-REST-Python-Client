@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from office365.directory.permissions.require_permission import require_permission
 from office365.directory.security.attacksimulations.repeat_offender import (
     AttackSimulationRepeatOffender,
@@ -40,3 +42,7 @@ class SecurityReportsRoot(Entity):
         qry = FunctionQuery(self, "getAttackSimulationSimulationUserCoverage", None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.SecurityReportsRoot"

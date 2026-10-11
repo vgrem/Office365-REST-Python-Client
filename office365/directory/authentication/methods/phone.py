@@ -1,5 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.authentication.methods.method import AuthenticationMethod
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+
+if TYPE_CHECKING:
+    from office365.directory.authentication.methods.signinstate import (
+        AuthenticationMethodSignInState,
+    )
+    from office365.directory.authentication.phonetype import AuthenticationPhoneType
 
 
 class PhoneAuthenticationMethod(AuthenticationMethod):
@@ -47,3 +57,23 @@ class PhoneAuthenticationMethod(AuthenticationMethod):
         if they do not match the required format.
         """
         return self.properties.get("phoneNumber", None)
+
+    @property
+    def phone_type(self) -> AuthenticationPhoneType:
+        """Gets the phoneType property"""
+        from office365.directory.authentication.phonetype import AuthenticationPhoneType
+
+        return self.properties.get("phoneType", AuthenticationPhoneType.mobile)
+
+    @property
+    def sms_sign_in_state(self) -> AuthenticationMethodSignInState:
+        """Gets the smsSignInState property"""
+        from office365.directory.authentication.methods.signinstate import (
+            AuthenticationMethodSignInState,
+        )
+
+        return self.properties.get("smsSignInState", AuthenticationMethodSignInState.notSupported)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.PhoneAuthenticationMethod"

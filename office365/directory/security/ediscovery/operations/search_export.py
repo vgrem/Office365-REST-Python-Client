@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.security.cases.additionaloptions import AdditionalOptions
 from office365.directory.security.cases.exportcriteria import ExportCriteria
@@ -9,6 +9,12 @@ from office365.directory.security.cases.exportlocation import ExportLocation
 from office365.directory.security.cloudattachmentversion import CloudAttachmentVersion
 from office365.directory.security.search.documentversion import DocumentVersion
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.security.ediscovery.search import EdiscoverySearch
+    from office365.directory.security.export_file_metadata import ExportFileMetadata
 
 
 class EdiscoverySearchExportOperation(Entity):
@@ -60,3 +66,17 @@ class EdiscoverySearchExportOperation(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.EdiscoverySearchExportOperation"
+
+    @property
+    def export_file_metadata(self) -> ClientValueCollection[ExportFileMetadata]:
+        """Gets the exportFileMetadata property"""
+        from office365.directory.security.export_file_metadata import ExportFileMetadata
+
+        return self.properties.get("exportFileMetadata", ClientValueCollection[ExportFileMetadata](ExportFileMetadata))
+
+    @property
+    def search(self) -> EdiscoverySearch:
+        """Gets the search property"""
+        from office365.directory.security.ediscovery.search import EdiscoverySearch
+
+        return self.properties.get("search", EdiscoverySearch(self.context, ResourcePath("search", self.resource_path)))

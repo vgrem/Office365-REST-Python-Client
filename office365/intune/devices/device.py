@@ -1,12 +1,19 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.objects.collection import DirectoryObjectCollection
 from office365.directory.objects.object import DirectoryObject
+from office365.entity_collection import EntityCollection
 from office365.intune.devices.alternative_security_id import AlternativeSecurityId
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.extensions.extension import Extension
 
 
 class Device(DirectoryObject):
@@ -103,4 +110,134 @@ class Device(DirectoryObject):
         return self.properties.get(
             "transitiveMemberOf",
             DirectoryObjectCollection(self.context, ResourcePath("transitiveMemberOf", self.resource_path)),
+        )
+
+    @property
+    def device_category(self) -> Optional[str]:
+        """Gets the deviceCategory property"""
+        return self.properties.get("deviceCategory", None)
+
+    @property
+    def device_metadata(self) -> Optional[str]:
+        """Gets the deviceMetadata property"""
+        return self.properties.get("deviceMetadata", None)
+
+    @property
+    def device_version(self) -> Optional[int]:
+        """Gets the deviceVersion property"""
+        return self.properties.get("deviceVersion", None)
+
+    @property
+    def display_name(self) -> Optional[str]:
+        """Gets the displayName property"""
+        return self.properties.get("displayName", None)
+
+    @property
+    def enrollment_profile_name(self) -> Optional[str]:
+        """Gets the enrollmentProfileName property"""
+        return self.properties.get("enrollmentProfileName", None)
+
+    @property
+    def enrollment_type(self) -> Optional[str]:
+        """Gets the enrollmentType property"""
+        return self.properties.get("enrollmentType", None)
+
+    @property
+    def is_compliant(self) -> Optional[bool]:
+        """Gets the isCompliant property"""
+        return self.properties.get("isCompliant", None)
+
+    @property
+    def is_managed(self) -> Optional[bool]:
+        """Gets the isManaged property"""
+        return self.properties.get("isManaged", None)
+
+    @property
+    def is_management_restricted(self) -> Optional[bool]:
+        """Gets the isManagementRestricted property"""
+        return self.properties.get("isManagementRestricted", None)
+
+    @property
+    def is_rooted(self) -> Optional[bool]:
+        """Gets the isRooted property"""
+        return self.properties.get("isRooted", None)
+
+    @property
+    def management_type(self) -> Optional[str]:
+        """Gets the managementType property"""
+        return self.properties.get("managementType", None)
+
+    @property
+    def manufacturer(self) -> Optional[str]:
+        """Gets the manufacturer property"""
+        return self.properties.get("manufacturer", None)
+
+    @property
+    def mdm_app_id(self) -> Optional[str]:
+        """Gets the mdmAppId property"""
+        return self.properties.get("mdmAppId", None)
+
+    @property
+    def model(self) -> Optional[str]:
+        """Gets the model property"""
+        return self.properties.get("model", None)
+
+    @property
+    def on_premises_last_sync_date_time(self) -> Optional[datetime]:
+        """Gets the onPremisesLastSyncDateTime property"""
+        return self.properties.get("onPremisesLastSyncDateTime", datetime.min)
+
+    @property
+    def on_premises_security_identifier(self) -> Optional[str]:
+        """Gets the onPremisesSecurityIdentifier property"""
+        return self.properties.get("onPremisesSecurityIdentifier", None)
+
+    @property
+    def on_premises_sync_enabled(self) -> Optional[bool]:
+        """Gets the onPremisesSyncEnabled property"""
+        return self.properties.get("onPremisesSyncEnabled", None)
+
+    @property
+    def operating_system(self) -> Optional[str]:
+        """Gets the operatingSystem property"""
+        return self.properties.get("operatingSystem", None)
+
+    @property
+    def operating_system_version(self) -> Optional[str]:
+        """Gets the operatingSystemVersion property"""
+        return self.properties.get("operatingSystemVersion", None)
+
+    @property
+    def physical_ids(self) -> StringCollection:
+        """Gets the physicalIds property"""
+        return self.properties.get("physicalIds", StringCollection())
+
+    @property
+    def profile_type(self) -> Optional[str]:
+        """Gets the profileType property"""
+        return self.properties.get("profileType", None)
+
+    @property
+    def registration_date_time(self) -> Optional[datetime]:
+        """Gets the registrationDateTime property"""
+        return self.properties.get("registrationDateTime", datetime.min)
+
+    @property
+    def system_labels(self) -> StringCollection:
+        """Gets the systemLabels property"""
+        return self.properties.get("systemLabels", StringCollection())
+
+    @property
+    def trust_type(self) -> Optional[str]:
+        """Gets the trustType property"""
+        return self.properties.get("trustType", None)
+
+    @property
+    def extensions(self) -> EntityCollection[Extension]:
+        """Gets the extensions property"""
+        from office365.directory.extensions.extension import Extension
+
+        return self.properties.get(
+            "extensions",
+            EntityCollection[Extension](self.context, Extension, ResourcePath("extensions", self.resource_path)),
         )

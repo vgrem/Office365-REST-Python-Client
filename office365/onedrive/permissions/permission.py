@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional
 
 from office365.directory.permissions.identity_set import IdentitySet
@@ -110,3 +111,12 @@ class Permission(Entity):
         provides a reference to the item where the content type is defined.
         """
         return self.properties.get("inheritedFrom", ItemReference())
+
+    @property
+    def expiration_date_time(self) -> Optional[datetime]:
+        """Gets the expirationDateTime property"""
+        return self.properties.get("expirationDateTime", datetime.min)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.Permission"

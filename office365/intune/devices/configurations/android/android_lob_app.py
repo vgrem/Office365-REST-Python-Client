@@ -1,8 +1,13 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+
+if TYPE_CHECKING:
+    from office365.intune.android_minimum_operating_system import (
+        AndroidMinimumOperatingSystem,
+    )
 
 
 class AndroidLobApp(Entity):
@@ -24,3 +29,12 @@ class AndroidLobApp(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AndroidLobApp"
+
+    @property
+    def minimum_supported_operating_system(self) -> AndroidMinimumOperatingSystem:
+        """Gets the minimumSupportedOperatingSystem property"""
+        from office365.intune.android_minimum_operating_system import (
+            AndroidMinimumOperatingSystem,
+        )
+
+        return self.properties.get("minimumSupportedOperatingSystem", AndroidMinimumOperatingSystem())

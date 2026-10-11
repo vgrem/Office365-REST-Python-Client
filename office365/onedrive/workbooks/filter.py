@@ -33,3 +33,7 @@ class WorkbookFilter(Entity):
     def criteria(self) -> Optional[WorkbookFilterCriteria]:
         """The currently applied filter on the given column."""
         return self.properties.get("criteria", WorkbookFilterCriteria())
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookFilter"

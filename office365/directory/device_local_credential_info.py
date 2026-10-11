@@ -1,7 +1,13 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
+
+if TYPE_CHECKING:
+    from office365.intune.devices.local_credential import DeviceLocalCredential
 
 
 class DeviceLocalCredentialInfo(Entity):
@@ -24,3 +30,14 @@ class DeviceLocalCredentialInfo(Entity):
     def refresh_datetime(self):
         """When the local administrator account credential will be refreshed and backed up to Azure Active Directory."""
         return self.properties.get("refreshDateTime", datetime.min)
+
+    @property
+    def credentials(self) -> ClientValueCollection[DeviceLocalCredential]:
+        """Gets the credentials property"""
+        from office365.intune.devices.local_credential import DeviceLocalCredential
+
+        return self.properties.get("credentials", ClientValueCollection[DeviceLocalCredential](DeviceLocalCredential))
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.DeviceLocalCredentialInfo"

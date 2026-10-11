@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.policies.admin_consent_request import AdminConsentRequestPolicy
 from office365.directory.policies.app_management import AppManagementPolicy
 from office365.directory.policies.authentication_flows import AuthenticationFlowsPolicy
@@ -8,12 +12,16 @@ from office365.directory.policies.authentication_strength import (
     AuthenticationStrengthPolicy,
 )
 from office365.directory.policies.authorization import AuthorizationPolicy
-from office365.directory.policies.conditionalaccess.conditional_access import ConditionalAccessPolicy
+from office365.directory.policies.conditionalaccess.conditional_access import (
+    ConditionalAccessPolicy,
+)
 from office365.directory.policies.crosstenant.access import CrossTenantAccessPolicy
 from office365.directory.policies.device_registration import DeviceRegistrationPolicy
 from office365.directory.policies.feature_rollout import FeatureRolloutPolicy
 from office365.directory.policies.permission_grant import PermissionGrantPolicy
-from office365.directory.policies.security_defaults import IdentitySecurityDefaultsEnforcementPolicy
+from office365.directory.policies.security_defaults import (
+    IdentitySecurityDefaultsEnforcementPolicy,
+)
 from office365.directory.policies.tenant_app_management import TenantAppManagementPolicy
 from office365.directory.policies.unifiedrolemanagement.policy import (
     UnifiedRoleManagementPolicy,
@@ -22,6 +30,24 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.policies.activity_based_timeout_policy import (
+        ActivityBasedTimeoutPolicy,
+    )
+    from office365.directory.policies.claims_mapping_policy import ClaimsMappingPolicy
+    from office365.directory.policies.federated_token_validation_policy import (
+        FederatedTokenValidationPolicy,
+    )
+    from office365.directory.policies.home_realm_discovery import (
+        HomeRealmDiscoveryPolicy,
+    )
+    from office365.directory.policies.ownerless_group_policy import OwnerlessGroupPolicy
+    from office365.directory.policies.token_issuance import TokenIssuancePolicy
+    from office365.directory.policies.token_lifetime import TokenLifetimePolicy
+    from office365.directory.unified_role_management_policy_assignment import (
+        UnifiedRoleManagementPolicyAssignment,
+    )
 
 
 class PolicyRoot(Entity):
@@ -220,3 +246,117 @@ class PolicyRoot(Entity):
             }
             default_value = property_mapping.get(name, None)
         return super().get_property(name, default_value)
+
+    @property
+    def activity_based_timeout_policies(self) -> EntityCollection[ActivityBasedTimeoutPolicy]:
+        """Gets the activityBasedTimeoutPolicies property"""
+        from office365.directory.policies.activity_based_timeout_policy import (
+            ActivityBasedTimeoutPolicy,
+        )
+
+        return self.properties.get(
+            "activityBasedTimeoutPolicies",
+            EntityCollection[ActivityBasedTimeoutPolicy](
+                self.context,
+                ActivityBasedTimeoutPolicy,
+                ResourcePath("activityBasedTimeoutPolicies", self.resource_path),
+            ),
+        )
+
+    @property
+    def claims_mapping_policies(self) -> EntityCollection[ClaimsMappingPolicy]:
+        """Gets the claimsMappingPolicies property"""
+        from office365.directory.policies.claims_mapping_policy import (
+            ClaimsMappingPolicy,
+        )
+
+        return self.properties.get(
+            "claimsMappingPolicies",
+            EntityCollection[ClaimsMappingPolicy](
+                self.context, ClaimsMappingPolicy, ResourcePath("claimsMappingPolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def federated_token_validation_policy(self) -> FederatedTokenValidationPolicy:
+        """Gets the federatedTokenValidationPolicy property"""
+        from office365.directory.policies.federated_token_validation_policy import (
+            FederatedTokenValidationPolicy,
+        )
+
+        return self.properties.get(
+            "federatedTokenValidationPolicy",
+            FederatedTokenValidationPolicy(
+                self.context, ResourcePath("federatedTokenValidationPolicy", self.resource_path)
+            ),
+        )
+
+    @property
+    def home_realm_discovery_policies(self) -> EntityCollection[HomeRealmDiscoveryPolicy]:
+        """Gets the homeRealmDiscoveryPolicies property"""
+        from office365.directory.policies.home_realm_discovery import (
+            HomeRealmDiscoveryPolicy,
+        )
+
+        return self.properties.get(
+            "homeRealmDiscoveryPolicies",
+            EntityCollection[HomeRealmDiscoveryPolicy](
+                self.context, HomeRealmDiscoveryPolicy, ResourcePath("homeRealmDiscoveryPolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def token_issuance_policies(self) -> EntityCollection[TokenIssuancePolicy]:
+        """Gets the tokenIssuancePolicies property"""
+        from office365.directory.policies.token_issuance import TokenIssuancePolicy
+
+        return self.properties.get(
+            "tokenIssuancePolicies",
+            EntityCollection[TokenIssuancePolicy](
+                self.context, TokenIssuancePolicy, ResourcePath("tokenIssuancePolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def token_lifetime_policies(self) -> EntityCollection[TokenLifetimePolicy]:
+        """Gets the tokenLifetimePolicies property"""
+        from office365.directory.policies.token_lifetime import TokenLifetimePolicy
+
+        return self.properties.get(
+            "tokenLifetimePolicies",
+            EntityCollection[TokenLifetimePolicy](
+                self.context, TokenLifetimePolicy, ResourcePath("tokenLifetimePolicies", self.resource_path)
+            ),
+        )
+
+    @property
+    def ownerless_group_policy(self) -> OwnerlessGroupPolicy:
+        """Gets the ownerlessGroupPolicy property"""
+        from office365.directory.policies.ownerless_group_policy import (
+            OwnerlessGroupPolicy,
+        )
+
+        return self.properties.get(
+            "ownerlessGroupPolicy",
+            OwnerlessGroupPolicy(self.context, ResourcePath("ownerlessGroupPolicy", self.resource_path)),
+        )
+
+    @property
+    def role_management_policy_assignments(self) -> EntityCollection[UnifiedRoleManagementPolicyAssignment]:
+        """Gets the roleManagementPolicyAssignments property"""
+        from office365.directory.unified_role_management_policy_assignment import (
+            UnifiedRoleManagementPolicyAssignment,
+        )
+
+        return self.properties.get(
+            "roleManagementPolicyAssignments",
+            EntityCollection[UnifiedRoleManagementPolicyAssignment](
+                self.context,
+                UnifiedRoleManagementPolicyAssignment,
+                ResourcePath("roleManagementPolicyAssignments", self.resource_path),
+            ),
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.PolicyRoot"

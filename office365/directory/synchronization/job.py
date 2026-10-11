@@ -1,4 +1,6 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.synchronization.bulk_upload import BulkUpload
 from office365.directory.synchronization.schema import SynchronizationSchema
@@ -8,6 +10,9 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.key_value_pair import KeyValuePair
+
+if TYPE_CHECKING:
+    from office365.directory.synchronization.schedule import SynchronizationSchedule
 
 
 class SynchronizationJob(Entity):
@@ -70,3 +75,10 @@ class SynchronizationJob(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.SynchronizationJob"
+
+    @property
+    def schedule(self) -> SynchronizationSchedule:
+        """Gets the schedule property"""
+        from office365.directory.synchronization.schedule import SynchronizationSchedule
+
+        return self.properties.get("schedule", SynchronizationSchedule())

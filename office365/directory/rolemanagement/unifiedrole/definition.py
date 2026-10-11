@@ -9,6 +9,7 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
 
 
@@ -54,3 +55,32 @@ class UnifiedRoleDefinition(Entity):
                 ResourcePath("inheritsPermissionsFrom", self.resource_path),
             ),
         )
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the description property"""
+        return self.properties.get("description", None)
+
+    @property
+    def is_enabled(self) -> Optional[bool]:
+        """Gets the isEnabled property"""
+        return self.properties.get("isEnabled", None)
+
+    @property
+    def resource_scopes(self) -> StringCollection:
+        """Gets the resourceScopes property"""
+        return self.properties.get("resourceScopes", StringCollection())
+
+    @property
+    def template_id(self) -> Optional[str]:
+        """Gets the templateId property"""
+        return self.properties.get("templateId", None)
+
+    @property
+    def version(self) -> Optional[str]:
+        """Gets the version property"""
+        return self.properties.get("version", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.UnifiedRoleDefinition"

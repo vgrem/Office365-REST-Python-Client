@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.termsofuse.agreement_file_data import (
+        AgreementFileData,
+    )
 
 
 class AgreementFileProperties(Entity):
@@ -40,3 +45,12 @@ class AgreementFileProperties(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AgreementFileProperties"
+
+    @property
+    def file_data(self) -> AgreementFileData:
+        """Gets the fileData property"""
+        from office365.directory.identitygovernance.termsofuse.agreement_file_data import (
+            AgreementFileData,
+        )
+
+        return self.properties.get("fileData", AgreementFileData())

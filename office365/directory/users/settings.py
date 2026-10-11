@@ -1,10 +1,21 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.users.insights_settings import UserInsightsSettings
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 from office365.teams.schedule.shifts.preferences import ShiftPreferences
+
+if TYPE_CHECKING:
+    from office365.common.exchange_settings import ExchangeSettings
+    from office365.directory.users.storage import UserStorage
+    from office365.directory.users.work_hours_and_locations_setting import (
+        WorkHoursAndLocationsSetting,
+    )
+    from office365.intune.windows_setting import WindowsSetting
 
 
 class UserSettings(Entity):
@@ -48,3 +59,41 @@ class UserSettings(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.UserSettings"
+
+    @property
+    def exchange(self) -> ExchangeSettings:
+        """Gets the exchange property"""
+        from office365.common.exchange_settings import ExchangeSettings
+
+        return self.properties.get(
+            "exchange", ExchangeSettings(self.context, ResourcePath("exchange", self.resource_path))
+        )
+
+    @property
+    def windows(self) -> EntityCollection[WindowsSetting]:
+        """Gets the windows property"""
+        from office365.intune.windows_setting import WindowsSetting
+
+        return self.properties.get(
+            "windows",
+            EntityCollection[WindowsSetting](self.context, WindowsSetting, ResourcePath("windows", self.resource_path)),
+        )
+
+    @property
+    def storage(self) -> UserStorage:
+        """Gets the storage property"""
+        from office365.directory.users.storage import UserStorage
+
+        return self.properties.get("storage", UserStorage(self.context, ResourcePath("storage", self.resource_path)))
+
+    @property
+    def work_hours_and_locations(self) -> WorkHoursAndLocationsSetting:
+        """Gets the workHoursAndLocations property"""
+        from office365.directory.users.work_hours_and_locations_setting import (
+            WorkHoursAndLocationsSetting,
+        )
+
+        return self.properties.get(
+            "workHoursAndLocations",
+            WorkHoursAndLocationsSetting(self.context, ResourcePath("workHoursAndLocations", self.resource_path)),
+        )

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Self
 
@@ -10,6 +12,19 @@ from office365.planner.tasks.task_details import PlannerTaskDetails
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.planner.assigned_to_task_board_task_format import (
+        PlannerAssignedToTaskBoardTaskFormat,
+    )
+    from office365.planner.bucket_task_board_task_format import (
+        PlannerBucketTaskBoardTaskFormat,
+    )
+    from office365.planner.planner_applied_categories import PlannerAppliedCategories
+    from office365.planner.progress_task_board_task_format import (
+        PlannerProgressTaskBoardTaskFormat,
+    )
+    from office365.planner.tasks.previewtype import PlannerPreviewType
 
 
 class PlannerTask(Entity):
@@ -101,3 +116,120 @@ class PlannerTask(Entity):
     def assignments(self) -> PlannerAssignments:
         """The set of users assigned to this task (keyed by user ID)."""
         return self.properties.get("assignments", PlannerAssignments())
+
+    @property
+    def active_checklist_item_count(self) -> Optional[int]:
+        """Gets the activeChecklistItemCount property"""
+        return self.properties.get("activeChecklistItemCount", None)
+
+    @property
+    def applied_categories(self) -> PlannerAppliedCategories:
+        """Gets the appliedCategories property"""
+        from office365.planner.planner_applied_categories import (
+            PlannerAppliedCategories,
+        )
+
+        return self.properties.get("appliedCategories", PlannerAppliedCategories())
+
+    @property
+    def assignee_priority(self) -> Optional[str]:
+        """Gets the assigneePriority property"""
+        return self.properties.get("assigneePriority", None)
+
+    @property
+    def checklist_item_count(self) -> Optional[int]:
+        """Gets the checklistItemCount property"""
+        return self.properties.get("checklistItemCount", None)
+
+    @property
+    def completed_by(self) -> IdentitySet:
+        """Gets the completedBy property"""
+        from office365.directory.identity_set import IdentitySet
+
+        return self.properties.get("completedBy", IdentitySet())
+
+    @property
+    def completed_date_time(self) -> Optional[datetime]:
+        """Gets the completedDateTime property"""
+        return self.properties.get("completedDateTime", datetime.min)
+
+    @property
+    def conversation_thread_id(self) -> Optional[str]:
+        """Gets the conversationThreadId property"""
+        return self.properties.get("conversationThreadId", None)
+
+    @property
+    def due_date_time(self) -> Optional[datetime]:
+        """Gets the dueDateTime property"""
+        return self.properties.get("dueDateTime", datetime.min)
+
+    @property
+    def has_description(self) -> Optional[bool]:
+        """Gets the hasDescription property"""
+        return self.properties.get("hasDescription", None)
+
+    @property
+    def order_hint(self) -> Optional[str]:
+        """Gets the orderHint property"""
+        return self.properties.get("orderHint", None)
+
+    @property
+    def preview_type(self) -> PlannerPreviewType:
+        """Gets the previewType property"""
+        from office365.planner.tasks.previewtype import PlannerPreviewType
+
+        return self.properties.get("previewType", PlannerPreviewType.automatic)
+
+    @property
+    def reference_count(self) -> Optional[int]:
+        """Gets the referenceCount property"""
+        return self.properties.get("referenceCount", None)
+
+    @property
+    def start_date_time(self) -> Optional[datetime]:
+        """Gets the startDateTime property"""
+        return self.properties.get("startDateTime", datetime.min)
+
+    @property
+    def assigned_to_task_board_format(self) -> PlannerAssignedToTaskBoardTaskFormat:
+        """Gets the assignedToTaskBoardFormat property"""
+        from office365.planner.assigned_to_task_board_task_format import (
+            PlannerAssignedToTaskBoardTaskFormat,
+        )
+
+        return self.properties.get(
+            "assignedToTaskBoardFormat",
+            PlannerAssignedToTaskBoardTaskFormat(
+                self.context, ResourcePath("assignedToTaskBoardFormat", self.resource_path)
+            ),
+        )
+
+    @property
+    def bucket_task_board_format(self) -> PlannerBucketTaskBoardTaskFormat:
+        """Gets the bucketTaskBoardFormat property"""
+        from office365.planner.bucket_task_board_task_format import (
+            PlannerBucketTaskBoardTaskFormat,
+        )
+
+        return self.properties.get(
+            "bucketTaskBoardFormat",
+            PlannerBucketTaskBoardTaskFormat(self.context, ResourcePath("bucketTaskBoardFormat", self.resource_path)),
+        )
+
+    @property
+    def progress_task_board_format(self) -> PlannerProgressTaskBoardTaskFormat:
+        """Gets the progressTaskBoardFormat property"""
+        from office365.planner.progress_task_board_task_format import (
+            PlannerProgressTaskBoardTaskFormat,
+        )
+
+        return self.properties.get(
+            "progressTaskBoardFormat",
+            PlannerProgressTaskBoardTaskFormat(
+                self.context, ResourcePath("progressTaskBoardFormat", self.resource_path)
+            ),
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.PlannerTask"

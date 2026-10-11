@@ -1,13 +1,21 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.intune.devices.management.mobileapps.category import MobileAppCategory
-from office365.intune.devices.management.mobileapps.publishingstate import MobileAppPublishingState
+from office365.intune.devices.management.mobileapps.publishingstate import (
+    MobileAppPublishingState,
+)
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.common.mime_content import MimeContent
+    from office365.intune.devices.management.mobileapps.assignment import (
+        MobileAppAssignment,
+    )
 
 
 class MobileApp(Entity):
@@ -84,3 +92,24 @@ class MobileApp(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.MobileApp"
+
+    @property
+    def large_icon(self) -> MimeContent:
+        """Gets the largeIcon property"""
+        from office365.common.mime_content import MimeContent
+
+        return self.properties.get("largeIcon", MimeContent())
+
+    @property
+    def assignments(self) -> EntityCollection[MobileAppAssignment]:
+        """Gets the assignments property"""
+        from office365.intune.devices.management.mobileapps.assignment import (
+            MobileAppAssignment,
+        )
+
+        return self.properties.get(
+            "assignments",
+            EntityCollection[MobileAppAssignment](
+                self.context, MobileAppAssignment, ResourcePath("assignments", self.resource_path)
+            ),
+        )

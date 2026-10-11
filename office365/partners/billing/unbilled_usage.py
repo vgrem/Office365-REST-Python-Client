@@ -4,4 +4,6 @@ from office365.entity import Entity
 
 
 class UnbilledUsage(Entity):
-    pass
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.partners.billing.UnbilledUsage"

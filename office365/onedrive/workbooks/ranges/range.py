@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.onedrive.workbooks.ranges.format import WorkbookRangeFormat
@@ -9,6 +9,9 @@ from office365.onedrive.workbooks.ranges.view import WorkbookRangeView
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
+
+if TYPE_CHECKING:
+    from office365.runtime.types.json import Json
 
 
 class WorkbookRange(Entity):
@@ -161,3 +164,57 @@ class WorkbookRange(Entity):
             "worksheet",
             WorkbookWorksheet(self.context, ResourcePath("worksheet", self.resource_path)),
         )
+
+    @property
+    def formulas(self) -> Json:
+        """Gets the formulas property"""
+        from office365.runtime.types.json import Json
+
+        return self.properties.get("formulas", Json())
+
+    @property
+    def formulas_local(self) -> Json:
+        """Gets the formulasLocal property"""
+        from office365.runtime.types.json import Json
+
+        return self.properties.get("formulasLocal", Json())
+
+    @property
+    def formulas_r1_c1(self) -> Json:
+        """Gets the formulasR1C1 property"""
+        from office365.runtime.types.json import Json
+
+        return self.properties.get("formulasR1C1", Json())
+
+    @property
+    def hidden(self) -> Optional[bool]:
+        """Gets the hidden property"""
+        return self.properties.get("hidden", None)
+
+    @property
+    def number_format(self) -> Json:
+        """Gets the numberFormat property"""
+        from office365.runtime.types.json import Json
+
+        return self.properties.get("numberFormat", Json())
+
+    @property
+    def row_count(self) -> Optional[int]:
+        """Gets the rowCount property"""
+        return self.properties.get("rowCount", None)
+
+    @property
+    def row_hidden(self) -> Optional[bool]:
+        """Gets the rowHidden property"""
+        return self.properties.get("rowHidden", None)
+
+    @property
+    def text(self) -> Json:
+        """Gets the text property"""
+        from office365.runtime.types.json import Json
+
+        return self.properties.get("text", Json())
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookRange"

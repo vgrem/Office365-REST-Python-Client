@@ -1,11 +1,22 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.permissions.identity import Identity
 from office365.directory.users.identity import UserIdentity
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
+from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.audit.signins.governance_insight import GovernanceInsight
+    from office365.directory.identitygovernance.accessreview.instance_decision_item_permission import (
+        AccessReviewInstanceDecisionItemPermission,
+    )
+    from office365.directory.identitygovernance.accessreview.instance_decision_item_resource import (
+        AccessReviewInstanceDecisionItemResource,
+    )
 
 
 class AccessReviewInstanceDecisionItem(Entity):
@@ -72,3 +83,40 @@ class AccessReviewInstanceDecisionItem(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessReviewInstanceDecisionItem"
+
+    @property
+    def apply_description(self) -> Optional[str]:
+        """Gets the applyDescription property"""
+        return self.properties.get("applyDescription", None)
+
+    @property
+    def permission(self) -> AccessReviewInstanceDecisionItemPermission:
+        """Gets the permission property"""
+        from office365.directory.identitygovernance.accessreview.instance_decision_item_permission import (
+            AccessReviewInstanceDecisionItemPermission,
+        )
+
+        return self.properties.get("permission", AccessReviewInstanceDecisionItemPermission())
+
+    @property
+    def resource(self) -> AccessReviewInstanceDecisionItemResource:
+        """Gets the resource property"""
+        from office365.directory.identitygovernance.accessreview.instance_decision_item_resource import (
+            AccessReviewInstanceDecisionItemResource,
+        )
+
+        return self.properties.get("resource", AccessReviewInstanceDecisionItemResource())
+
+    @property
+    def insights(self) -> EntityCollection[GovernanceInsight]:
+        """Gets the insights property"""
+        from office365.directory.audit.signins.governance_insight import (
+            GovernanceInsight,
+        )
+
+        return self.properties.get(
+            "insights",
+            EntityCollection[GovernanceInsight](
+                self.context, GovernanceInsight, ResourcePath("insights", self.resource_path)
+            ),
+        )

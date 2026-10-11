@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.directory.identities.userflows.language_page import UserFlowLanguagePage
@@ -47,3 +49,12 @@ class UserFlowLanguageConfiguration(Entity):
                 ResourcePath("overridesPages", self.resource_path),
             ),
         )
+
+    @property
+    def is_enabled(self) -> Optional[bool]:
+        """Gets the isEnabled property"""
+        return self.properties.get("isEnabled", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.UserFlowLanguageConfiguration"

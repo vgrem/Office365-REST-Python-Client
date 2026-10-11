@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import json
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Self
 
-from office365.directory.applications.roles.assignment_collection import AppRoleAssignmentCollection
+from office365.directory.applications.roles.assignment_collection import (
+    AppRoleAssignmentCollection,
+)
 from office365.directory.extensions.extension import Extension
 from office365.directory.groups.assigned_label import AssignedLabel
 from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
@@ -14,9 +18,15 @@ from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.licenses.processing_state import LicenseProcessingState
 from office365.directory.objects.collection import DirectoryObjectCollection
 from office365.directory.objects.object import DirectoryObject
-from office365.directory.objects.onpremisesprovisioningerror import OnPremisesProvisioningError
-from office365.directory.objects.serviceprovisioningerror import ServiceProvisioningError
-from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
+from office365.directory.objects.onpremisesprovisioningerror import (
+    OnPremisesProvisioningError,
+)
+from office365.directory.objects.serviceprovisioningerror import (
+    ServiceProvisioningError,
+)
+from office365.directory.permissions.grants.resource_specific import (
+    ResourceSpecificPermissionGrant,
+)
 from office365.directory.permissions.require_permission import require_permission
 from office365.directory.profile_photo import ProfilePhoto
 from office365.entity_collection import EntityCollection
@@ -37,6 +47,12 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
 from office365.teams.team import Team
+
+if TYPE_CHECKING:
+    from office365.directory.groups.access_type import GroupAccessType
+    from office365.directory.users.onpremisesextensionattributes import (
+        OnPremisesExtensionAttributes,
+    )
 
 
 class Group(DirectoryObject):
@@ -651,3 +667,39 @@ class Group(DirectoryObject):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Group"
+
+    @property
+    def on_premises_extension_attributes(self) -> OnPremisesExtensionAttributes:
+        """Gets the onPremisesExtensionAttributes property"""
+        from office365.directory.users.onpremisesextensionattributes import (
+            OnPremisesExtensionAttributes,
+        )
+
+        return self.properties.get("onPremisesExtensionAttributes", OnPremisesExtensionAttributes())
+
+    @property
+    def organization_id(self) -> Optional[str]:
+        """Gets the organizationId property"""
+        return self.properties.get("organizationId", None)
+
+    @property
+    def access_type(self) -> GroupAccessType:
+        """Gets the accessType property"""
+        from office365.directory.groups.access_type import GroupAccessType
+
+        return self.properties.get("accessType", GroupAccessType.none)
+
+    @property
+    def is_favorite(self) -> Optional[bool]:
+        """Gets the isFavorite property"""
+        return self.properties.get("isFavorite", None)
+
+    @property
+    def unseen_conversations_count(self) -> Optional[int]:
+        """Gets the unseenConversationsCount property"""
+        return self.properties.get("unseenConversationsCount", None)
+
+    @property
+    def unseen_messages_count(self) -> Optional[int]:
+        """Gets the unseenMessagesCount property"""
+        return self.properties.get("unseenMessagesCount", None)

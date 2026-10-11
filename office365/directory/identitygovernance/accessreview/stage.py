@@ -1,12 +1,20 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.identitygovernance.accessreview.instance_decision_item import (
     AccessReviewInstanceDecisionItem,
 )
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.accessreview.reviewer_scope import (
+        AccessReviewReviewerScope,
+    )
 
 
 class AccessReviewStage(Entity):
@@ -48,3 +56,25 @@ class AccessReviewStage(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessReviewStage"
+
+    @property
+    def fallback_reviewers(self) -> ClientValueCollection[AccessReviewReviewerScope]:
+        """Gets the fallbackReviewers property"""
+        from office365.directory.identitygovernance.accessreview.reviewer_scope import (
+            AccessReviewReviewerScope,
+        )
+
+        return self.properties.get(
+            "fallbackReviewers", ClientValueCollection[AccessReviewReviewerScope](AccessReviewReviewerScope)
+        )
+
+    @property
+    def reviewers(self) -> ClientValueCollection[AccessReviewReviewerScope]:
+        """Gets the reviewers property"""
+        from office365.directory.identitygovernance.accessreview.reviewer_scope import (
+            AccessReviewReviewerScope,
+        )
+
+        return self.properties.get(
+            "reviewers", ClientValueCollection[AccessReviewReviewerScope](AccessReviewReviewerScope)
+        )

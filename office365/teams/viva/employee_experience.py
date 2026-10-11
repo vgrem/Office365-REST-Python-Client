@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -5,6 +9,10 @@ from office365.runtime.types.odata_property import odata
 from office365.teams.viva.community import Community
 from office365.teams.viva.learning.courses.activity import LearningCourseActivity
 from office365.teams.viva.learning.provider import LearningProvider
+
+if TYPE_CHECKING:
+    from office365.common.engagement_async_operation import EngagementAsyncOperation
+    from office365.common.engagement_role import EngagementRole
 
 
 class EmployeeExperience(Entity):
@@ -47,3 +55,29 @@ class EmployeeExperience(Entity):
                 ResourcePath("learningProviders", self.resource_path),
             ),
         )
+
+    @property
+    def engagement_async_operations(self) -> EntityCollection[EngagementAsyncOperation]:
+        """Gets the engagementAsyncOperations property"""
+        from office365.common.engagement_async_operation import EngagementAsyncOperation
+
+        return self.properties.get(
+            "engagementAsyncOperations",
+            EntityCollection[EngagementAsyncOperation](
+                self.context, EngagementAsyncOperation, ResourcePath("engagementAsyncOperations", self.resource_path)
+            ),
+        )
+
+    @property
+    def roles(self) -> EntityCollection[EngagementRole]:
+        """Gets the roles property"""
+        from office365.common.engagement_role import EngagementRole
+
+        return self.properties.get(
+            "roles",
+            EntityCollection[EngagementRole](self.context, EngagementRole, ResourcePath("roles", self.resource_path)),
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.EmployeeExperience"

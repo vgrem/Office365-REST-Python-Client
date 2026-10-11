@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.entity import Entity
@@ -20,3 +22,12 @@ class TeamInfo(Entity):
         from office365.teams.team import Team
 
         return self.properties.get("team", Team(self.context, ResourcePath("team", self.resource_path)))
+
+    @property
+    def tenant_id(self) -> Optional[str]:
+        """Gets the tenantId property"""
+        return self.properties.get("tenantId", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.TeamInfo"

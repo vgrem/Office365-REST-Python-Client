@@ -1,9 +1,21 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.protection.risk_detection import RiskDetection
 from office365.directory.protection.riskyusers.collection import RiskyUserCollection
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.protection.riskyusers.risky_service_principal import (
+        RiskyServicePrincipal,
+    )
+    from office365.directory.protection.riskyusers.service_principal_risk_detection import (
+        ServicePrincipalRiskDetection,
+    )
 
 
 class IdentityProtectionRoot(Entity):
@@ -29,3 +41,33 @@ class IdentityProtectionRoot(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.IdentityProtectionRoot"
+
+    @property
+    def risky_service_principals(self) -> EntityCollection[RiskyServicePrincipal]:
+        """Gets the riskyServicePrincipals property"""
+        from office365.directory.protection.riskyusers.risky_service_principal import (
+            RiskyServicePrincipal,
+        )
+
+        return self.properties.get(
+            "riskyServicePrincipals",
+            EntityCollection[RiskyServicePrincipal](
+                self.context, RiskyServicePrincipal, ResourcePath("riskyServicePrincipals", self.resource_path)
+            ),
+        )
+
+    @property
+    def service_principal_risk_detections(self) -> EntityCollection[ServicePrincipalRiskDetection]:
+        """Gets the servicePrincipalRiskDetections property"""
+        from office365.directory.protection.riskyusers.service_principal_risk_detection import (
+            ServicePrincipalRiskDetection,
+        )
+
+        return self.properties.get(
+            "servicePrincipalRiskDetections",
+            EntityCollection[ServicePrincipalRiskDetection](
+                self.context,
+                ServicePrincipalRiskDetection,
+                ResourcePath("servicePrincipalRiskDetections", self.resource_path),
+            ),
+        )

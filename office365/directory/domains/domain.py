@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
+
 from office365.directory.domains.dns_record import DomainDnsRecord
 from office365.directory.domains.state import DomainState
 from office365.directory.objects.collection import DirectoryObjectCollection
@@ -10,6 +14,12 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.domains.domain import Domain
+    from office365.directory.domains.internal_domain_federation import (
+        InternalDomainFederation,
+    )
 
 
 @limit(*IDENTITY_QUOTAS)
@@ -94,3 +104,83 @@ class Domain(Entity):
     def state(self) -> DomainState:
         """Status of asynchronous operations scheduled for the domain."""
         return self.properties.get("state", DomainState())
+
+    @property
+    def authentication_type(self) -> Optional[str]:
+        """Gets the authenticationType property"""
+        return self.properties.get("authenticationType", None)
+
+    @property
+    def availability_status(self) -> Optional[str]:
+        """Gets the availabilityStatus property"""
+        return self.properties.get("availabilityStatus", None)
+
+    @property
+    def is_admin_managed(self) -> Optional[bool]:
+        """Gets the isAdminManaged property"""
+        return self.properties.get("isAdminManaged", None)
+
+    @property
+    def is_default(self) -> Optional[bool]:
+        """Gets the isDefault property"""
+        return self.properties.get("isDefault", None)
+
+    @property
+    def is_initial(self) -> Optional[bool]:
+        """Gets the isInitial property"""
+        return self.properties.get("isInitial", None)
+
+    @property
+    def is_root(self) -> Optional[bool]:
+        """Gets the isRoot property"""
+        return self.properties.get("isRoot", None)
+
+    @property
+    def is_verified(self) -> Optional[bool]:
+        """Gets the isVerified property"""
+        return self.properties.get("isVerified", None)
+
+    @property
+    def manufacturer(self) -> Optional[str]:
+        """Gets the manufacturer property"""
+        return self.properties.get("manufacturer", None)
+
+    @property
+    def model(self) -> Optional[str]:
+        """Gets the model property"""
+        return self.properties.get("model", None)
+
+    @property
+    def password_notification_window_in_days(self) -> Optional[int]:
+        """Gets the passwordNotificationWindowInDays property"""
+        return self.properties.get("passwordNotificationWindowInDays", None)
+
+    @property
+    def password_validity_period_in_days(self) -> Optional[int]:
+        """Gets the passwordValidityPeriodInDays property"""
+        return self.properties.get("passwordValidityPeriodInDays", None)
+
+    @property
+    def federation_configuration(self) -> EntityCollection[InternalDomainFederation]:
+        """Gets the federationConfiguration property"""
+        from office365.directory.domains.internal_domain_federation import (
+            InternalDomainFederation,
+        )
+
+        return self.properties.get(
+            "federationConfiguration",
+            EntityCollection[InternalDomainFederation](
+                self.context, InternalDomainFederation, ResourcePath("federationConfiguration", self.resource_path)
+            ),
+        )
+
+    @property
+    def root_domain(self) -> Domain:
+        """Gets the rootDomain property"""
+        from office365.directory.domains.domain import Domain
+
+        return self.properties.get("rootDomain", Domain(self.context, ResourcePath("rootDomain", self.resource_path)))
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.Domain"

@@ -1,4 +1,6 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity_collection import EntityCollection
 from office365.onedrive.base_item import BaseItem
@@ -11,6 +13,10 @@ from office365.onedrive.sharepoint.ids import SharePointIds
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 from office365.subscriptions.subscription import Subscription
+
+if TYPE_CHECKING:
+    from office365.onedrive.driveitems.system_facet import SystemFacet
+    from office365.onedrive.permissions.permission import Permission
 
 
 class List(BaseItem):
@@ -90,3 +96,24 @@ class List(BaseItem):
                 ResourcePath("subscriptions", self.resource_path),
             ),
         )
+
+    @property
+    def system(self) -> SystemFacet:
+        """Gets the system property"""
+        from office365.onedrive.driveitems.system_facet import SystemFacet
+
+        return self.properties.get("system", SystemFacet())
+
+    @property
+    def permissions(self) -> EntityCollection[Permission]:
+        """Gets the permissions property"""
+        from office365.onedrive.permissions.permission import Permission
+
+        return self.properties.get(
+            "permissions",
+            EntityCollection[Permission](self.context, Permission, ResourcePath("permissions", self.resource_path)),
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.List"

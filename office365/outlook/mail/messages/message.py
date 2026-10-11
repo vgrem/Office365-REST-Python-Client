@@ -513,3 +513,10 @@ class Message(OutlookItem):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Message"
+
+    @property
+    def from_(self) -> Recipient:
+        """Gets the from property"""
+        from office365.outlook.mail.recipient import Recipient
+
+        return self.properties.get("from", Recipient())

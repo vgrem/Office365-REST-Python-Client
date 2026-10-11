@@ -1,18 +1,25 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.identitygovernance.quarantine_details import QuarantineDetails
 from office365.directory.identitygovernance.run import Run
 from office365.directory.identitygovernance.task_report import TaskReport
-from office365.directory.identitygovernance.user_processing_result import UserProcessingResult
+from office365.directory.identitygovernance.user_processing_result import (
+    UserProcessingResult,
+)
 from office365.directory.identitygovernance.workflow.setting import WorkflowSetting
 from office365.directory.identitygovernance.workflow.version import WorkflowVersion
 from office365.directory.objects.object import DirectoryObject
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.subject_processing_result import (
+        SubjectProcessingResult,
+    )
 
 
 class Workflow(Entity):
@@ -104,3 +111,17 @@ class Workflow(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.identityGovernance.Workflow"
+
+    @property
+    def subject_processing_results(self) -> EntityCollection[SubjectProcessingResult]:
+        """Gets the subjectProcessingResults property"""
+        from office365.directory.identitygovernance.subject_processing_result import (
+            SubjectProcessingResult,
+        )
+
+        return self.properties.get(
+            "subjectProcessingResults",
+            EntityCollection[SubjectProcessingResult](
+                self.context, SubjectProcessingResult, ResourcePath("subjectProcessingResults", self.resource_path)
+            ),
+        )

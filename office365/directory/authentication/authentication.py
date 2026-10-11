@@ -1,8 +1,30 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.authentication.methods.method import AuthenticationMethod
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.common.external_authentication_method import (
+        ExternalAuthenticationMethod,
+    )
+    from office365.common.software_oath_authentication_method import (
+        SoftwareOathAuthenticationMethod,
+    )
+    from office365.directory.authentication.platform_credential_authentication_method import (
+        PlatformCredentialAuthenticationMethod,
+    )
+    from office365.directory.authentication.temporary_access_pass_authentication_method import (
+        TemporaryAccessPassAuthenticationMethod,
+    )
+    from office365.intune.windows_hello_for_business_authentication_method import (
+        WindowsHelloForBusinessAuthenticationMethod,
+    )
+    from office365.onedrive.operations.long_running import LongRunningOperation
 
 
 class Authentication(Entity):
@@ -15,7 +37,9 @@ class Authentication(Entity):
     @property
     def email_methods(self):
         """The email address registered to a user for authentication."""
-        from office365.directory.authentication.methods.email import EmailAuthenticationMethod
+        from office365.directory.authentication.methods.email import (
+            EmailAuthenticationMethod,
+        )
 
         return self.properties.get(
             "emailMethods",
@@ -26,7 +50,9 @@ class Authentication(Entity):
     @property
     def fido2_methods(self):
         """Represents the FIDO2 security keys registered to a user for authentication."""
-        from office365.directory.authentication.methods.fido import Fido2AuthenticationMethod
+        from office365.directory.authentication.methods.fido import (
+            Fido2AuthenticationMethod,
+        )
 
         return self.properties.get(
             "fido2Methods",
@@ -53,7 +79,9 @@ class Authentication(Entity):
     @property
     def phone_methods(self):
         """The phone numbers registered to a user for authentication."""
-        from office365.directory.authentication.methods.phone import PhoneAuthenticationMethod
+        from office365.directory.authentication.methods.phone import (
+            PhoneAuthenticationMethod,
+        )
 
         return self.properties.get(
             "phoneMethods",
@@ -66,7 +94,9 @@ class Authentication(Entity):
         """Represents the password that's registered to a user for authentication. For security, the password itself
         will never be returned in the object, but action can be taken to reset a password.
         """
-        from office365.directory.authentication.methods.password import PasswordAuthenticationMethod
+        from office365.directory.authentication.methods.password import (
+            PasswordAuthenticationMethod,
+        )
 
         return self.properties.get(
             "passwordMethods",
@@ -85,3 +115,93 @@ class Authentication(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Authentication"
+
+    @property
+    def external_authentication_methods(self) -> EntityCollection[ExternalAuthenticationMethod]:
+        """Gets the externalAuthenticationMethods property"""
+        from office365.common.external_authentication_method import (
+            ExternalAuthenticationMethod,
+        )
+
+        return self.properties.get(
+            "externalAuthenticationMethods",
+            EntityCollection[ExternalAuthenticationMethod](
+                self.context,
+                ExternalAuthenticationMethod,
+                ResourcePath("externalAuthenticationMethods", self.resource_path),
+            ),
+        )
+
+    @property
+    def operations(self) -> EntityCollection[LongRunningOperation]:
+        """Gets the operations property"""
+        from office365.onedrive.operations.long_running import LongRunningOperation
+
+        return self.properties.get(
+            "operations",
+            EntityCollection[LongRunningOperation](
+                self.context, LongRunningOperation, ResourcePath("operations", self.resource_path)
+            ),
+        )
+
+    @property
+    def platform_credential_methods(self) -> EntityCollection[PlatformCredentialAuthenticationMethod]:
+        """Gets the platformCredentialMethods property"""
+        from office365.directory.authentication.platform_credential_authentication_method import (
+            PlatformCredentialAuthenticationMethod,
+        )
+
+        return self.properties.get(
+            "platformCredentialMethods",
+            EntityCollection[PlatformCredentialAuthenticationMethod](
+                self.context,
+                PlatformCredentialAuthenticationMethod,
+                ResourcePath("platformCredentialMethods", self.resource_path),
+            ),
+        )
+
+    @property
+    def software_oath_methods(self) -> EntityCollection[SoftwareOathAuthenticationMethod]:
+        """Gets the softwareOathMethods property"""
+        from office365.common.software_oath_authentication_method import (
+            SoftwareOathAuthenticationMethod,
+        )
+
+        return self.properties.get(
+            "softwareOathMethods",
+            EntityCollection[SoftwareOathAuthenticationMethod](
+                self.context, SoftwareOathAuthenticationMethod, ResourcePath("softwareOathMethods", self.resource_path)
+            ),
+        )
+
+    @property
+    def temporary_access_pass_methods(self) -> EntityCollection[TemporaryAccessPassAuthenticationMethod]:
+        """Gets the temporaryAccessPassMethods property"""
+        from office365.directory.authentication.temporary_access_pass_authentication_method import (
+            TemporaryAccessPassAuthenticationMethod,
+        )
+
+        return self.properties.get(
+            "temporaryAccessPassMethods",
+            EntityCollection[TemporaryAccessPassAuthenticationMethod](
+                self.context,
+                TemporaryAccessPassAuthenticationMethod,
+                ResourcePath("temporaryAccessPassMethods", self.resource_path),
+            ),
+        )
+
+    @property
+    def windows_hello_for_business_methods(self) -> EntityCollection[WindowsHelloForBusinessAuthenticationMethod]:
+        """Gets the windowsHelloForBusinessMethods property"""
+        from office365.intune.windows_hello_for_business_authentication_method import (
+            WindowsHelloForBusinessAuthenticationMethod,
+        )
+
+        return self.properties.get(
+            "windowsHelloForBusinessMethods",
+            EntityCollection[WindowsHelloForBusinessAuthenticationMethod](
+                self.context,
+                WindowsHelloForBusinessAuthenticationMethod,
+                ResourcePath("windowsHelloForBusinessMethods", self.resource_path),
+            ),
+        )

@@ -1,4 +1,6 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.rolemanagement.app_scope import AppScope
 from office365.directory.rolemanagement.unifiedrole.definition import (
@@ -7,6 +9,9 @@ from office365.directory.rolemanagement.unifiedrole.definition import (
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.objects.object import DirectoryObject
 
 
 class UnifiedRoleAssignment(Entity):
@@ -72,3 +77,30 @@ class UnifiedRoleAssignment(Entity):
             "appScope",
             AppScope(self.context, ResourcePath("appScope", self.resource_path)),
         )
+
+    @property
+    def principal_organization_id(self) -> Optional[str]:
+        """Gets the principalOrganizationId property"""
+        return self.properties.get("principalOrganizationId", None)
+
+    @property
+    def directory_scope(self) -> DirectoryObject:
+        """Gets the directoryScope property"""
+        from office365.directory.objects.object import DirectoryObject
+
+        return self.properties.get(
+            "directoryScope", DirectoryObject(self.context, ResourcePath("directoryScope", self.resource_path))
+        )
+
+    @property
+    def principal(self) -> DirectoryObject:
+        """Gets the principal property"""
+        from office365.directory.objects.object import DirectoryObject
+
+        return self.properties.get(
+            "principal", DirectoryObject(self.context, ResourcePath("principal", self.resource_path))
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.UnifiedRoleAssignment"

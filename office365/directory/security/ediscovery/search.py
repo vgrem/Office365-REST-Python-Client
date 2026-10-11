@@ -1,12 +1,23 @@
 from __future__ import annotations
 
-from office365.directory.security.ediscovery.noncustodial_data_source import EdiscoveryNoncustodialDataSource
-from office365.directory.security.ediscovery.operations.add_to_review_set import EdiscoveryAddToReviewSetOperation
+from typing import TYPE_CHECKING
+
+from office365.directory.security.ediscovery.noncustodial_data_source import (
+    EdiscoveryNoncustodialDataSource,
+)
+from office365.directory.security.ediscovery.operations.add_to_review_set import (
+    EdiscoveryAddToReviewSetOperation,
+)
 from office365.directory.security.search.data_source import DataSource
 from office365.directory.security.search.datasourcescopes import DataSourceScopes
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.security.ediscovery.ediscovery_estimate_operation import (
+        EdiscoveryEstimateOperation,
+    )
 
 
 class EdiscoverySearch(Entity):
@@ -54,3 +65,17 @@ class EdiscoverySearch(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.EdiscoverySearch"
+
+    @property
+    def last_estimate_statistics_operation(self) -> EdiscoveryEstimateOperation:
+        """Gets the lastEstimateStatisticsOperation property"""
+        from office365.directory.security.ediscovery.ediscovery_estimate_operation import (
+            EdiscoveryEstimateOperation,
+        )
+
+        return self.properties.get(
+            "lastEstimateStatisticsOperation",
+            EdiscoveryEstimateOperation(
+                self.context, ResourcePath("lastEstimateStatisticsOperation", self.resource_path)
+            ),
+        )

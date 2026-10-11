@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.security.cases.exportfilestructure import ExportFileStructure
 from office365.directory.security.cases.exportoptions import ExportOptions
 from office365.directory.security.ediscovery.review_set import EdiscoveryReviewSet
-from office365.directory.security.ediscovery.review_set_query import EdiscoveryReviewSetQuery
+from office365.directory.security.ediscovery.review_set_query import (
+    EdiscoveryReviewSetQuery,
+)
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.security.export_file_metadata import ExportFileMetadata
 
 
 class EdiscoveryExportOperation(Entity):
@@ -48,3 +54,10 @@ class EdiscoveryExportOperation(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.EdiscoveryExportOperation"
+
+    @property
+    def export_file_metadata(self) -> ClientValueCollection[ExportFileMetadata]:
+        """Gets the exportFileMetadata property"""
+        from office365.directory.security.export_file_metadata import ExportFileMetadata
+
+        return self.properties.get("exportFileMetadata", ClientValueCollection[ExportFileMetadata](ExportFileMetadata))

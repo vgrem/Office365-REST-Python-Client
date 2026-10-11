@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.entity import Entity
@@ -28,3 +30,7 @@ class LinkedResource(Entity):
     def web_url(self) -> Optional[str]:
         """The deep link to the related item in the source application."""
         return self.properties.get("webUrl", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.LinkedResource"

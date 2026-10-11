@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.security.threatintelligence.host import Host
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.security.whois_contact import WhoisContact
+    from office365.directory.security.whois_nameserver import WhoisNameserver
 
 
 class WhoisBaseRecord(Entity):
@@ -57,3 +62,66 @@ class WhoisBaseRecord(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.WhoisBaseRecord"
+
+    @property
+    def abuse(self) -> WhoisContact:
+        """Gets the abuse property"""
+        from office365.directory.security.whois_contact import WhoisContact
+
+        return self.properties.get("abuse", WhoisContact())
+
+    @property
+    def admin(self) -> WhoisContact:
+        """Gets the admin property"""
+        from office365.directory.security.whois_contact import WhoisContact
+
+        return self.properties.get("admin", WhoisContact())
+
+    @property
+    def billing(self) -> WhoisContact:
+        """Gets the billing property"""
+        from office365.directory.security.whois_contact import WhoisContact
+
+        return self.properties.get("billing", WhoisContact())
+
+    @property
+    def nameservers(self) -> ClientValueCollection[WhoisNameserver]:
+        """Gets the nameservers property"""
+        from office365.directory.security.whois_nameserver import WhoisNameserver
+
+        return self.properties.get("nameservers", ClientValueCollection[WhoisNameserver](WhoisNameserver))
+
+    @property
+    def noc(self) -> WhoisContact:
+        """Gets the noc property"""
+        from office365.directory.security.whois_contact import WhoisContact
+
+        return self.properties.get("noc", WhoisContact())
+
+    @property
+    def registrant(self) -> WhoisContact:
+        """Gets the registrant property"""
+        from office365.directory.security.whois_contact import WhoisContact
+
+        return self.properties.get("registrant", WhoisContact())
+
+    @property
+    def registrar(self) -> WhoisContact:
+        """Gets the registrar property"""
+        from office365.directory.security.whois_contact import WhoisContact
+
+        return self.properties.get("registrar", WhoisContact())
+
+    @property
+    def technical(self) -> WhoisContact:
+        """Gets the technical property"""
+        from office365.directory.security.whois_contact import WhoisContact
+
+        return self.properties.get("technical", WhoisContact())
+
+    @property
+    def zone(self) -> WhoisContact:
+        """Gets the zone property"""
+        from office365.directory.security.whois_contact import WhoisContact
+
+        return self.properties.get("zone", WhoisContact())

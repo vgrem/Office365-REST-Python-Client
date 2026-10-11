@@ -1,6 +1,15 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
+from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.groups.group import Group
+    from office365.directory.users.user import User
+    from office365.teams.community_privacy import CommunityPrivacy
 
 
 class Community(Entity):
@@ -26,3 +35,35 @@ class Community(Entity):
     def description(self) -> Optional[str]:
         """The description of the community. The maximum length is 1,024 characters."""
         return self.properties.get("description", None)
+
+    @property
+    def group_id(self) -> Optional[str]:
+        """Gets the groupId property"""
+        return self.properties.get("groupId", None)
+
+    @property
+    def privacy(self) -> CommunityPrivacy:
+        """Gets the privacy property"""
+        from office365.teams.community_privacy import CommunityPrivacy
+
+        return self.properties.get("privacy", CommunityPrivacy.public)
+
+    @property
+    def group(self) -> Group:
+        """Gets the group property"""
+        from office365.directory.groups.group import Group
+
+        return self.properties.get("group", Group(self.context, ResourcePath("group", self.resource_path)))
+
+    @property
+    def owners(self) -> EntityCollection[User]:
+        """Gets the owners property"""
+        from office365.directory.users.user import User
+
+        return self.properties.get(
+            "owners", EntityCollection[User](self.context, User, ResourcePath("owners", self.resource_path))
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.Community"

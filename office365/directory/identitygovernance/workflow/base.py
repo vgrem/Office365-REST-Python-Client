@@ -1,14 +1,23 @@
-from datetime import datetime
-from typing import Optional
+from __future__ import annotations
 
-from office365.directory.identitygovernance.lifecycleworkflows.category import LifecycleWorkflowCategory
+from datetime import datetime
+from typing import TYPE_CHECKING, Optional
+
+from office365.directory.identitygovernance.lifecycleworkflows.category import (
+    LifecycleWorkflowCategory,
+)
 from office365.directory.identitygovernance.task import Task
-from office365.directory.identitygovernance.workflow.executionconditions import WorkflowExecutionConditions
+from office365.directory.identitygovernance.workflow.executionconditions import (
+    WorkflowExecutionConditions,
+)
 from office365.directory.objects.object import DirectoryObject
 from office365.directory.users.user import User
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.subject_type import SubjectType
 
 
 class WorkflowBase(Entity):
@@ -86,3 +95,10 @@ class WorkflowBase(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.identityGovernance.WorkflowBase"
+
+    @property
+    def target_subject_type(self) -> SubjectType:
+        """Gets the targetSubjectType property"""
+        from office365.directory.identitygovernance.subject_type import SubjectType
+
+        return self.properties.get("targetSubjectType", SubjectType.user)

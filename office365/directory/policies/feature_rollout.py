@@ -1,7 +1,14 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
+
 from office365.directory.objects.collection import DirectoryObjectCollection
 from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.policies.stagedfeaturename import StagedFeatureName
 
 
 class FeatureRolloutPolicy(Entity):
@@ -31,3 +38,34 @@ class FeatureRolloutPolicy(Entity):
                 ResourcePath("appliesTo", self.resource_path),
             ),
         )
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the description property"""
+        return self.properties.get("description", None)
+
+    @property
+    def display_name(self) -> Optional[str]:
+        """Gets the displayName property"""
+        return self.properties.get("displayName", None)
+
+    @property
+    def feature(self) -> StagedFeatureName:
+        """Gets the feature property"""
+        from office365.directory.policies.stagedfeaturename import StagedFeatureName
+
+        return self.properties.get("feature", StagedFeatureName.passthroughAuthentication)
+
+    @property
+    def is_applied_to_organization(self) -> Optional[bool]:
+        """Gets the isAppliedToOrganization property"""
+        return self.properties.get("isAppliedToOrganization", None)
+
+    @property
+    def is_enabled(self) -> Optional[bool]:
+        """Gets the isEnabled property"""
+        return self.properties.get("isEnabled", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.FeatureRolloutPolicy"

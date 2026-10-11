@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from datetime import datetime
+from typing import Optional
+
 from typing_extensions import Self
 
 from office365.entity import Entity
@@ -90,3 +93,13 @@ class Set(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.termStore.set"
+
+    @property
+    def created_date_time(self) -> Optional[datetime]:
+        """Gets the createdDateTime property"""
+        return self.properties.get("createdDateTime", datetime.min)
+
+    @property
+    def description(self) -> Optional[str]:
+        """Gets the description property"""
+        return self.properties.get("description", None)

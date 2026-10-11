@@ -2,33 +2,45 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Self
 
 from office365.communications.onlinemeetings.collection import OnlineMeetingCollection
 from office365.communications.presences.presence import Presence
 from office365.delta_collection import DeltaCollection
-from office365.directory.applications.roles.assignment_collection import AppRoleAssignmentCollection
+from office365.directory.applications.roles.assignment_collection import (
+    AppRoleAssignmentCollection,
+)
 from office365.directory.audit.signins.activity import SignInActivity
 from office365.directory.authentication.authentication import Authentication
 from office365.directory.extensions.extension import Extension
 from office365.directory.extensions.open_type import OpenTypeExtension
 from office365.directory.groups.on_premises_sync_behavior import OnPremisesSyncBehavior
 from office365.directory.identities.object_identity import ObjectIdentity
-from office365.directory.identitygovernance.termsofuse.agreement_acceptance import AgreementAcceptance
+from office365.directory.identitygovernance.termsofuse.agreement_acceptance import (
+    AgreementAcceptance,
+)
 from office365.directory.insights.office_graph import OfficeGraphInsights
 from office365.directory.licenses.assigned_license import AssignedLicense
 from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.directory.licenses.assignment_state import LicenseAssignmentState
 from office365.directory.licenses.details import LicenseDetails
 from office365.directory.objects.collection import DirectoryObjectCollection
-from office365.directory.objects.customsecurityattributevalue import CustomSecurityAttributeValue
+from office365.directory.objects.customsecurityattributevalue import (
+    CustomSecurityAttributeValue,
+)
 from office365.directory.objects.object import DirectoryObject
-from office365.directory.objects.onpremisesprovisioningerror import OnPremisesProvisioningError
-from office365.directory.objects.serviceprovisioningerror import ServiceProvisioningError
+from office365.directory.objects.onpremisesprovisioningerror import (
+    OnPremisesProvisioningError,
+)
+from office365.directory.objects.serviceprovisioningerror import (
+    ServiceProvisioningError,
+)
 from office365.directory.permissions.grants.oauth2 import OAuth2PermissionGrant
-from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
+from office365.directory.permissions.grants.resource_specific import (
+    ResourceSpecificPermissionGrant,
+)
 from office365.directory.permissions.require_permission import require_permission
 from office365.directory.permissions.scoped_role_membership import ScopedRoleMembership
 from office365.directory.profile_photo import ProfilePhoto
@@ -36,13 +48,19 @@ from office365.directory.rolemanagement.roles.role import DirectoryRole
 from office365.directory.users.activities.collection import UserActivityCollection
 from office365.directory.users.authorizationinfo import AuthorizationInfo
 from office365.directory.users.employeeorgdata import EmployeeOrgData
-from office365.directory.users.onpremisesextensionattributes import OnPremisesExtensionAttributes
+from office365.directory.users.onpremisesextensionattributes import (
+    OnPremisesExtensionAttributes,
+)
 from office365.directory.users.password_profile import PasswordProfile
 from office365.directory.users.settings import UserSettings
 from office365.entity_collection import EntityCollection
 from office365.intune.devices.data import DeviceAndAppManagementData
-from office365.intune.devices.management.managed.app.diagnostic_status import ManagedAppDiagnosticStatus
-from office365.intune.devices.management.managed.app.registration import ManagedAppRegistration
+from office365.intune.devices.management.managed.app.diagnostic_status import (
+    ManagedAppDiagnosticStatus,
+)
+from office365.intune.devices.management.managed.app.registration import (
+    ManagedAppRegistration,
+)
 from office365.intune.devices.management.managed.managed import ManagedDevice
 from office365.intune.organizations.contact import OrgContact
 from office365.intune.policies.managed_app import ManagedAppPolicy
@@ -60,7 +78,9 @@ from office365.outlook.calendar.events.event import Event
 from office365.outlook.calendar.events.reminder import Reminder
 from office365.outlook.calendar.group import CalendarGroup
 from office365.outlook.calendar.location_constraint import LocationConstraint
-from office365.outlook.calendar.meetingtimes.suggestions_result import MeetingTimeSuggestionsResult
+from office365.outlook.calendar.meetingtimes.suggestions_result import (
+    MeetingTimeSuggestionsResult,
+)
 from office365.outlook.calendar.meetingtimes.time_constraint import TimeConstraint
 from office365.outlook.contacts.collection import ContactCollection
 from office365.outlook.contacts.folders.collection import ContactFolderCollection
@@ -97,6 +117,21 @@ from office365.teams.teamwork.user import UserTeamwork
 from office365.teams.viva.employee_experience_user import EmployeeExperienceUser
 from office365.todo.todo import Todo
 
+if TYPE_CHECKING:
+    from office365.communications.adhoc_call import AdhocCall
+    from office365.directory.identitygovernance.user_data_security_and_governance import (
+        UserDataSecurityAndGovernance,
+    )
+    from office365.directory.security.cloud_clipboard_root import CloudClipboardRoot
+    from office365.directory.users.inference_classification import (
+        InferenceClassification,
+    )
+    from office365.directory.users.note import Note
+    from office365.intune.devices.cloud_pc import CloudPC
+    from office365.intune.devices.management_troubleshooting_event import (
+        DeviceManagementTroubleshootingEvent,
+    )
+
 
 class User(DirectoryObject):
     """Represents an Azure AD user account. Inherits from directoryObject."""
@@ -116,7 +151,9 @@ class User(DirectoryObject):
         Enable, configure, automatic replies (notify people automatically upon receipt of their email)
 
         """
-        from office365.outlook.mail.automaticreplies.setting import AutomaticRepliesSetting
+        from office365.outlook.mail.automaticreplies.setting import (
+            AutomaticRepliesSetting,
+        )
 
         setting = AutomaticRepliesSetting(
             status=status,
@@ -140,7 +177,9 @@ class User(DirectoryObject):
         Args:
             clear_all (bool): If true, clear all automatic replies settings
         """
-        from office365.outlook.mail.automaticreplies.setting import AutomaticRepliesSetting
+        from office365.outlook.mail.automaticreplies.setting import (
+            AutomaticRepliesSetting,
+        )
 
         setting = AutomaticRepliesSetting(status="disabled")
 
@@ -1456,3 +1495,92 @@ class User(DirectoryObject):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.User"
+
+    @property
+    def cloud_pcs(self) -> EntityCollection[CloudPC]:
+        """Gets the cloudPCs property"""
+        from office365.intune.devices.cloud_pc import CloudPC
+
+        return self.properties.get(
+            "cloudPCs", EntityCollection[CloudPC](self.context, CloudPC, ResourcePath("cloudPCs", self.resource_path))
+        )
+
+    @property
+    def data_security_and_governance(self) -> UserDataSecurityAndGovernance:
+        """Gets the dataSecurityAndGovernance property"""
+        from office365.directory.identitygovernance.user_data_security_and_governance import (
+            UserDataSecurityAndGovernance,
+        )
+
+        return self.properties.get(
+            "dataSecurityAndGovernance",
+            UserDataSecurityAndGovernance(self.context, ResourcePath("dataSecurityAndGovernance", self.resource_path)),
+        )
+
+    @property
+    def sponsor_of(self) -> EntityCollection[DirectoryObject]:
+        """Gets the sponsorOf property"""
+        from office365.directory.objects.object import DirectoryObject
+
+        return self.properties.get(
+            "sponsorOf",
+            EntityCollection[DirectoryObject](
+                self.context, DirectoryObject, ResourcePath("sponsorOf", self.resource_path)
+            ),
+        )
+
+    @property
+    def inference_classification(self) -> InferenceClassification:
+        """Gets the inferenceClassification property"""
+        from office365.directory.users.inference_classification import (
+            InferenceClassification,
+        )
+
+        return self.properties.get(
+            "inferenceClassification",
+            InferenceClassification(self.context, ResourcePath("inferenceClassification", self.resource_path)),
+        )
+
+    @property
+    def notes(self) -> EntityCollection[Note]:
+        """Gets the notes property"""
+        from office365.directory.users.note import Note
+
+        return self.properties.get(
+            "notes", EntityCollection[Note](self.context, Note, ResourcePath("notes", self.resource_path))
+        )
+
+    @property
+    def device_management_troubleshooting_events(self) -> EntityCollection[DeviceManagementTroubleshootingEvent]:
+        """Gets the deviceManagementTroubleshootingEvents property"""
+        from office365.intune.devices.management_troubleshooting_event import (
+            DeviceManagementTroubleshootingEvent,
+        )
+
+        return self.properties.get(
+            "deviceManagementTroubleshootingEvents",
+            EntityCollection[DeviceManagementTroubleshootingEvent](
+                self.context,
+                DeviceManagementTroubleshootingEvent,
+                ResourcePath("deviceManagementTroubleshootingEvents", self.resource_path),
+            ),
+        )
+
+    @property
+    def cloud_clipboard(self) -> CloudClipboardRoot:
+        """Gets the cloudClipboard property"""
+        from office365.directory.security.cloud_clipboard_root import CloudClipboardRoot
+
+        return self.properties.get(
+            "cloudClipboard", CloudClipboardRoot(self.context, ResourcePath("cloudClipboard", self.resource_path))
+        )
+
+    @property
+    def adhoc_calls(self) -> EntityCollection[AdhocCall]:
+        """Gets the adhocCalls property"""
+        from office365.communications.adhoc_call import AdhocCall
+
+        return self.properties.get(
+            "adhocCalls",
+            EntityCollection[AdhocCall](self.context, AdhocCall, ResourcePath("adhocCalls", self.resource_path)),
+        )

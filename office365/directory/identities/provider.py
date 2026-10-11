@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.entity import Entity
@@ -25,3 +27,17 @@ class IdentityProvider(Entity):
         with the identity provider. This is write-only. A read operation will return ****
         """
         return self.properties.get("clientSecret", None)
+
+    @property
+    def name(self) -> Optional[str]:
+        """Gets the name property"""
+        return self.properties.get("name", None)
+
+    @property
+    def type(self) -> Optional[str]:
+        """Gets the type property"""
+        return self.properties.get("type", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.IdentityProvider"

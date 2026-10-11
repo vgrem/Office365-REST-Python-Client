@@ -1,8 +1,14 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
+
+if TYPE_CHECKING:
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.localized_text import (
+        AccessPackageLocalizedText,
+    )
 
 
 class AccessPackageQuestion(Entity):
@@ -29,3 +35,14 @@ class AccessPackageQuestion(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessPackageQuestion"
+
+    @property
+    def localizations(self) -> ClientValueCollection[AccessPackageLocalizedText]:
+        """Gets the localizations property"""
+        from office365.directory.identitygovernance.entitlementmanagement.accesspackage.localized_text import (
+            AccessPackageLocalizedText,
+        )
+
+        return self.properties.get(
+            "localizations", ClientValueCollection[AccessPackageLocalizedText](AccessPackageLocalizedText)
+        )

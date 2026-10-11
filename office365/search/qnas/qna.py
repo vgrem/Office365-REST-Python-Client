@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.intune.devices.platformtype import DevicePlatformType
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
 from office365.search.answers.answer import SearchAnswer
 from office365.search.answers.state import AnswerState
+
+if TYPE_CHECKING:
+    from office365.search.answers.keyword import AnswerKeyword
+    from office365.search.answers.variant import AnswerVariant
 
 
 class Qna(SearchAnswer):
@@ -53,3 +59,17 @@ class Qna(SearchAnswer):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.search.Qna"
+
+    @property
+    def keywords(self) -> AnswerKeyword:
+        """Gets the keywords property"""
+        from office365.search.answers.keyword import AnswerKeyword
+
+        return self.properties.get("keywords", AnswerKeyword())
+
+    @property
+    def targeted_variations(self) -> ClientValueCollection[AnswerVariant]:
+        """Gets the targetedVariations property"""
+        from office365.search.answers.variant import AnswerVariant
+
+        return self.properties.get("targetedVariations", ClientValueCollection[AnswerVariant](AnswerVariant))

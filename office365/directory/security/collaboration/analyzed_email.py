@@ -1,10 +1,45 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
+
+if TYPE_CHECKING:
+    from office365.directory.security.antispam_directionality import (
+        AntispamDirectionality,
+    )
+    from office365.directory.security.collaboration.analyzed_email_attachment import (
+        AnalyzedEmailAttachment,
+    )
+    from office365.directory.security.collaboration.analyzed_email_authentication_detail import (
+        AnalyzedEmailAuthenticationDetail,
+    )
+    from office365.directory.security.collaboration.analyzed_email_delivery_detail import (
+        AnalyzedEmailDeliveryDetail,
+    )
+    from office365.directory.security.collaboration.analyzed_email_dlp_rule_info import (
+        AnalyzedEmailDlpRuleInfo,
+    )
+    from office365.directory.security.collaboration.analyzed_email_exchange_transport_rule_info import (
+        AnalyzedEmailExchangeTransportRuleInfo,
+    )
+    from office365.directory.security.collaboration.analyzed_email_recipient_detail import (
+        AnalyzedEmailRecipientDetail,
+    )
+    from office365.directory.security.collaboration.analyzed_email_sender_detail import (
+        AnalyzedEmailSenderDetail,
+    )
+    from office365.directory.security.collaboration.analyzed_email_url import (
+        AnalyzedEmailUrl,
+    )
+    from office365.directory.security.threat_detection_detail import (
+        ThreatDetectionDetail,
+    )
+    from office365.directory.security.threat_type import ThreatType
+    from office365.directory.security.timeline_event import TimelineEvent
 
 
 class AnalyzedEmail(Entity):
@@ -131,3 +166,123 @@ class AnalyzedEmail(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.AnalyzedEmail"
+
+    @property
+    def attachments(self) -> ClientValueCollection[AnalyzedEmailAttachment]:
+        """Gets the attachments property"""
+        from office365.directory.security.collaboration.analyzed_email_attachment import (
+            AnalyzedEmailAttachment,
+        )
+
+        return self.properties.get(
+            "attachments", ClientValueCollection[AnalyzedEmailAttachment](AnalyzedEmailAttachment)
+        )
+
+    @property
+    def authentication_details(self) -> AnalyzedEmailAuthenticationDetail:
+        """Gets the authenticationDetails property"""
+        from office365.directory.security.collaboration.analyzed_email_authentication_detail import (
+            AnalyzedEmailAuthenticationDetail,
+        )
+
+        return self.properties.get("authenticationDetails", AnalyzedEmailAuthenticationDetail())
+
+    @property
+    def directionality(self) -> AntispamDirectionality:
+        """Gets the directionality property"""
+        from office365.directory.security.antispam_directionality import (
+            AntispamDirectionality,
+        )
+
+        return self.properties.get("directionality", AntispamDirectionality.unknown)
+
+    @property
+    def dlp_rules(self) -> ClientValueCollection[AnalyzedEmailDlpRuleInfo]:
+        """Gets the dlpRules property"""
+        from office365.directory.security.collaboration.analyzed_email_dlp_rule_info import (
+            AnalyzedEmailDlpRuleInfo,
+        )
+
+        return self.properties.get("dlpRules", ClientValueCollection[AnalyzedEmailDlpRuleInfo](AnalyzedEmailDlpRuleInfo))
+
+    @property
+    def exchange_transport_rules(self) -> ClientValueCollection[AnalyzedEmailExchangeTransportRuleInfo]:
+        """Gets the exchangeTransportRules property"""
+        from office365.directory.security.collaboration.analyzed_email_exchange_transport_rule_info import (
+            AnalyzedEmailExchangeTransportRuleInfo,
+        )
+
+        return self.properties.get(
+            "exchangeTransportRules",
+            ClientValueCollection[AnalyzedEmailExchangeTransportRuleInfo](AnalyzedEmailExchangeTransportRuleInfo),
+        )
+
+    @property
+    def latest_delivery(self) -> AnalyzedEmailDeliveryDetail:
+        """Gets the latestDelivery property"""
+        from office365.directory.security.collaboration.analyzed_email_delivery_detail import (
+            AnalyzedEmailDeliveryDetail,
+        )
+
+        return self.properties.get("latestDelivery", AnalyzedEmailDeliveryDetail())
+
+    @property
+    def original_delivery(self) -> AnalyzedEmailDeliveryDetail:
+        """Gets the originalDelivery property"""
+        from office365.directory.security.collaboration.analyzed_email_delivery_detail import (
+            AnalyzedEmailDeliveryDetail,
+        )
+
+        return self.properties.get("originalDelivery", AnalyzedEmailDeliveryDetail())
+
+    @property
+    def recipient_detail(self) -> AnalyzedEmailRecipientDetail:
+        """Gets the recipientDetail property"""
+        from office365.directory.security.collaboration.analyzed_email_recipient_detail import (
+            AnalyzedEmailRecipientDetail,
+        )
+
+        return self.properties.get("recipientDetail", AnalyzedEmailRecipientDetail())
+
+    @property
+    def sender_detail(self) -> AnalyzedEmailSenderDetail:
+        """Gets the senderDetail property"""
+        from office365.directory.security.collaboration.analyzed_email_sender_detail import (
+            AnalyzedEmailSenderDetail,
+        )
+
+        return self.properties.get("senderDetail", AnalyzedEmailSenderDetail())
+
+    @property
+    def threat_detection_details(self) -> ClientValueCollection[ThreatDetectionDetail]:
+        """Gets the threatDetectionDetails property"""
+        from office365.directory.security.threat_detection_detail import (
+            ThreatDetectionDetail,
+        )
+
+        return self.properties.get(
+            "threatDetectionDetails", ClientValueCollection[ThreatDetectionDetail](ThreatDetectionDetail)
+        )
+
+    @property
+    def threat_types(self) -> ClientValueCollection[ThreatType]:
+        """Gets the threatTypes property"""
+        from office365.directory.security.threat_type import ThreatType
+
+        return self.properties.get("threatTypes", ClientValueCollection[ThreatType](ThreatType))
+
+    @property
+    def timeline_events(self) -> ClientValueCollection[TimelineEvent]:
+        """Gets the timelineEvents property"""
+        from office365.directory.security.timeline_event import TimelineEvent
+
+        return self.properties.get("timelineEvents", ClientValueCollection[TimelineEvent](TimelineEvent))
+
+    @property
+    def urls(self) -> ClientValueCollection[AnalyzedEmailUrl]:
+        """Gets the urls property"""
+        from office365.directory.security.collaboration.analyzed_email_url import (
+            AnalyzedEmailUrl,
+        )
+
+        return self.properties.get("urls", ClientValueCollection[AnalyzedEmailUrl](AnalyzedEmailUrl))

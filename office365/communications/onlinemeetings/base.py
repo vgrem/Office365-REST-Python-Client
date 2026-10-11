@@ -1,19 +1,45 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from office365.communications.meetings.chathistorydefaultmode import MeetingChatHistoryDefaultMode
+from office365.communications.meetings.chathistorydefaultmode import (
+    MeetingChatHistoryDefaultMode,
+)
 from office365.communications.meetings.chatmode import MeetingChatMode
 from office365.communications.meetings.liveshareoptions import MeetingLiveShareOptions
-from office365.communications.onlinemeetings.allowedlobbyadmitterroles import AllowedLobbyAdmitterRoles
-from office365.communications.onlinemeetings.lobby_bypass_settings import LobbyBypassSettings
-from office365.communications.onlinemeetings.online_meeting_type import OnlineMeetingType
+from office365.communications.onlinemeetings.allowedlobbyadmitterroles import (
+    AllowedLobbyAdmitterRoles,
+)
+from office365.communications.onlinemeetings.lobby_bypass_settings import (
+    LobbyBypassSettings,
+)
+from office365.communications.onlinemeetings.online_meeting_type import (
+    OnlineMeetingType,
+)
 from office365.communications.onlinemeetings.presenters import OnlineMeetingPresenters
-from office365.communications.onlinemeetings.watermark_protection_values import WatermarkProtectionValues
+from office365.communications.onlinemeetings.watermark_protection_values import (
+    WatermarkProtectionValues,
+)
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.outlook.mail.item_body import ItemBody
+from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
+    from office365.communications.audio_conferencing import AudioConferencing
+    from office365.communications.chat_restrictions import ChatRestrictions
+    from office365.communications.join_meeting_id_settings import JoinMeetingIdSettings
     from office365.communications.onlinemeetings.collection import ChatInfo
+    from office365.communications.onlinemeetings.meeting_attendance_report import (
+        MeetingAttendanceReport,
+    )
+    from office365.communications.onlinemeetings.sensitivity_label_assignment import (
+        OnlineMeetingSensitivityLabelAssignment,
+    )
+    from office365.directory.security.cloud_video_interop_info import (
+        CloudVideoInteropInfo,
+    )
 
 
 class OnlineMeetingBase(Entity):
@@ -171,3 +197,58 @@ class OnlineMeetingBase(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.OnlineMeetingBase"
+
+    @property
+    def audio_conferencing(self) -> AudioConferencing:
+        """Gets the audioConferencing property"""
+        from office365.communications.audio_conferencing import AudioConferencing
+
+        return self.properties.get("audioConferencing", AudioConferencing())
+
+    @property
+    def chat_restrictions(self) -> ChatRestrictions:
+        """Gets the chatRestrictions property"""
+        from office365.communications.chat_restrictions import ChatRestrictions
+
+        return self.properties.get("chatRestrictions", ChatRestrictions())
+
+    @property
+    def cloud_video_interop_info(self) -> CloudVideoInteropInfo:
+        """Gets the cloudVideoInteropInfo property"""
+        from office365.directory.security.cloud_video_interop_info import (
+            CloudVideoInteropInfo,
+        )
+
+        return self.properties.get("cloudVideoInteropInfo", CloudVideoInteropInfo())
+
+    @property
+    def join_meeting_id_settings(self) -> JoinMeetingIdSettings:
+        """Gets the joinMeetingIdSettings property"""
+        from office365.communications.join_meeting_id_settings import (
+            JoinMeetingIdSettings,
+        )
+
+        return self.properties.get("joinMeetingIdSettings", JoinMeetingIdSettings())
+
+    @property
+    def sensitivity_label_assignment(self) -> OnlineMeetingSensitivityLabelAssignment:
+        """Gets the sensitivityLabelAssignment property"""
+        from office365.communications.onlinemeetings.sensitivity_label_assignment import (
+            OnlineMeetingSensitivityLabelAssignment,
+        )
+
+        return self.properties.get("sensitivityLabelAssignment", OnlineMeetingSensitivityLabelAssignment())
+
+    @property
+    def attendance_reports(self) -> EntityCollection[MeetingAttendanceReport]:
+        """Gets the attendanceReports property"""
+        from office365.communications.onlinemeetings.meeting_attendance_report import (
+            MeetingAttendanceReport,
+        )
+
+        return self.properties.get(
+            "attendanceReports",
+            EntityCollection[MeetingAttendanceReport](
+                self.context, MeetingAttendanceReport, ResourcePath("attendanceReports", self.resource_path)
+            ),
+        )

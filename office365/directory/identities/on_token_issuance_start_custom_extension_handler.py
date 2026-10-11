@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from office365.directory.identitygovernance.entitlementmanagement.custom_extension_overwrite_configuration import (
     CustomExtensionOverwriteConfiguration,
 )
 from office365.runtime.client_value import ClientValue
+
+if TYPE_CHECKING:
+    from office365.directory.identities.on_token_issuance_start_custom_extension import (
+        OnTokenIssuanceStartCustomExtension,
+    )
 
 
 @dataclass
@@ -15,3 +21,5 @@ class OnTokenIssuanceStartCustomExtensionHandler(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.OnTokenIssuanceStartCustomExtensionHandler"
+
+    customExtension: OnTokenIssuanceStartCustomExtension | None = None

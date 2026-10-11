@@ -5,10 +5,14 @@ from typing import TYPE_CHECKING
 
 from office365.directory.security.ssl_certificate import SslCertificate
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
+    from office365.directory.security.host_ssl_certificate_port import (
+        HostSslCertificatePort,
+    )
     from office365.directory.security.threatintelligence.host import Host
 
 
@@ -41,3 +45,12 @@ class HostSslCertificate(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.HostSslCertificate"
+
+    @property
+    def ports(self) -> ClientValueCollection[HostSslCertificatePort]:
+        """Gets the ports property"""
+        from office365.directory.security.host_ssl_certificate_port import (
+            HostSslCertificatePort,
+        )
+
+        return self.properties.get("ports", ClientValueCollection[HostSslCertificatePort](HostSslCertificatePort))

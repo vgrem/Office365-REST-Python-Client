@@ -1,9 +1,14 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.onedrive.workbooks.ranges.range import WorkbookRange
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
+
+if TYPE_CHECKING:
+    from office365.runtime.types.json import Json
 
 
 class WorkbookNamedItem(Entity):
@@ -48,3 +53,24 @@ class WorkbookNamedItem(Entity):
     @property
     def property_ref_name(self) -> str:
         return "name"
+
+    @property
+    def type(self) -> Optional[str]:
+        """Gets the type property"""
+        return self.properties.get("type", None)
+
+    @property
+    def value(self) -> Json:
+        """Gets the value property"""
+        from office365.runtime.types.json import Json
+
+        return self.properties.get("value", Json())
+
+    @property
+    def visible(self) -> Optional[bool]:
+        """Gets the visible property"""
+        return self.properties.get("visible", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookNamedItem"

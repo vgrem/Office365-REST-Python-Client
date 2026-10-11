@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from office365.entity import Entity
@@ -102,3 +104,7 @@ class WorkbookFunctions(Entity):
         qry = ServiceOperationQuery(self, "power", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookFunctions"

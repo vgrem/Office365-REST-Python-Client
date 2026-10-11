@@ -8,7 +8,10 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource import AccessPackageResource
+    from office365.directory.connection_info import ConnectionInfo
+    from office365.directory.identitygovernance.entitlementmanagement.accesspackage.resource import (
+        AccessPackageResource,
+    )
 
 
 class AccessPackageResourceEnvironment(Entity):
@@ -60,3 +63,10 @@ class AccessPackageResourceEnvironment(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.AccessPackageResourceEnvironment"
+
+    @property
+    def connection_info(self) -> ConnectionInfo:
+        """Gets the connectionInfo property"""
+        from office365.directory.connection_info import ConnectionInfo
+
+        return self.properties.get("connectionInfo", ConnectionInfo())

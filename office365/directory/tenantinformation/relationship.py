@@ -1,12 +1,23 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from office365.directory.tenantinformation.information import TenantInformation
 from office365.directory.tenantinformation.multi_organization import (
     MultiTenantOrganization,
 )
 from office365.entity import Entity
+from office365.entity_collection import EntityCollection
 from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.directory.delegatedadmin.customer import DelegatedAdminCustomer
+    from office365.directory.delegatedadmin.relationship import (
+        DelegatedAdminRelationship,
+    )
 
 
 class TenantRelationship(Entity):
@@ -51,3 +62,33 @@ class TenantRelationship(Entity):
                 ResourcePath("multiTenantOrganization", self.resource_path),
             ),
         )
+
+    @property
+    def delegated_admin_customers(self) -> EntityCollection[DelegatedAdminCustomer]:
+        """Gets the delegatedAdminCustomers property"""
+        from office365.directory.delegatedadmin.customer import DelegatedAdminCustomer
+
+        return self.properties.get(
+            "delegatedAdminCustomers",
+            EntityCollection[DelegatedAdminCustomer](
+                self.context, DelegatedAdminCustomer, ResourcePath("delegatedAdminCustomers", self.resource_path)
+            ),
+        )
+
+    @property
+    def delegated_admin_relationships(self) -> EntityCollection[DelegatedAdminRelationship]:
+        """Gets the delegatedAdminRelationships property"""
+        from office365.directory.delegatedadmin.relationship import (
+            DelegatedAdminRelationship,
+        )
+
+        return self.properties.get(
+            "delegatedAdminRelationships",
+            EntityCollection[DelegatedAdminRelationship](
+                self.context, DelegatedAdminRelationship, ResourcePath("delegatedAdminRelationships", self.resource_path)
+            ),
+        )
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.TenantRelationship"

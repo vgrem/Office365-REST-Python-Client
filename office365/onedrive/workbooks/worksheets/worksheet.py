@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from office365.directory.permissions.require_permission import require_permission
@@ -120,3 +122,17 @@ class WorkbookWorksheet(Entity):
             "protection",
             WorkbookWorksheetProtection(self.context, ResourcePath("protection", self.resource_path)),
         )
+
+    @property
+    def position(self) -> Optional[int]:
+        """Gets the position property"""
+        return self.properties.get("position", None)
+
+    @property
+    def visibility(self) -> Optional[str]:
+        """Gets the visibility property"""
+        return self.properties.get("visibility", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.WorkbookWorksheet"

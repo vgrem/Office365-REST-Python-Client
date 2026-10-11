@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from typing import Optional
+from uuid import UUID
 
 from office365.directory.permissions.default_user_role import DefaultUserRolePermissions
 from office365.directory.policies.base import PolicyBase
@@ -51,3 +54,12 @@ class AuthorizationPolicy(PolicyBase):
     def default_user_role_permissions(self) -> Optional[DefaultUserRolePermissions]:
         """Specifies certain customizable permissions for default user role."""
         return self.properties.get("defaultUserRolePermissions", DefaultUserRolePermissions())
+
+    @property
+    def guest_user_role_id(self) -> Optional[UUID]:
+        """Gets the guestUserRoleId property"""
+        return self.properties.get("guestUserRoleId", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.AuthorizationPolicy"

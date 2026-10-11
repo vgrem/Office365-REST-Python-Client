@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from office365.directory.security.cases.statisticsoptions import StatisticsOptions
 from office365.directory.security.ediscovery.search import EdiscoverySearch
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+
+if TYPE_CHECKING:
+    from office365.directory.security.report_file_metadata import ReportFileMetadata
 
 
 class EdiscoveryEstimateOperation(Entity):
@@ -52,3 +56,10 @@ class EdiscoveryEstimateOperation(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.EdiscoveryEstimateOperation"
+
+    @property
+    def report_file_metadata(self) -> ClientValueCollection[ReportFileMetadata]:
+        """Gets the reportFileMetadata property"""
+        from office365.directory.security.report_file_metadata import ReportFileMetadata
+
+        return self.properties.get("reportFileMetadata", ClientValueCollection[ReportFileMetadata](ReportFileMetadata))

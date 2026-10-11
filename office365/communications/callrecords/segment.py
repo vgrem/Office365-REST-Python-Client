@@ -1,5 +1,15 @@
+from __future__ import annotations
+
+from datetime import datetime
+from typing import TYPE_CHECKING, Optional
+
 from office365.communications.callrecords.endpoint import Endpoint
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
+
+if TYPE_CHECKING:
+    from office365.communications.callrecords.failure_info import FailureInfo
+    from office365.communications.callrecords.media import Media
 
 
 class Segment(Entity):
@@ -21,3 +31,27 @@ class Segment(Entity):
     @property
     def entity_type_name(self):
         return "microsoft.graph.callRecords.segment"
+
+    @property
+    def end_date_time(self) -> Optional[datetime]:
+        """Gets the endDateTime property"""
+        return self.properties.get("endDateTime", datetime.min)
+
+    @property
+    def failure_info(self) -> FailureInfo:
+        """Gets the failureInfo property"""
+        from office365.communications.callrecords.failure_info import FailureInfo
+
+        return self.properties.get("failureInfo", FailureInfo())
+
+    @property
+    def media(self) -> ClientValueCollection[Media]:
+        """Gets the media property"""
+        from office365.communications.callrecords.media import Media
+
+        return self.properties.get("media", ClientValueCollection[Media](Media))
+
+    @property
+    def start_date_time(self) -> Optional[datetime]:
+        """Gets the startDateTime property"""
+        return self.properties.get("startDateTime", datetime.min)

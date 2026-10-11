@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from office365.directory.security.threatintelligence.article_indicator import ArticleIndicator
+from office365.directory.security.threatintelligence.article_indicator import (
+    ArticleIndicator,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
+
+if TYPE_CHECKING:
+    from office365.directory.security.formatted_content import FormattedContent
 
 
 class Article(Entity):
@@ -54,3 +59,17 @@ class Article(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.Article"
+
+    @property
+    def body(self) -> FormattedContent:
+        """Gets the body property"""
+        from office365.directory.security.formatted_content import FormattedContent
+
+        return self.properties.get("body", FormattedContent())
+
+    @property
+    def summary(self) -> FormattedContent:
+        """Gets the summary property"""
+        from office365.directory.security.formatted_content import FormattedContent
+
+        return self.properties.get("summary", FormattedContent())

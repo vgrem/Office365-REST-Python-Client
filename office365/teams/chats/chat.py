@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from office365.directory.permissions.grants.resource_specific import ResourceSpecificPermissionGrant
+from office365.directory.permissions.grants.resource_specific import (
+    ResourceSpecificPermissionGrant,
+)
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
@@ -15,6 +18,11 @@ from office365.teams.members.conversation_collection import ConversationMemberCo
 from office365.teams.operations.async_operation import TeamsAsyncOperation
 from office365.teams.tabs.tab import TeamsTab
 from office365.teams.teamwork.online_meeting_info import TeamworkOnlineMeetingInfo
+
+if TYPE_CHECKING:
+    from office365.teams.chats.pinned_chat_message_info import PinnedChatMessageInfo
+    from office365.teams.chats.targeted_chat_message import TargetedChatMessage
+    from office365.teams.migration_mode import MigrationMode
 
 
 class Chat(Entity):
@@ -138,3 +146,34 @@ class Chat(Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.Chat"
+
+    @property
+    def migration_mode(self) -> MigrationMode:
+        """Gets the migrationMode property"""
+        from office365.teams.migration_mode import MigrationMode
+
+        return self.properties.get("migrationMode", MigrationMode.inProgress)
+
+    @property
+    def pinned_messages(self) -> EntityCollection[PinnedChatMessageInfo]:
+        """Gets the pinnedMessages property"""
+        from office365.teams.chats.pinned_chat_message_info import PinnedChatMessageInfo
+
+        return self.properties.get(
+            "pinnedMessages",
+            EntityCollection[PinnedChatMessageInfo](
+                self.context, PinnedChatMessageInfo, ResourcePath("pinnedMessages", self.resource_path)
+            ),
+        )
+
+    @property
+    def targeted_messages(self) -> EntityCollection[TargetedChatMessage]:
+        """Gets the targetedMessages property"""
+        from office365.teams.chats.targeted_chat_message import TargetedChatMessage
+
+        return self.properties.get(
+            "targetedMessages",
+            EntityCollection[TargetedChatMessage](
+                self.context, TargetedChatMessage, ResourcePath("targetedMessages", self.resource_path)
+            ),
+        )

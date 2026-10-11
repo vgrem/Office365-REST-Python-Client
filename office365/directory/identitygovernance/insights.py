@@ -4,4 +4,6 @@ from office365.entity import Entity
 
 
 class Insights(Entity):
-    pass
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.identityGovernance.Insights"

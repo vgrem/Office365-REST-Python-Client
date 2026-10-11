@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from datetime import datetime
 from typing import Optional
 
 from typing_extensions import Self
@@ -83,3 +86,17 @@ class PlannerPlan(Entity):
     def created_by(self):
         """Identity of the user, device, or application which created the plan."""
         return self.properties.get("createdBy", IdentitySet())
+
+    @property
+    def created_date_time(self) -> Optional[datetime]:
+        """Gets the createdDateTime property"""
+        return self.properties.get("createdDateTime", datetime.min)
+
+    @property
+    def owner(self) -> Optional[str]:
+        """Gets the owner property"""
+        return self.properties.get("owner", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.PlannerPlan"

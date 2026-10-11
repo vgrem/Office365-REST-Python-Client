@@ -1,4 +1,12 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
+
 from office365.entity import Entity
+from office365.runtime.client_value_collection import ClientValueCollection
+
+if TYPE_CHECKING:
+    from office365.directory.profile_card_annotation import ProfileCardAnnotation
 
 
 class ProfileCardProperty(Entity):
@@ -13,3 +21,24 @@ class ProfileCardProperty(Entity):
     For more information about how to add properties to the profile card for an organization, see Add or remove
     custom attributes on a profile card using the profile card API.
     """
+
+    @property
+    def annotations(self) -> ClientValueCollection[ProfileCardAnnotation]:
+        """Gets the annotations property"""
+        from office365.directory.profile_card_annotation import ProfileCardAnnotation
+
+        return self.properties.get("annotations", ClientValueCollection[ProfileCardAnnotation](ProfileCardAnnotation))
+
+    @property
+    def directory_property_name(self) -> Optional[str]:
+        """Gets the directoryPropertyName property"""
+        return self.properties.get("directoryPropertyName", None)
+
+    @property
+    def is_visible(self) -> Optional[bool]:
+        """Gets the isVisible property"""
+        return self.properties.get("isVisible", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.ProfileCardProperty"

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from typing_extensions import Self
 
@@ -18,6 +20,10 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.booking.chedulingpolicy import BookingSchedulingPolicy
+    from office365.booking.pagesettings import BookingPageSettings
 
 
 class BookingBusiness(Entity):
@@ -158,3 +164,71 @@ class BookingBusiness(Entity):
                 ResourcePath("staffMembers", self.resource_path),
             ),
         )
+
+    @property
+    def booking_page_settings(self) -> BookingPageSettings:
+        """Gets the bookingPageSettings property"""
+        from office365.booking.pagesettings import BookingPageSettings
+
+        return self.properties.get("bookingPageSettings", BookingPageSettings())
+
+    @property
+    def business_type(self) -> Optional[str]:
+        """Gets the businessType property"""
+        return self.properties.get("businessType", None)
+
+    @property
+    def created_date_time(self) -> Optional[datetime]:
+        """Gets the createdDateTime property"""
+        return self.properties.get("createdDateTime", datetime.min)
+
+    @property
+    def default_currency_iso(self) -> Optional[str]:
+        """Gets the defaultCurrencyIso property"""
+        return self.properties.get("defaultCurrencyIso", None)
+
+    @property
+    def email(self) -> Optional[str]:
+        """Gets the email property"""
+        return self.properties.get("email", None)
+
+    @property
+    def is_published(self) -> Optional[bool]:
+        """Gets the isPublished property"""
+        return self.properties.get("isPublished", None)
+
+    @property
+    def language_tag(self) -> Optional[str]:
+        """Gets the languageTag property"""
+        return self.properties.get("languageTag", None)
+
+    @property
+    def last_updated_date_time(self) -> Optional[datetime]:
+        """Gets the lastUpdatedDateTime property"""
+        return self.properties.get("lastUpdatedDateTime", datetime.min)
+
+    @property
+    def phone(self) -> Optional[str]:
+        """Gets the phone property"""
+        return self.properties.get("phone", None)
+
+    @property
+    def public_url(self) -> Optional[str]:
+        """Gets the publicUrl property"""
+        return self.properties.get("publicUrl", None)
+
+    @property
+    def scheduling_policy(self) -> BookingSchedulingPolicy:
+        """Gets the schedulingPolicy property"""
+        from office365.booking.chedulingpolicy import BookingSchedulingPolicy
+
+        return self.properties.get("schedulingPolicy", BookingSchedulingPolicy())
+
+    @property
+    def web_site_url(self) -> Optional[str]:
+        """Gets the webSiteUrl property"""
+        return self.properties.get("webSiteUrl", None)
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.BookingBusiness"
