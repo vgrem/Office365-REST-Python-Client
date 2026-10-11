@@ -58,7 +58,10 @@ class DriveItemCopyResult(LongRunningOperationResult):
     """
 
     def __init__(self, context: "ClientRuntimeContext", source: "DriveItem | None" = None) -> None:
-        super().__init__(context, str(), authenticate=True)
+        # The monitor URL lives on the drive's host (OneDrive / SharePoint), not
+        # Graph, and is pre-authenticated for the original caller — attaching the
+        # Graph token here would fail with "Invalid audience".
+        super().__init__(context, str(), authenticate=False)
         self._source = source
         #: Destination drive id, captured from the parent reference when known.
         self.destination_drive_id: str | None = None

@@ -500,9 +500,10 @@ class LongRunningOperationResult(ClientResult[str]):
         result = source_item.copy(name="report (copy).xlsx", parent=dest).execute_query()
         status = result.wait()  # or: status = await result.wait_async()
 
-    Unlike the raw :class:`OperationPoller`, credentials are attached by default
-    because Microsoft Graph hands back authenticated monitor URLs (often on the
-    tenant's SharePoint host) for its long-running actions.
+    Microsoft Graph hands back monitor URLs on the drive's host (OneDrive /
+    SharePoint) that are pre-authenticated for the original caller, so by default
+    no credentials are attached when polling — pass ``authenticate=True`` only for
+    services (e.g. Azure) that require them.
     """
 
     def __init__(
@@ -510,7 +511,7 @@ class LongRunningOperationResult(ClientResult[str]):
         context: "ClientRuntimeContext",
         default_value: str | None = None,
         *,
-        authenticate: bool = True,
+        authenticate: bool = False,
         final_state_via: str = "auto",
     ) -> None:
         super().__init__(context, str() if default_value is None else default_value)
