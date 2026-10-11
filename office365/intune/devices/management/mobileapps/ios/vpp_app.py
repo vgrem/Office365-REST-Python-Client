@@ -9,10 +9,10 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.mobileapps.ios.ios_device_type import (
         IosDeviceType,
     )
+    from office365.intune.devices.management.mobileapps.vpp_licensing_type import VppLicensingType
     from office365.intune.devices.management.vpptokens.accounttype import (
         VppTokenAccountType,
     )
-    from office365.intune.vpp_licensing_type import VppLicensingType
 
 
 class IosVppApp(Entity):
@@ -38,7 +38,7 @@ class IosVppApp(Entity):
     @property
     def licensing_type(self) -> VppLicensingType:
         """Gets the licensingType property"""
-        from office365.intune.vpp_licensing_type import VppLicensingType
+        from office365.intune.devices.management.mobileapps.vpp_licensing_type import VppLicensingType
 
         return self.properties.get("licensingType", VppLicensingType())
 

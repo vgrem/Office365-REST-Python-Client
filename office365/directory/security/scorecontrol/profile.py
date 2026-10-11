@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from office365.directory.security.security_vendor_information import (
         SecurityVendorInformation,
     )
-    from office365.intune.compliance_information import ComplianceInformation
+    from office365.intune.devices.compliance.information import ComplianceInformation
 
 
 class SecureScoreControlProfile(Entity):
@@ -39,7 +39,7 @@ class SecureScoreControlProfile(Entity):
     @property
     def compliance_information(self) -> ClientValueCollection[ComplianceInformation]:
         """Gets the complianceInformation property"""
-        from office365.intune.compliance_information import ComplianceInformation
+        from office365.intune.devices.compliance.information import ComplianceInformation
 
         return self.properties.get(
             "complianceInformation", ClientValueCollection[ComplianceInformation](ComplianceInformation)

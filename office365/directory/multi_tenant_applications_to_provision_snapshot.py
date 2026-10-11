@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.intune.applications_required_resource_access import (
+from office365.directory.applications.applications_required_resource_access import (
     ApplicationsRequiredResourceAccess,
 )
 from office365.runtime.client_value import ClientValue

@@ -7,7 +7,7 @@ from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
 if TYPE_CHECKING:
-    from office365.intune.compliance_management_partner_assignment import (
+    from office365.intune.devices.compliance.management_partner_assignment import (
         ComplianceManagementPartnerAssignment,
     )
     from office365.intune.devices.management.partnertenantstate import (
@@ -19,7 +19,7 @@ class ComplianceManagementPartner(Entity):
     @property
     def android_enrollment_assignments(self) -> ClientValueCollection[ComplianceManagementPartnerAssignment]:
         """Gets the androidEnrollmentAssignments property"""
-        from office365.intune.compliance_management_partner_assignment import (
+        from office365.intune.devices.compliance.management_partner_assignment import (
             ComplianceManagementPartnerAssignment,
         )
 
@@ -41,7 +41,7 @@ class ComplianceManagementPartner(Entity):
     @property
     def ios_enrollment_assignments(self) -> ClientValueCollection[ComplianceManagementPartnerAssignment]:
         """Gets the iosEnrollmentAssignments property"""
-        from office365.intune.compliance_management_partner_assignment import (
+        from office365.intune.devices.compliance.management_partner_assignment import (
             ComplianceManagementPartnerAssignment,
         )
 
@@ -63,7 +63,7 @@ class ComplianceManagementPartner(Entity):
     @property
     def mac_os_enrollment_assignments(self) -> ClientValueCollection[ComplianceManagementPartnerAssignment]:
         """Gets the macOsEnrollmentAssignments property"""
-        from office365.intune.compliance_management_partner_assignment import (
+        from office365.intune.devices.compliance.management_partner_assignment import (
             ComplianceManagementPartnerAssignment,
         )
 

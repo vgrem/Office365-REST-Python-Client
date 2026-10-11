@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from office365.runtime.client_runtime_context import ClientRuntimeContext
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.odata.literals import escape_odata_string
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.taxonomy.groups.group import TermGroup

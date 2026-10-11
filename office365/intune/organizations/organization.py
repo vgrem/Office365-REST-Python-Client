@@ -10,9 +10,9 @@ from office365.directory.domains.verified import VerifiedDomain
 from office365.directory.extensions.extension import Extension
 from office365.directory.licenses.assigned_plan import AssignedPlan
 from office365.directory.objects.object import DirectoryObject
+from office365.directory.users.provisioned_plan import ProvisionedPlan
 from office365.entity_collection import EntityCollection
 from office365.intune.organizations.branding import OrganizationalBranding
-from office365.intune.provisioned_plan import ProvisionedPlan
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection

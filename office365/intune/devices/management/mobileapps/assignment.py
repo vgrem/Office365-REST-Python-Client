@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from office365.directory.policies.conditionalaccess.device_and_app_management_assignment_target import (
         DeviceAndAppManagementAssignmentTarget,
     )
-    from office365.intune.mobile_app_assignment_settings import (
+    from office365.intune.devices.management.mobileapps.mobile_app_assignment_settings import (
         MobileAppAssignmentSettings,
     )
 
@@ -27,7 +27,7 @@ class MobileAppAssignment(Entity):
     @property
     def settings(self) -> MobileAppAssignmentSettings:
         """Gets the settings property"""
-        from office365.intune.mobile_app_assignment_settings import (
+        from office365.intune.devices.management.mobileapps.mobile_app_assignment_settings import (
             MobileAppAssignmentSettings,
         )
 

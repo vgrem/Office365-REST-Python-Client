@@ -12,7 +12,7 @@ if TYPE_CHECKING:
         FederatedIdpMfaBehavior,
     )
     from office365.directory.domains.promptloginbehavior import PromptLoginBehavior
-    from office365.intune.system_browser_enabled_on import SystemBrowserEnabledOn
+    from office365.intune.devices.management.system_browser_enabled_on import SystemBrowserEnabledOn
 
 
 class InternalDomainFederation(Entity):
@@ -69,7 +69,7 @@ class InternalDomainFederation(Entity):
     @property
     def system_browser_enabled_on(self) -> SystemBrowserEnabledOn:
         """Gets the systemBrowserEnabledOn property"""
-        from office365.intune.system_browser_enabled_on import SystemBrowserEnabledOn
+        from office365.intune.devices.management.system_browser_enabled_on import SystemBrowserEnabledOn
 
         return self.properties.get("systemBrowserEnabledOn", SystemBrowserEnabledOn.none)
 

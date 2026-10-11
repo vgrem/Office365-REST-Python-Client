@@ -12,10 +12,10 @@ from office365.teams.schedule.shifts.preferences import ShiftPreferences
 if TYPE_CHECKING:
     from office365.common.exchange_settings import ExchangeSettings
     from office365.directory.users.storage import UserStorage
+    from office365.directory.users.windows_setting import WindowsSetting
     from office365.directory.users.work_hours_and_locations_setting import (
         WorkHoursAndLocationsSetting,
     )
-    from office365.intune.windows_setting import WindowsSetting
 
 
 class UserSettings(Entity):
@@ -72,7 +72,7 @@ class UserSettings(Entity):
     @property
     def windows(self) -> EntityCollection[WindowsSetting]:
         """Gets the windows property"""
-        from office365.intune.windows_setting import WindowsSetting
+        from office365.directory.users.windows_setting import WindowsSetting
 
         return self.properties.get(
             "windows",

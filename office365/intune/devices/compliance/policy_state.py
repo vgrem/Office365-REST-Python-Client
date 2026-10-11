@@ -6,13 +6,13 @@ from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
 if TYPE_CHECKING:
-    from office365.intune.device_compliance_policy_setting_state import (
-        DeviceCompliancePolicySettingState,
-    )
     from office365.intune.devices.compliance.policyplatformtype import (
         PolicyPlatformType,
     )
     from office365.intune.devices.compliance.status import ComplianceStatus
+    from office365.intune.devices.management.compliance_policy_setting_state import (
+        DeviceCompliancePolicySettingState,
+    )
 
 
 class DeviceCompliancePolicyState(Entity):
@@ -40,7 +40,7 @@ class DeviceCompliancePolicyState(Entity):
     @property
     def setting_states(self) -> ClientValueCollection[DeviceCompliancePolicySettingState]:
         """Gets the settingStates property"""
-        from office365.intune.device_compliance_policy_setting_state import (
+        from office365.intune.devices.management.compliance_policy_setting_state import (
             DeviceCompliancePolicySettingState,
         )
 

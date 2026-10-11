@@ -1,6 +1,6 @@
 from office365.delta_collection import DeltaCollection
 from office365.outlook.contacts.folders.folder import ContactFolder
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.odata.literals import escape_odata_string
 
 

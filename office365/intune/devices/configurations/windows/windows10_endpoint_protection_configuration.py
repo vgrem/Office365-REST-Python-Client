@@ -6,9 +6,6 @@ from office365.entity import Entity
 from office365.runtime.types.collections import StringCollection
 
 if TYPE_CHECKING:
-    from office365.intune.bit_locker_removable_drive_policy import (
-        BitLockerRemovableDrivePolicy,
-    )
     from office365.intune.devices.configurations.windows.applicationguardblockclipboardsharingtype import (
         ApplicationGuardBlockClipboardSharingType,
     )
@@ -17,6 +14,9 @@ if TYPE_CHECKING:
     )
     from office365.intune.devices.configurations.windows.applockerapplicationcontroltype import (
         AppLockerApplicationControlType,
+    )
+    from office365.intune.devices.configurations.windows.bit_locker_removable_drive_policy import (
+        BitLockerRemovableDrivePolicy,
     )
     from office365.intune.devices.configurations.windows.firewall_network_profile import (
         WindowsFirewallNetworkProfile,
@@ -122,7 +122,7 @@ class Windows10EndpointProtectionConfiguration(Entity):
     @property
     def bit_locker_removable_drive_policy(self) -> BitLockerRemovableDrivePolicy:
         """Gets the bitLockerRemovableDrivePolicy property"""
-        from office365.intune.bit_locker_removable_drive_policy import (
+        from office365.intune.devices.configurations.windows.bit_locker_removable_drive_policy import (
             BitLockerRemovableDrivePolicy,
         )
 

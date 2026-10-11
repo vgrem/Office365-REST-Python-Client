@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.intune.device_geo_location import DeviceGeoLocation
+from office365.intune.devices.management.geo_location import DeviceGeoLocation
 from office365.runtime.client_value import ClientValue
 
 

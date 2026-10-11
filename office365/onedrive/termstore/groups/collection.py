@@ -1,7 +1,7 @@
 from office365.directory.permissions.require_permission import require_permission
 from office365.entity_collection import EntityCollection
 from office365.onedrive.termstore.groups.group import Group
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.odata.literals import escape_odata_string
 
 

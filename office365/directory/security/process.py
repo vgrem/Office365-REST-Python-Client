@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from office365.directory.security.file_hash import FileHash
-from office365.intune.process_integrity_level import ProcessIntegrityLevel
+from office365.intune.devices.management.process_integrity_level import ProcessIntegrityLevel
 from office365.runtime.client_value import ClientValue
 
 

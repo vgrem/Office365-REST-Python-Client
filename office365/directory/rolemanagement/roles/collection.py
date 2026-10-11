@@ -6,7 +6,7 @@ from office365.delta_collection import DeltaCollection
 from office365.directory.rolemanagement.roles.role import DirectoryRole
 from office365.directory.rolemanagement.templates.collection import DirectoryRoleTemplateCollection
 from office365.directory.rolemanagement.templates.template import DirectoryRoleTemplate
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.odata.literals import escape_odata_string
 
 

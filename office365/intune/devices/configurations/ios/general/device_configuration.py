@@ -7,7 +7,6 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.collections import StringCollection
 
 if TYPE_CHECKING:
-    from office365.intune.app_list_item import AppListItem
     from office365.intune.devices.compliance.requiredpasswordtype import (
         RequiredPasswordType,
     )
@@ -38,6 +37,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.configurations.webbrowsercookiesettings import (
         WebBrowserCookieSettings,
     )
+    from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
 
 class IosGeneralDeviceConfiguration(Entity):
@@ -84,7 +84,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def apps_single_app_mode_list(self) -> ClientValueCollection[AppListItem]:
         """Gets the appsSingleAppModeList property"""
-        from office365.intune.app_list_item import AppListItem
+        from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
         return self.properties.get("appsSingleAppModeList", ClientValueCollection[AppListItem](AppListItem))
 
@@ -116,7 +116,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def apps_visibility_list(self) -> ClientValueCollection[AppListItem]:
         """Gets the appsVisibilityList property"""
-        from office365.intune.app_list_item import AppListItem
+        from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
         return self.properties.get("appsVisibilityList", ClientValueCollection[AppListItem](AppListItem))
 
@@ -187,7 +187,7 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def compliant_apps_list(self) -> ClientValueCollection[AppListItem]:
         """Gets the compliantAppsList property"""
-        from office365.intune.app_list_item import AppListItem
+        from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
         return self.properties.get("compliantAppsList", ClientValueCollection[AppListItem](AppListItem))
 

@@ -18,7 +18,7 @@ from office365.runtime.auth.providers.cookie_provider import CookieAuthProvider
 from office365.runtime.auth.providers.saml_token_provider import SamlTokenProvider
 from office365.runtime.auth.token_response import TokenResponse
 from office365.runtime.auth.user_credential import UserCredential
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.http.url import get_absolute_url
 

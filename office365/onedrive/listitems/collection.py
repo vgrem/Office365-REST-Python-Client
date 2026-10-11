@@ -5,7 +5,7 @@ from typing_extensions import Self
 from office365.delta_collection import DeltaCollection
 from office365.directory.permissions.require_permission import require_permission
 from office365.onedrive.listitems.list_item import ListItem
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.literals import escape_odata_string
 from office365.runtime.paths.resource_path import ResourcePath

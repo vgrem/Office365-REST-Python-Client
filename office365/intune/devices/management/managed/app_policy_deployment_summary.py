@@ -7,7 +7,7 @@ from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
 if TYPE_CHECKING:
-    from office365.intune.managed_app_policy_deployment_summary_per_app import (
+    from office365.intune.devices.management.mobileapps.managed.app_policy_deployment_summary_per_app import (
         ManagedAppPolicyDeploymentSummaryPerApp,
     )
 
@@ -21,7 +21,7 @@ class ManagedAppPolicyDeploymentSummary(Entity):
     @property
     def configuration_deployment_summary_per_app(self) -> ClientValueCollection[ManagedAppPolicyDeploymentSummaryPerApp]:
         """Gets the configurationDeploymentSummaryPerApp property"""
-        from office365.intune.managed_app_policy_deployment_summary_per_app import (
+        from office365.intune.devices.management.mobileapps.managed.app_policy_deployment_summary_per_app import (
             ManagedAppPolicyDeploymentSummaryPerApp,
         )
 

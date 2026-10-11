@@ -105,30 +105,15 @@ type_routing:
   Access*: office365.directory.identitygovernance
   Copilot*: office365.copilot
   UserExperienceAnalytics*: office365.intune
-  ImportedWindowsAutopilotDeviceIdentityState: office365.intune
   ConfigurationManager*: office365.intune
   Compliance*: office365.intune
-  BitLockerRemovableDrivePolicy: office365.intune
-  DefenderDetectedMalwareActions: office365.intune
-  SharedPCAccountManagerPolicy: office365.intune
-  OutOfBoxExperienceSetting: office365.intune
-  UpdateWindowsDeviceAccountActionParameter: office365.intune
-  ManagedAppPolicyDeploymentSummaryPerApp: office365.intune
-  VppLicensingType: office365.intune
-  MicrosoftStoreForBusinessAppAssignmentSettings: office365.intune
   M365Capability*: office365.intune
   AirPrintSettings: office365.intune
   ArchivedPrintJob: office365.intune
-  AppConfigurationSettingItem: office365.intune
-  AppListItem: office365.intune
-  AppLogCollectionDownloadDetails: office365.intune
-  ApplicationsRequiredResourceAccess: office365.intune
   AppsInstallationOptions*: office365.intune
   EdgeSearchEngine*: office365.intune
   MediaContentRating*: office365.intune
   InsightValue*: office365.intune
-  RgbColor: office365.intune
-  IntegerRange: office365.intune
   MediaConfig: office365.communications
   MediaInfo: office365.communications
   MediaPrompt: office365.communications
@@ -272,13 +257,11 @@ type_routing:
   MonitorMode: office365.directory.security
   MonitorRunStatus: office365.directory.security
   MonitorStatus: office365.directory.security
-  ObliterationBehavior: office365.intune
   RelationshipCreationType: office365.directory
   RelationshipStatus: office365.directory
   RequestStatus: office365.directory
   RoleType: office365.directory
   Status: office365.directory
-  SystemBrowserEnabledOn: office365.intune
   WellknownListName: office365.onedrive
 
 # Verified product rules (candidates are proposed by --suggest-routing).
@@ -511,6 +494,63 @@ type_routing:
   GroupPeerOutlierRecommendationInsightSettings: office365.intune.devices.management
   UserLastSignInRecommendationInsightSetting: office365.intune.devices.management
 
+# Remaining Intune root types, placed by role.
+  AppConfigurationSettingItem: office365.intune.devices.management.mobileapps
+  AppListItem: office365.intune.devices.management.mobileapps
+  AppLogCollectionDownloadDetails: office365.intune.devices.management.mobileapps
+  AppLogCollectionRequest: office365.intune.devices.management.mobileapps
+  ApplicationsRequiredResourceAccess: office365.directory.applications
+  AppsInstallationOptionsForMac: office365.intune.devices.management.mobileapps
+  AppsInstallationOptionsForWindows: office365.intune.devices.management.mobileapps
+  BitLockerRemovableDrivePolicy: office365.intune.devices.configurations.windows
+  Compliance: office365.intune.devices.compliance
+  ComplianceInformation: office365.intune.devices.compliance
+  ComplianceManagementPartner: office365.intune.devices.compliance
+  ComplianceManagementPartnerAssignment: office365.intune.devices.compliance
+  ConfigurationManagerClientEnabledFeatures: office365.intune.devices.management
+  ConfigurationManagerCollectionAssignmentTarget: office365.intune.devices.management
+  DefenderDetectedMalwareActions: office365.intune.devices.management
+  DeviceCompliancePolicySettingState: office365.intune.devices.management
+  DeviceConfigurationSettingState: office365.intune.devices.management
+  DeviceEnrollmentPlatformRestriction: office365.intune.devices.management
+  DeviceExchangeAccessStateSummary: office365.intune.devices.management
+  DeviceGeoLocation: office365.intune.devices.management
+  DeviceHealthAttestationState: office365.intune.devices.management
+  DeviceManagementPartnerAssignment: office365.intune.devices.management
+  DeviceOperatingSystemSummary: office365.intune.devices.management
+  EnrollmentState: office365.intune.devices.management
+  ImportedWindowsAutopilotDeviceIdentityState: office365.intune.devices.management
+  InstanceResourceAccess: office365.directory.applications
+  IntegerRange: office365.intune.devices.management
+  IosCertificateProfile: office365.intune.devices.configurations.ios
+  IosUpdateDeviceStatus: office365.intune.devices.management
+  MalwareStateForWindowsDevice: office365.intune.devices.management.windowsmalware
+  ManagedAppPolicyDeploymentSummaryPerApp: office365.intune.devices.management.mobileapps
+  MicrosoftStoreForBusinessAppAssignmentSettings: office365.intune.devices.management.mobileapps
+  MobileAppAssignmentSettings: office365.intune.devices.management.mobileapps
+  MobileAppIdentifier: office365.intune.devices.management.mobileapps
+  MobileAppInstallTimeSettings: office365.intune.devices.management.mobileapps
+  MobileAppTroubleshootingEvent: office365.intune.devices.management.mobileapps
+  MobileThreatDefenseConnector: office365.intune.devices.management
+  ObliterationBehavior: office365.intune.devices.management
+  OutOfBoxExperienceSetting: office365.intune.devices.configurations.windows
+  PackageStatus: office365.intune.devices.management
+  ProcessIntegrityLevel: office365.intune.devices.management
+  ProvisionedPlan: office365.directory.users
+  ResourcePermission: office365.directory.applications
+  RgbColor: office365.intune.devices.configurations
+  SharedPCAccountManagerPolicy: office365.intune.devices.configurations.windows
+  SystemBrowserEnabledOn: office365.intune.devices.management
+  UpdateWindowsDeviceAccountActionParameter: office365.intune.devices.management
+  VppLicensingType: office365.intune.devices.management.mobileapps
+  WindowsDefenderAdvancedThreatProtectionConfiguration: office365.intune.devices.configurations.windows
+  WindowsDeviceAccount: office365.intune.devices.management
+  WindowsDeviceADAccount: office365.intune.devices.management
+  WindowsDeviceAzureADAccount: office365.intune.devices.management
+  WindowsHelloForBusinessAuthenticationMethod: office365.directory.authentication
+  WindowsSetting: office365.directory.users
+  WindowsSettingInstance: office365.directory.users
+
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common
 
@@ -589,8 +629,6 @@ type_routing:
   "TermsAndConditionsAcceptanceStatus": office365.intune.devices.management
   "TermsAndConditionsAssignment": office365.intune.devices.management
   "SettingStateDeviceSummary": office365.intune.devices.compliance
-  "AppLogCollectionRequest": office365.intune
-  "MalwareStateForWindowsDevice": office365.intune
   "TargetedManagedAppPolicyAssignment": office365.intune.devices.management.managed.app.protections
   "LocalizedNotificationMessage": office365.intune.devices.management
   "M365AppsInstallationOptions": office365.admin.microsoft365

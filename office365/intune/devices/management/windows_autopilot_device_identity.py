@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.intune.enrollment_state import EnrollmentState
+    from office365.intune.devices.management.enrollment_state import EnrollmentState
 
 
 class WindowsAutopilotDeviceIdentity(Entity):
@@ -28,7 +28,7 @@ class WindowsAutopilotDeviceIdentity(Entity):
     @property
     def enrollment_state(self) -> EnrollmentState:
         """Gets the enrollmentState property"""
-        from office365.intune.enrollment_state import EnrollmentState
+        from office365.intune.devices.management.enrollment_state import EnrollmentState
 
         return self.properties.get("enrollmentState", EnrollmentState.unknown)
 

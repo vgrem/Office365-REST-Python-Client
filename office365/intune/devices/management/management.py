@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
+from office365.common.intune_brand import IntuneBrand
 from office365.directory.rolemanagement.roles.permission import RolePermission
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.intune.audit.event_collection import AuditEventCollection
-from office365.intune.brand import IntuneBrand
 from office365.intune.devices.category import DeviceCategory
 from office365.intune.devices.enrollment.configuration import (
     DeviceEnrollmentConfiguration,
@@ -28,11 +28,11 @@ from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
     from office365.common.role_definition import RoleDefinition
-    from office365.intune.compliance_management_partner import (
-        ComplianceManagementPartner,
-    )
     from office365.intune.devices.and_app_management_role_assignment import (
         DeviceAndAppManagementRoleAssignment,
+    )
+    from office365.intune.devices.compliance.management_partner import (
+        ComplianceManagementPartner,
     )
     from office365.intune.devices.compliance.policy import DeviceCompliancePolicy
     from office365.intune.devices.compliance_policy_device_state_summary import (
@@ -57,7 +57,14 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.imported_windows_autopilot_device_identity import (
         ImportedWindowsAutopilotDeviceIdentity,
     )
+    from office365.intune.devices.management.ios_update_device_status import IosUpdateDeviceStatus
     from office365.intune.devices.management.managed.device_overview import ManagedDeviceOverview
+    from office365.intune.devices.management.mobile_threat_defense_connector import (
+        MobileThreatDefenseConnector,
+    )
+    from office365.intune.devices.management.mobileapps.mobile_app_troubleshooting_event import (
+        MobileAppTroubleshootingEvent,
+    )
     from office365.intune.devices.management.notification_message_template import (
         NotificationMessageTemplate,
     )
@@ -163,13 +170,6 @@ if TYPE_CHECKING:
     from office365.intune.devices.management_partner import DeviceManagementPartner
     from office365.intune.devices.management_troubleshooting_event import (
         DeviceManagementTroubleshootingEvent,
-    )
-    from office365.intune.ios_update_device_status import IosUpdateDeviceStatus
-    from office365.intune.mobile_app_troubleshooting_event import (
-        MobileAppTroubleshootingEvent,
-    )
-    from office365.intune.mobile_threat_defense_connector import (
-        MobileThreatDefenseConnector,
     )
 
 
@@ -395,7 +395,7 @@ class DeviceManagement(Entity):
     @property
     def ios_update_statuses(self) -> EntityCollection[IosUpdateDeviceStatus]:
         """Gets the iosUpdateStatuses property"""
-        from office365.intune.ios_update_device_status import IosUpdateDeviceStatus
+        from office365.intune.devices.management.ios_update_device_status import IosUpdateDeviceStatus
 
         return self.properties.get(
             "iosUpdateStatuses",
@@ -419,7 +419,7 @@ class DeviceManagement(Entity):
     @property
     def compliance_management_partners(self) -> EntityCollection[ComplianceManagementPartner]:
         """Gets the complianceManagementPartners property"""
-        from office365.intune.compliance_management_partner import (
+        from office365.intune.devices.compliance.management_partner import (
             ComplianceManagementPartner,
         )
 
@@ -475,7 +475,7 @@ class DeviceManagement(Entity):
     @property
     def mobile_threat_defense_connectors(self) -> EntityCollection[MobileThreatDefenseConnector]:
         """Gets the mobileThreatDefenseConnectors property"""
-        from office365.intune.mobile_threat_defense_connector import (
+        from office365.intune.devices.management.mobile_threat_defense_connector import (
             MobileThreatDefenseConnector,
         )
 
@@ -525,7 +525,7 @@ class DeviceManagement(Entity):
     @property
     def mobile_app_troubleshooting_events(self) -> EntityCollection[MobileAppTroubleshootingEvent]:
         """Gets the mobileAppTroubleshootingEvents property"""
-        from office365.intune.mobile_app_troubleshooting_event import (
+        from office365.intune.devices.management.mobileapps.mobile_app_troubleshooting_event import (
             MobileAppTroubleshootingEvent,
         )
 

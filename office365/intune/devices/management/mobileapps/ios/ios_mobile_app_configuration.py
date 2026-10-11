@@ -6,7 +6,7 @@ from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
 if TYPE_CHECKING:
-    from office365.intune.app_configuration_setting_item import (
+    from office365.intune.devices.management.mobileapps.app_configuration_setting_item import (
         AppConfigurationSettingItem,
     )
 
@@ -24,7 +24,7 @@ class IosMobileAppConfiguration(Entity):
     @property
     def settings(self) -> ClientValueCollection[AppConfigurationSettingItem]:
         """Gets the settings property"""
-        from office365.intune.app_configuration_setting_item import (
+        from office365.intune.devices.management.mobileapps.app_configuration_setting_item import (
             AppConfigurationSettingItem,
         )
 

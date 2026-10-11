@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.intune.device_exchange_access_state_summary import (
+    from office365.intune.devices.management.exchange_access_state_summary import (
         DeviceExchangeAccessStateSummary,
     )
-    from office365.intune.device_operating_system_summary import (
+    from office365.intune.devices.management.operating_system_summary import (
         DeviceOperatingSystemSummary,
     )
 
@@ -17,7 +17,7 @@ class ManagedDeviceOverview(Entity):
     @property
     def device_exchange_access_state_summary(self) -> DeviceExchangeAccessStateSummary:
         """Gets the deviceExchangeAccessStateSummary property"""
-        from office365.intune.device_exchange_access_state_summary import (
+        from office365.intune.devices.management.exchange_access_state_summary import (
             DeviceExchangeAccessStateSummary,
         )
 
@@ -26,7 +26,7 @@ class ManagedDeviceOverview(Entity):
     @property
     def device_operating_system_summary(self) -> DeviceOperatingSystemSummary:
         """Gets the deviceOperatingSystemSummary property"""
-        from office365.intune.device_operating_system_summary import (
+        from office365.intune.devices.management.operating_system_summary import (
             DeviceOperatingSystemSummary,
         )
 

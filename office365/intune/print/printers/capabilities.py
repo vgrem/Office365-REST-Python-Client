@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.intune.integer_range import IntegerRange
+from office365.intune.devices.management.integer_range import IntegerRange
 from office365.intune.print.colormode import PrintColorMode
 from office365.intune.print.duplexmode import PrintDuplexMode
 from office365.intune.print.finishing import PrintFinishing

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.configurations.sharedpc.allowedaccounttype import (
         SharedPCAllowedAccountType,
     )
-    from office365.intune.shared_pc_account_manager_policy import (
+    from office365.intune.devices.configurations.windows.shared_pc_account_manager_policy import (
         SharedPCAccountManagerPolicy,
     )
 
@@ -18,7 +18,7 @@ class SharedPCConfiguration(Entity):
     @property
     def account_manager_policy(self) -> SharedPCAccountManagerPolicy:
         """Gets the accountManagerPolicy property"""
-        from office365.intune.shared_pc_account_manager_policy import (
+        from office365.intune.devices.configurations.windows.shared_pc_account_manager_policy import (
             SharedPCAccountManagerPolicy,
         )
 

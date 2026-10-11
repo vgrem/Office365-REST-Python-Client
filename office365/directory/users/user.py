@@ -52,6 +52,7 @@ from office365.directory.users.onpremisesextensionattributes import (
     OnPremisesExtensionAttributes,
 )
 from office365.directory.users.password_profile import PasswordProfile
+from office365.directory.users.provisioned_plan import ProvisionedPlan
 from office365.directory.users.settings import UserSettings
 from office365.entity_collection import EntityCollection
 from office365.intune.devices.data import DeviceAndAppManagementData
@@ -65,7 +66,6 @@ from office365.intune.devices.management.managed.managed import ManagedDevice
 from office365.intune.organizations.contact import OrgContact
 from office365.intune.policies.managed_app import ManagedAppPolicy
 from office365.intune.print.user_print import UserPrint
-from office365.intune.provisioned_plan import ProvisionedPlan
 from office365.onedrive.drives.drive import Drive
 from office365.onedrive.sites.site import Site
 from office365.onenote.onenote import Onenote

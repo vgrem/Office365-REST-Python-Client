@@ -3,7 +3,7 @@ from typing import Optional
 from typing_extensions import Self
 
 from office365.runtime.client_result import ClientResult
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.odata.literals import escape_odata_string
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.service_operation import ServiceOperationPath

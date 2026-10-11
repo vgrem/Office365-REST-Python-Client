@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from office365.count_collection import CountCollection
 from office365.directory.serviceprincipals.service_principal import ServicePrincipal
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.odata.literals import escape_odata_string
 from office365.runtime.paths.appid import AppIdPath
 

@@ -7,9 +7,6 @@ from office365.entity import Entity
 from office365.runtime.types.collections import StringCollection
 
 if TYPE_CHECKING:
-    from office365.intune.defender_detected_malware_actions import (
-        DefenderDetectedMalwareActions,
-    )
     from office365.intune.devices.compliance.requiredpasswordtype import (
         RequiredPasswordType,
     )
@@ -55,6 +52,9 @@ if TYPE_CHECKING:
     )
     from office365.intune.devices.configurations.windows.windows10_network_proxy_server import (
         Windows10NetworkProxyServer,
+    )
+    from office365.intune.devices.management.defender_detected_malware_actions import (
+        DefenderDetectedMalwareActions,
     )
 
 
@@ -170,7 +170,7 @@ class Windows10GeneralConfiguration(Entity):
     @property
     def defender_detected_malware_actions(self) -> DefenderDetectedMalwareActions:
         """Gets the defenderDetectedMalwareActions property"""
-        from office365.intune.defender_detected_malware_actions import (
+        from office365.intune.devices.management.defender_detected_malware_actions import (
             DefenderDetectedMalwareActions,
         )
 

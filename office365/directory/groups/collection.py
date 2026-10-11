@@ -4,7 +4,7 @@ from office365.count_collection import CountCollection
 from office365.directory.groups.group import Group
 from office365.directory.groups.profile import GroupProfile
 from office365.directory.permissions.require_permission import require_permission
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.odata.literals import escape_odata_string
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.types.collections import StringCollection

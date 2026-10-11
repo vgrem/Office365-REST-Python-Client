@@ -7,7 +7,7 @@ from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
 if TYPE_CHECKING:
-    from office365.intune.device_management_partner_assignment import (
+    from office365.intune.devices.management.partner_assignment import (
         DeviceManagementPartnerAssignment,
     )
     from office365.intune.devices.management.partnerapptype import (
@@ -27,7 +27,7 @@ class DeviceManagementPartner(Entity):
     @property
     def groups_requiring_partner_enrollment(self) -> ClientValueCollection[DeviceManagementPartnerAssignment]:
         """Gets the groupsRequiringPartnerEnrollment property"""
-        from office365.intune.device_management_partner_assignment import (
+        from office365.intune.devices.management.partner_assignment import (
             DeviceManagementPartnerAssignment,
         )
 

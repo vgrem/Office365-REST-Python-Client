@@ -7,8 +7,10 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
+    from office365.directory.users.windows_setting_instance import (
+        WindowsSettingInstance,
+    )
     from office365.directory.users.windowssettingtype import WindowsSettingType
-    from office365.intune.windows_setting_instance import WindowsSettingInstance
 
 
 class WindowsSetting(Entity):
@@ -32,7 +34,9 @@ class WindowsSetting(Entity):
     @property
     def instances(self) -> EntityCollection[WindowsSettingInstance]:
         """Gets the instances property"""
-        from office365.intune.windows_setting_instance import WindowsSettingInstance
+        from office365.directory.users.windows_setting_instance import (
+            WindowsSettingInstance,
+        )
 
         return self.properties.get(
             "instances",

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from office365.entity_collection import EntityCollection
 from office365.onedrive.sitepages.site_page import SitePage
 from office365.onedrive.sitepages.title_area import TitleArea
-from office365.runtime.decorators import deprecated
+from office365.runtime.deprecated import deprecated
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.literals import escape_odata_string
 from office365.runtime.paths.resource_path import ResourcePath

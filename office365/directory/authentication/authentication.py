@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from office365.directory.authentication.temporary_access_pass_authentication_method import (
         TemporaryAccessPassAuthenticationMethod,
     )
-    from office365.intune.windows_hello_for_business_authentication_method import (
+    from office365.directory.authentication.windows_hello_for_business_authentication_method import (
         WindowsHelloForBusinessAuthenticationMethod,
     )
     from office365.onedrive.operations.long_running import LongRunningOperation
@@ -193,7 +193,7 @@ class Authentication(Entity):
     @property
     def windows_hello_for_business_methods(self) -> EntityCollection[WindowsHelloForBusinessAuthenticationMethod]:
         """Gets the windowsHelloForBusinessMethods property"""
-        from office365.intune.windows_hello_for_business_authentication_method import (
+        from office365.directory.authentication.windows_hello_for_business_authentication_method import (
             WindowsHelloForBusinessAuthenticationMethod,
         )
 

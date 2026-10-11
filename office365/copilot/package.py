@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     )
     from office365.copilot.copilot_package_request_type import CopilotPackageRequestType
     from office365.copilot.package_type import PackageType
-    from office365.intune.package_status import PackageStatus
+    from office365.intune.devices.management.package_status import PackageStatus
     from office365.runtime.types.json import Json
 
 
@@ -35,7 +35,7 @@ class CopilotPackage(Entity):
     @property
     def available_to(self) -> PackageStatus:
         """Gets the availableTo property"""
-        from office365.intune.package_status import PackageStatus
+        from office365.intune.devices.management.package_status import PackageStatus
 
         return self.properties.get("availableTo", PackageStatus.none)
 
@@ -47,7 +47,7 @@ class CopilotPackage(Entity):
     @property
     def deployed_to(self) -> PackageStatus:
         """Gets the deployedTo property"""
-        from office365.intune.package_status import PackageStatus
+        from office365.intune.devices.management.package_status import PackageStatus
 
         return self.properties.get("deployedTo", PackageStatus.none)
 

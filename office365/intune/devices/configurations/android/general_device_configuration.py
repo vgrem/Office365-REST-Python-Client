@@ -6,7 +6,6 @@ from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 
 if TYPE_CHECKING:
-    from office365.intune.app_list_item import AppListItem
     from office365.intune.devices.compliance.androidrequiredpasswordtype import (
         AndroidRequiredPasswordType,
     )
@@ -14,6 +13,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.configurations.webbrowsercookiesettings import (
         WebBrowserCookieSettings,
     )
+    from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
 
 class AndroidGeneralDeviceConfiguration(Entity):
@@ -35,21 +35,21 @@ class AndroidGeneralDeviceConfiguration(Entity):
     @property
     def apps_hide_list(self) -> ClientValueCollection[AppListItem]:
         """Gets the appsHideList property"""
-        from office365.intune.app_list_item import AppListItem
+        from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
         return self.properties.get("appsHideList", ClientValueCollection[AppListItem](AppListItem))
 
     @property
     def apps_install_allow_list(self) -> ClientValueCollection[AppListItem]:
         """Gets the appsInstallAllowList property"""
-        from office365.intune.app_list_item import AppListItem
+        from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
         return self.properties.get("appsInstallAllowList", ClientValueCollection[AppListItem](AppListItem))
 
     @property
     def apps_launch_block_list(self) -> ClientValueCollection[AppListItem]:
         """Gets the appsLaunchBlockList property"""
-        from office365.intune.app_list_item import AppListItem
+        from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
         return self.properties.get("appsLaunchBlockList", ClientValueCollection[AppListItem](AppListItem))
 
@@ -93,7 +93,7 @@ class AndroidGeneralDeviceConfiguration(Entity):
     @property
     def compliant_apps_list(self) -> ClientValueCollection[AppListItem]:
         """Gets the compliantAppsList property"""
-        from office365.intune.app_list_item import AppListItem
+        from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
         return self.properties.get("compliantAppsList", ClientValueCollection[AppListItem](AppListItem))
 
@@ -125,7 +125,7 @@ class AndroidGeneralDeviceConfiguration(Entity):
     @property
     def kiosk_mode_apps(self) -> ClientValueCollection[AppListItem]:
         """Gets the kioskModeApps property"""
-        from office365.intune.app_list_item import AppListItem
+        from office365.intune.devices.management.mobileapps.app_list_item import AppListItem
 
         return self.properties.get("kioskModeApps", ClientValueCollection[AppListItem](AppListItem))
 

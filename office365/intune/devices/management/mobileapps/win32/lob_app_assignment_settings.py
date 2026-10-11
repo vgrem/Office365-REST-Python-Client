@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from office365.intune.devices.management.mobileapps.mobile_app_install_time_settings import (
+    MobileAppInstallTimeSettings,
+)
 from office365.intune.devices.management.mobileapps.win32.deliveryoptimizationpriority import (
     Win32LobAppDeliveryOptimizationPriority,
 )
@@ -13,9 +16,6 @@ from office365.intune.devices.management.mobileapps.win32.lob_app_restart_settin
 )
 from office365.intune.devices.management.mobileapps.win32.notification import (
     Win32LobAppNotification,
-)
-from office365.intune.mobile_app_install_time_settings import (
-    MobileAppInstallTimeSettings,
 )
 from office365.runtime.client_value import ClientValue
 

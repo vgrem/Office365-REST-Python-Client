@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.intune.imported_windows_autopilot_device_identity_state import (
+    from office365.intune.devices.management.imported_windows_autopilot_device_identity_state import (
         ImportedWindowsAutopilotDeviceIdentityState,
     )
 
@@ -44,7 +44,7 @@ class ImportedWindowsAutopilotDeviceIdentity(Entity):
     @property
     def state(self) -> ImportedWindowsAutopilotDeviceIdentityState:
         """Gets the state property"""
-        from office365.intune.imported_windows_autopilot_device_identity_state import (
+        from office365.intune.devices.management.imported_windows_autopilot_device_identity_state import (
             ImportedWindowsAutopilotDeviceIdentityState,
         )
 

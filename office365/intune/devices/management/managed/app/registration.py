@@ -14,7 +14,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
     from office365.intune.devices.management.managed.app.operation import ManagedAppOperation
-    from office365.intune.mobile_app_identifier import MobileAppIdentifier
+    from office365.intune.devices.management.mobileapps.mobile_app_identifier import MobileAppIdentifier
 
 
 class ManagedAppRegistration(Entity):
@@ -108,7 +108,7 @@ class ManagedAppRegistration(Entity):
     @property
     def app_identifier(self) -> MobileAppIdentifier:
         """Gets the appIdentifier property"""
-        from office365.intune.mobile_app_identifier import MobileAppIdentifier
+        from office365.intune.devices.management.mobileapps.mobile_app_identifier import MobileAppIdentifier
 
         return self.properties.get("appIdentifier", MobileAppIdentifier())
 
