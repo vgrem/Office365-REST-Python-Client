@@ -7,7 +7,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.directory.security.subjectrightsrequests.request import (
+    from office365.security.subjectrightsrequests.request import (
         SubjectRightsRequest,
     )
 
@@ -16,7 +16,7 @@ class Privacy(Entity):
     @property
     def subject_rights_requests(self) -> EntityCollection[SubjectRightsRequest]:
         """Gets the subjectRightsRequests property"""
-        from office365.directory.security.subjectrightsrequests.request import (
+        from office365.security.subjectrightsrequests.request import (
             SubjectRightsRequest,
         )
 

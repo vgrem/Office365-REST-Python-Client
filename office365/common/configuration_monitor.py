@@ -9,8 +9,8 @@ from office365.runtime.paths.resource_path import ResourcePath
 if TYPE_CHECKING:
     from office365.common.configuration_baseline import ConfigurationBaseline
     from office365.directory.identity_set import IdentitySet
-    from office365.directory.security.monitor_mode import MonitorMode
-    from office365.directory.security.monitor_status import MonitorStatus
+    from office365.security.monitor_mode import MonitorMode
+    from office365.security.monitor_status import MonitorStatus
     from office365.teams.members.open_complex_dictionary_type import (
         OpenComplexDictionaryType,
     )
@@ -59,7 +59,7 @@ class ConfigurationMonitor(Entity):
     @property
     def mode(self) -> MonitorMode:
         """Gets the mode property"""
-        from office365.directory.security.monitor_mode import MonitorMode
+        from office365.security.monitor_mode import MonitorMode
 
         return self.properties.get("mode", MonitorMode.monitorOnly)
 
@@ -80,7 +80,7 @@ class ConfigurationMonitor(Entity):
     @property
     def status(self) -> MonitorStatus:
         """Gets the status property"""
-        from office365.directory.security.monitor_status import MonitorStatus
+        from office365.security.monitor_status import MonitorStatus
 
         return self.properties.get("status", MonitorStatus.active)
 

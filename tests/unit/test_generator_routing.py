@@ -42,11 +42,11 @@ def test_route_namespace_longest_prefix_wins():
 
 def test_router_prefers_exact_then_namespace_then_prefix():
     router = Router(
-        namespace={"microsoft.graph.security": "office365.directory.security"},
+        namespace={"microsoft.graph.security": "office365.security"},
         types={"microsoft.graph.Special": "office365.special", "Edu*": "office365.education"},
     )
     assert router.module_for("microsoft.graph.Special") == "office365.special"  # exact
-    assert router.module_for("microsoft.graph.security.Alert") == "office365.directory.security"  # namespace
+    assert router.module_for("microsoft.graph.security.Alert") == "office365.security"  # namespace
     assert router.module_for("microsoft.graph.EduThing") == "office365.education"  # prefix
     assert router.module_for("microsoft.graph.Unknown") is None  # unrouted
 
@@ -60,16 +60,16 @@ def test_router_from_options():
 
 
 def test_short_name_exact_rule_matches_bare_type():
-    router = Router(types={"AlertDetection": "office365.directory.security"})
-    assert router.module_for("microsoft.graph.AlertDetection") == "office365.directory.security"
+    router = Router(types={"AlertDetection": "office365.security"})
+    assert router.module_for("microsoft.graph.AlertDetection") == "office365.security"
 
 
 def test_namespace_takes_precedence_over_short_exact_rule():
     router = Router(
-        namespace={"microsoft.graph.security": "office365.directory.security"},
+        namespace={"microsoft.graph.security": "office365.security"},
         types={"Alert": "office365.somewhere.else"},
     )
-    assert router.module_for("microsoft.graph.security.Alert") == "office365.directory.security"
+    assert router.module_for("microsoft.graph.security.Alert") == "office365.security"
 
 
 def test_short_exact_rule_does_not_override_prefix_for_named_namespace():

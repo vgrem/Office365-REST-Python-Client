@@ -5,14 +5,14 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.directory.security.audit.multi_tenant_organization_join_request_transition_details import (
-        MultiTenantOrganizationJoinRequestTransitionDetails,
-    )
     from office365.directory.tenantinformation.multitenantorganizationmemberrole import (
         MultiTenantOrganizationMemberRole,
     )
     from office365.directory.tenantinformation.multitenantorganizationmemberstate import (
         MultiTenantOrganizationMemberState,
+    )
+    from office365.security.audit.multi_tenant_organization_join_request_transition_details import (
+        MultiTenantOrganizationJoinRequestTransitionDetails,
     )
 
 
@@ -43,7 +43,7 @@ class MultiTenantOrganizationJoinRequestRecord(Entity):
     @property
     def transition_details(self) -> MultiTenantOrganizationJoinRequestTransitionDetails:
         """Gets the transitionDetails property"""
-        from office365.directory.security.audit.multi_tenant_organization_join_request_transition_details import (
+        from office365.security.audit.multi_tenant_organization_join_request_transition_details import (
             MultiTenantOrganizationJoinRequestTransitionDetails,
         )
 

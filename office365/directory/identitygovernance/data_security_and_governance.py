@@ -7,7 +7,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.directory.security.datasecurity.sensitivity_label import (
+    from office365.security.datasecurity.sensitivity_label import (
         SensitivityLabel,
     )
 
@@ -20,7 +20,7 @@ class DataSecurityAndGovernance(Entity):
     @property
     def sensitivity_labels(self) -> EntityCollection[SensitivityLabel]:
         """Gets the sensitivityLabels property"""
-        from office365.directory.security.datasecurity.sensitivity_label import (
+        from office365.security.datasecurity.sensitivity_label import (
             SensitivityLabel,
         )
 

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from office365.directory.security.custom_security_attribute_comparison_operator import (
+from office365.runtime.client_value import ClientValue
+from office365.security.custom_security_attribute_comparison_operator import (
     CustomSecurityAttributeComparisonOperator,
 )
-from office365.runtime.client_value import ClientValue
 
 
 @dataclass

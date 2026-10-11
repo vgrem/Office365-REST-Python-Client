@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from office365.directory.permissions.require_permission import require_permission
-from office365.directory.security.attacksimulations.repeat_offender import (
-    AttackSimulationRepeatOffender,
-)
-from office365.directory.security.attacksimulations.user_coverage import (
-    AttackSimulationSimulationUserCoverage,
-)
 from office365.entity import Entity
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.function import FunctionQuery
+from office365.security.attacksimulations.repeat_offender import (
+    AttackSimulationRepeatOffender,
+)
+from office365.security.attacksimulations.user_coverage import (
+    AttackSimulationSimulationUserCoverage,
+)
 
 
 class SecurityReportsRoot(Entity):

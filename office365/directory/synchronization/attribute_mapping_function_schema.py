@@ -1,6 +1,6 @@
-from office365.directory.security.attribute_mapping_parameter_schema import AttributeMappingParameterSchema
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.security.attribute_mapping_parameter_schema import AttributeMappingParameterSchema
 
 
 class AttributeMappingFunctionSchema(Entity):

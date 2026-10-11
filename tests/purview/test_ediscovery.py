@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import ClassVar, Optional
 
-from office365.directory.security.cases.ediscovery import EdiscoveryCase
+from office365.security.cases.ediscovery import EdiscoveryCase
 
 from tests.decorators import requires_delegated
 from tests.graph_case import GraphDelegatedTestCase

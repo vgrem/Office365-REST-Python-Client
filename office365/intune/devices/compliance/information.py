@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.directory.security.certification_control import CertificationControl
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.security.certification_control import CertificationControl
 
 
 @dataclass

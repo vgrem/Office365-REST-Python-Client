@@ -122,7 +122,6 @@ if TYPE_CHECKING:
     from office365.directory.identitygovernance.user_data_security_and_governance import (
         UserDataSecurityAndGovernance,
     )
-    from office365.directory.security.cloud_clipboard_root import CloudClipboardRoot
     from office365.directory.users.inference_classification import (
         InferenceClassification,
     )
@@ -131,6 +130,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.management_troubleshooting_event import (
         DeviceManagementTroubleshootingEvent,
     )
+    from office365.security.cloud_clipboard_root import CloudClipboardRoot
 
 
 class User(DirectoryObject):
@@ -1569,7 +1569,7 @@ class User(DirectoryObject):
     @property
     def cloud_clipboard(self) -> CloudClipboardRoot:
         """Gets the cloudClipboard property"""
-        from office365.directory.security.cloud_clipboard_root import CloudClipboardRoot
+        from office365.security.cloud_clipboard_root import CloudClipboardRoot
 
         return self.properties.get(
             "cloudClipboard", CloudClipboardRoot(self.context, ResourcePath("cloudClipboard", self.resource_path))

@@ -42,7 +42,6 @@ from office365.directory.protection.information import InformationProtection
 from office365.directory.protection.root import IdentityProtectionRoot
 from office365.directory.rolemanagement.management import RoleManagement
 from office365.directory.rolemanagement.roles.collection import DirectoryRoleCollection
-from office365.directory.security.security import Security
 from office365.directory.serviceprincipals.collection import ServicePrincipalCollection
 from office365.directory.tenantinformation.relationship import TenantRelationship
 from office365.directory.users.collection import UserCollection
@@ -75,6 +74,7 @@ from office365.runtime.transport.requests_transport import DEFAULT_POOL_CONNECTI
 from office365.search.entity import SearchEntity
 from office365.search.external.connection import ExternalConnection
 from office365.search.external.external import External
+from office365.security.security import Security
 from office365.subscriptions.collection import SubscriptionCollection
 from office365.teams.apps.catalog import AppCatalogs
 from office365.teams.chats.collection import ChatCollection

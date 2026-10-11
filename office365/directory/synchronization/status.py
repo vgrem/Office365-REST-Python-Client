@@ -3,13 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from office365.directory.security.string_key_long_value_pair import StringKeyLongValuePair
 from office365.directory.synchronization.progress import SynchronizationProgress
 from office365.directory.synchronization.quarantine import SynchronizationQuarantine
 from office365.directory.synchronization.statuscode import SynchronizationStatusCode
 from office365.directory.synchronization.task_execution import SynchronizationTaskExecution
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.security.string_key_long_value_pair import StringKeyLongValuePair
 
 
 @dataclass

@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from office365.communications.onlinemeetings.sensitivity_label_assignment import (
         OnlineMeetingSensitivityLabelAssignment,
     )
-    from office365.directory.security.cloud_video_interop_info import (
+    from office365.security.cloud_video_interop_info import (
         CloudVideoInteropInfo,
     )
 
@@ -215,7 +215,7 @@ class OnlineMeetingBase(Entity):
     @property
     def cloud_video_interop_info(self) -> CloudVideoInteropInfo:
         """Gets the cloudVideoInteropInfo property"""
-        from office365.directory.security.cloud_video_interop_info import (
+        from office365.security.cloud_video_interop_info import (
             CloudVideoInteropInfo,
         )
 

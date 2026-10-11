@@ -7,19 +7,19 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.directory.security.cloud_pc_audit_event import CloudPcAuditEvent
-    from office365.directory.security.cloud_pc_device_image import CloudPcDeviceImage
-    from office365.directory.security.cloud_pc_gallery_image import CloudPcGalleryImage
-    from office365.directory.security.cloud_pc_on_premises_connection import (
+    from office365.intune.devices.cloud_pc import CloudPC
+    from office365.security.cloud_pc_audit_event import CloudPcAuditEvent
+    from office365.security.cloud_pc_device_image import CloudPcDeviceImage
+    from office365.security.cloud_pc_gallery_image import CloudPcGalleryImage
+    from office365.security.cloud_pc_on_premises_connection import (
         CloudPcOnPremisesConnection,
     )
-    from office365.directory.security.cloud_pc_provisioning_policy import (
+    from office365.security.cloud_pc_provisioning_policy import (
         CloudPcProvisioningPolicy,
     )
-    from office365.directory.security.cloud_pc_report import CloudPcReport
-    from office365.directory.security.cloud_pc_service_plan import CloudPcServicePlan
-    from office365.directory.security.cloud_pc_user_setting import CloudPcUserSetting
-    from office365.intune.devices.cloud_pc import CloudPC
+    from office365.security.cloud_pc_report import CloudPcReport
+    from office365.security.cloud_pc_service_plan import CloudPcServicePlan
+    from office365.security.cloud_pc_user_setting import CloudPcUserSetting
 
 
 class VirtualEndpoint(Entity):
@@ -31,7 +31,7 @@ class VirtualEndpoint(Entity):
     @property
     def audit_events(self) -> EntityCollection[CloudPcAuditEvent]:
         """Gets the auditEvents property"""
-        from office365.directory.security.cloud_pc_audit_event import CloudPcAuditEvent
+        from office365.security.cloud_pc_audit_event import CloudPcAuditEvent
 
         return self.properties.get(
             "auditEvents",
@@ -52,7 +52,7 @@ class VirtualEndpoint(Entity):
     @property
     def device_images(self) -> EntityCollection[CloudPcDeviceImage]:
         """Gets the deviceImages property"""
-        from office365.directory.security.cloud_pc_device_image import (
+        from office365.security.cloud_pc_device_image import (
             CloudPcDeviceImage,
         )
 
@@ -66,7 +66,7 @@ class VirtualEndpoint(Entity):
     @property
     def gallery_images(self) -> EntityCollection[CloudPcGalleryImage]:
         """Gets the galleryImages property"""
-        from office365.directory.security.cloud_pc_gallery_image import (
+        from office365.security.cloud_pc_gallery_image import (
             CloudPcGalleryImage,
         )
 
@@ -80,7 +80,7 @@ class VirtualEndpoint(Entity):
     @property
     def on_premises_connections(self) -> EntityCollection[CloudPcOnPremisesConnection]:
         """Gets the onPremisesConnections property"""
-        from office365.directory.security.cloud_pc_on_premises_connection import (
+        from office365.security.cloud_pc_on_premises_connection import (
             CloudPcOnPremisesConnection,
         )
 
@@ -94,7 +94,7 @@ class VirtualEndpoint(Entity):
     @property
     def provisioning_policies(self) -> EntityCollection[CloudPcProvisioningPolicy]:
         """Gets the provisioningPolicies property"""
-        from office365.directory.security.cloud_pc_provisioning_policy import (
+        from office365.security.cloud_pc_provisioning_policy import (
             CloudPcProvisioningPolicy,
         )
 
@@ -108,14 +108,14 @@ class VirtualEndpoint(Entity):
     @property
     def report(self) -> CloudPcReport:
         """Gets the report property"""
-        from office365.directory.security.cloud_pc_report import CloudPcReport
+        from office365.security.cloud_pc_report import CloudPcReport
 
         return self.properties.get("report", CloudPcReport(self.context, ResourcePath("report", self.resource_path)))
 
     @property
     def service_plans(self) -> EntityCollection[CloudPcServicePlan]:
         """Gets the servicePlans property"""
-        from office365.directory.security.cloud_pc_service_plan import (
+        from office365.security.cloud_pc_service_plan import (
             CloudPcServicePlan,
         )
 
@@ -129,7 +129,7 @@ class VirtualEndpoint(Entity):
     @property
     def user_settings(self) -> EntityCollection[CloudPcUserSetting]:
         """Gets the userSettings property"""
-        from office365.directory.security.cloud_pc_user_setting import (
+        from office365.security.cloud_pc_user_setting import (
             CloudPcUserSetting,
         )
 

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from office365.directory.security.restrictionaction import RestrictionAction
 from office365.runtime.client_value import ClientValue
+from office365.security.restrictionaction import RestrictionAction
 
 
 @dataclass

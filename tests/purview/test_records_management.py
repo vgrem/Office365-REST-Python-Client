@@ -12,22 +12,22 @@ from __future__ import annotations
 
 from typing import ClassVar, Optional
 
-from office365.directory.security.labels.retention.actionafterretentionperiod import (
+from office365.runtime.client_request_exception import ClientRequestException
+from office365.security.labels.retention.actionafterretentionperiod import (
     ActionAfterRetentionPeriod,
 )
-from office365.directory.security.labels.retention.behaviorduringretentionperiod import (
+from office365.security.labels.retention.behaviorduringretentionperiod import (
     BehaviorDuringRetentionPeriod,
 )
-from office365.directory.security.labels.retention.defaultrecordbehavior import (
+from office365.security.labels.retention.defaultrecordbehavior import (
     DefaultRecordBehavior,
 )
-from office365.directory.security.labels.retention.duration_in_days import (
+from office365.security.labels.retention.duration_in_days import (
     RetentionDurationInDays,
 )
-from office365.directory.security.labels.retention.label import RetentionLabel
-from office365.directory.security.labels.retention.trigger import RetentionTrigger
-from office365.directory.security.triggertypes.event_type import RetentionEventType
-from office365.runtime.client_request_exception import ClientRequestException
+from office365.security.labels.retention.label import RetentionLabel
+from office365.security.labels.retention.trigger import RetentionTrigger
+from office365.security.triggertypes.event_type import RetentionEventType
 
 from tests.decorators import requires_delegated
 from tests.graph_case import GraphDelegatedTestCase

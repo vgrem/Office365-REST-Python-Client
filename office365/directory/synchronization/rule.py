@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.directory.security.container_filter import ContainerFilter
-from office365.directory.security.group_filter import GroupFilter
-from office365.directory.security.object_mapping import ObjectMapping
-from office365.directory.security.string_key_string_value_pair import StringKeyStringValuePair
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.security.container_filter import ContainerFilter
+from office365.security.group_filter import GroupFilter
+from office365.security.object_mapping import ObjectMapping
+from office365.security.string_key_string_value_pair import StringKeyStringValuePair
 
 
 @dataclass

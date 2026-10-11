@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
-from office365.directory.security.object_definition import ObjectDefinition
 from office365.directory.synchronization.directorydefinitiondiscoverabilities import DirectoryDefinitionDiscoverabilities
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.security.object_definition import ObjectDefinition
 
 
 class DirectoryDefinition(Entity):

@@ -8,10 +8,10 @@ from __future__ import annotations
 
 from typing import ClassVar, Optional
 
-from office365.directory.security.subjectrightsrequests.identity import (
+from office365.security.subjectrightsrequests.identity import (
     SubjectRightsRequestIdentity,
 )
-from office365.directory.security.subjectrightsrequests.request import (
+from office365.security.subjectrightsrequests.request import (
     SubjectRightsRequest,
 )
 

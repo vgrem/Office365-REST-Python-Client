@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.directory.security.datasecurity.process_content_request import (
+    from office365.security.datasecurity.process_content_request import (
         ProcessContentRequest,
     )
 
@@ -14,7 +14,7 @@ class ContentActivity(Entity):
     @property
     def content_metadata(self) -> ProcessContentRequest:
         """Gets the contentMetadata property"""
-        from office365.directory.security.datasecurity.process_content_request import (
+        from office365.security.datasecurity.process_content_request import (
             ProcessContentRequest,
         )
 

@@ -92,7 +92,7 @@ class TestIncidents(GraphDelegatedTestCase):
         target = result[0]
         # Set a test comment and don't change the actual classification
         try:
-            from office365.directory.security.alerts.comment import AlertComment
+            from office365.security.alerts.comment import AlertComment
 
             comment = AlertComment(comment="SDK test incident — reviewing")
             target.comments.append(comment)

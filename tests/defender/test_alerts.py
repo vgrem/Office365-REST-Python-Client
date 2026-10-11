@@ -125,7 +125,7 @@ class TestAlerts(GraphDelegatedTestCase):
         assert alert_id is not None
         try:
             # Add a comment
-            from office365.directory.security.alerts.comment import AlertComment
+            from office365.security.alerts.comment import AlertComment
 
             comment = AlertComment(comment="SDK test — automated triage comment")
             target.comments.add(comment)

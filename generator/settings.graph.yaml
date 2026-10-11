@@ -34,6 +34,7 @@ modules:
   - office365.copilot
   - office365.runtime
   - office365.common
+  - office365.security
   - office365.todo
   - office365.externalconnectors
   - office365.partners
@@ -57,7 +58,7 @@ routing:
   microsoft.graph.reports: office365.reports
   microsoft.graph.roleManagement: office365.directory.rolemanagement
   microsoft.graph.search: office365.search
-  microsoft.graph.security: office365.directory.security
+  microsoft.graph.security: office365.security
   microsoft.graph.subscriptions: office365.subscriptions
   microsoft.graph.teams: office365.teams
   microsoft.graph.todo: office365.todo
@@ -99,9 +100,9 @@ type_routing:
   Teleconference*: office365.communications
   Virtual*: office365.communications
   Search*: office365.search
-  Attack*: office365.directory.security
-  Simulation*: office365.directory.security
-  Cloud*: office365.directory.security
+  Attack*: office365.security
+  Simulation*: office365.security
+  Cloud*: office365.security
   Access*: office365.directory.identitygovernance
   Copilot*: office365.copilot
   UserExperienceAnalytics*: office365.intune
@@ -142,42 +143,42 @@ type_routing:
   CommsNotification: office365.communications
   CommsNotifications: office365.communications
   EngagementIdentitySet: office365.communications
-  AlertDetection: office365.directory.security
-  AlertTrigger: office365.directory.security
-  SecurityResource: office365.directory.security
-  SecurityVendorInformation: office365.directory.security
-  HostSecurityState: office365.directory.security
-  InvestigationSecurityState: office365.directory.security
-  UriClickSecurityState: office365.directory.security
-  UserSecurityState: office365.directory.security
-  VulnerabilityState: office365.directory.security
-  MessageSecurityState: office365.directory.security
-  MalwareState: office365.directory.security
-  RegistryKeyState: office365.directory.security
-  NetworkConnection: office365.directory.security
-  SecureScoreControlStateUpdate: office365.directory.security
-  ControlScore: office365.directory.security
-  CertificationControl: office365.directory.security
-  AverageComparativeScore: office365.directory.security
-  SensitivityLabelInfo: office365.directory.security
-  Training*: office365.directory.security
-  UserTraining*: office365.directory.security
-  AssignedTrainingInfo: office365.directory.security
-  CustomTrainingSetting: office365.directory.security
-  MicrosoftCustomTrainingSetting: office365.directory.security
-  MicrosoftManagedTrainingSetting: office365.directory.security
-  MicrosoftTrainingAssignmentMapping: office365.directory.security
-  NoTrainingSetting: office365.directory.security
-  NoTrainingNotificationSetting: office365.directory.security
-  PositiveReinforcementNotification: office365.directory.security
-  BaseEndUserNotification: office365.directory.security
-  EndUserNotificationSetting: office365.directory.security
-  PayloadCoachmark: office365.directory.security
-  PayloadDetail: office365.directory.security
-  EmailPayloadDetail: office365.directory.security
-  AccountTargetContent: office365.directory.security
-  AddressBookAccountTargetContent: office365.directory.security
-  IncludeAllAccountTargetContent: office365.directory.security
+  AlertDetection: office365.security
+  AlertTrigger: office365.security
+  SecurityResource: office365.security
+  SecurityVendorInformation: office365.security
+  HostSecurityState: office365.security
+  InvestigationSecurityState: office365.security
+  UriClickSecurityState: office365.security
+  UserSecurityState: office365.security
+  VulnerabilityState: office365.security
+  MessageSecurityState: office365.security
+  MalwareState: office365.security
+  RegistryKeyState: office365.security
+  NetworkConnection: office365.security
+  SecureScoreControlStateUpdate: office365.security
+  ControlScore: office365.security
+  CertificationControl: office365.security
+  AverageComparativeScore: office365.security
+  SensitivityLabelInfo: office365.security
+  Training*: office365.security
+  UserTraining*: office365.security
+  AssignedTrainingInfo: office365.security
+  CustomTrainingSetting: office365.security
+  MicrosoftCustomTrainingSetting: office365.security
+  MicrosoftManagedTrainingSetting: office365.security
+  MicrosoftTrainingAssignmentMapping: office365.security
+  NoTrainingSetting: office365.security
+  NoTrainingNotificationSetting: office365.security
+  PositiveReinforcementNotification: office365.security
+  BaseEndUserNotification: office365.security
+  EndUserNotificationSetting: office365.security
+  PayloadCoachmark: office365.security
+  PayloadDetail: office365.security
+  EmailPayloadDetail: office365.security
+  AccountTargetContent: office365.security
+  AddressBookAccountTargetContent: office365.security
+  IncludeAllAccountTargetContent: office365.security
   ResultTemplate*: office365.search
   AlterationResponse: office365.search
   AlteredQueryToken: office365.search
@@ -226,10 +227,10 @@ type_routing:
   ProxiedDomain: office365.common
   SettingSource: office365.common
   SharePointEmbeddedConfiguration: office365.common
-  ActivityMetadata: office365.directory.security
-  CoachmarkLocation: office365.directory.security
-  Process: office365.directory.security
-  UserSimulationEventInfo: office365.directory.security
+  ActivityMetadata: office365.security
+  CoachmarkLocation: office365.security
+  Process: office365.security
+  UserSimulationEventInfo: office365.security
   OutOfOfficeSettings: office365.communications
   RemovedState: office365.communications
   UserWorkLocation: office365.communications
@@ -246,17 +247,17 @@ type_routing:
   BinaryOperator: office365.externalconnectors
   ChannelLayoutType: office365.teams
   ClaimBindingSource: office365.directory
-  CoachmarkLocationType: office365.directory.security
+  CoachmarkLocationType: office365.security
   CommunityPrivacy: office365.teams
   ConnectorType: office365.externalconnectors
   CustomCalloutExtensionType: office365.directory.identitygovernance
   CustomExtensionResourceType: office365.directory.identitygovernance
-  EvaluationOutcome: office365.directory.security
+  EvaluationOutcome: office365.security
   MaxWorkLocationDetails: office365.communications
   MigrationMode: office365.teams
-  MonitorMode: office365.directory.security
-  MonitorRunStatus: office365.directory.security
-  MonitorStatus: office365.directory.security
+  MonitorMode: office365.security
+  MonitorRunStatus: office365.security
+  MonitorStatus: office365.security
   RelationshipCreationType: office365.directory
   RelationshipStatus: office365.directory
   RequestStatus: office365.directory
@@ -293,7 +294,7 @@ type_routing:
   ManagedEBookAssignment: office365.intune.devices.management.managed.ebook
   ManagedMobileApp: office365.intune.devices.management
   RoleManagementCustomCalloutExtension: office365.directory.identitygovernance.privilegedaccess
-  TenantProtectionScopeContainer: office365.directory.security.datasecurity
+  TenantProtectionScopeContainer: office365.security.datasecurity
 
 # Platform-specific Intune device configuration / compliance types.
   Windows10CustomConfiguration: office365.intune.devices.configurations.windows
@@ -580,12 +581,12 @@ type_routing:
   "NotificationMessageTemplate": office365.intune.devices.management
   "ResourceOperation": office365.intune.devices.management
   "RemoteAssistancePartner": office365.intune.devices.management
-  "AuthoredNote": office365.directory.security.subjectrightsrequests
-  "SecureScore": office365.directory.security
-  "LabelContentRight": office365.directory.security.datasecurity
+  "AuthoredNote": office365.security.subjectrightsrequests
+  "SecureScore": office365.security
+  "LabelContentRight": office365.security.datasecurity
   "ActivitiesContainer": office365.directory.identitygovernance
   "ContentActivity": office365.directory.identitygovernance
-  "UsageRightsIncluded": office365.directory.security.datasecurity
+  "UsageRightsIncluded": office365.security.datasecurity
   "UserProtectionScopeContainer": office365.directory.identitygovernance
   "OnPremisesDirectorySynchronization": office365.directory
   "RemoteTenantGroup": office365.directory
@@ -636,11 +637,11 @@ type_routing:
   "ProfilePropertySetting": office365.admin.people
   "ProfileSource": office365.admin.people
   "PronounsSettings": office365.admin.people
-  "EndUserNotification": office365.directory.security
-  "LoginPage": office365.directory.security.attacksimulations
-  "Payload": office365.directory.security.attacksimulations
-  "EndUserNotificationDetail": office365.directory.security
-  "LandingPageDetail": office365.directory.security.attacksimulations
+  "EndUserNotification": office365.security
+  "LoginPage": office365.security.attacksimulations
+  "Payload": office365.security.attacksimulations
+  "EndUserNotificationDetail": office365.security
+  "LandingPageDetail": office365.security.attacksimulations
   "AttendanceRecord": office365.communications.onlinemeetings
   "AudioRoutingGroup": office365.communications.calls
   "ContentSharingSession": office365.communications.calls
@@ -685,7 +686,7 @@ services:
   backup-storage: office365.backuprestore
   calendars: office365.outlook.calendar
   change-notifications: office365.subscriptions
-  compliance: office365.directory.security
+  compliance: office365.security
   cross-device-experiences: office365.directory
   customer-booking: office365.booking
   device-and-app-management: office365.intune
@@ -704,7 +705,7 @@ services:
   personal-contacts: office365.outlook
   reports: office365.reports
   search: office365.search
-  security: office365.directory.security
+  security: office365.security
   sites-and-lists: office365.onedrive
   tasks-and-plans: office365.planner
   teamwork-and-communications: office365.teams

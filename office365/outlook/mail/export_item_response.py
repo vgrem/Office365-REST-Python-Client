@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.directory.security.stream import Stream
 from office365.outlook.mail.tips.error import MailTipsError
 from office365.runtime.client_value import ClientValue
+from office365.security.stream import Stream
 
 
 @dataclass

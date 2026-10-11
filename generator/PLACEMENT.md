@@ -18,8 +18,8 @@ office365/                 package root (config `output_path`)
   routing is precisely to **split that container into products** (`directory`,
   `intune`, `communications`, `outlook`, `teams`, `onedrive`, …).
 - **Level 1 = service** for SharePoint (`sharepoint`).
-- **Level 2 = subsystem** (curated): `directory.security`, `intune.devices`,
-  `sharepoint.tenant`, `sharepoint.publishing`, …
+- **Level 2 = subsystem** (curated), for services that have them:
+  `intune.devices`, `directory.identitygovernance`, `sharepoint.tenant`, …
 - **Level 3+** narrows further, often matching the metadata namespace or an
   existing subpackage.
 - `office365.runtime` is **infrastructure**, not a product.
@@ -35,7 +35,7 @@ office365/                 package root (config `output_path`)
    removed. Metadata additions are appended only.
 2. **Exact OData name** — `[type_routing]` entry keyed by the full name.
 3. **Namespace** — `[routing]` prefix, e.g.
-   `microsoft.graph.security.* → office365.directory.security.*`.
+   `microsoft.graph.security.* → office365.security.*`.
 4. **Exact short name** — `[type_routing]` entry keyed by the class name
    (bare `microsoft.graph.*` types only, so it can never shadow a namespace).
 5. **Prefix** — `[type_routing]` `Prefix*`, first match in configuration order.

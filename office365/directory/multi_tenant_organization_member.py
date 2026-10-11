@@ -7,14 +7,14 @@ from uuid import UUID
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.directory.security.audit.multi_tenant_organization_member_transition_details import (
-        MultiTenantOrganizationMemberTransitionDetails,
-    )
     from office365.directory.tenantinformation.multitenantorganizationmemberrole import (
         MultiTenantOrganizationMemberRole,
     )
     from office365.directory.tenantinformation.multitenantorganizationmemberstate import (
         MultiTenantOrganizationMemberState,
+    )
+    from office365.security.audit.multi_tenant_organization_member_transition_details import (
+        MultiTenantOrganizationMemberTransitionDetails,
     )
 
 
@@ -65,7 +65,7 @@ class MultiTenantOrganizationMember(Entity):
     @property
     def transition_details(self) -> MultiTenantOrganizationMemberTransitionDetails:
         """Gets the transitionDetails property"""
-        from office365.directory.security.audit.multi_tenant_organization_member_transition_details import (
+        from office365.security.audit.multi_tenant_organization_member_transition_details import (
             MultiTenantOrganizationMemberTransitionDetails,
         )
 
