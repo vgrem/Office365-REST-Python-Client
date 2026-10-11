@@ -41,7 +41,7 @@ ready-to-run scripts, and copy the pattern you need.
 - **Microsoft Purview** — eDiscovery, retention labels, subject rights requests
     [Browse →](purview/index.md)
 
-- **Usage Reports** — email, mailbox, OneDrive, SharePoint, Teams, Copilot, MFA
+- **Usage Reports** — email & mailboxes, OneDrive & SharePoint, Teams, M365 apps & activations, MFA, Copilot
     [Browse →](reports/index.md)
 
 - **Insights** — shared documents, trending content

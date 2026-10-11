@@ -384,6 +384,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   defaults, temp-dir outputs, missing-scope hints that exit cleanly) and the
   duplicated usage reports / call-records / online-meeting scripts moved to
   `examples/reports/` and `examples/communications/` instead of being duplicated.
+- **Usage-reports tour:** `examples/reports/` is reorganised by workload
+  (`mail/`, `files/`, `teams/`, `apps/`, `security/`, `copilot/`) with a new
+  tenant-snapshot `quickstart.py` and a README per folder. The scripts decode the
+  report CSV with `utf-8-sig` (Graph prepends a BOM), target the correct
+  report/columns, keep outputs in the temp directory, and handle throttling and
+  concealed report data gracefully.
 
 ### Fixed
 - **Sharing-link expiration rejected as an invalid date:** `ListItem.share_link`

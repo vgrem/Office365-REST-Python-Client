@@ -182,7 +182,7 @@ into a portable folder.
 Teams usage analytics live with the rest of the reporting endpoints, and the
 reusable asynchronous patterns live under `patterns/`:
 
-- [`../reports/teams_usage.py`](../reports/teams_usage.py) — team counts and user activity over periods
+- [`../reports/teams/usage.py`](../reports/teams/usage.py) — team counts and user activity over periods
 - [`../reports/usage_reports.py`](../reports/usage_reports.py) — the wider Graph reporting surface
 - [`../patterns/async/provision_teams_async.py`](../patterns/async/provision_teams_async.py) — provision many teams concurrently
 - [`../patterns/lro/wait_team_clone_async.py`](../patterns/lro/wait_team_clone_async.py) — clone a team without blocking the loop
