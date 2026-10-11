@@ -6,7 +6,7 @@ Tests cover:
   - Updating a section display name
   - Listing pages within a section
   - Section property assertions (displayName, pagesUrl, isDefault)
-  - Deleting a notebook (cascades to sections)
+  - The absence of a delete-notebook operation
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ from typing import ClassVar, Optional
 
 from office365.onenote.notebooks.notebook import Notebook
 from office365.onenote.sections.section import OnenoteSection
+from office365.runtime.client_request_exception import ClientRequestException
 
 from tests import create_unique_name
 from tests.decorators import requires_delegated
@@ -112,18 +113,19 @@ class TestSection(GraphDelegatedTestCase):
         "Notes.ReadWrite.All",
         bypass_roles=["Global Administrator"],
     )
-    def test_06_delete_notebook(self):
-        """Deleting a notebook (cascades to sections) should succeed."""
+    def test_06_notebook_delete_is_not_supported(self):
+        """Graph exposes no delete-notebook operation, so the request is rejected."""
         notebook = TestSection.target_notebook
         if not notebook:
             self.skipTest("No notebook created from previous test")
 
-        notebook.delete_object().execute_query()
-        TestSection.target_notebook = None
-        TestSection.target_section = None
+        with self.assertRaises(ClientRequestException):
+            notebook.delete_object().execute_query()
 
     @classmethod
     def tearDownClass(cls):
+        # Microsoft Graph has no delete-notebook operation, so the notebook created by
+        # this test cannot be removed; the attempt below is best-effort only.
         notebook = cls.target_notebook
         if notebook and notebook.resource_path:
             try:
