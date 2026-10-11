@@ -48,6 +48,19 @@ class ClientResult(Generic[ClientValueT]):
         return self
 
     def set_property(self, key: str, value: Any, persist_changes: bool = False) -> Self:
+        if key == "__value":
+            # A raw/scalar payload (non-JSON responses, e.g. report CSVs) carries
+            # the result's value. A model that represents raw content (``Report``)
+            # receives it through its ``content`` field, keeping the declared type.
+            current = self._value
+            if isinstance(current, ClientValue) and hasattr(current, "content"):
+                current.set_property("content", value)
+                return self
+            # A declared ``datetime`` / ``Enum`` value is coerced by the branch
+            # below, so only assign raw values that have no declared type.
+            if not isinstance(current, (datetime, Enum)):
+                self._value = value
+                return self
         current = self._value
         if isinstance(current, ClientValue):
             current.set_property(key, value, persist_changes)

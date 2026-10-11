@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   well as the plain snake-case name, so such a property deserializes to its
   declared type — `CallRecord.type` is a `CallType` member, not the raw JSON
   string.
+- **Raw report content is surfaced again:** `ClientResult.set_property("__value", ...)`
+  now fills a content-bearing `ClientValue` (`Report.content`) instead of storing
+  the value only on the result, so `client.reports...` CSV/JSON responses are no
+  longer empty. (`Report.to_bytes()` had been returning `None` for every
+  `create_report_query` endpoint.)
 
 ### Added
 - **Sharing-link updates:** `ListItem.share_link` / `File.share_link` /
