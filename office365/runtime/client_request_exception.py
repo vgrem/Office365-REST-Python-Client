@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import Optional
 
@@ -8,6 +9,31 @@ from requests import RequestException, Response
 from office365.runtime.converters.scalars import parse_int
 
 _HEADER_REQUEST_IDS = ("request-id", "client-request-id", "SPRequestGuid")
+_OPERATION_ID_MARKER = " - Operation ID (for customer support):"
+
+
+def _clean_message(text: str) -> str:
+    """Normalise a Graph/Intune error message into a readable one-liner.
+
+    The Intune proxy returns ``error.message`` as a JSON object string
+    (``{"_version": 3, "Message": "Application is not authorized ..."}``)
+    and appends support diagnostics (`` - Operation ID ... - Activity ID ...``).
+    This unwraps the inner ``Message`` and drops the diagnostics, without
+    changing plain-text messages from other services.
+    """
+    message = text
+    stripped = message.strip()
+    if stripped.startswith("{"):
+        try:
+            payload = json.loads(stripped)
+        except ValueError:
+            payload = None
+        if isinstance(payload, dict):
+            inner = payload.get("Message") or payload.get("message")
+            if isinstance(inner, str):
+                message = inner
+    head, marker, _ = message.partition(_OPERATION_ID_MARKER)
+    return head if marker else message
 
 
 @dataclass(frozen=True)
@@ -55,6 +81,7 @@ def _parse_error(response: Response) -> dict:
 def _to_payload(error: dict, response: Response) -> ErrorPayload:
     msg = error.get("message")
     message = str(msg.get("value", "")) if isinstance(msg, dict) else str(msg or "")
+    message = _clean_message(message)
     details = error.get("details")
     return ErrorPayload(
         code=str(error.get("code") or ""),
@@ -143,8 +170,8 @@ class ClientRequestException(RequestException):
     def message(self) -> str:
         msg = self._error.get("message")
         if isinstance(msg, dict):
-            return str(msg.get("value", ""))
-        return str(msg or "")
+            return _clean_message(str(msg.get("value", "")))
+        return _clean_message(str(msg or ""))
 
     @property
     def message_lang(self) -> Optional[str]:

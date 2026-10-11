@@ -139,6 +139,29 @@ class TestFromResponse(unittest.TestCase):
         exc = ClientRequestException.from_response(_make_error_response(body))
         self.assertIsInstance(exc, DuplicatedObjectException)
 
+    def test_nested_json_message_is_unwrapped(self):
+        inner = (
+            "Application is not authorized to perform this operation. "
+            "Application must have one of the following scopes: DeviceManagementApps.Read.All"
+        )
+        noisy = inner + " - Operation ID (for customer support): 0000 - Activity ID: abc - Url: https://proxy"
+        body = {
+            "error": {
+                "code": "Forbidden",
+                "message": json.dumps({"_version": 3, "Message": noisy, "RetryAfter": None}),
+            }
+        }
+        exc = ClientRequestException.from_response(_make_error_response(body))
+        self.assertEqual(exc.message, inner)
+        self.assertIn(inner, str(exc))
+        self.assertNotIn("_version", str(exc))
+        self.assertNotIn("Activity ID", str(exc))
+
+    def test_plain_message_is_untouched(self):
+        body = {"error": {"code": "BadRequest", "message": "{not json}"}}
+        exc = ClientRequestException.from_response(_make_error_response(body))
+        self.assertEqual(exc.message, "{not json}")
+
     def test_unrelated_error_stays_generic(self):
         body = {
             "error": {
