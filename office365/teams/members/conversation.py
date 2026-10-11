@@ -30,4 +30,6 @@ class ConversationMember(Entity):
 
     @property
     def entity_type_name(self) -> str:
-        return "microsoft.graph.ConversationMember"
+        # Graph rejects the abstract ``conversationMember`` type on writes and
+        # expects the concrete AAD user type (Teams members are always AAD users).
+        return "microsoft.graph.AadUserConversationMember"

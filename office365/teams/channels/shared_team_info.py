@@ -25,3 +25,9 @@ class SharedWithChannelTeamInfo(TeamInfo):
                 ResourcePath("allowedMembers", self.resource_path),
             ),
         )
+
+    @property
+    def entity_type_name(self) -> str:
+        # The base TeamInfo serializes as "teamInfo"; the sharedWithTeams endpoint
+        # rejects anything but the concrete sharedWithChannelTeamInfo type.
+        return "microsoft.graph.sharedWithChannelTeamInfo"

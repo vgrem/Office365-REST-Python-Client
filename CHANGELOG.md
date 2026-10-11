@@ -32,6 +32,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the value only on the result, so `client.reports...` CSV/JSON responses are no
   longer empty. (`Report.to_bytes()` had been returning `None` for every
   `create_report_query` endpoint.)
+- **Teams members use the concrete payload type:** adding a team member posts an
+  `aadUserConversationMember` (`@odata.type`, `roles`, `user@odata.bind`) rather
+  than the abstract `conversationMember`, and “set role” PATCHes the same type —
+  Graph previously rejected both with an unsupported-OData-type error.
+- **Teams chat creation carries its topic:** `ChatCollection.add(..., topic=...)`
+  includes the topic in the creation payload, so creating a group chat no longer
+  fails with “Only 'Topic' must be specified in the request body”.
+- **Shared-channel team info serializes concretely:**
+  `SharedWithChannelTeamInfo` reports `microsoft.graph.sharedWithChannelTeamInfo`
+  instead of the base `teamInfo`, which the `sharedWithTeams` endpoint rejected.
 
 ### Added
 - **Sharing-link updates:** `ListItem.share_link` / `File.share_link` /
@@ -306,6 +316,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ServicePrincipal.revoke_application_permissions` only deletes the assignment
   for the requested role, so both are safe to re-run and `setup_sharepoint_app.py`
   grants `Sites.Selected` in a single call.
+- **Teams creations accept owners:** `TeamCollection.create(...)` /
+  `create_and_wait(...)` and `ChannelCollection.add(...)` take `owners=[...]`,
+  which Graph requires when a team or a private/shared channel is created in
+  application context (otherwise: “A team owner must be provided…”).
+- **Async (202) channel creation is awaited:** creating a private or shared
+  channel can answer `202 Accepted` with a `teamsAsyncOperation`;
+  `ChannelCollection.add()` now follows the operation and loads the finished
+  channel, so `channel.id` is populated when `execute_query()` returns.
+- **`Prefer: include-unknown-enum-members` helper**
+  (`office365.runtime.http.prefer.prefer_include_unknown_enum_members`): opt a
+  request into future enum members — e.g. `ChannelMembershipType` for shared
+  channels reads `shared` instead of `unknownFutureValue`.
 
 ### Deprecated
 - **Resolver `get_by_<key>` names:** the collection-resolving `get_by_name` /

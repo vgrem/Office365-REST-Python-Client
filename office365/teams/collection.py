@@ -100,11 +100,40 @@ class TeamCollection(EntityCollection[Team]):
         self.context.add_query(qry)
         return return_type
 
+    def _create_payload(
+        self,
+        display_name: str,
+        description: str | None,
+        template: str,
+        owners: list[str] | None,
+    ) -> dict:
+        """Build the ``POST /teams`` body, including owners when supplied.
+
+        Application-context creation must name at least one owner, so pass the
+        user ids (or user principal names) of the intended owners.
+        """
+        payload: dict = {
+            "displayName": display_name,
+            "description": description,
+            "template@odata.bind": f"{self.context.teams_templates.resource_url}('{template}')",
+        }
+        if owners:
+            payload["members"] = [
+                {
+                    "@odata.type": "#microsoft.graph.aadUserConversationMember",
+                    "roles": ["owner"],
+                    "user@odata.bind": f"{self.context.users.resource_url}('{owner}')",
+                }
+                for owner in owners
+            ]
+        return payload
+
     def create(
         self,
         display_name: str,
         description: str | None = None,
         template: str = "standard",
+        owners: list[str] | None = None,
     ) -> TeamsAsyncOperation:
         """Create a new team (async) — returns the ``teamsAsyncOperation``.
 
@@ -118,6 +147,8 @@ class TeamCollection(EntityCollection[Team]):
             display_name (str): The name of the team.
             description (str or None): An optional description for the team. Maximum length: 1024 characters.
             template (str): The team template to create from (default ``"standard"``).
+            owners (list[str] or None): User ids or user principal names to assign as owners.
+                Required when creating in application context.
         """
         return_type = TeamsAsyncOperation(self.context, EntityPath(None, self.resource_path))
 
@@ -127,11 +158,7 @@ class TeamCollection(EntityCollection[Team]):
                 operation_path = ODataPathBuilder.parse_url(loc)
                 return_type._resource_path = operation_path
 
-        payload = {
-            "displayName": display_name,
-            "description": description,
-            "template@odata.bind": f"{self.context.teams_templates.resource_url}('{template}')",
-        }
+        payload = self._create_payload(display_name, description, template, owners)
         qry = CreateEntityQuery(self, payload, return_type)
         self.context.add_query(qry).after_execute(_process_response, include_response=True)
         return return_type
@@ -141,6 +168,7 @@ class TeamCollection(EntityCollection[Team]):
         display_name: str,
         description: str | None = None,
         template: str = "standard",
+        owners: list[str] | None = None,
     ) -> Team:
         """Create a team and wait for provisioning (deferred).
 
@@ -152,6 +180,8 @@ class TeamCollection(EntityCollection[Team]):
             display_name (str): The name of the team.
             description (str or None): An optional description for the team. Maximum length: 1024 characters.
             template (str): The team template to create from (default ``"standard"``).
+            owners (list[str] or None): User ids or user principal names to assign as owners.
+                Required when creating in application context.
         """
         return_type = Team(self.context)
         self.add_child(return_type)
@@ -171,11 +201,7 @@ class TeamCollection(EntityCollection[Team]):
 
             wait_for_operation(operation, success_callback=_on_succeeded)
 
-        payload = {
-            "displayName": display_name,
-            "description": description,
-            "template@odata.bind": f"{self.context.teams_templates.resource_url}('{template}')",
-        }
+        payload = self._create_payload(display_name, description, template, owners)
         qry = CreateEntityQuery(self, payload, return_type)
         self.context.add_query(qry).after_execute(_process_response, include_response=True)
         return return_type

@@ -53,7 +53,8 @@ def app_record(app) -> AppRecord:
 
 
 def channel_record(channel, options: TeamsExportOptions) -> ChannelRecord:
-    members = [member_record(m) for m in channel.members.get().execute_query()] if options.include_members else []
+    include_members = options.include_members and options.include_channel_members
+    members = [member_record(m) for m in channel.members.get().execute_query()] if include_members else []
     tabs = (
         [tab_record(t) for t in channel.tabs.expand(["teamsApp"]).get().execute_query()] if options.include_tabs else []
     )

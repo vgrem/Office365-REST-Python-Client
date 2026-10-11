@@ -16,7 +16,12 @@ class ChatCollection(EntityCollection[Chat]):
     def __init__(self, context, resource_path=None):
         super().__init__(context, Chat, resource_path)
 
-    def add(self, chat_type: Union[str, ChatType], owner_ids: Optional[List[str]] = None) -> Chat:
+    def add(
+        self,
+        chat_type: Union[str, ChatType],
+        owner_ids: Optional[List[str]] = None,
+        topic: Optional[str] = None,
+    ) -> Chat:
         """Create a new chat object.
 
         Note: Only one one-on-one chat can exist between two members. If a one-on-one chat already exists,
@@ -25,11 +30,15 @@ class ChatCollection(EntityCollection[Chat]):
         Args:
             chat_type (str): Specifies the type of chat. Possible values are: group and oneOnOne.
             owner_ids (List[str]): The list of user IDs of the chat members that are owners.
+            topic (str): The topic of the group chat (group chats only).
         """
         if isinstance(chat_type, ChatType):
             chat_type = chat_type.value
 
-        return_type = self.create_typed_object({"chatType": chat_type})
+        initial_properties = {"chatType": chat_type}
+        if topic:
+            initial_properties["topic"] = topic
+        return_type = self.create_typed_object(initial_properties)
         if owner_ids:
             from office365.teams.members.aad_user_conversation import (
                 AadUserConversationMember,

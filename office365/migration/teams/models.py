@@ -66,6 +66,7 @@ class TeamsExportOptions:
     """What to include in a Teams export archive."""
 
     include_members: bool = True
+    include_channel_members: bool = True
     include_tabs: bool = True
     include_apps: bool = True
     include_messages: bool = True

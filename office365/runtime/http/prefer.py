@@ -18,6 +18,10 @@ BYPASS_SHARED_LOCK = "bypass-shared-lock"
 #: with a monitor URL instead of blocking until the work completes.
 RESPOND_ASYNC = "respond-async"
 
+#: Value of the ``Prefer`` header that asks the service to return evolvable-enum
+#: members it would otherwise collapse to ``unknownFutureValue`` (Microsoft Graph).
+INCLUDE_UNKNOWN_ENUM_MEMBERS = "include-unknown-enum-members"
+
 
 def prefer_bypass_shared_lock(request: RequestOptions) -> None:
     """Attach ``Prefer: bypass-shared-lock`` to a request.
@@ -52,3 +56,18 @@ def prefer_respond_async(request: RequestOptions, wait: int | None = None) -> No
     """
     value = RESPOND_ASYNC if wait is None else f"{RESPOND_ASYNC}, wait={wait}"
     request.set_header("Prefer", value)
+
+
+def prefer_include_unknown_enum_members(request: RequestOptions) -> None:
+    """Attach ``Prefer: include-unknown-enum-members`` to a request.
+
+    Microsoft Graph marks newer members of some enums as "evolvable": by default
+    it collapses them to ``unknownFutureValue`` so that older clients keep
+    working. Adding this preference asks the service to return the real member
+    (for example ``shared`` for :class:`ChannelMembershipType`, which would
+    otherwise read as ``unknownFutureValue``).
+
+    Attach it to a single request with ``context.before_execute`` (repeat for
+    every query that needs it).
+    """
+    request.set_header("Prefer", INCLUDE_UNKNOWN_ENUM_MEMBERS)
