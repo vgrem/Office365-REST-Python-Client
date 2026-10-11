@@ -6,6 +6,7 @@ from office365.directory.permissions.identity_set import IdentitySet
 from office365.directory.permissions.require_permission import require_permission
 from office365.entity_collection import EntityCollection
 from office365.onedrive.base_item import BaseItem
+from office365.onedrive.driveitems.collection import DriveItemCollection
 from office365.onedrive.driveitems.conflict_behavior import ConflictBehavior
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.driveitems.system_facet import SystemFacet
@@ -66,7 +67,7 @@ class Drive(BaseItem):
         Args:
             query_text (str):
         """
-        return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
+        return_type = DriveItemCollection(self.context, self.items.resource_path)
         qry = FunctionQuery(self, "search", {"q": query_text}, return_type)
         self.context.add_query(qry)
         return return_type
@@ -77,14 +78,14 @@ class Drive(BaseItem):
         This collection includes items that are in the user's drive as well as items
         they have access to from other drives.
         """
-        return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
+        return_type = DriveItemCollection(self.context, self.items.resource_path)
         qry = FunctionQuery(self, "recent", None, return_type)
         self.context.add_query(qry)
         return return_type
 
     def shared_with_me(self) -> EntityCollection[DriveItem]:
         """Retrieve a collection of DriveItem resources that have been shared with the owner of the Drive."""
-        return_type = EntityCollection(self.context, DriveItem, self.items.resource_path)
+        return_type = DriveItemCollection(self.context, self.items.resource_path)
         qry = FunctionQuery(self, "sharedWithMe", None, return_type)
         self.context.add_query(qry)
         return return_type
@@ -141,15 +142,13 @@ class Drive(BaseItem):
     def bundles(self) -> EntityCollection[DriveItem]:
         """Bundle metadata, if the item is a bundle."""
         return self.properties.get(
-            "bundles", EntityCollection(self.context, DriveItem, ResourcePath("bundles", self.resource_path))
+            "bundles", DriveItemCollection(self.context, ResourcePath("bundles", self.resource_path))
         )
 
     @property
     def items(self) -> EntityCollection[DriveItem]:
         """All items contained in the drive."""
-        return self.properties.get(
-            "items", EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path))
-        )
+        return self.properties.get("items", DriveItemCollection(self.context, ResourcePath("items", self.resource_path)))
 
     @property
     @require_permission(
@@ -167,7 +166,7 @@ class Drive(BaseItem):
     def following(self) -> EntityCollection[DriveItem]:
         """The list of items the user is following. Only in OneDrive for Business."""
         return self.properties.get(
-            "following", EntityCollection(self.context, DriveItem, ResourcePath("following", self.resource_path))
+            "following", DriveItemCollection(self.context, ResourcePath("following", self.resource_path))
         )
 
     @property
@@ -191,7 +190,7 @@ class Drive(BaseItem):
     def special(self) -> EntityCollection[DriveItem]:
         """Collection of special folders available in OneDrive. Read-only. Nullable."""
         return self.properties.get(
-            "special", EntityCollection(self.context, DriveItem, ResourcePath("special", self.resource_path))
+            "special", DriveItemCollection(self.context, ResourcePath("special", self.resource_path))
         )
 
     @property

@@ -69,6 +69,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with `on_unsupported="warn"`. Applied to `CallRecordCollection`, whose feed
   rejects `$top`, so the `call_records` example no longer sends it. Mirrors the
   `@odata` / `@limit` / `@require_permission` declare-collect-enforce family.
+- **Property-level query capabilities and `Prefer` injection:**
+  `@query_capabilities(...)` now also accepts `unsupported_filter` / `filterable`,
+  `unsupported_orderby` / `orderable` (property deny/allow-lists) and `prefer` (a
+  property-to-`Prefer`-header map). A `$filter` / `$orderby` that references a
+  rejected property raises `QueryPropertyNotSupportedError` before the request is
+  sent (or warns with `on_unsupported="warn"`, keeping the expression — silently
+  dropping one side of a filter would change its meaning). A declared `prefer`
+  value is attached to the request automatically. Applied to the new
+  `DriveItemCollection`: filtering `driveItem.size` is rejected client-side
+  (SharePoint maps it to the non-filterable `SMTotalFileStreamSize`), and
+  filtering `lastModifiedDateTime` carries the `Prefer` header the service
+  requests.
 - **SharePoint upload parity:** `Folder.ensure_file(relative_path, content, *,
   on_conflict="skip", chunk_size=...)` is the deferred get-or-upload counterpart
   of `Folder.upload_file` — it creates missing parent folders, then reuses the

@@ -3,6 +3,7 @@ from __future__ import annotations
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity_collection import EntityCollection
 from office365.onedrive.base_item import BaseItem
+from office365.onedrive.driveitems.collection import DriveItemCollection
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.onedrive.internal.paths.root import RootPath
 from office365.onedrive.listitems.list_item import ListItem
@@ -19,9 +20,7 @@ class SharedDriveItem(BaseItem):
     @property
     def items(self) -> EntityCollection[DriveItem]:
         """All driveItems contained in the sharing root. This collection cannot be enumerated."""
-        return self.properties.get(
-            "items", EntityCollection(self.context, DriveItem, ResourcePath("items", self.resource_path))
-        )
+        return self.properties.get("items", DriveItemCollection(self.context, ResourcePath("items", self.resource_path)))
 
     @odata(name="listItem")
     @property

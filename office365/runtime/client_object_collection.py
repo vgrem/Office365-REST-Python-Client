@@ -19,6 +19,7 @@ from typing_extensions import Self
 
 from office365.runtime.client_object import ClientObject, ClientObjectT
 from office365.runtime.client_runtime_context import ClientRuntimeContext
+from office365.runtime.http.prefer import add_prefer
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.operations import Progress
@@ -26,7 +27,9 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.query_capabilities import (
     QueryCapability,
     QueryOptionNotSupportedError,
+    QueryPropertyNotSupportedError,
     hint,
+    property_hint,
     query_capabilities_of,
 )
 from office365.runtime.types.event_handler import EventHandler
@@ -315,6 +318,37 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
             return False
         raise QueryOptionNotSupportedError(type(self), option, capability)
 
+    def _ensure_query_properties(self, option: str, expression: str) -> None:
+        """Validate the properties an expression references against the declaration.
+
+        A property-level restriction (e.g. a drive's ``size``, which the service
+        maps to the non-filterable ``SMTotalFileStreamSize``) is caught here,
+        before a round trip. With ``on_unsupported="warn"`` the expression is
+        kept as-is: silently dropping one side of a filter would change its
+        meaning, so the warning is a caution rather than a rewrite.
+        """
+        capability = query_capabilities_of(type(self))
+        if capability is None:
+            return
+        violations = (
+            capability.filter_violations(expression) if option == "filter" else capability.orderby_violations(expression)
+        )
+        if not violations:
+            return
+        if capability.on_unsupported == "warn":
+            warnings.warn(property_hint(type(self), option, violations[0], capability), UserWarning, stacklevel=3)
+            return
+        raise QueryPropertyNotSupportedError(type(self), option, violations[0], capability)
+
+    def _apply_query_preferences(self, request: RequestOptions) -> None:
+        """Attach the ``Prefer`` values the declared capability requires for this query."""
+        capability = query_capabilities_of(type(self))
+        if capability is None or not capability.prefer:
+            return
+        values = capability.preference_values(self.query_options.filter, self.query_options.order_by)
+        if values:
+            add_prefer(request, *values)
+
     def select(self, names: List[str]) -> Self:
         """Include specific properties in the query (``$select``)."""
         if self._ensure_query_option("select"):
@@ -341,6 +375,7 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
             ValueError: If no matching items found
         """
         if self._ensure_query_option("filter"):
+            self._ensure_query_properties("filter", expression)
             self.query_options.filter = expression
         return self
 
@@ -355,6 +390,7 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
             self: Supports fluent method chaining
         """
         if self._ensure_query_option("order_by"):
+            self._ensure_query_properties("order_by", value)
             self.query_options.order_by = value
         return self
 
@@ -423,7 +459,11 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
             if self._paged_mode and self._page_headers is None and request is not None:
                 self._page_headers = dict(request.headers)
 
-        self.context.load(self).after_execute(_capture_headers, include_response=True).after_execute(_loaded)
+        self.context.load(self)
+        capability = query_capabilities_of(type(self))
+        if capability is not None and capability.prefer:
+            self.context.before_execute(self._apply_query_preferences)
+        self.context.after_execute(_capture_headers, include_response=True).after_execute(_loaded)
         return self
 
     def get_all(

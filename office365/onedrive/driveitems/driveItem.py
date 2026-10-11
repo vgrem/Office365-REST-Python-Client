@@ -151,9 +151,10 @@ class DriveItem(BaseItem):
         The fluent ``.select([...])`` / ``.expand([...])`` applied to the returned
         collection is honored on every ``children`` page the scan loads.
         """
+        from office365.onedrive.driveitems.collection import DriveItemCollection
         from office365.runtime.queries.deferred import DeferredOperationQuery
 
-        return_type = EntityCollection(self.context, DriveItem, self.resource_path)
+        return_type = DriveItemCollection(self.context, self.resource_path)
 
         def _get_files(parent_drive_item: DriveItem) -> None:
             def _after_loaded(col: EntityCollection[DriveItem]) -> None:
@@ -197,9 +198,10 @@ class DriveItem(BaseItem):
         The fluent ``.select([...])`` / ``.expand([...])`` applied to the returned
         collection is honored on every ``children`` page the scan loads.
         """
+        from office365.onedrive.driveitems.collection import DriveItemCollection
         from office365.runtime.queries.deferred import DeferredOperationQuery
 
-        return_type = EntityCollection(self.context, DriveItem, self.resource_path)
+        return_type = DriveItemCollection(self.context, self.resource_path)
 
         def _get_folders(parent: DriveItem) -> None:
             def _after_loaded(col: EntityCollection[DriveItem]) -> None:
@@ -1102,7 +1104,9 @@ class DriveItem(BaseItem):
         Args:
             query_text (str):
         """
-        return_type = EntityCollection[DriveItem](self.context, DriveItem, ResourcePath("items", self.resource_path))
+        from office365.onedrive.driveitems.collection import DriveItemCollection
+
+        return_type = DriveItemCollection(self.context, ResourcePath("items", self.resource_path))
         qry = FunctionQuery(self, "search", {"q": query_text}, return_type)
         self.context.add_query(qry)
         return return_type
@@ -1335,9 +1339,11 @@ class DriveItem(BaseItem):
         """Collection containing Item objects for the immediate children of Item. Only items representing folders
         have children.
         """
+        from office365.onedrive.driveitems.collection import DriveItemCollection
+
         return self.properties.get(
             "children",
-            EntityCollection(self.context, DriveItem, ChildrenPath(self.resource_path)),
+            DriveItemCollection(self.context, ChildrenPath(self.resource_path)),
         )
 
     @property

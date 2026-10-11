@@ -22,6 +22,36 @@ RESPOND_ASYNC = "respond-async"
 #: members it would otherwise collapse to ``unknownFutureValue`` (Microsoft Graph).
 INCLUDE_UNKNOWN_ENUM_MEMBERS = "include-unknown-enum-members"
 
+#: Value of the ``Prefer`` header required to filter a drive item by
+#: ``lastModifiedDateTime``. The service warns the result may be incomplete
+#: because the property is not indexed, but without the header it rejects the
+#: whole request rather than returning an approximate answer.
+TRY_FILTER_LAST_MODIFIED_DATE_TIME = "TryFilterLastModifiedDateTimeTimeWarningMayFailRandomly"
+
+
+def _prefer_values(request: RequestOptions) -> list[str]:
+    """The ``Prefer`` header values already set on a request, split on commas."""
+    header = request.headers.get("Prefer")
+    if not header:
+        return []
+    return [value.strip() for value in header.split(",") if value.strip()]
+
+
+def add_prefer(request: RequestOptions, *values: str) -> None:
+    """Merge one or more values into the request's ``Prefer`` header (idempotent).
+
+    Unlike :func:`prefer_bypass_shared_lock` and friends (which set a single
+    header), this appends to whatever is already there without duplicating an
+    existing value — so a collection can layer a property-specific preference on
+    top of one the caller attached by hand.
+    """
+    merged = _prefer_values(request)
+    for value in values:
+        if value and value not in merged:
+            merged.append(value)
+    if merged:
+        request.set_header("Prefer", ", ".join(merged))
+
 
 def prefer_bypass_shared_lock(request: RequestOptions) -> None:
     """Attach ``Prefer: bypass-shared-lock`` to a request.
