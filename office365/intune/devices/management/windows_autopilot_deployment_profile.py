@@ -12,10 +12,10 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.managed.windows.autopilot_device_type import (
         WindowsAutopilotDeviceType,
     )
-    from office365.intune.out_of_box_experience_setting import OutOfBoxExperienceSetting
-    from office365.intune.windows_autopilot_device_identity import (
+    from office365.intune.devices.management.windows_autopilot_device_identity import (
         WindowsAutopilotDeviceIdentity,
     )
+    from office365.intune.out_of_box_experience_setting import OutOfBoxExperienceSetting
 
 
 class WindowsAutopilotDeploymentProfile(Entity):
@@ -90,7 +90,7 @@ class WindowsAutopilotDeploymentProfile(Entity):
     @property
     def assigned_devices(self) -> EntityCollection[WindowsAutopilotDeviceIdentity]:
         """Gets the assignedDevices property"""
-        from office365.intune.windows_autopilot_device_identity import (
+        from office365.intune.devices.management.windows_autopilot_device_identity import (
             WindowsAutopilotDeviceIdentity,
         )
 

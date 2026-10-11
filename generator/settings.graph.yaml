@@ -404,6 +404,11 @@ type_routing:
   WindowsDeviceMalwareState: office365.intune.devices.management.windowsmalware
   WindowsProtectionState: office365.intune.devices.management
 
+# Windows Autopilot cluster (peer: ImportedWindowsAutopilotDeviceIdentity).
+  WindowsAutopilotDeploymentProfile: office365.intune.devices.management
+  WindowsAutopilotDeploymentProfileAssignment: office365.intune.devices.management
+  WindowsAutopilotDeviceIdentity: office365.intune.devices.management
+
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common
 

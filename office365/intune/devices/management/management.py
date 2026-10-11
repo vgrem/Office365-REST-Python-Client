@@ -78,6 +78,9 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.user_experience_analytics_settings import (
         UserExperienceAnalyticsSettings,
     )
+    from office365.intune.devices.management.windows_autopilot_device_identity import (
+        WindowsAutopilotDeviceIdentity,
+    )
     from office365.intune.devices.management.windows_information_protection_app_learning_summary import (
         WindowsInformationProtectionAppLearningSummary,
     )
@@ -167,9 +170,6 @@ if TYPE_CHECKING:
     )
     from office365.intune.user_experience_analytics_work_from_anywhere_model_performance import (
         UserExperienceAnalyticsWorkFromAnywhereModelPerformance,
-    )
-    from office365.intune.windows_autopilot_device_identity import (
-        WindowsAutopilotDeviceIdentity,
     )
 
 
@@ -966,7 +966,7 @@ class DeviceManagement(Entity):
     @property
     def windows_autopilot_device_identities(self) -> EntityCollection[WindowsAutopilotDeviceIdentity]:
         """Gets the windowsAutopilotDeviceIdentities property"""
-        from office365.intune.windows_autopilot_device_identity import (
+        from office365.intune.devices.management.windows_autopilot_device_identity import (
             WindowsAutopilotDeviceIdentity,
         )
 
