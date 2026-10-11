@@ -26,8 +26,8 @@ transport-agnostic poller (`office365.runtime.lro`):
 1. **Waitable results** — `driveItem.copy()` returns a result whose
    `wait()` / `wait_async()` poll to completion and hand back the new item.
 2. **Operation entities** — `TeamsAsyncOperation`, `WorkbookOperation`, and rich
-   long-running operations are entities you `get()` and poll, with a generic
-   `poll_for_status()` / `poll_for_status_async()`.
+   long-running operations are entities you `get()` and poll, generically with
+   `wait()` / `wait_async()` (and `poll_for_status()` on `TeamsAsyncOperation`).
 3. **The raw poller** — `OperationPoller`, for anything else, with pluggable
    URL resolution, `Retry-After` pacing, progress callbacks and continuation
    tokens.
@@ -78,9 +78,11 @@ these actions. The raw `OperationPoller` does **not** — see below.
 
 When the service models the operation as a *resource* (rather than only a monitor
 URL), the entity itself is pollable. `PollableOperation` supplies
-`wait()` / `wait_async()`, `poll_for_status()` / `poll_for_status_async()`,
-`next_poll_delay()`, `is_transient_poll_error()` and `normalize_status()`; the
-concrete classes add typed properties.
+`wait()` / `wait_async()`, `operation_status`, `is_operation_complete()` /
+`is_operation_failed()`, `next_poll_delay()` and `is_transient_poll_error()`;
+the concrete classes add typed properties — and generated operation entities
+(`LongRunningOperation`, `security.CaseOperation`, `PrintOperation`, … and their
+subtypes) get the mixin automatically.
 
 **Teams** — `clone()` / `create()` return a `TeamsAsyncOperation`; `execute_query()`
 submits it (HTTP `202`), then poll:
