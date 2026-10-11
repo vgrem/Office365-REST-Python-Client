@@ -3,7 +3,7 @@ Submit and list threat assessments — the security-team workflow.
 
 Assess a file or email-file against threat categories (spam, phishing,
 malware) and review existing requests. URL assessment is covered in
-``examples/purview/threat_assessment/scan_url.py``.
+``examples/purview/threat-assessment/scan_url.py``.
 
 Requires delegated permission ``ThreatAssessment.ReadWrite.All``.
 

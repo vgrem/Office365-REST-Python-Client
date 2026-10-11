@@ -55,7 +55,7 @@ flowchart LR
 Create the label either via the Graph API:
 
 ```bash
-uv run examples/purview/records/retention_label.py
+uv run examples/purview/records/create_label.py
 ```
 
 Or in the Purview portal: **Solutions → Data Lifecycle Management →

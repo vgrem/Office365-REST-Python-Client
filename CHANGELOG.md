@@ -402,6 +402,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a breaking import change.
 
 ### Documentation
+- **Microsoft Purview guided tour:** `examples/purview/` is reorganised by
+  surface (`ediscovery/`, `records/`, `sensitivity-labels/`, `subject-rights/`,
+  `threat-assessment/`) around a read-only capability-snapshot `quickstart.py`,
+  with a guided root README and a README per folder. Every script uses `main()`
+  plus `argparse`, layers a pre-flight `require_*` guard with a typed
+  `AccessDeniedException` catch, and states exactly which permission or
+  administrator role it needs.
 - **Async discoverability:** the README now has an "Async / await" section and
   table-of-contents entry, the docs landing page lists the async guide in its
   reading path and *What you get*, and `docs/async.md` opens with a note that sync
