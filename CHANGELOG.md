@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- **The Security API now lives at `office365.security`** (was
+  `office365.directory.security`). `microsoft.graph.security` is a top-level Graph
+  service — a sibling of `/directory`, which the old path contradicted. Imports
+  must be updated: `from office365.directory.security.alerts... import ...`
+  becomes `from office365.security.alerts... import ...`. `client.security` is
+  unchanged.
+
 ### Added
 - **Sharing-link updates:** `ListItem.share_link` / `File.share_link` /
   `Folder.share_link` accept an optional `share_id` (the `ShareId` returned when a
