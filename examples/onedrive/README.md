@@ -148,6 +148,7 @@ Files are only part of what a drive/site exposes. Each area has its own guide:
 | **Pages** | site pages, publishing, web parts | [`pages/`](./pages/README.md) |
 | **Term store** | taxonomy: groups → sets → terms | [`termstore/`](./termstore/README.md) |
 | **Excel** | workbook sessions, tables, ranges, formulas | [`excel/`](./excel/README.md) |
+| **Webhooks** | change notifications pushed to your endpoint | [`webhooks/`](./webhooks/README.md) |
 
 ---
 
