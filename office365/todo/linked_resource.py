@@ -33,4 +33,4 @@ class LinkedResource(Entity):
 
     @property
     def entity_type_name(self) -> str:
-        return "microsoft.graph.LinkedResource"
+        return None  # type: ignore

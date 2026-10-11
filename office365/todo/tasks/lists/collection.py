@@ -21,6 +21,7 @@ class TodoTaskListCollection(DeltaCollection[TodoTaskList]):
     def ensure(self, display_name: str) -> TodoTaskList:
         """Ensure a Task List with the given name exists (idempotent)."""
         return_type = TodoTaskList(self.context, EntityPath(None, self.resource_path))
+        return_type.set_property("displayName", display_name)
         self.add_child(return_type)
 
         def _ensure(col: TodoTaskListCollection):

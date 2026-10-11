@@ -11,6 +11,11 @@ class AttachmentBase(Entity):
     of an attachment."""
 
     @property
+    def content_bytes(self) -> Optional[str]:
+        """The base64-encoded contents of a file attachment (``None`` for other kinds)."""
+        return self.properties.get("contentBytes", None)
+
+    @property
     def content_type(self) -> Optional[str]:
         """The MIME type."""
         return self.properties.get("contentType", None)

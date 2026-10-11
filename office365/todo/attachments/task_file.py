@@ -1,5 +1,3 @@
-from typing import Optional
-
 from office365.todo.attachments.base import AttachmentBase
 
 
@@ -11,6 +9,5 @@ class TaskFileAttachment(AttachmentBase):
     """
 
     @property
-    def content_bytes(self) -> Optional[bytes]:
-        """The base64-encoded contents of the file."""
-        return self.properties.get("contentBytes", None)
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.taskFileAttachment"

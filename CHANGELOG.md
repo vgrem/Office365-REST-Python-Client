@@ -57,8 +57,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   now derives from the generic `RoleAssignment`, so `device_management.role_assignments`
   entries expose `display_name`, `description` and `role_definition` alongside
   their `members` — previously only `members` was available.
+- **To Do list creation sends its name:** `TodoTaskListCollection.ensure(...)`
+  now includes `displayName` in the `POST /me/todo/lists` payload. The property
+  was set on the returned object but never marked for persistence, so the first
+  `ensure` call failed with *"The property 'displayName' is required"*.
+- **To Do attachments/links declare the right OData type:**
+  `TaskFileAttachment` reports `microsoft.graph.taskFileAttachment`, so
+  `todoTask.attachments.add(...)` creates a file attachment instead of an
+  abstract one; `LinkedResource` reports no type (the To Do service cannot
+  resolve `microsoft.graph.linkedResource` and rejected creation).
 
 ### Added
+- **To Do attachment content:** `AttachmentBase.content_bytes` exposes the
+  base64-encoded `contentBytes` of an attachment returned by
+  `todoTask.attachments`, which yields the base type rather than the concrete
+  `TaskFileAttachment`.
 - **Sharing-link updates:** `ListItem.share_link` / `File.share_link` /
   `Folder.share_link` accept an optional `share_id` (the `ShareId` returned when a
   link was created). The server then updates that existing tokenized link in place
