@@ -13,6 +13,7 @@ dumped at the package root.
 
 from __future__ import annotations
 
+import ast
 import keyword
 import os
 import re
@@ -119,13 +120,60 @@ def module_directory(module_path: str, output_base: str) -> str:
     return os.path.join(*parts)
 
 
-def descend_module(module_path: str, class_name: str, output_base: str) -> tuple[str, str]:
-    """Descend into a matching subsystem package, stripping the class-name prefix.
+def _plural(word: str) -> str:
+    """A naive English plural, enough to match OData collection package names."""
+    if word.endswith(("s", "x", "z", "ch", "sh")):
+        return word + "es"
+    if word.endswith("y") and word[-2:-1] not in "aeiou":
+        return word[:-1] + "ies"
+    return word + "s"
 
-    E.g. ``...identitygovernance`` + ``AccessReviewContextDataBase`` ->
-    ``...identitygovernance.accessreview`` + ``context_data_base`` when an
-    ``accessreview/`` package exists under the routed directory. Only new files
-    descend (placed types stay put: placement is sticky).
+
+def _consume_prefix(entry: str, words: list[str]) -> int:
+    """How many leading ``words`` a package name consumes, or 0.
+
+    Matches the joined words exactly or as their plural (``call`` -> ``calls``).
+    """
+    target = entry.lower().replace("_", "")
+    acc = ""
+    for index, word in enumerate(words):
+        acc += word.lower().replace("_", "")
+        if target == acc or target == _plural(acc):
+            return index + 1
+        if not target.startswith(acc):
+            break
+    return 0
+
+
+def _defines_class(path: str, class_name: str) -> bool:
+    """Whether ``path`` defines a top-level class named ``class_name``."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            tree = ast.parse(f.read())
+    except (OSError, SyntaxError):
+        return False
+    return any(isinstance(node, ast.ClassDef) and node.name == class_name for node in tree.body)
+
+
+def _collides(directory: str, stem: str, class_name: str) -> bool:
+    """Whether ``<directory>/<stem>.py`` exists and defines a *different* class."""
+    path = os.path.join(directory, stem + ".py")
+    return os.path.isfile(path) and not _defines_class(path, class_name)
+
+
+def descend_module(module_path: str, class_name: str, output_base: str) -> tuple[str, str]:
+    """Place a new type in a matching subsystem package, stripping the prefix.
+
+    Two steps, both only for new files (placed types stay put: sticky):
+
+    1. descend into a subpackage whose name matches the class-name prefix,
+       singular or plural (``CallParticipantInfo`` -> ``calls/participant_info``);
+    2. otherwise strip a prefix equal to the module's own name
+       (``communications`` + ``CommunicationsApplicationIdentity`` ->
+       ``communications/application_identity``).
+
+    A prefix is only stripped when the result would not collide with a file that
+    defines a *different* class; on collision the full name is kept.
     """
     file_stem = to_snake_case(class_name, avoid_keywords=False)
     if not module_path or not output_base:
@@ -134,6 +182,7 @@ def descend_module(module_path: str, class_name: str, output_base: str) -> tuple
     if not os.path.isdir(base):
         return module_path, file_stem
     words = file_stem.split("_")
+
     best: tuple[int, int, str] | None = None
     for entry in sorted(os.listdir(base)):
         subdir = os.path.join(base, entry)
@@ -141,23 +190,23 @@ def descend_module(module_path: str, class_name: str, output_base: str) -> tuple
             continue
         if not os.path.isfile(os.path.join(subdir, "__init__.py")):
             continue
-        prefix = entry.lower().replace("_", "")
-        consumed = 0
-        acc = ""
-        for index, word in enumerate(words):
-            acc += word.lower().replace("_", "")
-            if acc == prefix:
-                consumed = index + 1
-                break
-            if not prefix.startswith(acc):
-                break
-        if consumed and (best is None or len(prefix) > best[0]):
-            best = (len(prefix), consumed, entry)
-    if best is None:
-        return module_path, file_stem
-    _, consumed, dirname = best
-    remaining = "_".join(words[consumed:]) or file_stem
-    return f"{module_path}.{dirname}", remaining
+        consumed = _consume_prefix(entry, words)
+        if consumed and (best is None or len(entry) > best[0]):
+            best = (len(entry), consumed, entry)
+    if best is not None:
+        _, consumed, dirname = best
+        remaining = "_".join(words[consumed:]) or file_stem
+        if not _collides(os.path.join(base, dirname), remaining, class_name):
+            return f"{module_path}.{dirname}", remaining
+        return f"{module_path}.{dirname}", file_stem
+
+    segment = module_path.rsplit(".", 1)[-1]
+    consumed = _consume_prefix(segment, words)
+    if 0 < consumed < len(words):
+        remaining = "_".join(words[consumed:])
+        if not _collides(base, remaining, class_name):
+            return module_path, remaining
+    return module_path, file_stem
 
 
 def planned_module(type_name: str, schema, registry, router: Router, output_base: str = "") -> Optional[str]:

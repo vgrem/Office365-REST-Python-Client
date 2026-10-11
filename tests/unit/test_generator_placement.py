@@ -39,3 +39,37 @@ def test_longest_matching_package_wins(tmp_path: Path):
 
     assert module == "office365.directory.accessreview"
     assert stem == "instance"
+
+
+def test_descend_matches_a_plural_subpackage(tmp_path: Path):
+    package = tmp_path / "communications" / "calls"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("", encoding="utf-8")
+
+    module, stem = descend_module("office365.communications", "CallMediaState", str(tmp_path))
+
+    assert module == "office365.communications.calls"
+    assert stem == "media_state"
+
+
+def test_descend_keeps_the_full_name_on_a_collision(tmp_path: Path):
+    package = tmp_path / "communications" / "calls"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "participant_info.py").write_text("class ParticipantInfo:\n    pass\n", encoding="utf-8")
+
+    module, stem = descend_module("office365.communications", "CallParticipantInfo", str(tmp_path))
+
+    assert module == "office365.communications.calls"
+    assert stem == "call_participant_info"
+
+
+def test_descend_strips_a_redundant_module_name(tmp_path: Path):
+    package = tmp_path / "communications"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("", encoding="utf-8")
+
+    module, stem = descend_module("office365.communications", "CommunicationsApplicationIdentity", str(tmp_path))
+
+    assert module == "office365.communications"
+    assert stem == "application_identity"
