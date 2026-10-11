@@ -27,7 +27,6 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
-    from office365.common.managed_device_overview import ManagedDeviceOverview
     from office365.common.role_definition import RoleDefinition
     from office365.intune.compliance_management_partner import (
         ComplianceManagementPartner,
@@ -58,6 +57,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.imported_windows_autopilot_device_identity import (
         ImportedWindowsAutopilotDeviceIdentity,
     )
+    from office365.intune.devices.management.managed.device_overview import ManagedDeviceOverview
     from office365.intune.devices.management.notification_message_template import (
         NotificationMessageTemplate,
     )
@@ -515,7 +515,7 @@ class DeviceManagement(Entity):
     @property
     def managed_device_overview(self) -> ManagedDeviceOverview:
         """Gets the managedDeviceOverview property"""
-        from office365.common.managed_device_overview import ManagedDeviceOverview
+        from office365.intune.devices.management.managed.device_overview import ManagedDeviceOverview
 
         return self.properties.get(
             "managedDeviceOverview",

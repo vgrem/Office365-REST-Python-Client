@@ -9,7 +9,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
-    from office365.common.tenant_protection_scope_container import (
+    from office365.directory.security.datasecurity.tenant_protection_scope_container import (
         TenantProtectionScopeContainer,
     )
 
@@ -28,7 +28,7 @@ class TenantDataSecurityAndGovernance(Entity):
     @property
     def protection_scopes(self) -> TenantProtectionScopeContainer:
         """Gets the protectionScopes property"""
-        from office365.common.tenant_protection_scope_container import (
+        from office365.directory.security.datasecurity.tenant_protection_scope_container import (
             TenantProtectionScopeContainer,
         )
 

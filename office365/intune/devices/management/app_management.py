@@ -20,9 +20,6 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
-    from office365.common.managed_device_mobile_app_configuration import (
-        ManagedDeviceMobileAppConfiguration,
-    )
     from office365.intune.devices.management.managed.app.protections.android import (
         AndroidManagedAppProtection,
     )
@@ -33,6 +30,9 @@ if TYPE_CHECKING:
         IosManagedAppProtection,
     )
     from office365.intune.devices.management.managed.app.status import ManagedAppStatus
+    from office365.intune.devices.management.managed.device_mobile_app_configuration import (
+        ManagedDeviceMobileAppConfiguration,
+    )
     from office365.intune.devices.management.mdm_windows_information_protection_policy import (
         MdmWindowsInformationProtectionPolicy,
     )
@@ -141,7 +141,7 @@ class DeviceAppManagement(Entity):
     @property
     def mobile_app_configurations(self) -> EntityCollection[ManagedDeviceMobileAppConfiguration]:
         """Gets the mobileAppConfigurations property"""
-        from office365.common.managed_device_mobile_app_configuration import (
+        from office365.intune.devices.management.managed.device_mobile_app_configuration import (
             ManagedDeviceMobileAppConfiguration,
         )
 

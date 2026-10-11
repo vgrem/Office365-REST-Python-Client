@@ -8,7 +8,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.teams.viva.engagement.creationmode import EngagementCreationMode
 
 if TYPE_CHECKING:
-    from office365.common.engagement_conversation_message import (
+    from office365.teams.viva.engagement.conversation_message import (
         EngagementConversationMessage,
     )
 
@@ -31,7 +31,7 @@ class EngagementConversation(Entity):
     @property
     def messages(self) -> EntityCollection[EngagementConversationMessage]:
         """Gets the messages property"""
-        from office365.common.engagement_conversation_message import (
+        from office365.teams.viva.engagement.conversation_message import (
             EngagementConversationMessage,
         )
 
@@ -45,7 +45,7 @@ class EngagementConversation(Entity):
     @property
     def starter(self) -> EngagementConversationMessage:
         """Gets the starter property"""
-        from office365.common.engagement_conversation_message import (
+        from office365.teams.viva.engagement.conversation_message import (
             EngagementConversationMessage,
         )
 

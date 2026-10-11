@@ -6,7 +6,7 @@ from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.common.workbook_chart_data_label_format import (
+    from office365.onedrive.workbooks.charts.data_label_format import (
         WorkbookChartDataLabelFormat,
     )
 
@@ -57,7 +57,7 @@ class WorkbookChartDataLabels(Entity):
     @property
     def format(self) -> WorkbookChartDataLabelFormat:
         """Gets the format property"""
-        from office365.common.workbook_chart_data_label_format import (
+        from office365.onedrive.workbooks.charts.data_label_format import (
             WorkbookChartDataLabelFormat,
         )
 

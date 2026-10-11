@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from office365.runtime.client_value import ClientValue
+from office365.search.identity import Identity
 
 
 @dataclass
@@ -14,3 +15,9 @@ class IdentitySet(ClientValue):
     @property
     def entity_type_name(self):
         return "microsoft.graph.search.identitySet"
+
+    application: Identity = field(default_factory=Identity)
+
+    device: Identity = field(default_factory=Identity)
+
+    user: Identity = field(default_factory=Identity)

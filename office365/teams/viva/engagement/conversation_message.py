@@ -8,15 +8,15 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.common.engagement_conversation_message import (
-        EngagementConversationMessage,
-    )
-    from office365.common.engagement_conversation_message_reaction import (
-        EngagementConversationMessageReaction,
-    )
     from office365.communications.engagement_identity_set import EngagementIdentitySet
     from office365.outlook.mail.item_body import ItemBody
     from office365.teams.viva.engagement.conversation import EngagementConversation
+    from office365.teams.viva.engagement.conversation_message import (
+        EngagementConversationMessage,
+    )
+    from office365.teams.viva.engagement.conversation_message_reaction import (
+        EngagementConversationMessageReaction,
+    )
     from office365.teams.viva.engagement.creationmode import EngagementCreationMode
 
 
@@ -71,7 +71,7 @@ class EngagementConversationMessage(Entity):
     @property
     def reactions(self) -> EntityCollection[EngagementConversationMessageReaction]:
         """Gets the reactions property"""
-        from office365.common.engagement_conversation_message_reaction import (
+        from office365.teams.viva.engagement.conversation_message_reaction import (
             EngagementConversationMessageReaction,
         )
 
@@ -85,7 +85,7 @@ class EngagementConversationMessage(Entity):
     @property
     def replies(self) -> EntityCollection[EngagementConversationMessage]:
         """Gets the replies property"""
-        from office365.common.engagement_conversation_message import (
+        from office365.teams.viva.engagement.conversation_message import (
             EngagementConversationMessage,
         )
 
@@ -99,7 +99,7 @@ class EngagementConversationMessage(Entity):
     @property
     def reply_to(self) -> EngagementConversationMessage:
         """Gets the replyTo property"""
-        from office365.common.engagement_conversation_message import (
+        from office365.teams.viva.engagement.conversation_message import (
             EngagementConversationMessage,
         )
 

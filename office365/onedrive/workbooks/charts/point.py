@@ -6,7 +6,7 @@ from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.common.workbook_chart_point_format import WorkbookChartPointFormat
+    from office365.onedrive.workbooks.charts.point_format import WorkbookChartPointFormat
     from office365.runtime.types.json import Json
 
 
@@ -23,7 +23,7 @@ class WorkbookChartPoint(Entity):
     @property
     def format(self) -> WorkbookChartPointFormat:
         """Gets the format property"""
-        from office365.common.workbook_chart_point_format import (
+        from office365.onedrive.workbooks.charts.point_format import (
             WorkbookChartPointFormat,
         )
 

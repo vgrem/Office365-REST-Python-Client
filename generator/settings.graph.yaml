@@ -34,6 +34,10 @@ modules:
   - office365.copilot
   - office365.runtime
   - office365.common
+  - office365.todo
+  - office365.externalconnectors
+  - office365.partners
+  - office365.migration
 routing:
   microsoft.graph.admin: office365.admin
   microsoft.graph.backupRestore: office365.backuprestore
@@ -279,6 +283,34 @@ type_routing:
 
 # Verified product rules (candidates are proposed by --suggest-routing).
   BillingMetrics*: office365.partners.billing
+
+# Common-bucket ownership (proposed by --suggest-routing, reviewed by hand).
+  AiInteractionHistory: office365.copilot
+  AiOnlineMeeting: office365.copilot
+  AiUser: office365.copilot
+  B2BRegistrationMetricsInitial: office365.directory
+  B2BRegistrationMetricsRecent: office365.directory
+  B2BSignInActivityMetrics: office365.directory
+  B2BSignInActivityMetricsInitial: office365.directory
+  B2BSignInActivityMetricsRecent: office365.directory
+  ConfigurationManagement: office365.admin
+  EngagementConversationMessage: office365.teams.viva.engagement
+  EngagementConversationMessageReaction: office365.teams.viva.engagement
+  ExchangeAdmin: office365.admin
+  IdentityVerifiedIdRoot: office365.directory.identities
+  ManagedAppOperation: office365.intune.devices.management.managed.app
+  ManagedAppPolicyDeploymentSummary: office365.intune.devices.management
+  ManagedDeviceMobileAppConfiguration: office365.intune.devices.management
+  ManagedDeviceMobileAppConfigurationAssignment: office365.intune.devices.management
+  ManagedDeviceMobileAppConfigurationDeviceStatus: office365.intune.devices.management
+  ManagedDeviceMobileAppConfigurationDeviceSummary: office365.intune.devices.management
+  ManagedDeviceMobileAppConfigurationUserStatus: office365.intune.devices.management
+  ManagedDeviceMobileAppConfigurationUserSummary: office365.intune.devices.management
+  ManagedDeviceOverview: office365.intune.devices.management
+  ManagedEBookAssignment: office365.intune.devices.management.managed.ebook
+  ManagedMobileApp: office365.intune.devices.management
+  RoleManagementCustomCalloutExtension: office365.directory.identitygovernance.privilegedaccess
+  TenantProtectionScopeContainer: office365.directory.security.datasecurity
 
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common

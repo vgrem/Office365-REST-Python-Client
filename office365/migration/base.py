@@ -22,6 +22,16 @@ class MigrationMode(str, Enum):
     INCREMENTAL = "incremental"
     UPSERT = "upsert"
 
+    inProgress = "0"
+
+    completed = "1"
+
+    unknownFutureValue = "2"
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.MigrationMode"
+
 
 class ExportFormat(str, Enum):
     FILESYSTEM = "filesystem"

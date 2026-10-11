@@ -10,7 +10,7 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.common.role_management_custom_callout_extension import (
+    from office365.directory.identitygovernance.privilegedaccess.role_management_custom_callout_extension import (
         RoleManagementCustomCalloutExtension,
     )
 
@@ -32,7 +32,7 @@ class PrivilegedAccessRoot(Entity):
     @property
     def custom_extensions(self) -> EntityCollection[RoleManagementCustomCalloutExtension]:
         """Gets the customExtensions property"""
-        from office365.common.role_management_custom_callout_extension import (
+        from office365.directory.identitygovernance.privilegedaccess.role_management_custom_callout_extension import (
             RoleManagementCustomCalloutExtension,
         )
 

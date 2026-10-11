@@ -13,7 +13,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.common.managed_app_operation import ManagedAppOperation
+    from office365.intune.devices.management.managed.app.operation import ManagedAppOperation
     from office365.intune.mobile_app_identifier import MobileAppIdentifier
 
 
@@ -115,7 +115,7 @@ class ManagedAppRegistration(Entity):
     @property
     def operations(self) -> EntityCollection[ManagedAppOperation]:
         """Gets the operations property"""
-        from office365.common.managed_app_operation import ManagedAppOperation
+        from office365.intune.devices.management.managed.app.operation import ManagedAppOperation
 
         return self.properties.get(
             "operations",

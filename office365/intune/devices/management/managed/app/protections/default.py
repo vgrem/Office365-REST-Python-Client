@@ -12,10 +12,10 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.key_value_pair import KeyValuePair
 
 if TYPE_CHECKING:
-    from office365.common.managed_app_policy_deployment_summary import (
+    from office365.intune.devices.management.managed.app_policy_deployment_summary import (
         ManagedAppPolicyDeploymentSummary,
     )
-    from office365.common.managed_mobile_app import ManagedMobileApp
+    from office365.intune.devices.management.managed.mobile_app import ManagedMobileApp
 
 
 class DefaultManagedAppProtection(Entity):
@@ -76,7 +76,7 @@ class DefaultManagedAppProtection(Entity):
     @property
     def apps(self) -> EntityCollection[ManagedMobileApp]:
         """Gets the apps property"""
-        from office365.common.managed_mobile_app import ManagedMobileApp
+        from office365.intune.devices.management.managed.mobile_app import ManagedMobileApp
 
         return self.properties.get(
             "apps",
@@ -86,7 +86,7 @@ class DefaultManagedAppProtection(Entity):
     @property
     def deployment_summary(self) -> ManagedAppPolicyDeploymentSummary:
         """Gets the deploymentSummary property"""
-        from office365.common.managed_app_policy_deployment_summary import (
+        from office365.intune.devices.management.managed.app_policy_deployment_summary import (
             ManagedAppPolicyDeploymentSummary,
         )
 

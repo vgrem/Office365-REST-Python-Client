@@ -59,16 +59,29 @@ class SymbolIndex:
             return None
         key = normalize_type_name(type_name) or type_name
         short = key.rsplit(".", 1)[-1]
-        return self._resolve_by_odata_name(key, short) or self._resolve_by_class_name(
-            key, short, strict=strict, kind=kind
-        )
+        by_odata = self._resolve_by_odata_name(key, short)
+        by_name = self._resolve_by_class_name(key, short, strict=strict, kind=kind)
+        if by_odata is not None and by_name is not None and by_odata != by_name:
+            # Two modules claim the type (e.g. a ``common`` duplicate with an
+            # explicit ``entity_type_name`` vs. the real product module that
+            # omits it). Keep the more plausible home rather than the duplicate.
+            if _consistency_score(key, by_name) > _consistency_score(key, by_odata):
+                return by_name
+        return by_odata or by_name
 
     def _resolve_by_odata_name(self, key: str, short: str) -> Optional[str]:
-        candidates = self._by_odata.get(key, [])
-        for class_name, module in candidates:
-            if class_name == short:
-                return module
-        return candidates[0][1] if candidates else None
+        candidates = [module for class_name, module in self._by_odata.get(key, []) if class_name == short]
+        if not candidates:
+            candidates = [module for _, module in self._by_odata.get(key, [])]
+        if not candidates:
+            return None
+        if len(candidates) == 1:
+            return candidates[0]
+        # The same OData name may be claimed by several modules (a same-name type,
+        # or a duplicate left behind by an earlier run). Prefer the most plausible
+        # home instead of whichever file happened to be scanned first — otherwise
+        # ``office365.common`` (scanned early) shadows the real product module.
+        return max(candidates, key=lambda module: _consistency_score(key, module))
 
     def _resolve_by_class_name(self, key: str, short: str, *, strict: bool, kind: Optional[str] = None) -> Optional[str]:
         modules = self._by_name.get(short, [])

@@ -29,13 +29,13 @@ if TYPE_CHECKING:
     from office365.common.custom_authentication_extension import (
         CustomAuthenticationExtension,
     )
-    from office365.common.identity_verified_id_root import IdentityVerifiedIdRoot
     from office365.directory.identities.authentication_events_flow import (
         AuthenticationEventsFlow,
     )
     from office365.directory.identities.riskPrevention.container import (
         RiskPreventionContainer,
     )
+    from office365.directory.identities.verified_id_root import IdentityVerifiedIdRoot
 
 
 class IdentityContainer(Entity):
@@ -204,7 +204,7 @@ class IdentityContainer(Entity):
     @property
     def verified_id(self) -> IdentityVerifiedIdRoot:
         """Gets the verifiedId property"""
-        from office365.common.identity_verified_id_root import IdentityVerifiedIdRoot
+        from office365.directory.identities.verified_id_root import IdentityVerifiedIdRoot
 
         return self.properties.get(
             "verifiedId", IdentityVerifiedIdRoot(self.context, ResourcePath("verifiedId", self.resource_path))

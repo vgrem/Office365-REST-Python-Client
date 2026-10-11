@@ -6,8 +6,8 @@ from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.common.workbook_chart_line_format import WorkbookChartLineFormat
     from office365.onedrive.workbooks.charts.font import WorkbookChartFont
+    from office365.onedrive.workbooks.charts.line_format import WorkbookChartLineFormat
 
 
 class WorkbookChartAxisFormat(Entity):
@@ -21,7 +21,7 @@ class WorkbookChartAxisFormat(Entity):
     @property
     def line(self) -> WorkbookChartLineFormat:
         """Gets the line property"""
-        from office365.common.workbook_chart_line_format import WorkbookChartLineFormat
+        from office365.onedrive.workbooks.charts.line_format import WorkbookChartLineFormat
 
         return self.properties.get(
             "line", WorkbookChartLineFormat(self.context, ResourcePath("line", self.resource_path))

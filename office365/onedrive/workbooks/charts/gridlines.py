@@ -6,7 +6,7 @@ from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.common.workbook_chart_gridlines_format import (
+    from office365.onedrive.workbooks.charts.gridlines_format import (
         WorkbookChartGridlinesFormat,
     )
 
@@ -20,7 +20,7 @@ class WorkbookChartGridlines(Entity):
     @property
     def format(self) -> WorkbookChartGridlinesFormat:
         """Gets the format property"""
-        from office365.common.workbook_chart_gridlines_format import (
+        from office365.onedrive.workbooks.charts.gridlines_format import (
             WorkbookChartGridlinesFormat,
         )
 

@@ -12,9 +12,9 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
+    from office365.admin.configuration_management import ConfigurationManagement
     from office365.admin.edge.edge import Edge
-    from office365.common.configuration_management import ConfigurationManagement
-    from office365.common.exchange_admin import ExchangeAdmin
+    from office365.admin.exchange.admin import ExchangeAdmin
     from office365.teams.admin_root import TeamsAdminRoot
 
 
@@ -74,7 +74,7 @@ class Admin(Entity):
     @property
     def exchange(self) -> ExchangeAdmin:
         """Gets the exchange property"""
-        from office365.common.exchange_admin import ExchangeAdmin
+        from office365.admin.exchange.admin import ExchangeAdmin
 
         return self.properties.get("exchange", ExchangeAdmin(self.context, ResourcePath("exchange", self.resource_path)))
 
@@ -88,7 +88,7 @@ class Admin(Entity):
     @property
     def configuration_management(self) -> ConfigurationManagement:
         """Gets the configurationManagement property"""
-        from office365.common.configuration_management import ConfigurationManagement
+        from office365.admin.configuration_management import ConfigurationManagement
 
         return self.properties.get(
             "configurationManagement",

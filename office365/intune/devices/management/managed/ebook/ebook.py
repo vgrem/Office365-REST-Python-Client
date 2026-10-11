@@ -8,9 +8,9 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.common.managed_e_book_assignment import ManagedEBookAssignment
     from office365.common.mime_content import MimeContent
     from office365.intune.devices.install_state import DeviceInstallState
+    from office365.intune.devices.management.managed.ebook.e_book_assignment import ManagedEBookAssignment
     from office365.intune.devices.management.managed.ebook.install_summary import (
         EBookInstallSummary,
     )
@@ -76,7 +76,7 @@ class ManagedEBook(Entity):
     @property
     def assignments(self) -> EntityCollection[ManagedEBookAssignment]:
         """Gets the assignments property"""
-        from office365.common.managed_e_book_assignment import ManagedEBookAssignment
+        from office365.intune.devices.management.managed.ebook.e_book_assignment import ManagedEBookAssignment
 
         return self.properties.get(
             "assignments",

@@ -6,10 +6,10 @@ from office365.entity import Entity
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
-    from office365.common.b2_b_registration_metrics_initial import (
+    from office365.directory.b2b_registration_metrics_initial import (
         B2BRegistrationMetricsInitial,
     )
-    from office365.common.b2_b_registration_metrics_recent import (
+    from office365.directory.b2b_registration_metrics_recent import (
         B2BRegistrationMetricsRecent,
     )
 
@@ -18,7 +18,7 @@ class B2bRegistrationMetrics(Entity):
     @property
     def initial(self) -> B2BRegistrationMetricsInitial:
         """Gets the initial property"""
-        from office365.common.b2_b_registration_metrics_initial import (
+        from office365.directory.b2b_registration_metrics_initial import (
             B2BRegistrationMetricsInitial,
         )
 
@@ -29,7 +29,7 @@ class B2bRegistrationMetrics(Entity):
     @property
     def recent(self) -> B2BRegistrationMetricsRecent:
         """Gets the recent property"""
-        from office365.common.b2_b_registration_metrics_recent import (
+        from office365.directory.b2b_registration_metrics_recent import (
             B2BRegistrationMetricsRecent,
         )
 
