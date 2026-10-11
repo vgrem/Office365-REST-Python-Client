@@ -27,6 +27,65 @@ cp .env.example .env
 uv run python examples/outlook/messages/send.py
 ```
 
+## Common recipes (copy-paste)
+
+Short, runnable answers to the questions people actually ask.
+
+**Send a message** — the one-liner:
+
+```python
+client.me.send_mail(subject="Hi", body="Hello!", to_recipients=["a@contoso.com"]).execute_query()
+```
+
+**Send with an attachment** (small file inline, large via upload session):
+
+```python
+client.me.messages.add(subject="Report", to_recipients=["a@contoso.com"]).upload_attachment(
+    "report.pdf"
+).send().execute_query()
+```
+
+**Read the newest unread mail**:
+
+```python
+for m in client.me.mail_folders["inbox"].messages.filter("isRead eq false").top(10).get().execute_query():
+    print(m.subject, m.from_recipient.emailAddress.address)
+```
+
+**Send from a shared mailbox (Send As)**:
+
+```python
+client.users["support@contoso.com"].send_mail(
+    subject="From support", body="...", to_recipients=["a@contoso.com"]
+).execute_query()
+```
+
+**Create an event and get its Teams join link**:
+
+```python
+event = client.me.calendar.events.add(
+    subject="Sync",
+    start=when,
+    end=when + timedelta(minutes=30),
+    isOnlineMeeting=True,
+    onlineMeetingProvider="teamsForBusiness",
+).execute_query()
+print(event.online_meeting.join_url)
+```
+
+**Find an available room**:
+
+```python
+for room in client.places.rooms.get().execute_query():
+    print(room.display_name, room.email_address)
+```
+
+**Detect users forwarding mail externally** (governance):
+
+```bash
+uv run python examples/outlook/mail_flow/forwarding_report.py
+```
+
 ## Working with messages
 
 Send, reply, forward, move and delete. `send_mail` is the one-liner; for
