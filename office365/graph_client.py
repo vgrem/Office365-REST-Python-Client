@@ -59,7 +59,7 @@ from office365.onedrive.drives.collection import DriveCollection
 from office365.onedrive.shares.collection import SharesCollection
 from office365.onedrive.sites.sites_with_root import SitesWithRoot
 from office365.onedrive.storage.storage import Storage
-from office365.outlook.calendar.place import Place
+from office365.outlook.calendar.place_collection import PlaceCollection
 from office365.outlook.calendar.rooms.list import RoomList
 from office365.planner.planner import Planner
 from office365.reports.root import ReportRoot
@@ -791,9 +791,9 @@ class GraphClient(ClientRuntimeContext):
         return AuditLogRoot(self, ResourcePath("auditLogs"))
 
     @property
-    def places(self) -> EntityCollection[Place]:
+    def places(self) -> PlaceCollection:
         """Gets all places in a tenant"""
-        return EntityCollection(self, Place, ResourcePath("places"))
+        return PlaceCollection(self, ResourcePath("places"))
 
     @property
     def oauth2_permission_grants(self) -> OAuth2PermissionGrantCollection:

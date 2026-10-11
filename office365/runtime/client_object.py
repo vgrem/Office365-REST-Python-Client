@@ -16,7 +16,13 @@ from typing_extensions import Self
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_runtime_context import ClientRuntimeContext
-from office365.runtime.converters.value import _add_type_metadata, declared_type, deserialize_value, serialize_value
+from office365.runtime.converters.value import (
+    _add_type_metadata,
+    declared_type,
+    deserialize_value,
+    serialize_value,
+    to_snake_case,
+)
 from office365.runtime.exceptions import ObjectNotFoundException
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.limits import Limit, LimitDecl, collect_class_limits, collect_limit_meta
@@ -397,6 +403,9 @@ class ClientObject:
                 return getattr(self, meta.attr)
             normalized_name = name[0].lower() + name[1:]
             default_value = getattr(self, normalized_name, None)
+            if default_value is None:
+                # Multi-word names (``onlineMeeting``) map to a snake_case getter.
+                default_value = getattr(self, to_snake_case(name), None)
         return self._properties.get(name, default_value)
 
     def set_property(self, name: str, value: Any, persist_changes: bool = True) -> Self:

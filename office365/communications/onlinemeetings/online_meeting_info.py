@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Optional
 
 from office365.booking.phone import Phone
 from office365.runtime.client_value import ClientValue
@@ -20,3 +21,8 @@ class OnlineMeetingInfo(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.OnlineMeetingInfo"
+
+    @property
+    def join_url(self) -> Optional[str]:
+        """The join link (snake_case alias for the ``joinUrl`` field)."""
+        return self.joinUrl

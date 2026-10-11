@@ -42,7 +42,11 @@ def serialize_value(value: Any, json_format: Optional[ODataJsonFormat] = None) -
     ``list``, ``ClientResult``) passes through unchanged.
     """
     if isinstance(value, Enum):
-        return value.value
+        # Graph/OData enum values go on the wire as the member *name*
+        # ("teamsForBusiness"). Enums generated with string values already match
+        # their name; older ones (e.g. auto-numbered ``unknown = 0``) must fall
+        # back to the name, not the ordinal.
+        return value.value if isinstance(value.value, str) else value.name
     if isinstance(value, uuid.UUID):
         return str(value)
     if isinstance(value, bytes):

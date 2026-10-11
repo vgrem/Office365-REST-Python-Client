@@ -1,12 +1,23 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Optional, cast
 
 from office365.outlook.mail.attachments.attachment import Attachment
 
 
 class FileAttachment(Attachment):
     """A file (such as a text file or Word document) attached to a user event, message, or post."""
+
+    def to_json(self, json_format: Any = None) -> dict:
+        # ``attachment`` is an abstract type: Graph needs the concrete
+        # discriminator on create, and the V4 format does not add it.
+        result: dict = cast(dict, super().to_json(json_format))
+        result["@odata.type"] = f"#{self.entity_type_name}"
+        return result
+
+    @property
+    def entity_type_name(self) -> str:
+        return "microsoft.graph.fileAttachment"
 
     @property
     def content_id(self) -> Optional[str]:
