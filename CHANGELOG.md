@@ -42,6 +42,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Shared-channel team info serializes concretely:**
   `SharedWithChannelTeamInfo` reports `microsoft.graph.sharedWithChannelTeamInfo`
   instead of the base `teamInfo`, which the `sharedWithTeams` endpoint rejected.
+- **Intune errors are readable:** the Intune proxy nests a JSON object (and
+  support diagnostics) inside `error.message`; `ClientRequestException.message`
+  now unwraps the inner `Message` and drops the ` - Operation ID … - Activity ID …`
+  suffix, so `str(exception)` is the actionable sentence
+  (`Application is not authorized to perform this operation. Application must have
+  one of the following scopes: …`). Plain-text messages from other services are
+  unchanged.
+- **Intune role assignments are typed:** `DeviceAndAppManagementRoleAssignment`
+  now derives from the generic `RoleAssignment`, so `device_management.role_assignments`
+  entries expose `display_name`, `description` and `role_definition` alongside
+  their `members` — previously only `members` was available.
 
 ### Added
 - **Sharing-link updates:** `ListItem.share_link` / `File.share_link` /
@@ -490,6 +501,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Two-user test model:** `OFFICE365_TEST_USER1`/`OFFICE365_TEST_USER2` replaced by
   `OFFICE365_USERNAME` and optional `OFFICE365_USERNAME_ALT`; `tests/__init__.py`
   still exposes `test_user_principal_name`/`test_user_principal_name_alt`.
+
+### Documentation
+- **The Intune examples are now a lifecycle-guided tour.** `examples/intune/` is
+  organised by where a device is in its Intune journey — enrol (`enrollment/`),
+  register (`devices/`), configure (`policies/`), protect (`apps/`), govern
+  (`reports/`), audit (`audit/`), administer (`administration/`, `protection/`) —
+  with a Mermaid lifecycle diagram in the root README explaining how the stages
+  connect and which of the two Intune singletons (`device_management` vs
+  `device_app_management`) owns each resource. New scripts cover enrolment
+  configurations and Autopilot, compliance/configuration rollups, protection
+  connectors (with stale-heartbeat flags), long-running export jobs, audit
+  events, RBAC and device categories. Every script runs against a live tenant,
+  is scope-gated (a missing permission prints the exact scope and exits `0`),
+  defaults to delegated auth, and writes outputs to the system temp directory.
 
 ## [3.2.0] - 2026-09-27
 

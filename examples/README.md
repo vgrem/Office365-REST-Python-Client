@@ -21,7 +21,7 @@ library across Microsoft 365 and Entra ID services.
 | [`onenote/`](./onenote/) | **Microsoft OneNote** | Notebooks, sections, section groups, pages |
 | [`planner/`](./planner/) | **Microsoft Planner** | Plans, buckets, tasks, assignments, details |
 | [`entraid/`](./entraid/) | **Microsoft Entra ID** | Users, groups, applications, roles, policies, identity |
-| [`intune/`](./intune/) | **Microsoft Intune** | Devices, compliance, configuration profiles, remote actions |
+| [`intune/`](./intune/) | **Microsoft Intune** | Enrolment & Autopilot, devices, compliance & configuration, apps & MAM, reports & export jobs, audit, RBAC |
 | [`booking/`](./booking/) | **Microsoft Bookings** | Businesses, services, appointments |
 | [`communications/`](./communications/) | **Cloud Communications** | Presence, online meetings, call records, telephony |
 | [`purview/`](./purview/) | **Microsoft Purview** | eDiscovery, retention labels, subject rights requests |

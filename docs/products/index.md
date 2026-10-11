@@ -29,7 +29,7 @@ ready-to-run scripts, and copy the pattern you need.
 - **Microsoft Entra ID** — users, groups, applications, roles, identity, reports
     [Browse →](entraid/index.md)
 
-- **Microsoft Intune** — devices, compliance, configuration profiles, remote actions
+- **Microsoft Intune** — the device lifecycle: enrolment, devices, compliance & configuration, apps & MAM, reports, audit, RBAC
     [Browse →](intune/index.md)
 
 - **Microsoft Bookings** — businesses, services, appointments
