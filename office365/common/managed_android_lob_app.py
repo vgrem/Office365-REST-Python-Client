@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.intune.android_minimum_operating_system import (
+    from office365.intune.devices.configurations.android.minimum_operating_system import (
         AndroidMinimumOperatingSystem,
     )
 
@@ -14,7 +14,7 @@ class ManagedAndroidLobApp(Entity):
     @property
     def minimum_supported_operating_system(self) -> AndroidMinimumOperatingSystem:
         """Gets the minimumSupportedOperatingSystem property"""
-        from office365.intune.android_minimum_operating_system import (
+        from office365.intune.devices.configurations.android.minimum_operating_system import (
             AndroidMinimumOperatingSystem,
         )
 

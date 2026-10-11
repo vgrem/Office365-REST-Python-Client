@@ -15,10 +15,12 @@ if TYPE_CHECKING:
     from office365.intune.devices.configurations.ios.general.ratingappstype import (
         RatingAppsType,
     )
+    from office365.intune.devices.configurations.ios.network_usage_rule import (
+        IosNetworkUsageRule,
+    )
     from office365.intune.devices.configurations.webbrowsercookiesettings import (
         WebBrowserCookieSettings,
     )
-    from office365.intune.ios_network_usage_rule import IosNetworkUsageRule
     from office365.intune.media_content_rating_australia import (
         MediaContentRatingAustralia,
     )
@@ -580,7 +582,9 @@ class IosGeneralDeviceConfiguration(Entity):
     @property
     def network_usage_rules(self) -> ClientValueCollection[IosNetworkUsageRule]:
         """Gets the networkUsageRules property"""
-        from office365.intune.ios_network_usage_rule import IosNetworkUsageRule
+        from office365.intune.devices.configurations.ios.network_usage_rule import (
+            IosNetworkUsageRule,
+        )
 
         return self.properties.get("networkUsageRules", ClientValueCollection[IosNetworkUsageRule](IosNetworkUsageRule))
 

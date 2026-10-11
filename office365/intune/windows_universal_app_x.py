@@ -7,6 +7,9 @@ from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
+    from office365.intune.devices.configurations.windows.minimum_operating_system import (
+        WindowsMinimumOperatingSystem,
+    )
     from office365.intune.devices.management.mobileapps.contained_app import (
         MobileContainedApp,
     )
@@ -15,9 +18,6 @@ if TYPE_CHECKING:
     )
     from office365.intune.devices.management.mobileapps.windows.devicetype import (
         WindowsDeviceType,
-    )
-    from office365.intune.windows_minimum_operating_system import (
-        WindowsMinimumOperatingSystem,
     )
 
 
@@ -68,7 +68,7 @@ class WindowsUniversalAppX(Entity):
     @property
     def minimum_supported_operating_system(self) -> WindowsMinimumOperatingSystem:
         """Gets the minimumSupportedOperatingSystem property"""
-        from office365.intune.windows_minimum_operating_system import (
+        from office365.intune.devices.configurations.windows.minimum_operating_system import (
             WindowsMinimumOperatingSystem,
         )
 

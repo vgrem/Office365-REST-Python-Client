@@ -52,10 +52,10 @@ if TYPE_CHECKING:
     from office365.intune.devices.configurations.windows.weeklyschedule import (
         WeeklySchedule,
     )
-    from office365.intune.edge_search_engine_base import EdgeSearchEngineBase
-    from office365.intune.windows10_network_proxy_server import (
+    from office365.intune.devices.configurations.windows.windows10_network_proxy_server import (
         Windows10NetworkProxyServer,
     )
+    from office365.intune.edge_search_engine_base import EdgeSearchEngineBase
 
 
 class Windows10GeneralConfiguration(Entity):
@@ -582,13 +582,9 @@ class Windows10GeneralConfiguration(Entity):
         return self.properties.get("networkProxyDisableAutoDetect", None)
 
     @property
-    def network_proxy_server(self) -> Windows10NetworkProxyServer:
+    def network_proxy_server(self) -> Optional[Windows10NetworkProxyServer]:
         """Gets the networkProxyServer property"""
-        from office365.intune.windows10_network_proxy_server import (
-            Windows10NetworkProxyServer,
-        )
-
-        return self.properties.get("networkProxyServer", Windows10NetworkProxyServer())
+        return self.properties.get("networkProxyServer", None)
 
     @property
     def nfc_blocked(self) -> Optional[bool]:

@@ -18,6 +18,9 @@ if TYPE_CHECKING:
     from office365.intune.devices.configurations.windows.applockerapplicationcontroltype import (
         AppLockerApplicationControlType,
     )
+    from office365.intune.devices.configurations.windows.firewall_network_profile import (
+        WindowsFirewallNetworkProfile,
+    )
     from office365.intune.devices.configurations.windows.firewallcertificaterevocationlistcheckmethodtype import (
         FirewallCertificateRevocationListCheckMethodType,
     )
@@ -26,9 +29,6 @@ if TYPE_CHECKING:
     )
     from office365.intune.devices.configurations.windows.firewallpresharedkeyencodingmethodtype import (
         FirewallPreSharedKeyEncodingMethodType,
-    )
-    from office365.intune.windows_firewall_network_profile import (
-        WindowsFirewallNetworkProfile,
     )
 
 
@@ -226,31 +226,19 @@ class Windows10EndpointProtectionConfiguration(Entity):
         )
 
     @property
-    def firewall_profile_domain(self) -> WindowsFirewallNetworkProfile:
+    def firewall_profile_domain(self) -> Optional[WindowsFirewallNetworkProfile]:
         """Gets the firewallProfileDomain property"""
-        from office365.intune.windows_firewall_network_profile import (
-            WindowsFirewallNetworkProfile,
-        )
-
-        return self.properties.get("firewallProfileDomain", WindowsFirewallNetworkProfile())
+        return self.properties.get("firewallProfileDomain", None)
 
     @property
-    def firewall_profile_private(self) -> WindowsFirewallNetworkProfile:
+    def firewall_profile_private(self) -> Optional[WindowsFirewallNetworkProfile]:
         """Gets the firewallProfilePrivate property"""
-        from office365.intune.windows_firewall_network_profile import (
-            WindowsFirewallNetworkProfile,
-        )
-
-        return self.properties.get("firewallProfilePrivate", WindowsFirewallNetworkProfile())
+        return self.properties.get("firewallProfilePrivate", None)
 
     @property
-    def firewall_profile_public(self) -> WindowsFirewallNetworkProfile:
+    def firewall_profile_public(self) -> Optional[WindowsFirewallNetworkProfile]:
         """Gets the firewallProfilePublic property"""
-        from office365.intune.windows_firewall_network_profile import (
-            WindowsFirewallNetworkProfile,
-        )
-
-        return self.properties.get("firewallProfilePublic", WindowsFirewallNetworkProfile())
+        return self.properties.get("firewallProfilePublic", None)
 
     @property
     def smart_screen_block_override_for_files(self) -> Optional[bool]:

@@ -19,6 +19,9 @@ if TYPE_CHECKING:
     from office365.intune.devices.configurations.windows.prereleasefeatures import (
         PrereleaseFeatures,
     )
+    from office365.intune.devices.configurations.windows.update_install_schedule_type import (
+        WindowsUpdateInstallScheduleType,
+    )
     from office365.intune.devices.configurations.windows.updateforbusinessupdateweeks import (
         WindowsUpdateForBusinessUpdateWeeks,
     )
@@ -27,9 +30,6 @@ if TYPE_CHECKING:
     )
     from office365.intune.devices.configurations.windows.updatetype import (
         WindowsUpdateType,
-    )
-    from office365.intune.windows_update_install_schedule_type import (
-        WindowsUpdateInstallScheduleType,
     )
 
 
@@ -148,13 +148,9 @@ class WindowsUpdateForBusinessConfiguration(Entity):
         return self.properties.get("featureUpdatesWillBeRolledBack", None)
 
     @property
-    def installation_schedule(self) -> WindowsUpdateInstallScheduleType:
+    def installation_schedule(self) -> Optional[WindowsUpdateInstallScheduleType]:
         """Gets the installationSchedule property"""
-        from office365.intune.windows_update_install_schedule_type import (
-            WindowsUpdateInstallScheduleType,
-        )
-
-        return self.properties.get("installationSchedule", WindowsUpdateInstallScheduleType())
+        return self.properties.get("installationSchedule", None)
 
     @property
     def microsoft_update_service_allowed(self) -> Optional[bool]:

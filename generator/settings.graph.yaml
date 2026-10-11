@@ -75,6 +75,16 @@ type_routing:
   Win32*: office365.intune
   Ios*: office365.intune
   Android*: office365.intune
+  # Platform-specific types live under the existing devices/ subpackages.
+  AndroidCustomConfiguration: office365.intune.devices.configurations.android
+  AndroidGeneralDeviceConfiguration: office365.intune.devices.configurations.android
+  AndroidWorkProfileCustomConfiguration: office365.intune.devices.configurations.android
+  AndroidWorkProfileGeneralDeviceConfiguration: office365.intune.devices.configurations.android
+  AndroidMinimumOperatingSystem: office365.intune.devices.configurations.android
+  AndroidMobileAppIdentifier: office365.intune.devices.configurations.android
+  AndroidCompliancePolicy: office365.intune.devices.compliance
+  AndroidWorkProfileCompliancePolicy: office365.intune.devices.compliance
+  AndroidManagedAppRegistration: office365.intune.devices.management
   Oma*: office365.intune
   Printer*: office365.intune
   Print*: office365.intune
@@ -311,6 +321,42 @@ type_routing:
   ManagedMobileApp: office365.intune.devices.management
   RoleManagementCustomCalloutExtension: office365.directory.identitygovernance.privilegedaccess
   TenantProtectionScopeContainer: office365.directory.security.datasecurity
+
+# Platform-specific Intune device configuration / compliance types.
+  Windows10CustomConfiguration: office365.intune.devices.configurations.windows
+  Windows10GeneralConfiguration: office365.intune.devices.configurations.windows
+  Windows10TeamGeneralConfiguration: office365.intune.devices.configurations.windows
+  Windows10SecureAssessmentConfiguration: office365.intune.devices.configurations.windows
+  Windows10EndpointProtectionConfiguration: office365.intune.devices.configurations.windows
+  Windows10EnrollmentCompletionPageConfiguration: office365.intune.devices.configurations.windows
+  Windows10EnterpriseModernAppManagementConfiguration: office365.intune.devices.configurations.windows
+  Windows81GeneralConfiguration: office365.intune.devices.configurations.windows
+  WindowsPhone81CustomConfiguration: office365.intune.devices.configurations.windows
+  WindowsPhone81GeneralConfiguration: office365.intune.devices.configurations.windows
+  WindowsUpdateForBusinessConfiguration: office365.intune.devices.configurations.windows
+  Windows10NetworkProxyServer: office365.intune.devices.configurations.windows
+  WindowsFirewallNetworkProfile: office365.intune.devices.configurations.windows
+  WindowsMinimumOperatingSystem: office365.intune.devices.configurations.windows
+  WindowsUpdateActiveHoursInstall: office365.intune.devices.configurations.windows
+  WindowsUpdateInstallScheduleType: office365.intune.devices.configurations.windows
+  WindowsUpdateScheduledInstall: office365.intune.devices.configurations.windows
+  IosCustomConfiguration: office365.intune.devices.configurations.ios
+  IosDeviceFeaturesConfiguration: office365.intune.devices.configurations.ios
+  IosGeneralDeviceConfiguration: office365.intune.devices.configurations.ios
+  IosUpdateConfiguration: office365.intune.devices.configurations.ios
+  IosHomeScreenApp: office365.intune.devices.configurations.ios
+  IosHomeScreenFolder: office365.intune.devices.configurations.ios
+  IosHomeScreenFolderPage: office365.intune.devices.configurations.ios
+  IosHomeScreenItem: office365.intune.devices.configurations.ios
+  IosHomeScreenPage: office365.intune.devices.configurations.ios
+  IosNetworkUsageRule: office365.intune.devices.configurations.ios
+  IosNotificationSettings: office365.intune.devices.configurations.ios
+  IosMinimumOperatingSystem: office365.intune.devices.configurations.ios
+  Windows10CompliancePolicy: office365.intune.devices.compliance
+  Windows10MobileCompliancePolicy: office365.intune.devices.compliance
+  Windows81CompliancePolicy: office365.intune.devices.compliance
+  WindowsPhone81CompliancePolicy: office365.intune.devices.compliance
+  IosCompliancePolicy: office365.intune.devices.compliance
 
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common

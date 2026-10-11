@@ -11,9 +11,8 @@ from office365.runtime.client_value_collection import ClientValueCollection
 class IosNetworkUsageRule(ClientValue):
     cellularDataBlocked: bool | None = None
     cellularDataBlockWhenRoaming: bool | None = None
+    managedApps: ClientValueCollection[AppListItem] = field(default_factory=lambda: ClientValueCollection(AppListItem))
 
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.IosNetworkUsageRule"
-
-    managedApps: ClientValueCollection[AppListItem] = field(default_factory=lambda: ClientValueCollection(AppListItem))
