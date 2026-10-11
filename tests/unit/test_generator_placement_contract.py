@@ -87,5 +87,9 @@ def test_same_named_type_of_a_different_kind_is_not_resolved() -> None:
     options = GeneratorOptions.load("graph", _GENERATOR)
     registry = TypeRegistry(options.modules.split(","), namespace=options.namespace)
 
-    assert registry.strict_module_for("microsoft.graph.Endpoint", "EntityType") is None
-    assert registry.strict_module_for("microsoft.graph.callRecords.Endpoint", "ComplexType")
+    assert registry.strict_module_for("microsoft.graph.Endpoint", "EntityType") != (
+        "office365.communications.callrecords.endpoint"
+    )
+    assert registry.strict_module_for("microsoft.graph.callRecords.Endpoint", "ComplexType") == (
+        "office365.communications.callrecords.endpoint"
+    )

@@ -54,10 +54,12 @@ def to_snake_case(name: str, avoid_keywords: bool = True, avoid_builtins: bool =
 def normalize_member_key(name: str) -> str:
     """A separator-insensitive key for member de-duplication.
 
-    ``created_date_time`` and ``created_datetime`` share a key, while the leading
-    and trailing underscores of names like ``__class__`` are preserved.
+    ``created_date_time``/``created_datetime``, ``e_tag``/``etag`` and
+    ``type_``/``type`` all share a key, while the leading underscores of names
+    like ``__class__`` are preserved (so ``class`` never matches ``__class__``).
     """
-    return re.sub(r"(?<=\w)_(?=\w)", "", name)
+    name = re.sub(r"(?<=\w)_(?=\w)", "", name)  # internal separators
+    return re.sub(r"(?<=\w)_$", "", name)  # one trailing keyword-avoid underscore
 
 
 def python_name(type_name: str | None, is_object_type: bool = False) -> str:

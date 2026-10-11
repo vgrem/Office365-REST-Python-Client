@@ -267,11 +267,17 @@ class TypeBuilder(ast.NodeTransformer):
             if node.name == "entity_type_name":
                 self._entity_type_name_exists = True
 
-            matching_prop = next((prop for prop in self._properties if prop.name == node.name), None)
+            node_key = normalize_member_key(node.name)
+            matching_prop = next(
+                (prop for prop in self._properties if normalize_member_key(prop.name) == node_key), None
+            )
             if matching_prop:
                 matching_prop.status = "attached"
         else:
-            matching_method = next((m for m in self._methods if m.name == node.name), None)
+            node_key = normalize_member_key(node.name)
+            matching_method = next(
+                (method for method in self._methods if normalize_member_key(method.name) == node_key), None
+            )
             if matching_method:
                 matching_method.status = "attached"
 
@@ -285,7 +291,10 @@ class TypeBuilder(ast.NodeTransformer):
             and isinstance(node.attr, str)
         ):
             prop_name = node.attr
-            matching_prop = next((prop for prop in self._properties if prop.name == prop_name), None)
+            prop_key = normalize_member_key(prop_name)
+            matching_prop = next(
+                (prop for prop in self._properties if normalize_member_key(prop.name) == prop_key), None
+            )
             if matching_prop:
                 matching_prop.status = "attached"
 
