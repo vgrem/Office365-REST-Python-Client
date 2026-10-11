@@ -37,6 +37,8 @@ def to_snake_case(name: str, avoid_keywords: bool = True, avoid_builtins: bool =
     """
     # lower -> upper boundary (emailIDs -> email_IDs)
     s1 = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", _protect_compounds(name))
+    # keep a digit that sits inside an acronym joined (B2_B -> B2B)
+    s1 = re.sub(r"([A-Z])(\d)_([A-Z])", r"\1\2\3", s1)
     # single capital followed by a word (ASite -> A_Site, IFollowed -> I_Followed)
     s2 = re.sub(r"([A-Z])([A-Z][a-z]{2,})", r"\1_\2", s1)
     # acronym followed by a short word (UTCTo -> UTC_To); 's' is excluded so that

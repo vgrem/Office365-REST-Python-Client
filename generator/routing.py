@@ -78,6 +78,11 @@ class Router:
             types = {name: str(module).strip() for name, module in options.type_routing.items()}
         return cls(namespace, types)
 
+    @property
+    def fallback(self) -> str:
+        """The catch-all (``*``) module, if the table defines one."""
+        return self.types.get("*", "").strip()
+
     def module_for(self, type_name: str, *, allow_fallback: bool = True) -> Optional[str]:
         """The routed module for a type: exact name, then namespace, then prefix.
 
@@ -129,6 +134,37 @@ def _plural(word: str) -> str:
     return word + "s"
 
 
+def _singular(word: str) -> str:
+    """A naive English singular, the inverse of :func:`_plural`."""
+    if word.endswith("ies") and len(word) > len("ies"):
+        return word[:-3] + "y"
+    if word.endswith(("ses", "xes", "zes", "ches", "shes")):
+        return word[:-2]
+    if word.endswith("s") and not word.endswith("ss"):
+        return word[:-1]
+    return word
+
+
+def _path_words(module_path: str) -> set[str]:
+    """Singularized package segments of a module path (drops the ``office365`` root)."""
+    return {_singular(seg.lower()) for seg in module_path.split(".") if seg and seg != "office365"}
+
+
+def _strip_path_prefix(words: list[str], module_path: str) -> list[str]:
+    """Strip leading ``words`` that merely repeat a segment of ``module_path``.
+
+    ``WorkbookChartAxisFormat`` routed to ``...workbooks.charts`` -> ``[axis, format]``;
+    ``X509Certificate...`` routed to ``...certificates.x509`` -> ``[authentication, ...]``.
+    Order-insensitive (``x509`` matches the later ``x509`` segment) and singular-aware.
+    Returns the original words when everything would be stripped.
+    """
+    segments = _path_words(module_path)
+    index = 0
+    while index < len(words) and _singular(words[index].lower()) in segments:
+        index += 1
+    return words[index:] or words
+
+
 def _consume_prefix(entry: str, words: list[str]) -> int:
     """How many leading ``words`` a package name consumes, or 0.
 
@@ -162,15 +198,16 @@ def _collides(directory: str, stem: str, class_name: str) -> bool:
 
 
 def descend_module(module_path: str, class_name: str, output_base: str) -> tuple[str, str]:
-    """Place a new type in a matching subsystem package, stripping the prefix.
+    """Place a new type in a matching subsystem package, stripping prefixes.
 
-    Two steps, both only for new files (placed types stay put: sticky):
+    Three steps, all only for new files (placed types stay put: sticky):
 
-    1. descend into a subpackage whose name matches the class-name prefix,
-       singular or plural (``CallParticipantInfo`` -> ``calls/participant_info``);
-    2. otherwise strip a prefix equal to the module's own name
-       (``communications`` + ``CommunicationsApplicationIdentity`` ->
-       ``communications/application_identity``).
+    1. strip leading words implied by the module path
+       (``WorkbookChartAxisFormat`` + ``...workbooks.charts`` -> ``axis_format``);
+    2. descend into a subpackage whose name matches the remaining prefix,
+       singular or plural (``CallMediaState`` -> ``calls/media_state``);
+    3. otherwise strip a prefix equal to the module's own name
+       (``communications`` + ``CommunicationsApplicationIdentity``).
 
     A prefix is only stripped when the result would not collide with a file that
     defines a *different* class; on collision the full name is kept.
@@ -181,7 +218,7 @@ def descend_module(module_path: str, class_name: str, output_base: str) -> tuple
     base = module_directory(module_path, output_base)
     if not os.path.isdir(base):
         return module_path, file_stem
-    words = file_stem.split("_")
+    words = _strip_path_prefix(file_stem.split("_"), module_path)
 
     best: tuple[int, int, str] | None = None
     for entry in sorted(os.listdir(base)):
@@ -200,12 +237,9 @@ def descend_module(module_path: str, class_name: str, output_base: str) -> tuple
             return f"{module_path}.{dirname}", remaining
         return f"{module_path}.{dirname}", file_stem
 
-    segment = module_path.rsplit(".", 1)[-1]
-    consumed = _consume_prefix(segment, words)
-    if 0 < consumed < len(words):
-        remaining = "_".join(words[consumed:])
-        if not _collides(base, remaining, class_name):
-            return module_path, remaining
+    remaining = "_".join(words)
+    if remaining and remaining != file_stem and not _collides(base, remaining, class_name):
+        return module_path, remaining
     return module_path, file_stem
 
 
@@ -227,6 +261,28 @@ def planned_module(type_name: str, schema, registry, router: Router, output_base
     return f"{directory}.{file_stem}"
 
 
+def _in_fallback(module: str, fallback: str) -> bool:
+    """Whether ``module`` lives in the catch-all (fallback) bucket."""
+    if not fallback:
+        return False
+    prefix = fallback.rstrip(".")
+    return module == prefix or module.startswith(prefix + ".")
+
+
+def _owning_module(modules: Counter) -> str:
+    """The module that most plausibly owns a type, given its referrer modules.
+
+    A type is normally referenced from the package that *defines* its accessor,
+    but sometimes also from a sub-package that extends it. Prefer the deepest
+    referrer that is an ancestor of the dominant one, so a type used from
+    ``.../app/protections`` lands in ``.../app`` rather than ``.../protections``.
+    """
+    ranked = modules.most_common()
+    dominant = ranked[0][0]
+    ancestors = [module for module, _ in ranked if module != dominant and dominant.startswith(module + ".")]
+    return max(ancestors, key=len) if ancestors else dominant
+
+
 def _majority(values: Iterable[str]) -> Optional[str]:
     """The most common value, or ``None`` when there are none."""
     counts = Counter(values)
@@ -243,18 +299,21 @@ def infer_placements(model, type_filter, registry, router: Router, rounds: int =
     """
     assigned: dict[str, str] = {}
     in_scope: list[str] = []
+    fallback = router.fallback
     for name, schema in model.types.items():
         if not type_filter.in_scope(name, schema):
             continue
         in_scope.append(name)
         # A *directory* module: for an attached type drop the file segment.
+        # Types parked in the fallback bucket are not anchors: they are
+        # re-derived from their referrers so they can be re-routed.
         module = registry.strict_module_for(name)
-        if module:
+        if module and not _in_fallback(module, fallback):
             assigned[name] = module.rsplit(".", 1)[0]
-        else:
-            routed = router.module_for(name, allow_fallback=False)
-            if routed:
-                assigned[name] = routed
+            continue
+        routed = router.module_for(name, allow_fallback=False)
+        if routed:
+            assigned[name] = routed
 
     short = {name.rsplit(".", 1)[-1]: name for name in in_scope}
 
@@ -279,7 +338,7 @@ def infer_placements(model, type_filter, registry, router: Router, rounds: int =
                 continue
             modules = Counter(assigned[r] for r in referrers.get(name, ()) if r in assigned)
             if modules:
-                assigned[name] = modules.most_common(1)[0][0]
+                assigned[name] = _owning_module(modules)
                 changed = True
         if not changed:
             break
@@ -304,11 +363,18 @@ def render_suggestions(
     services = services or {}
     service_map = service_map or {}
     assigned = infer_placements(model, type_filter, registry, router)
+    fallback = router.fallback
     unrouted: dict[str, list[str]] = defaultdict(list)
+    relocatable: set[str] = set()
     for name, schema in model.types.items():
         if not type_filter.in_scope(name, schema):
             continue
-        if registry.strict_module_for(name) or router.module_for(name, allow_fallback=False):
+        attached = registry.strict_module_for(name)
+        if attached:
+            if _in_fallback(attached, fallback):
+                relocatable.add(name)
+            continue
+        if router.module_for(name, allow_fallback=False):
             continue
         unrouted[name.rsplit(".", 1)[0]].append(name)
 
@@ -331,15 +397,17 @@ def render_suggestions(
     # reference graph; the rest are grouped into ``Prefix*`` rules.
     exact_lines: list[str] = []
     by_prefix: dict[str, list[str]] = defaultdict(list)
-    for name in unrouted.get("microsoft.graph", []):
+    candidates = list(unrouted.get("microsoft.graph", []))
+    candidates += [name for name in sorted(relocatable) if name.rsplit(".", 1)[0] == "microsoft.graph"]
+    for name in candidates:
         short = name.rsplit(".", 1)[-1]
         module = service_module(name)
         if module:
             service = service_map.get(short.lower())
             exact_lines.append(f'  "{short}": {module}   # service: {service}')
-        elif name in assigned:
+        elif name in assigned and not _in_fallback(assigned[name], fallback):
             anchor = model.anchors.get(name)
-            note = f"   # anchor: {anchor}" if anchor else ""
+            note = f"   # anchor: {anchor}" if anchor else (f"   # out of {fallback}" if name in relocatable else "")
             exact_lines.append(f'  "{short}": {assigned[name]}{note}')
         else:
             by_prefix[_first_word(short)].append(name)

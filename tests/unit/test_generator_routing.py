@@ -79,3 +79,21 @@ def test_short_exact_rule_does_not_override_prefix_for_named_namespace():
     )
     assert router.module_for("microsoft.graph.search.SearchRequest") == "office365.search"
     assert router.module_for("microsoft.graph.SearchRequest") == "office365.other"
+
+
+def test_router_fallback_and_bucket_detection():
+    from generator.routing import _in_fallback
+
+    router = Router(types={"*": "office365.common"})
+    assert router.fallback == "office365.common"
+    assert _in_fallback("office365.common.workbook_chart_axis_format", router.fallback)
+    assert not _in_fallback("office365.directory.user", router.fallback)
+
+
+def test_owning_module_prefers_ancestor_of_the_dominant_referrer():
+    from collections import Counter
+
+    from generator.routing import _owning_module
+
+    modules = Counter({"office365.intune.x.app.protections": 3, "office365.intune.x.app": 1})
+    assert _owning_module(modules) == "office365.intune.x.app"
