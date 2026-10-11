@@ -40,7 +40,7 @@ class TypeRegistry:
                 return cls
         return _resolve_cached(short, self.modules)
 
-    def module_for(self, type_name: str | None) -> Optional[str]:
+    def module_for(self, type_name: str | None, kind: str | None = None) -> Optional[str]:
         """The module defining the referenced class, resolved statically."""
         if not type_name:
             return None
@@ -48,14 +48,14 @@ class TypeRegistry:
         planned = self._type_modules.get(key)
         if planned is not None:
             return planned
-        module = self._index.resolve_module(type_name)
+        module = self._index.resolve_module(type_name, kind=kind)
         if module is not None:
             return module
         cls = self.resolve(type_name)
         mod = inspect.getmodule(cls) if cls is not None else None
         return mod.__name__ if mod is not None else None
 
-    def strict_module_for(self, type_name: str | None) -> Optional[str]:
+    def strict_module_for(self, type_name: str | None, kind: str | None = None) -> Optional[str]:
         """Like :meth:`module_for`, but without any bare-class-name fallback.
 
         Used for update decisions: a wrong match makes the generator write into a
@@ -64,7 +64,7 @@ class TypeRegistry:
         """
         if not type_name:
             return None
-        return self._index.resolve_module(type_name, strict=True)
+        return self._index.resolve_module(type_name, strict=True, kind=kind)
 
     def members_of(self, type_name: str | None) -> set[str]:
         """Member names a class already has (incl. inherited), purely from AST."""

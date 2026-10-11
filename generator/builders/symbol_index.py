@@ -32,12 +32,18 @@ class SymbolIndex:
         self._by_name: dict[str, list[str]] = {}
         self._by_odata: dict[str, list[tuple[str, str]]] = {}
         self._files: dict[tuple[str, str], str] = {}
+        #: (module, class) -> declared OData name, for same-name disambiguation.
+        self._odata_of: dict[tuple[str, str], str] = {}
+        #: (module, class) -> CSDL kind (EntityType/ComplexType/EnumType), from its base.
+        self._kind_of: dict[tuple[str, str], str] = {}
         self._members_cache: dict[tuple[str, str], set[str]] = {}
         for module_name in modules:
             for root in self._package_dirs(module_name):
                 self._scan_root(module_name, root)
 
-    def resolve_module(self, type_name: str | None, *, strict: bool = False) -> Optional[str]:
+    def resolve_module(
+        self, type_name: str | None, *, strict: bool = False, kind: Optional[str] = None
+    ) -> Optional[str]:
         """The module that defines ``type_name`` (an OData name or bare class name).
 
         Resolution order: the authoritative OData name; then the bare class name.
@@ -53,7 +59,9 @@ class SymbolIndex:
             return None
         key = normalize_type_name(type_name) or type_name
         short = key.rsplit(".", 1)[-1]
-        return self._resolve_by_odata_name(key, short) or self._resolve_by_class_name(key, short, strict=strict)
+        return self._resolve_by_odata_name(key, short) or self._resolve_by_class_name(
+            key, short, strict=strict, kind=kind
+        )
 
     def _resolve_by_odata_name(self, key: str, short: str) -> Optional[str]:
         candidates = self._by_odata.get(key, [])
@@ -62,10 +70,19 @@ class SymbolIndex:
                 return module
         return candidates[0][1] if candidates else None
 
-    def _resolve_by_class_name(self, key: str, short: str, *, strict: bool) -> Optional[str]:
+    def _resolve_by_class_name(self, key: str, short: str, *, strict: bool, kind: Optional[str] = None) -> Optional[str]:
         modules = self._by_name.get(short, [])
         if not modules:
             return None
+        if kind:
+            # A same-named class of a different kind is a different type
+            # (microsoft.graph.Endpoint [Entity] vs microsoft.graph.callRecords.Endpoint
+            # [ComplexType]); never resolve one to the other.
+            typed = [module for module in modules if self._kind_of.get((module, short), kind) == kind]
+            if typed:
+                modules = typed
+            elif strict:
+                return None
         if len(modules) == 1:
             # A bare ``microsoft.graph`` namespace has no signal, so accept it;
             # otherwise require the module path to be consistent with the type.
@@ -121,6 +138,23 @@ class SymbolIndex:
             if odata_name:
                 key = normalize_type_name(odata_name) or odata_name
                 self._by_odata.setdefault(key, []).append((node.name, module_path))
+                self._odata_of[(module_path, node.name)] = key
+            kind = self._class_kind(node)
+            if kind:
+                self._kind_of[(module_path, node.name)] = kind
+
+    @staticmethod
+    def _class_kind(node: ast.ClassDef) -> Optional[str]:
+        """The CSDL kind implied by a class's base (for same-name disambiguation)."""
+        for base in node.bases:
+            name = base.id if isinstance(base, ast.Name) else base.attr if isinstance(base, ast.Attribute) else None
+            if name == "Enum":
+                return "EnumType"
+            if name == "ClientValue":
+                return "ComplexType"
+            if name in ("ClientObject", "Entity"):
+                return "EntityType"
+        return None
 
     @staticmethod
     def _entity_type_name(node: ast.ClassDef) -> Optional[str]:

@@ -29,6 +29,7 @@ class BuilderContext:
     type_modules: Mapping[str, str] = field(default_factory=dict)
     cyclic_types: frozenset[str] = frozenset()
     enum_defaults: Mapping[str, str] = field(default_factory=dict)
+    entity_types: frozenset[str] = frozenset()
     inherited_members: Mapping[str, frozenset[str]] = field(default_factory=dict)
     dry_run: bool = False
 
@@ -58,6 +59,7 @@ class BuilderContext:
             type_modules=dict(options.get("type_modules") or {}),
             cyclic_types=frozenset(options.get("cyclic_types") or ()),
             enum_defaults=dict(options.get("enum_defaults") or {}),
+            entity_types=frozenset(options.get("entity_types") or ()),
             inherited_members={
                 name: frozenset(members) for name, members in (options.get("inherited_members") or {}).items()
             },
@@ -72,6 +74,7 @@ class BuilderContext:
         cyclic_types: frozenset[str],
         enum_defaults: Mapping[str, str],
         inherited_members: Mapping[str, frozenset[str]],
+        entity_types: frozenset[str] = frozenset(),
     ) -> "BuilderContext":
         """Return a copy enriched with the run plan (known types, modules, cycles)."""
         return replace(
@@ -80,5 +83,6 @@ class BuilderContext:
             type_modules=dict(type_modules),
             cyclic_types=cyclic_types,
             enum_defaults=dict(enum_defaults),
+            entity_types=frozenset(entity_types),
             inherited_members={name: frozenset(members) for name, members in inherited_members.items()},
         )

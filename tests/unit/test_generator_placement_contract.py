@@ -37,7 +37,7 @@ def _placements(service: str) -> tuple[Path, tuple[tuple[str, str, Placement], .
         if not schema_filter.in_scope(name, schema):
             continue
         module = planned_module(name, schema, registry, router, options.output_path)
-        placement = planner.plan(name, schema.IsValueObject or False)
+        placement = planner.plan(name, schema.BaseTypeFullName)
         entries.append((name, module or "", placement))
     return Path(options.output_path).resolve(), tuple(entries)
 
@@ -79,3 +79,13 @@ def test_attached_types_keep_an_existing_file(service: str) -> None:
     for name, _module, placement in entries:
         if placement.is_attached:
             assert Path(placement.file).is_file(), name
+
+
+def test_same_named_type_of_a_different_kind_is_not_resolved() -> None:
+    """microsoft.graph.Endpoint (Entity) must not resolve to the callRecords Endpoint
+    (ComplexType) - only the kind-matched one resolves."""
+    options = GeneratorOptions.load("graph", _GENERATOR)
+    registry = TypeRegistry(options.modules.split(","), namespace=options.namespace)
+
+    assert registry.strict_module_for("microsoft.graph.Endpoint", "EntityType") is None
+    assert registry.strict_module_for("microsoft.graph.callRecords.Endpoint", "ComplexType")

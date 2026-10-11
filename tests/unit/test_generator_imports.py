@@ -26,7 +26,7 @@ class _FixedResolver:
     def module_for(self, type_name):
         return self._module
 
-    def strict_module_for(self, type_name):
+    def strict_module_for(self, type_name, kind=None):
         return self._module
 
     def members_of(self, type_name):
@@ -104,6 +104,25 @@ def test_dataclass_member_named_field_aliases_the_dataclasses_field_import(tmp_p
     assert "from dataclasses import field as field_" in source
     assert "field_(default_factory=Bucket)" in source
     assert "field: str | None = None" in source
+
+
+def test_entity_field_in_a_client_value_defaults_to_none(tmp_path: Path):
+    """An entity field needs a context, so inside a ClientValue it defaults to None."""
+    schema = TypeInformation(BaseTypeFullName="ComplexType", FullName="microsoft.graph.TestValue", IsValueObject=True)
+    schema.add_property(PropertyInformation(Name="owner", TypeName="microsoft.graph.SomeEntity"))
+    options = {
+        "template_path": str(_TEMPLATES_GRAPH),
+        "output_path": str(tmp_path),
+        "modules": "office365",
+        "entity_types": {"microsoft.graph.SomeEntity"},
+    }
+    builder = TypeBuilder(schema, options, resolver=_FixedResolver("office365.some_entity"))
+    builder.build()
+    source = builder.render()
+    ast.parse(source)
+
+    assert "owner: SomeEntity | None = None" in source
+    assert "default_factory=SomeEntity" not in source
 
 
 def test_method_entity_return_is_imported_lazily(tmp_path: Path):

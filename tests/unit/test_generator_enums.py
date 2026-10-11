@@ -21,7 +21,7 @@ class _NullResolver:
     def module_for(self, type_name):
         return None
 
-    def strict_module_for(self, type_name):
+    def strict_module_for(self, type_name, kind=None):
         return None
 
     def members_of(self, type_name):

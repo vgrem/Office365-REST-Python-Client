@@ -167,7 +167,7 @@ def planned_module(type_name: str, schema, registry, router: Router, output_base
     module of the file the generator will create (not the package), so imports
     point at the file rather than the package ``__init__``.
     """
-    module = registry.strict_module_for(type_name)
+    module = registry.strict_module_for(type_name, schema.BaseTypeFullName)
     if module:
         return module
     directory = router.module_for(type_name)

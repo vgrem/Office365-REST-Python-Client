@@ -463,7 +463,12 @@ class TypeBuilder(ast.NodeTransformer):
         """
         default: ast.expr = prop.build_default_value()
         make_optional = False
-        if not prop.is_collection_type:
+        type_name = prop.type_ref.text
+        if prop.is_collection_type:
+            if type_name in self._context.entity_types:
+                # A collection of entities needs a context; a ClientValue has none.
+                default, make_optional = ast.Constant(value=None), True
+        else:
             resolved = prop.resolve_client_type()
             if resolved is not None and inspect.isclass(resolved):
                 if issubclass(resolved, Enum):
@@ -476,11 +481,11 @@ class TypeBuilder(ast.NodeTransformer):
                     # An entity needs a context, so it cannot be a zero-arg default.
                     default, make_optional = ast.Constant(value=None), True
             else:
-                enum_name = prop.type_ref.text
-                member = self._enum_defaults.get(enum_name)
+                member = self._enum_defaults.get(type_name)
                 if member:
                     default = self._member_attr(prop_type, member)
-                elif enum_name in self._enum_defaults:
+                elif type_name in self._enum_defaults or type_name in self._context.entity_types:
+                    # A planned enum/entity defaults to None (never factory-constructed).
                     default, make_optional = ast.Constant(value=None), True
         return default, (self._optional(prop_type) if make_optional else annotation)
 
@@ -667,7 +672,7 @@ class TypeBuilder(ast.NodeTransformer):
 
     def _ensure_placement(self) -> Placement:
         if self._placement is None:
-            self._placement = self._planner.plan(self._schema.FullName, self._schema.IsValueObject or False)
+            self._placement = self._planner.plan(self._schema.FullName, self._schema.BaseTypeFullName)
         return self._placement
 
     @property

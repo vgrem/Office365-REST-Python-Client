@@ -32,7 +32,7 @@ class _StubResolver:
     def module_for(self, type_name):
         return self._module
 
-    def strict_module_for(self, type_name):
+    def strict_module_for(self, type_name, kind=None):
         return self._module
 
     def members_of(self, type_name):

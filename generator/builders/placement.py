@@ -65,11 +65,11 @@ class TypePlanner:
         self._resolver = resolver
         self._router = Router.from_options(context)
 
-    def plan(self, full_name: str, is_value_object: bool) -> Placement:
-        """The placement for an OData type name."""
-        class_name = python_name(full_name, is_value_object or False)
+    def plan(self, full_name: str, kind: Optional[str] = None) -> Placement:
+        """The placement for an OData type name (``kind`` = CSDL kind)."""
+        class_name = python_name(full_name, kind == "EntityType")
 
-        module_name = self._resolver.strict_module_for(full_name)
+        module_name = self._resolver.strict_module_for(full_name, kind)
         origin = module_file(module_name) if module_name else None
         if origin is not None:
             return Placement(_ATTACHED, origin, True)
