@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.intune.printer_location import PrinterLocation
+    from office365.intune.print.printers.location import PrinterLocation
 
 
 class PrintConnector(Entity):
@@ -32,7 +32,7 @@ class PrintConnector(Entity):
     @property
     def location(self) -> PrinterLocation:
         """Gets the location property"""
-        from office365.intune.printer_location import PrinterLocation
+        from office365.intune.print.printers.location import PrinterLocation
 
         return self.properties.get("location", PrinterLocation())
 

@@ -9,9 +9,9 @@ from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
     from office365.intune.print.job import PrintJob
-    from office365.intune.printer_defaults import PrinterDefaults
-    from office365.intune.printer_location import PrinterLocation
-    from office365.intune.printer_status import PrinterStatus
+    from office365.intune.print.printers.defaults import PrinterDefaults
+    from office365.intune.print.printers.location import PrinterLocation
+    from office365.intune.print.printers.status import PrinterStatus
 
 
 class PrinterBase(Entity):
@@ -25,7 +25,7 @@ class PrinterBase(Entity):
     @property
     def defaults(self) -> PrinterDefaults:
         """Gets the defaults property"""
-        from office365.intune.printer_defaults import PrinterDefaults
+        from office365.intune.print.printers.defaults import PrinterDefaults
 
         return self.properties.get("defaults", PrinterDefaults())
 
@@ -42,7 +42,7 @@ class PrinterBase(Entity):
     @property
     def location(self) -> PrinterLocation:
         """Gets the location property"""
-        from office365.intune.printer_location import PrinterLocation
+        from office365.intune.print.printers.location import PrinterLocation
 
         return self.properties.get("location", PrinterLocation())
 
@@ -59,7 +59,7 @@ class PrinterBase(Entity):
     @property
     def status(self) -> PrinterStatus:
         """Gets the status property"""
-        from office365.intune.printer_status import PrinterStatus
+        from office365.intune.print.printers.status import PrinterStatus
 
         return self.properties.get("status", PrinterStatus())
 

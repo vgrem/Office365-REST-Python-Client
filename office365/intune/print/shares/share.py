@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from office365.directory.groups.group import Group
     from office365.directory.users.user import User
     from office365.intune.print.printers.printer import Printer
-    from office365.intune.printer_share_viewpoint import PrinterShareViewpoint
+    from office365.intune.print.printers.share_viewpoint import PrinterShareViewpoint
 
 
 class PrinterShare(PrinterBase):
@@ -30,7 +30,7 @@ class PrinterShare(PrinterBase):
     @property
     def view_point(self) -> PrinterShareViewpoint:
         """Gets the viewPoint property"""
-        from office365.intune.printer_share_viewpoint import PrinterShareViewpoint
+        from office365.intune.print.printers.share_viewpoint import PrinterShareViewpoint
 
         return self.properties.get("viewPoint", PrinterShareViewpoint())
 

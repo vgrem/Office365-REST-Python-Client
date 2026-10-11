@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from office365.common.service_announcement_attachment import (
         ServiceAnnouncementAttachment,
     )
-    from office365.intune.service_update_message_viewpoint import (
+    from office365.intune.servicecommunications.service_update_message_viewpoint import (
         ServiceUpdateMessageViewpoint,
     )
     from office365.intune.servicecommunications.updatecategory import (
@@ -92,7 +92,7 @@ class ServiceUpdateMessage(ServiceAnnouncementBase):
     @property
     def view_point(self) -> ServiceUpdateMessageViewpoint:
         """Gets the viewPoint property"""
-        from office365.intune.service_update_message_viewpoint import (
+        from office365.intune.servicecommunications.service_update_message_viewpoint import (
             ServiceUpdateMessageViewpoint,
         )
 

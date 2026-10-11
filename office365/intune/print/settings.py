@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from office365.intune.printer_discovery_settings import PrinterDiscoverySettings
+from office365.intune.print.printers.discovery_settings import PrinterDiscoverySettings
 from office365.runtime.client_value import ClientValue
 
 

@@ -255,8 +255,6 @@ type_routing:
   OutOfOfficeSettings: office365.communications
   RemovedState: office365.communications
   UserWorkLocation: office365.communications
-  ServiceHealthIssuePost: office365.intune
-  ServiceUpdateMessageViewpoint: office365.intune
   Deleted: office365.onedrive
   ResourceVisualization: office365.directory
   TicketInfo: office365.directory
@@ -441,6 +439,18 @@ type_routing:
   UserExperienceAnalyticsWorkFromAnywhereHardwareReadinessMetric: office365.intune.devices.management.userexperienceanalytics
   UserExperienceAnalyticsWorkFromAnywhereMetric: office365.intune.devices.management.userexperienceanalytics
   UserExperienceAnalyticsWorkFromAnywhereModelPerformance: office365.intune.devices.management.userexperienceanalytics
+
+# Intune print / service-communications clusters.
+  AirPrintSettings: office365.intune.print
+  ArchivedPrintJob: office365.intune.print
+  PrinterCreateOperation: office365.intune.print
+  PrinterDefaults: office365.intune.print
+  PrinterDiscoverySettings: office365.intune.print
+  PrinterLocation: office365.intune.print
+  PrinterShareViewpoint: office365.intune.print
+  PrinterStatus: office365.intune.print
+  ServiceHealthIssuePost: office365.intune.servicecommunications
+  ServiceUpdateMessageViewpoint: office365.intune.servicecommunications
 
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common

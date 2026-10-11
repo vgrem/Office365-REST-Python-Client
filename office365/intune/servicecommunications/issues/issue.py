@@ -13,9 +13,9 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.queries.function import FunctionQuery
 
 if TYPE_CHECKING:
-    from office365.intune.service_health_issue_post import ServiceHealthIssuePost
     from office365.intune.servicecommunications.health.origin import ServiceHealthOrigin
     from office365.intune.servicecommunications.health.status import ServiceHealthStatus
+    from office365.intune.servicecommunications.service_health_issue_post import ServiceHealthIssuePost
 
 
 class ServiceHealthIssue(ServiceAnnouncementBase):
@@ -78,7 +78,7 @@ class ServiceHealthIssue(ServiceAnnouncementBase):
     @property
     def posts(self) -> ClientValueCollection[ServiceHealthIssuePost]:
         """Gets the posts property"""
-        from office365.intune.service_health_issue_post import ServiceHealthIssuePost
+        from office365.intune.servicecommunications.service_health_issue_post import ServiceHealthIssuePost
 
         return self.properties.get("posts", ClientValueCollection[ServiceHealthIssuePost](ServiceHealthIssuePost))
 
