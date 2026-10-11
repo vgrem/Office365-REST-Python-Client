@@ -358,6 +358,28 @@ type_routing:
   WindowsPhone81CompliancePolicy: office365.intune.devices.compliance
   IosCompliancePolicy: office365.intune.devices.compliance
 
+# Platform-specific Intune mobile apps.
+  WindowsAppX: office365.intune.devices.management.mobileapps.windows
+  WindowsAppXAppAssignmentSettings: office365.intune.devices.management.mobileapps.windows
+  WindowsMicrosoftEdgeApp: office365.intune.devices.management.mobileapps.windows
+  WindowsMobileMSI: office365.intune.devices.management.mobileapps.windows
+  WindowsUniversalAppX: office365.intune.devices.management.mobileapps.windows
+  WindowsUniversalAppXContainedApp: office365.intune.devices.management.mobileapps.windows
+  WindowsUniversalAppXAppAssignmentSettings: office365.intune.devices.management.mobileapps.windows
+  WindowsWebApp: office365.intune.devices.management.mobileapps.windows
+  IosLobApp: office365.intune.devices.management.mobileapps.ios
+  IosLobAppAssignmentSettings: office365.intune.devices.management.mobileapps.ios
+  IosLobAppProvisioningConfigurationAssignment: office365.intune.devices.management.mobileapps.ios
+  IosStoreApp: office365.intune.devices.management.mobileapps.ios
+  IosStoreAppAssignmentSettings: office365.intune.devices.management.mobileapps.ios
+  IosVppApp: office365.intune.devices.management.mobileapps.ios
+  IosVppAppAssignmentSettings: office365.intune.devices.management.mobileapps.ios
+  IosVppEBook: office365.intune.devices.management.mobileapps.ios
+  IosVppEBookAssignment: office365.intune.devices.management.mobileapps.ios
+  IosMobileAppIdentifier: office365.intune.devices.management.mobileapps.ios
+  IosiPadOSWebClip: office365.intune.devices.management.mobileapps.ios
+  IosManagedAppRegistration: office365.intune.devices.management
+
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common
 

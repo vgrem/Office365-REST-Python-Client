@@ -6,7 +6,9 @@ from typing import TYPE_CHECKING, Optional
 from office365.entity import Entity
 
 if TYPE_CHECKING:
-    from office365.intune.devices.configurations.ios.minimum_operating_system import IosMinimumOperatingSystem
+    from office365.intune.devices.configurations.ios.minimum_operating_system import (
+        IosMinimumOperatingSystem,
+    )
     from office365.intune.devices.management.mobileapps.ios.ios_device_type import (
         IosDeviceType,
     )
