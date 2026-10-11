@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **OneNote pages can be created from in-memory HTML:** `OnenotePageCollection.add`
+  accepts the page HTML as a `str`, `bytes`/`bytearray`, or a file-like object
+  (previously a named file was required), and its attachment mapping is typed as
+  `Mapping[str, PageSource]`. `OnenoteSection.pages` now returns an
+  `OnenotePageCollection`, so pages can be created directly from a section.
+
 ### Changed
 - **The Security API now lives at `office365.security`** (was
   `office365.directory.security`). `microsoft.graph.security` is a top-level Graph

@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from office365.directory.permissions.require_permission import require_permission
-from office365.entity_collection import EntityCollection
 from office365.onenote.entity_hierarchy_model import OnenoteEntityHierarchyModel
 from office365.onenote.operations.onenote import OnenoteOperation
 from office365.onenote.pages.links import PageLinks
@@ -12,7 +11,7 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
-    from office365.onenote.pages.page import OnenotePage
+    from office365.onenote.pages.collection import OnenotePageCollection
     from office365.onenote.sectiongroups.section_group import SectionGroup
 
 
@@ -63,15 +62,15 @@ class OnenoteSection(OnenoteEntityHierarchyModel):
         return self.properties.get("links", PageLinks())
 
     @property
-    def pages(self) -> EntityCollection[OnenotePage]:
+    def pages(self) -> OnenotePageCollection:
         """
         The collection of pages in the section. Read-only. Nullable.
         """
-        from office365.onenote.pages.page import OnenotePage  # noqa
+        from office365.onenote.pages.collection import OnenotePageCollection
 
         return self.properties.get(
             "pages",
-            EntityCollection(self.context, OnenotePage, ResourcePath("pages", self.resource_path)),
+            OnenotePageCollection(self.context, ResourcePath("pages", self.resource_path)),
         )
 
     @odata(name="parentNotebook")
