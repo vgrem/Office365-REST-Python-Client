@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.windows_malware_overview import (
         WindowsMalwareOverview,
     )
+    from office365.intune.devices.management.windowsmalware.windows_malware_information import WindowsMalwareInformation
     from office365.intune.devices.management_exchange_connector import (
         DeviceManagementExchangeConnector,
     )
@@ -170,7 +171,6 @@ if TYPE_CHECKING:
     from office365.intune.windows_autopilot_device_identity import (
         WindowsAutopilotDeviceIdentity,
     )
-    from office365.intune.windows_malware_information import WindowsMalwareInformation
 
 
 class DeviceManagement(Entity):
@@ -936,7 +936,7 @@ class DeviceManagement(Entity):
     @property
     def windows_malware_information(self) -> EntityCollection[WindowsMalwareInformation]:
         """Gets the windowsMalwareInformation property"""
-        from office365.intune.windows_malware_information import (
+        from office365.intune.devices.management.windowsmalware.windows_malware_information import (
             WindowsMalwareInformation,
         )
 

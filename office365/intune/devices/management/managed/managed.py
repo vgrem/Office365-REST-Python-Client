@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from office365.intune.devices.log_collection_response import (
         DeviceLogCollectionResponse,
     )
-    from office365.intune.windows_protection_state import WindowsProtectionState
+    from office365.intune.devices.management.windows_protection_state import WindowsProtectionState
 
 
 class ManagedDevice(Entity):
@@ -497,7 +497,7 @@ class ManagedDevice(Entity):
     @property
     def windows_protection_state(self) -> WindowsProtectionState:
         """Gets the windowsProtectionState property"""
-        from office365.intune.windows_protection_state import WindowsProtectionState
+        from office365.intune.devices.management.windows_protection_state import WindowsProtectionState
 
         return self.properties.get(
             "windowsProtectionState",

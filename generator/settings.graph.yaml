@@ -394,6 +394,16 @@ type_routing:
   WindowsInformationProtectionAppLearningSummary: office365.intune.devices.management
   WindowsInformationProtectionPinCharacterRequirements: office365.intune.devices.management
 
+# Windows malware / protection state cluster.
+  WindowsMalwareCategoryCount: office365.intune.devices.management.windowsmalware
+  WindowsMalwareExecutionStateCount: office365.intune.devices.management.windowsmalware
+  WindowsMalwareInformation: office365.intune.devices.management.windowsmalware
+  WindowsMalwareNameCount: office365.intune.devices.management.windowsmalware
+  WindowsMalwareSeverityCount: office365.intune.devices.management.windowsmalware
+  WindowsMalwareStateCount: office365.intune.devices.management.windowsmalware
+  WindowsDeviceMalwareState: office365.intune.devices.management.windowsmalware
+  WindowsProtectionState: office365.intune.devices.management
+
 # Fallback: any remaining bare microsoft.graph.* type lands in the shared bucket.
   "*": office365.common
 

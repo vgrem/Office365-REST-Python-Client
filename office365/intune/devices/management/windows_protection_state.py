@@ -14,7 +14,9 @@ if TYPE_CHECKING:
     from office365.intune.devices.management.managed.windows.healthstate import (
         WindowsDeviceHealthState,
     )
-    from office365.intune.windows_device_malware_state import WindowsDeviceMalwareState
+    from office365.intune.devices.management.windowsmalware.windows_device_malware_state import (
+        WindowsDeviceMalwareState,
+    )
 
 
 class WindowsProtectionState(Entity):
@@ -134,7 +136,7 @@ class WindowsProtectionState(Entity):
     @property
     def detected_malware_state(self) -> EntityCollection[WindowsDeviceMalwareState]:
         """Gets the detectedMalwareState property"""
-        from office365.intune.windows_device_malware_state import (
+        from office365.intune.devices.management.windowsmalware.windows_device_malware_state import (
             WindowsDeviceMalwareState,
         )
 
