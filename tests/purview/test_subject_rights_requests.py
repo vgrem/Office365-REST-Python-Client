@@ -8,9 +8,7 @@ from __future__ import annotations
 
 from typing import ClassVar, Optional
 
-from office365.security.subjectrightsrequests.identity import (
-    SubjectRightsRequestIdentity,
-)
+from office365.security.subjectrightsrequests.data_subject import DataSubject
 from office365.security.subjectrightsrequests.request import (
     SubjectRightsRequest,
 )
@@ -98,7 +96,7 @@ class TestSubjectRightsRequestLifecycle(GraphDelegatedTestCase):
                 "displayName": "SDK Test DSR Export Request",
                 "description": "Automated SDK test — please delete after review",
                 "internalDueDateTime": "2026-07-05T00:00:00Z",
-                "dataSubject": SubjectRightsRequestIdentity(
+                "dataSubject": DataSubject(
                     email="sdk-test-user@contoso.com",
                 ),
             }

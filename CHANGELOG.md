@@ -66,6 +66,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `todoTask.attachments.add(...)` creates a file attachment instead of an
   abstract one; `LinkedResource` reports no type (the To Do service cannot
   resolve `microsoft.graph.linkedResource` and rejected creation).
+- **URL threat assessments carry the concrete OData type:**
+  `UrlAssessmentRequest` reports `microsoft.graph.urlAssessmentRequest` instead
+  of inheriting the abstract `microsoft.graph.threatAssessmentRequest` from
+  `ThreatAssessmentRequest`. The Graph endpoint rejected the abstract type with
+  `InvalidBody`, so `information_protection.create_url_assessment(...)` failed;
+  the file and email-file requests were already correct.
+- **Subject rights requests send a conforming `dataSubject`:** creation now
+  builds the subject with `DataSubject` (`microsoft.graph.dataSubject`) rather
+  than the never-valid `SubjectRightsRequestIdentity`, which Graph rejected with
+  *Invalid OData type specified*.
 
 ### Added
 - **To Do attachment content:** `AttachmentBase.content_bytes` exposes the
@@ -382,6 +392,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   same strict behavior (or omit `required` for the new tolerant default).
   Term-store sets' `get_by_name` alias stays tolerant, matching its
   `find_by_name`. These names keep working unchanged otherwise.
+
+### Removed
+- **`SubjectRightsRequestIdentity`:** the
+  `office365.security.subjectrightsrequests.identity` class is gone. It
+  advertised a `microsoft.graph.subjectRightsRequestSubjectIdentity` type that
+  does not exist in Graph and was never used by the library; the
+  `subjectRightsRequest.dataSubject` property is typed as `DataSubject`. This is
+  a breaking import change.
 
 ### Documentation
 - **Async discoverability:** the README now has an "Async / await" section and
