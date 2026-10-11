@@ -63,7 +63,7 @@ threat assessment.
 
 | Scenario | File | Permission |
 |---|---|---|
-| Report phishing-simulation campaigns and training | [`../entraid/security/attack_simulations.py`](../entraid/security/attack_simulations.py) | `AttackSimulation.Read.All` |
+| Report phishing-simulation campaigns and training | [`../security/attack_simulation.py`](../security/attack_simulation.py) | `AttackSimulation.Read.All` |
 
 ---
 

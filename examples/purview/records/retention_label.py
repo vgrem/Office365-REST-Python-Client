@@ -8,12 +8,12 @@ and the Records Management administrator role.
 https://learn.microsoft.com/en-us/graph/api/security-post-retentionlabels
 """
 
-from office365.directory.security.labels.retention.actionafterretentionperiod import ActionAfterRetentionPeriod
-from office365.directory.security.labels.retention.behaviorduringretentionperiod import BehaviorDuringRetentionPeriod
-from office365.directory.security.labels.retention.defaultrecordbehavior import DefaultRecordBehavior
-from office365.directory.security.labels.retention.duration_in_days import RetentionDurationInDays
-from office365.directory.security.labels.retention.trigger import RetentionTrigger
 from office365.graph_client import GraphClient
+from office365.security.labels.retention.actionafterretentionperiod import ActionAfterRetentionPeriod
+from office365.security.labels.retention.behaviorduringretentionperiod import BehaviorDuringRetentionPeriod
+from office365.security.labels.retention.defaultrecordbehavior import DefaultRecordBehavior
+from office365.security.labels.retention.duration_in_days import RetentionDurationInDays
+from office365.security.labels.retention.trigger import RetentionTrigger
 from tests.settings import admin_username, client_id, tenant
 
 client = (

@@ -86,7 +86,7 @@ def main():
     # -- Step 3: create a custom alert (for security workflows) --
     # Alerts can also be created, for example from a SOAR playbook:
     #
-    # from office365.directory.security.alerts.alert import Alert
+    # from office365.security.alerts.alert import Alert
     # new_alert = Alert(client.context)
     # new_alert.set_property("title", "Custom alert from automation")
     # new_alert.set_property("severity", "medium")

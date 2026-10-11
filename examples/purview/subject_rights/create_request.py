@@ -6,8 +6,8 @@ Requires delegated permission ``SubjectRightsRequest.ReadWrite.All``.
 https://learn.microsoft.com/en-us/graph/api/security-post-subjectrightsrequests
 """
 
-from office365.directory.security.subjectrightsrequests.identity import SubjectRightsRequestIdentity
 from office365.graph_client import GraphClient
+from office365.security.subjectrightsrequests.identity import SubjectRightsRequestIdentity
 from tests.settings import client_id, client_secret, tenant
 
 client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)

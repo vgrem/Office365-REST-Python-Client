@@ -21,14 +21,13 @@ library across Microsoft 365 and Entra ID services.
 | [`onenote/`](./onenote/) | **Microsoft OneNote** | Notebooks, sections, section groups, pages |
 | [`planner/`](./planner/) | **Microsoft Planner** | Plans, buckets, tasks, assignments, details |
 | [`entraid/`](./entraid/) | **Microsoft Entra ID** | Users, groups, applications, roles, policies, identity |
-| [`defender/`](./defender/) | **Microsoft Defender** | Advanced hunting, incidents, alerts, secure score |
 | [`intune/`](./intune/) | **Microsoft Intune** | Devices, compliance, configuration profiles, remote actions |
 | [`booking/`](./booking/) | **Microsoft Bookings** | Businesses, services, appointments |
 | [`communications/`](./communications/) | **Cloud Communications** | Calls, online meetings, presence |
 | [`purview/`](./purview/) | **Microsoft Purview** | eDiscovery, retention labels, subject rights requests |
 | [`reports/`](./reports/) | M365 usage reports | Email, mailbox, OneDrive, SharePoint, Teams, M365 app, Office activations, MFA, Copilot |
 | [`insights/`](./insights/) | Graph Insights API | Shared documents, trending content |
-| [`security/`](./security/) | **Microsoft Graph Security** | Alerts, incidents, secure score |
+| [`security/`](./security/) | **Security API (Defender XDR)** | Alerts, incidents, advanced hunting, secure score, threat intel, attack simulation |
 | [`backuprestore/`](./backuprestore/) | **M365 Backup Storage** | Backup and restore |
 | [`todo/`](./todo/) | **Microsoft To Do** | Task lists and tasks |
 | [`data/`](./data/) | Sample data | Files used by other examples (JSON, CSV, XLSX, images) |

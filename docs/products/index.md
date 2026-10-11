@@ -29,9 +29,6 @@ ready-to-run scripts, and copy the pattern you need.
 - **Microsoft Entra ID** — users, groups, applications, roles, identity, reports
     [Browse →](entraid/index.md)
 
-- **Microsoft Defender** — advanced hunting, incidents, alerts, secure score
-    [Browse →](defender/index.md)
-
 - **Microsoft Intune** — devices, compliance, configuration profiles, remote actions
     [Browse →](intune/index.md)
 
@@ -50,7 +47,7 @@ ready-to-run scripts, and copy the pattern you need.
 - **Insights** — shared documents, trending content
     [Browse →](insights/index.md)
 
-- **Security** — alerts, incidents, secure score
+- **Security API (Microsoft Defender XDR)** — alerts, incidents, advanced hunting, secure score, threat intelligence, attack simulation
     [Browse →](security/index.md)
 
 - **Microsoft 365 Backup Storage** — backup & restore
