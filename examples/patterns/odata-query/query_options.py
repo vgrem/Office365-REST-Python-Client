@@ -37,12 +37,21 @@ def main() -> None:
     for item in items:
         print(f"  {item.name:40} {item.size or 0:>12,} bytes")
 
-    # $filter — evaluated by the service, not by you.
-    sized = root.children.filter("size gt 0").select(["name", "size"]).top(10).get().execute_query()
-    print(f"\n{len(sized)} item(s) with a non-zero size (filtered server-side)")
+    # $filter — evaluated by the service, not by you. Use a property the endpoint
+    # can filter on. Note that driveItem.size is *not* server-filterable (the
+    # SharePoint backing store maps it to SMTotalFileStreamSize), so asking for
+    # it raises QueryPropertyNotSupportedError before any request is sent.
+    folders = root.children.filter("folder ne null").select(["name", "folder"]).top(10).get().execute_query()
+    print(f"\n{len(folders)} folder(s) (filtered server-side)")
 
-    # $expand — pull a related facet in the same call.
-    with_meta = root.children.expand(["listItem"]).select(["name"]).top(1).get().execute_query()
+    # For a property the service can't filter, narrow the set client-side:
+    big = [item for item in root.children.get().execute_query() if (item.size or 0) > 0]
+    print(f"{len(big)} item(s) with a non-zero size (filtered client-side)")
+
+    # $expand — pull a related facet in the same call. Note: pairing $expand with a
+    # narrow $select on this feed makes Graph stream a malformed body, so expand on
+    # its own here.
+    with_meta = root.children.expand(["listItem"]).top(1).get().execute_query()
     for item in with_meta:
         print(f"\n{item.name!r} expands to its backing listItem ({item.list_item.id})")
 
