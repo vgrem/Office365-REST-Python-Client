@@ -87,6 +87,23 @@ def suggest_routing(service: str) -> None:
     )
 
 
+def report_duplicates(service: str) -> None:
+    """Print OData names claimed by more than one module (one shadows another)."""
+    options = GeneratorOptions.load(service, GENERATOR_DIR)
+    registry = TypeRegistry(options.modules.split(","), namespace=options.namespace)
+    duplicates = registry.duplicate_types()
+    if not duplicates:
+        print("No duplicate OData names found.")
+        return
+    print(f"{len(duplicates)} duplicate OData name(s):")
+    for name, modules in sorted(duplicates.items()):
+        chosen = registry.strict_module_for(name) or registry.module_for(name)
+        print(f"  {name}")
+        for module in modules:
+            marker = "  <- used" if module == chosen else ""
+            print(f"    {module}{marker}")
+
+
 def fetch_services() -> None:
     """Fetch the Graph docs service taxonomy and cache it for --suggest-routing."""
     services = fetch_service_map()
@@ -147,12 +164,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="fetch the Graph docs service taxonomy (for --suggest-routing) and exit",
     )
+    parser.add_argument(
+        "--report-duplicates",
+        action="store_true",
+        help="print OData names claimed by more than one module and exit",
+    )
     args = parser.parse_args(argv)
     if args.fetch_services:
         fetch_services()
         return 0
     if args.suggest_routing:
         suggest_routing(args.service)
+        return 0
+    if args.report_duplicates:
+        report_duplicates(args.service)
         return 0
     try:
         generate(

@@ -66,6 +66,10 @@ class TypeRegistry:
             return None
         return self._index.resolve_module(type_name, strict=True, kind=kind)
 
+    def duplicate_types(self) -> dict[str, list[str]]:
+        """OData names claimed by more than one module (see :class:`SymbolIndex`)."""
+        return self._index.duplicate_types()
+
     def members_of(self, type_name: str | None) -> set[str]:
         """Member names a class already has (incl. inherited), purely from AST."""
         if not type_name:

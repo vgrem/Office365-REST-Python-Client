@@ -109,6 +109,20 @@ class SymbolIndex:
         # lookup, annotation hints) keep the first candidate.
         return None if strict else modules[0]
 
+    def duplicate_types(self) -> dict[str, list[str]]:
+        """OData names claimed by more than one module (potential duplicates).
+
+        A name owned by several modules means one file shadows another; the
+        resolver picks the more plausible home, but the stale copy still needs
+        to be removed by hand. Returns ``{odata_name: [module, ...]}``.
+        """
+        duplicates: dict[str, list[str]] = {}
+        for key, candidates in self._by_odata.items():
+            modules = sorted({module for _, module in candidates})
+            if len(modules) > 1:
+                duplicates[key] = modules
+        return duplicates
+
     def class_members(self, type_name: str | None) -> set[str]:
         """Member names a class already has (incl. inherited), purely from AST."""
         if not type_name:
