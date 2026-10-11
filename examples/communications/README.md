@@ -1,68 +1,95 @@
-# Microsoft Teams — Communications
+# Working with cloud communications
 
-Examples for working with presence, online meetings, and call records
-via the Microsoft Graph Communications API.
+`client.communications` is Microsoft Graph's **cloud communications** endpoint:
+presence, online meetings, calls and call records. "Communications" is the API
+namespace, not a product — Teams, a contact centre or a softphone all sit on top
+of it.
 
----
-
-## Prerequisites
-
-| Permission | Description |
-|---|---|
-| `Presence.Read` (delegated) | Read a user's presence |
-| `Presence.Read.All` (application) | Read presence for all users |
-| `Presence.ReadWrite` (delegated) | Set your own presence and status message |
-| `OnlineMeetings.ReadWrite` (delegated) | Create and list online meetings |
-| `CallRecords.Read.All` (application) | Read Teams call records |
-
----
-
-## How communications works
+## The model
 
 ```mermaid
-graph TD
-    A[Graph Communications API] --> B[Presence]
-    A --> C[Online meetings]
-    A --> D[Call records]
-    B --> B1[availability / activity]
-    C --> C1[join URL / recordings]
-    D --> D1[call quality / sessions]
+flowchart LR
+    C["client.communications"] --> P["presences<br/>who is reachable"]
+    C --> M["online_meetings<br/>join links &amp; artifacts"]
+    C --> CR["call_records<br/>call quality, Direct Routing"]
+    C --> CA["calls · adhoc_calls<br/>real-time calling"]
 ```
 
-Presence is delegated (a user's own or with consent); online meetings are
-delegated; call records require **application** permission.
+Three independent areas — with three different permission stories:
 
----
+| Area | Who may call it | Folder |
+| --- | --- | --- |
+| Presence | a user's own presence (delegated) | [`presence/`](./presence/) |
+| Online meetings | the signed-in organizer's meetings (delegated) | [`meetings/`](./meetings/) |
+| Call records | **application only** — no "my calls" version | [`callrecords/`](./callrecords/) |
 
-## Examples
+Real-time `calls` and `adhoc_calls` need a media bot (application- or
+service-hosted media), so they are out of scope here.
 
-| Scenario | File | Permission |
-|---|---|---|
-| Get presence for a user | [`get_presence.py`](./get_presence.py) | `Presence.Read` |
-| Set presence and status message | [`set_presence.py`](./set_presence.py) | `Presence.ReadWrite` |
-| Presence monitor with polling and routing | [`teams_presence_monitor.py`](./teams_presence_monitor.py) | `Presence.Read.All`, `Presence.ReadWrite` |
-| Create a Teams meeting and list your meetings | [`online_meetings.py`](./online_meetings.py) | `OnlineMeetings.ReadWrite` |
-| List Teams call records (call quality) | [`call_records.py`](./call_records.py) | `CallRecords.Read.All` |
+## Start here
 
----
+```bash
+cp .env.example .env
+uv run python examples/communications/quickstart.py
+```
 
-## Quick start
+→ [`quickstart.py`](./quickstart.py) connects and reads your own presence. If it
+prints a status, your app registration and consent are fine.
+
+## Presence — is this person reachable?
+
+[`presence/`](./presence/) · `Presence.Read` (own) · `Presence.Read.All` (anyone) · `Presence.ReadWrite` (change)
+
+One resource per user, kept current by Teams. Read one user, read 650 at once,
+or override your own status for a fixed window.
 
 ```python
-from office365.graph_client import GraphClient
-
-client = GraphClient(tenant="contoso.onmicrosoft.com").with_username_and_password(
-    "client_id", "user@contoso.com", "password"
-)
-
 presence = client.me.presence.get().execute_query()
-print(f"{presence.availability}  {presence.activity}")
+print(presence.availability, presence.activity)  # e.g. Busy / InACall
+
+for presence in client.communications.get_presences_by_user_id(upns).execute_query():
+    print(presence.id, presence.availability)  # one request, many users
 ```
 
----
+## Online meetings — join links without a calendar
+
+[`meetings/`](./meetings/) · `OnlineMeetings.ReadWrite`
+
+An online meeting is *not* a calendar event: you get a `joinWebUrl` and nothing
+lands in anyone's inbox. Post the link as an event body if you do want an invite
+([`../outlook/events/online_meeting.py`](../outlook/events/online_meeting.py)).
+
+```python
+meeting = client.me.online_meetings.create(
+    subject="Project sync", start_datetime=start, end_datetime=end
+).execute_query()
+print(meeting.join_web_url)
+```
+
+Idempotent creation is available too — `create_or_get(external_id=…)` returns the
+existing meeting when your external id is already known, which makes retries and
+booking syncs safe.
+
+## Call records — call quality and PSTN
+
+[`callrecords/`](./callrecords/) · `CallRecords.Read.All` (application)
+
+A record is the call, a **session** is one endpoint's leg, a **segment** is a
+media stream inside it. Records are retained for 30 days and the feed rejects
+`$top`, so filter on `startDateTime`. Direct Routing calls are a flat log
+(`get_direct_routing_calls`) rather than entities.
+
+## Why is this folder not under `teams/`?
+
+Because it is not the Teams API. Presence, online meetings and call records are
+their own Graph namespace — `client.communications` — with their own endpoint and
+their own scopes, and this tree mirrors the client: one folder per namespace. The
+only overlap with the product is online meetings, so [`../teams/`](../teams/)
+links here instead of duplicating the code.
 
 ## Official docs
 
-- [Presence API overview](https://learn.microsoft.com/en-us/graph/api/resources/presence)
-- [Cloud communications API](https://learn.microsoft.com/en-us/graph/api/resources/communications-api-overview)
+- [Cloud communications API overview](https://learn.microsoft.com/en-us/graph/api/resources/communications-api-overview)
+- [Presence API](https://learn.microsoft.com/en-us/graph/api/resources/presence)
+- [Online meetings](https://learn.microsoft.com/en-us/graph/api/resources/onlinemeeting)
 - [Call records API](https://learn.microsoft.com/en-us/graph/api/resources/callrecords-api-overview)

@@ -76,13 +76,15 @@ See [`migration/README.md`](./migration/README.md) for the archive layout and pe
 | [`chats_lifecycle.py`](./chats_lifecycle.py) | Create and manage chats |
 | [`chats_messages.py`](./chats_messages.py) | Chat messaging: send, reply, list, export, digest |
 
-## Meetings & analytics
+## Analytics & reports
 
 | Script | What it does |
 |---|---|
-| [`online_meetings.py`](./online_meetings.py) | Create online meetings with join links |
 | [`usage_report.py`](./usage_report.py) | Team counts and user activity over periods |
-| [`call_records.py`](./call_records.py) | Teams call quality analytics |
+
+Online meetings, presence and call records are **not** part of the Teams API —
+they belong to Graph's cloud-communications namespace (`client.communications`),
+so they have their own tour: [`../communications/`](../communications/).
 
 ## Typical workflow (bulk onboarding → governance → cleanup)
 

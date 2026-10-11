@@ -23,7 +23,7 @@ library across Microsoft 365 and Entra ID services.
 | [`entraid/`](./entraid/) | **Microsoft Entra ID** | Users, groups, applications, roles, policies, identity |
 | [`intune/`](./intune/) | **Microsoft Intune** | Devices, compliance, configuration profiles, remote actions |
 | [`booking/`](./booking/) | **Microsoft Bookings** | Businesses, services, appointments |
-| [`communications/`](./communications/) | **Cloud Communications** | Calls, online meetings, presence |
+| [`communications/`](./communications/) | **Cloud Communications** | Presence, online meetings, call records, telephony |
 | [`purview/`](./purview/) | **Microsoft Purview** | eDiscovery, retention labels, subject rights requests |
 | [`reports/`](./reports/) | M365 usage reports | Email, mailbox, OneDrive, SharePoint, Teams, M365 app, Office activations, MFA, Copilot |
 | [`insights/`](./insights/) | Graph Insights API | Shared documents, trending content |
