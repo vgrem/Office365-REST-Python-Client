@@ -22,10 +22,10 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 from office365.graph_client import GraphClient
-from office365.intune.print.taskstatus import TaskStatus
 from office365.outlook.mail.importance import Importance
 from office365.todo.tasks.lists.list import TodoTaskList
 from office365.todo.tasks.task import TodoTask
+from office365.todo.tasks.taskstatus import TaskStatus
 from tests.settings import client_id, password, tenant, username
 
 IMPORTANCE = {"low": Importance.low, "normal": Importance.normal, "high": Importance.high}

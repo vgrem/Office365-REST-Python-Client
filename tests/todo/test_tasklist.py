@@ -18,9 +18,9 @@ from __future__ import annotations
 
 from typing import ClassVar, Optional
 
-from office365.intune.print.taskstatus import TaskStatus
 from office365.todo.tasks.lists.list import TodoTaskList
 from office365.todo.tasks.task import TodoTask
+from office365.todo.tasks.taskstatus import TaskStatus
 from tests import create_unique_name
 from tests.decorators import requires_delegated
 from tests.graph_case import GraphDelegatedTestCase

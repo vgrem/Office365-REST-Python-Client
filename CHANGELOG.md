@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   must be updated: `from office365.directory.security.alerts... import ...`
   becomes `from office365.security.alerts... import ...`. `client.security` is
   unchanged.
+- **`TaskStatus` moved to `office365.todo.tasks.taskstatus`** (was
+  `office365.intune.print.taskstatus`). The enum models the Microsoft To Do task
+  status and is only used by `TodoTask`, so it now sits next to its consumer.
+  Update imports accordingly.
 
 ### Fixed
 - **Request payload scalars are serialized:** a body built from a dictionary or

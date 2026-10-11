@@ -10,7 +10,6 @@ from office365.directory.extensions.open_type import OpenTypeExtension
 from office365.directory.permissions.require_permission import require_permission
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
-from office365.intune.print.taskstatus import TaskStatus
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.mail.importance import Importance
 from office365.outlook.mail.item_body import ItemBody
@@ -24,6 +23,7 @@ from office365.todo.attachments.session import AttachmentSession
 from office365.todo.attachments.task_file import TaskFileAttachment
 from office365.todo.checklist_item import ChecklistItem
 from office365.todo.linked_resource import LinkedResource
+from office365.todo.tasks.taskstatus import TaskStatus
 
 DEFAULT_ATTACHMENT_CHUNK_SIZE = 4 * 1024 * 1024
 MAX_SIMPLE_ATTACHMENT_BYTES = 3 * 1024 * 1024

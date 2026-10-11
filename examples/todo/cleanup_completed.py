@@ -12,7 +12,7 @@ import argparse
 from datetime import datetime, timedelta, timezone
 
 from office365.graph_client import GraphClient
-from office365.intune.print.taskstatus import TaskStatus
+from office365.todo.tasks.taskstatus import TaskStatus
 from tests.settings import client_id, password, tenant, username
 
 

@@ -671,6 +671,7 @@ type_routing:
   "AttachmentSession": office365.todo
   "ChecklistItem": office365.todo
   "LinkedResource": office365.todo
+  "TaskStatus": office365.todo.tasks
   "ServiceStorageQuotaBreakdown": office365.directory
   "VerifiedIdProfile": office365.directory
   "WorkPlanOccurrence": office365.directory.users
