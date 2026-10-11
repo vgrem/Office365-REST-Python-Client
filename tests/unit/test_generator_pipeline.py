@@ -8,6 +8,7 @@ from generator import pipeline as pipeline_module
 from generator.config import GeneratorOptions
 from generator.manifest import Manifest, manifest_path, run_signature
 from generator.odata.model import ODataModel
+from generator.odata.property import PropertyInformation
 from generator.odata.type_information import TypeInformation
 from generator.pipeline import GeneratorPipeline
 
@@ -108,3 +109,36 @@ def test_cli_up_to_date_fast_path(tmp_path: Path, monkeypatch) -> None:
     assert cli._up_to_date(options, force=True, only_types=None, report_path=None) is False
     assert cli._up_to_date(options, force=False, only_types=["SP.X"], report_path=None) is False
     assert cli._up_to_date(options, force=False, only_types=None, report_path="r.json") is False
+
+
+def test_pollable_types_marks_operation_families():
+    """Operation entities (name ends ``*Operation`` with a ``status``) are pollable."""
+    model = ODataModel()
+    entity = TypeInformation(BaseTypeFullName="EntityType", FullName="microsoft.graph.Entity", IsValueObject=False)
+    lro = TypeInformation(
+        BaseTypeFullName="EntityType",
+        FullName="microsoft.graph.LongRunningOperation",
+        BaseTypeName="microsoft.graph.Entity",
+        IsValueObject=False,
+    )
+    lro.add_property(PropertyInformation(Name="status", TypeName="Edm.String"))
+    rich = TypeInformation(
+        BaseTypeFullName="EntityType",
+        FullName="microsoft.graph.RichLongRunningOperation",
+        BaseTypeName="microsoft.graph.LongRunningOperation",
+        IsValueObject=False,
+    )
+    widget = TypeInformation(
+        BaseTypeFullName="EntityType",
+        FullName="microsoft.graph.Widget",
+        BaseTypeName="microsoft.graph.Entity",
+        IsValueObject=False,
+    )
+    for schema in (entity, lro, rich, widget):
+        model.add_type(schema)
+
+    pollable = pipeline_module._pollable_types(model)
+
+    assert "microsoft.graph.LongRunningOperation" in pollable
+    assert "microsoft.graph.RichLongRunningOperation" in pollable  # inherits from the base
+    assert "microsoft.graph.Widget" not in pollable

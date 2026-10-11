@@ -4,12 +4,13 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.directory.identitygovernance.operationstatus import OperationStatus
 
 
-class Operation(Entity):
+class Operation(PollableOperation, Entity):
     @property
     def created_date_time(self) -> Optional[datetime]:
         """Gets the createdDateTime property"""

@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.onedrive.operations.longrunningoperationstatus import (
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     )
 
 
-class LongRunningOperation(Entity):
+class LongRunningOperation(PollableOperation, Entity):
     """The status of a long-running operation."""
 
     @property

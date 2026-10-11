@@ -4,12 +4,13 @@ from typing import TYPE_CHECKING
 
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.directory.security.report_file_metadata import ReportFileMetadata
 
 
-class EdiscoveryPurgeDataOperation(Entity):
+class EdiscoveryPurgeDataOperation(PollableOperation, Entity):
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.security.EdiscoveryPurgeDataOperation"

@@ -11,13 +11,14 @@ from office365.directory.security.search.documentversion import DocumentVersion
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.directory.security.ediscovery.search import EdiscoverySearch
     from office365.directory.security.export_file_metadata import ExportFileMetadata
 
 
-class EdiscoverySearchExportOperation(Entity):
+class EdiscoverySearchExportOperation(PollableOperation, Entity):
     @property
     def additional_options(self) -> AdditionalOptions:
         """Gets the additionalOptions property"""

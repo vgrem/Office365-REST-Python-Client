@@ -7,12 +7,13 @@ from office365.directory.security.ediscovery.search import EdiscoverySearch
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.directory.security.report_file_metadata import ReportFileMetadata
 
 
-class EdiscoveryEstimateOperation(Entity):
+class EdiscoveryEstimateOperation(PollableOperation, Entity):
     @property
     def indexed_item_count(self) -> Optional[int]:
         """Gets the indexedItemCount property"""

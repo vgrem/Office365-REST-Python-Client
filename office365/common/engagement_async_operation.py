@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.teams.viva.engagement.asyncoperationtype import (
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
     )
 
 
-class EngagementAsyncOperation(Entity):
+class EngagementAsyncOperation(PollableOperation, Entity):
     @property
     def operation_type(self) -> EngagementAsyncOperationType:
         """Gets the operationType property"""

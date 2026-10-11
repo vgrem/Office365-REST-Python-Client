@@ -2,9 +2,10 @@ from datetime import datetime
 from typing import Optional
 
 from office365.entity import Entity
+from office365.runtime.pollable import PollableOperation
 
 
-class DataPolicyOperation(Entity):
+class DataPolicyOperation(PollableOperation, Entity):
     """
     Represents a submitted data policy operation. It contains necessary information for tracking the status of
     an operation. For example, a company administrator can submit a data policy operation request to export an

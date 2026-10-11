@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import Optional
 
 from office365.entity import Entity
+from office365.runtime.pollable import PollableOperation
 
 
-class RecordOperation(Entity):
+class RecordOperation(PollableOperation, Entity):
     @property
     def recording_access_token(self) -> Optional[str]:
         """Gets the recordingAccessToken property"""

@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.directory.delegatedadmin.relationshipoperationtype import (
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     )
 
 
-class DelegatedAdminRelationshipOperation(Entity):
+class DelegatedAdminRelationshipOperation(PollableOperation, Entity):
     @property
     def created_date_time(self) -> Optional[datetime]:
         """Gets the createdDateTime property"""

@@ -6,12 +6,13 @@ from office365.entity import Entity
 from office365.externalconnectors.connectionoperationstatus import (
     ConnectionOperationStatus,
 )
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.runtime.types.public_error import PublicError
 
 
-class ConnectionOperation(Entity):
+class ConnectionOperation(PollableOperation, Entity):
     @property
     def status(self) -> ConnectionOperationStatus:
         """Gets the status property"""

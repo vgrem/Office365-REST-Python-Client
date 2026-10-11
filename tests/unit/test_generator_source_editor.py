@@ -83,6 +83,25 @@ def test_splice_drops_sole_pass() -> None:
     ast.parse(out)
 
 
+def test_splice_prepends_extra_bases() -> None:
+    out = SourceEditor("class Thing(Entity):\n    pass\n", "Thing").splice([], [], extra_bases=["PollableOperation"])
+
+    assert "class Thing(PollableOperation, Entity):" in out
+
+
+def test_splice_prepend_bases_is_idempotent() -> None:
+    original = "class Thing(PollableOperation, Entity):\n    pass\n"
+    out = SourceEditor(original, "Thing").splice([], [], extra_bases=["PollableOperation"])
+
+    assert out.count("PollableOperation") == 1
+
+
+def test_splice_prepends_extra_base_when_class_has_no_base() -> None:
+    out = SourceEditor("class Thing:\n    pass\n", "Thing").splice([], [], extra_bases=["PollableOperation"])
+
+    assert "class Thing(PollableOperation):" in out
+
+
 def test_splice_adds_dataclass_decorator_when_requested() -> None:
     out = SourceEditor("class Thing:\n    existing = 1\n", "Thing").splice([_stmt("new = 2")], [], add_dataclass=True)
 

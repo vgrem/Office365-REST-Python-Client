@@ -12,13 +12,14 @@ from office365.directory.security.search.documentversion import DocumentVersion
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.directory.security.ediscovery.search import EdiscoverySearch
     from office365.directory.security.report_file_metadata import ReportFileMetadata
 
 
-class EdiscoveryAddToReviewSetOperation(Entity):
+class EdiscoveryAddToReviewSetOperation(PollableOperation, Entity):
     @property
     def additional_data_options(self) -> AdditionalDataOptions:
         """Gets the additionalDataOptions property"""

@@ -11,12 +11,13 @@ from office365.directory.security.ediscovery.review_set_query import (
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.directory.security.export_file_metadata import ExportFileMetadata
 
 
-class EdiscoveryExportOperation(Entity):
+class EdiscoveryExportOperation(PollableOperation, Entity):
     @property
     def description(self) -> Optional[str]:
         """Gets the description property"""

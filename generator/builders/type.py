@@ -71,6 +71,8 @@ class TypeBuilder(ast.NodeTransformer):
         self._changes: List[str] = []
         self._docstring: Optional[str] = None
         self._entity_type_name_exists: bool = False
+        self._pollable = self._schema.FullName in self._context.pollable_types
+        self._pollable_base_added = False
         self._known_types: set[str] = set(self._context.known_types)
         self._original_text: Optional[str] = None
         self._added_members: List[ast.stmt] = []
@@ -127,6 +129,8 @@ class TypeBuilder(ast.NodeTransformer):
 
         kind = self._effective_kind(node)
         self._kind = kind
+        if kind == "EntityType" and self._pollable:
+            self._ensure_pollable_base(node)
         if kind == "ComplexType":
             self._build_value_properties(node)
         elif kind == "EnumType":
@@ -136,6 +140,21 @@ class TypeBuilder(ast.NodeTransformer):
 
         self._build_post(node)
         self._build_methods(node)
+
+    def _ensure_pollable_base(self, node: ast.ClassDef) -> None:
+        """Make an operation entity awaitable by adding the ``PollableOperation`` mixin.
+
+        Skipped when a base class already provides it (e.g. a hand-written
+        subclass that lists ``PollableOperation`` or inherits a pollable type),
+        so the mixin is never added twice — which would break the MRO.
+        """
+        pollable_names = {name.rsplit(".", 1)[-1] for name in self._context.pollable_types}
+        bases = {base.id for base in node.bases if isinstance(base, ast.Name)}
+        if bases & ({"PollableOperation", "ClientValue", "Enum"} | pollable_names):
+            return
+        node.bases.insert(0, ast.Name(id="PollableOperation", ctx=ast.Load()))
+        self._pollable_base_added = True
+        self._changes.append("base PollableOperation")
 
     def _effective_kind(self, node: ast.ClassDef) -> str:
         """The kind to build from, honouring the on-disk class's actual base.
@@ -351,6 +370,21 @@ class TypeBuilder(ast.NodeTransformer):
 
         existing = existing_import_names(module)
         insert_index = len([n for n in module.body if isinstance(n, (ast.Import, ast.ImportFrom))])
+        if self._pollable_base_added and "PollableOperation" not in existing:
+            self._added_imports.extend(
+                install_imports(
+                    module,
+                    [
+                        ast.ImportFrom(
+                            module="office365.runtime.pollable",
+                            names=[ast.alias(name="PollableOperation")],
+                            level=0,
+                        )
+                    ],
+                    existing,
+                    insert_index,
+                )
+            )
         self._added_imports.extend(
             install_imports(module, self._template.build_references(collector), existing, insert_index)
         )
@@ -602,7 +636,10 @@ class TypeBuilder(ast.NodeTransformer):
         assert self._original_text is not None
         editor = SourceEditor(self._original_text, self.client_type_name)
         add_dataclass = self._schema.BaseTypeFullName == "ComplexType"
-        return editor.splice(self._added_members, self._added_imports, add_dataclass=add_dataclass)
+        extra_bases = ["PollableOperation"] if self._pollable_base_added else None
+        return editor.splice(
+            self._added_members, self._added_imports, add_dataclass=add_dataclass, extra_bases=extra_bases
+        )
 
     def save(self):
         code = self.render()

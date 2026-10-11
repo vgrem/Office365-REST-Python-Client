@@ -29,6 +29,39 @@ from generator.validation import ValidationError, validate_source
 from generator.verification import PostCommitVerifier, semantic_issues
 
 
+def _pollable_types(model: ODataModel) -> frozenset[str]:
+    """Entity types that model a long-running/async operation.
+
+    A type is pollable when it or any ancestor in the CSDL base chain is an
+    ``*Operation`` entity with a ``status`` property (``LongRunningOperation``,
+    ``security.CaseOperation``, ``PrintOperation`` …); subtypes inherit it. Such
+    types get the ``PollableOperation`` mixin so ``wait()`` / ``wait_async()``
+    work on them.
+    """
+
+    def is_operation_with_status(name: str) -> bool:
+        schema = model.types.get(name)
+        return (
+            bool(schema)
+            and name.rsplit(".", 1)[-1].endswith("Operation")
+            and any(prop.lower() == "status" for prop in schema.Properties)
+        )
+
+    def walk(name: str) -> bool:
+        seen: set[str] = set()
+        while name and name not in seen:
+            seen.add(name)
+            if is_operation_with_status(name):
+                return True
+            schema = model.types.get(name)
+            name = getattr(schema, "BaseTypeName", None) if schema else ""
+        return False
+
+    return frozenset(
+        name for name, schema in model.types.items() if schema.BaseTypeFullName == "EntityType" and walk(name)
+    )
+
+
 class GeneratorPipeline:
     """Runs one generation pass over an :class:`ODataModel`.
 
@@ -90,6 +123,7 @@ class GeneratorPipeline:
             entity_types=frozenset(
                 name for name, schema in model.types.items() if schema.BaseTypeFullName == "EntityType"
             ),
+            pollable_types=_pollable_types(model),
         )
         self._checkpoint = Checkpoint(checkpoint_path(options.metadata_path, base_dir))
         self._output_root = Path(options.output_path).resolve()

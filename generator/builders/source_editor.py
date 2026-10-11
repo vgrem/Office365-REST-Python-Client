@@ -133,12 +133,23 @@ class SourceEditor:
     text: str
     class_name: str
 
-    def splice(self, members: list[ast.stmt], imports: list[ast.stmt], *, add_dataclass: bool = False) -> str:
-        """Return the source with ``members``/``imports`` spliced in."""
+    def splice(
+        self,
+        members: list[ast.stmt],
+        imports: list[ast.stmt],
+        *,
+        add_dataclass: bool = False,
+        extra_bases: Optional[list[str]] = None,
+    ) -> str:
+        """Return the source with ``members``/``imports`` spliced in.
+
+        ``extra_bases`` are mixins to prepend to the class's base list (e.g.
+        ``PollableOperation`` when an operation entity becomes awaitable).
+        """
         tree = ast.parse(self.text)
         members, imports = self._qualify(members, imports, tree)
         runtime_lines, type_checking_lines = self._split_imports(imports)
-        return self._assemble(tree, members, runtime_lines, type_checking_lines, add_dataclass)
+        return self._assemble(tree, members, runtime_lines, type_checking_lines, add_dataclass, extra_bases or [])
 
     @staticmethod
     def _qualify(
@@ -174,11 +185,15 @@ class SourceEditor:
         runtime_lines: list[str],
         type_checking_lines: list[str],
         add_dataclass: bool,
+        extra_bases: list[str],
     ) -> str:
         lines = self.text.splitlines()
         class_end = self._class_body_end_line(tree)
         runtime_insert = self._last_runtime_import_line(tree)
         tc_block = self._find_type_checking_block(tree)
+
+        if extra_bases:
+            self._prepend_bases(tree, lines, extra_bases)
 
         if members:
             pass_line = self._sole_pass_line(tree)
@@ -214,6 +229,17 @@ class SourceEditor:
             if isinstance(node, ast.ClassDef) and node.name == self.class_name:
                 return node.lineno - 1
         return None
+
+    def _prepend_bases(self, tree: ast.Module, lines: list[str], extra_bases: list[str]) -> None:
+        """Insert ``extra_bases`` at the front of the target class's bases."""
+        for node in tree.body:
+            if not isinstance(node, ast.ClassDef) or node.name != self.class_name:
+                continue
+            existing = [ast.unparse(base) for base in node.bases]
+            new_bases = [name for name in extra_bases if name not in existing] + existing
+            if new_bases:
+                lines[node.lineno - 1] = f"class {self.class_name}({', '.join(new_bases)}):"
+            return
 
     def _has_dataclass_decorator(self, tree: ast.Module) -> bool:
         for node in tree.body:

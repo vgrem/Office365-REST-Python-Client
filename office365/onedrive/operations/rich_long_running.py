@@ -3,13 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from office365.onedrive.operations.long_running import LongRunningOperation
-from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.runtime.types.public_error import PublicError
 
 
-class RichLongRunningOperation(PollableOperation, LongRunningOperation):
+class RichLongRunningOperation(LongRunningOperation):
     """Represents the status of a long-running operation on a site or a list."""
 
     @property

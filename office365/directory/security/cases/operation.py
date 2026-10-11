@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
+from office365.runtime.pollable import PollableOperation
 
 if TYPE_CHECKING:
     from office365.communications.result_info import ResultInfo
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
     from office365.directory.security.cases.operationstatus import CaseOperationStatus
 
 
-class CaseOperation(Entity):
+class CaseOperation(PollableOperation, Entity):
     """An abstract entity that represents a long-running eDiscovery process.
     It contains a common set of properties that are shared among inheriting entities"""
 
