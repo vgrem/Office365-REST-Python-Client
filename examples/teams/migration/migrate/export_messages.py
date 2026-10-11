@@ -18,15 +18,25 @@ permissions for the chosen scope).
 """
 
 import argparse
+import tempfile
 from pathlib import Path
 
 from office365.graph_client import GraphClient
+from office365.runtime.client_request_exception import ClientRequestException
 from tests.settings import client_id, client_secret, tenant, user_principal
+
+
+def _scope_hint(args) -> str:
+    if args.tenant:
+        return "Tenant-wide channel messages need Teamwork.Migrate.All (and ChannelMessage.Read.All)."
+    if args.team:
+        return "Channel messages need ChannelMessage.Read.All."
+    return "User chat messages need Chat.Read.All or Chat.ReadWrite.All."
 
 
 def main():
     parser = argparse.ArgumentParser(description="Export Teams messages to NDJSON")
-    parser.add_argument("--output", default="/tmp", help="output directory")
+    parser.add_argument("--output", default=str(Path(tempfile.gettempdir()) / "teams_messages"), help="output directory")
     parser.add_argument("--team", default=None, help="team id (all channel messages)")
     parser.add_argument("--user", default=user_principal, help=f"user id/UPN (default: {user_principal})")
     parser.add_argument("--tenant", action="store_true", help="tenant-wide channel messages (overrides --user)")
@@ -47,11 +57,17 @@ def main():
 
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
-    with open(out / "messages.ndjson", "w", encoding="utf-8") as f:
-        chain = messages.get_all().to_ndjson(f)
-        if not args.no_attachments:
-            chain.download_hosted_contents(out / "attachments")
-        chain.execute_query()
+    try:
+        with open(out / "messages.ndjson", "w", encoding="utf-8") as f:
+            chain = messages.get_all().to_ndjson(f)
+            if not args.no_attachments:
+                chain.download_hosted_contents(out / "attachments")
+            chain.execute_query()
+    except ClientRequestException as ex:
+        if ex.code not in ("Forbidden", "UnknownError"):
+            raise
+        print(f"✗ {_scope_hint(args)}\n  ({ex.code}: {str(ex)[:200]})")
+        return
 
     print(f"Exported {len(messages)} messages to {out / 'messages.ndjson'}")
 

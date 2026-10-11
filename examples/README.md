@@ -16,7 +16,7 @@ library across Microsoft 365 and Entra ID services.
 | [`admin/`](./admin/) | **Microsoft 365 Admin** | Service health, tenant settings, profile cards |
 | [`sharepoint/`](./sharepoint/) | **Microsoft SharePoint** | Lists, items, files, folders, search, permissions, sites, taxonomy, webhooks |
 | [`onedrive/`](./onedrive/) | **Microsoft OneDrive** | Files, folders, drives, sharing, search, Excel workbooks |
-| [`teams/`](./teams/) | **Microsoft Teams** | Lifecycle, channels, messages, members, apps, tabs |
+| [`teams/`](./teams/) | **Microsoft Teams** | Administration, members, channels & messages, chats, apps & tabs, tags, governance, export & migration |
 | [`outlook/`](./outlook/) | **Outlook / Exchange Online** | Mail (send, draft, folders, rules, search), events, calendars |
 | [`onenote/`](./onenote/) | **Microsoft OneNote** | Notebooks, sections, section groups, pages |
 | [`planner/`](./planner/) | **Microsoft Planner** | Plans, buckets, tasks, assignments, details |

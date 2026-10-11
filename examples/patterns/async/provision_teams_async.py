@@ -39,7 +39,7 @@ from office365.teams.operations.async_operation import TeamsAsyncOperation
 from office365.teams.operations.async_status import TeamsAsyncOperationStatus
 from office365.teams.visibility_type import TeamVisibilityType
 from tests import create_unique_name
-from tests.settings import client_id, client_secret, tenant
+from tests.settings import client_id, client_secret, tenant, user_principal
 
 DEFAULT_TEMPLATE = "standard"
 _TERMINAL = (TeamsAsyncOperationStatus.succeeded, TeamsAsyncOperationStatus.failed)
@@ -75,7 +75,7 @@ def mail_nickname(name: str) -> str:
     return f"{slug}{uuid.uuid4().hex[:6]}"
 
 
-async def submit(client: GraphClient, row: TeamRequest) -> TeamsAsyncOperation:
+async def submit(client: GraphClient, row: TeamRequest, owner: str) -> TeamsAsyncOperation:
     """Create or clone a team; either call returns a ``teamsAsyncOperation``."""
     if row.clone_from:
         return (
@@ -89,7 +89,8 @@ async def submit(client: GraphClient, row: TeamRequest) -> TeamsAsyncOperation:
             )
             .execute_query_async()
         )
-    return await client.teams.create(row.name, row.description, row.template).execute_query_async()
+    # Application context must name an owner; a clone inherits the source owners.
+    return await client.teams.create(row.name, row.description, row.template, owners=[owner]).execute_query_async()
 
 
 async def poll_all(
@@ -151,6 +152,11 @@ async def main() -> None:
     parser.add_argument("--interval", type=float, default=15, help="seconds between polls (default: 15)")
     parser.add_argument("--timeout", type=float, default=900, help="batch timeout in seconds")
     parser.add_argument("--keep", action="store_true", help="keep the provisioned teams")
+    parser.add_argument(
+        "--owner",
+        default=user_principal,
+        help="UPN or id of the owning user for created teams (required in application context)",
+    )
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
@@ -160,7 +166,9 @@ async def main() -> None:
             requests = read_rows(args.file)
         else:
             source_name = create_unique_name("bulk_src")
-            source_op = await client.teams.create(source_name, "Template team for the batch").execute_query_async()
+            source_op = await client.teams.create(
+                source_name, "Template team for the batch", owners=[args.owner]
+            ).execute_query_async()
             await source_op.poll_for_status_async(
                 timeout_sec=int(args.timeout), polling_interval=max(1, int(args.interval))
             )
@@ -179,7 +187,7 @@ async def main() -> None:
 
         submitted: list[tuple[TeamRequest, TeamsAsyncOperation]] = []
         for row in requests:
-            submitted.append((row, await submit(client, row)))
+            submitted.append((row, await submit(client, row, args.owner)))
             print(f"  submitted {row.name}")
 
         try:

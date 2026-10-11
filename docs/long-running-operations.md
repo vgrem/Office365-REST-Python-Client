@@ -115,7 +115,7 @@ keeps polling; a `succeeded`/`failed` status ends it. `wait()` uses
 `next_poll_delay()` (honoring `Retry-After`).
 
 - [Clone a team asynchronously](products/patterns/lro/wait_team_clone_async.md)
-- [Wait for a team clone (synchronous)](products/teams/wait_for_clone.md)
+- [Wait for a team clone (synchronous)](products/teams/administration/clone.md)
 
 **Workbook** — `workbook.operations` is an `EntityCollection[WorkbookOperation]`;
 after a `respond-async` submission the operation is pollable:
@@ -313,7 +313,7 @@ End-to-end scripts for the whole surface:
   [concurrent team provisioning](products/patterns/async/provision_teams_async.md),
   [archive past a retention window](products/patterns/async/archive_old_files_async.md),
   [sync copy & wait](products/patterns/lro/copy_and_wait.md),
-  [sync team clone](products/teams/wait_for_clone.md),
+  [sync team clone](products/teams/administration/clone.md),
   [LRO-in-batch guard](products/patterns/lro/lro_in_batch_guard.md).
 - **SharePoint migration** (poll a server-side ingestion job) —
   [monitor migration jobs concurrently](products/sharepoint/migration/monitor/monitor_async.md).

@@ -18,7 +18,7 @@ flowchart LR
 
 > Other users' mailboxes, shared mailboxes and rooms are reached the same way,
 > addressed by id/UPN — see [Shared mailboxes](#shared-mailboxes) and
-> [Rooms & meeting locations](#rooms--meeting-locations).
+> [Rooms & meeting locations](#rooms-meeting-locations).
 
 ## Start here
 

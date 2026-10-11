@@ -321,7 +321,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   which Graph requires when a team or a private/shared channel is created in
   application context (otherwise: “A team owner must be provided…”).
 - **Async (202) channel creation is awaited:** creating a private or shared
-  channel can answer `202 Accepted` with a `teamsAsyncOperation`;
+  channel answers `202 Accepted` with a `teamsAsyncOperation`;
   `ChannelCollection.add()` now follows the operation and loads the finished
   channel, so `channel.id` is populated when `execute_query()` returns.
 - **`Prefer: include-unknown-enum-members` helper**
@@ -357,7 +357,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `provision_teams_async.py` and `archive_old_files_async.py`, plus
   `examples/sharepoint/migration/monitor/monitor_async.py`,
   `examples/reports/export_usage_async.py`,
-  `examples/onedrive/files/copy_and_wait.py` and `examples/teams/wait_for_clone.py`.
+  `examples/onedrive/files/copy_and_wait.py` and `examples/teams/administration/clone.py`.
 - **SharePoint getting-started onboarding:** `examples/sharepoint/getting-started/`
   adds a full-cycle `setup_sharepoint_app.py` (reuse/create the app registration,
   attach a self-signed certificate, grant `Sites.Selected` with admin consent,
@@ -365,6 +365,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and a walkthrough that answers the app-registration, certificate, and
   permission-scope questions. The SharePoint product README is now a guided hub
   (start here → common tasks → full catalog), and the auth pages cross-link it.
+- **Teams examples guided tour:** `examples/teams/` is reorganised by resource
+  (`administration/`, `members/`, `channels/`, `chats/`, `apps/`, `tags/`,
+  `audit/`, `governance/`, `export/`, `migration/`) with a new `quickstart.py`,
+  a guided root README (basics → popular tasks → audit/governance → export/migration)
+  and a README per folder. Every script was made runnable end-to-end (argparse
+  defaults, temp-dir outputs, missing-scope hints that exit cleanly) and the
+  duplicated usage reports / call-records / online-meeting scripts moved to
+  `examples/reports/` and `examples/communications/` instead of being duplicated.
 
 ### Fixed
 - **Sharing-link expiration rejected as an invalid date:** `ListItem.share_link`
