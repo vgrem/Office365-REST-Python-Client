@@ -93,6 +93,7 @@ class ODataReader(ABC):
             raise ValueError("Type node missing 'Name' attribute")
         type_schema.FullName = f"{schema_node.attrib['Namespace']}.{ODataType.normalize_class_name(type_name)}"
         type_schema.BaseTypeFullName = base_type
+        type_schema.BaseTypeName = self._qualified_type_name(type_node.get("BaseType"))
         type_schema.IsValueObject = base_type == "EntityType"
 
         if base_type == "EnumType":

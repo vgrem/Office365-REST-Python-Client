@@ -86,6 +86,7 @@ class GeneratorPipeline:
             type_modules=type_modules,
             cyclic_types=frozenset(find_cyclic_types(model, known_types)),
             enum_defaults=enum_defaults,
+            inherited_members=model.inherited_member_names(),
         )
         self._checkpoint = Checkpoint(checkpoint_path(options.metadata_path, base_dir))
         self._output_root = Path(options.output_path).resolve()

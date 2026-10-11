@@ -18,6 +18,8 @@ class TypeInformation:
 
     BaseTypeFullName: str = ""
     FullName: str = ""
+    #: OData name of the base type (CSDL ``BaseType``), or ``None``.
+    BaseTypeName: Optional[str] = None
     IsValueObject: Optional[bool] = None
     Methods: Dict[str, MethodInformation] = field(default_factory=dict)
     Properties: Dict[str, PropertyInformation] = field(default_factory=dict)

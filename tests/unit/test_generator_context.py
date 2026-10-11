@@ -57,6 +57,7 @@ def test_with_plan_returns_an_enriched_copy() -> None:
         type_modules={"SP.Foo": "office365.foo"},
         cyclic_types=frozenset(),
         enum_defaults={},
+        inherited_members={},
     )
 
     assert planned.known_types == frozenset({"SP.Foo"})

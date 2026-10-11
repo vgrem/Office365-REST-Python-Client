@@ -83,6 +83,19 @@ def test_build_is_idempotent(tmp_path: Path, monkeypatch):
     assert second.render() == target.read_text(encoding="utf8")
 
 
+def test_inherited_members_arent_redeclared_from_metadata(tmp_path: Path, monkeypatch):
+    """A property declared by a CSDL ancestor is not re-added to the subclass."""
+    target = tmp_path / "test_thing.py"
+    target.write_text("class TestThing:\n    pass\n", encoding="utf8")
+    monkeypatch.setattr(placement, "module_file", lambda name: str(target))
+    options = {**_options(tmp_path), "inherited_members": {"SP.TestThing": {"Title"}}}
+
+    builder = TypeBuilder(_schema(), options, resolver=_StubResolver())
+    builder.build()
+
+    assert builder.status is None
+
+
 def test_inherited_members_are_not_redeclared(tmp_path: Path, monkeypatch):
     """A property already present on the base class is skipped."""
     target = tmp_path / "test_thing.py"

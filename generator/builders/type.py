@@ -151,7 +151,13 @@ class TypeBuilder(ast.NodeTransformer):
         can expose both a property and a bound function with the same name (e.g.
         ``Settings``), which would otherwise generate two identical members.
         """
-        reserved_props = {normalize_member_key(name) for name in self._reserved_names(_RESERVED_PROPERTY_NAMES)}
+        inherited_keys = {
+            normalize_member_key(to_snake_case(name, avoid_builtins=False))
+            for name in self._context.inherited_members.get(self._schema.FullName, ())
+        }
+        reserved_props = {
+            normalize_member_key(name) for name in self._reserved_names(_RESERVED_PROPERTY_NAMES)
+        } | inherited_keys
         ignored_properties = set(self._context.ignored_properties)
         self._properties = []
         seen_props: set[str] = set()
@@ -174,9 +180,11 @@ class TypeBuilder(ast.NodeTransformer):
         self._members = [MemberBuilder(member_schema) for _, member_schema in self._schema.Members.items()]
 
         ignored_methods = set(self._context.ignored_methods)
-        reserved_methods = {
-            normalize_member_key(name) for name in self._reserved_names(_RESERVED_METHOD_NAMES)
-        } | seen_props
+        reserved_methods = (
+            {normalize_member_key(name) for name in self._reserved_names(_RESERVED_METHOD_NAMES)}
+            | seen_props
+            | inherited_keys
+        )
         self._methods = []
         seen_methods: set[str] = set()
         for method_name, method_schema in self._schema.Methods.items():

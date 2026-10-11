@@ -38,6 +38,26 @@ class ODataModel:
         """Returns the type schema by name, or ``None`` when it is unknown."""
         return self._types.get(type_name)
 
+    def inherited_member_names(self) -> Dict[str, set]:
+        """For each type, the properties/methods declared by its CSDL ancestors.
+
+        Used to skip re-declaring inherited members on a subclass (the base may not
+        exist on disk yet when both are generated in the same run).
+        """
+        result: Dict[str, set] = {}
+        for name, schema in self._types.items():
+            names: set = set()
+            seen = {name}
+            base = schema.BaseTypeName
+            while base and base in self._types and base not in seen:
+                seen.add(base)
+                ancestor = self._types[base]
+                names.update(ancestor.Properties)
+                names.update(ancestor.Methods)
+                base = ancestor.BaseTypeName
+            result[name] = names
+        return result
+
     def get_type(self, type_name: str) -> TypeInformation:
         """Retrieves a type schema by name.
 
