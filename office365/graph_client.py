@@ -906,21 +906,15 @@ class GraphClient(ClientRuntimeContext):
 
         return _check(self, scope, app_id)
 
-    def has_application_permissions(self, scope: str, app_id: str) -> ClientResult[bool]:
+    def has_application_permissions(self, scope: str, app_id: str) -> bool:
         """Check if an app has an application permission on Microsoft Graph.
 
         Args:
             scope (str): Permission scope name (e.g. 'Mail.Read')
             app_id (str): Application (client) ID of the app to check
         """
-        return_type = ClientResult[bool](self)
-
-        def _verify(result: ClientResult[AppRoleCollection]) -> None:
-            has_perms = any(role.value == scope for role in result.value)
-            return_type.set_property("__value", has_perms)
-
-        self.get_application_permissions(app_id).after_execute(_verify)
-        return return_type
+        granted = self.get_application_permissions(app_id).execute_query().value
+        return any(role.value == scope for role in granted)
 
     def grant_delegated_permissions(self, app_id: str, scope: AppRole | str) -> Self:
         """Grants a delegated permission on Microsoft Graph (AllPrincipals).

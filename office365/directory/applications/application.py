@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID
 
@@ -114,7 +114,7 @@ class Application(DirectoryObject):
             end_datetime (datetime.datetime): The date and time at which the credential expires. Default: now + 180days
         """
         if start_datetime is None:
-            start_datetime = datetime.utcnow()
+            start_datetime = datetime.now(timezone.utc)
         if end_datetime is None:
             end_datetime = start_datetime + timedelta(days=180)
         params = KeyCredential(

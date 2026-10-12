@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 from office365.runtime.client_value import ClientValue
+from office365.runtime.converters.scalars import ensure_aware_utc
 
 
 @dataclass
@@ -23,16 +24,18 @@ class PasswordCredential(ClientValue):
     @property
     def is_expired(self) -> bool:
         """True if the credential's end date has passed."""
-        if self.endDateTime is None or self.endDateTime == datetime.min:
+        end = ensure_aware_utc(self.endDateTime)
+        if end is None or end == datetime.min.replace(tzinfo=timezone.utc):
             return False
-        return self.endDateTime < datetime.now(timezone.utc)
+        return end < datetime.now(timezone.utc)
 
     @property
     def days_until_expiry(self) -> int | None:
         """Number of days until expiry, or None if no end date is set."""
-        if self.endDateTime is None or self.endDateTime == datetime.min:
+        end = ensure_aware_utc(self.endDateTime)
+        if end is None or end == datetime.min.replace(tzinfo=timezone.utc):
             return None
-        return (self.endDateTime - datetime.now(timezone.utc)).days
+        return (end - datetime.now(timezone.utc)).days
 
     def __str__(self):
         return str(self.displayName or self.entity_type_name or "")

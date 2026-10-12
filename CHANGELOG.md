@@ -142,6 +142,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   builds the subject with `DataSubject` (`microsoft.graph.dataSubject`) rather
   than the never-valid `SubjectRightsRequestIdentity`, which Graph rejected with
   *Invalid OData type specified*.
+- **Credential expiry handles naive timestamps:** `PasswordCredential` and
+  `KeyCredential` interpret a naive `endDateTime` as UTC in `is_expired` /
+  `days_until_expiry` instead of raising *can't subtract offset-naive and
+  offset-aware datetimes*; `Application.add_certificate` now stores aware UTC
+  timestamps.
+- **`GraphClient.has_application_permissions` returns a correct answer:** the
+  check now executes the service-principal lookup eagerly (matching
+  `require_application_permission` and `has_delegated_permission`) instead of
+  evaluating a deferred callback before the app roles were populated, so it no
+  longer reports a false negative; it returns a plain `bool` (was a
+  non-functional `ClientResult[bool]`).
 
 ### Added
 - **To Do attachment content:** `AttachmentBase.content_bytes` exposes the

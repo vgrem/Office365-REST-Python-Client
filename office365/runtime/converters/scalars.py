@@ -82,6 +82,18 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def ensure_aware_utc(value: Optional[datetime]) -> Optional[datetime]:
+    """Return ``value`` as a timezone-aware UTC datetime.
+
+    Values created locally (for example when adding a credential) may carry no
+    ``tzinfo``. Comparing such naive datetimes against :func:`datetime.now`
+    (UTC) raises ``TypeError``; treat them as UTC instead.
+    """
+    if value is not None and value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value
+
+
 def iso(value: Any) -> str:
     """ISO-8601 string for a datetime (second precision); ``""`` for ``None``."""
     if value is None:
