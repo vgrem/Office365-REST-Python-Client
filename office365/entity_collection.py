@@ -32,7 +32,7 @@ class EntityCollection(RecordCollection[ClientObjectT]):
         if isinstance(key, int):
             return super().__getitem__(key)
         elif isinstance(key, str):
-            return self.create_typed_object(resource_path=EntityPath(key, self.resource_path))
+            return self.create_typed_object(resource_path=EntityPath(key, self._canonical_collection()))
         else:
             raise ValueError("Invalid key: expected either an entity index [int] or identifier [str]")
 
@@ -50,8 +50,20 @@ class EntityCollection(RecordCollection[ClientObjectT]):
         resource_path: Optional[ResourcePath] = None,
     ) -> ClientObjectT:
         if resource_path is None:
-            resource_path = EntityPath(None, self.resource_path)
+            resource_path = EntityPath(None, self._canonical_collection())
         return super().create_typed_object(initial_properties, resource_path)
+
+    def _canonical_collection(self) -> Optional[ResourcePath]:
+        """The collection at which entities of this container are created and addressed.
+
+        Most collections are addressed directly (their own ``resource_path``). A path
+        that carries a ``collection`` (OneDrive ``children``, Teams ``joinedTeams`` or
+        the Planner owner-scoped collections) instead exposes the canonical top-level
+        item set, which is where item CRUD is valid even though listing goes through
+        the owner.
+        """
+        item_path = getattr(self.resource_path, "collection", None)
+        return item_path if item_path is not None else self.resource_path
 
     @property
     def context(self) -> GraphClient:

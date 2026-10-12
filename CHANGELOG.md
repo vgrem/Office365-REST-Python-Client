@@ -15,7 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `PlannerTaskCollection.find_by_title`, `PlannerBucketCollection.find_by_name`,
   `MailFolderCollection.find_by_display_name` and
   `NotebookCollection` / `OnenoteSectionCollection.find_by_display_name` look an
-  item up by a natural key through a server-side `$filter`. Every lookup is
+  item up by a natural key. Most use a server-side `$filter`; Graph ignores
+  `$filter` on a plan's buckets/tasks and on `me/planner/tasks`, so the Planner
+  lookups match client-side. Every lookup is
   deferred (run it with `execute_query()`) and tolerant by default — a miss
   leaves the returned object uninitialized (`is_loaded` is `False`); pass
   `required=True` to raise `NotFoundException` instead. `PlannerPlan.buckets`
@@ -35,7 +37,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `Mapping[str, PageSource]`. `OnenoteSection.pages` now returns an
   `OnenotePageCollection`, so pages can be created directly from a section.
 
+- **Planner assignments and checklists:** `PlannerTask.assign_to(user)` /
+  `.unassign(user)` and `PlannerTaskDetails.add_checklist_item(...)` /
+  `.set_checklist(items)`, backed by `PlannerAssignments.add/remove` and
+  `PlannerChecklistItems.add/remove`. Both are Open Type maps keyed by id that
+  mutate in place (the change is sent by `update()`), deserialize to typed
+  values, and remove entries by sending `null`.
+
 ### Changed
+- **Planner writes:** Planner entities derive from the new `PlannerEntity` base,
+  which sends the `If-Match` header from the latest etag on update/delete and
+  requests `Prefer: return=representation` so the refreshed etag is captured —
+  consecutive updates no longer fail with a stale-token `409`. Collections route
+  writes to the canonical top-level sets: `plan.buckets.add(...)` /
+  `plan.tasks.add(...)` `POST` to `/planner/buckets` / `/planner/tasks` and
+  listed items update/delete at the top-level item paths, while listing stays
+  nested under the plan. Plans listed through `me/planner/plans` are likewise
+  addressed at the top-level `/planner/plans/{id}` set, so `plan.buckets` /
+  `plan.tasks` resolve there (Graph rejects those navigations under `/me`).
+  `PlannerChecklistItems` is now a `ClientValue` map (was
+  a `ClientValueCollection` list), and the value modules dropped the `planner_`
+  prefix (`office365.planner.assignment`, `.external_reference`,
+  `.order_hints_by_assignee`, `.applied_categories`).
 - **Report calls now return `ReportResult`** (was `ClientResult[bytes]` for the
   CSV-streaming variants, e.g. `get_email_activity_counts`,
   `get_mailbox_usage_storage`, `get_teams_team_counts`). `ReportResult` is a
@@ -110,6 +133,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ThreatAssessmentRequest`. The Graph endpoint rejected the abstract type with
   `InvalidBody`, so `information_protection.create_url_assessment(...)` failed;
   the file and email-file requests were already correct.
+- **Planner assignments/checklists are writable:** the assignment and checklist
+  Open Type maps serialize as JSON objects keyed by id (previously a list, or an
+  empty `{}`), and `PlannerAssignment` / `PlannerChecklistItem` omit the
+  server-managed `assignedBy` / `lastModifiedBy` / `lastModifiedDateTime`
+  fields that Graph rejects with *Incompatible type kinds were found*.
 - **Subject rights requests send a conforming `dataSubject`:** creation now
   builds the subject with `DataSubject` (`microsoft.graph.dataSubject`) rather
   than the never-valid `SubjectRightsRequestIdentity`, which Graph rejected with

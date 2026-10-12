@@ -3,12 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from office365.entity import Entity
-from office365.entity_collection import EntityCollection
-from office365.planner.tasks.task import PlannerTask
-from office365.runtime.paths.resource_path import ResourcePath
+from office365.planner.internal.paths.collections import PlannerCollectionPath
 
 if TYPE_CHECKING:
     from office365.planner.plans.collection import PlannerPlanCollection
+    from office365.planner.tasks.collection import PlannerTaskCollection
 
 
 class PlannerUser(Entity):
@@ -21,14 +20,17 @@ class PlannerUser(Entity):
         from office365.planner.plans.collection import PlannerPlanCollection
 
         return self.properties.get(
-            "plans", PlannerPlanCollection(self.context, ResourcePath("plans", self.resource_path))
+            "plans", PlannerPlanCollection(self.context, PlannerCollectionPath("plans", self.resource_path))
         )
 
     @property
-    def tasks(self) -> EntityCollection[PlannerTask]:
+    def tasks(self) -> PlannerTaskCollection:
         """Returns the plannerTasks assigned to the user."""
+        from office365.planner.tasks.collection import PlannerTaskCollection
+
         return self.properties.get(
-            "tasks", EntityCollection(self.context, PlannerTask, ResourcePath("tasks", self.resource_path))
+            "tasks",
+            PlannerTaskCollection(self.context, parent=self),
         )
 
     @property

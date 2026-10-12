@@ -1,10 +1,10 @@
-from office365.entity import Entity
 from office365.planner.category_descriptions import PlannerCategoryDescriptions
+from office365.planner.entity import PlannerEntity
 from office365.planner.user_ids import PlannerUserIds
 from office365.runtime.types.odata_property import odata
 
 
-class PlannerPlanDetails(Entity):
+class PlannerPlanDetails(PlannerEntity):
     """
     The plannerPlanDetails resource represents the additional information about a plan.
     Each plan object has a details object.
@@ -17,6 +17,10 @@ class PlannerPlanDetails(Entity):
         An object that specifies the descriptions of the 25 categories that can be associated with tasks in the plan.
         """
         return self.properties.get("categoryDescriptions", PlannerCategoryDescriptions())
+
+    @category_descriptions.setter
+    def category_descriptions(self, value: PlannerCategoryDescriptions) -> None:
+        self.set_property("categoryDescriptions", value)
 
     @odata(name="sharedWith")
     @property

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from office365.entity import Entity
+from office365.planner.entity import PlannerEntity
 
 
-class PlannerBucketTaskBoardTaskFormat(Entity):
+class PlannerBucketTaskBoardTaskFormat(PlannerEntity):
     @property
     def order_hint(self) -> Optional[str]:
         """Gets the orderHint property"""

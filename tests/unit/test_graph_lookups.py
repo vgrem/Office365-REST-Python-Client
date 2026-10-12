@@ -152,7 +152,7 @@ def test_find_by_title_escapes_single_quote():
     assert "title eq 'O''Brien''s task'" in unquote_plus(transport.urls[0])
 
 
-def test_planner_task_find_by_title_scopes_to_the_plan():
+def test_planner_task_find_by_title_matches_client_side():
     client, transport = _client([{"id": "p1", "title": "Plan"}, {"value": [PLANNER_TASK]}])
     plan = client.planner.plans["p1"].get().execute_query()
 
@@ -167,10 +167,20 @@ def test_planner_task_find_by_title_scopes_to_the_plan():
     assert task.get_property("id") == "pkt1"
     url = unquote_plus(transport.urls[1])
     assert "/planner/plans/p1/tasks" in url
-    assert "title eq 'Draft the plan'" in url
+    # Graph ignores $filter on a plan's tasks, so the match is client-side.
+    assert "$filter" not in url
 
 
-def test_planner_bucket_find_by_name_scopes_to_the_plan():
+def test_planner_task_find_by_title_miss_is_client_side():
+    client, _ = _client([{"id": "p1", "title": "Plan"}, {"value": [{"id": "pkt2", "title": "Other"}]}])
+    plan = client.planner.plans["p1"].get().execute_query()
+
+    task = plan.tasks.find_by_title("Draft the plan").execute_query()
+
+    assert not task.is_loaded
+
+
+def test_planner_bucket_find_by_name_matches_client_side():
     client, transport = _client([{"id": "p1", "title": "Plan"}, {"value": [PLANNER_BUCKET]}])
     plan = client.planner.plans["p1"].get().execute_query()
 
@@ -185,7 +195,30 @@ def test_planner_bucket_find_by_name_scopes_to_the_plan():
     assert bucket.get_property("id") == "pbk1"
     url = unquote_plus(transport.urls[1])
     assert "/planner/plans/p1/buckets" in url
-    assert "name eq 'Backlog'" in url
+    # Graph ignores $filter on a plan's buckets, so the match is client-side.
+    assert "$filter" not in url
+
+
+def test_planner_bucket_find_by_name_miss_is_client_side():
+    client, _ = _client([{"id": "p1", "title": "Plan"}, {"value": [{"id": "pbk2", "name": "Other"}]}])
+    plan = client.planner.plans["p1"].get().execute_query()
+
+    bucket = plan.buckets.find_by_name("Backlog").execute_query()
+
+    assert not bucket.is_loaded
+
+
+def test_user_plans_are_addressed_at_the_canonical_set():
+    """Items listed via ``me/planner/plans`` are addressed at ``/planner/plans/{id}``.
+
+    Graph rejects the nested ``/me/planner/plans/{id}/buckets`` navigation, so the
+    item path must be the canonical top-level one for nested reads to resolve.
+    """
+    client, _ = _client([{"value": [{"id": "p1", "title": "Plan"}]}])
+
+    plan = client.me.planner.plans.get().execute_query()[0]
+
+    assert str(plan.resource_path) == "/planner/plans/p1"
 
 
 def test_find_by_mail_defers_and_returns_match():

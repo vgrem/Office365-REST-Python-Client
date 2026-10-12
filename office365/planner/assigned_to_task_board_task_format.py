@@ -2,19 +2,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from office365.entity import Entity
+from office365.planner.entity import PlannerEntity
 
 if TYPE_CHECKING:
-    from office365.planner.planner_order_hints_by_assignee import (
+    from office365.planner.order_hints_by_assignee import (
         PlannerOrderHintsByAssignee,
     )
 
 
-class PlannerAssignedToTaskBoardTaskFormat(Entity):
+class PlannerAssignedToTaskBoardTaskFormat(PlannerEntity):
     @property
     def order_hints_by_assignee(self) -> PlannerOrderHintsByAssignee:
         """Gets the orderHintsByAssignee property"""
-        from office365.planner.planner_order_hints_by_assignee import (
+        from office365.planner.order_hints_by_assignee import (
             PlannerOrderHintsByAssignee,
         )
 

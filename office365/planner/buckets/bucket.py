@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from office365.entity import Entity
-from office365.entity_collection import EntityCollection
-from office365.planner.tasks.task import PlannerTask
-from office365.runtime.paths.resource_path import ResourcePath
+from office365.planner.entity import PlannerEntity
+
+if TYPE_CHECKING:
+    from office365.planner.tasks.collection import PlannerTaskCollection
 
 
-class PlannerBucket(Entity):
+class PlannerBucket(PlannerEntity):
     """Represents a bucket (or "custom column") for tasks in a plan in Microsoft 365.
     It is contained in a plannerPlan and can have a collection of plannerTasks.
     """
@@ -32,11 +32,13 @@ class PlannerBucket(Entity):
         self.set_property("planId", value)
 
     @property
-    def tasks(self) -> EntityCollection[PlannerTask]:
+    def tasks(self) -> PlannerTaskCollection:
         """Read-only. Nullable. Collection of tasks in the bucket."""
+        from office365.planner.tasks.collection import PlannerTaskCollection
+
         return self.properties.get(
             "tasks",
-            EntityCollection(self.context, PlannerTask, ResourcePath("tasks", self.resource_path)),
+            PlannerTaskCollection(self.context, parent=self),
         )
 
     @property
