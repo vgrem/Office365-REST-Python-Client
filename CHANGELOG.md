@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Report CSV parsing:** `ReportResult.to_text()` / `ReportResult.csv_rows()`
+  decode a usage report and parse it into row dicts, decoding with `utf-8-sig`
+  to strip the UTF-8 BOM Graph prefixes to the first header.
 - **Named lookups for common collections:** `TodoTaskCollection.find_by_title`,
   `PlannerTaskCollection.find_by_title`, `PlannerBucketCollection.find_by_name`,
   `MailFolderCollection.find_by_display_name` and
@@ -33,6 +36,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `OnenotePageCollection`, so pages can be created directly from a section.
 
 ### Changed
+- **Report calls now return `ReportResult`** (was `ClientResult[bytes]` for the
+  CSV-streaming variants, e.g. `get_email_activity_counts`,
+  `get_mailbox_usage_storage`, `get_teams_team_counts`). `ReportResult` is a
+  `ClientResult[Report]`, so `result.value` is a `Report` for every report
+  method, and it adds `result.to_text()` for decoded text and `result.csv_rows()`
+  for parsed rows; use `result.to_bytes()` for the raw CSV.
+  `execute_query()`/`execute_query_async()` return the `ReportResult` itself, so
+  the calls chain (e.g. `...execute_query().csv_rows()`). The
+  `create_report_stream_query` helper is removed (its `create_report_query`
+  equivalent already returned a `Report`).
 - **The Security API now lives at `office365.security`** (was
   `office365.directory.security`). `microsoft.graph.security` is a top-level Graph
   service — a sibling of `/directory`, which the old path contradicted. Imports
