@@ -5,7 +5,7 @@ from office365.onenote.operations.onenote import OnenoteOperation
 from office365.onenote.pages.collection import OnenotePageCollection
 from office365.onenote.resources.resource import OnenoteResource
 from office365.onenote.sectiongroups.section_group import SectionGroup
-from office365.onenote.sections.section import OnenoteSection
+from office365.onenote.sections.collection import OnenoteSectionCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 
@@ -43,10 +43,10 @@ class Onenote(Entity):
         )
 
     @property
-    def sections(self) -> EntityCollection[OnenoteSection]:
+    def sections(self) -> OnenoteSectionCollection:
         """Retrieve a list of onenoteSection objects from the specified notebook."""
         return self.properties.get(
-            "sections", EntityCollection(self.context, OnenoteSection, ResourcePath("sections", self.resource_path))
+            "sections", OnenoteSectionCollection(self.context, ResourcePath("sections", self.resource_path))
         )
 
     @odata(name="sectionGroups")

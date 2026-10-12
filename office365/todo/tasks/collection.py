@@ -7,6 +7,7 @@ from office365.delta_collection import DeltaCollection
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.mail.importance import Importance
 from office365.outlook.mail.item_body import ItemBody
+from office365.runtime.odata.literals import escape_odata_string
 from office365.runtime.paths.v4.entity import EntityPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.todo.tasks.task import TodoTask
@@ -17,6 +18,20 @@ class TodoTaskCollection(DeltaCollection[TodoTask]):
 
     def __init__(self, context, resource_path=None):
         super().__init__(context, TodoTask, resource_path)
+
+    def find_by_title(self, title: str, *, required: bool = False) -> TodoTask:
+        """Look up a task by its ``title``.
+
+        Deferred — run with ``execute_query()``. Tolerant by default: when no
+        task matches, the returned object is left uninitialized (check
+        :attr:`~office365.runtime.client_object.ClientObject.is_loaded`). Pass
+        ``required=True`` to raise instead (or on an ambiguous match).
+
+        Args:
+            title (str): The task title
+            required (bool): Raise on a missing or ambiguous match when ``True``
+        """
+        return self._find_by_filter(f"title eq '{escape_odata_string(title)}'", required=required)
 
     def add(
         self,

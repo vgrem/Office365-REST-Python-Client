@@ -21,6 +21,12 @@ from office365.teams.team import Team
 from tests._scripted_transport import ScriptedTransport
 
 USER = {"id": "u1", "displayName": "Ada Lovelace", "mail": "ada@contoso.com"}
+TODO_TASK = {"id": "tt1", "title": "Ship the release"}
+MAIL_FOLDER = {"id": "mf1", "displayName": "Archive"}
+NOTEBOOK = {"id": "nb1", "displayName": "SDK OneNote Tour"}
+SECTION = {"id": "sec1", "displayName": "SDK Examples"}
+PLANNER_TASK = {"id": "pkt1", "title": "Draft the plan"}
+PLANNER_BUCKET = {"id": "pbk1", "name": "Backlog"}
 TEAM = {"id": "g1", "displayName": "Team One", "resourceProvisioningOptions": ["Team"]}
 BUSINESS = {"id": "b1", "displayName": "Contoso Bookings"}
 DEVICE = {"id": "d1", "deviceName": "DESKTOP-1"}
@@ -63,6 +69,123 @@ def test_lookup_miss_leaves_entity_uninitialized(lookup, key, payload):
 
     assert not entity.is_loaded
     assert entity.get_property("id") is None
+
+
+@pytest.mark.parametrize(
+    ("lookup", "key", "payload", "entity_id", "path", "filter_fragment"),
+    [
+        (
+            lambda c: c.me.todo.lists["l1"].tasks.find_by_title,
+            "Ship the release",
+            TODO_TASK,
+            "tt1",
+            "/me/todo/lists/l1/tasks",
+            "title eq 'Ship the release'",
+        ),
+        (
+            lambda c: c.me.mail_folders.find_by_display_name,
+            "Archive",
+            MAIL_FOLDER,
+            "mf1",
+            "/me/mailFolders",
+            "displayName eq 'Archive'",
+        ),
+        (
+            lambda c: c.me.onenote.notebooks.find_by_display_name,
+            "SDK OneNote Tour",
+            NOTEBOOK,
+            "nb1",
+            "/me/onenote/notebooks",
+            "displayName eq 'SDK OneNote Tour'",
+        ),
+        (
+            lambda c: c.me.onenote.sections.find_by_display_name,
+            "SDK Examples",
+            SECTION,
+            "sec1",
+            "/me/onenote/sections",
+            "displayName eq 'SDK Examples'",
+        ),
+    ],
+)
+def test_named_find_by_defers_and_returns_match(lookup, key, payload, entity_id, path, filter_fragment):
+    client, transport = _client([{"value": [payload]}])
+
+    entity = lookup(client)(key)
+
+    assert transport.urls == []
+    assert not entity.is_loaded
+
+    entity.execute_query()
+
+    assert entity.is_loaded
+    assert entity.get_property("id") == entity_id
+    url = unquote_plus(transport.urls[0])
+    assert path in url
+    assert filter_fragment in url
+
+
+@pytest.mark.parametrize(
+    "lookup",
+    [
+        lambda c: c.me.todo.lists["l1"].tasks.find_by_title,
+        lambda c: c.me.mail_folders.find_by_display_name,
+        lambda c: c.me.onenote.notebooks.find_by_display_name,
+        lambda c: c.me.onenote.sections.find_by_display_name,
+    ],
+)
+def test_named_find_by_miss_leaves_entity_uninitialized(lookup):
+    client, _ = _client([{"value": []}])
+
+    entity = lookup(client)("Missing").execute_query()
+
+    assert not entity.is_loaded
+    assert entity.get_property("id") is None
+
+
+def test_find_by_title_escapes_single_quote():
+    """An embedded apostrophe is doubled inside the OData string literal."""
+    client, transport = _client([{"value": []}])
+
+    client.me.todo.lists["l1"].tasks.find_by_title("O'Brien's task").execute_query()
+
+    assert "title eq 'O''Brien''s task'" in unquote_plus(transport.urls[0])
+
+
+def test_planner_task_find_by_title_scopes_to_the_plan():
+    client, transport = _client([{"id": "p1", "title": "Plan"}, {"value": [PLANNER_TASK]}])
+    plan = client.planner.plans["p1"].get().execute_query()
+
+    task = plan.tasks.find_by_title("Draft the plan")
+
+    assert len(transport.urls) == 1  # deferred: only the plan read so far
+    assert not task.is_loaded
+
+    task.execute_query()
+
+    assert task.is_loaded
+    assert task.get_property("id") == "pkt1"
+    url = unquote_plus(transport.urls[1])
+    assert "/planner/plans/p1/tasks" in url
+    assert "title eq 'Draft the plan'" in url
+
+
+def test_planner_bucket_find_by_name_scopes_to_the_plan():
+    client, transport = _client([{"id": "p1", "title": "Plan"}, {"value": [PLANNER_BUCKET]}])
+    plan = client.planner.plans["p1"].get().execute_query()
+
+    bucket = plan.buckets.find_by_name("Backlog")
+
+    assert len(transport.urls) == 1
+    assert not bucket.is_loaded
+
+    bucket.execute_query()
+
+    assert bucket.is_loaded
+    assert bucket.get_property("id") == "pbk1"
+    url = unquote_plus(transport.urls[1])
+    assert "/planner/plans/p1/buckets" in url
+    assert "name eq 'Backlog'" in url
 
 
 def test_find_by_mail_defers_and_returns_match():

@@ -1,20 +1,21 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Self
 
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
-from office365.entity_collection import EntityCollection
-from office365.planner.buckets.bucket import PlannerBucket
 from office365.planner.plans.container import PlannerPlanContainer
 from office365.planner.plans.details import PlannerPlanDetails
-from office365.planner.tasks.task import PlannerTask
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
+
+if TYPE_CHECKING:
+    from office365.planner.buckets.collection import PlannerBucketCollection
+    from office365.planner.tasks.collection import PlannerTaskCollection
 
 
 class PlannerPlan(Entity):
@@ -47,13 +48,14 @@ class PlannerPlan(Entity):
         return self.properties.get("title", None)
 
     @property
-    def buckets(self) -> EntityCollection[PlannerBucket]:
+    def buckets(self) -> PlannerBucketCollection:
         """Collection of buckets in the plan."""
+        from office365.planner.buckets.collection import PlannerBucketCollection
+
         return self.properties.get(
             "buckets",
-            EntityCollection(
+            PlannerBucketCollection(
                 self.context,
-                PlannerBucket,
                 ResourcePath("buckets", ResourcePath(self.id, ResourcePath("plans", ResourcePath("planner")))),
             ),
         )
@@ -70,13 +72,14 @@ class PlannerPlan(Entity):
         )
 
     @property
-    def tasks(self) -> EntityCollection[PlannerTask]:
+    def tasks(self) -> PlannerTaskCollection:
         """Collection of tasks in the plan."""
+        from office365.planner.tasks.collection import PlannerTaskCollection
+
         return self.properties.get(
             "tasks",
-            EntityCollection(
+            PlannerTaskCollection(
                 self.context,
-                PlannerTask,
                 ResourcePath("tasks", ResourcePath(self.id, ResourcePath("plans", ResourcePath("planner")))),
             ),
         )

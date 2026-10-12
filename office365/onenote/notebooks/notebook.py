@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 from office365.entity_collection import EntityCollection
 from office365.onenote.entity_hierarchy_model import OnenoteEntityHierarchyModel
-from office365.onenote.sections.section import OnenoteSection
+from office365.onenote.sections.collection import OnenoteSectionCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
 
@@ -17,15 +17,14 @@ class Notebook(OnenoteEntityHierarchyModel):
     """A OneNote notebook."""
 
     @property
-    def sections(self) -> EntityCollection[OnenoteSection]:
+    def sections(self) -> OnenoteSectionCollection:
         """
         Retrieve a list of onenoteSection objects from the specified notebook.
         """
         return self.properties.get(
             "sections",
-            EntityCollection(
+            OnenoteSectionCollection(
                 self.context,
-                OnenoteSection,
                 ResourcePath("sections", self.resource_path),
             ),
         )

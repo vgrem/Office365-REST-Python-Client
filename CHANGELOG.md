@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Named lookups for common collections:** `TodoTaskCollection.find_by_title`,
+  `PlannerTaskCollection.find_by_title`, `PlannerBucketCollection.find_by_name`,
+  `MailFolderCollection.find_by_display_name` and
+  `NotebookCollection` / `OnenoteSectionCollection.find_by_display_name` look an
+  item up by a natural key through a server-side `$filter`. Every lookup is
+  deferred (run it with `execute_query()`) and tolerant by default — a miss
+  leaves the returned object uninitialized (`is_loaded` is `False`); pass
+  `required=True` to raise `NotFoundException` instead. `PlannerPlan.buckets`
+  and `.tasks` now return those typed collections, so the planner lookups can be
+  scoped to a plan.
 - **OneNote pages can be created from in-memory HTML:** `OnenotePageCollection.add`
   accepts the page HTML as a `str`, `bytes`/`bytearray`, or a file-like object
   (previously a named file was required), and its attachment mapping is typed as

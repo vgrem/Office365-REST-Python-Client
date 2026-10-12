@@ -5,6 +5,7 @@ from office365.onenote.notebooks.notebook import Notebook
 from office365.onenote.notebooks.recent import RecentNotebook
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.odata.literals import escape_odata_string
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
@@ -12,6 +13,20 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 class NotebookCollection(EntityCollection[Notebook]):
     def __init__(self, context, resource_path=None):
         super().__init__(context, Notebook, resource_path)
+
+    def find_by_display_name(self, display_name: str, *, required: bool = False) -> Notebook:
+        """Look up a notebook by its ``displayName``.
+
+        Deferred — run with ``execute_query()``. Tolerant by default: when no
+        notebook matches, the returned object is left uninitialized (check
+        :attr:`~office365.runtime.client_object.ClientObject.is_loaded`). Pass
+        ``required=True`` to raise instead (or on an ambiguous match).
+
+        Args:
+            display_name (str): The notebook display name
+            required (bool): Raise on a missing or ambiguous match when ``True``
+        """
+        return self._find_by_filter(f"displayName eq '{escape_odata_string(display_name)}'", required=required)
 
     @require_permission(
         delegated=["Notes.Create", "Notes.ReadWrite", "Notes.ReadWrite.All"], application=["Notes.ReadWrite.All"]
