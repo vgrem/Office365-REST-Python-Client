@@ -1,23 +1,49 @@
 """
-Check if a delegated permission (OAuth scope) is granted to your app.
+Check whether a delegated (OAuth2) scope is granted to an app.
 
-https://learn.microsoft.com/en-us/graph/permissions-grant-via-msgraph
+Read-only: prints the answer and exits. Combine with ``grant_delegated_perms.py``
+to make a permission pipeline idempotent.
 
-Requires delegated permission ``AppRoleAssignment.ReadWrite.All``.
+Usage:
+
+    python has_delegated_perms.py --scope User.Read
+    python has_delegated_perms.py --scope Mail.Read --app-id <guid>
+
+Requires application permission ``Directory.Read.All`` (delegated
+``DelegatedPermissionGrant.Read.All`` also works).
+
+Reference:
+    https://learn.microsoft.com/en-us/graph/permissions-grant-via-msgraph
 """
 
+from __future__ import annotations
+
+import argparse
+
 from office365.graph_client import GraphClient
-from tests import test_admin_principal_name, test_client_id, test_tenant
+from tests.settings import client_id, client_secret, tenant
 
-client = (
-    GraphClient(tenant=test_tenant)
-    .with_token_interactive(test_client_id, test_admin_principal_name)
-    .require_role("Global Administrator", "Privileged Role Administrator")
-)
 
-scope = input("Permission scope: ")
+def _client() -> GraphClient:
+    return (
+        GraphClient(tenant=tenant)
+        .with_client_secret(client_id, client_secret)
+        .require_application_permission("Directory.Read.All")
+    )
 
-if client.has_delegated_permission(scope, test_client_id):
-    print(f"Permission '{scope}' is granted.")
-else:
-    print(f"Permission '{scope}' is not granted.")
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--scope", default="User.Read", help="delegated scope to check")
+    parser.add_argument("--app-id", default=client_id, help="application (client) ID to inspect")
+    args = parser.parse_args()
+
+    client = _client()
+    if client.has_delegated_permission(args.scope, args.app_id):
+        print(f"'{args.scope}' IS granted to {args.app_id}.")
+    else:
+        print(f"'{args.scope}' is NOT granted to {args.app_id}.")
+
+
+if __name__ == "__main__":
+    main()

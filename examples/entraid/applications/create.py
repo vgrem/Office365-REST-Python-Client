@@ -7,18 +7,31 @@ The returned app object includes the app/client ID needed for authentication.
 By default the demo app is deleted again (clean run). Pass ``--keep`` to register
 a persistent app and print a ready ``OFFICE365_CLIENT_ID=...`` line.
 
-https://learn.microsoft.com/en-us/graph/api/application-post-applications
+Requires an interactive sign-in by a Global Administrator or Privileged Role
+Administrator (the delegated ``Application.ReadWrite.All`` scope is carried by
+the signed-in account).
 
-https://learn.microsoft.com/en-us/graph/api/resources/application
-
-Requires delegated permission ``Application.ReadWrite.All``.
+Reference:
+    https://learn.microsoft.com/en-us/graph/api/application-post-applications
+    https://learn.microsoft.com/en-us/graph/api/resources/application
 """
+
+from __future__ import annotations
 
 import argparse
 
 from office365.graph_client import GraphClient
 from tests import create_unique_name
-from tests.settings import client_id, password, tenant, username
+from tests.settings import admin_username, client_id, tenant
+
+
+def _privileged_client() -> GraphClient:
+    """Sign in interactively with an admin account to register an app."""
+    return (
+        GraphClient(tenant=tenant)
+        .with_token_interactive(client_id, admin_username)
+        .require_role("Global Administrator", "Privileged Role Administrator")
+    )
 
 
 def main() -> None:
@@ -27,7 +40,7 @@ def main() -> None:
     parser.add_argument("--keep", action="store_true", help="keep the app instead of deleting it")
     args = parser.parse_args()
 
-    client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
+    client = _privileged_client()
 
     app = client.applications.add(
         args.name or create_unique_name("DemoApp"),

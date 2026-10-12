@@ -50,6 +50,58 @@ tenant-level policies, and audit logs.
 
 ---
 
+## Learning path
+
+Each folder is a guided tour; work through them roughly in this order.
+
+| # | Tour | Covers |
+|---|------|--------|
+| 1 | [Users](./users/README.md) | Create, update, disable, restore; passwords, managers, guests, MFA |
+| 2 | [Groups](./groups/README.md) | Security vs Microsoft 365 groups, membership, owners, lifecycle |
+| 3 | [Licenses](./licenses/README.md) | View and assign licenses, bulk assignment |
+| 4 | [Applications](./applications/README.md) | Register apps, rotate credentials, consent, governance reports |
+| 5 | [Roles](./roles/README.md) | Directory roles, membership, PIM assignments |
+| 6 | [Audit](./audit/README.md) | Sign-in and directory audit logs |
+| 7 | [Policies](./policies/README.md) | Authorization, Conditional Access, authentication methods |
+| 8 | [Identity](./identity/README.md) | Identity providers, named locations, user flows |
+| 9 | [Protection](./protection/README.md) | Risky users and risk detections |
+| 10 | [Governance](./governance/README.md) | Access reviews, Terms of Use, change notifications |
+| 11 | [Domains](./domains/README.md), [Devices](./devices/README.md), [Tenant](./tenant/README.md) | Infrastructure inventory |
+
+## Popular automations
+
+Recipes that combine a few scripts into a task you would actually schedule.
+
+| Task | Start here |
+|------|-----------|
+| **Onboard a user** — create, license, add to groups | [`users/create.py`](./users/create.py), [`licenses/assign.py`](./licenses/assign.py), [`groups/add_member.py`](./groups/add_member.py) |
+| **Offboard a user** — disable, remove licenses, delete | [`users/update.py`](./users/update.py), [`users/delete.py`](./users/delete.py) |
+| **Guest (B2B) hygiene** — invite, then audit inactivity | [`users/invite_guest.py`](./users/invite_guest.py), [`users/find_inactive_guests.py`](./users/find_inactive_guests.py) |
+| **MFA readiness** — who lacks strong auth | [`users/mfa_status_report.py`](./users/mfa_status_report.py) |
+| **Privileged access review** — who is an admin | [`roles/privileged_users.py`](./roles/privileged_users.py), [`roles/pim_report.py`](./roles/pim_report.py) |
+| **Credential expiry** — secrets and certs about to break | [`applications/credentials_report.py`](./applications/credentials_report.py) |
+| **Rotate expired secrets** | [`applications/rotate_all_expired.py`](./applications/rotate_all_expired.py), [`applications/cleanup_old.py`](./applications/cleanup_old.py) |
+| **Register an app end to end** — credentials, permissions, consent | [`applications/provision.py`](./applications/provision.py) |
+| **Permission audit** — requested vs granted, per resource | [`applications/permissions_report.py`](./applications/permissions_report.py) |
+| **Consent governance** — review, grant, revoke | [`applications/consent_grants.py`](./applications/consent_grants.py), [`applications/grant_delegated_perms.py`](./applications/grant_delegated_perms.py) |
+| **Break-glass audit** — CA exclusions and permanent admins | [`users/break_glass_report.py`](./users/break_glass_report.py) |
+
+## API coverage gaps
+
+- **B2X user flows are supported.** Self-service sign-up flows for Entra External
+  ID are exposed through `office365.directory.identities.userflows.b2x` and listed
+  by [`identity/list_user_flows.py`](./identity/list_user_flows.py).
+- **B2C has no dedicated Graph surface.** Microsoft Entra External ID (B2C)
+  historically lives on the separate Azure AD B2C Graph API (`b2cUserFlow`,
+  `b2cIdentityUserFlow`); the v1.0 Microsoft Graph model generated here does not
+  include those types. Use the B2X user-flow API for the newer model, and the
+  B2C-specific API for existing B2C tenants.
+- **PIM eligible assignments need `RoleManagement.Read.Directory`.** The
+  `roles/pim_report.py` example degrades gracefully when only
+  `Directory.Read.All` is available.
+
+---
+
 ## Examples — Users
 
 | Operation | File | Required role | API reference |
@@ -122,6 +174,18 @@ tenant-level policies, and audit logs.
 | App secret expiry report — certs/passwords expiring soon | [`applications/credentials_report.py`](./applications/credentials_report.py) | `Application.Read.All` | [app credentials](https://learn.microsoft.com/en-us/graph/api/resources/application) |
 | OAuth consent grants — review delegated permissions per app | [`applications/consent_grants.py`](./applications/consent_grants.py) | `DelegatedPermissionGrant.Read.All` | [consent grants](https://learn.microsoft.com/en-us/graph/api/resources/oauth2permissiongrant) |
 | Find orphaned apps — registrations/SPs without owners | [`applications/find_orphans.py`](./applications/find_orphans.py) | `Application.Read.All` | [app list](https://learn.microsoft.com/en-us/graph/api/application-list) |
+| Provision an app end to end — credentials, permissions, consent | [`applications/provision.py`](./applications/provision.py) | `Application.ReadWrite.All`, `DelegatedPermissionGrant.ReadWrite.All` | [create app](https://learn.microsoft.com/en-us/graph/api/application-post-applications) |
+| Permission inventory — requested vs granted, per resource | [`applications/permissions_report.py`](./applications/permissions_report.py) | `Directory.Read.All` | [app role assignments](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-list-approleassignments) |
+| Find stale apps — no valid credentials | [`applications/find_stale_apps.py`](./applications/find_stale_apps.py) | `Application.Read.All` | [app list](https://learn.microsoft.com/en-us/graph/api/application-list) |
+| Rotate every expired secret | [`applications/rotate_all_expired.py`](./applications/rotate_all_expired.py) | `Application.ReadWrite.All` | [add password](https://learn.microsoft.com/en-us/graph/api/application-add-password) |
+| Remove superseded secrets | [`applications/cleanup_old.py`](./applications/cleanup_old.py) | `Application.ReadWrite.All` | [remove password](https://learn.microsoft.com/en-us/graph/api/application-remove-password) |
+| Delete stale apps | [`applications/cleanup_stale.py`](./applications/cleanup_stale.py) | `Application.ReadWrite.All` | [delete app](https://learn.microsoft.com/en-us/graph/api/application-delete) |
+| Restore a soft-deleted app | [`applications/restore_app.py`](./applications/restore_app.py) | `Application.ReadWrite.All` | [deletedItems restore](https://learn.microsoft.com/en-us/graph/api/directory-deleteditems-restore) |
+| Update redirect URIs | [`applications/redirect_uris.py`](./applications/redirect_uris.py) | `Application.ReadWrite.All` | [update app](https://learn.microsoft.com/en-us/graph/api/application-update) |
+| List certificates with validity status | [`applications/list_certificates.py`](./applications/list_certificates.py) | `Directory.Read.All` | [app credentials](https://learn.microsoft.com/en-us/graph/api/resources/application) |
+| Grant app access to one SharePoint site (`Sites.Selected`) | [`applications/grant_site_selected_permission.py`](./applications/grant_site_selected_permission.py) | SharePoint admin | [site permissions](https://learn.microsoft.com/en-us/graph/api/site-post-permissions) |
+| Over-privileged service principals | [`applications/high_privilege_service_principals.py`](./applications/high_privilege_service_principals.py) | `Directory.Read.All` | [role assignments](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-list-approleassignments) |
+| App sign-in activity | [`applications/app_signins.py`](./applications/app_signins.py) | `AuditLog.Read.All` | [signIn list](https://learn.microsoft.com/en-us/graph/api/signin-list) |
 
 ## Examples — Roles & Identity
 
@@ -135,6 +199,7 @@ tenant-level policies, and audit logs.
 | List conditional access policies | [`identity/list_conditional_access_policies.py`](./identity/list_conditional_access_policies.py) | `Policy.Read.All` | [conditionalAccessPolicy list](https://learn.microsoft.com/en-us/graph/api/conditionalaccessroot-list-policies) |
 | List self-service sign-up user flows | [`identity/list_user_flows.py`](./identity/list_user_flows.py) | `IdentityUserFlow.Read.All` | [b2xUserFlows list](https://learn.microsoft.com/en-us/graph/api/identitycontainer-list-b2xuserflows) |
 | PIM report — privileged role assignments | [`roles/pim_report.py`](./roles/pim_report.py) | `RoleManagement.Read.All` | [role assignments](https://learn.microsoft.com/en-us/graph/api/privilegedroleassignment-list) |
+| Privileged-users report — every user and the admin roles they hold | [`roles/privileged_users.py`](./roles/privileged_users.py) | `Directory.Read.All` | [directoryRole list members](https://learn.microsoft.com/en-us/graph/api/directoryrole-list-members) |
 
 ## Examples — Policies
 

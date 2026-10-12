@@ -1,44 +1,68 @@
-"""List certificates registered on the app with their validity status.
+"""
+List an app's certificates (key credentials) with their validity status.
 
-Requires delegated permission ``Application.ReadWrite.All``.
+Shows, for one app, every registered certificate together with its thumbprint
+(``customKeyIdentifier``) and whether it is expired, not yet valid, expiring
+soon or valid. Handy when mapping a certificate back to the app that owns it.
 
 Usage:
-    python list_certificates.py
+
+    python list_certificates.py                    # this app
+    python list_certificates.py --app-id <guid>
+    python list_certificates.py --warn-days 60
+
+Requires application permission ``Directory.Read.All``.
+
+Reference:
+    https://learn.microsoft.com/en-us/graph/api/resources/keycredential
 """
 
-from datetime import datetime, timedelta, timezone
+from __future__ import annotations
 
+import argparse
+
+from office365.directory.key_credential import KeyCredential
 from office365.graph_client import GraphClient
-from tests import test_admin_principal_name, test_client_id, test_tenant
+from tests.settings import client_id, client_secret, tenant
 
-client = (
-    GraphClient(tenant=test_tenant)
-    .with_token_interactive(test_client_id, test_admin_principal_name)
-    .require_role("Global Administrator", "Privileged Role Administrator")
-)
+DEFAULT_WARN_DAYS = 30
 
-app = client.applications.get_by_app_id(test_client_id).get().execute_query()
 
-now = datetime.now(timezone.utc)
-soon = now + timedelta(days=30)
+def _client() -> GraphClient:
+    return (
+        GraphClient(tenant=tenant)
+        .with_client_secret(client_id, client_secret)
+        .require_application_permission("Directory.Read.All")
+    )
 
-for cred in app.key_credentials:
-    name = cred.displayName or "<unnamed>"
-    start, end = cred.startDateTime, cred.endDateTime
-    if not start or not end:
-        print(f"{name:<20} {'NO DATES':<16}")
-        continue
-    if isinstance(start, str):
-        start = datetime.fromisoformat(start.replace("Z", "+00:00"))
-    if isinstance(end, str):
-        end = datetime.fromisoformat(end.replace("Z", "+00:00"))
-    if end < now:
-        status = "EXPIRED"
-    elif start > now:
-        status = "NOT YET VALID"
-    elif end < soon:
-        status = "EXPIRING SOON"
-    else:
-        status = "VALID"
-    tid = cred.customKeyIdentifier or ""
-    print(f"{name:<16} {status:<14} {start.strftime('%Y-%m-%d'):<10} {end.strftime('%Y-%m-%d'):<10} {tid}")
+
+def _status(cred: KeyCredential, warn_days: int) -> str:
+    if cred.is_expired:
+        return "EXPIRED"
+    days = cred.days_until_expiry
+    if days is None:
+        return "NO EXPIRY"
+    if days < warn_days:
+        return "EXPIRING SOON"
+    return "VALID"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--app-id", default=client_id, help="application (client) ID to inspect")
+    parser.add_argument("--warn-days", type=int, default=DEFAULT_WARN_DAYS)
+    args = parser.parse_args()
+
+    client = _client()
+    app = client.applications.get_by_app_id(args.app_id).get().execute_query()
+
+    certs = app.key_credentials
+    print(f"{app.display_name}: {len(certs)} certificate(s)\n")
+    for cred in certs:
+        name = cred.displayName or "<unnamed>"
+        end = cred.endDateTime.date() if cred.endDateTime else "-"
+        print(f"  {name:<24} {_status(cred, args.warn_days):<14} expires {end}  {cred.customKeyIdentifier or ''}")
+
+
+if __name__ == "__main__":
+    main()

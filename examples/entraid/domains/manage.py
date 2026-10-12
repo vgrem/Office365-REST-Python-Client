@@ -16,13 +16,13 @@ https://learn.microsoft.com/en-us/graph/api/resources/domain
 """
 
 from office365.graph_client import GraphClient
-from tests import test_client_id, test_client_secret, test_tenant
+from tests.settings import client_id, client_secret, tenant
 
 CUSTOM_DOMAIN = "contoso-marketing.com"  # ← change to your domain
 
 
 def main():
-    client = GraphClient(tenant=test_tenant).with_client_secret(test_client_id, test_client_secret)
+    client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
 
     # -- Step 1: list existing domains --
     domains = client.domains.get().execute_query()

@@ -1,24 +1,48 @@
 """
-How to list delegated permissions for an app using Microsoft Graph.
-Delegated permissions, also called scopes or OAuth2 permissions, allow an app to call an API
-on behalf of a signed-in user.
+List the delegated (OAuth2) scopes granted to an app.
 
+These are the Microsoft Graph scopes the app can request on behalf of a
+signed-in user, as granted by tenant-wide admin consent.
 
-https://learn.microsoft.com/en-us/graph/permissions-grant-via-msgraph?tabs=http&pivots=grant-delegated-permissions
+Usage:
 
-Requires delegated permission ``AppRoleAssignment.ReadWrite.All``.
+    python list_delegated_perms.py                 # this app
+    python list_delegated_perms.py --app-id <guid>
+
+Requires application permission ``Directory.Read.All`` (delegated
+``DelegatedPermissionGrant.Read.All`` also works).
+
+Reference:
+    https://learn.microsoft.com/en-us/graph/api/serviceprincipal-list-delegatedpermissions
 """
 
+from __future__ import annotations
+
+import argparse
+
 from office365.graph_client import GraphClient
-from tests import test_admin_principal_name, test_client_id, test_tenant
+from tests.settings import client_id, client_secret, tenant
 
-client = (
-    GraphClient(tenant=test_tenant)
-    .with_token_interactive(test_client_id, test_admin_principal_name)
-    .require_role("Global Administrator", "Privileged Role Administrator")
-)
 
-result = client.get_delegated_permissions(test_client_id).execute_query()
+def _client() -> GraphClient:
+    return (
+        GraphClient(tenant=tenant)
+        .with_client_secret(client_id, client_secret)
+        .require_application_permission("Directory.Read.All")
+    )
 
-for scope in result.value:
-    print(scope)
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--app-id", default=client_id, help="application (client) ID to inspect")
+    args = parser.parse_args()
+
+    client = _client()
+    scopes = list(client.get_delegated_permissions(args.app_id).execute_query().value)
+    print(f"Delegated scopes granted to {args.app_id} ({len(scopes)}):")
+    for scope in scopes:
+        print(f"  {scope}")
+
+
+if __name__ == "__main__":
+    main()

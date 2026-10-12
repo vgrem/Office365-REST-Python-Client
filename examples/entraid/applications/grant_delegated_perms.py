@@ -1,32 +1,52 @@
 """
-How to grant delegated (OAuth2) permissions for an app using Microsoft Graph.
+Grant a delegated (OAuth2) scope to an app via admin consent.
 
-This script checks whether a delegated permission is already granted, and
-if not, prompts an admin to grant it via interactive consent.
+Idempotent: if the scope is already granted nothing changes, so it is safe to
+re-run. The grant is tenant-wide (``consentType=AllPrincipals``).
 
 Usage:
-    python -m examples.directory.applications.grant_delegated_perms
 
-Requires an administrative role that can grant delegated permissions
-(e.g. Global Administrator). See Azure Portal > App registrations > API permissions.
+    python grant_delegated_perms.py --scope User.Read
+    python grant_delegated_perms.py --scope Mail.Read --app-id <guid>
 
-https://learn.microsoft.com/en-us/graph/permissions-grant-via-msgraph
+Requires an interactive sign-in by a Global Administrator or Privileged Role
+Administrator (interactive consent is what makes the tenant-wide grant work).
+
+Reference:
+    https://learn.microsoft.com/en-us/graph/permissions-grant-via-msgraph
 """
 
+from __future__ import annotations
+
+import argparse
+
 from office365.graph_client import GraphClient
-from tests import test_admin_principal_name, test_client_id, test_tenant
+from tests.settings import admin_username, client_id, tenant
 
-client = (
-    GraphClient(tenant=test_tenant)
-    .with_token_interactive(test_client_id, test_admin_principal_name)
-    .require_role("Global Administrator", "Privileged Role Administrator")
-)
 
-scope = input("Permission scope: ")
+def _privileged_client() -> GraphClient:
+    """Sign in interactively with an admin account to grant consent."""
+    return (
+        GraphClient(tenant=tenant)
+        .with_token_interactive(client_id, admin_username)
+        .require_role("Global Administrator", "Privileged Role Administrator")
+    )
 
-if client.has_delegated_permission(scope, test_client_id):
-    print(f"Permission '{scope}' is already granted.")
-else:
-    print(f"Permission '{scope}' is not granted.")
-    client.grant_delegated_permissions(test_client_id, scope).execute_query()
-    print(f"Permission '{scope}' granted.")
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--scope", default="User.Read", help="delegated scope to grant")
+    parser.add_argument("--app-id", default=client_id, help="application (client) ID that receives the grant")
+    args = parser.parse_args()
+
+    privileged_client = _privileged_client()
+    if privileged_client.has_delegated_permission(args.scope, args.app_id):
+        print(f"'{args.scope}' is already granted to {args.app_id}.")
+        return
+
+    privileged_client.grant_delegated_permissions(args.app_id, args.scope).execute_query()
+    print(f"Granted '{args.scope}' to {args.app_id}.")
+
+
+if __name__ == "__main__":
+    main()

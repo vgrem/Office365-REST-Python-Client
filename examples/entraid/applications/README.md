@@ -1,73 +1,148 @@
 # Application Registration & Permissions
 
-Manage app registrations, certificate credentials, and API permissions.
+App registrations are the identity half of Entra ID: an app registration declares
+*who* an application is and *what it asks for*, while its service principal is the
+per-tenant object that actually receives permissions and credentials. This tour
+walks from listing and creating apps, through credential lifecycle (rotate,
+renew, clean up), to consent (check, grant, revoke) and the governance reports
+you need to keep the directory clean.
 
-> **Setting up `.env`?** Run `python -m tests.setup` for a guided setup, or use
-> these scripts directly — client secrets, certificates, and permissions. See
-> [Set up live authentication](https://github.com/vgrem/office365-rest-python-client/blob/master/README-dev.md#set-up-live-authentication).
+## Which client do I use?
 
-## App Management
+The scripts split into two groups:
 
-| What | File | Notes |
-|------|------|-------|
-| **List apps** | [`list.py`](./list.py) | First 100 app registrations |
-| **Create app** | [`create.py`](./create.py) | Register a new app + cleanup |
-| **Get by app ID** | [`get_by_app_id.py`](./get_by_app_id.py) | Find an app registration by its client ID |
-| **Add certificate** | [`rotate_cert.py`](rotate_cert.py) | Generate and upload a certificate to an app |
-| **Add password** | [`rotate_secret.py`](rotate_secret.py) | Create a client secret |
-| **Update redirect URIs** | [`redirect_uris.py`](./redirect_uris.py) | Add or update app redirect URIs |
-| **Consolidated credentials report** | [`credentials_report.py`](./credentials_report.py) | All apps with passwords + certs + expiry |
+- **Read-only reports** sign in with an **app-only client secret** (e.g.
+  `credentials_report.py`, `permissions_report.py`, `list_*`) and need
+  `Directory.Read.All`.
+- **Privileged writes** sign in **interactively as an administrator** with
+  `with_token_interactive(...).require_role("Global Administrator", "Privileged Role Administrator")`,
+  because no app-only role in this library consents to consent. The helper is
+  named `_privileged_client()` so the intent is obvious.
 
-## Credential Renewal
-
-| What | File | Notes |
-|------|------|-------|
-| **Renew secret if expiring** | [`renew_secret.py`](./renew_secret.py) | Check → if expiring in 30d, add replacement |
-| **Renew cert if expiring** | [`renew_cert.py`](./renew_cert.py) | Check → if expiring in 30d, upload replacement |
-| **Rotate all expired** | [`rotate_all_expired.py`](./rotate_all_expired.py) | Scan all apps → rotate every expired secret |
-| **Clean up old credentials** | [`cleanup_old.py`](./cleanup_old.py) | Remove expired passwords past grace period |
-
-## Permission Management
-
-Check, list, grant, and revoke delegated or application permissions for an app.
-
-### Check & List
+## 1. Get your bearings
 
 | What | File | Notes |
 |------|------|-------|
-| **Check delegated perms** | [`has_delegated_perms.py`](./has_delegated_perms.py) | Does the app have a specific OAuth scope? |
-| **Check application perms** | [`has_application_perms.py`](./has_application_perms.py) | Does the app have a specific app role? |
-| **List delegated perms** | [`list_delegated_perms.py`](./list_delegated_perms.py) | All OAuth scopes granted to the app |
-| **List application perms** | [`list_application_perms.py`](./list_application_perms.py) | All app roles granted to the app |
-| **Find consent grants** | [`consent_graants.py`](./consent_graants.py) | Enumerate existing OAuth consent grants |
+| List app registrations | [`list.py`](./list.py) | First 100 `applications` and their app IDs |
+| Look up one app by client ID | [`get_by_app_id.py`](./get_by_app_id.py) | `applications.get_by_app_id(...)` |
+| Register a new app | [`create.py`](./create.py) | Creates an app, then deletes it again |
+| Update redirect URIs | [`redirect_uris.py`](./redirect_uris.py) | Merge new URIs into the existing `web` object |
 
-### Grant & Revoke
+```python
+app = client.applications.get_by_app_id("00000000-0000-0000-0000-000000000000").get().execute_query()
+print(app.display_name, app.app_id)
+```
 
-| What | File | Notes |
-|------|------|-------|
-| **Grant delegated perms** | [`grant_delegated_perms.py`](./grant_delegated_perms.py) | Grant an OAuth scope via admin consent (interactive) |
-| **Grant application perms** | [`grant_application_perms.py`](./grant_application_perms.py) | Grant an app role (admin consent) |
-| **Revoke delegated perms** | [`revoke_delegated_perms.py`](./revoke_delegated_perms.py) | Remove an OAuth scope grant |
-| **Revoke application perms** | [`revoke_application_perms.py`](./revoke_application_perms.py) | Remove an app role assignment |
+## 2. Inventory credentials
 
-## Auditing & Compliance
-
-| What | File | Notes |
-|------|------|-------|
-| **Password expiry** | [`password_expiry.py`](./password_expiry.py) | Find app passwords expiring within 30 days |
-| **Certificate expiry** | [`certificate_expiry.py`](./certificate_expiry.py) | Find app certificates expiring within 30 days |
-| **Find stale apps** | [`find_stale_apps.py`](./find_stale_apps.py) | Apps where all credentials have expired |
-| **Find orphaned apps** | [`find_orphans.py`](./find_orphans.py) | Apps and service principals without owners |
-| **Service principal credential audit** | [`sp_report.py`](./sp_report.py) | SP passwords and certs with expiry status |
-| **List certificates** | [`list_certificates.py`](./list_certificates.py) | App certificates with validity status |
-
-## Cleanup & Remediation
+Start here if you have inherited a tenant. Every app is listed with its password
+and certificate credentials and their expiry, so you can see what is about to
+break.
 
 | What | File | Notes |
 |------|------|-------|
-| **Remove expired passwords** | [`cleanup_old.py`](./cleanup_old.py) | Remove expired secrets from all apps |
-| **Delete stale apps** | [`cleanup_stale.py`](./cleanup_stale.py) | Delete apps with no valid credentials |
-| **Grant Sites.Selected** | [`grant_site_selected_permission.py`](./grant_site_selected_permission.py) | Grant app access to a specific SharePoint site |
+| All app credentials + expiry | [`credentials_report.py`](./credentials_report.py) | Passwords and certificates; `--warn-days`, `--expired-only` |
+| Service-principal credentials | [`sp_report.py`](./sp_report.py) | Credentials on service principals (not just app objects) |
+| Certificates only | [`list_certificates.py`](./list_certificates.py) | VALID / EXPIRING / EXPIRED per certificate |
+| All consent grants | [`consent_grants.py`](./consent_grants.py) | Tenant-wide and user-scoped OAuth2 grants |
+| App sign-in activity | [`app_signins.py`](./app_signins.py) | Last sign-in per app to spot unused registrations |
+
+```python
+for p in app.password_credentials:
+    state = "expired" if p.is_expired else f"{p.days_until_expiry}d left"
+    print(p.display_name or p.hint or "(unnamed)", state)
+```
+
+## 3. Rotate and renew credentials
+
+The credential properties `is_expired` and `days_until_expiry` interpret a naive
+`endDateTime` as UTC, so the checks below are portable.
+
+| What | File | Notes |
+|------|------|-------|
+| Add a client secret | [`rotate_secret.py`](./rotate_secret.py) | Generate a password, optionally print `CLIENT_SECRET=...` |
+| Renew a secret before it expires | [`renew_secret.py`](./renew_secret.py) | No-op unless within `--days` |
+| Upload a certificate | [`rotate_cert.py`](./rotate_cert.py) | Self-signed cert generated into a temp dir |
+| Renew a certificate | [`renew_cert.py`](./renew_cert.py) | Same check-then-add flow for certs |
+| Rotate every expired secret | [`rotate_all_expired.py`](./rotate_all_expired.py) | Dry-run by default; `--apply` to write |
+| Remove expired secrets | [`cleanup_old.py`](./cleanup_old.py) | Dry-run by default; keeps a grace period |
+
+```python
+new = app.add_password("rotated-by-sdk").execute_query()  # or add_certificate(cert, ...)
+print(new.key_id)  # keep the secretText, it is shown once
+```
+
+## 4. Check and list permissions
+
+| What | File | Notes |
+|------|------|-------|
+| Full permission inventory | [`permissions_report.py`](./permissions_report.py) | Requested + granted, names resolved per resource |
+| Does the app have a delegated scope? | [`has_delegated_perms.py`](./has_delegated_perms.py) | Returns `bool` |
+| Does the app have an application role? | [`has_application_perms.py`](./has_application_perms.py) | Returns `bool` |
+| List granted delegated scopes | [`list_delegated_perms.py`](./list_delegated_perms.py) | All-principals grants on Microsoft Graph |
+| List granted application roles | [`list_application_perms.py`](./list_application_perms.py) | App-role assignments on Microsoft Graph |
+
+`permissions_report.py` is the one to reach for first: it resolves each
+`resourceAppId` against that resource's own service principal, so roles on
+non-Graph resources are named too — a report that only maps Microsoft Graph
+leaks raw GUIDs for everything else.
+
+## 5. Grant and revoke consent
+
+Grant and revoke scripts sign in as an administrator because consent is a
+privileged operation.
+
+| What | File | Notes |
+|------|------|-------|
+| Grant a delegated scope | [`grant_delegated_perms.py`](./grant_delegated_perms.py) | AllPrincipals; idempotent |
+| Grant an application role | [`grant_application_perms.py`](./grant_application_perms.py) | Needs `AppRoleAssignment.ReadWrite.All` |
+| Revoke a delegated scope | [`revoke_delegated_perms.py`](./revoke_delegated_perms.py) | Delete the OAuth2 grant |
+| Revoke an application role | [`revoke_application_perms.py`](./revoke_application_perms.py) | Delete the app-role assignment |
+| Grant a site-scoped role | [`grant_site_selected_permission.py`](./grant_site_selected_permission.py) | `Sites.Selected` pattern for one SharePoint site |
+
+The full pipeline — register → create service principal → add secret and
+certificate → request permissions → consent — is wired together in
+[`provision.py`](./provision.py). It cleans up after itself and is the best
+end-to-end reference.
+
+```python
+# delegated consent (works with Directory.ReadWrite.All)
+client.grant_delegated_permissions(app_id, "User.Read").execute_query()
+
+# application consent needs AppRoleAssignment.ReadWrite.All
+client.grant_application_permissions(app_id, "User.Read.All").execute_query()
+```
+
+## 6. Governance and hygiene
+
+| What | File | Notes |
+|------|------|-------|
+| Apps with no valid credentials | [`find_stale_apps.py`](./find_stale_apps.py) | Candidates for deletion |
+| Apps with no owners | [`find_orphans.py`](./find_orphans.py) | Ownerless registrations are a risk |
+| Over-privileged service principals | [`high_privilege_service_principals.py`](./high_privilege_service_principals.py) | Directory-role holders |
+| Delete stale apps | [`cleanup_stale.py`](./cleanup_stale.py) | Dry-run by default; `--apply` to delete |
+| Restore a deleted app | [`restore_app.py`](./restore_app.py) | Uses `deleted_items` |
+
+## Sharp edges
+
+- **Reading app registrations works app-only; writing needs delegated consent.**
+  `Directory.Read.All` covers the read-only reports (`list.py`,
+  `get_by_app_id.py`, `permissions_report.py`), but app-only roles here do not
+  include `Application.ReadWrite.All`, so the lifecycle scripts sign in
+  interactively as an administrator instead.
+- **Granting an application role needs `AppRoleAssignment.ReadWrite.All`.**
+  Blanket admin consent via `Directory.ReadWrite.All` grants *delegated* scopes
+  but **not** app roles; `grant_application_perms.py` and `provision.py` catch the
+  `Authorization_RequestDenied` and print the requirement instead of crashing.
+- **Creating an app does not create its service principal.** Call
+  `client.service_principals.ensure(app_id).execute_query()` before using any
+  service-principal-scoped helper.
+- **`add_password` does not return a `displayName`.** The secret text is returned
+  once; read `key_id` and `secret_text`, and label the secret in your own store.
+  Portal-created secrets *do* carry a `displayName`.
+- **PATCHing `web` replaces the whole object.** Read
+  `dict(app.properties.get("web") or {})`, mutate `redirectUris`, then write it
+  back — otherwise you drop the other `web` keys.
 
 ---
 
@@ -75,3 +150,4 @@ Check, list, grant, and revoke delegated or application permissions for an app.
 
 - [Register an application](https://learn.microsoft.com/en-us/graph/auth-register-app-v2)
 - [Permissions grant via Graph API](https://learn.microsoft.com/en-us/graph/permissions-grant-via-msgraph)
+- [Service principal objects](https://learn.microsoft.com/en-us/entra/identity-platform/app-objects-and-service-principals)

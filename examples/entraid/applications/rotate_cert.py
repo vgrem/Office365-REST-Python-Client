@@ -1,30 +1,47 @@
 """
-Add (or generate) a certificate for an app using Microsoft Graph.
+Add a new certificate to an app (rotate its key credential).
 
-Uploads the *public* certificate (``.crt``/``.cer``); the private key stays local
-and is what the client authenticates with (``OFFICE365_CERT_PATH``).
+Uploads the *public* certificate (``.crt``); the private key stays local and is
+what the client authenticates with. By default a self-signed pair is generated
+with openssl into a temporary directory; pass ``--cert`` to upload an existing
+certificate instead.
 
-Pass ``--generate`` to create a self-signed pair with openssl first and print a
-paste-ready ``.env`` block. Otherwise ``--cert`` uploads an existing certificate.
+Usage:
 
-https://learn.microsoft.com/en-us/graph/applications-how-to-add-certificate
+    python rotate_cert.py                          # generate and upload
+    python rotate_cert.py --cert /path/to/cert.crt # upload an existing certificate
 
-Requires delegated permission ``Application.ReadWrite.All``.
+Requires an interactive sign-in by a Global Administrator or Privileged Role
+Administrator (the delegated ``Application.ReadWrite.All`` scope is carried by
+the signed-in account).
+
+Reference:
+    https://learn.microsoft.com/en-us/graph/api/application-addcertificate
+    https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials
 """
+
+from __future__ import annotations
 
 import argparse
 import subprocess
+import tempfile
 from pathlib import Path
 
 from office365.graph_client import GraphClient
 from tests.settings import admin_username, client_id, tenant
 
-DEFAULT_CERT = "tests/selfsigncert.crt"
+
+def _privileged_client() -> GraphClient:
+    return (
+        GraphClient(tenant=tenant)
+        .with_token_interactive(client_id, admin_username)
+        .require_role("Global Administrator", "Privileged Role Administrator")
+    )
 
 
-def generate_certificate(cert_path: Path, key_path: Path, common_name: str) -> None:
-    cert_path.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["openssl", "genrsa", "-out", str(key_path), "2048"], check=True)
+def _generate_certificate(directory: Path, common_name: str) -> tuple[Path, Path]:
+    key_path, cert_path = directory / "private.pem", directory / "public.crt"
+    subprocess.run(["openssl", "genrsa", "-out", str(key_path), "2048"], check=True, capture_output=True)
     subprocess.run(
         [
             "openssl",
@@ -41,49 +58,29 @@ def generate_certificate(cert_path: Path, key_path: Path, common_name: str) -> N
             f"/CN={common_name}",
         ],
         check=True,
-    )
-
-
-def get_thumbprint(cert_path: Path) -> str:
-    result = subprocess.run(
-        ["openssl", "x509", "-in", str(cert_path), "-noout", "-fingerprint", "-sha1"],
         capture_output=True,
-        text=True,
-        check=True,
     )
-    return result.stdout.strip().removeprefix("SHA1 Fingerprint=").replace(":", "")
+    return key_path, cert_path
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cert", default=DEFAULT_CERT, help="path to the public certificate (default: %(default)s)")
+    parser.add_argument("--cert", help="path to an existing public certificate (.crt)")
+    parser.add_argument("--app-id", default=client_id, help="application (client) ID to rotate")
     parser.add_argument("--name", default="office365-rest-python-client", help="certificate display name")
-    parser.add_argument("--generate", action="store_true", help="generate a self-signed certificate first")
     args = parser.parse_args()
 
-    cert_path = Path(args.cert)
-    key_path = cert_path.with_suffix(".pem")
+    if args.cert:
+        cert_path = Path(args.cert)
+        key_path = cert_path.with_suffix(".pem")
+    else:
+        key_path, cert_path = _generate_certificate(Path(tempfile.mkdtemp()), args.name)
 
-    if args.generate:
-        generate_certificate(cert_path, key_path, args.name)
-
-    client = (
-        GraphClient(tenant=tenant)
-        .with_token_interactive(client_id, admin_username)
-        .require_role("Global Administrator", "Privileged Role Administrator")
-    )
-
-    target_app = client.applications.get_by_app_id(client_id)
-    target_app.add_certificate(cert_path.read_bytes(), args.name).execute_query()
-    print(f"Uploaded {cert_path} to app {client_id}")
-
-    if args.generate:
-        print()
-        print("Add to .env:")
-        print(f"OFFICE365_TENANT={tenant}")
-        print(f"OFFICE365_CLIENT_ID={client_id}")
-        print(f"OFFICE365_CERT_THUMBPRINT={get_thumbprint(cert_path)}")
-        print(f"OFFICE365_CERT_PATH={key_path}")
+    client = _privileged_client()
+    app = client.applications.get_by_app_id(args.app_id).get().execute_query()
+    app.add_certificate(cert_path.read_bytes(), args.name).execute_query()
+    print(f"Uploaded {cert_path} to {app.display_name}.")
+    print(f"Keep the private key at: {key_path}")
 
 
 if __name__ == "__main__":
