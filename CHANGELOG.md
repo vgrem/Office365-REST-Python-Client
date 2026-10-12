@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `required=True` to raise `NotFoundException` instead. `PlannerPlan.buckets`
   and `.tasks` now return those typed collections, so the planner lookups can be
   scoped to a plan.
+- **Idempotent `ensure` helpers:** `NotebookCollection.ensure`,
+  `OnenoteSectionCollection.ensure` and `MailFolderCollection.ensure` return an
+  existing object by name or create it, reusing the create-first
+  `create_or_get` mechanics — each of these services rejects a duplicate name,
+  so a rerun is a no-op. `TodoTaskCollection.ensure` is filter-first because To
+  Do task titles are not unique. All are deferred (run with `execute_query()`).
+  OneNote's duplicate-name error (`20117`) is now classified as
+  `DuplicatedObjectException`.
 - **OneNote pages can be created from in-memory HTML:** `OnenotePageCollection.add`
   accepts the page HTML as a `str`, `bytes`/`bytearray`, or a file-like object
   (previously a named file was required), and its attachment mapping is typed as

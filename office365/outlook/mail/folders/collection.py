@@ -24,6 +24,29 @@ class MailFolderCollection(DeltaCollection[MailFolder]):
         """
         return self._find_by_filter(f"displayName eq '{escape_odata_string(display_name)}'", required=required)
 
+    def ensure(self, display_name: str) -> MailFolder:
+        """Return the mail folder with the given name, creating it when absent (idempotent).
+
+        Deferred — resolve with ``execute_query()``. Outlook rejects a duplicate
+        sibling folder name (``ErrorFolderExists``, classified as
+        :class:`~office365.runtime.exceptions.DuplicatedObjectException`), so the
+        create-first helper is safe and a re-run is a no-op:
+
+            archive = inbox.child_folders.ensure("Archive").execute_query()
+
+        Args:
+            display_name (str): The folder display name
+
+        Returns:
+            MailFolder: The existing or newly created folder
+        """
+        from office365.runtime.queries.get_or_create import create_or_get
+
+        return create_or_get(
+            create=lambda: self.add(display_name),
+            find=lambda: self.find_by_display_name(display_name, required=True),
+        )
+
     @require_permission(delegated=["Mail.ReadWrite"], application=["Mail.ReadWrite"])
     def add(self, display_name: str, is_hidden: bool = False) -> MailFolder:
         """

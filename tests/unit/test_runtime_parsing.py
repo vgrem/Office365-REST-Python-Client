@@ -139,6 +139,16 @@ class TestFromResponse(unittest.TestCase):
         exc = ClientRequestException.from_response(_make_error_response(body))
         self.assertIsInstance(exc, DuplicatedObjectException)
 
+    def test_onenote_name_already_exists(self):
+        body = {
+            "error": {
+                "code": "20117",
+                "message": "An item with this name already exists in this location.",
+            }
+        }
+        exc = ClientRequestException.from_response(_make_error_response(body))
+        self.assertIsInstance(exc, DuplicatedObjectException)
+
     def test_nested_json_message_is_unwrapped(self):
         inner = (
             "Application is not authorized to perform this operation. "

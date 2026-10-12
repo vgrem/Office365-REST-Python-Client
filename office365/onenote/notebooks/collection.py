@@ -40,6 +40,29 @@ class NotebookCollection(EntityCollection[Notebook]):
         """
         return super().add(displayName=display_name)
 
+    def ensure(self, display_name: str) -> Notebook:
+        """Return the notebook with the given name, creating it when absent (idempotent).
+
+        Deferred — resolve with ``execute_query()``. OneNote rejects a duplicate
+        notebook name (``20117``, classified as
+        :class:`~office365.runtime.exceptions.DuplicatedObjectException`), so the
+        create-first helper is safe and a re-run is a no-op:
+
+            notebook = client.me.onenote.notebooks.ensure("Project X").execute_query()
+
+        Args:
+            display_name (str): The notebook display name
+
+        Returns:
+            Notebook: The existing or newly created notebook
+        """
+        from office365.runtime.queries.get_or_create import create_or_get
+
+        return create_or_get(
+            create=lambda: self.add(display_name),
+            find=lambda: self.find_by_display_name(display_name, required=True),
+        )
+
     @require_permission(
         delegated=["Notes.Read", "Notes.Read.All", "Notes.ReadWrite", "Notes.ReadWrite.All"],
         application=["Notes.Read.All", "Notes.ReadWrite.All"],

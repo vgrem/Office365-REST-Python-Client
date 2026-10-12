@@ -22,3 +22,26 @@ class OnenoteSectionCollection(EntityCollection[OnenoteSection]):
             required (bool): Raise on a missing or ambiguous match when ``True``
         """
         return self._find_by_filter(f"displayName eq '{escape_odata_string(display_name)}'", required=required)
+
+    def ensure(self, display_name: str) -> OnenoteSection:
+        """Return the section with the given name, creating it when absent (idempotent).
+
+        Deferred — resolve with ``execute_query()``. OneNote rejects a duplicate
+        section name (``20117``, classified as
+        :class:`~office365.runtime.exceptions.DuplicatedObjectException`), so the
+        create-first helper is safe and a re-run is a no-op:
+
+            section = notebook.sections.ensure("Meeting Notes").execute_query()
+
+        Args:
+            display_name (str): The section display name
+
+        Returns:
+            OnenoteSection: The existing or newly created section
+        """
+        from office365.runtime.queries.get_or_create import create_or_get
+
+        return create_or_get(
+            create=lambda: self.add(displayName=display_name),
+            find=lambda: self.find_by_display_name(display_name, required=True),
+        )

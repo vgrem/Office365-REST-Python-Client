@@ -23,7 +23,8 @@ class DuplicatedObjectException(ClientRequestException):
 
     MATCH_PRIORITY = 10
     # Lower-case: ``matches`` compares against ``payload.code.lower()``.
-    _CODES = frozenset({"namealreadyexists", "errorfolderexists", "-2130575342"})
+    # ``20117`` is OneNote's "an item with this name already exists in this location".
+    _CODES = frozenset({"namealreadyexists", "errorfolderexists", "-2130575342", "20117"})
 
     @classmethod
     def matches(cls, payload: ErrorPayload) -> bool:

@@ -33,6 +33,36 @@ class TodoTaskCollection(DeltaCollection[TodoTask]):
         """
         return self._find_by_filter(f"title eq '{escape_odata_string(title)}'", required=required)
 
+    def ensure(self, title: str) -> TodoTask:
+        """Return the task with the given title, creating it when absent (idempotent).
+
+        Deferred — resolve with ``execute_query()``. To Do task titles are **not**
+        unique, so unlike the create-first helpers this looks the task up first
+        and only creates it when the lookup comes back empty (the first match
+        wins when several share the title):
+
+            task = task_list.tasks.ensure("Prepare the demo").execute_query()
+
+        Args:
+            title (str): The task title
+
+        Returns:
+            TodoTask: The existing or newly created task
+        """
+        return_type = TodoTask(self.context, EntityPath(None, self.resource_path))
+        return_type.set_property("title", title)
+        self.add_child(return_type)
+
+        def _ensure(col: TodoTaskCollection):
+            if len(col) == 0:
+                qry = CreateEntityQuery(self, cast(Dict, return_type.to_json()), return_type)
+                self.context.add_query(qry)
+            else:
+                return_type.copy_from(col[0])
+
+        self.get().filter(f"title eq '{escape_odata_string(title)}'").after_execute(_ensure)
+        return return_type
+
     def add(
         self,
         title: str,
