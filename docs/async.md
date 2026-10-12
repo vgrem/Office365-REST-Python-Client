@@ -396,6 +396,15 @@ The retry policy mirrors `execute_query_retry` exactly: transient errors
 jitter. Pass a `failure_callback` (for example returning the server's
 `Retry-After` via `retry_after_delay`) to override the backoff.
 
+For a context-wide policy, `with_auto_retry(...)` makes **every**
+`execute_query_async` retry transient failures, so you don't opt in at each call
+site:
+
+```python
+ctx.with_auto_retry(max_retry=5, max_delay=60)
+await ctx.me.get().execute_query_async()
+```
+
 ## Credentials
 
 A token callback registered with `with_access_token` may be an ordinary function

@@ -43,6 +43,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `PlannerChecklistItems.add/remove`. Both are Open Type maps keyed by id that
   mutate in place (the change is sent by `update()`), deserialize to typed
   values, and remove entries by sending `null`.
+- **Client-level retry:** `ClientRuntimeContext.with_auto_retry(...)` — inherited
+  by `GraphClient` / `SharePointClient` — makes every `execute_query` /
+  `execute_query_async` on the context retry transient failures
+  (HTTP 408/429/5xx or a dropped connection) with exponential backoff and
+  jitter, honoring the server's `Retry-After`; permanent failures (400/401/403/
+  404) still raise immediately. It is opt-in (off unless called), chainable, and
+  the context-wide counterpart of the per-call `execute_query_retry`.
+  `ctx.auto_retry` reports whether a policy is active.
 
 ### Changed
 - **Planner writes:** Planner entities derive from the new `PlannerEntity` base,

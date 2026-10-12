@@ -49,6 +49,12 @@ class ClientRuntimeContext(ABC):
         # execution sets it per sub-query (including on worker threads), so query
         # handlers keyed on ``current_query`` resolve to the right query.
         self._current_query_lock = threading.RLock()
+        # Client-level retry policy set by :meth:`with_auto_retry`; ``None``
+        # means ``execute_query`` runs the pending queries once with no retry.
+        self._retry_policy: dict[str, Any] | None = None
+        # True while :meth:`execute_query_retry` drives the retry loop, so the
+        # public ``execute_query`` it calls runs the queue once (no recursion).
+        self._in_retry = False
 
     @classmethod
     def declared_limits(cls) -> Tuple[Limit, ...]:
@@ -144,6 +150,7 @@ class ClientRuntimeContext(ABC):
             if callable(success_callback) and self.current_query is not None:
                 success_callback(self.current_query.return_type)
 
+        self._in_retry = True
         try:
             retry(
                 self.execute_query,
@@ -159,6 +166,8 @@ class ClientRuntimeContext(ABC):
         except BaseException:
             self._clear_retry_state()
             raise
+        finally:
+            self._in_retry = False
 
     def _clear_retry_state(self) -> None:
         """Undo any failed-query re-queue and reset the cursor after an error.
@@ -363,12 +372,75 @@ class ClientRuntimeContext(ABC):
         self.pending_request().with_client_request_id(enabled)
         return self
 
+    @property
+    def auto_retry(self) -> bool:
+        """Whether a client-level retry policy is active (see :meth:`with_auto_retry`)."""
+        return self._retry_policy is not None
+
+    def with_auto_retry(
+        self,
+        max_retry: int = 5,
+        timeout_secs: int = 5,
+        max_delay: Optional[int] = None,
+        jitter: bool = True,
+        exceptions: Tuple[Type[Exception], ...] = DEFAULT_RETRY_EXCEPTIONS,
+        is_retriable: Optional[Callable[[Exception], bool]] = None,
+    ) -> Self:
+        """Make ``execute_query`` retry transient failures automatically (opt-in).
+
+        By default ``execute_query`` runs the pending queries once and raises on
+        the first failure. After calling this, **every** ``execute_query`` /
+        ``execute_query_async`` on the context retries transient failures
+        (HTTP 408/429/5xx or a dropped connection) with exponential backoff and
+        jitter, honoring the server's ``Retry-After`` header. Permanent failures
+        (e.g. 400/401/403/404) still raise immediately.
+
+        This is the client-level counterpart of the per-call
+        :meth:`execute_query_retry`; the policy applies to every query on the
+        context, including those issued internally by ``ClientObject`` /
+        ``ClientResult`` helpers, so callers that build a deferred request
+        anywhere keep the safety net without opting in at each call site.
+        Call it after any transport configuration (``with_transport`` /
+        ``with_rate_limit``) and chain it with the other ``with_*`` methods.
+
+        Args:
+            max_retry: Maximum number of retry attempts
+            timeout_secs: Base delay for exponential backoff (seconds)
+            max_delay: Optional cap on the exponential delay (seconds)
+            jitter: Whether to randomize the delay (default True)
+            exceptions: Exception types that trigger retries
+            is_retriable: Optional predicate deciding whether a caught exception
+                is retried. Defaults to
+                :func:`~office365.runtime.retry.is_transient_error`; pass
+                :func:`~office365.runtime.retry.retry_on` to also retry
+                otherwise-permanent errors such as a locked file (HTTP 423).
+
+        Returns:
+            Self: Supports method chaining
+        """
+        self._retry_policy = {
+            "max_retry": max_retry,
+            "timeout_secs": timeout_secs,
+            "max_delay": max_delay,
+            "jitter": jitter,
+            "exceptions": exceptions,
+            "is_retriable": is_retriable,
+        }
+        return self
+
     def execute_query(self) -> Self:
         """Executes all pending queries.
+
+        When :meth:`with_auto_retry` has configured a client-level retry policy,
+        transient failures are retried automatically (delegating to
+        :meth:`execute_query_retry`); otherwise the pending queries run once.
 
         Returns:
             Self for method chaining
         """
+        if self._retry_policy is not None and not self._in_retry:
+            self.execute_query_retry(**self._retry_policy)
+            return self
         while self.has_pending_request:
             qry = self._get_next_query()
             qry.execute_query(self.pending_request())
@@ -384,9 +456,15 @@ class ClientRuntimeContext(ABC):
         :meth:`execute_query_parallel_async` with ``concurrency`` > 1, or use
         :meth:`execute_batch_async` with ``concurrency`` > 1.
 
+        When :meth:`with_auto_retry` is configured, transient failures are
+        retried (delegating to :meth:`execute_query_async_retry`).
+
         Returns:
             Self for method chaining
         """
+        if self._retry_policy is not None and not self._in_retry:
+            await self.execute_query_async_retry(**self._retry_policy)
+            return self
         while self.has_pending_request:
             qry = self._get_next_query()
             try:
@@ -447,6 +525,7 @@ class ClientRuntimeContext(ABC):
             if callable(success_callback) and self.current_query is not None:
                 success_callback(self.current_query.return_type)
 
+        self._in_retry = True
         try:
             await retry_async(
                 self.execute_query_async,
@@ -462,6 +541,8 @@ class ClientRuntimeContext(ABC):
         except BaseException:
             self._clear_retry_state()
             raise
+        finally:
+            self._in_retry = False
 
     def _restore_pending(self, prepared: List[Tuple[ClientQuery, RequestOptions]]) -> None:
         """Re-queue popped queries in their original order after an aborted run.

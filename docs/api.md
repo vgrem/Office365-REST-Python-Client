@@ -137,6 +137,15 @@ result = client.users.top(10).get().execute_query_retry()  # per query
 client.execute_batch(concurrency=5)  # retries throttled sub-requests
 ```
 
+Make it the default for a whole client — every `execute_query` on the context
+then retries transient failures, including deferred requests built internally by
+`ClientObject` / `ClientResult` helpers:
+
+```python
+client.with_auto_retry()  # opt-in; off by default
+client.me.get().execute_query()  # retries 429/5xx with backoff + Retry-After
+```
+
 Retry any callable with the same policy — call it, or decorate one:
 
 ```python
