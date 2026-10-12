@@ -51,6 +51,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   404) still raise immediately. It is opt-in (off unless called), chainable, and
   the context-wide counterpart of the per-call `execute_query_retry`.
   `ctx.auto_retry` reports whether a policy is active.
+- **Permission hints on denied requests:** the per-method `@require_permission(...)`
+  declaration (previously documentation-only) now tags the query the method
+  builds. When a request is denied, the raised `AccessDeniedException` names the
+  declared permission alongside generic remediation (grant the app role and
+  admin-consent it, or add the delegated scope; fail fast with
+  `require_application_permission(...)` / `require_role(...)`). Other error types
+  are left untouched, so the hint never misleads. `ClientRequestException.add_hint`
+  / `.hints` let application code append or read custom hints, and
+  `ClientRuntimeContext.last_query` exposes the most recently queued query. The
+  shared rendering pipeline also backs the SharePoint guidance-bearing errors
+  (`FileLockedException`, `SPFileCheckOutException`, `SPQueryThrottledException`),
+  so each shows its guidance exactly once.
 
 ### Changed
 - **Planner writes:** Planner entities derive from the new `PlannerEntity` base,

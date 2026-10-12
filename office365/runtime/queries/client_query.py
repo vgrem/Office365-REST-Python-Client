@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
 
 from typing_extensions import Self
 
@@ -45,6 +45,10 @@ class ClientQuery(Generic[ReturnT]):
         self._parameters_type = parameters_type
         self._parameters_name = parameters_name
         self._return_type: ReturnT | None = return_type
+        # Optional permission metadata (set by ``@require_permission`` when the
+        # query is built). Surfaced as an error hint when the request is denied.
+        # Untyped on purpose: the runtime stays independent of the directory models.
+        self._permission_requirement: Any = None
         # Queries run inside a batch by default. A query that targets an endpoint
         # the batch service doesn't accept (e.g. ``_vti_bin/listdata.svc``) sets
         # this to ``False`` so batch execution runs it on its own, in order.
@@ -137,6 +141,19 @@ class ClientQuery(Generic[ReturnT]):
     def parameters_type(self) -> ClientObject | ClientValue | dict | str | bytes | None:
         """Type of parameters for this query."""
         return self._parameters_type
+
+    @property
+    def permission_requirement(self) -> Any:
+        """Permission metadata attached by ``@require_permission`` (or ``None``).
+
+        Used to enrich an :class:`~office365.runtime.exceptions.AccessDeniedException`
+        with the permissions the API declares, so a 403 explains what to grant.
+        """
+        return self._permission_requirement
+
+    @permission_requirement.setter
+    def permission_requirement(self, value: Any) -> None:
+        self._permission_requirement = value
 
     @property
     def return_type(self) -> ReturnT | None:

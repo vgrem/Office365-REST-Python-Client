@@ -103,6 +103,12 @@ class ClientRequestException(RequestException):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._error: dict = {}
+        self._hints: list[str] = []
+
+    #: Optional class-level remediation appended to ``str(exc)`` by
+    #: :meth:`_render` (e.g. the generic advice on
+    #: :class:`~office365.runtime.exceptions.AccessDeniedException`).
+    GUIDANCE: str = ""
 
     #: Specificity of this type when several match a payload; the highest wins
     #: (ties broken by registration order). Lets catch-alls coexist with the
@@ -214,6 +220,35 @@ class ClientRequestException(RequestException):
     def health_score(self) -> Optional[int]:
         """SharePoint server health score (``X-SharePointHealthScore``)."""
         return parse_int((getattr(self.response, "headers", None) or {}).get("X-SharePointHealthScore"))
+
+    def add_hint(self, hint: str) -> "ClientRequestException":
+        """Append a remediation hint that ``str(exc)`` will display (chainable).
+
+        Used by the runtime to explain a denied request with the permissions the
+        called API declares (via ``@require_permission``). Callers may add their
+        own hints to ``except`` blocks without re-wrapping the exception.
+        """
+        if hint:
+            self._hints.append(hint)
+        return self
+
+    @property
+    def hints(self) -> tuple[str, ...]:
+        """Remediation hints attached to this error (class ``GUIDANCE`` excluded)."""
+        return tuple(self._hints)
+
+    def _base_description(self) -> str:
+        """The underlying ``RequestException`` description (no guidance/hints)."""
+        return super().__str__()
+
+    def _render(self, described: str) -> str:
+        """Compose the description with class ``GUIDANCE`` and any hints."""
+        parts = [described] if described else []
+        parts.extend(extra for extra in ([self.GUIDANCE] if self.GUIDANCE else []) + self._hints if extra)
+        return "\n".join(parts)
+
+    def __str__(self) -> str:
+        return self._render(self._base_description())
 
 
 # Error types consulted by ``from_response``. The generic runtime types live in

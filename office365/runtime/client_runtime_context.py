@@ -72,6 +72,16 @@ class ClientRuntimeContext(ABC):
     def current_query(self) -> ClientQuery | None:
         return self._current_query
 
+    @property
+    def last_query(self) -> ClientQuery | None:
+        """The most recently queued (still pending) query, or ``None``.
+
+        Lets a builder method associate metadata with the query it just created
+        -- ``@require_permission`` stamps its requirement here so a later denial
+        can explain which permission was missing.
+        """
+        return self._queries[-1] if self._queries else None
+
     @contextmanager
     def current_query_scope(self, query: ClientQuery) -> Iterator[None]:
         """Expose ``query`` as :attr:`current_query` while executing a block.

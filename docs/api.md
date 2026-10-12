@@ -251,6 +251,34 @@ Errors with a recovery path expose it in `GUIDANCE`, appended to `str(exc)`:
 `SPFileCheckOutException`, `FileLockedException`, and `SPQueryThrottledException`
 (page or index a column — see [Large lists](large-lists.md)).
 
+### Permission hints
+
+A denied request appends the *declared* permission to the exception, so you see
+what to grant without opening the docs. Library methods carry their requirement
+as `@require_permission(...)` metadata (also folded into `help(method)`); when a
+decorated method's request is rejected, the requirement is attached to the query
+it built and surfaced on `AccessDeniedException`:
+
+```python
+from office365.runtime.exceptions import AccessDeniedException
+
+try:
+    client.drives.get().execute_query()
+except AccessDeniedException as exc:
+    print(exc)
+    # ('accessDenied', 'Access denied.')
+    # The caller is not permitted to perform this request. ...
+    # This API declares: application Files.Read.All, ... (List all drives in the tenant)
+```
+
+The generic part names the likely fix — an app-only role plus admin consent, or a
+delegated OAuth scope — and points at `require_application_permission(...)` /
+`require_role(...)` to fail fast with the exact requirement. Only permission
+denials are enriched; every other error is left untouched so the hint cannot
+mislead. Application code can append its own context with `exc.add_hint("...")`
+and read the collected text back via `exc.hints`. The most recently queued query
+is available as `client.last_query`.
+
 ## Power features
 
 ### Proxy, custom SSL, timeouts

@@ -268,12 +268,15 @@ class ClientRequest(ABC):
             self.process_response(response, query)
             self.afterExecute(response)
         except ClientRequestException as e:
+            self._add_permission_hint(e, query)
             if self.onError:
                 self.onError(e)
                 return
             raise
         except HTTPError as e:
-            raise ClientRequestException.from_response(e.response) from e
+            exc = ClientRequestException.from_response(e.response)
+            self._add_permission_hint(exc, query)
+            raise exc from e
 
     async def execute_query_async(self, query: ClientQuery) -> None:
         """Submits a pending request to the server without blocking the loop.
@@ -289,12 +292,34 @@ class ClientRequest(ABC):
             self.process_response(response, query)
             self.afterExecute(response)
         except ClientRequestException as e:
+            self._add_permission_hint(e, query)
             if self.onError:
                 self.onError(e)
                 return
             raise
         except HTTPError as e:
-            raise ClientRequestException.from_response(e.response) from e
+            exc = ClientRequestException.from_response(e.response)
+            self._add_permission_hint(exc, query)
+            raise exc from e
+
+    @staticmethod
+    def _add_permission_hint(exc: ClientRequestException, query: ClientQuery) -> None:
+        """Enrich a denied request with the permission the called API declares.
+
+        The declaration comes from ``@require_permission``, which tags the query
+        it built (``query.permission_requirement``). Only permission denials are
+        enriched, so the hint cannot mislead on an unrelated failure.
+        """
+        from office365.runtime.exceptions import AccessDeniedException
+
+        if not isinstance(exc, AccessDeniedException):
+            return
+        requirement = getattr(query, "permission_requirement", None)
+        to_hint = getattr(requirement, "to_hint", None)
+        if callable(to_hint):
+            hint = to_hint()
+            if isinstance(hint, str) and hint:
+                exc.add_hint(hint)
 
     def on_error(
         self,

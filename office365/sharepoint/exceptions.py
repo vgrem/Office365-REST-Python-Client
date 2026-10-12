@@ -87,7 +87,7 @@ class SPQueryThrottledException(SharePointException):
     )
 
     def __str__(self) -> str:
-        return f"{super().__str__()}\n{self.GUIDANCE}"
+        return self._render(self._base_description())
 
 
 class SPFileCheckOutException(SharePointException):
@@ -110,7 +110,7 @@ class SPFileCheckOutException(SharePointException):
     )
 
     def __str__(self) -> str:
-        return f"{super().__str__()}\n{self.GUIDANCE}"
+        return self._render(self._base_description())
 
 
 class SPListDataValidationException(SharePointException):

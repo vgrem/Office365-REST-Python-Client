@@ -100,8 +100,10 @@ class FileLockedException(ClientRequestException):
 
     def __str__(self) -> str:
         owner = self.lock_owner
-        described = f"{super().__str__()} (locked by {owner})" if owner else super().__str__()
-        return f"{described}\n{self.GUIDANCE}"
+        described = self._base_description()
+        if owner:
+            described = f"{described} (locked by {owner})"
+        return self._render(described)
 
 
 register_error_type(FileLockedException)
@@ -126,6 +128,13 @@ class AccessDeniedException(ClientRequestException):
     _CODES = frozenset({"accessdenied", "authorization_requestdenied", "erroraccessdenied", "forbidden"})
     # E_ACCESSDENIED (0x80070005), as emitted by SharePoint/OneDrive.
     _HRESULTS = frozenset({"-2147024891"})
+
+    GUIDANCE = (
+        "The caller is not permitted to perform this request. For an app-only call, confirm the "
+        "application role is granted and admin-consented; for a delegated call, confirm the signed-in "
+        "user has the OAuth scope. Use require_application_permission(...) / require_role(...) to fail "
+        "fast with the exact requirement. Prefer a least-privileged permission that covers the endpoint."
+    )
 
     @classmethod
     def matches(cls, payload: ErrorPayload) -> bool:
