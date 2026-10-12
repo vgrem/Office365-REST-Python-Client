@@ -16,20 +16,11 @@ https://learn.microsoft.com/en-us/graph/api/resources/report
 from __future__ import annotations
 
 import argparse
-import csv
-import io
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
 
 GIB = 1024**3
-
-
-def _rows(result) -> list[dict]:
-    """Decode a report result into CSV rows (the CSV carries a UTF-8 BOM)."""
-    value = result.value
-    text = value.decode("utf-8-sig") if isinstance(value, bytes) else (value.content or b"").decode("utf-8-sig")
-    return list(csv.DictReader(io.StringIO(text)))
 
 
 def _latest(rows: list[dict]) -> dict:
@@ -50,11 +41,11 @@ def main() -> None:
 
     reports = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret).reports
 
-    email = _latest(_rows(reports.get_email_activity_counts(args.period).execute_query()))
-    mailboxes = _latest(_rows(reports.get_mailbox_usage_mailbox_counts(args.period).execute_query()))
-    onedrive = _latest(_rows(reports.get_onedrive_usage_file_counts(args.period).execute_query()))
-    storage = _latest(_rows(reports.get_onedrive_usage_storage(args.period).execute_query()))
-    teams = _latest(_rows(reports.get_teams_team_counts(args.period).execute_query()))
+    email = _latest(reports.get_email_activity_counts(args.period).execute_query().csv_rows())
+    mailboxes = _latest(reports.get_mailbox_usage_mailbox_counts(args.period).execute_query().csv_rows())
+    onedrive = _latest(reports.get_onedrive_usage_file_counts(args.period).execute_query().csv_rows())
+    storage = _latest(reports.get_onedrive_usage_storage(args.period).execute_query().csv_rows())
+    teams = _latest(reports.get_teams_team_counts(args.period).execute_query().csv_rows())
 
     print(f"Microsoft 365 snapshot ({args.period}, latest reported day)\n")
     if email:

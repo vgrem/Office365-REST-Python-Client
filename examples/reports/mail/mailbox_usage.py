@@ -21,20 +21,11 @@ https://learn.microsoft.com/en-us/graph/api/reportroot-getmailboxusagequotastatu
 from __future__ import annotations
 
 import argparse
-import csv
-import io
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
 
 GIB = 1024**3
-
-
-def _rows(result) -> list[dict]:
-    """Decode a report result into CSV rows (the CSV carries a UTF-8 BOM)."""
-    value = result.value
-    text = value.decode("utf-8-sig") if isinstance(value, bytes) else (value.content or b"").decode("utf-8-sig")
-    return list(csv.DictReader(io.StringIO(text)))
 
 
 def _latest(rows: list[dict]) -> dict:
@@ -52,9 +43,9 @@ def main() -> None:
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
-    storage = _rows(client.reports.get_mailbox_usage_storage(args.period).execute_query())
-    counts = _rows(client.reports.get_mailbox_usage_mailbox_counts(args.period).execute_query())
-    quota = _rows(client.reports.get_mailbox_usage_quota_status_mailbox_counts(args.period).execute_query())
+    storage = client.reports.get_mailbox_usage_storage(args.period).execute_query().csv_rows()
+    counts = client.reports.get_mailbox_usage_mailbox_counts(args.period).execute_query().csv_rows()
+    quota = client.reports.get_mailbox_usage_quota_status_mailbox_counts(args.period).execute_query().csv_rows()
 
     print(f"Mailbox storage ({args.period}) — {len(storage)} day(s)")
     if storage:

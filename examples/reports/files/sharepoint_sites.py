@@ -18,20 +18,11 @@ https://learn.microsoft.com/en-us/graph/api/reportroot-getsharepointsiteusagedet
 from __future__ import annotations
 
 import argparse
-import csv
-import io
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
 
 GIB = 1024**3
-
-
-def _rows(result) -> list[dict]:
-    """Decode a report result into CSV rows (the CSV carries a UTF-8 BOM)."""
-    value = result.value
-    text = value.decode("utf-8-sig") if isinstance(value, bytes) else (value.content or b"").decode("utf-8-sig")
-    return list(csv.DictReader(io.StringIO(text)))
 
 
 def _storage(row: dict) -> float:
@@ -49,7 +40,7 @@ def main() -> None:
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
-    rows = _rows(client.reports.get_sharepoint_site_usage_detail(args.period).execute_query())
+    rows = client.reports.get_sharepoint_site_usage_detail(args.period).execute_query().csv_rows()
     if not args.include_deleted:
         rows = [r for r in rows if (r.get("Is Deleted") or "").lower() != "true"]
 

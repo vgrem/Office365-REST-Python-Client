@@ -19,7 +19,7 @@ Sent, received, and read counts per day, with period totals — spot usage trend
 and justify (or reclaim) mail licensing.
 
 ```python
-rows = _rows(client.reports.get_email_activity_counts("D30").execute_query())
+rows = client.reports.get_email_activity_counts("D30").execute_query().csv_rows()
 for row in rows:
     print(row["Report Date"][:10], row["Send"], row["Receive"], row["Read"])
 ```
@@ -31,8 +31,8 @@ breakdown (under limit, warning issued, send prohibited, send/receive
 prohibited, indeterminate) — the input for storage planning.
 
 ```python
-storage = _rows(client.reports.get_mailbox_usage_storage("D30").execute_query())
-quota = _rows(client.reports.get_mailbox_usage_quota_status_mailbox_counts("D30").execute_query())
+storage = client.reports.get_mailbox_usage_storage("D30").execute_query().csv_rows()
+quota = client.reports.get_mailbox_usage_quota_status_mailbox_counts("D30").execute_query().csv_rows()
 ```
 
 Both scripts need the **`Reports.Read.All`** application permission.

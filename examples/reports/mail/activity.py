@@ -16,22 +16,9 @@ https://learn.microsoft.com/en-us/graph/api/reportroot-getemailactivitycounts
 from __future__ import annotations
 
 import argparse
-import csv
-import io
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
-
-
-def _rows(result) -> list[dict]:
-    """Decode a report result into CSV rows.
-
-    Graph returns the CSV with a UTF-8 BOM on the first header, so decode with
-    ``utf-8-sig`` to keep ``\"Report Date\"`` (and friends) addressable.
-    """
-    value = result.value
-    text = value.decode("utf-8-sig") if isinstance(value, bytes) else (value.content or b"").decode("utf-8-sig")
-    return list(csv.DictReader(io.StringIO(text)))
 
 
 def main() -> None:
@@ -40,7 +27,7 @@ def main() -> None:
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
-    rows = _rows(client.reports.get_email_activity_counts(args.period).execute_query())
+    rows = client.reports.get_email_activity_counts(args.period).execute_query().csv_rows()
 
     print(f"Email activity ({args.period}) — {len(rows)} day(s)\n")
     print(f"{'Date':12s}  {'Sent':>8s}  {'Received':>9s}  {'Read':>8s}")

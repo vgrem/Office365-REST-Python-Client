@@ -15,21 +15,15 @@ the scripts download, parse, and summarise.
 ```mermaid
 flowchart LR
     C[GraphClient] -->|"reports.get_*_(period)"| R["Graph returns CSV bytes"]
-    R --> P["decode utf-8-sig + csv.DictReader"]
+    R --> P["result.csv_rows()"]
     P --> S["summarise / print / write to temp"]
 ```
 
-One call, one CSV. The pattern below is the whole idea; each example wraps it
-around a specific report:
+One call, one CSV. ``execute_query()`` returns a ``ReportResult``;
+``ReportResult.csv_rows()`` hands back one dict per row:
 
 ```python
-def _rows(result) -> list[dict]:
-    value = result.value
-    text = value.decode("utf-8-sig") if isinstance(value, bytes) else (value.content or b"").decode("utf-8-sig")
-    return list(csv.DictReader(io.StringIO(text)))
-
-
-rows = _rows(client.reports.get_email_activity_counts("D30").execute_query())
+rows = client.reports.get_email_activity_counts("D30").execute_query().csv_rows()
 for row in rows:
     print(f"{row['Report Date'][:10]}  sent={row['Send']}  read={row['Read']}")
 ```
@@ -37,7 +31,7 @@ for row in rows:
 !!! note "Decode with `utf-8-sig`, not `utf-8`"
     Graph prefixes the CSV with a UTF-8 BOM. Decoding with plain `utf-8` leaves the
     first column named `"\ufeffReport Date"`, so every lookup silently returns
-    `None`. Use `utf-8-sig`.
+    `None`. ``ReportResult.csv_rows()`` decodes with ``utf-8-sig`` for you.
 
 ---
 
@@ -50,7 +44,7 @@ the fastest way to confirm `Reports.Read.All` works and to get a feel for a tena
 
 ```python
 email = client.reports.get_email_activity_counts("D7").execute_query()
-print(_rows(email)[-1])  # latest day: Send / Receive / Read
+print(email.csv_rows()[-1])  # latest day: Send / Receive / Read
 ```
 
 ### [Any report](usage_reports.py)
@@ -59,7 +53,7 @@ A generic explorer over all report methods: `--list` to discover, `--report` and
 `--period` to fetch, `--csv` to save the raw CSV (defaults to the temp directory).
 
 ```python
-rows = _rows(client.reports.get_sharepoint_activity_user_detail("D30").execute_query())
+rows = client.reports.get_sharepoint_activity_user_detail("D30").execute_query().csv_rows()
 ```
 
 ### [Export several reports concurrently](export_usage_async.py)

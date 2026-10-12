@@ -23,18 +23,9 @@ https://learn.microsoft.com/en-us/graph/api/reportroot-getteamsuseractivityuserc
 from __future__ import annotations
 
 import argparse
-import csv
-import io
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
-
-
-def _rows(result) -> list[dict]:
-    """Decode a report result into CSV rows (the CSV carries a UTF-8 BOM)."""
-    value = result.value
-    text = value.decode("utf-8-sig") if isinstance(value, bytes) else (value.content or b"").decode("utf-8-sig")
-    return list(csv.DictReader(io.StringIO(text)))
 
 
 def _int(value) -> int:
@@ -50,8 +41,8 @@ def main() -> None:
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
-    teams = _rows(client.reports.get_teams_team_counts(args.period).execute_query())
-    users = _rows(client.reports.get_teams_user_activity_user_counts(args.period).execute_query())
+    teams = client.reports.get_teams_team_counts(args.period).execute_query().csv_rows()
+    users = client.reports.get_teams_user_activity_user_counts(args.period).execute_query().csv_rows()
 
     if teams:
         latest = max(teams, key=lambda r: r.get("Report Date") or "")

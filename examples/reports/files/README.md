@@ -21,7 +21,7 @@ Unique users who viewed or edited, synced, or shared files each day — split in
 internal and external sharing, with peak and total per activity type.
 
 ```python
-rows = _rows(client.reports.get_onedrive_activity_user_counts("D30").execute_query())
+rows = client.reports.get_onedrive_activity_user_counts("D30").execute_query().csv_rows()
 for row in rows:
     print(row["Report Date"][:10], row["Viewed Or Edited"], row["Shared Externally"])
 ```
@@ -32,8 +32,8 @@ Total vs active files, and the daily storage trend. The storage report returns
 one row per site type; the script keeps the `OneDrive` rows.
 
 ```python
-files = _rows(client.reports.get_onedrive_usage_file_counts("D30").execute_query())
-storage = _rows(client.reports.get_onedrive_usage_storage("D30").execute_query())
+files = client.reports.get_onedrive_usage_file_counts("D30").execute_query().csv_rows()
+storage = client.reports.get_onedrive_usage_storage("D30").execute_query().csv_rows()
 ```
 
 ## [SharePoint sites](sharepoint_sites.py)
@@ -42,7 +42,7 @@ Per-site storage and file counts for the whole tenant, listing the largest sites
 by default — the basis for SharePoint storage governance and cleanup.
 
 ```python
-rows = _rows(client.reports.get_sharepoint_site_usage_detail("D30").execute_query())
+rows = client.reports.get_sharepoint_site_usage_detail("D30").execute_query().csv_rows()
 total = sum(float(r.get("Storage Used (Byte)") or 0) for r in rows)
 ```
 

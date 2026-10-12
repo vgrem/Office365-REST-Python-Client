@@ -21,18 +21,9 @@ https://learn.microsoft.com/en-us/graph/api/reportroot-getoffice365activationsus
 from __future__ import annotations
 
 import argparse
-import csv
-import io
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
-
-
-def _rows(result) -> list[dict]:
-    """Decode a report result into CSV rows (the CSV carries a UTF-8 BOM)."""
-    value = result.value
-    text = value.decode("utf-8-sig") if isinstance(value, bytes) else (value.content or b"").decode("utf-8-sig")
-    return list(csv.DictReader(io.StringIO(text)))
 
 
 def _int(value) -> int:
@@ -43,7 +34,7 @@ def _int(value) -> int:
 
 
 def _platform_rows(result) -> None:
-    rows = _rows(result)
+    rows = result.csv_rows()
     if not rows:
         print("Activation counts: no data (the tenant may have no Office activations)")
         return
@@ -57,7 +48,7 @@ def _platform_rows(result) -> None:
 
 
 def _user_rows(result) -> None:
-    rows = _rows(result)
+    rows = result.csv_rows()
     if not rows:
         print("\nActivations user counts: no data")
         return

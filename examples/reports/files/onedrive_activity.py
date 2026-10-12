@@ -16,20 +16,11 @@ https://learn.microsoft.com/en-us/graph/api/reportroot-getonedriveactivityuserco
 from __future__ import annotations
 
 import argparse
-import csv
-import io
 
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
 
 ACTIVITIES = ("Viewed Or Edited", "Synced", "Shared Internally", "Shared Externally")
-
-
-def _rows(result) -> list[dict]:
-    """Decode a report result into CSV rows (the CSV carries a UTF-8 BOM)."""
-    value = result.value
-    text = value.decode("utf-8-sig") if isinstance(value, bytes) else (value.content or b"").decode("utf-8-sig")
-    return list(csv.DictReader(io.StringIO(text)))
 
 
 def main() -> None:
@@ -38,7 +29,7 @@ def main() -> None:
     args = parser.parse_args()
 
     client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
-    rows = _rows(client.reports.get_onedrive_activity_user_counts(args.period).execute_query())
+    rows = client.reports.get_onedrive_activity_user_counts(args.period).execute_query().csv_rows()
 
     print(f"OneDrive activity ({args.period}) — {len(rows)} day(s)\n")
     header = "  ".join(f"{name:>17s}" for name in ACTIVITIES)

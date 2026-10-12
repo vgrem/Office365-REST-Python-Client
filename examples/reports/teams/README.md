@@ -15,8 +15,8 @@ Team counts by visibility with the active-vs-total split, plus unique users per
 activity type (team chat messages, private chat messages, calls, meetings).
 
 ```python
-teams = _rows(client.reports.get_teams_team_counts("D30").execute_query())
-users = _rows(client.reports.get_teams_user_activity_user_counts("D30").execute_query())
+teams = client.reports.get_teams_team_counts("D30").execute_query().csv_rows()
+users = client.reports.get_teams_user_activity_user_counts("D30").execute_query().csv_rows()
 ```
 
 A period with no Teams activity is normal in a small tenant; the script prints

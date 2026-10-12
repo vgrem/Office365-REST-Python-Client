@@ -34,7 +34,7 @@ and prints active users per day. Without Copilot licenses there is no column, an
 the script says so.
 
 ```python
-rows = _rows(client.reports.get_m365_app_user_counts("D30").execute_query())
+rows = client.reports.get_m365_app_user_counts("D30").execute_query().csv_rows()
 copilot_columns = [c for c in rows[0] if "copilot" in c.lower()]
 ```
 
