@@ -67,6 +67,7 @@ print(f"Downloaded: {len(downloaded.content)} bytes")
 |------|------|-------|
 | Upload a small file | [`upload.py`](./upload.py) | File < 4 MB |
 | Upload a large file | [`upload_large.py`](./upload_large.py) | Chunked upload session |
+| Upload with a progress bar | [`upload_with_progress.py`](./upload_with_progress.py) | tqdm progress for large files |
 | Upload a path or stream | `FileCollection.upload_file` | Simple request or resumable session, picked by size |
 | Ensure a file exists | `Folder.ensure_file` | Deferred get-or-upload; re-runs are no-ops |
 | Upload with checksum | [`upload_with_checksum.py`](./upload_with_checksum.py) | MD5 verification |
@@ -99,6 +100,8 @@ file = target_folder.ensure_file("2026/Q1/report.txt", "hello").execute_query()
 | Download a whole library | [`download_from_lib.py`](./download_from_lib.py) | Every file, preserving folders |
 | Download most recent | [`download_recent.py`](./download_recent.py) | Latest uploaded file |
 | Download a version | [`download_versions.py`](./download_versions.py) | A specific file version |
+| Download with a progress bar | [`download_with_progress.py`](./download_with_progress.py) | Folder → zip, tqdm progress |
+| Download files in parallel | [`download_parallel.py`](./download_parallel.py) | No manual threads or contexts |
 | Read bytes in memory | [`get_content.py`](./get_content.py) | Without touching disk |
 
 ```python
@@ -152,6 +155,7 @@ with open("archive.zip", "wb") as f:
 | System metadata | [`get_system_metadata.py`](./get_system_metadata.py) | Author, modified-by, created |
 | Check existence | [`exists.py`](./exists.py) | |
 | Enumerate a library | [`get_all_items.py`](./get_all_items.py) | Files and folders |
+| Enumerate a folder with >5,000 items | [`list_large_folder.py`](./list_large_folder.py) | Paged enumeration past the list view threshold |
 | Recently modified | [`get_recent_files.py`](./get_recent_files.py) | |
 | Pre-authorized download URL | [`get_download_link.py`](./get_download_link.py) | Time-limited link |
 

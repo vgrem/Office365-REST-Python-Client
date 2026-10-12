@@ -13,6 +13,9 @@ contains an automated setup script plus the manual steps.
 
 ## Automated setup
 
+[`certificate_auth.py`](./certificate_auth.py) is the narrower certificate + site
+grant path:
+
 ```bash
 uv run python examples/sharepoint/auth/setup/certificate_auth.py \
     --site https://contoso.sharepoint.com/sites/project

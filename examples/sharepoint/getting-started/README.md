@@ -60,12 +60,15 @@ Administrator**.
 
 ## Step 2 — Run the full-cycle setup
 
+[`setup_sharepoint_app.py`](./setup_sharepoint_app.py) walks the whole cycle in one
+command:
+
 ```bash
 uv run python examples/sharepoint/getting-started/setup_sharepoint_app.py \
     --site https://contoso.sharepoint.com/sites/team
 ```
 
-The script walks the whole cycle in one command and tells you what it did:
+The script tells you what it did:
 
 | Step | What happens |
 |---|---|

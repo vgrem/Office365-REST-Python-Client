@@ -64,6 +64,7 @@ A `Tenant` object is the entry point for all tenant-level operations.
 | Storage usage report (all sites) | [`site_storage_report.py`](./site_storage_report.py) | SharePoint Admin + `Sites.Read.All` | [Tenant REST API](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
 | Quota management (site + OneDrive) | [`quota_management.py`](./quota_management.py) | SharePoint Admin + `Sites.FullControl.All` | [Tenant REST API](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
 | Find orphan OneDrive sites | [`find_orphan_onedrives.py`](./find_orphan_onedrives.py) | SharePoint Admin + `Directory.Read.All` | [Tenant REST API](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
+| Export every OneDrive site's collection admins to CSV | [`export_onedrive_admins.py`](./export_onedrive_admins.py) | SharePoint Admin | [Tenant REST API](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
 
 ---
 

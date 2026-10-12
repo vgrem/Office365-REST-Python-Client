@@ -20,6 +20,7 @@ tenant-wide search, site groups, and OneDrive details.
 | Operation | File | Required role |
 |---|---|---|
 | Get current user | [`whoami.py`](./whoami.py) | Any authenticated user |
+| Get current user (async) | [`whoami_async.py`](./whoami_async.py) | Any authenticated user |
 | Get my personal site | [`get_my_site.py`](./get_my_site.py) | Any authenticated user |
 
 ### List and search

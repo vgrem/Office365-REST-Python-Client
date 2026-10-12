@@ -40,6 +40,7 @@ Modern pages use a canvas layout with web parts and can be promoted to news post
 | **5** | Promote to news: promote or demote as news post | [`promote_to_news.py`](./promote_to_news.py) | Member on site | [Site pages API](https://learn.microsoft.com/en-us/sharepoint/dev/apis/site-pages-api-reference) |
 | **6** | Report: pages across the site | [`report.py`](./report.py) | Read access | [Site pages API](https://learn.microsoft.com/en-us/sharepoint/dev/apis/site-pages-api-reference) |
 | **7** | Export HTML: save every page as a .html file | [`export_html.py`](./export_html.py) | Read access | [Site pages API](https://learn.microsoft.com/en-us/sharepoint/dev/apis/site-pages-api-reference) |
+| **8** | Modernize: migrate classic blog posts to modern pages | [`modernize_blog_pages.py`](./modernize_blog_pages.py) | Member on site | [Transform classic pages](https://learn.microsoft.com/en-us/sharepoint/dev/transform/modernize-userinterface-site-pages) |
 
 ---
 
