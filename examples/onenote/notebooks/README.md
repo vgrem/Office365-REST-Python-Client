@@ -37,10 +37,11 @@ Lay down the same sections and starter pages every time. The script is
 idempotent — an existing section is reused by name, and its starter page is only
 added when the section is still empty — so running it again changes nothing.
 
+OneNote rejects a duplicate name (`20117`), so `ensure` can create first and
+fall back to a lookup — a rerun is a no-op:
+
 ```python
-section = notebook.sections.find_by_display_name("Meeting Notes").execute_query()
-if not section.is_loaded:
-    section = notebook.sections.add(displayName="Meeting Notes").execute_query()
+section = notebook.sections.ensure("Meeting Notes").execute_query()
 section.pages.add(presentation_file="<html><head><title>Meeting Notes</title></head><body/></html>").execute_query()
 ```
 

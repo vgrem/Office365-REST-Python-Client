@@ -44,9 +44,7 @@ def main() -> None:
     client = _client()
     try:
         task_list = client.me.todo.lists.ensure(LIST_NAME).execute_query()
-        task = task_list.tasks.find_by_title(args.task).execute_query()
-        if not task.is_loaded:
-            task = task_list.tasks.add(args.task).execute_query()
+        task = task_list.tasks.ensure(args.task).execute_query()
 
         for item in task.checklist_items.get().execute_query():
             item.delete_object().execute_query()

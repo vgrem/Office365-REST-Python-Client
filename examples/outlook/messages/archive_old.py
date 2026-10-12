@@ -39,10 +39,7 @@ def main() -> None:
         print("Dry run — re-run with --apply to archive.")
         return
 
-    archive = folder.child_folders.find_by_display_name("Archive").execute_query()
-    if not archive.is_loaded:
-        archive = folder.child_folders.add("Archive").execute_query()
-        print("Created 'Archive' folder")
+    archive = folder.child_folders.ensure("Archive").execute_query()
 
     for message in messages:
         message.move(archive.id).execute_query()

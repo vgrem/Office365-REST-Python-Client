@@ -60,10 +60,7 @@ def main():
     # -- Step 4: move to a subfolder --
     # Ensure a subfolder exists
     inbox = client.me.mail_folders["inbox"].get().execute_query()
-    archive_folder = inbox.child_folders.find_by_display_name("Archive").execute_query()
-    if not archive_folder.is_loaded:
-        archive_folder = inbox.child_folders.add("Archive").execute_query()
-        print("  (Created 'Archive' folder)")
+    archive_folder = inbox.child_folders.ensure("Archive").execute_query()
 
     moved = message.move(archive_folder.id).execute_query()
     print(f"✓ Moved to '{archive_folder.display_name}' (new id: {moved.id})")

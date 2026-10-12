@@ -39,15 +39,6 @@ def _client() -> GraphClient:
     return GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
 
-def _resolve_notebook(client: GraphClient, name: str):
-    """Return ``(notebook, created)`` — create ``name`` when it does not exist yet."""
-    notebooks = client.me.onenote.notebooks
-    notebook = notebooks.find_by_display_name(name).execute_query()
-    if notebook.is_loaded:
-        return notebook, False
-    return notebooks.add(name).execute_query(), True
-
-
 def _starter_page(section_name: str, body: str) -> str:
     return (
         f"<!DOCTYPE html><html><head><title>{section_name}</title></head>"
@@ -61,16 +52,12 @@ def main() -> None:
     args = parser.parse_args()
 
     client = _client().require_delegated_permission(*NOTES_WRITE)
-    notebook, created = _resolve_notebook(client, args.notebook)
-    print(f"Notebook {notebook.display_name!r} ({'created' if created else 'reused'})")
+    notebook = client.me.onenote.notebooks.ensure(args.notebook).execute_query()
+    print(f"Notebook {notebook.display_name!r}")
 
     for section_name, body in TEMPLATE.items():
-        section = notebook.sections.find_by_display_name(section_name).execute_query()
-        if section.is_loaded:
-            print(f"  section {section.display_name!r} (exists)")
-        else:
-            section = notebook.sections.add(displayName=section_name).execute_query()
-            print(f"  section {section.display_name!r} (created)")
+        section = notebook.sections.ensure(section_name).execute_query()
+        print(f"  section {section.display_name!r}")
 
         pages = list(section.pages.top(1).get().execute_query())
         if pages:
