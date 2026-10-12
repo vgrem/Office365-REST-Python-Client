@@ -50,8 +50,8 @@ a time. Notebooks, sections and pages all support `$filter`, so a natural key
 like a name is enough to address one:
 
 ```python
-notebook = client.me.onenote.notebooks.first_or_none("displayName eq 'Project X'").execute_query()
-section = notebook.sections.first_or_none("displayName eq 'Meeting Notes'").execute_query()
+notebook = client.me.onenote.notebooks.find_by_display_name("Project X").execute_query()
+section = notebook.sections.find_by_display_name("Meeting Notes").execute_query()
 pages = section.pages.top(10).get().execute_query()
 html = client.me.onenote.pages[pages[0].id].get_content().execute_query().value
 ```

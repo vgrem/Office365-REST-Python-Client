@@ -39,8 +39,8 @@ def main() -> None:
         print("Dry run — re-run with --apply to archive.")
         return
 
-    archive = next((f for f in folder.child_folders.get().execute_query() if f.display_name == "Archive"), None)
-    if archive is None:
+    archive = folder.child_folders.find_by_display_name("Archive").execute_query()
+    if not archive.is_loaded:
         archive = folder.child_folders.add("Archive").execute_query()
         print("Created 'Archive' folder")
 

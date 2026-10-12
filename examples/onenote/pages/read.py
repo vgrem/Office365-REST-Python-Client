@@ -26,7 +26,6 @@ import tempfile
 from pathlib import Path
 
 from office365.graph_client import GraphClient
-from office365.runtime.odata.literals import escape_odata_string
 from tests.settings import client_id, password, tenant, username
 
 NOTES_READ = ("Notes.Read", "Notes.Read.All", "Notes.ReadWrite", "Notes.ReadWrite.All")
@@ -38,9 +37,7 @@ def _client() -> GraphClient:
 
 def _resolve_notebook(client: GraphClient, name: str | None):
     if name:
-        notebook = client.me.onenote.notebooks.first_or_none(
-            f"displayName eq '{escape_odata_string(name)}'"
-        ).execute_query()
+        notebook = client.me.onenote.notebooks.find_by_display_name(name).execute_query()
         if not notebook.is_loaded:
             raise SystemExit(f"No notebook named {name!r}.")
         return notebook

@@ -21,7 +21,6 @@ from __future__ import annotations
 import argparse
 
 from office365.graph_client import GraphClient
-from office365.runtime.odata.literals import escape_odata_string
 from tests.settings import client_id, password, tenant, username
 
 NOTES_WRITE = ("Notes.Create", "Notes.ReadWrite", "Notes.ReadWrite.All")
@@ -43,7 +42,7 @@ def _client() -> GraphClient:
 def _resolve_notebook(client: GraphClient, name: str):
     """Return ``(notebook, created)`` — create ``name`` when it does not exist yet."""
     notebooks = client.me.onenote.notebooks
-    notebook = notebooks.first_or_none(f"displayName eq '{escape_odata_string(name)}'").execute_query()
+    notebook = notebooks.find_by_display_name(name).execute_query()
     if notebook.is_loaded:
         return notebook, False
     return notebooks.add(name).execute_query(), True
@@ -66,9 +65,7 @@ def main() -> None:
     print(f"Notebook {notebook.display_name!r} ({'created' if created else 'reused'})")
 
     for section_name, body in TEMPLATE.items():
-        section = notebook.sections.first_or_none(
-            f"displayName eq '{escape_odata_string(section_name)}'"
-        ).execute_query()
+        section = notebook.sections.find_by_display_name(section_name).execute_query()
         if section.is_loaded:
             print(f"  section {section.display_name!r} (exists)")
         else:

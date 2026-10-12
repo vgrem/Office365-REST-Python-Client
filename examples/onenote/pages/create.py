@@ -23,7 +23,6 @@ import time
 
 from office365.graph_client import GraphClient
 from office365.runtime.client_request_exception import ClientRequestException
-from office365.runtime.odata.literals import escape_odata_string
 from tests.settings import client_id, password, tenant, username
 
 NOTES_WRITE = ("Notes.Create", "Notes.ReadWrite", "Notes.ReadWrite.All")
@@ -80,11 +79,11 @@ def _client() -> GraphClient:
 def _ensure_section(client: GraphClient):
     """Find, or create, the dedicated ``SDK Examples`` section of the tour notebook."""
     notebooks = client.me.onenote.notebooks
-    notebook = notebooks.first_or_none(f"displayName eq '{escape_odata_string(EXAMPLE_NOTEBOOK)}'").execute_query()
+    notebook = notebooks.find_by_display_name(EXAMPLE_NOTEBOOK).execute_query()
     if not notebook.is_loaded:
         notebook = notebooks.add(EXAMPLE_NOTEBOOK).execute_query()
         print(f"Created notebook {EXAMPLE_NOTEBOOK!r} (Graph cannot delete notebooks).")
-    section = notebook.sections.first_or_none(f"displayName eq '{escape_odata_string(EXAMPLE_SECTION)}'").execute_query()
+    section = notebook.sections.find_by_display_name(EXAMPLE_SECTION).execute_query()
     if section.is_loaded:
         return section
     return notebook.sections.add(displayName=EXAMPLE_SECTION).execute_query()

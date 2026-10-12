@@ -38,7 +38,7 @@ idempotent — an existing section is reused by name, and its starter page is on
 added when the section is still empty — so running it again changes nothing.
 
 ```python
-section = notebook.sections.first_or_none("displayName eq 'Meeting Notes'").execute_query()
+section = notebook.sections.find_by_display_name("Meeting Notes").execute_query()
 if not section.is_loaded:
     section = notebook.sections.add(displayName="Meeting Notes").execute_query()
 section.pages.add(presentation_file="<html><head><title>Meeting Notes</title></head><body/></html>").execute_query()

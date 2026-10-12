@@ -39,10 +39,6 @@ def _client() -> GraphClient:
     return GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
 
-def _find_task(task_list, title: str):
-    return next((task for task in task_list.tasks.get().execute_query() if task.title == title), None)
-
-
 def _source(args: argparse.Namespace) -> tuple[str, bytes, str]:
     if args.file:
         path = pathlib.Path(args.file)
@@ -67,7 +63,9 @@ def main() -> None:
             return
 
         task_list = client.me.todo.lists.ensure(LIST_NAME).execute_query()
-        task = _find_task(task_list, args.task) or task_list.tasks.add(args.task).execute_query()
+        task = task_list.tasks.find_by_title(args.task).execute_query()
+        if not task.is_loaded:
+            task = task_list.tasks.add(args.task).execute_query()
 
         attachment = task.upload_attachment(content, name, content_type)
         print(f"Attached {attachment.name!r} ({len(content)} bytes, {attachment.content_type})")

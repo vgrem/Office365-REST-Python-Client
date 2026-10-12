@@ -29,10 +29,6 @@ def _client() -> GraphClient:
     return GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
 
-def _find_task(task_list, title: str):
-    return next((task for task in task_list.tasks.get().execute_query() if task.title == title), None)
-
-
 def _print_links(task) -> None:
     for resource in task.linked_resources.get().execute_query():
         print(f"  {resource.application_name:10s} {resource.display_name:30s} {resource.web_url}")
@@ -47,7 +43,9 @@ def main() -> None:
     client = _client()
     try:
         task_list = client.me.todo.lists.ensure(LIST_NAME).execute_query()
-        task = _find_task(task_list, args.task) or task_list.tasks.add(args.task).execute_query()
+        task = task_list.tasks.find_by_title(args.task).execute_query()
+        if not task.is_loaded:
+            task = task_list.tasks.add(args.task).execute_query()
 
         for existing in task.linked_resources.get().execute_query():
             existing.delete_object().execute_query()
