@@ -183,6 +183,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `AgreementFileProperties` (the metadata base type) instead of `Entity`, so the
   declared `fileName`, `language`, `isDefault`, `createdDateTime`, … properties
   are populated instead of returning `None`.
+- **Graph change notifications serialize correctly:**
+  `SubscriptionCollection.add(...)` accepts a plain `resource` string (a
+  leading slash is stripped) as well as a `ResourcePath`, and
+  `Subscription.expiration_datetime` serializes `expirationDateTime` in UTC `Z`
+  form (the generic serializer emitted a numeric offset).
+  `client.subscriptions.add(...)` previously produced a payload Graph rejected.
 
 ### Added
 - **To Do attachment content:** `AttachmentBase.content_bytes` exposes the

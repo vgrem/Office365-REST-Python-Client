@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, List, Optional, Union
 
 from office365.entity import Entity
+from office365.runtime.converters.scalars import iso_z, parse_datetime
+from office365.runtime.odata.json_format import ODataJsonFormat
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.odata_property import odata
 
@@ -82,6 +84,29 @@ class Subscription(Entity):
         an amount of time from subscription creation that varies for the resource subscribed to
         """
         return self.properties.get("expirationDateTime", datetime.min)
+
+    @expiration_datetime.setter
+    def expiration_datetime(self, value: Union[datetime, str]) -> None:
+        """Set the subscription expiry."""
+        self.set_property("expirationDateTime", value)
+
+    def to_json(self, json_format: Optional[ODataJsonFormat] = None) -> Dict[str, Any] | List[Any]:
+        """Serialize the subscription, emitting ``expirationDateTime`` as UTC ``Z``.
+
+        Microsoft Graph subscriptions expect a UTC timestamp ending in ``Z``;
+        the generic datetime serializer would otherwise emit a numeric offset
+        (``+00:00``), which some endpoints reject.
+        """
+        payload = super().to_json(json_format)
+        if isinstance(payload, dict):
+            expiration = payload.get("expirationDateTime")
+            if isinstance(expiration, datetime):
+                payload["expirationDateTime"] = iso_z(expiration)
+            elif isinstance(expiration, str):
+                parsed = parse_datetime(expiration)
+                if parsed is not None:
+                    payload["expirationDateTime"] = iso_z(parsed)
+        return payload
 
     @property
     def include_resource_data(self) -> Optional[bool]:

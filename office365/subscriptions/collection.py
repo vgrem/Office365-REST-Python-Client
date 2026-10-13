@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 from office365.entity_collection import EntityCollection
+from office365.runtime.converters.scalars import iso_z
+from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
-from office365.sharepoint.types.resource_path import ResourcePath
 from office365.subscriptions.subscription import Subscription
 
 
@@ -17,7 +20,7 @@ class SubscriptionCollection(EntityCollection[Subscription]):
         self,
         change_type: str,
         notification_url: str,
-        resource_path: ResourcePath,
+        resource: Union[str, ResourcePath],
         expiration: datetime,
         client_state: Optional[str] = None,
         latest_supported_tls_version: Optional[str] = None,
@@ -34,7 +37,8 @@ class SubscriptionCollection(EntityCollection[Subscription]):
             notification_url (str): The URL of the endpoint that will receive the change notifications. This URL
               must make use of the HTTPS protocol. Any query string parameter included in the notificationUrl property
               will be included in the HTTP POST request when Microsoft Graph sends the change notifications.
-            resource_path (office365.runtime.paths.resource_path.ResourcePath or str):
+            resource (str): The resource that will be monitored for changes (for example ``users`` or
+              ``me/drive/root``). A :class:`~office365.runtime.paths.resource_path.ResourcePath` is also accepted.
             expiration (datetime.datetime): Specifies the date and time when the webhook subscription expires.
             client_state (str): Specifies the value of the clientState property sent by the service in each change
               notification
@@ -58,8 +62,8 @@ class SubscriptionCollection(EntityCollection[Subscription]):
         payload = {
             "changeType": change_type,
             "notificationUrl": notification_url,
-            "resource": str(resource_path),
-            "expirationDateTime": expiration.isoformat() + "Z",
+            "resource": str(resource).lstrip("/"),
+            "expirationDateTime": iso_z(expiration),
             "clientState": client_state,
             "latestSupportedTlsVersion": latest_supported_tls_version,
             "includeResourceData": include_resource_data,
