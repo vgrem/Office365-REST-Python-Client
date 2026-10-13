@@ -23,8 +23,8 @@ from office365.graph_client import GraphClient
 from tests.settings import client_id, password, tenant, username
 
 
-def _expiry(**delta: int) -> str:
-    return (datetime.now(timezone.utc) + timedelta(**delta)).isoformat()
+def _expiry(**delta: int) -> datetime:
+    return datetime.now(timezone.utc) + timedelta(**delta)
 
 
 def main() -> None:
@@ -37,16 +37,16 @@ def main() -> None:
     client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
     subscription = client.subscriptions.add(
-        changeType="updated",
-        notificationUrl=args.notification_url,
+        change_type="updated",
+        notification_url=args.notification_url,
         resource=args.resource,
-        expirationDateTime=_expiry(hours=12),
-        clientState="verify-me",  # echoed back on every notification
+        expiration=_expiry(hours=12),
+        client_state="verify-me",  # echoed back on every notification
     ).execute_query()
-    print(f"Subscription {subscription.id} on {subscription.resource} expires {subscription.expiration_date_time}")
+    print(f"Subscription {subscription.id} on {subscription.resource} expires {subscription.expiration_datetime}")
 
     # Graph expires subscriptions, so renew them on a schedule.
-    subscription.set_property("expirationDateTime", _expiry(days=1))
+    subscription.expiration_datetime = _expiry(days=1)
     subscription.update().execute_query()
     print("Renewed for another day.")
 

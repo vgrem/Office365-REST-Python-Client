@@ -1,46 +1,61 @@
 """
-Access reviews — list history definitions, instances, and decisions.
+Access reviews - list review definitions and their instances.
 
-Requires delegated permission ``AccessReview.Read.All`` or
-``AccessReview.ReadWrite.All``.
+Access reviews let reviewers periodically attest who still needs access to a
+group or application. This script walks the resource tree exposed by the
+library:
 
-https://learn.microsoft.com/en-us/graph/api/resources/accessreviewsv2-overview
+    access_reviews.definitions -> definition.instances
+
+Use it to audit what is currently under review and to see which review
+instances are still open.
+
+Requires application permission ``AccessReview.Read.All`` (or delegated).
+Not every tenant grants it; the script reports a denied request and exits 0.
+
+Reference:
+    https://learn.microsoft.com/en-us/graph/api/resources/accessreviewsv2-overview
 """
 
+from __future__ import annotations
+
+import argparse
+
 from office365.graph_client import GraphClient
+from office365.runtime.client_request_exception import ClientRequestException
 from tests.settings import client_id, client_secret, tenant
 
 
-def main():
-    client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
+def _client() -> GraphClient:
+    return GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
 
-    ar = client.identity_governance.access_reviews
 
-    hist_defs = ar.history_definitions.get().execute_query()
-    print(f"History definitions: {len(hist_defs)}\n")
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--limit", type=int, default=10, help="max definitions to inspect")
+    args = parser.parse_args()
 
-    for hd in hist_defs:
-        created_by = hd.created_by.user_principal_name if hd.created_by else "?"
-        print(f"  {hd.display_name:35s}  status={hd.status.name if hd.status else '?'}  created_by={created_by}")
-        for inst in hd.instances.get().execute_query() or []:
-            dt = inst.created_date_time.strftime("%Y-%m-%d") if inst.created_date_time else "?"
-            print(f"    -> instance: created={dt}  status={inst.properties.get('status', '?')}")
+    client = _client()
+    access_reviews = client.identity_governance.access_reviews
 
-    if not hist_defs:
-        print("(No history definitions found.)")
-
-    print("\nDirect API call to list schedule definitions:")
     try:
-        response = client.execute_request_get(
-            "/identityGovernance/accessReviews/definitions?$select=id,displayName,status,createdDateTime&$top=10"
-        )
-        for d in response.json().get("value", []):
+        definitions = access_reviews.definitions.top(args.limit).get().execute_query()
+    except ClientRequestException as e:
+        print(f"Access reviews are not available with these credentials:\n  {e}")
+        return
+
+    print(f"Access review definitions ({len(definitions)}):\n")
+    for definition in definitions:
+        print(f"  {definition.display_name}  status={definition.status or '?'}  by={definition.created_by}")
+        for instance in definition.instances.get().execute_query():
             print(
-                f"    {d.get('displayName', '?'):40s}  status={d.get('status', '?'):15s}  "
-                f"created={str(d.get('createdDateTime', ''))[:10]}"
+                f"    {instance.start_date_time:%Y-%m-%d} -> {instance.end_date_time:%Y-%m-%d}  status={instance.status}"
             )
-    except Exception as e:
-        print(f"  (not available: {e})")
+
+    history = access_reviews.history_definitions.get().execute_query()
+    print(f"\nHistory definitions ({len(history)}):")
+    for definition in history:
+        print(f"  {definition.display_name}  status={definition.status.name}  by={definition.created_by}")
 
 
 if __name__ == "__main__":

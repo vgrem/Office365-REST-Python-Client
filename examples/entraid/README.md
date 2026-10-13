@@ -65,8 +65,9 @@ Each folder is a guided tour; work through them roughly in this order.
 | 7 | [Policies](./policies/README.md) | Authorization, Conditional Access, authentication methods |
 | 8 | [Identity](./identity/README.md) | Identity providers, named locations, user flows |
 | 9 | [Protection](./protection/README.md) | Risky users and risk detections |
-| 10 | [Governance](./governance/README.md) | Access reviews, Terms of Use, change notifications |
-| 11 | [Domains](./domains/README.md), [Devices](./devices/README.md), [Tenant](./tenant/README.md) | Infrastructure inventory |
+| 10 | [Governance](./governance/README.md) | Access reviews, Terms of Use, entitlement management |
+| 11 | [Subscriptions](./subscriptions/README.md) | Graph change notifications (webhooks) |
+| 12 | [Domains](./domains/README.md), [Devices](./devices/README.md), [Tenant](./tenant/README.md) | Infrastructure inventory |
 
 ## Popular automations
 
@@ -224,7 +225,7 @@ Recipes that combine a few scripts into a task you would actually schedule.
 | **Domain management** — add, verify DNS, check service records | [`domains/manage.py`](./domains/manage.py) | `Domain.ReadWrite.All` | [domains API](https://learn.microsoft.com/en-us/graph/api/resources/domain) |
 | **Auth methods** — tenant MFA/passwordless readiness, per-user methods (FIDO2, phone, Authenticator) | [`users/auth_methods.py`](./users/auth_methods.py) | `UserAuthenticationMethod.Read.All`, `AuditLog.Read.All` | [auth methods overview](https://learn.microsoft.com/en-us/graph/api/resources/authenticationmethods-overview) |
 | **Security alerts** — list, filter, triage M365 Defender alerts, update classification/status | [`../security/alerts_triage.py`](../security/alerts_triage.py) | `SecurityAlert.ReadWrite.All` | [security alerts](https://learn.microsoft.com/en-us/graph/api/resources/alert) |
-| **Change notifications** — subscribe to Graph webhooks, manage subscription lifecycle | [`governance/change_notifications.py`](./governance/change_notifications.py) | Depends on resource | [subscriptions](https://learn.microsoft.com/en-us/graph/api/resources/subscription) |
+| **Change notifications** — subscribe to Graph webhooks, manage subscription lifecycle | [`subscriptions/change_notifications.py`](./subscriptions/change_notifications.py) | Depends on resource | [subscriptions](https://learn.microsoft.com/en-us/graph/api/resources/subscription) |
 | **Terms of use** — list agreements, track user acceptances, compliance check | [`governance/terms_of_use.py`](./governance/terms_of_use.py) | `Agreement.Read.All` | [agreements](https://learn.microsoft.com/en-us/graph/api/resources/agreement) |
 
 ---

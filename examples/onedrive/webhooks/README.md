@@ -37,7 +37,7 @@ Answer the **validation handshake** synchronously (echo `validationToken`), then
 return `202` to real notifications and verify `clientState`.
 
 > The same pattern works for other resources — see
-> [`../../entraid/governance/change_notifications.py`](../../entraid/governance/change_notifications.py).
+> [`../../entraid/subscriptions/change_notifications.py`](../../entraid/subscriptions/change_notifications.py).
 
 https://learn.microsoft.com/en-us/graph/change-notifications-overview
 https://learn.microsoft.com/en-us/onedrive/developer/rest-api/concepts/webhooks

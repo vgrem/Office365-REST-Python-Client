@@ -1,85 +1,104 @@
 """
-Domain management — add, verify, check DNS records, and configure
-supported services.
+Domain management — add, verify, inspect DNS records, and configure services.
 
-Managing custom domains is one of the first steps when onboarding a
-new tenant. This example covers the full lifecycle:
-  - Add a custom domain
-  - Read the verification DNS records to paste into your registrar
-  - Verify domain ownership
-  - Show service configuration DNS records
-  - Set supported services (Email, OfficeCommunicationsOnline, etc.)
+Managing custom domains is one of the first steps when onboarding a new
+tenant. This example covers the full lifecycle:
+
+  - list the tenant's domains
+  - add a custom domain idempotently (``client.domains.ensure(...)``)
+  - read the verification DNS records to paste into your registrar
+  - verify domain ownership
+  - show service configuration DNS records
+  - set supported services (Email, OfficeCommunicationsOnline, ...)
 
 Requires delegated permission ``Domain.ReadWrite.All``.
 
 https://learn.microsoft.com/en-us/graph/api/resources/domain
 """
 
+from __future__ import annotations
+
+import argparse
+
 from office365.graph_client import GraphClient
-from tests.settings import client_id, client_secret, tenant
+from office365.runtime.client_request_exception import ClientRequestException
+from tests.settings import client_id, password, tenant, username
 
-CUSTOM_DOMAIN = "contoso-marketing.com"  # ← change to your domain
+DEFAULT_DOMAIN = "contoso-marketing.com"
 
 
-def main():
-    client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
+def _print_dns_records(records, title: str) -> None:
+    """Print the DNS records a registrar needs to host."""
+    print(f"\n{title}:")
+    if not records:
+        print("  (none — the domain may already be verified)")
+        return
+    for record in records:
+        print(f"  {record.record_type or '?':<6} {record.label or '?':<35} -> {record.value or '?'}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--domain", default=DEFAULT_DOMAIN, help="custom domain to manage")
+    parser.add_argument(
+        "--services",
+        nargs="*",
+        help="supported services to enable (e.g. Email OfficeCommunicationsOnline)",
+    )
+    parser.add_argument("--verify", action="store_true", help="verify ownership (add the DNS records first)")
+    parser.add_argument("--apply", action="store_true", help="apply changes (default: dry run)")
+    args = parser.parse_args()
+
+    client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
+    client.require_delegated_permission("Domain.ReadWrite.All")
 
     # -- Step 1: list existing domains --
     domains = client.domains.get().execute_query()
     print("Domain(s):")
     for d in domains:
-        state = "✔ verified" if d.state and d.state.status == "Verified" else "✗ unverified"
+        state = "verified" if d.state and d.state.status == "Verified" else "unverified"
         svc = ", ".join(d.supported_services) if d.supported_services else "none"
-        print(f"  {d.id:30s}  {state:14s}  services: {svc}")
-    print()
+        print(f"  {d.id:35s}  {state:12s}  services: {svc}")
 
-    # -- Step 2: add a custom domain (if it doesn't exist already) --
-    domain = next((d for d in domains if d.id == CUSTOM_DOMAIN), None)
-    if domain is None:
-        print(f"Adding domain '{CUSTOM_DOMAIN}'...")
-        domain = client.domains.add(id=CUSTOM_DOMAIN).execute_query()
-        print(f"  Added: {domain.id}")
-    else:
-        print(f"Domain '{CUSTOM_DOMAIN}' already exists.")
+    # -- Step 2: add the custom domain if it is missing (idempotent) --
+    exists = any(d.id == args.domain for d in domains)
+    if not exists and not args.apply:
+        print(f"\nDomain '{args.domain}' is not present. Re-run with --apply to add it.")
+        return
+    domain = client.domains.ensure(args.domain)
+    try:
+        domain = domain.execute_query()
+    except ClientRequestException as e:
+        # Adding a domain also requires the signed-in user to administer domains.
+        print(f"\nCould not add '{args.domain}': {e}")
+        return
+    print(f"\nDomain '{args.domain}' is {'present' if exists else 'added'}.")
 
-    # -- Step 3: show verification DNS records --
-    # These need to be added to your DNS registrar's zone file.
-    print(f"\nVerification DNS records for '{CUSTOM_DOMAIN}':")
-    v_records = domain.verification_dns_records.get().execute_query()
-    for r in v_records:
-        rtype = r.properties.get("recordType", "?")
-        label = r.properties.get("label", "?")
-        value = r.properties.get("value", r.properties.get("text", "?"))
-        ttl = r.properties.get("ttl", "?")
-        print(f"  {rtype:6s}  {label:35s}  TTL={ttl:>5}  → {value}")
+    # -- Step 3: show the verification DNS records --
+    records = domain.verification_dns_records.get().execute_query()
+    _print_dns_records(records, f"Verification DNS records for '{args.domain}'")
 
-    if not v_records:
-        print("  (no verification records — domain may already be verified)")
+    # -- Step 4: verify ownership (only after the DNS records are live) --
+    if args.verify:
+        if not args.apply:
+            print("\nVerification skipped (dry run). Re-run with --apply --verify.")
+        else:
+            domain = domain.verify().execute_query()
+            ok = domain.state and domain.state.status == "Verified"
+            print(f"\nDomain verification: {'SUCCESS' if ok else 'FAILED (DNS records not yet visible?)'}")
 
-    # -- Step 4: verify the domain --
-    # Do this only after you've added the DNS records at your registrar.
-    response = input("\nAdd the DNS records above at your registrar, then type 'verify' to confirm: ")
-    if response.strip().lower() == "verify":
-        domain = domain.verify().execute_query()
-        is_verified = domain.state and domain.state.status == "Verified"
-        print(f"  Domain verification: {'✔ SUCCESS' if is_verified else '✗ FAILED'}")
-    else:
-        print("  Skipped verification.")
-
-    # -- Step 5: show service configuration records --
-    print("\nService configuration DNS records:")
-    s_records = domain.service_configuration_records.get().execute_query()
-    for r in s_records:
-        rtype = r.properties.get("recordType", "?")
-        label = r.properties.get("label", "?")
-        value = r.properties.get("value", r.properties.get("text", "?"))
-        ttl = r.properties.get("ttl", "?")
-        print(f"  {rtype:6s}  {label:35s}  TTL={ttl:>5}  → {value}")
+    # -- Step 5: show service configuration DNS records --
+    records = domain.service_configuration_records.get().execute_query()
+    _print_dns_records(records, f"Service configuration DNS records for '{args.domain}'")
 
     # -- Step 6: set supported services (optional) --
-    # domain.set_property("supportedServices", ["Email", "OfficeCommunicationsOnline"])
-    # domain.update().execute_query()
-    # print(f"\nSupported services updated.")
+    if args.services:
+        if args.apply:
+            domain.set_property("supportedServices", args.services)
+            domain.update().execute_query()
+            print(f"\nSupported services set to: {', '.join(args.services)}")
+        else:
+            print(f"\nWould set supported services to: {', '.join(args.services)} (dry run).")
 
 
 if __name__ == "__main__":
