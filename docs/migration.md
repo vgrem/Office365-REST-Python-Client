@@ -45,6 +45,32 @@ and a paused or failed run continues where it stopped (`job.resume()`). Set
 `MigrationOptions(incremental=True)` to skip items at or below the persisted
 watermark.
 
+## Idempotency & conflicts
+
+A re-run must not duplicate content. Two mechanisms cooperate:
+
+- **Per-item checkpoint** — items already `done`/`skipped` aren't re-driven, so a
+  resumed run continues where it stopped.
+- **Conflict policy** — `MigrationOptions(conflict_resolution=…)` decides what a
+  target that already exists should do:
+  - `SKIP` (default) — leave it untouched;
+  - `OVERWRITE` — replace it;
+  - `RENAME` — land beside it under a numeric suffix.
+
+The runner applies the policy to file targets directly. Record targets (such as
+`SharePointListTarget` with a `key`) receive it through an optional
+`configure(options)` hook: `OVERWRITE` maps to the record pipeline's
+`on_conflict="update"` (keyed create-or-reconcile), everything else to
+`on_conflict="skip"`. Passing an explicit `on_conflict=` to a record target pins
+it regardless of the options. This is the same `on_conflict` vocabulary the data
+pipeline uses (see [Data pipeline](data-pipeline.md)).
+
+> **SPMT, accurately.** The SharePoint Migration Tool's exactly-once reliability
+> comes from a *server-managed, keyed* bulk import (the Migration API) that
+> reconciles identity server-side — **not** from an HTTP `PATCH`/`PUT` upsert
+> pattern. The client-side runner therefore can't reproduce SPMT's semantics; the
+> server-side path (`MigrationServerJob`) is what does.
+
 ## Adapters
 
 | Adapter | Direction | Content |

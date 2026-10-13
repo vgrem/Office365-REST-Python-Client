@@ -160,6 +160,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is now bound to the OData `TextField` property, so listing web/list fields no
   longer trips the computed `text_field` getter's assertion
   (`assert text_field_id is not None`).
+- **Migration conflict policy reaches record targets:**
+  `MigrationOptions(conflict_resolution=OVERWRITE)` previously did not overwrite
+  keyed list records — `SharePointListTarget` kept its own `on_conflict="skip"`
+  default. The runner now calls an optional `DataTarget.configure(options)` hook
+  before the first write, and `SharePointListTarget` maps `OVERWRITE` →
+  `on_conflict="update"` (anything else → `"skip"`); an explicit
+  `on_conflict=` still wins. `RENAME` has no record-level meaning (records are
+  keyed, not pathed) and maps to `"skip"`.
 - **Backup Storage entity hierarchy:** `SharePointProtectionPolicy`,
   `ExchangeProtectionPolicy`, the OneDrive/SharePoint/Exchange browse and
   restore sessions, the drive/mailbox/site protection units and the
@@ -591,6 +599,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   does not exist in Graph and was never used by the library; the
   `subjectRightsRequest.dataSubject` property is typed as `DataSubject`. This is
   a breaking import change.
+- **`MigrationMode`:** the unused `office365.migration.base.MigrationMode` enum
+  is gone. It duplicated the generated `office365.teams.migration_mode.MigrationMode`,
+  carried a bogus `microsoft.graph.MigrationMode` type name, and no code used it —
+  the FULL/INCREMENTAL choice is `MigrationOptions.incremental` and the UPSERT
+  behavior is `MigrationOptions.conflict_resolution`. This is a breaking import
+  change.
 
 ### Documentation
 - **Microsoft Purview guided tour:** `examples/purview/` is reorganised by

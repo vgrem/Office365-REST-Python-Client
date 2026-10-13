@@ -149,6 +149,55 @@ def test_conflict_rename(tmp_path):
     assert (dst / "img-1.png").exists()
 
 
+def test_conflict_to_on_conflict_mapping():
+    from office365.migration.base import conflict_to_on_conflict
+
+    assert conflict_to_on_conflict(ConflictResolution.OVERWRITE) == "update"
+    assert conflict_to_on_conflict(ConflictResolution.SKIP) == "skip"
+    assert conflict_to_on_conflict(ConflictResolution.RENAME) == "skip"  # records are keyed, not pathed
+
+
+def test_list_target_derives_on_conflict_from_options():
+    from office365.migration.sharepoint.adapters import SharePointListTarget
+
+    target = SharePointListTarget(mock.Mock(), key="Title")
+    assert target.on_conflict == "skip"  # default (no runner yet)
+
+    target.configure(MigrationOptions(conflict_resolution=ConflictResolution.OVERWRITE))
+    assert target.on_conflict == "update"
+
+    target.configure(MigrationOptions(conflict_resolution=ConflictResolution.RENAME))
+    assert target.on_conflict == "skip"
+
+
+def test_list_target_explicit_on_conflict_wins():
+    from office365.migration.sharepoint.adapters import SharePointListTarget
+
+    target = SharePointListTarget(mock.Mock(), key="Title", on_conflict="update")
+    target.configure(MigrationOptions(conflict_resolution=ConflictResolution.SKIP))
+    assert target.on_conflict == "update"
+
+
+def test_runner_configures_target_with_options():
+    items = [MigrationItem(source_path="/s", dest_path="f.txt")]
+
+    class _ConfigurableTarget(_FakeTarget):
+        def __init__(self):
+            super().__init__()
+            self.configured_with = None
+
+        def configure(self, options):
+            self.configured_with = options
+
+    source = _FakeSource(items)
+    target = _ConfigurableTarget()
+    options = MigrationOptions(concurrency=2, batch_size=100)
+
+    MigrationRunner().run(source, target, items, options, Checkpoint.create())  # type: ignore[arg-type]
+
+    assert target.configured_with is options
+
+
 def test_pause_then_resume(tmp_path):
     src, dst = tmp_path / "src", tmp_path / "dst"
     src.mkdir(parents=True)

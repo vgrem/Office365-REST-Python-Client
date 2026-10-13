@@ -17,7 +17,7 @@ from datetime import timezone
 from typing import TYPE_CHECKING, cast
 
 from office365.migration.adapters import MigrationProgress
-from office365.migration.base import MigrationItem, PermissionEntry
+from office365.migration.base import MigrationItem, PermissionEntry, conflict_to_on_conflict
 from office365.migration.sharepoint.transfer import Failure
 from office365.runtime.converters.json_file import record_to_json
 from office365.runtime.converters.scalars import iso_or_none, parse_datetime, parse_int
@@ -182,6 +182,10 @@ class SharePointListTarget:
     a hash of those columns is stored in ``key_field`` and each payload is created
     or (``on_conflict="update"``) updated, so re-runs never duplicate. Without a
     key, records are appended and idempotency relies on the checkpoint/manifest.
+
+    ``on_conflict`` may be passed explicitly; otherwise it is derived from
+    ``MigrationOptions.conflict_resolution`` by :meth:`configure` (the runner calls
+    it before writes): ``OVERWRITE`` → ``"update"``, anything else → ``"skip"``.
     """
 
     def __init__(
@@ -189,14 +193,30 @@ class SharePointListTarget:
         target_list: "SPList",
         key: str | list[str] | None = None,
         key_field: str = "MigrationKey",
-        on_conflict: str = "skip",
+        on_conflict: str | None = None,
     ) -> None:
         self._list = target_list
         self._key_columns = [key] if isinstance(key, str) else (list(key) if key else [])
         self._key_field = key_field
-        self._on_conflict = on_conflict
+        self._on_conflict_override = on_conflict
+        self._on_conflict = on_conflict or "skip"
         self._target = None
         self._existing: dict = {}
+
+    @property
+    def on_conflict(self) -> str:
+        """The active record conflict policy (``"skip"`` or ``"update"``)."""
+        return self._on_conflict
+
+    def configure(self, options) -> None:
+        """Derive ``on_conflict`` from ``MigrationOptions.conflict_resolution``.
+
+        Called by :class:`MigrationRunner` before the run, so a single
+        ``conflict_resolution`` drives both file and record targets. An
+        ``on_conflict`` passed to the constructor is honored as-is.
+        """
+        if self._on_conflict_override is None:
+            self._on_conflict = conflict_to_on_conflict(options.conflict_resolution)
 
     def label(self) -> str:
         return f"list:{self._list.title}"

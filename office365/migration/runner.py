@@ -116,6 +116,9 @@ class MigrationRunner:
         stop_event: Callable[[], bool] | None = None,
     ) -> MigrationStats:
         _assert_fidelity_supported(options, source, target)
+        # Let the target derive any per-run policy from the options before writes
+        # start (e.g. a record target maps ``conflict_resolution`` -> ``on_conflict``).
+        _call_optional(target, "configure", options)
         watermark = _Watermark(checkpoint) if options.incremental else None
         parallel = (
             options.concurrency > 1

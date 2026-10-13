@@ -33,10 +33,10 @@ from office365.migration.base import (
     ExportFormat,
     ItemStatus,
     MigrationItem,
-    MigrationMode,
     MigrationOptions,
     MigrationPhase,
     MigrationStats,
+    conflict_to_on_conflict,
 )
 from office365.migration.checkpoint import Checkpoint
 from office365.migration.job import MigrationJob
@@ -86,7 +86,6 @@ __all__ = [
     "Manifest",
     "MigrationItem",
     "MigrationJob",
-    "MigrationMode",
     "MigrationOptions",
     "MigrationPhase",
     "MigrationReport",
@@ -102,6 +101,7 @@ __all__ = [
     "SessionTask",
     "VerificationReport",
     "build_report",
+    "conflict_to_on_conflict",
     "export_reports",
     "scan_pairs",
     "verify",

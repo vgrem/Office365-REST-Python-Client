@@ -17,20 +17,14 @@ class ConflictResolution(str, Enum):
     RENAME = "rename"
 
 
-class MigrationMode(str, Enum):
-    FULL = "full"
-    INCREMENTAL = "incremental"
-    UPSERT = "upsert"
+def conflict_to_on_conflict(conflict: ConflictResolution) -> str:
+    """Map a migration conflict policy to a record pipeline ``on_conflict`` value.
 
-    inProgress = "0"
-
-    completed = "1"
-
-    unknownFutureValue = "2"
-
-    @property
-    def entity_type_name(self) -> str:
-        return "microsoft.graph.MigrationMode"
+    ``OVERWRITE`` reconciles an existing keyed record (``"update"``); ``SKIP`` is
+    create-if-missing (``"skip"``). ``RENAME`` has no record-level meaning — a
+    record is keyed, not pathed — so it also maps to ``"skip"``.
+    """
+    return "update" if conflict == ConflictResolution.OVERWRITE else "skip"
 
 
 class ExportFormat(str, Enum):

@@ -45,9 +45,13 @@ class DataSource(ABC):
 class DataTarget(ABC):
     """Writes migration items to a target.
 
-    Optional hooks (not declared here so ``hasattr`` reflects real support),
-    used for best-effort fidelity after a write:
-    ``apply_timestamps(item)`` and ``apply_permissions(item, permissions)``.
+    Optional hooks (not declared here so ``hasattr`` reflects real support):
+
+    - ``configure(options)`` — called once by the runner before any write, so a
+      target can derive per-run policy (e.g. a record target maps
+      ``options.conflict_resolution`` onto its ``on_conflict`` mode);
+    - ``apply_timestamps(item)`` / ``apply_permissions(item, permissions)`` —
+      best-effort fidelity applied after a successful write.
     """
 
     @abstractmethod
