@@ -16,6 +16,10 @@ class UserIdentity(ClientValue):
     ipAddress: str | None = None
     userPrincipalName: str | None = None
 
+    def __str__(self) -> str:
+        """Best-effort human-readable label (name, UPN or IP)."""
+        return self.displayName or self.userPrincipalName or self.ipAddress or ""
+
     @property
     def entity_type_name(self):
         return "microsoft.graph.UserIdentity"

@@ -13,6 +13,10 @@ class Identity(ClientValue):
     displayName: str | None = None
     id: str | None = None
 
+    def __str__(self) -> str:
+        """Best-effort human-readable label (display name or object id)."""
+        return self.displayName or self.id or ""
+
     def __repr__(self):
         return repr(self.to_json())
 

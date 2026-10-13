@@ -65,6 +65,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   shared rendering pipeline also backs the SharePoint guidance-bearing errors
   (`FileLockedException`, `SPFileCheckOutException`, `SPQueryThrottledException`),
   so each shows its guidance exactly once.
+- **Human-readable identity values:** `UserIdentity` and `Identity` implement
+  `__str__`, so a display name (falling back to UPN / IP / object id) prints
+  instead of the class name.
 
 ### Changed
 - **Planner writes:** Planner entities derive from the new `PlannerEntity` base,
@@ -175,6 +178,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   evaluating a deferred callback before the app roles were populated, so it no
   longer reports a false negative; it returns a plain `bool` (was a
   non-functional `ClientResult[bool]`).
+- **Agreement-file types inherit their properties:** `AgreementFile`,
+  `AgreementFileLocalization` and `AgreementFileVersion` now derive from
+  `AgreementFileProperties` (the metadata base type) instead of `Entity`, so the
+  declared `fileName`, `language`, `isDefault`, `createdDateTime`, … properties
+  are populated instead of returning `None`.
 
 ### Added
 - **To Do attachment content:** `AttachmentBase.content_bytes` exposes the

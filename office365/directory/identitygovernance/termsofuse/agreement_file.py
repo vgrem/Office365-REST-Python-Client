@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from office365.directory.identitygovernance.termsofuse.agreement_file_localization import AgreementFileLocalization
-from office365.entity import Entity
+from office365.directory.identitygovernance.termsofuse.agreement_file_properties import (
+    AgreementFileProperties,
+)
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
 
-class AgreementFile(Entity):
+class AgreementFile(AgreementFileProperties):
     @property
     def localizations(self) -> EntityCollection[AgreementFileLocalization]:
         """Gets the localizations property"""
