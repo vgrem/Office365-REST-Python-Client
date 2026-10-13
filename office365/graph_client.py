@@ -21,7 +21,7 @@ from office365.directory.certificates.auth_configuration import (
     CertificateBasedAuthConfiguration,
 )
 from office365.directory.directory import Directory
-from office365.directory.domains.domain import Domain
+from office365.directory.domains.collection import DomainCollection
 from office365.directory.extensions.schema import SchemaExtension
 from office365.directory.groups.collection import GroupCollection
 from office365.directory.groups.lifecycle_policy import GroupLifecyclePolicy
@@ -590,9 +590,9 @@ class GraphClient(ClientRuntimeContext):
         return UserCollection(self, ResourcePath("users"))
 
     @property
-    def domains(self) -> EntityCollection[Domain]:
-        """Alias to domains"""
-        return EntityCollection(self, Domain, ResourcePath("domains"))
+    def domains(self) -> DomainCollection:
+        """Get the tenant domains. Use ``ensure("contoso.com")`` for an idempotent add."""
+        return DomainCollection(self, ResourcePath("domains"))
 
     @property
     def groups(self) -> GroupCollection:

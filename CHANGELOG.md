@@ -68,6 +68,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Human-readable identity values:** `UserIdentity` and `Identity` implement
   `__str__`, so a display name (falling back to UPN / IP / object id) prints
   instead of the class name.
+- **Domain management:** `client.domains` is now a `DomainCollection` with
+  `add(domain_id)`, `get_by_id(domain_id)` and an idempotent `ensure(domain_id)`
+  (get-first, because Graph rejects a duplicate domain rather than returning
+  it). `DomainDnsRecord.value` surfaces the record's target value
+  (`canonicalName` / `text` / `mailExchange` / `nameTarget`), whichever the
+  record type uses.
 
 ### Changed
 - **Planner writes:** Planner entities derive from the new `PlannerEntity` base,

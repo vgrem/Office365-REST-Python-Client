@@ -151,3 +151,34 @@ def test_todo_task_ensure_reuses_existing():
 
     assert task.id == "task-1"
     assert _methods(transport) == [HttpMethod.Get]
+
+
+_DOMAIN = {"id": "contoso.com", "isDefault": False, "isVerified": False}
+_DOMAIN_404 = {
+    "http_status": 404,
+    "body": {"error": {"code": "Request_ResourceNotFound", "message": "Domain not found."}},
+}
+
+
+def test_domain_ensure_creates_when_missing():
+    transport = _RecordingTransport([_DOMAIN_404, _DOMAIN])
+    client = _client(transport)
+
+    domain = client.domains.ensure("contoso.com").execute_query()
+
+    assert domain.id == "contoso.com"
+    assert _methods(transport) == [HttpMethod.Get, HttpMethod.Post]
+    assert transport.requests[0].url.endswith("/domains/contoso.com")
+    assert transport.requests[1].url.endswith("/domains")
+    assert transport.requests[1].data["id"] == "contoso.com"
+
+
+def test_domain_ensure_reuses_existing():
+    transport = _RecordingTransport([_DOMAIN])
+    client = _client(transport)
+
+    domain = client.domains.ensure("contoso.com").execute_query()
+
+    assert domain.id == "contoso.com"
+    assert _methods(transport) == [HttpMethod.Get]
+    assert transport.requests[0].url.endswith("/domains/contoso.com")

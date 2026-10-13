@@ -37,5 +37,19 @@ class DomainDnsRecord(Entity):
         return self.properties.get("ttl", None)
 
     @property
+    def value(self) -> Optional[str]:
+        """Target value to publish in the DNS zone file.
+
+        Depending on :attr:`record_type` the server stores it under a different
+        name (``canonicalName`` for CNAME, ``text`` for TXT, ``mailExchange``
+        for MX, ``nameTarget`` for SRV); this convenience property surfaces the
+        first one that is present so callers do not have to branch.
+        """
+        for name in ("canonicalName", "text", "mailExchange", "nameTarget"):
+            if name in self.properties:
+                return self.properties[name]
+        return None
+
+    @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.DomainDnsRecord"
