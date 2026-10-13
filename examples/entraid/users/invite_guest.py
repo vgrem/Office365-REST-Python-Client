@@ -20,5 +20,6 @@ invitation = client.invitations.create(
     invite_redirect_url=f"https://myapps.microsoft.com/{test_tenant}",
 ).execute_query()
 
-print(f"Invited: {invitation.invited_user.email}")
+invited = invitation.invited_user
+print(f"Invited: {invited.mail if invited else invitation.invited_user_email_address}")
 print(f"Redeem URL: {invitation.invite_redeem_url}")

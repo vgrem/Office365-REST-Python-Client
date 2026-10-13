@@ -22,6 +22,8 @@ from __future__ import annotations
 from office365.graph_client import GraphClient
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import (
+    cert_path,
+    cert_thumbprint,
     client_id,
     client_secret,
     site_url,
@@ -41,8 +43,8 @@ def list_available_labels(client: GraphClient) -> list[dict]:
             labels.append(
                 {
                     "id": label.id,
-                    "display_name": getattr(label, "display_name", label.id),
-                    "priority": getattr(label, "priority", 0),
+                    "display_name": label.display_name or label.id,
+                    "priority": label.priority or 0,
                 }
             )
     except Exception as e:
@@ -56,8 +58,8 @@ def get_current_site_label(ctx: ClientContext) -> str | None:
 
     Returns the label ID as a string, or None if no label is set.
     """
-    web = ctx.web.select(["SensitivityLabelId"]).get().execute_query()
-    return getattr(web, "sensitivity_label_id", None)
+    site = ctx.site.select(["SensitivityLabelId"]).get().execute_query()
+    return site.sensitivity_label_id
 
 
 def assign_sensitivity_label(site_url: str, label_id: str) -> bool:
@@ -70,13 +72,15 @@ def assign_sensitivity_label(site_url: str, label_id: str) -> bool:
     Returns:
         True if successful, False otherwise.
     """
-    ctx = ClientContext(site_url).with_client_secret(tenant, client_id, client_secret)
+    ctx = ClientContext(site_url).with_client_certificate(
+        tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
+    )
 
     try:
         # Set the sensitivity label on the site
-        web = ctx.web
-        web.set_property("SensitivityLabelId", label_id)
-        web.update().execute_query()
+        site = ctx.site
+        site.set_property("SensitivityLabelId", label_id)
+        site.update().execute_query()
         print(f"  Label {label_id} applied to {site_url}")
         return True
     except Exception as e:
@@ -102,7 +106,9 @@ def main():
         print(f"  [{lbl['id'][:8]}...] {lbl['display_name']} (priority {lbl['priority']})")
 
     # 2. Check current label on the site
-    ctx = ClientContext(site_url).with_client_secret(tenant, client_id, client_secret)
+    ctx = ClientContext(site_url).with_client_certificate(
+        tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
+    )
     current = get_current_site_label(ctx)
     print(f"\nCurrent label on {site_url}: {current or 'None'}")
 

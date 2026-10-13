@@ -16,26 +16,30 @@ Required delegated permissions:
 https://learn.microsoft.com/en-us/graph/api/resources/authenticationmethods-overview
 """
 
+from __future__ import annotations
+
 from office365.graph_client import GraphClient
-from tests import test_client_id, test_client_secret, test_tenant
+from tests.settings import client_id, client_secret, tenant
 
 STRONG_METHODS = {
-    "microsoftAuthenticatorAuthenticationMethod",
-    "phoneAuthenticationMethod",
-    "fido2AuthenticationMethod",
-    "windowsHelloForBusinessAuthenticationMethod",
-    "passwordlessMicrosoftAuthenticatorAuthenticationMethod",
+    "microsoft.graph.MicrosoftAuthenticatorAuthenticationMethod",
+    "microsoft.graph.PhoneAuthenticationMethod",
+    "microsoft.graph.Fido2AuthenticationMethod",
+    "microsoft.graph.WindowsHelloForBusinessAuthenticationMethod",
+    "microsoft.graph.PasswordlessMicrosoftAuthenticatorAuthenticationMethod",
 }
 
 _DISPLAY_LIMIT = 20
 
 
-def user_has_mfa(client: GraphClient, user_id: str) -> bool:
+def user_has_mfa(client: GraphClient, user_id: str | None) -> bool:
     """Check if a user has at least one strong MFA method registered."""
+    if not user_id:
+        return False
     try:
         methods = client.users[user_id].authentication.methods.get().execute_query()
         for method in methods:
-            if method.type_name in STRONG_METHODS:
+            if method.entity_type_name in STRONG_METHODS:
                 return True
     except Exception:
         pass
@@ -48,18 +52,18 @@ def mfa_status_report() -> tuple[list[dict], list[dict]]:
     Returns:
         Tuple of (users_with_mfa, users_without_mfa).
     """
-    client = GraphClient(tenant=test_tenant).with_client_secret(test_client_id, test_client_secret)
+    client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
 
     with_mfa = []
     without_mfa = []
 
-    users = client.users.get().execute_query()
+    users = client.users.get_all().execute_query()
     for user in users:
         has = user_has_mfa(client, user.id)
         entry = {
             "upn": user.user_principal_name,
             "display_name": user.display_name,
-            "user_type": getattr(user, "user_type", "Member"),
+            "user_type": user.user_type,
         }
         if has:
             with_mfa.append(entry)

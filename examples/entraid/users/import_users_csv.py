@@ -1,96 +1,66 @@
 """
-Import users from CSV — bulk provision users from a structured file.
+Import users from a CSV file via the streaming data pipeline (``from_csv``).
 
-Reads a CSV with user properties and creates each user in Entra ID.
-Useful for:
-  - Tenant-to-tenant migration user provisioning
-  - HR system integration (new hire provisioning)
-  - Bulk user creation for testing or staging environments
+Each row becomes a user-create request; the file is streamed in chunks, so
+memory stays bounded no matter how many rows it holds. Failures (for example a
+UPN that already exists) are collected instead of aborting the run.
 
-CSV format:
-    userPrincipalName,givenName,surname,displayName,department,jobTitle,
-    officeLocation,city,country,mobilePhone,mail,password,accountEnabled
+The sample file lives in ``examples/data/users.csv``; pass ``--path`` to import
+your own. ``--domain`` sets the UPN domain for the ``userName`` column.
 
-Requires delegated permission ``User.ReadWrite.All``.
+The record-at-a-time counterpart is ``import.py``.
+
+Requires delegated permission ``User.ReadWrite.All`` (and ``pandas``, installed
+via ``office365-rest-python-client[pandas]``).
 
 https://learn.microsoft.com/en-us/graph/api/user-post-users
 """
 
-import csv
-from io import StringIO
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
 
 from office365.graph_client import GraphClient
-from tests import create_unique_name, test_client_id, test_client_secret, test_tenant
+from office365.runtime.converters.dataframe import records_from_dataframe
+from office365.runtime.progress import progress_bar
+from tests.settings import client_id, password, tenant, username
 
-SAMPLE_CSV = (
-    "userPrincipalName,givenName,surname,displayName,department,jobTitle,"
-    "officeLocation,city,country,mobilePhone,mail,password,accountEnabled\n"
-    "user1@contoso.com,John,Doe,John Doe,Engineering,Developer,Seattle,Seattle,USA,+1-555-0101,,TempP@ss123,True\n"
-    "user2@contoso.com,Jane,Smith,Jane Smith,Marketing,Manager,New York,New York,USA,+1-555-0102,,TempP@ss456,True\n"
-    "user3@contoso.com,Bob,Johnson,Bob Johnson,Sales,Representative,Chicago,Chicago,USA,+1-555-0103,,TempP@ss789,True\n"
-)
+SAMPLE_CSV = Path(__file__).resolve().parents[2] / "data" / "users.csv"
 
 
-def import_users_from_csv(csv_content: str) -> list[dict]:
-    """Import users from CSV content.
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Bulk-provision users from a CSV file")
+    parser.add_argument("--path", default=str(SAMPLE_CSV), help="CSV file (default: examples/data/users.csv)")
+    parser.add_argument("--domain", default=tenant, help="UPN domain appended to each `userName` value")
+    parser.add_argument("--chunk", type=int, default=50, help="rows per commit")
+    parser.add_argument("--apply", action="store_true", help="create the users (default: preview only)")
+    args = parser.parse_args()
 
-    Returns list of result dicts with status per user.
-    """
-    client = GraphClient(tenant=test_tenant).with_client_secret(test_client_id, test_client_secret)
-    reader = csv.DictReader(StringIO(csv_content))
-    results = []
+    client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
 
-    for row in reader:
-        upn = row["userPrincipalName"].strip()
-        password = row.get("password", "").strip() or create_unique_name("P@ssw0rd")
+    def to_records(chunk) -> list[dict]:
+        """Turn the CSV columns into user records (build the UPN, enable the account)."""
+        records = records_from_dataframe(chunk)
+        for record in records:
+            record["userPrincipalName"] = f"{record.pop('userName')}@{args.domain}"
+            record["mailNickname"] = record["userPrincipalName"].split("@")[0]
+            record["accountEnabled"] = True
+        return records
 
-        try:
-            # Build user profile
-            user = client.users.add_with_password(
-                userPrincipalName=upn,
-                givenName=row.get("givenName", "").strip(),
-                surname=row.get("surname", "").strip(),
-                displayName=row.get("displayName", "").strip() or row.get("givenName", "").strip(),
-                department=row.get("department", "").strip(),
-                jobTitle=row.get("jobTitle", "").strip(),
-                officeLocation=row.get("officeLocation", "").strip(),
-                city=row.get("city", "").strip(),
-                country=row.get("country", "").strip(),
-                mobilePhone=row.get("mobilePhone", "").strip(),
-                mail=row.get("mail", "").strip() or upn,
-                password=password,
-                accountEnabled=row.get("accountEnabled", "True").strip().lower() == "true",
-            ).execute_query()
+    result = client.users.from_csv(
+        args.path,
+        chunksize=args.chunk,
+        to_records=to_records,
+        mapping={"password": "passwordProfile/password"},
+        on_error="collect",
+        dry_run=not args.apply,
+        progress=progress_bar("Importing users"),
+    ).execute_query()
 
-            results.append({"user": upn, "status": "success", "id": user.id})
-        except Exception as e:
-            results.append({"user": upn, "status": "failed", "error": str(e)})
-
-    return results
-
-
-def main():
-    print("Importing users from CSV\n")
-
-    # In production, read from a file:
-    # with open("users.csv") as f:
-    #     csv_content = f.read()
-    csv_content = SAMPLE_CSV
-
-    results = import_users_from_csv(csv_content)
-
-    success = [r for r in results if r["status"] == "success"]
-    failed = [r for r in results if r["status"] == "failed"]
-
-    print(f"Total:   {len(results)}")
-    print(f"Created: {len(success)}")
-    print(f"Failed:  {len(failed)}\n")
-
-    for r in failed:
-        print(f"  ✗ {r['user']}: {r.get('error', 'Unknown')}")
-
-    for r in success:
-        print(f"  ✓ {r['user']}  (id: {r['id'][:20]}...)")
+    print(result.value.summary())
+    for failure in result.checkpoint.failures:
+        print(f"  {failure.get('error', failure)}")
 
 
 if __name__ == "__main__":

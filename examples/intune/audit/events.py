@@ -30,7 +30,7 @@ def actor_name(event) -> str:
     actor = event.actor
     if actor is None:
         return "?"
-    return getattr(actor, "userPrincipalName", None) or getattr(actor, "applicationDisplayName", None) or "?"
+    return actor.userPrincipalName or actor.applicationDisplayName or "?"
 
 
 def main() -> None:
@@ -61,7 +61,7 @@ def main() -> None:
         print(f"  {when}  {(event.activity or '?'):35s} by {actor_name(event)}  -> {event.activity_result or '?'}")
         if args.details:
             for resource in event.resources or []:
-                print(f"      {getattr(resource, 'auditResourceType', '?')}: {getattr(resource, 'displayName', '?')}")
+                print(f"      {resource.auditResourceType or '?'}: {resource.displayName or '?'}")
 
 
 if __name__ == "__main__":

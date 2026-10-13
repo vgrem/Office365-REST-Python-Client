@@ -52,8 +52,8 @@ def get_site_storage_report(threshold_pct: float = 80.0) -> list[dict]:
     report = []
 
     for site in sites:
-        quota = getattr(site, "storage_quota", 0)
-        usage = getattr(site, "storage_usage_current", 0)
+        quota = site.storage_maximum_level or 0
+        usage = site.storage_usage or 0
 
         if quota == 0:
             pct = 0.0
@@ -64,7 +64,7 @@ def get_site_storage_report(threshold_pct: float = 80.0) -> list[dict]:
             {
                 "url": site.url,
                 "title": site.title,
-                "template": getattr(site, "template", ""),
+                "template": site.template or "",
                 "quota_mb": quota,
                 "usage_mb": usage,
                 "usage_pct": pct,

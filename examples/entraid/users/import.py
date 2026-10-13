@@ -1,43 +1,53 @@
 """
-Demonstrates how to bulk import users using the Microsoft Graph API.
+Bulk-create users from generated profiles via the batch data pipeline.
 
-https://learn.microsoft.com/en-us/graph/api/resources/user
+Records are generated locally (faker) and queued on the collection; a single
+``execute_batch`` commits them in server-side batches, so N creates cost a
+handful of round trips. The CSV-driven counterpart is ``import_users_csv.py``.
 
-Requires delegated permission ``User.Read.All``.
+Requires delegated permission ``User.ReadWrite.All``.
+
+https://learn.microsoft.com/en-us/graph/api/user-post-users
 """
 
+from __future__ import annotations
+
+import argparse
+
 from faker import Faker
-from office365.directory.users.profile import UserProfile
 from office365.graph_client import GraphClient
-from tests import (
-    create_unique_name,
-    test_client_id,
-    test_password,
-    test_tenant,
-    test_username,
-)
+from office365.runtime.progress import progress_bar
+from tests.settings import client_id, password, tenant, username
 
 
-def generate_user_profile():
-    fake = Faker()
-
-    user_json = {
-        "given_name": fake.name(),
-        "company_name": fake.company(),
-        "business_phones": [fake.phone_number()],
-        "office_location": fake.street_address(),
+def make_record(fake: Faker) -> dict:
+    """Build one user-create record from faker-generated values."""
+    user_name = fake.user_name()
+    return {
+        "userPrincipalName": f"{user_name}@{tenant}",
+        "mailNickname": user_name,
+        "displayName": fake.name(),
+        "department": fake.job(),
+        "officeLocation": fake.street_address(),
         "city": fake.city(),
         "country": fake.country(),
-        "principal_name": f"{fake.user_name()}@{test_tenant}",
-        "password": create_unique_name("P@ssw0rd"),
-        "account_enabled": True,
+        "accountEnabled": True,
+        "passwordProfile": {"password": "P@ssw0rd-" + fake.password(length=8)},
     }
-    return UserProfile(**user_json)
 
 
-client = GraphClient(tenant=test_tenant).with_username_and_password(test_client_id, test_username, test_password)
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Bulk-create generated users in batched requests")
+    parser.add_argument("--count", type=int, default=25, help="number of users to create")
+    args = parser.parse_args()
 
-for _ in range(100):
-    user_profile = generate_user_profile()
-    user = client.users.add(user_profile).execute_query()
-    print(f"'{user.user_principal_name}' user has been created")
+    fake = Faker()
+    client = GraphClient(tenant=tenant).with_username_and_password(client_id, username, password)
+
+    client.users.queue_records([make_record(fake) for _ in range(args.count)], progress=progress_bar("Creating users"))
+    client.execute_batch(20)
+    print(f"Created {args.count} users")
+
+
+if __name__ == "__main__":
+    main()

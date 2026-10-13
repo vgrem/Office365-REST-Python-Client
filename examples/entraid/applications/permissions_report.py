@@ -32,6 +32,7 @@ Reference:
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
 
 from office365.directory.applications.application import Application
 from office365.graph_client import GraphClient
@@ -45,7 +46,7 @@ def _client() -> GraphClient:
 def _requested_permissions(client: GraphClient, app: Application) -> list[str]:
     """Resolve ``requiredResourceAccess`` entries to ``[kind] resource: name``."""
     result: list[str] = []
-    resolved: dict[str, tuple[dict[str, str], dict[str, str], str]] = {}
+    resolved: dict[str, tuple[dict[str, str | None], dict[str, str | None], str]] = {}
     for entry in app.required_resource_access:
         resource_id = entry.resourceAppId or ""
         if resource_id not in resolved:
@@ -67,7 +68,7 @@ def _requested_permissions(client: GraphClient, app: Application) -> list[str]:
     return result
 
 
-def _print_permissions(title: str, names: list[str]) -> None:
+def _print_permissions(title: str, names: Sequence[str | None]) -> None:
     print(f"\n{title}")
     if names:
         for name in names:

@@ -35,10 +35,9 @@ def find_break_glass_accounts() -> dict:
     try:
         policies = client.identity.conditional_access.policies.get().execute_query()
         for policy in policies:
-            conditions = getattr(policy, "conditions", None)
-            users_cond = getattr(conditions, "users", None) if conditions else None
-            include_users = getattr(users_cond, "include_users", []) if users_cond else []
-            exclude_users = getattr(users_cond, "exclude_users", []) if users_cond else []
+            users_cond = policy.conditions.users
+            include_users = users_cond.includeUsers
+            exclude_users = users_cond.excludeUsers
 
             if "All" in include_users and exclude_users:
                 for uid in exclude_users:
@@ -46,9 +45,9 @@ def find_break_glass_accounts() -> dict:
                         user = client.users[uid].select(["displayName", "userPrincipalName"]).get().execute_query()
                         result["ca_excluded"].append(
                             {
-                                "upn": getattr(user, "user_principal_name", uid),
-                                "display_name": getattr(user, "display_name", uid),
-                                "excluded_by_policy": getattr(policy, "display_name", "Unknown"),
+                                "upn": user.user_principal_name,
+                                "display_name": user.display_name,
+                                "excluded_by_policy": policy.display_name,
                                 "id": uid,
                             }
                         )
@@ -57,7 +56,7 @@ def find_break_glass_accounts() -> dict:
                             {
                                 "upn": uid,
                                 "display_name": uid,
-                                "excluded_by_policy": getattr(policy, "display_name", "Unknown"),
+                                "excluded_by_policy": policy.display_name,
                             }
                         )
     except Exception as e:
@@ -65,18 +64,16 @@ def find_break_glass_accounts() -> dict:
 
     # 2. Find permanently active Global Admins
     try:
-        role_assignments = client.identity_governance.role_management.directory.role_assignments.get().execute_query()
+        role_assignments = client.role_management.directory.role_assignments.get().execute_query()
         for ra in role_assignments:
-            role_def = (
-                client.identity_governance.role_management.directory.role_definitions[ra.role_definition_id]
-                .get()
-                .execute_query()
-            )
-            role_name = getattr(role_def, "display_name", "")
+            if not ra.role_definition_id:
+                continue
+            role_def = client.role_management.directory.role_definitions[ra.role_definition_id].get().execute_query()
+            role_name = role_def.display_name
             if role_name in ("Global Administrator", "Global Admin"):
                 result["permanent_admins"].append(
                     {
-                        "upn": getattr(ra.principal, "user_principal_name", ra.principal_id),
+                        "upn": ra.principal_id,
                         "role": role_name,
                     }
                 )

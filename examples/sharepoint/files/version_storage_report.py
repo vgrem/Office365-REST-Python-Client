@@ -56,21 +56,21 @@ def analyze_version_storage(ctx: ClientContext, library_name: str = "Shared Docu
     for f in files:
         version_count = 0
         total_version_size = 0
-        current_size = getattr(f, "length", 0)
+        current_size = f.length or 0
 
         try:
             versions = f.versions
             if versions:
                 version_count = len(versions)
                 for v in versions:
-                    total_version_size += getattr(v, "size", 0) or 0
+                    total_version_size += v.size or 0
         except Exception:
             pass
 
         results.append(
             {
-                "name": getattr(f, "name", "Unknown"),
-                "url": getattr(f, "server_relative_url", ""),
+                "name": f.name or "Unknown",
+                "url": f.server_relative_url or "",
                 "current_size": current_size,
                 "version_count": version_count,
                 "total_version_size": total_version_size,

@@ -48,7 +48,7 @@ def main() -> None:
             continue
         newest = max(creds, key=lambda c: c.startDateTime or c.endDateTime)
         for cred in creds:
-            if cred.keyId == newest.keyId:
+            if cred.keyId is None or cred.keyId == newest.keyId:
                 continue
             if args.apply:
                 app.remove_password(cred.keyId).execute_query()

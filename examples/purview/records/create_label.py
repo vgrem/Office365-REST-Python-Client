@@ -45,19 +45,19 @@ def main() -> None:
     args = parser.parse_args()
 
     client = _client()
+    duration = RetentionDurationInDays(args.days)
     label = client.security.labels.retention_labels.add(
         args.name,
         RetentionTrigger.dateLabeled,
-        RetentionDurationInDays(args.days),
+        duration,
         BehaviorDuringRetentionPeriod.retainAsRecord,
         DefaultRecordBehavior.startLocked,
         ActionAfterRetentionPeriod.delete,
     ).execute_query()
 
-    duration = label.retention_duration
     print(f"Label created: {label.display_name}")
     print(f"  Trigger:          {label.retention_trigger}")
-    print(f"  Duration:         {getattr(duration, 'days', duration)} day(s)")
+    print(f"  Duration:         {duration.days} day(s)")
     print(f"  End action:       {label.action_after_retention_period}")
     print(f"  Default behavior: {label.default_record_behavior}")
     print(f"  In use:           {label.is_in_use}")

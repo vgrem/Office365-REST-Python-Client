@@ -37,9 +37,8 @@ def _resolve_user(client: GraphClient, user_ref: str) -> User:
 
 
 def _preview_body(message) -> str:
-    body = message.properties.get("body", None) if message is not None else None
-    content = getattr(body, "content", None) if body is not None else None
-    return str(content or "").replace("\n", " ")[:60]
+    body = message.body if message is not None else None
+    return str(body.content or "").replace("\n", " ")[:60] if body is not None else ""
 
 
 def _fmt_time(dt) -> str:

@@ -50,10 +50,10 @@ async def find_inactive_sites(
     sem = asyncio.Semaphore(concurrency)
 
     async def inspect(site: SiteProperties) -> dict | None:
-        template = getattr(site, "template", "") or ""
+        template = site.template or ""
         if site.url is None or template == "REDIRECTSITE#0":
             return None
-        if getattr(site, "archive_status", None) != "NotArchived":
+        if site.archive_status != "NotArchived":
             return None
         if not include_channel_sites and template.startswith("TEAMCHANNEL"):
             return None
@@ -63,7 +63,7 @@ async def find_inactive_sites(
             clone = ctx.clone(admin_site_url)
             props = await Tenant(clone).get_site_properties_by_url(site.url).execute_query_async()
 
-        last_activity = getattr(props, "last_content_modified_date", None)
+        last_activity = props.last_content_modified_date
         if last_activity is None or last_activity >= cutoff:
             return None
         return {
@@ -71,8 +71,8 @@ async def find_inactive_sites(
             "title": site.title,
             "template": template,
             "last_activity": last_activity,
-            "storage_used_mb": getattr(site, "storage_usage_current", 0),
-            "storage_quota_mb": getattr(site, "storage_quota", 0),
+            "storage_used_mb": site.storage_usage or 0,
+            "storage_quota_mb": site.storage_maximum_level or 0,
         }
 
     # return_exceptions isolates a failing site instead of cancelling the batch
@@ -80,7 +80,7 @@ async def find_inactive_sites(
 
     rows: list[dict] = []
     for site, result in zip(sites, results):
-        if isinstance(result, Exception):
+        if isinstance(result, BaseException):
             print(f"  skipped {site.url}: {result}")
         elif result is not None:
             rows.append(result)

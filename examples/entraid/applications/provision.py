@@ -114,10 +114,13 @@ def main() -> None:
 
     # 1. Register the application
     app = client.applications.add(name, signInAudience="AzureADMyOrg").execute_query()
-    print(f"1. Registered: {app.display_name} (appId={app.app_id})")
+    if app.app_id is None:
+        raise RuntimeError("Application was created without an appId")
+    app_id = app.app_id
+    print(f"1. Registered: {app.display_name} (appId={app_id})")
 
     # 2. Create its service principal
-    sp = client.service_principals.ensure(app.app_id).execute_query()
+    sp = client.service_principals.ensure(app_id).execute_query()
     print(f"2. Service principal: {sp.id}")
 
     # 3. Add credentials (secret + certificate)
@@ -134,11 +137,11 @@ def main() -> None:
 
     # 5. Grant admin consent
     for scope in args.delegated:
-        client.grant_delegated_permissions(app.app_id, scope).execute_query()
+        client.grant_delegated_permissions(app_id, scope).execute_query()
         print(f"5a. Granted delegated scope: {scope}")
     for role in args.application:
         try:
-            client.grant_application_permissions(app.app_id, role).execute_query()
+            client.grant_application_permissions(app_id, role).execute_query()
             print(f"5b. Granted application role: {role}")
         except ClientRequestException as exc:
             print(f"5b. Could not grant application role {role}: {exc}.")

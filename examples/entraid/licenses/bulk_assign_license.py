@@ -35,9 +35,9 @@ def resolve_sku_id(client: GraphClient, sku_part: str) -> str | None:
     """Resolve a SKU display name or partial ID to a full GUID."""
     skus = client.subscribed_skus.get().execute_query()
     for sku in skus:
-        name = getattr(sku, "sku_part_number", "")
-        sid = getattr(sku, "sku_id", "")
-        if sku_part.lower() in name.lower() or sku_part.lower() in str(sid).lower():
+        name = sku.sku_part_number or ""
+        sid = sku.sku_id or ""
+        if sku_part.lower() in name.lower() or sku_part.lower() in sid.lower():
             return sid
     return None
 
@@ -90,10 +90,10 @@ def bulk_assign_licenses(csv_content: str) -> list[dict]:
             if disabled:
                 # Look up service plan IDs for disabled plans
                 for sku in client.subscribed_skus.get().execute_query():
-                    if getattr(sku, "sku_id", "") == sku_id:
-                        for sp in getattr(sku, "service_plans", []):
-                            if getattr(sp, "service_plan_name", "") in disabled:
-                                disabled_ids.append(getattr(sp, "service_plan_id", ""))
+                    if sku.sku_id == sku_id:
+                        for sp in sku.service_plans:
+                            if sp.servicePlanName in disabled:
+                                disabled_ids.append(sp.servicePlanId or "")
                         break
 
             user = client.users[user_id]

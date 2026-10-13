@@ -20,4 +20,4 @@ user = client.users.get_by_principal_name("user@contoso.onmicrosoft.com")
 groups = user.member_of.get().execute_query()
 
 for g in groups:
-    print(f"{g.resource_type:<20s}  {g.display_name}")
+    print(f"{g.entity_type_name:<45s}  {g.display_name or ''}")

@@ -107,7 +107,8 @@ Recipes that combine a few scripts into a task you would actually schedule.
 
 | Operation | File | Required role | API reference |
 |---|---|---|---|
-| Import users from CSV | [`users/import.py`](./users/import.py) | `User.ReadWrite.All` | [create user](https://learn.microsoft.com/en-us/graph/api/user-post-users) |
+| Import generated users | [`users/import.py`](./users/import.py) | `User.ReadWrite.All` | [create user](https://learn.microsoft.com/en-us/graph/api/user-post-users) |
+| Import users from CSV | [`users/import_users_csv.py`](./users/import_users_csv.py) | `User.ReadWrite.All` | [create user](https://learn.microsoft.com/en-us/graph/api/user-post-users) |
 | Get total user count | [`users/get_count.py`](./users/get_count.py) | `User.Read.All` | [get user](https://learn.microsoft.com/en-us/graph/api/user-get) |
 | Get disabled user accounts | [`users/get_disabled.py`](./users/get_disabled.py) | `User.Read.All` | [list users](https://learn.microsoft.com/en-us/graph/api/user-list) |
 | Get users with expired passwords | [`users/password_expiry_report.py`](./users/password_expiry_report.py) | `User.Read.All` | [list users](https://learn.microsoft.com/en-us/graph/api/user-list) |

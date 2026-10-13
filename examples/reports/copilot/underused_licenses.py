@@ -29,17 +29,6 @@ from tests.settings import client_id, client_secret, tenant
 COPILOT_KEYWORDS = ("COPILOT",)
 
 
-def _as_datetime(value) -> datetime | None:
-    if isinstance(value, datetime):
-        return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
-    if isinstance(value, str) and value:
-        try:
-            return datetime.fromisoformat(value.replace("Z", "+00:00"))
-        except ValueError:
-            return None
-    return None
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Find underused Copilot licenses")
     parser.add_argument("--days", type=int, default=30, help="No-sign-in threshold in days (default: 30)")
@@ -64,7 +53,7 @@ def main() -> None:
             .execute_query()
         )
     except ClientRequestException as exc:
-        if exc.response.status_code in (401, 403):
+        if exc.response is not None and exc.response.status_code in (401, 403):
             print("Could not read sign-in activity; grant the 'AuditLog.Read.All' application permission.")
             return
         raise
@@ -75,7 +64,7 @@ def main() -> None:
         licensed = [lic for lic in (user.assigned_licenses or []) if lic.skuId in sku_ids]
         if not licensed:
             continue
-        last_sign_in = _as_datetime(user.sign_in_activity.lastSignInDateTime)
+        last_sign_in = user.sign_in_activity.lastSignInDateTime
         if last_sign_in is None or last_sign_in < cutoff:
             underused.append((user, last_sign_in))
 

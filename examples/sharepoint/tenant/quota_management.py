@@ -42,8 +42,8 @@ def main():
 
     report = []
     for site in sites:
-        quota = getattr(site, "storage_quota", 0) or 0
-        usage = getattr(site, "storage_usage_current", 0) or 0
+        quota = site.storage_maximum_level or 0
+        usage = site.storage_usage or 0
         pct = round((usage / quota) * 100, 1) if quota > 0 else 0
         report.append(
             {
@@ -96,7 +96,7 @@ def main():
         updated_site = tenant_obj.get_site_properties_from_sharepoint().execute_query()
         for s in updated_site:
             if s.url == target["url"]:
-                print(f"  Verified: quota = {format_mb(getattr(s, 'storage_quota', 0))}")
+                print(f"  Verified: quota = {format_mb(s.storage_maximum_level or 0)}")
 
     # -- Step 3: read current OneDrive default storage quota --
     one_drive_quota = tenant_obj.one_drive_storage_quota

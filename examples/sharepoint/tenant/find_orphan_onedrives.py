@@ -18,6 +18,7 @@ https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/site-o
 
 from __future__ import annotations
 
+from office365.directory.users.user import User
 from office365.graph_client import GraphClient
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.tenant.administration.tenant import Tenant
@@ -41,19 +42,16 @@ def get_inactive_users(graph_client: GraphClient) -> set:
     inactive = set()
     try:
         # Deleted users
-        deleted = graph_client.directory.deleted_items("microsoft.graph.user").get().execute_query()
+        deleted = graph_client.directory.deleted_items("microsoft.graph.user").get_all().execute_query()
         for user in deleted:
-            upn = getattr(user, "user_principal_name", None)
-            if upn:
-                inactive.add(upn)
+            if isinstance(user, User) and user.user_principal_name:
+                inactive.add(user.user_principal_name)
 
         # Active but blocked users
-        users = graph_client.users.get().execute_query()
+        users = graph_client.users.get_all().execute_query()
         for user in users:
-            if getattr(user, "account_enabled", True) is False:
-                upn = getattr(user, "user_principal_name", None)
-                if upn:
-                    inactive.add(upn)
+            if user.account_enabled is False and user.user_principal_name:
+                inactive.add(user.user_principal_name)
     except Exception as e:
         print(f"  Warning: could not fetch user data: {e}")
 
@@ -83,21 +81,21 @@ def find_orphan_onedrives() -> list[dict]:
     orphans = []
 
     for site in sites:
-        template = getattr(site, "template", "")
+        template = site.template or ""
+        url = site.url or ""
         # OneDrive sites use template "SPSPERS#10" or contain "my.sharepoint"
-        if template != "SPSPERS#10" and "my.sharepoint.com" not in getattr(site, "url", ""):
+        if template != "SPSPERS#10" and "my.sharepoint.com" not in url:
             continue
 
         # Extract user principal name from the OneDrive URL
         # e.g. https://tenant-my.sharepoint.com/personal/user_domain_com
-        url = getattr(site, "url", "")
         user_upn = url.rsplit("/", 1)[-1].replace("_", "@") if "/" in url else url
 
         if user_upn in inactive_users:
             orphans.append(
                 {
                     "url": url,
-                    "storage_mb": getattr(site, "storage_usage_current", 0),
+                    "storage_mb": site.storage_usage or 0,
                     "user": user_upn,
                 }
             )

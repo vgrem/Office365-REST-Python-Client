@@ -19,11 +19,11 @@ https://learn.microsoft.com/en-us/graph/api/resources/authenticationmethods-over
 """
 
 from office365.graph_client import GraphClient
-from tests import test_client_id, test_client_secret, test_tenant
+from tests.settings import client_id, client_secret, tenant
 
 
 def main():
-    client = GraphClient(tenant=test_tenant).with_client_secret(test_client_id, test_client_secret)
+    client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
 
     am = client.reports.authentication_methods
 
@@ -40,15 +40,12 @@ def main():
 
     # -- Step 2: tenant-wide summary by method --
     method_summary = am.users_registered_by_method().execute_query()
-    if method_summary and method_summary.value:
-        ms = method_summary.value
+    ms = method_summary.value
+    if ms:
         print("Users by authentication method:")
-        if hasattr(ms, "users_registered_by_method") and ms.users_registered_by_method:
-            for m in ms.users_registered_by_method:
-                print(f"  {m.method_type or '?':30s}  {m.user_count or 0} users")
-        elif hasattr(ms, "registration_count") and ms.registration_count:
-            for rc in ms.registration_count:
-                print(f"  {rc.method or '?':30s}  {rc.count or 0} users")
+        print(f"  Total users: {ms.totalUserCount or '?'}")
+        for m in ms.userRegistrationMethodCounts:
+            print(f"  {m.authenticationMethod or '?':30s}  {m.userCount or 0} users")
         print()
 
     # -- Step 3: per-user registration details --
@@ -60,7 +57,7 @@ def main():
     for d in details:
         pref = d.user_preferred_method_for_secondary_authentication or "-"
         print(
-            f"{d.user_principal_name[:33]:35s} "
+            f"{(d.user_principal_name or '')[:33]:35s} "
             f"{'✔' if d.is_mfa_registered else '✗':6s} "
             f"{'✔' if d.is_passwordless_capable else '✗':9s} "
             f"{'✔' if d.is_sspr_capable else '✗':9s} "
@@ -71,7 +68,7 @@ def main():
 
     # -- Step 4: per-user registered methods for a specific user --
     print()
-    sample_upn = details[0].user_principal_name if details else "admin@contoso.onmicrosoft.com"
+    sample_upn = (details[0].user_principal_name if details else None) or "admin@contoso.onmicrosoft.com"
     users = client.users.filter(f"userPrincipalName eq '{sample_upn}'").get().execute_query()
     if users:
         user = users[0]
@@ -79,7 +76,7 @@ def main():
         all_methods = auth.methods.get().execute_query()
         print(f"Authentication methods for {user.user_principal_name}: {len(all_methods)}")
         for m in all_methods:
-            mtype = m.properties.get("@odata.type", m.entity_type_name)
+            mtype = m.entity_type_name
             extra = ""
             if "phone" in mtype.lower():
                 extra = m.properties.get("phoneNumber", "") or m.properties.get("phoneType", "")

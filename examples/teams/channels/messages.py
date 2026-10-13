@@ -38,7 +38,7 @@ def _get_channel(team: Team, channel_id: str):
 def _fmt_author(message: ChatMessage) -> str:
     sender = message.from_
     user = sender.user if sender else None
-    return str(getattr(user, "displayName", None) or "?") if user else "?"
+    return str(user.displayName or "?") if user else "?"
 
 
 def _fmt_time(dt) -> str:
@@ -84,8 +84,7 @@ def cmd_list(client: GraphClient, args: argparse.Namespace) -> None:
     messages = channel.messages.order_by("createdDateTime desc").top(args.top).get().execute_query()
     print(f"Recent messages in '{channel.display_name}' ({len(messages)}):")
     for message in messages:
-        preview = message.body.content if message.body else ""
-        preview = preview.replace("\n", " ")[:70]
+        preview = (message.body.content or "").replace("\n", " ")[:70]
         print(f"  {_fmt_time(message.created_datetime)}  {_fmt_author(message):20s}  {preview}")
 
 

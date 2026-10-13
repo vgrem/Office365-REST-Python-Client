@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 from collections import defaultdict
 
+from office365.directory.users.user import User
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
 
@@ -50,9 +51,9 @@ def _client() -> GraphClient:
 
 def _display(member) -> str:
     """Human-readable label for a role member (user, group or service principal)."""
-    if getattr(member, "user_principal_name", None):
+    if isinstance(member, User):
         return f"{member.display_name} <{member.user_principal_name}>"
-    return f"{member.display_name or '(unnamed)'} [{member.entity_type_name}]"
+    return f"{member.display_name} [{member.entity_type_name}]"
 
 
 def main() -> None:
@@ -72,7 +73,9 @@ def main() -> None:
             continue
         members = role.members.select(["id", "displayName", "userPrincipalName"]).get().execute_query()
         for member in members:
-            users[member.id].add(role.display_name)
+            if member.id is None:
+                continue
+            users[member.id].add(role.display_name or "")
             labels[member.id] = _display(member)
             total_memberships += 1
 

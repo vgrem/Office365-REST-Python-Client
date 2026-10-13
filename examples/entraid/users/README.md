@@ -16,8 +16,8 @@ script; writes use delegated or interactive sign-in.
 | Bulk update | [`update_batch.py`](./update_batch.py) | Batch requests in one round trip |
 | Delete a user | [`delete.py`](./delete.py) | Soft-delete (restorable for 30 days) |
 | Restore a deleted user | [`restore_deleted_user.py`](./restore_deleted_user.py) | From `directory/deletedItems` |
-| Import from CSV | [`import.py`](./import.py) | Row-by-row create |
-| Import users from CSV (helper) | [`import_users_csv.py`](./import_users_csv.py) | Uses the CSV import helper |
+| Import generated users | [`import.py`](./import.py) | Queued creates committed in batches |
+| Import users from CSV | [`import_users_csv.py`](./import_users_csv.py) | `users.from_csv(...)` streams `examples/data/users.csv` |
 
 ## 2. Read and export
 

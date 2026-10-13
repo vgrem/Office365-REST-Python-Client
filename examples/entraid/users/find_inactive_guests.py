@@ -16,10 +16,12 @@ Required delegated permissions:
 https://learn.microsoft.com/en-us/graph/api/resources/user
 """
 
+from __future__ import annotations
+
 from datetime import datetime, timedelta, timezone
 
 from office365.graph_client import GraphClient
-from tests import test_client_id, test_client_secret, test_tenant
+from tests.settings import client_id, client_secret, tenant
 
 
 def find_inactive_guests(days_threshold: int = 90) -> list[dict]:
@@ -31,7 +33,7 @@ def find_inactive_guests(days_threshold: int = 90) -> list[dict]:
     Returns:
         List of guest dicts with user info and days since last activity.
     """
-    client = GraphClient(tenant=test_tenant).with_client_secret(test_client_id, test_client_secret)
+    client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=days_threshold)
     inactive = []
@@ -40,14 +42,10 @@ def find_inactive_guests(days_threshold: int = 90) -> list[dict]:
     guests = client.users.filter("userType eq 'Guest'").get_all().execute_query()
 
     for guest in guests:
-        last_signin = getattr(guest, "sign_in_activity", None)
-        if last_signin:
-            last_success = getattr(last_signin, "last_successful_sign_in_date_time", None)
-        else:
-            last_success = None
+        last_success = guest.sign_in_activity.lastSuccessfulSignInDateTime
 
         # Also check creation date as fallback
-        created = getattr(guest, "created_date_time", None)
+        created = guest.created_date_time
 
         last_activity = last_success or created
         if last_activity and last_activity < cutoff:

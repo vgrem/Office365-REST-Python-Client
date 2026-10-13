@@ -1,0 +1,4 @@
+userName,givenName,surname,displayName,department,jobTitle,officeLocation,city,country,password
+alex.wilmer,Alex,Wilmer,Alex Wilmer,Engineering,Software Engineer,18/2111,Seattle,USA,P@ssw0rd-Import-1
+jane.smith,Jane,Smith,Jane Smith,Marketing,Marketing Manager,18/2105,New York,USA,P@ssw0rd-Import-2
+bob.jones,Bob,Jones,Bob Jones,Sales,Account Executive,18/2203,Chicago,USA,P@ssw0rd-Import-3

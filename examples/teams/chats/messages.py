@@ -50,7 +50,7 @@ def _body_content(message: ChatMessage) -> str:
 def _fmt_author(message: ChatMessage) -> str:
     sender = message.from_
     user = sender.user if sender else None
-    return str(getattr(user, "displayName", None) or "?") if user else "?"
+    return str(user.displayName or "?") if user else "?"
 
 
 def cmd_send(client: GraphClient, args: argparse.Namespace) -> None:

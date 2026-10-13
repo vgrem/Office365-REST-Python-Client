@@ -39,6 +39,7 @@ def main() -> None:
     args = parser.parse_args()
 
     client = _client()
+    subscription = None
 
     if args.apply:
         expiration = datetime.now(timezone.utc) + timedelta(hours=args.hours)
@@ -64,7 +65,7 @@ def main() -> None:
     for item in subscriptions:
         print(f"  {item.id:45s}  resource={item.resource or '?':30s}  expires={item.expiration_datetime:%Y-%m-%d %H:%M}")
 
-    if args.apply:
+    if subscription is not None:
         subscription.delete_object().execute_query()
         print(f"\nDeleted subscription {subscription.id}.")
 

@@ -47,10 +47,10 @@ def get_all_sites() -> List[dict]:
         {
             "url": site.url,
             "title": site.title,
-            "template": getattr(site, "template", ""),
+            "template": site.template or "",
         }
         for site in sites
-        if getattr(site, "template", "") not in ("REDIRECTSITE#0",)
+        if (site.template or "") not in ("REDIRECTSITE#0",)
     ]
 
 
@@ -68,7 +68,7 @@ def get_retention_policies(client: GraphClient) -> List[dict]:
             policies.append(
                 {
                     "id": label.id,
-                    "display_name": getattr(label, "display_name", label.id),
+                    "display_name": label.display_name or label.id,
                 }
             )
     except Exception as e:

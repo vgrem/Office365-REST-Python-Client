@@ -15,6 +15,8 @@ Required delegated permissions:
 https://learn.microsoft.com/en-us/graph/api/resources/oauth2permissiongrant
 """
 
+from __future__ import annotations
+
 from office365.graph_client import GraphClient
 from tests.settings import client_id, client_secret, tenant
 
@@ -30,15 +32,15 @@ def list_consent_grants() -> list[dict]:
     try:
         oauth_grants = client.oauth2_permission_grants.get().execute_query()
         for g in oauth_grants:
-            client_app = getattr(g, "client_id", "Unknown")
-            scope = getattr(g, "scope", "")
-            consent_type = getattr(g, "consent_type", "AllPrincipals")
+            client_app = g.client_id or "Unknown"
+            scope = g.scope or ""
+            consent_type = g.consent_type or "AllPrincipals"
 
             # Resolve app name from service principal
             app_name = client_app
             try:
                 sp = client.service_principals[client_app].select(["displayName"]).get().execute_query()
-                app_name = getattr(sp, "display_name", client_app)
+                app_name = sp.display_name or client_app
             except Exception:
                 pass
 

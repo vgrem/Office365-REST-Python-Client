@@ -68,11 +68,11 @@ def find_inactive_sites(days_threshold: int = 90, include_channel_sites: bool = 
 
     for site in sites:
         # Skip archived sites
-        if getattr(site, "archive_status", None) == "NotArchived":
+        if site.archive_status == "NotArchived":
             continue
 
         # Skip Teams channel sites unless explicitly included
-        template = getattr(site, "template", "")
+        template = site.template or ""
         if not include_channel_sites and template in ("TEAMCHANNEL#0", "TEAMCHANNEL#1"):
             continue
 
@@ -86,17 +86,17 @@ def find_inactive_sites(days_threshold: int = 90, include_channel_sites: bool = 
             # Get site properties with last activity
             site_props = admin.get_site_properties_by_url(site.url).execute_query()
 
-            last_activity = getattr(site_props, "last_content_modified_date", None)
+            last_activity = site_props.last_content_modified_date
 
-            if last_activity and last_activity < cutoff:
+            if last_activity is None or last_activity < cutoff:
                 results.append(
                     {
                         "url": site.url,
                         "title": site.title,
                         "last_activity": last_activity,
                         "template": template,
-                        "storage_used_mb": getattr(site, "storage_usage_current", 0),
-                        "storage_quota_mb": getattr(site, "storage_quota", 0),
+                        "storage_used_mb": site.storage_usage or 0,
+                        "storage_quota_mb": site.storage_maximum_level or 0,
                         "owner": get_site_owner(site, admin),
                     }
                 )
