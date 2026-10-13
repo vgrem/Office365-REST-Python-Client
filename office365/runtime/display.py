@@ -160,6 +160,7 @@ def describe_collection(
     *,
     max_items: int | None = MAX_ITEMS,
     max_column_width: int | None = MAX_COLUMN_WIDTH,
+    more: bool = False,
 ) -> str:
     """Return a bounded, pandas-like preview of an already-loaded collection.
 
@@ -169,41 +170,63 @@ def describe_collection(
     render as a concise list. Pass ``max_items=None`` to render every item and
     ``max_column_width=None`` to disable per-column truncation (both used by
     ``to_string()`` for full reports).
+
+    Args:
+        more: Whether the server may hold further, not-yet-loaded pages. When
+            true the count is marked with ``+`` and a hint to call
+            ``get_all()`` is appended, so a preview never implies the
+            collection is complete.
     """
+    footer = f"{_INDENT}(more pages available — call get_all() to load them)" if more else ""
     total = len(items)
     if total == 0:
-        return f"{name}([])"
+        return "\n".join(part for part in (f"{name}([])", footer) if part)
     limit = total if max_items is None else max_items
     preview = list(islice(items, limit))
     columns, records = _columns_and_rows(preview)
     if columns is None or records is None or not columns:
-        return f"{name}({format_value(items, max_items=limit)})"
-    lines = [f"{name}(count={total})", _render_table(columns, records, max_column_width)]
+        return "\n".join(part for part in (f"{name}({format_value(items, max_items=limit)})", footer) if part)
+    lines = [
+        f"{name}(count={total}{'+' if more else ''})",
+        _render_table(columns, records, max_column_width),
+    ]
     if len(preview) < total:
         lines.append(f"{_INDENT}… (+{total - len(preview)} more)")
+    if footer:
+        lines.append(footer)
     return "\n".join(lines)
 
 
-def collection_html(items: Any, name: str) -> str:
-    """Render an already-loaded collection as an HTML table for Jupyter."""
+def collection_html(items: Any, name: str, *, more: bool = False) -> str:
+    """Render an already-loaded collection as an HTML table for Jupyter.
+
+    Args:
+        more: Whether the server may hold further pages (see
+            :func:`describe_collection`); reflected in the count and a note.
+    """
     import html
 
     total = len(items)
+    suffix = "+" if more else ""
+    note = " <i>(more pages available — call get_all())</i>" if more else ""
     if total == 0:
-        return f"<div><b>{html.escape(name)}</b> (empty)</div>"
+        return f"<div><b>{html.escape(name)}</b> (empty){note}</div>"
     preview = list(islice(items, MAX_ITEMS))
     columns, records = _columns_and_rows(preview)
-    more = f" … (+{total - MAX_ITEMS} more)" if total > MAX_ITEMS else ""
+    truncated = f" … (+{total - MAX_ITEMS} more)" if total > MAX_ITEMS else ""
     if columns is None or records is None or not columns:
         cells = "".join(f"<td>{html.escape(_cell(item))}</td>" for item in preview)
-        return f"<div><b>{html.escape(name)}</b> (count={total}){more}<table><tr>{cells}</tr></table></div>"
+        return (
+            f"<div><b>{html.escape(name)}</b> (count={total}{suffix}){truncated}{note}"
+            f"<table><tr>{cells}</tr></table></div>"
+        )
     head = "".join(f"<th>{html.escape(column)}</th>" for column in columns)
     body = "".join(
         "<tr>" + "".join(f"<td>{html.escape(_cell(record.get(column, '')))}</td>" for column in columns) + "</tr>"
         for record in records
     )
     return (
-        f"<div><b>{html.escape(name)}</b> (count={total}){more}"
+        f"<div><b>{html.escape(name)}</b> (count={total}{suffix}){truncated}{note}"
         f"<table border='1' cellspacing='0' cellpadding='3'>"
         f"<thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>"
     )

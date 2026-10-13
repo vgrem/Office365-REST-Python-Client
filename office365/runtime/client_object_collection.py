@@ -280,7 +280,7 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
         """Return a bounded preview of the already-loaded items (never fetches)."""
         from office365.runtime.display import describe_collection
 
-        return describe_collection(self._data, type(self).__name__)
+        return describe_collection(self._data, type(self).__name__, more=self.has_next)
 
     def __str__(self) -> str:
         """Return the same bounded preview as :meth:`__repr__`."""
@@ -290,7 +290,7 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
         """Render the loaded items as an HTML table (Jupyter/rich display)."""
         from office365.runtime.display import collection_html
 
-        return collection_html(self._data, type(self).__name__)
+        return collection_html(self._data, type(self).__name__, more=self.has_next)
 
     def to_string(self, max_items: int | None = None) -> str:
         """Render the loaded items as a full, aligned table.
@@ -303,10 +303,13 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
         """
         from office365.runtime.display import describe_collection
 
-        result = describe_collection(self._data, type(self).__name__, max_items=max_items, max_column_width=None)
-        if self.has_next:
-            result += "\n(… more items are available — call get_all() to load them)"
-        return result
+        return describe_collection(
+            self._data,
+            type(self).__name__,
+            max_items=max_items,
+            max_column_width=None,
+            more=self.has_next,
+        )
 
     def __getitem__(self, index: int) -> ClientObjectT:
         """Get an item by its index position."""

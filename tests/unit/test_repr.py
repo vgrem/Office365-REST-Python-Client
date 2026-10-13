@@ -186,6 +186,26 @@ class TestObjectCollectionRendering(unittest.TestCase):
         self.assertNotIn(long_upn, repr(collection))  # the preview bounds the column
         self.assertIn(long_upn, collection.to_string())  # the report keeps it intact
 
+    def test_repr_marks_unloaded_pages(self):
+        collection = self._loaded(2)
+        collection._next_request_url = "https://graph.microsoft.com/v1.0/users?$skiptoken=abc"
+
+        rendered = repr(collection)
+        self.assertIn("count=2+", rendered)  # count is a floor while pages remain
+        self.assertIn("more pages available", rendered)
+
+    def test_to_string_marks_unloaded_pages(self):
+        collection = self._loaded(2)
+        collection._next_request_url = "https://graph.microsoft.com/v1.0/users?$skiptoken=abc"
+
+        self.assertIn("more pages available", collection.to_string())
+
+    def test_html_marks_unloaded_pages(self):
+        collection = self._loaded(2)
+        collection._next_request_url = "https://graph.microsoft.com/v1.0/users?$skiptoken=abc"
+
+        self.assertIn("more pages available", collection._repr_html_())
+
 
 class TestValueCollectionRendering(unittest.TestCase):
     def test_scalar_collection(self):

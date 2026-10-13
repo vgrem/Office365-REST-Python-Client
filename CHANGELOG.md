@@ -90,7 +90,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the `@dataclass` decorator runs, so the generated `repr` no longer shadows it.
   Call `collection.to_string()` for a full text report — it renders every loaded
   item and does not truncate columns (so identifiers such as a UPN or GUID stay
-  intact), unlike the bounded `repr`/`str` preview.
+  intact), unlike the bounded `repr`/`str` preview. A preview is honest about
+  completeness: when the server signalled a further page (`has_next`) the count
+  is marked `N+` and a "more pages available — call get_all()" hint is appended,
+  so `print(collection)` never implies you have seen everything.
 - **Credential expiry helpers:** new `Credential` base for `KeyCredential` and
   `PasswordCredential` carrying the shared `is_expired` / `days_until_expiry`
   logic, plus `expiry_status(warn_days=30)` returning a printable
