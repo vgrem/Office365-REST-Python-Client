@@ -21,6 +21,7 @@ import argparse
 import asyncio
 import json
 import os
+import tempfile
 
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import cert_path, cert_thumbprint, client_id, site_url, tenant
@@ -46,7 +47,11 @@ def load_done_ids(path: str) -> set[str]:
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Stream a large list to JSONL with resume")
     parser.add_argument("--list-title", default="Documents", help="list title")
-    parser.add_argument("--output", default="list-export.jsonl", help="JSONL output file")
+    parser.add_argument(
+        "--output",
+        default=os.path.join(tempfile.gettempdir(), "list-export.jsonl"),
+        help="JSONL output file (default: temp dir)",
+    )
     parser.add_argument("--page-size", type=int, default=1000, help="items per page (default: 1000)")
     parser.add_argument("--fields", default="", help="comma-separated fields (default: every loaded field)")
     args = parser.parse_args()

@@ -47,8 +47,7 @@ for node in ql:
 
 | What | File | Notes |
 |------|------|-------|
-| **Add node** | [`add_child_node.py`](./add_child_node.py) | Add a top-level node to Quick Launch or top nav |
-| **Add child node** | [`add_child_node.py`](./add_child_node.py) | Add a sub-menu under an existing node |
+| **Add child node** | [`add_child_node.py`](./add_child_node.py) | Add a sub-menu under an existing Quick Launch node |
 
 ## Copy
 

@@ -72,7 +72,7 @@ def main():
         manifest_uri=containers.MetadataContainerUri,
         encryption_key=containers.EncryptionKey,
         site_url=site_url,
-        list_title=library.title,
+        list_title=library.title or args.library,
         list_url=library_url,
         web_url=urlparse(site_url).path or "/",
         root_folder_id=root.unique_id,

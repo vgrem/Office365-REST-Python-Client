@@ -6,6 +6,8 @@ https://learn.microsoft.com/en-us/sharepoint/dev/general-development/sharepoint-
 
 import argparse
 import csv
+import os
+import tempfile
 
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import cert_path, cert_thumbprint, client_id, site_url, tenant
@@ -16,7 +18,11 @@ COLUMNS = ["Path", "Title", "Author", "LastModifiedTime"]
 def main():
     parser = argparse.ArgumentParser(description="Export search results to CSV")
     parser.add_argument("--query", default="IsDocument:1", help="KQL query")
-    parser.add_argument("--output", required=True, help="Output CSV path")
+    parser.add_argument(
+        "--output",
+        default=os.path.join(tempfile.gettempdir(), "search_results.csv"),
+        help="Output CSV path (default: temp dir)",
+    )
     parser.add_argument("--limit", type=int, default=100, help="Maximum results")
     args = parser.parse_args()
 

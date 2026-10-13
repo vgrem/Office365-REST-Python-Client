@@ -3,6 +3,8 @@
 Official documentation: https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/navigation/list-operations
 """
 
+import argparse
+
 from faker import Faker
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.listitems.listitem import ListItem
@@ -45,15 +47,24 @@ def run_import(source_data: list, target_list: List) -> None:
     ctx.execute_batch(100, success_callback=_print_progress)
 
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description="Import list items in bulk")
+    parser.add_argument("--list-title", default="Contacts_Large", help="target list title")
+    parser.add_argument("--amount", type=int, default=100, help="number of items to generate")
+    args = parser.parse_args()
+
     client = ClientContext(team_site_url).with_username_and_password(
         tenant=tenant,
         client_id=client_id,
         username=username,
         password=password,
     )
-    contacts = load_source()
-    contacts_list = client.web.lists.ensure_list("Contacts_Large").execute_query()
+    contacts = load_source(args.amount)
+    contacts_list = client.web.lists.ensure_list(args.list_title).execute_query()
     contacts_list.ensure_fields(list(contacts[0].keys()))
     client.execute_query()
     run_import(contacts, contacts_list)
+
+
+if __name__ == "__main__":
+    main()

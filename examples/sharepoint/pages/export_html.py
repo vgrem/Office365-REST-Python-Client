@@ -16,7 +16,7 @@ https://learn.microsoft.com/en-us/sharepoint/dev/apis/site-pages-api-reference
 """
 
 import argparse
-import sys
+import tempfile
 from pathlib import Path
 
 from office365.sharepoint.client_context import ClientContext
@@ -28,7 +28,11 @@ PAGE_SIZE = 50
 def main():
     parser = argparse.ArgumentParser(description="Export modern site pages to HTML files")
     parser.add_argument("--site-url", default=site_url, help="site URL")
-    parser.add_argument("--output", default="site_pages", help="output directory for the .html files")
+    parser.add_argument(
+        "--output",
+        default=str(Path(tempfile.gettempdir()) / "site_pages"),
+        help="output directory for the .html files (default: temp dir)",
+    )
     args = parser.parse_args()
 
     ctx = ClientContext(args.site_url).with_client_certificate(
@@ -38,14 +42,15 @@ def main():
     pages = list(ctx.site_pages.pages.paged(PAGE_SIZE).get().execute_query())
     pages = [page for page in pages if page.file_name and page.file_name.endswith(".aspx")]
     if not pages:
-        sys.exit("No modern pages found.")
+        print("No modern pages found.")
+        return
 
     out_dir = Path(args.output)
     out_dir.mkdir(parents=True, exist_ok=True)
     for page in pages:
         title = page.properties.get("Title") or ""
         content = page.canvas_content or ""
-        filename = page.file_name.replace(".aspx", ".html")
+        filename = (page.file_name or "page").replace(".aspx", ".html")
         html = f"<div><h1>{title}</h1></div>{content}"
         (out_dir / filename).write_text(html, encoding="utf-8")
         print(f"  ✓ {filename}")

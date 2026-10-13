@@ -9,6 +9,8 @@ https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api
 import argparse
 import csv
 import json
+import os
+import tempfile
 
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import cert_path, cert_thumbprint, client_id, site_url, tenant
@@ -18,8 +20,10 @@ def main():
     parser = argparse.ArgumentParser(description="Export field definitions")
     parser.add_argument("--list-title", default="Documents", help="List to export")
     parser.add_argument("--format", choices=["csv", "json"], default="csv")
-    parser.add_argument("--output", required=True, help="Output file path")
+    parser.add_argument("--output", default=None, help="Output file path (default: temp dir)")
     args = parser.parse_args()
+    if args.output is None:
+        args.output = os.path.join(tempfile.gettempdir(), f"field_schema.{args.format}")
 
     ctx = ClientContext(site_url).with_client_certificate(
         tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path

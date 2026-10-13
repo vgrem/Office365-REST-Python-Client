@@ -1,6 +1,6 @@
 """
 Acquire SharePoint Online browser-session cookies using Playwright and save them into
-storage_state.json (or a custom path), which can be consumed by examples/sharepoint/auth_cookies.py.
+storage_state.json (or a custom path), which can be consumed by examples/sharepoint/auth/load_cookies_from_playwright.py.
 
 Requirements (not installed by the library):
   pip install playwright
@@ -14,11 +14,12 @@ Usage:
 
 Notes:
 - The script opens a browser window. Complete the Microsoft login (including MFA) manually.
-- After login, return to the terminal and press Enter to persist cookies.
-- The resulting storage_state.json can be used by auth_cookies.py.
+- It polls for the FedAuth cookie and saves the state as soon as authentication completes.
+- The resulting storage_state.json can be used by load_cookies_from_playwright.py.
 """
 
 import os
+import time
 
 from playwright.sync_api import sync_playwright  # type: ignore[import-not-found]
 
@@ -31,6 +32,7 @@ def main() -> None:
     storage_state_path = os.environ.get("PLAYWRIGHT_STORAGE_STATE", "./storage_state.json")
     headless_env = os.environ.get("HEADLESS", "false").lower()
     headless = headless_env in ("1", "true", "yes")
+    timeout_seconds = int(os.environ.get("LOGIN_TIMEOUT", "180"))
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=headless)
@@ -41,7 +43,14 @@ def main() -> None:
         page.wait_for_load_state("networkidle")
 
         print("\nA browser window is open. Complete the login (including MFA) if prompted.")
-        input("When the SharePoint page is fully loaded and you are authenticated, press Enter here to continue...")
+        deadline = time.monotonic() + timeout_seconds
+        while time.monotonic() < deadline:
+            if any(cookie.get("name") == "FedAuth" for cookie in context.cookies()):
+                print("Authentication detected.")
+                break
+            page.wait_for_timeout(1000)
+        else:
+            print(f"Timed out after {timeout_seconds}s waiting for the FedAuth cookie; saving whatever was captured.")
 
         # Persist cookies and related state
         context.storage_state(path=storage_state_path)
