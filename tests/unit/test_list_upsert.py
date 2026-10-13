@@ -1,4 +1,4 @@
-"""Tests for key-based, idempotent record imports (skip / upsert)."""
+"""Tests for key-based, idempotent record imports (skip / update)."""
 
 from __future__ import annotations
 
@@ -70,7 +70,7 @@ def test_keyed_queue_upserts_existing():
     records = [{"Name_": "AAPL", "date": "d1"}, {"Name_": "AAPL", "date": "d2"}]
     existing = {record_key(records[0], ["Name_", "date"]): 7}
 
-    queued, skipped = _queue(target, records, existing, on_conflict="upsert")
+    queued, skipped = _queue(target, records, existing, on_conflict="update")
 
     assert (queued, skipped) == (2, 0)
     assert len(target.created) == 1  # the new row

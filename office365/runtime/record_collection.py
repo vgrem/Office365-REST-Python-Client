@@ -300,6 +300,11 @@ class RecordCollection(ClientObjectCollection[ClientObjectT]):
             pattern can instead be written with a single server round-trip via
             :meth:`~office365.entity.Entity.upsert` on an alternate-key-addressed
             entity (``client.groups.get_by_alternate_key(...).upsert()``).
+
+            Many collections also ship a typed ``ensure_<noun>`` helper for their
+            natural key (``client.applications.ensure(...)``,
+            ``web.ensure_folder_path(...)``, ``list.ensure_field(...)``); those are
+            create-if-missing by default and delegate to the same primitive.
         """
         from office365.runtime.odata.literals import odata_literal
         from office365.runtime.queries.create_entity import CreateEntityQuery

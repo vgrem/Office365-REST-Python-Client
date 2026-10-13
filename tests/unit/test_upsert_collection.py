@@ -171,7 +171,7 @@ def test_upsert_create_runs_before_queries_queued_after_it():
     assert transport.requests[2].url.endswith("/groups/g1")
 
 
-def test_upsert_rejects_an_unknown_on_conflict():
+def test_upsert_rejects_retired_on_conflict_value():
     client, _ = _client([])
 
     with pytest.raises(ValueError, match="on_conflict"):

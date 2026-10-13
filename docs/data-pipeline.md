@@ -63,11 +63,11 @@ lst.from_duckdb(duckdb.connect("analytics.db"), query="SELECT * FROM stocks").ex
 Pass a natural `key` to make an import duplicate-proof: a SHA-256 hash of the
 key column(s) is stored in a `MigrationKey` column (created automatically) and
 already-present rows are skipped (`on_conflict="skip"`) or updated
-(`on_conflict="upsert"`). The key is checked on **every** run — fresh or resumed —
+(`on_conflict="update"`). The key is checked on **every** run — fresh or resumed —
 so a replayed or overlapping chunk never duplicates.
 
 ```python
-lst.from_dataframe(df, key=["region", "date"], on_conflict="upsert").execute_batch()
+lst.from_dataframe(df, key=["region", "date"], on_conflict="update").execute_batch()
 ```
 
 For long runs, add a `checkpoint`: the committed cursor is persisted after each

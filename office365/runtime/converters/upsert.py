@@ -12,7 +12,7 @@ import hashlib
 import json
 from typing import Any, Iterable, Mapping, MutableMapping, Protocol, runtime_checkable
 
-ON_CONFLICT_MODES = ("skip", "upsert")
+ON_CONFLICT_MODES = ("skip", "update")
 
 
 def record_key(record: dict, key_columns: Iterable[str]) -> str:
@@ -66,7 +66,7 @@ def keyed_queue(
 
     Each record's natural key is hashed into ``target.key_field``. Records whose
     key is already in ``existing`` are either skipped (``on_conflict="skip"``) or
-    queued as an update (``on_conflict="upsert"``); the rest are created.
+    queued as an update (``on_conflict="update"``); the rest are created.
     ``existing`` is updated in place so duplicate keys within the same run are
     deduplicated too. With ``dry_run`` the counts are computed without queuing
     anything (a plan preview).
@@ -86,7 +86,7 @@ def keyed_queue(
         record[key_field] = key
         if key in existing:
             item_id = existing[key]
-            if item_id is not None and on_conflict == "upsert":
+            if item_id is not None and on_conflict == "update":
                 updates.append((item_id, record))
             else:
                 skipped += 1

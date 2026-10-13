@@ -372,18 +372,18 @@ The generic entry point is `collection.from_records(batches)` for any
 and `from_dataframe_large.py`, and the `examples/entraid` DataFrame export for
 the Graph side.
 
-#### Idempotent imports (skip / upsert)
+#### Idempotent imports (skip / update)
 
 Pass a natural `key` (one or more columns) to make the import **duplicate-proof**:
 a SHA-256 hash of those columns is stored in `key_field` (created if missing),
 the existing keys are loaded once, and a re-run either skips already-present
-rows (`on_conflict="skip"`) or updates them (`on_conflict="upsert"`):
+rows (`on_conflict="skip"`) or updates them (`on_conflict="update"`):
 
 ```python
 lst.from_dataframe(
     pd.read_csv("housing.csv", chunksize=2000),
     key=["region", "date"],  # natural key -> MigrationKey hash
-    on_conflict="upsert",
+    on_conflict="update",
 ).execute_batch(items_per_batch=100, concurrency=5)
 ```
 
@@ -410,7 +410,7 @@ optional content — distinct from the record export):
 collection.export_to(f, format="csv").execute_query()  # unified record export
 collection.export_to("out.csv", page_size=2000).execute_query()  # streamed (bounded)
 await collection.export_to_async("out.csv", page_size=2000)  # async twin (see docs/async.md)
-collection.from_dataframe(df, key=["id"], on_conflict="upsert")  # unified streaming import
+collection.from_dataframe(df, key=["id"], on_conflict="update")  # unified streaming import
 collection.from_records(batches, checkpoint="run.json")  # stream record batches
 
 lst.queue_dataframe(df).execute_query()  # deferred (queue-all)

@@ -180,7 +180,7 @@ class SharePointListTarget:
 
     Pass ``key`` (one or more natural-key columns) to make the target idempotent:
     a hash of those columns is stored in ``key_field`` and each payload is created
-    or (``on_conflict="upsert"``) updated, so re-runs never duplicate. Without a
+    or (``on_conflict="update"``) updated, so re-runs never duplicate. Without a
     key, records are appended and idempotency relies on the checkpoint/manifest.
     """
 

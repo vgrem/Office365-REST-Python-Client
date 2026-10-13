@@ -961,7 +961,7 @@ class List(SecurableObject):
             on_error: ``"raise"`` (default) or ``"collect"``.
             key: Natural-key source column(s) for idempotency; ``None`` disables it.
             key_field: Target column storing the derived key hash.
-            on_conflict: ``"skip"`` (default) or ``"upsert"``.
+            on_conflict: ``"skip"`` (default) or ``"update"``.
             enforce_unique: Mark the key column unique (guards a create race).
             dry_run: Plan the create/update/skip counts without writing.
             on_schema_change: ``"evolve"`` (default) or ``"fail"``.
