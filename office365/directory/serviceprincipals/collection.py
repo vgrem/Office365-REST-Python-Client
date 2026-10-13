@@ -4,7 +4,6 @@ from office365.count_collection import CountCollection
 from office365.directory.serviceprincipals.service_principal import ServicePrincipal
 from office365.runtime.deprecated import deprecated
 from office365.runtime.odata.literals import escape_odata_string
-from office365.runtime.paths.appid import AppIdPath
 
 
 class ServicePrincipalCollection(CountCollection[ServicePrincipal]):
@@ -27,7 +26,7 @@ class ServicePrincipalCollection(CountCollection[ServicePrincipal]):
         Args:
             app_id (str): appId is referred to as Application (Client) ID, respectively, in the Azure portal
         """
-        return ServicePrincipal(self.context, AppIdPath(app_id, self.resource_path))
+        return self.get_by_alternate_key("appId", app_id)
 
     def find_by_name(self, name: str, *, required: bool = False) -> ServicePrincipal:
         """Look up a service principal by its ``displayName``.

@@ -142,3 +142,25 @@ class AccessDeniedException(ClientRequestException):
 
 
 register_error_type(AccessDeniedException)
+
+
+class UpsertNotSupported(ClientRequestException):
+    """Raised when a service does not honour a server-side upsert (``create-if-missing``).
+
+    A server-side upsert is a ``PATCH`` carrying ``Prefer: create-if-missing``
+    against a resource addressed by an alternate key (or a singleton). Not every
+    entity set supports it: a service that does not answers ``404`` for a missing
+    resource instead of creating it. The client translates that response into
+    this type (chained to the original error) so callers can fall back to a
+    client-side lookup-then-write.
+
+    This type is **not** registered with the payload dispatcher - it is raised by
+    the client from :func:`~office365.runtime.queries.upsert_entity.raise_if_upsert_unsupported`,
+    never selected by matching an error body.
+    """
+
+    GUIDANCE = (
+        "The endpoint does not support server-side upsert (Prefer: create-if-missing). Fall back "
+        "to a client-side lookup-then-create/update - e.g. the collection's upsert(...) helper, "
+        "which reconciles locally."
+    )

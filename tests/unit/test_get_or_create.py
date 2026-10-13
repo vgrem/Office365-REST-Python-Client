@@ -116,3 +116,62 @@ def test_get_or_create_rejects_unknown_conflict_mode():
             return_type=_FakeEntity(ctx),
             on_conflict="nope",
         )
+
+
+def test_get_or_create_tolerant_miss_defers_create():
+    ctx = _FakeContext()
+    return_type = _FakeEntity(ctx)
+    found = _FakeEntity(ctx)
+    create_query = object()
+
+    get_or_create(
+        find=lambda: found,
+        create_query=lambda: create_query,
+        return_type=return_type,
+        missing=lambda entity: True,
+    )
+    barrier = ctx._queries[-1]
+    found._after[0](found)
+
+    assert create_query in ctx._queries
+    assert barrier not in ctx._queries
+    assert return_type.copied_from is None
+
+
+def test_get_or_create_tolerant_hit_reconciles():
+    ctx = _FakeContext()
+    return_type = _FakeEntity(ctx)
+    found = _FakeEntity(ctx)
+    seen: list = []
+
+    get_or_create(
+        find=lambda: found,
+        create_query=object,
+        return_type=return_type,
+        on_conflict="update",
+        reconcile=seen.append,
+        missing=lambda entity: False,
+    )
+    found._after[0](found)
+
+    assert seen == [return_type]
+    assert return_type.copied_from is found
+
+
+def test_get_or_create_skips_copy_when_find_returns_the_return_type():
+    ctx = _FakeContext()
+    return_type = _FakeEntity(ctx)
+    seen: list = []
+
+    get_or_create(
+        find=lambda: return_type,
+        create_query=object,
+        return_type=return_type,
+        on_conflict="update",
+        reconcile=seen.append,
+        missing=lambda entity: False,
+    )
+    return_type._after[0](return_type)
+
+    assert return_type.copied_from is None  # self-copy guarded
+    assert seen == [return_type]

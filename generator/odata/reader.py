@@ -108,6 +108,10 @@ class ODataReader(ABC):
                 if schema:
                     type_schema.add_property(schema)
 
+        if base_type == "EntityType" and self._document is not None:
+            for key in self._document.parse_alternate_keys(type_node):
+                type_schema.add_alternate_key(key)
+
         return type_schema
 
     @abstractmethod

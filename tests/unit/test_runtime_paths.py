@@ -206,3 +206,42 @@ def test_file_exposes_move_by_path():
     ctx = ClientContext(test_site_url)
     file = ctx.web.get_file_by_server_relative_path("/sites/x/Shared Documents/a.xlsx")
     assert callable(file.move_by_path)
+
+
+def test_alternate_key_path_renders_parenthesised_literal():
+    from office365.runtime.paths.alternate_key import AlternateKeyPath
+
+    path = AlternateKeyPath("uniqueName", "Group157", ResourcePath("groups"))
+
+    assert str(path) == "/groups(uniqueName='Group157')"
+    assert path.key_name == "uniqueName"
+    assert path.delimiter is None
+
+
+def test_appid_path_is_an_alternate_key_path():
+    from office365.runtime.paths.alternate_key import AlternateKeyPath
+    from office365.runtime.paths.appid import AppIdPath
+
+    app_id = "00000000-0000-0000-0000-000000000000"
+    path = AppIdPath(app_id, ResourcePath("servicePrincipals"))
+
+    assert isinstance(path, AlternateKeyPath)
+    assert path.key_name == "appId"
+    assert str(path) == f"/servicePrincipals(appId='{app_id}')"
+
+
+def test_get_by_alternate_key_builds_odata_path():
+    client = GraphClient()
+
+    group = client.groups.get_by_alternate_key("uniqueName", "Group157")
+
+    assert str(group.resource_path) == "/groups(uniqueName='Group157')"
+
+
+def test_get_by_app_id_delegates_to_alternate_key():
+    client = GraphClient()
+    app_id = "00000000-0000-0000-0000-000000000000"
+
+    principal = client.service_principals.get_by_app_id(app_id)
+
+    assert str(principal.resource_path) == f"/servicePrincipals(appId='{app_id}')"

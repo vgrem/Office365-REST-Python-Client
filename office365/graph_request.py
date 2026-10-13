@@ -8,12 +8,14 @@ from office365.runtime.auth.certificate import CertificateData
 from office365.runtime.auth.entra.authentication_context import AuthenticationContext
 from office365.runtime.client_request import ASYNC_AUTHENTICATED_FLAG
 from office365.runtime.http.http_method import HttpMethod
+from office365.runtime.http.prefer import prefer_upsert
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.request import ODataRequest
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
+from office365.runtime.queries.upsert_entity import UpsertEntityQuery
 
 
 class GraphRequest(ODataRequest):
@@ -183,7 +185,14 @@ class GraphRequest(ODataRequest):
 
     def build_request(self, query: ClientQuery) -> RequestOptions:
         request = super().build_request(query)
-        if isinstance(query, UpdateEntityQuery):
+        if isinstance(query, UpsertEntityQuery):
+            request.method = HttpMethod.Patch
+            prefer_upsert(request)
+            if query.if_match is not None:
+                request.set_header("If-Match", query.if_match)
+            if query.if_none_match is not None:
+                request.set_header("If-None-Match", query.if_none_match)
+        elif isinstance(query, UpdateEntityQuery):
             request.method = HttpMethod.Patch
         elif isinstance(query, DeleteEntityQuery):
             request.method = HttpMethod.Delete

@@ -9,6 +9,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.v4.entity import EntityPath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
+from office365.runtime.queries.upsert_entity import UpsertEntityQuery, raise_if_upsert_unsupported
 
 if TYPE_CHECKING:
     from office365.graph_client import GraphClient
@@ -30,6 +31,45 @@ class Entity(ClientObject):
         """
         qry = UpdateEntityQuery(self)
         self.context.add_query(qry)
+        return self
+
+    def upsert(
+        self,
+        *,
+        if_match: str | None = None,
+        if_none_match: str | None = None,
+    ) -> Self:
+        """Creates or updates the entity with a single server-side ``PATCH``.
+
+        The request is a ``PATCH`` carrying ``Prefer: create-if-missing,
+        return=representation``: if the resource addressed by this entity exists
+        it is updated, otherwise it is created, and the persisted representation
+        is returned. The entity must be addressed by an alternate key or be a
+        singleton so the service can identify it before creation.
+
+        Not every endpoint supports server-side upsert. When it does not, the
+        request raises
+        :class:`~office365.runtime.exceptions.UpsertNotSupported` (chained to the
+        server error) so the caller can fall back to a client-side
+        lookup-then-write - for collections that is
+        :meth:`~office365.entity_collection.EntityCollection.upsert`.
+
+        Args:
+            if_match: Optional ``If-Match`` value (optimistic concurrency).
+            if_none_match: Optional ``If-None-Match`` value; ``"*"`` makes the
+                request create-only (a no-op/``412`` when the resource exists).
+
+        Returns:
+            Self: The entity instance for method chaining.
+
+        Example:
+            >>> client = GraphClient()
+            >>> group = client.groups.get_by_alternate_key("uniqueName", "contoso")
+            >>> group.set_property("description", "Team site").upsert().execute_query()
+        """
+        qry = UpsertEntityQuery(self, if_match=if_match, if_none_match=if_none_match)
+        self.context.add_query(qry)
+        self.on_error(raise_if_upsert_unsupported)
         return self
 
     def update_properties(self, **properties: Any) -> Self:

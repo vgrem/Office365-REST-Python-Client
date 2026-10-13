@@ -63,6 +63,32 @@ def test_parse_parameters_qualifies_types() -> None:
     ]
 
 
+def test_parse_alternate_keys() -> None:
+    node = ET.fromstring(
+        '<EntityType Name="application" xmlns="http://docs.oasis-open.org/odata/ns/edm">'
+        '<Annotation Term="Org.OData.Core.V1.AlternateKeys"><Collection>'
+        '<Record Type="Org.OData.Core.V1.AlternateKey"><PropertyValue Property="Key"><Collection>'
+        '<Record Type="Org.OData.Core.V1.PropertyRef">'
+        '<PropertyValue Property="Alias" String="appId" />'
+        '<PropertyValue Property="Name" PropertyPath="appId" />'
+        "</Record></Collection></PropertyValue></Record>"
+        '<Record Type="Org.OData.Core.V1.AlternateKey"><PropertyValue Property="Key"><Collection>'
+        '<Record Type="Org.OData.Core.V1.PropertyRef">'
+        '<PropertyValue Property="Alias" String="uniqueName" />'
+        '<PropertyValue Property="Name" PropertyPath="uniqueName" />'
+        "</Record></Collection></PropertyValue></Record>"
+        "</Collection></Annotation></EntityType>"
+    )
+
+    assert _document().parse_alternate_keys(node) == [("appId",), ("uniqueName",)]
+
+
+def test_parse_alternate_keys_absent_returns_empty() -> None:
+    node = ET.fromstring('<EntityType Name="thing" xmlns="http://docs.oasis-open.org/odata/ns/edm" />')
+
+    assert _document().parse_alternate_keys(node) == []
+
+
 def test_entity_anchors_map_root_types_to_container_names() -> None:
     assert _document().entity_anchors() == {
         "microsoft.graph.User": "users",

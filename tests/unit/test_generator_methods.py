@@ -142,6 +142,43 @@ def test_v4_expands_schema_aliases(tmp_path: Path):
     assert evidence.Properties["email"].TypeName == "microsoft.graph.EmailAddress"
 
 
+_ALTERNATE_KEYS_METADATA = """<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:DataServices>
+    <Schema Namespace="microsoft.graph" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="group">
+        <Key><PropertyRef Name="id"/></Key>
+        <Property Name="id" Type="Edm.String" Nullable="false"/>
+        <Property Name="uniqueName" Type="Edm.String"/>
+        <Annotation Term="Org.OData.Core.V1.AlternateKeys">
+          <Collection>
+            <Record Type="Org.OData.Core.V1.AlternateKey">
+              <PropertyValue Property="Key">
+                <Collection>
+                  <Record Type="Org.OData.Core.V1.PropertyRef">
+                    <PropertyValue Property="Alias" String="uniqueName"/>
+                    <PropertyValue Property="Name" PropertyPath="uniqueName"/>
+                  </Record>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Collection>
+        </Annotation>
+      </EntityType>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
+"""
+
+
+def test_v4_parses_alternate_keys(tmp_path: Path):
+    model = ODataV4Reader(_write(tmp_path, "keys.xml", _ALTERNATE_KEYS_METADATA)).read()
+    schema = model.types["microsoft.graph.Group"]
+
+    assert schema.AlternateKeys == [("uniqueName",)]
+    assert schema.alternate_key_names == ["uniqueName"]
+
+
 def _build_static_method_type(tmp_path: Path, generate_methods: str) -> str:
     schema = TypeInformation(BaseTypeFullName="ComplexType", FullName="SP.TestThing", IsValueObject=True)
     schema.add_property(PropertyInformation(Name="Title", TypeName="Edm.String"))

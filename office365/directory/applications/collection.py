@@ -4,7 +4,6 @@ from typing import Any
 
 from office365.count_collection import CountCollection
 from office365.directory.applications.application import Application
-from office365.runtime.paths.appid import AppIdPath
 
 
 class ApplicationCollection(CountCollection[Application]):
@@ -31,7 +30,7 @@ class ApplicationCollection(CountCollection[Application]):
         Args:
             app_id (str): Application client identifier
         """
-        return Application(self.context, AppIdPath(app_id, self.resource_path))
+        return self.get_by_alternate_key("appId", app_id)
 
     def ensure(self, display_name: str, *, sign_in_audience: str = "AzureADMyOrg") -> Application:
         """Get an existing application by display name or create it (idempotent).

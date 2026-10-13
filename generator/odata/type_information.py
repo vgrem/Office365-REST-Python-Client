@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 from typing_extensions import Self
 
@@ -24,6 +24,20 @@ class TypeInformation:
     Methods: Dict[str, MethodInformation] = field(default_factory=dict)
     Properties: Dict[str, PropertyInformation] = field(default_factory=dict)
     Members: Dict[str, MemberInformation] = field(default_factory=dict)
+    #: Alternate keys declared on the type (CSDL ``Org.OData.Core.V1.AlternateKeys``).
+    #: One tuple of property names per alternate key; Graph declares e.g. group
+    #: ``uniqueName``, user ``userPrincipalName``, application/servicePrincipal
+    #: ``appId``, device ``deviceId``, directoryRole ``roleTemplateId``.
+    AlternateKeys: List[Tuple[str, ...]] = field(default_factory=list)
+
+    @property
+    def alternate_key_names(self) -> List[str]:
+        """Flat list of every property name that participates in an alternate key."""
+        return [name for key in self.AlternateKeys for name in key]
+
+    def add_alternate_key(self, key: Tuple[str, ...]) -> Self:
+        self.AlternateKeys.append(key)
+        return self
 
     def add_property(self, schema: PropertyInformation) -> Self:
         self.Properties[schema.Name] = schema

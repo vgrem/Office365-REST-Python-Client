@@ -10,12 +10,14 @@ idempotent); ``queue_*`` is the deferred queue-all entry.
 
 Keyed imports (skip/upsert) are opt-in: a subclass exposes an
 :class:`~office365.runtime.converters.upsert.UpsertTarget` via :meth:`upsert_target`.
+The single-entity counterpart, :meth:`RecordCollection.upsert`, reconciles one
+entity by key (create-if-missing, else write-idempotent update).
 """
 
 from __future__ import annotations
 
 from os import PathLike
-from typing import IO, TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import IO, TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Protocol, Union, cast
 
 from typing_extensions import Self
 
@@ -34,6 +36,18 @@ if TYPE_CHECKING:
 
 # The pipeline and the migration toolkit share one reconciliation report type.
 VerificationResult = VerificationReport
+
+
+class _UpdatableEntity(Protocol):
+    """Minimal view of an entity whose changed properties can be written back.
+
+    Both the Graph and SharePoint ``Entity`` expose ``update()``; neither shares
+    a runtime base, so the upsert verb reconciles through this structural type.
+    """
+
+    def update(self) -> Any:
+        """Queue an update of the changed properties."""
+        ...
 
 
 def _apply_mapping(convert: Callable[[Any], list[dict]], mapping: Dict[str, str]) -> Callable[[Any], list[dict]]:
@@ -234,6 +248,81 @@ class RecordCollection(ClientObjectCollection[ClientObjectT]):
         result = DataFrameResult(self.context)
         self.after_execute(lambda _: write_dataframe(self, result))
         return result
+
+    # ── Single-entity idempotent write ───────────────────────────
+
+    def upsert(
+        self,
+        key: str,
+        value: Union[int, str],
+        /,
+        *,
+        on_conflict: str = "update",
+        **properties: Any,
+    ) -> ClientObjectT:
+        """Create the entity matching ``key == value`` or reconcile it (idempotent).
+
+        The library's single-entity counterpart of the bulk keyed import: it looks
+        the entity up by ``key`` and then either **creates** it (missing) or
+        **updates** it (present), so a re-run converges on one resource. Nothing is
+        sent until the caller runs ``execute_query()``:
+
+            group = client.groups.upsert(
+                "uniqueName", "Group157", displayName="Group157", description="Team site"
+            ).execute_query()
+
+        The lookup uses ``$filter`` (``key eq value``), so ``key`` must be a
+        filterable property that identifies the entity — a primary key (``id``),
+        an alternate key (``uniqueName``, ``appId``, ``userPrincipalName``, ...) or
+        a unique field. The first match wins when several match.
+
+        Reconcile is **write-idempotent**: with ``on_conflict="update"`` (the
+        default) a property is only written when the loaded value actually
+        differs, so re-running an unchanged upsert queues no update at all. When
+        the entity is missing the ``key`` and the requested properties are sent on
+        the create. The reconcile is a client-side find-then-write, so it is not
+        atomic — two racing writers can both miss and create; use a unique key (or
+        the server-side ``Entity.upsert``) when that matters.
+
+        Args:
+            key: The property to match on (e.g. ``"uniqueName"``).
+            value: The value identifying the entity.
+            on_conflict: ``"update"`` (default) reconciles the existing entity;
+                ``"skip"`` leaves it untouched (create-only-if-missing).
+            **properties: The desired property values to create/reconcile with.
+
+        Returns:
+            The existing or newly created entity, populated after execution.
+
+        Note:
+            This is the portable, client-side path that works on Microsoft Graph
+            and SharePoint alike. Endpoints that implement the Graph ``upsert``
+            pattern can instead be written with a single server round-trip via
+            :meth:`~office365.entity.Entity.upsert` on an alternate-key-addressed
+            entity (``client.groups.get_by_alternate_key(...).upsert()``).
+        """
+        from office365.runtime.odata.literals import odata_literal
+        from office365.runtime.queries.create_entity import CreateEntityQuery
+        from office365.runtime.queries.get_or_create import get_or_create
+
+        return_type = self.first_or_none(f"{key} eq {odata_literal(value)}")
+
+        def _reconcile(entity: ClientObjectT) -> None:
+            changed = {name: val for name, val in properties.items() if entity.get_property(name) != val}
+            if not changed:
+                return
+            for name, val in changed.items():
+                entity.set_property(name, val)
+            cast("_UpdatableEntity", entity).update()
+
+        return get_or_create(
+            find=lambda: return_type,
+            create_query=lambda: CreateEntityQuery(self, {key: value, **properties}, return_type),
+            return_type=return_type,
+            missing=lambda entity: not entity.is_loaded,
+            on_conflict=on_conflict,
+            reconcile=_reconcile,
+        )
 
     # ── Import: deferred (queue-all) ─────────────────────────────
 

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union, cast
 
 from office365.entity import Entity
 from office365.runtime.client_object import ClientObjectT
+from office365.runtime.paths.alternate_key import AlternateKeyPath
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.paths.v4.entity import EntityPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
@@ -35,6 +36,24 @@ class EntityCollection(RecordCollection[ClientObjectT]):
             return self.create_typed_object(resource_path=EntityPath(key, self._canonical_collection()))
         else:
             raise ValueError("Invalid key: expected either an entity index [int] or identifier [str]")
+
+    def get_by_alternate_key(self, key_name: str, key_value: Union[int, str]) -> ClientObjectT:
+        """Addresses a single entity by one of its alternate keys.
+
+        Builds the parenthesised OData path ``.../<collection>(<key>='<value>')``
+        instead of a ``$filter`` lookup, so the entity is fetched by URL directly.
+        Deferred — resolve with ``execute_query()``. Use it for the keys Microsoft
+        Graph declares as alternate keys, for example::
+
+            group = client.groups.get_by_alternate_key("uniqueName", "Group157")
+
+        Args:
+            key_name (str): The alternate-key property name (e.g. ``uniqueName``).
+            key_value (object): The alternate-key value.
+        """
+        return self.create_typed_object(
+            resource_path=AlternateKeyPath(key_name, key_value, self._canonical_collection())
+        )
 
     def add(self, *args: Any, **kwargs: Any) -> ClientObjectT:
         """Creates an entity and prepares the query"""

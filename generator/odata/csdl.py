@@ -13,6 +13,9 @@ from xml.etree.ElementTree import Element
 
 from generator.odata.type_system import is_collection_name, normalize_class_name, strip_collection
 
+#: CSDL annotation term that declares alternate keys on an entity type.
+_ALTERNATE_KEYS_TERM = "Org.OData.Core.V1.AlternateKeys"
+
 
 class CsdlDocument:
     """Namespaces, schema aliases and traversal for one CSDL document."""
@@ -71,6 +74,39 @@ class CsdlDocument:
             return type_name
         namespace = self._aliases.get(namespace, namespace)
         return f"{namespace}.{normalize_class_name(class_name)}"
+
+    def parse_alternate_keys(self, node: Element) -> list[tuple[str, ...]]:
+        """Alternate keys declared on a type node.
+
+        ``Org.OData.Core.V1.AlternateKeys`` is a collection of ``AlternateKey``
+        records, each holding a ``Key`` collection of ``PropertyRef`` records.
+        The property path lives in the ``Name`` ``PropertyValue``; returns one
+        tuple of property names per declared key (empty when none).
+        """
+        result: list[tuple[str, ...]] = []
+        for annotation in node.findall("xmlns:Annotation", self._namespaces):
+            if annotation.get("Term") != _ALTERNATE_KEYS_TERM:
+                continue
+            for record in annotation.findall("xmlns:Collection/xmlns:Record", self._namespaces):
+                for prop_value in record.findall("xmlns:PropertyValue", self._namespaces):
+                    if prop_value.get("Property") != "Key":
+                        continue
+                    names: list[str] = []
+                    refs = prop_value.findall("xmlns:Collection/xmlns:Record", self._namespaces)
+                    for prop_ref in refs:
+                        name = self._property_ref_name(prop_ref)
+                        if name:
+                            names.append(name)
+                    if names:
+                        result.append(tuple(names))
+        return result
+
+    def _property_ref_name(self, prop_ref: Element) -> Optional[str]:
+        """The property path of a ``PropertyRef`` record (its ``Name`` value)."""
+        for prop_value in prop_ref.findall("xmlns:PropertyValue", self._namespaces):
+            if prop_value.get("Property") == "Name":
+                return prop_value.get("PropertyPath")
+        return None
 
     def parse_parameters(self, node: Element) -> list:
         """Extract ``<Parameter>`` children into plain dicts (types qualified)."""

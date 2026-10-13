@@ -28,6 +28,19 @@ INCLUDE_UNKNOWN_ENUM_MEMBERS = "include-unknown-enum-members"
 #: whole request rather than returning an approximate answer.
 TRY_FILTER_LAST_MODIFIED_DATE_TIME = "TryFilterLastModifiedDateTimeTimeWarningMayFailRandomly"
 
+#: Value of the ``Prefer`` header that turns a ``PATCH`` into an *upsert*: a
+#: ``PATCH`` against a (client-keyed) resource that does not exist creates it
+#: instead of returning ``404``. Requires the service to declare the entity set
+#: upsertable (Microsoft Graph ``Upsertable`` / alternate key). See
+#: :func:`prefer_upsert`.
+CREATE_IF_MISSING = "create-if-missing"
+
+#: Value of the ``Prefer`` header that asks the service to return the canonical
+#: representation of the affected resource in the response body (Microsoft
+#: Graph). Used together with :data:`CREATE_IF_MISSING` so an upsert yields the
+#: persisted entity rather than an empty ``204``.
+RETURN_REPRESENTATION = "return=representation"
+
 
 def _prefer_values(request: RequestOptions) -> list[str]:
     """The ``Prefer`` header values already set on a request, split on commas."""
@@ -86,6 +99,37 @@ def prefer_respond_async(request: RequestOptions, wait: int | None = None) -> No
     """
     value = RESPOND_ASYNC if wait is None else f"{RESPOND_ASYNC}, wait={wait}"
     request.set_header("Prefer", value)
+
+
+def prefer_create_if_missing(request: RequestOptions) -> None:
+    """Attach ``Prefer: create-if-missing`` to a request.
+
+    Merges (rather than replaces) the header so it can be combined with
+    :func:`prefer_return_representation` — see :func:`prefer_upsert`.
+    """
+    add_prefer(request, CREATE_IF_MISSING)
+
+
+def prefer_return_representation(request: RequestOptions) -> None:
+    """Attach ``Prefer: return=representation`` to a request."""
+    add_prefer(request, RETURN_REPRESENTATION)
+
+
+def prefer_upsert(request: RequestOptions) -> None:
+    """Opt a single ``PATCH`` into the server-side *upsert* pattern.
+
+    Attaches ``Prefer: create-if-missing, return=representation`` in one go: the
+    resource addressed by the request (an alternate-key or singleton URL) is
+    created when missing and updated otherwise, and the canonical representation
+    is returned in the response body.
+
+    The service must support it — generally an entity set that declares an
+    alternate key (Microsoft Graph ``Upsertable``). When it does not, the server
+    answers ``404`` for a missing resource (or rejects the request); callers that
+    need a universal operation fall back to the client-side lookup-then-write
+    path in :meth:`~office365.entity_collection.EntityCollection.upsert`.
+    """
+    add_prefer(request, CREATE_IF_MISSING, RETURN_REPRESENTATION)
 
 
 def prefer_include_unknown_enum_members(request: RequestOptions) -> None:
