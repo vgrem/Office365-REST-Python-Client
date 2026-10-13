@@ -74,6 +74,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   it). `DomainDnsRecord.value` surfaces the record's target value
   (`canonicalName` / `text` / `mailExchange` / `nameTarget`), whichever the
   record type uses.
+- **Credential expiry helpers:** new `Credential` base for `KeyCredential` and
+  `PasswordCredential` carrying the shared `is_expired` / `days_until_expiry`
+  logic, plus `expiry_status(warn_days=30)` returning a printable
+  `CredentialExpiry` (`VALID` / `EXPIRING` / `EXPIRED` / `NO_EXPIRY`) and a
+  `kind` label (`"Certificate"` / `"Password"`). `str(credential)` returns its
+  display name (falling back to `hint`, then `"(unnamed)"`).
 
 ### Changed
 - **Planner writes:** Planner entities derive from the new `PlannerEntity` base,
