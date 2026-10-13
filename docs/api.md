@@ -436,12 +436,36 @@ formats: `csv`, `tsv`, `json`, `ndjson`, `excel`, `parquet`, `orc`, `feather`,
 
 ### Idempotency
 
-Two idempotent layers, one model — a re-run never duplicates:
+Three idempotent layers, one model — a re-run never duplicates:
+
+- **`upsert` (generic verb)** — create-or-reconcile a *single* entity keyed by a
+  natural property. `RecordCollection.upsert(key, value, **properties)` looks the
+  entity up with `$filter` and then creates it (missing) or updates only the
+  properties that actually differ (present), so an unchanged re-run queues no
+  write at all. It is the portable client-side path shared by Graph and
+  SharePoint:
+
+  ```python
+  client.groups.upsert("uniqueName", "contoso", displayName="Contoso").execute_query()
+  ```
+
+  Endpoints that implement the Microsoft Graph *upsert* pattern can instead be
+  written in a single round-trip against an alternate-key-addressed entity — a
+  `PATCH` with `Prefer: create-if-missing`:
+
+  ```python
+  client.groups.get_by_alternate_key("uniqueName", "contoso").set_property(
+      "description", "Team site"
+  ).upsert().execute_query()
+  ```
+
+  `Entity.upsert` accepts `if_match=` / `if_none_match=` for optimistic
+  concurrency, and raises `UpsertNotSupported` when the service does not honour
+  `create-if-missing` (fall back to `RecordCollection.upsert`).
 
 - **Metadata (`ensure_*`)** — get-or-create a resource (field, list, content type,
   term, folder, user …), deferred; run with `execute_query()`. Pass
-  `on_conflict="update"` to **reconcile** an existing definition (the metadata
-  analogue of upsert):
+  `on_conflict="update"` to **reconcile** an existing definition:
 
   ```python
   lst.ensure_field("Status", FieldType.Text).execute_query()  # create if missing
@@ -458,8 +482,13 @@ Two idempotent layers, one model — a re-run never duplicates:
 - **Data (`from_records(key=…, on_conflict=…)`)** — get-or-create/update records
   by a natural key (see *Idempotent imports* above).
 
-Distinct from both: `ClientObject.ensure_property`/`ensure_properties` is a
-*client-side lazy load* (fetch a property if not already loaded), not a
+The verb defaults differ by intent: `add` always **creates**, `upsert`
+**reconciles** (`on_conflict="update"`), and `ensure`/`ensure_<noun>` create
+only if missing (`on_conflict="skip"`). They are all built on the same
+client-side `office365.runtime.queries.get_or_create` primitive.
+
+Distinct from all of these: `ClientObject.ensure_property`/`ensure_properties` is
+an *in-memory lazy load* (fetch a property if not already loaded), not a
 server-side get-or-create.
 
 ## Learn more

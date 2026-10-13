@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Unified `upsert` primitive (idempotent create-or-reconcile):**
+  - `EntityCollection.upsert(key, value, /, *, on_conflict="update", **properties)`
+    is the single-entity counterpart of the keyed bulk import. It finds the
+    entity with `$filter` and then creates it, or reconciles only the properties
+    that differ, so an unchanged re-run queues no write. It is the portable,
+    client-side path shared by Microsoft Graph and SharePoint.
+  - `Entity.upsert(*, if_match=None, if_none_match=None)` is the server-side fast
+    path for endpoints that implement the Microsoft Graph *upsert* pattern: one
+    `PATCH` with `Prefer: create-if-missing, return=representation` against an
+    alternate-key-addressed entity, with optional `If-Match` / `If-None-Match`.
+    When the service does not honour `create-if-missing` it raises the new
+    `office365.runtime.exceptions.UpsertNotSupported` so callers can fall back to
+    the client-side verb.
+  - `EntityCollection.get_by_alternate_key(key_name, key_value)` addresses an
+    entity by a CSDL alternate key (`ServicePrincipalCollection.get_by_app_id`,
+    `ApplicationCollection.get_by_app_id`); alternate-key metadata is now parsed
+    from the CSDL into the generator's type information.
+  - New `office365.runtime.http.prefer` helpers `prefer_create_if_missing()`,
+    `prefer_return_representation()` and `prefer_upsert()`.
+  - The record `on_conflict` vocabulary is unified to `"skip"` / `"update"`
+    across the single-entity and bulk paths (`"upsert"` is retired).
 - **`Field.schema_xml_for_copy()`:** returns `schema_xml` prepared for
   `CreateFieldAsXml` on another site by stripping the origin-specific
   `SourceID` / `Version` attributes, which SharePoint otherwise rejects with a

@@ -75,6 +75,11 @@ chunk and a source **signature** (format, chunk size, key columns) is recorded.
 If the signature changes between runs, the chunk skip is discarded and the source
 is re-scanned — the key keeps it duplicate-free.
 
+The bulk pipeline and the single-entity verb share one `on_conflict` vocabulary
+(`"skip"` / `"update"`): to reconcile **one** entity by a natural key, use
+`EntityCollection.upsert(key, value, **properties)` (see the
+[API reference](api.md#idempotency)).
+
 ```python
 lst.from_dataframe(
     pd.read_csv("stocks.csv", chunksize=2000),
