@@ -19,6 +19,7 @@ SKU inventory, license assignment, service plan management, and usage reports.
 
 | Scenario | File |
 |---|---|
+| **List available licenses (SKUs) with their service plans** | [`list_skus.py`](./list_skus.py) |
 | License inventory and unlicensed user report | [`report.py`](./report.py) |
 | License assignment and SKU switch | [`assign.py`](./assign.py) |
 | **Bulk assign licenses from CSV** | [`bulk_assign_license.py`](./bulk_assign_license.py) |
