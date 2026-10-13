@@ -112,6 +112,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Sign-in activity timestamps deserialize to `datetime`:** `SignInActivity.lastSignInDateTime`
+  and `lastNonInteractiveSignInDateTime` were annotated `datetime | str | None`, which
+  the value converter could not resolve to a scalar converter, so Graph's ISO-8601
+  strings were stored verbatim as `str` (while `lastSuccessfulSignInDateTime`
+  became a `datetime`). Both fields are now `datetime | None`, so all timestamps on
+  the object are parsed consistently — examples comparing them against a cutoff no
+  longer need to coerce strings.
 - **Request payload scalars are serialized:** a body built from a dictionary or
   list now serializes `datetime` / `date`, `Enum` and `UUID` values instead of
   handing them to the JSON encoder unchanged — `OnlineMeetingCollection.create_or_get(...)`

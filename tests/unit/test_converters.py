@@ -132,6 +132,20 @@ class TestDeclaredType(unittest.TestCase):
     def test_entity_odata_meta(self):
         self.assertEqual(declared_type(User, "passwordProfile"), PasswordProfile)
 
+    def test_dataclass_datetime_field(self):
+        from office365.directory.audit.signins.activity import SignInActivity
+
+        self.assertIs(declared_type(SignInActivity, "lastSignInDateTime"), datetime)
+        self.assertIs(declared_type(SignInActivity, "lastSuccessfulSignInDateTime"), datetime)
+
+    def test_sign_in_activity_parses_datetime(self):
+        from office365.directory.audit.signins.activity import SignInActivity
+
+        activity = SignInActivity()
+        activity.set_property("lastSignInDateTime", "2024-01-01T12:00:00Z")
+        self.assertIsInstance(activity.lastSignInDateTime, datetime)
+        self.assertEqual(activity.lastSignInDateTime, datetime(2024, 1, 1, 12, 0, tzinfo=timezone.utc))
+
     def test_dataclass_field(self):
         self.assertEqual(declared_type(UserProfile, "userPrincipalName"), str)
         self.assertEqual(declared_type(UserProfile, "accountEnabled"), bool)

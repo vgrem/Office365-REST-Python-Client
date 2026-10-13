@@ -30,9 +30,9 @@ class SignInActivity(ClientValue):
         lastSignInRequestId (str): Request identifier of the last interactive sign-in performed by this user.
     """
 
-    lastNonInteractiveSignInDateTime: datetime | str | None = None
+    lastNonInteractiveSignInDateTime: datetime | None = None
     lastNonInteractiveSignInRequestId: str | None = None
-    lastSignInDateTime: datetime | str | None = None
+    lastSignInDateTime: datetime | None = None
     lastSignInRequestId: str | None = None
     lastSuccessfulSignInDateTime: datetime | None = None
     lastSuccessfulSignInRequestId: str | None = None

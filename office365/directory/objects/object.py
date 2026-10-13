@@ -103,5 +103,17 @@ class DirectoryObject(Entity):
         return self.properties.get("deletedDateTime", datetime.min)
 
     @property
+    def display_name(self) -> str | None:
+        """The display name of the directory object.
+
+        The base ``directoryObject`` type does not declare ``displayName`` itself, but
+        almost every concrete type Graph returns (user, group, application, service
+        principal, device, ...) includes it. Surfacing it here keeps the heterogeneous
+        collections and navigations (``memberOf``, ``ownedObjects``, ``manager``, ...)
+        usable through a typed property instead of a raw ``getattr``/``properties`` read.
+        """
+        return self.properties.get("displayName", None)
+
+    @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.DirectoryObject"
