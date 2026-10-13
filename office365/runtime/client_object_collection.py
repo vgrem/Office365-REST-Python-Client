@@ -346,6 +346,25 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
             return False
         raise QueryOptionNotSupportedError(type(self), option, capability)
 
+    def _may_apply_query_option(self, option: str) -> bool:
+        """Whether the endpoint accepts ``option``, without raising or warning.
+
+        Used by :meth:`first` / :meth:`first_or_none` / :meth:`single` to bound
+        their query with ``$top`` only where the feed accepts it. Endpoints such
+        as ``directoryRoles`` reject custom page sizes, so when this returns
+        ``False`` the caller bounds the result client-side from the filtered
+        response instead of sending an unsupported option.
+        """
+        capability = query_capabilities_of(type(self))
+        return capability is None or capability.supports(option)
+
+    def _bounded(self, count: int) -> Self:
+        """``self.get()`` with a ``$top`` bound, applied only if supported."""
+        query = self.get()
+        if self._may_apply_query_option("top"):
+            query = query.top(count)
+        return query
+
     def _ensure_query_properties(self, option: str, expression: str) -> None:
         """Validate the properties an expression references against the declaration.
 
@@ -678,7 +697,7 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
             for k, v in col[0].properties.items():
                 return_type.set_property(k, v, False)
 
-        self.get().filter(expression).top(1).after_execute(_after_loaded)
+        self._bounded(1).filter(expression).after_execute(_after_loaded)
         return return_type
 
     def first_or_none(self, expression: str | None = None) -> ClientObjectT:
@@ -707,7 +726,7 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
                 for k, v in col[0].properties.items():
                     return_type.set_property(k, v, False)
 
-        query = self.get().top(1)
+        query = self._bounded(1)
         if expression:
             query = query.filter(expression)
         query.after_execute(_after_loaded)
@@ -722,8 +741,9 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
         Returns:
             The single matching item
 
-        The query is bounded to ``$top=2``: enough to detect an ambiguous match
-        without downloading every matching item just to reject it.
+        The query is bounded to ``$top=2`` when the endpoint accepts it: enough to
+        detect an ambiguous match without downloading every matching item just to
+        reject it. Feeds that reject ``$top`` fall back to bounding client-side.
 
         Raises:
             NotFoundException: If no items match
@@ -740,7 +760,7 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
             for k, v in col[0].properties.items():
                 return_type.set_property(k, v, False)
 
-        self.get().filter(expression).top(2).after_execute(_after_loaded)
+        self._bounded(2).filter(expression).after_execute(_after_loaded)
         return return_type
 
     def _find_by_filter(self, expression: str, *, required: bool = False) -> ClientObjectT:

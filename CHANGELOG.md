@@ -135,6 +135,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **`directoryRoles` lookups no longer send `$top`:** the `directoryRoles` feed
+  rejects custom page sizes (*"This resource does not support custom page
+  sizes"*), but `first` / `first_or_none` / `single` — and the `find_by_name`
+  built on them — bounded every lookup with `$top`. The internal `$top` hint is
+  now applied only when the collection's declared
+  :class:`~office365.runtime.query_capabilities.QueryCapability` accepts it (and
+  `DirectoryRoleCollection` declares `$top` unsupported), so the match is bounded
+  client-side from the filtered response instead of failing on the wire. An
+  explicit `.top(...)` on such a collection now fails fast with a clear
+  `QueryOptionNotSupportedError`.
 - **Sign-in activity timestamps deserialize to `datetime`:** `SignInActivity.lastSignInDateTime`
   and `lastNonInteractiveSignInDateTime` were annotated `datetime | str | None`, which
   the value converter could not resolve to a scalar converter, so Graph's ISO-8601

@@ -8,8 +8,14 @@ from office365.directory.rolemanagement.templates.collection import DirectoryRol
 from office365.directory.rolemanagement.templates.template import DirectoryRoleTemplate
 from office365.runtime.deprecated import deprecated
 from office365.runtime.odata.literals import escape_odata_string
+from office365.runtime.query_capabilities import query_capabilities
 
 
+@query_capabilities(
+    unsupported={"top"},
+    doc="https://learn.microsoft.com/en-us/graph/api/directoryrole-list",
+    note="directoryRoles cannot be paged with $top",
+)
 class DirectoryRoleCollection(DeltaCollection[DirectoryRole]):
     """User's collection"""
 

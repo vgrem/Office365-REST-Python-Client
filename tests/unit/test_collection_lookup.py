@@ -10,6 +10,7 @@ import asyncio
 
 import pytest
 from office365.graph_client import GraphClient
+from office365.runtime.query_capabilities import QueryOptionNotSupportedError
 from office365.runtime.types.exceptions import NotFoundException
 from tests._scripted_transport import AsyncScriptedTransport, ScriptedTransport
 
@@ -245,3 +246,44 @@ def test_get_by_principal_name_is_a_bare_address():
 
     assert len(transport.urls) == 1
     assert user.is_loaded
+
+
+def test_directory_role_lookup_skips_unsupported_top():
+    """``directoryRoles`` rejects custom page sizes, so the lookup must not send ``$top``.
+
+    The bound is enforced client-side instead of letting the server reject the
+    request with ``Request_UnsupportedQuery``.
+    """
+    payload = {
+        "value": [
+            {"id": "r2", "displayName": "Helpdesk Administrator"},
+        ]
+    }
+    client, transport = _client([payload])
+
+    role = client.directory_roles.find_by_name("Helpdesk Administrator", required=True).execute_query()
+
+    assert len(transport.urls) == 1
+    assert "$top" not in transport.urls[0]
+    assert "$filter=displayName eq 'Helpdesk Administrator'" in transport.urls[0]
+    assert role.get_property("id") == "r2"
+    assert str(role.resource_path) == "/directoryRoles/r2"
+
+
+def test_directory_role_first_or_none_skips_unsupported_top():
+    payload = {"value": [{"id": "r2", "displayName": "Helpdesk Administrator"}]}
+    client, transport = _client([payload])
+
+    role = client.directory_roles.first_or_none("displayName eq 'Helpdesk Administrator'").execute_query()
+
+    assert len(transport.urls) == 1
+    assert "$top" not in transport.urls[0]
+    assert role.get_property("id") == "r2"
+
+
+def test_directory_role_top_is_rejected_locally():
+    """An explicit ``.top()`` on ``directoryRoles`` fails fast with a clear message."""
+    client, _ = _client([{"value": []}])
+
+    with pytest.raises(QueryOptionNotSupportedError):
+        client.directory_roles.top(5)
