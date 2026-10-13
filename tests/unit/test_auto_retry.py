@@ -35,7 +35,16 @@ class TestWithAutoRetry(unittest.TestCase):
 
         self.assertIs(returned, ctx)
         self.assertTrue(ctx.auto_retry)
-        self.assertEqual(ctx._retry_policy["max_retry"], 3)
+        self.assertEqual(ctx.pending_request().retry_policy["max_retry"], 3)
+
+    def test_clone_inherits_policy(self):
+        ctx = ClientContext("https://contoso.sharepoint.com")
+        ctx.with_auto_retry(max_retry=7)
+
+        clone = ctx.clone("https://contoso.sharepoint.com/sites/team")
+
+        self.assertTrue(clone.auto_retry)
+        self.assertEqual(clone.pending_request().retry_policy["max_retry"], 7)
 
     def test_disabled_by_default(self):
         ctx = _context([{"status": 503}, {"d": {"Title": "Contoso"}}])

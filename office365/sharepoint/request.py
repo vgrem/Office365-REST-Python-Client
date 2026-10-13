@@ -108,9 +108,10 @@ class SharePointRequest(ODataRequest):
 
         The same objects are shared by reference (not copied), so the token
         cache and HTTP session stay single-flight and thread-safe. An explicit
-        async transport (see ``with_async_transport``) and the shared rate
-        limiter are carried over as well, so clones keep using the same
-        native-async engine and fleet-wide pacing.
+        async transport (see ``with_async_transport``), the shared rate
+        limiter and the client-level retry policy are carried over as well, so
+        clones keep using the same native-async engine, fleet-wide pacing and
+        resilience policy.
 
         Args:
             other: The request whose auth context and transport to reuse
@@ -119,6 +120,7 @@ class SharePointRequest(ODataRequest):
         self._transport = other._transport
         self._async_transport = other._async_transport
         self._rate_limiter = other._rate_limiter
+        self._retry_policy = other._retry_policy
         return self
 
     def build_request(self, query: ClientQuery) -> RequestOptions:

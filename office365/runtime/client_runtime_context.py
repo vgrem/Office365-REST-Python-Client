@@ -49,11 +49,10 @@ class ClientRuntimeContext(ABC):
         # execution sets it per sub-query (including on worker threads), so query
         # handlers keyed on ``current_query`` resolve to the right query.
         self._current_query_lock = threading.RLock()
-        # Client-level retry policy set by :meth:`with_auto_retry`; ``None``
-        # means ``execute_query`` runs the pending queries once with no retry.
-        self._retry_policy: dict[str, Any] | None = None
         # True while :meth:`execute_query_retry` drives the retry loop, so the
         # public ``execute_query`` it calls runs the queue once (no recursion).
+        # The client-level retry policy itself lives on the pending
+        # ``ClientRequest`` (a transport/resilience setting).
         self._in_retry = False
 
     @classmethod
@@ -385,7 +384,7 @@ class ClientRuntimeContext(ABC):
     @property
     def auto_retry(self) -> bool:
         """Whether a client-level retry policy is active (see :meth:`with_auto_retry`)."""
-        return self._retry_policy is not None
+        return self.pending_request().auto_retry
 
     def with_auto_retry(
         self,
@@ -428,14 +427,14 @@ class ClientRuntimeContext(ABC):
         Returns:
             Self: Supports method chaining
         """
-        self._retry_policy = {
-            "max_retry": max_retry,
-            "timeout_secs": timeout_secs,
-            "max_delay": max_delay,
-            "jitter": jitter,
-            "exceptions": exceptions,
-            "is_retriable": is_retriable,
-        }
+        self.pending_request().with_auto_retry(
+            max_retry=max_retry,
+            timeout_secs=timeout_secs,
+            max_delay=max_delay,
+            jitter=jitter,
+            exceptions=exceptions,
+            is_retriable=is_retriable,
+        )
         return self
 
     def execute_query(self) -> Self:
@@ -448,8 +447,9 @@ class ClientRuntimeContext(ABC):
         Returns:
             Self for method chaining
         """
-        if self._retry_policy is not None and not self._in_retry:
-            self.execute_query_retry(**self._retry_policy)
+        policy = self.pending_request().retry_policy
+        if policy is not None and not self._in_retry:
+            self.execute_query_retry(**policy)
             return self
         while self.has_pending_request:
             qry = self._get_next_query()
@@ -472,8 +472,9 @@ class ClientRuntimeContext(ABC):
         Returns:
             Self for method chaining
         """
-        if self._retry_policy is not None and not self._in_retry:
-            await self.execute_query_async_retry(**self._retry_policy)
+        policy = self.pending_request().retry_policy
+        if policy is not None and not self._in_retry:
+            await self.execute_query_async_retry(**policy)
             return self
         while self.has_pending_request:
             qry = self._get_next_query()

@@ -50,7 +50,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   jitter, honoring the server's `Retry-After`; permanent failures (400/401/403/
   404) still raise immediately. It is opt-in (off unless called), chainable, and
   the context-wide counterpart of the per-call `execute_query_retry`.
-  `ctx.auto_retry` reports whether a policy is active.
+  `ctx.auto_retry` reports whether a policy is active. The policy is stored on
+  the pending `ClientRequest` (next to the rate limiter) and is carried over by
+  `ClientContext.clone(...)`, which reuses the source request.
 - **Permission hints on denied requests:** the per-method `@require_permission(...)`
   declaration (previously documentation-only) now tags the query the method
   builds. When a request is denied, the raised `AccessDeniedException` names the

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Awaitable, Callable, Optional
+from typing import Any, Awaitable, Callable, Optional, Tuple, Type
 
 import requests
 from requests import HTTPError, Response
@@ -12,6 +12,7 @@ from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.http.throttling import RateLimiter
 from office365.runtime.queries.client_query import ClientQuery
+from office365.runtime.retry import DEFAULT_RETRY_EXCEPTIONS
 from office365.runtime.transport.base import BaseTransport, NoTimeoutType
 from office365.runtime.transport.offload import run_offloaded
 from office365.runtime.transport.requests_transport import (
@@ -35,6 +36,11 @@ class ClientRequest(ABC):
         self._async_transport: BaseTransport | None = None
         self._rate_limiter: RateLimiter | None = None
         self._client_request_id_enabled = True
+        # Retry policy set by :meth:`with_auto_retry`; ``None`` means queries are
+        # executed once. Stored here (not on the context) so the transport layer
+        # owns resilience settings, next to the rate limiter, and so clones that
+        # reuse this request inherit the policy.
+        self._retry_policy: dict[str, Any] | None = None
         #: Optional awaitable auth hook (see ``before_execute_async``), used by
         #: requests whose credentials are supplied as an async token callback.
         self._async_authenticate: Optional[Callable[[RequestOptions], Awaitable[None]]] = None
@@ -236,6 +242,56 @@ class ClientRequest(ABC):
         """
         if self._client_request_id_enabled:
             request.ensure_header("client-request-id", str(uuid.uuid4()))
+
+    @property
+    def auto_retry(self) -> bool:
+        """Whether a client-level retry policy is active (see :meth:`with_auto_retry`)."""
+        return self._retry_policy is not None
+
+    @property
+    def retry_policy(self) -> dict[str, Any] | None:
+        """The active retry policy, or ``None`` when auto-retry is disabled."""
+        return self._retry_policy
+
+    def with_auto_retry(
+        self,
+        max_retry: int = 5,
+        timeout_secs: int = 5,
+        max_delay: Optional[int] = None,
+        jitter: bool = True,
+        exceptions: Tuple[Type[Exception], ...] = DEFAULT_RETRY_EXCEPTIONS,
+        is_retriable: Optional[Callable[[Exception], bool]] = None,
+    ) -> Self:
+        """Enable client-level retry of transient failures (opt-in).
+
+        A transport-level resilience setting, configured next to
+        :meth:`with_rate_limit`; :meth:`~office365.runtime.client_runtime_context.ClientRuntimeContext.with_auto_retry`
+        exposes the same method on the client facade.
+
+        Args:
+            max_retry: Maximum number of retry attempts
+            timeout_secs: Base delay for exponential backoff (seconds)
+            max_delay: Optional cap on the exponential delay (seconds)
+            jitter: Whether to randomize the delay (default True)
+            exceptions: Exception types that trigger retries
+            is_retriable: Optional predicate deciding whether a caught exception
+                is retried. Defaults to
+                :func:`~office365.runtime.retry.is_transient_error`; pass
+                :func:`~office365.runtime.retry.retry_on` to also retry
+                otherwise-permanent errors such as a locked file (HTTP 423).
+
+        Returns:
+            Self: Supports method chaining
+        """
+        self._retry_policy = {
+            "max_retry": max_retry,
+            "timeout_secs": timeout_secs,
+            "max_delay": max_delay,
+            "jitter": jitter,
+            "exceptions": exceptions,
+            "is_retriable": is_retriable,
+        }
+        return self
 
     @property
     @abstractmethod
