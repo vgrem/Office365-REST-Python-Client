@@ -80,6 +80,18 @@ class ClientResult(Generic[ClientValueT]):
         assert self._value is not None
         return self._value
 
+    def __str__(self) -> str:
+        """Return the wrapped value's natural string form."""
+        if self._value is None:
+            return "ClientResult(<empty>)"
+        return str(self._value)
+
+    def __repr__(self) -> str:
+        """Return ``ClientResult(<value>)`` without triggering a request."""
+        if self._value is None:
+            return "ClientResult(<empty>)"
+        return f"ClientResult({self._value!r})"
+
     def to_bytes(self) -> bytes:
         """Returns the response payload as bytes.
 

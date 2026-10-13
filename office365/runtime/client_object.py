@@ -342,6 +342,28 @@ class ClientObject:
         """
         return len(self._properties) > 0
 
+    def __str__(self) -> str:
+        """Return the object's natural label (``displayName``/``name``/``title``).
+
+        Falls back to :meth:`__repr__` when no obvious label is loaded, so
+        ``print(obj)`` is always meaningful without reaching for a property.
+        """
+        for name in ("displayName", "name", "title"):
+            value = self._properties.get(name)
+            if isinstance(value, str) and value:
+                return value
+        return self.__repr__()
+
+    def __repr__(self) -> str:
+        """Return a bounded ``ClassName(prop=value, …)`` rendering.
+
+        Only already-loaded properties are projected; this never triggers a
+        request. Used by ``print``/``repr`` and logging.
+        """
+        from office365.runtime.display import describe
+
+        return describe(self)
+
     def is_property_available(self, name: str) -> bool:
         """
         Checks if a property has been retrieved or set.

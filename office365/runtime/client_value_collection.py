@@ -106,24 +106,39 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
         """Remove all items from the collection."""
         self._data.clear()
 
+    def _display_name(self) -> str:
+        """Name used in rendered previews."""
+        if self._item_type is not None:
+            return f"ClientValueCollection[{self._item_type.__name__}]"
+        return "ClientValueCollection"
+
     def __str__(self) -> str:
-        """Items as a concise list — uses str() of each child."""
-        items = []
-        for v in self._data:
-            if isinstance(v, str):
-                items.append(repr(v))
-            elif isinstance(v, ClientValue):
-                items.append(str(v))
-            elif isinstance(v, Enum):
-                items.append(v.name)
-            else:
-                items.append(str(v))
-        return f"[{', '.join(items)}]"
+        """Items as a bounded list (primitive) or aligned table (complex)."""
+        from office365.runtime.display import describe_collection
+
+        return describe_collection(self._data, self._display_name())
 
     def __repr__(self) -> str:
-        if self._item_type is not None:
-            return f"ClientValueCollection[{self._item_type.__name__}]({self._data!r})"
-        return f"ClientValueCollection[?]({self._data!r})"
+        """Return the same bounded preview as :meth:`__str__`."""
+        return self.__str__()
+
+    def _repr_html_(self) -> str:
+        """Render the items as an HTML table (Jupyter/rich display)."""
+        from office365.runtime.display import collection_html
+
+        return collection_html(self._data, self._display_name())
+
+    def to_string(self, max_items: int | None = None) -> str:
+        """Render every loaded item as a full, aligned table.
+
+        Unlike :meth:`__str__`/:meth:`__repr__` (a bounded preview), this
+        renders all items so it can back a report; pass ``max_items`` to cap
+        the rows. Columns are not truncated, so a report never loses identifier
+        digits.
+        """
+        from office365.runtime.display import describe_collection
+
+        return describe_collection(self._data, self._display_name(), max_items=max_items, max_column_width=None)
 
     def to_json(self, json_format: ODataJsonFormat | None = None) -> list[Any] | dict[str, Any]:
         """Serializes the collection to OData JSON format.

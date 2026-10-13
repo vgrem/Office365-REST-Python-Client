@@ -74,6 +74,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   it). `DomainDnsRecord.value` surfaces the record's target value
   (`canonicalName` / `text` / `mailExchange` / `nameTarget`), whichever the
   record type uses.
+- **Readable runtime objects:** `ClientValue`, `ClientObject`, `ClientResult`,
+  `ClientObjectCollection` and `ClientValueCollection` now render themselves, so
+  examples can `print(obj)` instead of reaching into a property. `str(obj)` gives
+  a natural label (`ClientObject` falls back to `displayName` / `name` / `title`,
+  then to `repr`); `repr(obj)` gives a bounded `ClassName(field=value, …)`
+  projection that skips unset (`None` / `datetime.min`) fields and truncates long
+  values. A collection renders a pandas-style preview of the items **already
+  loaded** — it never calls `execute_query`, so `repr`/`str` stay cheap and
+  side-effect-free — plus `_repr_html_` for an HTML table in Jupyter. Rendering
+  is recursion-safe and depth-bounded (a self-referential object prints `…`).
+  Domain label overrides (`Application.__str__`, `UserIdentity.__str__`, …) are
+  preserved. Behaviour limits live in `office365.runtime.display`. Dataclass-backed
+  values are covered too: `ClientValue.__init_subclass__` seeds `__repr__` before
+  the `@dataclass` decorator runs, so the generated `repr` no longer shadows it.
+  Call `collection.to_string()` for a full text report — it renders every loaded
+  item and does not truncate columns (so identifiers such as a UPN or GUID stay
+  intact), unlike the bounded `repr`/`str` preview.
 - **Credential expiry helpers:** new `Credential` base for `KeyCredential` and
   `PasswordCredential` carrying the shared `is_expired` / `days_until_expiry`
   logic, plus `expiry_status(warn_days=30)` returning a printable

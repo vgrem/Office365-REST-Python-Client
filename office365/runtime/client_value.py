@@ -9,6 +9,13 @@ from office365.runtime.converters.value import _add_type_metadata, declared_type
 from office365.runtime.odata.json_format import ODataJsonFormat
 
 
+def _render(self: "ClientValue") -> str:
+    """Bounded, side-effect-free rendering shared by ``str`` and ``repr``."""
+    from office365.runtime.display import describe
+
+    return describe(self)
+
+
 class ClientValue:
     """Represent complex type.
     Complex types consist of a list of properties with no key, and can therefore only exist as properties of a
@@ -17,8 +24,22 @@ class ClientValue:
 
     _is_client_value: bool = True
 
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        # ``@dataclass`` generates a ``__repr__`` unless one is already present
+        # in the class ``__dict__``, which would shadow the bounded rendering.
+        # Subclasses run ``__init_subclass__`` before the decorator is applied,
+        # so seeding the method here keeps dataclass-backed values consistent
+        # with every other ClientValue (and with domain overrides that define
+        # their own ``__repr__``).
+        if "__repr__" not in cls.__dict__:
+            cls.__repr__ = _render
+
     def __str__(self) -> str:
-        return type(self).__name__
+        return _render(self)
+
+    def __repr__(self) -> str:
+        return _render(self)
 
     def __format__(self, format_spec: str) -> str:
         return format(str(self), format_spec)
