@@ -34,8 +34,12 @@ graph TD
 
 A **site column** (web scope) is defined once and can be reused across
 lists, libraries, and content types. A **list column** is scoped to a
-single list. When a site column is added to a content type, it appears
-as a **field link** that defines the display order.
+single list. A content type references fields through **field links** that
+define column membership and display order.
+
+> **REST restriction:** a field link can only be added if the field already
+exists on the content type's parent. Add a new site column to a list (or to
+a parent content type) first, then link it to derived content types.
 
 ---
 
@@ -49,7 +53,7 @@ as a **field link** that defines the display order.
 | Create a lookup field with a dependent lookup | [`lookup_field.py`](./lookup_field.py) | Site Owner | [Add lookup](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
 | Create a taxonomy (managed metadata) field | [`taxonomy_field.py`](./taxonomy_field.py) | Site Owner | [Add taxonomy](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
 | Update field settings, forms, and indexing | [`update_field.py`](./update_field.py) | Site Owner | [Update](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
-| Add a site column to a content type | [`content_type_fields.py`](./content_type_fields.py) | Site Owner | [Content type fields](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
+| Link an existing field to a content type | [`content_type_fields.py`](./content_type_fields.py) | Site Owner | [Content type fields](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
 | Copy a field between sites via schema XML | [`copy_field.py`](./copy_field.py) | Site Owner | [Copy](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
 | Export field definitions to CSV or JSON | [`export_field_schema.py`](./export_field_schema.py) | Read access | [Fields API](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |
 | Delete a field from a list | [`delete_field.py`](./delete_field.py) | Site Owner | [Delete](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api) |

@@ -88,6 +88,15 @@ class TestSerializeValue(unittest.TestCase):
         profile = PasswordProfile(password="x", forceChangePasswordNextSignIn=True)
         self.assertEqual(serialize_value(profile), {"password": "x", "forceChangePasswordNextSignIn": True})
 
+    def test_int_enum_serialization_is_format_dependent(self):
+        # SharePoint (OData V3) enums are Edm.Int32 -> numeric value.
+        from office365.sharepoint.fields.type import FieldType
+
+        self.assertEqual(serialize_value(FieldType.Text, JsonLightFormat()), 2)
+        # OData V4 / Graph enums keep the member name.
+        self.assertEqual(serialize_value(FieldType.Text, V4JsonFormat()), "Text")
+        self.assertEqual(serialize_value(FieldType.Text), "Text")
+
 
 class TestClientValueToJson(unittest.TestCase):
     def test_user_profile(self):

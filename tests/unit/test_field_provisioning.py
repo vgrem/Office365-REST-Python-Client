@@ -235,3 +235,28 @@ def test_ensure_creates_rich_field_when_missing():
     assert transport.requests[-1].url.endswith("Fields/AddField")
     assert field.internal_name == "Status"
     assert list(field.choices) == ["A", "C"]
+
+
+# --- schema copy -------------------------------------------------------------
+
+
+def test_schema_xml_for_copy_strips_origin_specific_attributes():
+    ctx, _ = _sp([])
+    field = Field(ctx)
+    field.set_property(
+        "SchemaXml",
+        '<Field SourceID="{src}" Version="2" ID="{id}" Name="X" StaticName="X" />',
+    )
+
+    xml = field.schema_xml_for_copy()
+
+    assert xml is not None
+    assert "SourceID" not in xml
+    assert "Version" not in xml
+    assert 'ID="{id}"' in xml
+    assert 'Name="X"' in xml
+
+
+def test_schema_xml_for_copy_returns_none_when_unloaded():
+    ctx, _ = _sp([])
+    assert Field(ctx).schema_xml_for_copy() is None

@@ -3,6 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Optional, cast
 
+from office365.runtime.types.odata_property import odata
 from office365.sharepoint.fields.lookup import FieldLookup
 from office365.sharepoint.fields.multi_line_text import FieldMultiLineText
 from office365.sharepoint.taxonomy.create_xml_parameters import (
@@ -176,6 +177,7 @@ class TaxonomyField(FieldLookup):
         """
         return self.properties.get("TermSetId", None)
 
+    @odata(name="TextField")
     @property
     def text_field_id(self) -> str | None:
         """Gets the GUID that identifies the hidden text field in an item."""

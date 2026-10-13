@@ -43,7 +43,7 @@ def main():
     fields = lst.ensure_fields(FIELDS)
     ctx.execute_query()
     for info, field in zip(FIELDS, fields):
-        print(f"  created {info.Title:16s} ({info.FieldTypeKind.name}) -> {field.internal_name}")
+        print(f"  ensured {info.Title:16s} ({info.FieldTypeKind.name}) -> {field.internal_name}")
 
 
 if __name__ == "__main__":

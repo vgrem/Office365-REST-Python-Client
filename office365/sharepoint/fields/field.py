@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Optional, Type, Union
 
 from typing_extensions import Self
@@ -156,6 +157,21 @@ class Field(Entity):
     def schema_xml(self, val: str):
         """Sets a value that specifies the XML schema that defines the field."""
         self.set_property("SchemaXml", val)
+
+    def schema_xml_for_copy(self) -> Optional[str]:
+        """Return :attr:`schema_xml` prepared for ``CreateFieldAsXml`` on another site.
+
+        A schema copied verbatim carries its origin-specific ``SourceID`` and
+        ``Version`` attributes. SharePoint rejects such a payload with
+        "The object has been updated by another user since it was last
+        fetched" (while still creating the field); removing those attributes
+        lets the copy complete cleanly. Returns ``None`` when the schema is
+        not loaded.
+        """
+        xml = self.schema_xml
+        if xml is None:
+            return None
+        return re.sub(r'\s*(?:SourceID|Version)="[^"]*"', "", xml)
 
     @property
     def type_as_string(self) -> Optional[str]:

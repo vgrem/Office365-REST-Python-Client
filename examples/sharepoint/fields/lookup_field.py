@@ -36,6 +36,7 @@ def main():
     ).execute_query()
     print(f"Lookup field created: {lookup.internal_name}  (id: {lookup.id})")
 
+    dependent = None
     if args.dependent:
         if lookup.id is None:
             raise SystemExit("Lookup field id is not available")
@@ -45,6 +46,9 @@ def main():
         print(f"Dependent lookup created: {dependent.internal_name}")
 
     if not args.keep:
+        # A primary lookup cannot be removed while dependent lookups reference it.
+        if dependent is not None:
+            dependent.delete_object().execute_query()
         lookup.delete_object().execute_query()
         print("  (fields removed after demo)")
 

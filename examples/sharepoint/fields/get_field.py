@@ -20,9 +20,22 @@ def main():
         tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
     )
     field = ctx.web.lists.get_by_title(args.list_title).fields.get_by_internal_name_or_title(args.field)
-    ctx.load(field, ["SchemaXml", "Title", "FieldTypeKind", "Required", "Hidden", "Group", "Indexed"]).execute_query()
+    ctx.load(
+        field,
+        [
+            "SchemaXml",
+            "Title",
+            "InternalName",
+            "FieldTypeKind",
+            "TypeDisplayName",
+            "Required",
+            "Hidden",
+            "Group",
+            "Indexed",
+        ],
+    ).execute_query()
 
-    print(f"Field: {field.title}  (type: {field.type_display_name or field.field_type_kind})")
+    print(f"Field: {field.title}  (type: {field.type_display_name or field.field_type_kind.name})")
     print(f"  Internal name: {field.internal_name}")
     print(f"  Group: {field.group or '?'}")
     print(f"  Required: {field.properties.get('Required', False)}  Hidden: {field.hidden}  Indexed: {field.indexed}")

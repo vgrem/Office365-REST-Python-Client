@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **`Field.schema_xml_for_copy()`:** returns `schema_xml` prepared for
+  `CreateFieldAsXml` on another site by stripping the origin-specific
+  `SourceID` / `Version` attributes, which SharePoint otherwise rejects with a
+  false *"The object has been updated by another user since it was last
+  fetched"* error (while still creating the field).
 - **Microsoft 365 Backup Storage lifecycle actions:** the tenant root's
   `restore_points` collection is now a `RestorePointCollection` with a typed
   `search(...)` action, and the CSDL actions that were not generated are
@@ -147,6 +152,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **OData V3 enum serialization:** SharePoint enums are `Edm.Int32` and now
+  serialize as their numeric value instead of their member name (which the
+  server rejected with *"Cannot convert a primitive value to the expected type
+  'Edm.Int32'"*). Graph/OData V4 enums keep serializing as the member name.
+- **Taxonomy field `TextField` deserialization:** `TaxonomyField.text_field_id`
+  is now bound to the OData `TextField` property, so listing web/list fields no
+  longer trips the computed `text_field` getter's assertion
+  (`assert text_field_id is not None`).
 - **Backup Storage entity hierarchy:** `SharePointProtectionPolicy`,
   `ExchangeProtectionPolicy`, the OneDrive/SharePoint/Exchange browse and
   restore sessions, the drive/mailbox/site protection units and the

@@ -28,14 +28,15 @@ def main():
     source = make_ctx(args.source)
     source_field = source.web.fields.get_by_internal_name_or_title(args.field)
     source.load(source_field, ["SchemaXml"]).execute_query()
-    if source_field.schema_xml is None:
+    schema_xml = source_field.schema_xml_for_copy()
+    if schema_xml is None:
         raise SystemExit(f"Field '{args.field}' not found in the source site.")
 
     target = make_ctx(args.target)
     scope = target.web.fields
     if args.list_title:
         scope = target.web.lists.get_by_title(args.list_title).fields
-    copied = scope.create_field_as_xml(source_field.schema_xml).execute_query()
+    copied = scope.create_field_as_xml(schema_xml).execute_query()
     scope_name = "site column" if not args.list_title else args.list_title
     print(f"Copied '{args.field}' as '{copied.internal_name}' ({scope_name})")
 

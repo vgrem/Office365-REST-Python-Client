@@ -33,6 +33,20 @@ _SCALAR_CONVERTERS = {
 _declared_cache: Dict[Tuple[type, str], Any] = {}
 
 
+def _serialize_enum(value: Enum, json_format: Optional[ODataJsonFormat]) -> Any:
+    """Serialize an enum member for the active OData dialect.
+
+    OData V3 (SharePoint) enums travel as their numeric value
+    (``FieldTypeKind`` is ``Edm.Int32``); OData V4 / Graph enums travel as
+    the member *name* ("teamsForBusiness"). Enums generated with string
+    values already match their name; older Graph ones (e.g. auto-numbered
+    ``unknown = 0``) must fall back to the name, not the ordinal.
+    """
+    if isinstance(json_format, JsonLightFormat) and isinstance(value.value, int):
+        return value.value
+    return value.value if isinstance(value.value, str) else value.name
+
+
 def serialize_value(value: Any, json_format: Optional[ODataJsonFormat] = None) -> Any:
     """Convert a stored value to its JSON representation.
 
@@ -42,11 +56,7 @@ def serialize_value(value: Any, json_format: Optional[ODataJsonFormat] = None) -
     ``list``, ``ClientResult``) passes through unchanged.
     """
     if isinstance(value, Enum):
-        # Graph/OData enum values go on the wire as the member *name*
-        # ("teamsForBusiness"). Enums generated with string values already match
-        # their name; older ones (e.g. auto-numbered ``unknown = 0``) must fall
-        # back to the name, not the ordinal.
-        return value.value if isinstance(value.value, str) else value.name
+        return _serialize_enum(value, json_format)
     if isinstance(value, uuid.UUID):
         return str(value)
     if isinstance(value, bytes):
