@@ -25,7 +25,6 @@ client = (
     )
 )
 
-apps = client.applications.top(100).get().execute_query()
+apps = client.applications.select(["id", "displayName", "appId", "createdDateTime"]).top(100).get().execute_query()
 
-for app in apps:
-    print(f"{app.display_name:40s}  {app.app_id:40s}  {app.created_datetime}")
+print(apps.to_string())

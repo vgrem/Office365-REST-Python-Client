@@ -38,10 +38,8 @@ def main() -> None:
     print(f"  {org.street or '?'}, {org.postal_code or '?'} {org.city or '?'}, {org.state or '?'} {org.country or '?'}")
     print(f"  technical contacts: {', '.join(org.technical_notification_mails) or '(none)'}")
 
-    print(f"\nVerified domains ({len(org.verified_domains)}):")
-    for domain in org.verified_domains:
-        flags = " ".join(name for name, on in (("default", domain.isDefault), ("initial", domain.isInitial)) if on)
-        print(f"  {domain.name:35s}  {flags}")
+    print("\nVerified domains:")
+    print(org.verified_domains.to_string())
 
     try:
         branding = org.branding.get().execute_query()

@@ -19,11 +19,8 @@ def main():
     group = client.groups.find_by_name(args.group, required=True).execute_query()
 
     owners = group.owners.get().execute_query()
-    print(f"Owners of '{group.display_name}' ({len(owners)}):")
-    for owner in owners:
-        upn = owner.get_property("userPrincipalName") or "?"
-        name = owner.get_property("displayName") or ""
-        print(f"  {upn}  {name}")
+    print(f"Owners of '{group.display_name}':")
+    print(owners.to_string())
 
 
 if __name__ == "__main__":

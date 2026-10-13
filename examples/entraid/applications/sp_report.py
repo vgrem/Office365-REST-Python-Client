@@ -26,17 +26,6 @@ from tests.settings import client_id, client_secret, tenant
 DEFAULT_WARN_DAYS = 30
 
 
-def _status(cred, warn_days: int) -> str:
-    days = cred.days_until_expiry
-    if days is None:
-        return "  no expiry"
-    if cred.is_expired:
-        return f"  expired {-days}d ago"
-    if days < warn_days:
-        return f"  expires in {days}d  <<<"
-    return f"  expires in {days}d"
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--warn-days", type=int, default=DEFAULT_WARN_DAYS)
@@ -52,13 +41,13 @@ def main() -> None:
 
     print(f"Service principal credential audit ({len(sps)} SPs)\n")
     for sp in sorted(sps, key=lambda x: x.display_name or ""):
-        if not sp.password_credentials and not sp.key_credentials:
+        creds = list(sp.password_credentials or []) + list(sp.key_credentials or [])
+        if not creds:
             continue
         print(f"\n  {sp.display_name}  (app_id={sp.app_id})")
-        for p in sp.password_credentials:
-            print(f"    [P] {p.displayName or p.hint or '(unnamed)'}{_status(p, args.warn_days)}")
-        for k in sp.key_credentials:
-            print(f"    [C] {k.displayName or '(unnamed)'}{_status(k, args.warn_days)}")
+        for cred in creds:
+            # ``cred.kind`` is "Password"/"Certificate"; ``expiry_status`` is a printable label.
+            print(f"    [{cred.kind}] {cred.expiry_status(args.warn_days)}")
 
 
 if __name__ == "__main__":

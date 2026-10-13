@@ -62,7 +62,7 @@ script; writes use delegated or interactive sign-in.
 
 | What | File | Notes |
 |------|------|-------|
-| Full user report | [`report.py`](./report.py) | Sign-in activity, inactivity, MFA |
+| User + unlicensed report | [`report.py`](./report.py) | Sample users, accounts without a license |
 | Last sign-in report | [`last_signin_report.py`](./last_signin_report.py) | `signInActivity` |
 | Privileged users | [`../roles/privileged_users.py`](../roles/privileged_users.py) | Inverted view: per user, every admin role |
 

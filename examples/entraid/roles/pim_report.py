@@ -19,7 +19,7 @@ def main():
     assignments = client.role_management.directory.role_assignments.get().expand(["roleDefinition"]).execute_query()
     print(f"PIM directory role assignments ({len(assignments)}):")
     for r in assignments:
-        print(f"  Principal: {r.principal_id}  Role: {r.role_definition}")
+        print(f"  {r.role_definition.display_name or '?':35s} {r.principal_id}")
 
 
 if __name__ == "__main__":

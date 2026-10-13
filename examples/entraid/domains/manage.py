@@ -55,10 +55,7 @@ def main() -> None:
     # -- Step 1: list existing domains --
     domains = client.domains.get().execute_query()
     print("Domain(s):")
-    for d in domains:
-        state = "verified" if d.state and d.state.status == "Verified" else "unverified"
-        svc = ", ".join(d.supported_services) if d.supported_services else "none"
-        print(f"  {d.id:35s}  {state:12s}  services: {svc}")
+    print(domains.to_string())
 
     # -- Step 2: add the custom domain if it is missing (idempotent) --
     exists = any(d.id == args.domain for d in domains)

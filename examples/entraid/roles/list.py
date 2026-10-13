@@ -23,8 +23,7 @@ def main():
     )
 
     roles = client.directory_roles.get().execute_query()
-    for role in roles:
-        print(role)
+    print(roles.to_string())
 
 
 if __name__ == "__main__":

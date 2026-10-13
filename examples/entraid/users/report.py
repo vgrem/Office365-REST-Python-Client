@@ -1,28 +1,35 @@
 """
-Report: user sign-in activity, inactive accounts, and accounts without MFA.
+Report: sample users and accounts without an assigned license.
 
-Common audit scenarios for identity hygiene.
+Common identity-hygiene scenarios:
+  - sample users to check their core attributes
+  - find accounts that have no license assigned
 
-Requires delegated permission ``User.Read.All``, ``AuditLog.Read.All``,
-``Reports.Read.All``.
+Requires application permission ``User.Read.All``.
 
 https://learn.microsoft.com/en-us/graph/api/user-list
-https://learn.microsoft.com/en-us/graph/api/reportroot-getuserdetail
+https://learn.microsoft.com/en-us/graph/api/user-list-licensedetails
 """
 
+from __future__ import annotations
+
 from office365.graph_client import GraphClient
-from tests import test_client_id, test_client_secret, test_tenant
+from tests.settings import client_id, client_secret, tenant
 
-client = GraphClient(tenant=test_tenant).with_client_secret(test_client_id, test_client_secret)
 
-# 1. List users with sign-in activity
-users = client.users.select(["id", "displayName", "userPrincipalName"]).top(20).get().execute_query()
-print(f"Users ({len(users)}):")
-for u in users:
-    print(f"  {u.display_name:30s}  {u.user_principal_name}")
+def main() -> None:
+    client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
 
-# 2. Users without assigned licenses
-users = client.users.get_unlicensed().top(10).select(["displayName", "userPrincipalName"]).execute_query()
-print(f"\nUnlicensed accounts: {len(users)}")
-for u in users:
-    print(f"  {u.display_name or '':30s}  {u.user_principal_name}")
+    # 1. Sample users and their core attributes
+    users = client.users.select(["id", "displayName", "userPrincipalName"]).top(20).get().execute_query()
+    print("Users:")
+    print(users.to_string())
+
+    # 2. Users without an assigned license
+    unlicensed = client.users.get_unlicensed().top(10).select(["id", "displayName", "userPrincipalName"]).execute_query()
+    print(f"\nUnlicensed accounts ({len(unlicensed)}):")
+    print(unlicensed.to_string())
+
+
+if __name__ == "__main__":
+    main()

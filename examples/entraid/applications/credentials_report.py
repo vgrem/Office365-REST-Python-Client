@@ -39,17 +39,6 @@ def _client() -> GraphClient:
     )
 
 
-def _status(cred, warn_days: int) -> str:
-    days = cred.days_until_expiry
-    if days is None:
-        return "no expiry set"
-    if cred.is_expired:
-        return f"EXPIRED {-days}d ago"
-    if days < warn_days:
-        return f"expires in {days}d <<<"
-    return f"expires in {days}d"
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--warn-days", type=int, default=DEFAULT_WARN_DAYS, help="warn below this many days")
@@ -60,14 +49,14 @@ def main() -> None:
     listed = 0
 
     for app in client.applications.get_all().execute_query():
-        creds = [(f"[P] {p.displayName or p.hint or '(unnamed)'}", p) for p in (app.password_credentials or [])]
-        creds += [(f"[C] {k.displayName or k.keyId or '(unnamed)'}", k) for k in (app.key_credentials or [])]
-        if not creds or (args.expired_only and not any(c.is_expired for _, c in creds)):
+        creds = list(app.password_credentials or []) + list(app.key_credentials or [])
+        if not creds or (args.expired_only and not any(c.is_expired for c in creds)):
             continue
 
         print(f"\n{app.display_name}  (app_id={app.app_id})")
-        for label, cred in creds:
-            print(f"  {label:36s}  {_status(cred, args.warn_days)}")
+        for cred in creds:
+            # ``cred.kind`` is "Password"/"Certificate"; ``expiry_status`` is a printable label.
+            print(f"  [{cred.kind}] {cred.expiry_status(args.warn_days)}")
             listed += 1
 
     print(f"\n{listed} credential(s) listed.")

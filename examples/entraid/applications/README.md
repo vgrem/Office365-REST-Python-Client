@@ -23,7 +23,7 @@ The scripts split into two groups:
 
 | What | File | Notes |
 |------|------|-------|
-| List app registrations | [`list.py`](./list.py) | First 100 `applications` and their app IDs |
+| List app registrations | [`list.py`](./list.py) | First 100 app registrations (name, app id, created date) |
 | Look up one app by client ID | [`get_by_app_id.py`](./get_by_app_id.py) | `applications.get_by_app_id(...)` |
 | Register a new app | [`create.py`](./create.py) | Creates an app, then deletes it again |
 | Update redirect URIs | [`redirect_uris.py`](./redirect_uris.py) | Merge new URIs into the existing `web` object |
@@ -43,20 +43,20 @@ break.
 |------|------|-------|
 | All app credentials + expiry | [`credentials_report.py`](./credentials_report.py) | Passwords and certificates; `--warn-days`, `--expired-only` |
 | Service-principal credentials | [`sp_report.py`](./sp_report.py) | Credentials on service principals (not just app objects) |
-| Certificates only | [`list_certificates.py`](./list_certificates.py) | VALID / EXPIRING / EXPIRED per certificate |
+| Certificates only | [`list_certificates.py`](./list_certificates.py) | Per-certificate expiry status (`--warn-days`) |
 | All consent grants | [`consent_grants.py`](./consent_grants.py) | Tenant-wide and user-scoped OAuth2 grants |
 | App sign-in activity | [`app_signins.py`](./app_signins.py) | Last sign-in per app to spot unused registrations |
 
 ```python
-for p in app.password_credentials:
-    state = "expired" if p.is_expired else f"{p.days_until_expiry}d left"
-    print(p.display_name or p.hint or "(unnamed)", state)
+for cred in app.password_credentials:
+    print(f"[{cred.kind}] {cred}  {cred.expiry_status(warn_days=30)}")
 ```
 
 ## 3. Rotate and renew credentials
 
 The credential properties `is_expired` and `days_until_expiry` interpret a naive
-`endDateTime` as UTC, so the checks below are portable.
+`endDateTime` as UTC, so the checks below are portable. `expiry_status(warn_days)`
+wraps them into a printable label (`expired 3d ago`, `expiring in 9d`, ...).
 
 | What | File | Notes |
 |------|------|-------|

@@ -16,21 +16,8 @@ https://learn.microsoft.com/en-us/graph/api/directoryrole-list-members
 
 import argparse
 
-from office365.directory.groups.group import Group
-from office365.directory.users.user import User
 from office365.graph_client import GraphClient
-from office365.intune.devices.device import Device
 from tests.settings import client_id, client_secret, tenant
-
-
-def _describe(member) -> str:
-    if isinstance(member, User):
-        return f"User: {member.get_property('userPrincipalName') or member.get_property('id')}"
-    if isinstance(member, Group):
-        return f"Group: {member.get_property('displayName') or member.get_property('id')}"
-    if isinstance(member, Device):
-        return f"Device: {member.get_property('displayName') or member.get_property('id')}"
-    return f"{member.entity_type_name}: {member.get_property('displayName') or member.get_property('id')}"
 
 
 def main():
@@ -42,12 +29,21 @@ def main():
     )
     args = parser.parse_args()
 
-    client = GraphClient(tenant=tenant).with_client_secret(client_id, client_secret)
+    client = (
+        GraphClient(tenant=tenant)
+        .with_client_secret(client_id, client_secret)
+        .require_application_permission(
+            "RoleManagement.Read.Directory",
+            "RoleManagement.ReadWrite.Directory",
+            "Directory.Read.All",
+            "Directory.ReadWrite.All",
+        )
+    )
     role = client.directory_roles.find_by_name(args.role, required=True).execute_query()
     members = role.members.get().execute_query()
-    print(f"Members of '{role.get_property('displayName')}' ({len(members)}):")
+    print(f"Members of '{role.display_name}' ({len(members)}):")
     for member in members:
-        print(f"  {_describe(member)}")
+        print(f"  {type(member).__name__:<8} {member}")
 
 
 if __name__ == "__main__":
