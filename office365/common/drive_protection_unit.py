@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from office365.entity import Entity
+from office365.backuprestore.protection_unit_base import ProtectionUnitBase
 
 
-class DriveProtectionUnit(Entity):
+class DriveProtectionUnit(ProtectionUnitBase):
     @property
     def directory_object_id(self) -> Optional[str]:
         """Gets the directoryObjectId property"""

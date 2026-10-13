@@ -3,9 +3,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
+from typing_extensions import Self
+
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
@@ -23,6 +26,18 @@ class ProtectionPolicyBase(Entity):
     and include what data to protect, when to protect it, and for what time period to retain the protected data
     for a single Microsoft 365 service.
     """
+
+    def activate(self) -> Self:
+        """Activate the protection policy so protection starts for its units."""
+        qry = ServiceOperationQuery(self, "activate", return_type=self)
+        self.context.add_query(qry)
+        return self
+
+    def deactivate(self) -> Self:
+        """Deactivate the protection policy (protection stops for its units)."""
+        qry = ServiceOperationQuery(self, "deactivate", return_type=self)
+        self.context.add_query(qry)
+        return self
 
     @odata(name="createdBy")
     @property

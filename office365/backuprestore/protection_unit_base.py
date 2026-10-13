@@ -3,7 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
+from typing_extensions import Self
+
 from office365.entity import Entity
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 if TYPE_CHECKING:
     from office365.directory.identity_set import IdentitySet
@@ -13,6 +16,22 @@ if TYPE_CHECKING:
 
 
 class ProtectionUnitBase(Entity):
+    def offboard(self) -> Self:
+        """Remove the protection unit from its protection policy.
+
+        Offboarding is asynchronous: the unit stays in the policy until the operation
+        completes and its ``offboard_requested_date_time`` is stamped.
+        """
+        qry = ServiceOperationQuery(self, "offboard", return_type=self)
+        self.context.add_query(qry)
+        return self
+
+    def cancel_offboard(self) -> Self:
+        """Cancel a pending offboard request for the protection unit."""
+        qry = ServiceOperationQuery(self, "cancelOffboard", return_type=self)
+        self.context.add_query(qry)
+        return self
+
     @property
     def created_by(self) -> IdentitySet:
         """Gets the createdBy property"""

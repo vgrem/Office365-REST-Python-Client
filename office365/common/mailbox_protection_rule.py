@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from office365.entity import Entity
+from office365.directory.protection.rules.base import ProtectionRuleBase
 
 
-class MailboxProtectionRule(Entity):
+class MailboxProtectionRule(ProtectionRuleBase):
     @property
     def mailbox_expression(self) -> Optional[str]:
         """Gets the mailboxExpression property"""

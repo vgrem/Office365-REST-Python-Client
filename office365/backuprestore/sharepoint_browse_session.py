@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from office365.entity import Entity
+from office365.backuprestore.browse_session_base import BrowseSessionBase
 
 
-class SharePointBrowseSession(Entity):
+class SharePointBrowseSession(BrowseSessionBase):
     @property
     def site_id(self) -> Optional[str]:
         """Gets the siteId property"""

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from office365.entity import Entity
+from office365.directory.protection.policy.base import ProtectionPolicyBase
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     )
 
 
-class SharePointProtectionPolicy(Entity):
+class SharePointProtectionPolicy(ProtectionPolicyBase):
     @property
     def site_inclusion_rules(self) -> EntityCollection[SiteProtectionRule]:
         """Gets the siteInclusionRules property"""

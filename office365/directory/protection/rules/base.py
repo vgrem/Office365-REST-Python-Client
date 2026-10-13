@@ -3,7 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
+from typing_extensions import Self
+
 from office365.entity import Entity
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 if TYPE_CHECKING:
     from office365.directory.identity_set import IdentitySet
@@ -18,6 +21,18 @@ class ProtectionRuleBase(Entity):
 
     Currently, protection Rules are static in nature, meaning policy changes are applied only when the
     rule is executed, with no automatic/dynamic updates."""
+
+    def run(self) -> Self:
+        """Run the protection rule to (re)evaluate the units a policy protects."""
+        qry = ServiceOperationQuery(self, "run", return_type=self)
+        self.context.add_query(qry)
+        return self
+
+    def delete_and_unprotect(self) -> Self:
+        """Delete the protection rule and unprotect the units it had matched."""
+        qry = ServiceOperationQuery(self, "deleteAndUnprotect", return_type=self)
+        self.context.add_query(qry)
+        return self
 
     @property
     def created_by(self) -> IdentitySet:

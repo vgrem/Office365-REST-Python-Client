@@ -26,6 +26,7 @@ if TYPE_CHECKING:
         OneDriveForBusinessRestoreSession,
     )
     from office365.backuprestore.protection_unit_base import ProtectionUnitBase
+    from office365.backuprestore.restorepoints.collection import RestorePointCollection
     from office365.backuprestore.serviceapps.service_app import ServiceApp
     from office365.backuprestore.sharepoint_browse_session import (
         SharePointBrowseSession,
@@ -47,7 +48,6 @@ if TYPE_CHECKING:
     from office365.common.mailbox_protection_units_bulk_addition_job import (
         MailboxProtectionUnitsBulkAdditionJob,
     )
-    from office365.common.restore_point import RestorePoint
     from office365.common.restore_session_base import RestoreSessionBase
     from office365.common.site_protection_rule import SiteProtectionRule
     from office365.common.site_protection_unit import SiteProtectionUnit
@@ -279,15 +279,16 @@ class BackupRestoreRoot(Entity):
         )
 
     @property
-    def restore_points(self) -> EntityCollection[RestorePoint]:
+    def restore_points(self) -> RestorePointCollection:
         """Gets the restorePoints property"""
+        from office365.backuprestore.restorepoints.collection import (
+            RestorePointCollection,
+        )
         from office365.common.restore_point import RestorePoint
 
         return self.properties.get(
             "restorePoints",
-            EntityCollection[RestorePoint](
-                self.context, RestorePoint, ResourcePath("restorePoints", self.resource_path)
-            ),
+            RestorePointCollection(self.context, RestorePoint, ResourcePath("restorePoints", self.resource_path)),
         )
 
     @property

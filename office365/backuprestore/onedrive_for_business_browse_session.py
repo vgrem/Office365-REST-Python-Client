@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from office365.entity import Entity
+from office365.backuprestore.browse_session_base import BrowseSessionBase
 
 
-class OneDriveForBusinessBrowseSession(Entity):
+class OneDriveForBusinessBrowseSession(BrowseSessionBase):
     @property
     def directory_object_id(self) -> Optional[str]:
         """Gets the directoryObjectId property"""

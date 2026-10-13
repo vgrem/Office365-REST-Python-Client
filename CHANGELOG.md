@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Microsoft 365 Backup Storage lifecycle actions:** the tenant root's
+  `restore_points` collection is now a `RestorePointCollection` with a typed
+  `search(...)` action, and the CSDL actions that were not generated are
+  hand-written: `ProtectionPolicyBase.activate`/`deactivate`,
+  `RestoreSessionBase.activate`, `ProtectionUnitBase.offboard`/`cancel_offboard`,
+  `ProtectionRuleBase.run`/`delete_and_unprotect`, `BrowseSessionBase.browse`
+  and `ServiceApp.activate`/`deactivate`. The service is a **paid add-on**:
+  without a Backup Storage license the API returns `UnknownError` / the service
+  app must be registered first, so the examples degrade gracefully.
 - **Report CSV parsing:** `ReportResult.to_text()` / `ReportResult.csv_rows()`
   decode a usage report and parse it into row dicts, decoding with `utf-8-sig`
   to strip the UTF-8 BOM Graph prefixes to the first header.
@@ -138,6 +147,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Backup Storage entity hierarchy:** `SharePointProtectionPolicy`,
+  `ExchangeProtectionPolicy`, the OneDrive/SharePoint/Exchange browse and
+  restore sessions, the drive/mailbox/site protection units and the
+  mailbox/site protection rules now extend their CSDL base types
+  (`protectionPolicyBase`, `browseSessionBase`, `restoreSessionBase`,
+  `protectionUnitBase`, `protectionRuleBase`) instead of `Entity`, so they
+  expose the shared properties and lifecycle helpers.
 - **`directoryRoles` lookups no longer send `$top`:** the `directoryRoles` feed
   rejects custom page sizes (*"This resource does not support custom page
   sizes"*), but `first` / `first_or_none` / `single` — and the `find_by_name`

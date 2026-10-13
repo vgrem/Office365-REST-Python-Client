@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from office365.entity import Entity
+from office365.directory.protection.rules.base import ProtectionRuleBase
 
 
-class SiteProtectionRule(Entity):
+class SiteProtectionRule(ProtectionRuleBase):
     @property
     def site_expression(self) -> Optional[str]:
         """Gets the siteExpression property"""

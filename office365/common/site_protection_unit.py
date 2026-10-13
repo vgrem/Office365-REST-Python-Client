@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from office365.entity import Entity
+from office365.backuprestore.protection_unit_base import ProtectionUnitBase
 
 
-class SiteProtectionUnit(Entity):
+class SiteProtectionUnit(ProtectionUnitBase):
     @property
     def site_id(self) -> Optional[str]:
         """Gets the siteId property"""

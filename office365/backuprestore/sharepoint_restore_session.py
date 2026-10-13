@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from office365.entity import Entity
+from office365.common.restore_session_base import RestoreSessionBase
 from office365.entity_collection import EntityCollection
 from office365.runtime.paths.resource_path import ResourcePath
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     )
 
 
-class SharePointRestoreSession(Entity):
+class SharePointRestoreSession(RestoreSessionBase):
     @property
     def granular_site_restore_artifacts(self) -> EntityCollection[GranularSiteRestoreArtifact]:
         """Gets the granularSiteRestoreArtifacts property"""

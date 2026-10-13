@@ -3,7 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
+from typing_extensions import Self
+
 from office365.entity import Entity
+from office365.runtime.queries.service_operation import ServiceOperationQuery
 
 if TYPE_CHECKING:
     from office365.backuprestore.restorejobtype import RestoreJobType
@@ -16,6 +19,16 @@ if TYPE_CHECKING:
 
 
 class RestoreSessionBase(Entity):
+    def activate(self) -> Self:
+        """Activate the restore session so the restore job starts.
+
+        A freshly created restore session is in the ``draft`` state; activating it
+        moves it through ``activating`` to ``active`` / ``completed``.
+        """
+        qry = ServiceOperationQuery(self, "activate", return_type=self)
+        self.context.add_query(qry)
+        return self
+
     @property
     def completed_date_time(self) -> Optional[datetime]:
         """Gets the completedDateTime property"""
