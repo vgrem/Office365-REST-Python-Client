@@ -22,6 +22,7 @@ class MigrationSettings:
 
     migration_type: str = "Content"  # Content | Workflow
     preserve_permissions: bool = False
+    preserve_timestamps: bool = False  # client-side best-effort (SPMT preserves by default)
     preserve_inheritance: bool = True
     preserve_versions: bool = False
     keep_all_versions: bool = True
@@ -58,6 +59,7 @@ class MigrationSettings:
         """Build :class:`MigrationOptions` from the settings (``overrides`` win)."""
         values = {
             "preserve_permissions": self.preserve_permissions,
+            "preserve_timestamps": self.preserve_timestamps,
             "preserve_versions": self.preserve_versions,
             "exclude_patterns": [f"*.{extension.lstrip('.')}" for extension in self.skip_files_with_extension],
             "created_after": self.migrate_files_created_after,

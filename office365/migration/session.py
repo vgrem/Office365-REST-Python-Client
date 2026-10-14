@@ -59,6 +59,7 @@ def _job_status(job: MigrationJob) -> dict:
         "source": job.source_label,
         "target": job.target_label,
         "phase": job.phase.value,
+        "fidelity": job.fidelity().summary(),
         "stats": {
             "total": job.stats.total,
             "success": job.stats.success,
@@ -143,7 +144,7 @@ class MigrationSession:
         job = MigrationJob(
             source,
             target,
-            options if options is not None else self._options,
+            self._effective_options(options),
             manifest_path=manifest_path,
             checkpoint_path=checkpoint_path,
         )
@@ -195,7 +196,7 @@ class MigrationSession:
             job = MigrationJob(
                 source,
                 target,
-                options if options is not None else self._options,
+                self._effective_options(options),
                 manifest_path=_child_path(manifest_dir, label, "manifest.json"),
                 checkpoint_path=_child_path(checkpoint_dir, label, "checkpoint.json"),
             )
@@ -263,3 +264,28 @@ class MigrationSession:
     def verify(self, spot_checks: int = 20):
         """Reconcile source vs target for every task after migration."""
         return [entry.job.verify(spot_checks) for entry in self._tasks]
+
+    def fidelity(self) -> list[dict]:
+        """Per-task fidelity report — what each run will (and won't) preserve.
+
+        Empty before any task is added. Each entry is a JSON-serializable dict
+        (see :class:`~office365.migration.fidelity.FidelityReport`).
+        """
+        return [entry.job.fidelity().to_dict() for entry in self._tasks]
+
+    # ── Helpers ──────────────────────────────────────────────────
+
+    def _effective_options(self, options: MigrationOptions | None) -> MigrationOptions | None:
+        """Resolve the options for a new job: explicit > session > settings.
+
+        Registering ``MigrationSettings`` (the SPMT surface) now feeds its fidelity
+        flags into each task by default; an explicit ``options`` argument, or
+        options passed to :meth:`__init__`, still win.
+        """
+        if options is not None:
+            return options
+        if self._options is not None:
+            return self._options
+        if self._settings is not None:
+            return self._settings.to_options()
+        return None

@@ -114,9 +114,11 @@ print(session.show())
 session.unregister()
 ```
 
-`MigrationSettings` mirrors `Register-SPMTMigration` (permissions, versions,
-filters, user mapping, Azure storage…); the subset the core enforces is mapped by
-`to_options()`. Tasks can also be declared as `MigrationTask` objects or parsed
+`MigrationSettings` mirrors `Register-SPMTMigration` (permissions, timestamps,
+versions, filters, user mapping, Azure storage…); the subset the core enforces is
+mapped by `to_options()`, which the session applies to every task by default (pass
+`options=` to a task, or `MigrationSession(options=...)`, to override). Tasks can
+also be declared as `MigrationTask` objects or parsed
 from the SPMT JSON task format (`MigrationTask.from_json(...)`). A resolved
 SharePoint task replays the source list's columns, content types and views onto
 the (existing) target list before content is copied; pass
@@ -239,6 +241,19 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
 Adapters opt in by implementing optional hooks:
 `DataSource.read_permissions(item)`, `DataTarget.apply_timestamps(item)`, and
 `DataTarget.apply_permissions(item, permissions)`.
+
+To see what a pair will actually honor **before** a run, ask for a report —
+`MigrationJob.fidelity()`, or `MigrationSession.fidelity()` for every task:
+
+```python
+report = MigrationJob(source, target, MigrationOptions(preserve_timestamps=True)).fidelity()
+print(report.summary())  # "not requested: permissions, versions | UNSUPPORTED: timestamps"
+print(report.to_dict())  # JSON-serializable, for reports/status
+```
+
+The report is informational (it never raises); the run itself still fails fast on
+an unhonorable flag. `MigrationSettings.preserve_timestamps` / `.preserve_permissions`
+feed the matching options into every session task by default.
 
 ## Server-side migration (full fidelity)
 

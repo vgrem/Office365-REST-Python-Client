@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import pytest
-from office365.migration import MigrationSession, MigrationSettings, MigrationTask
+from office365.migration import MigrationOptions, MigrationSession, MigrationSettings, MigrationTask
 from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget
 
 
 def test_settings_map_to_options():
     settings = MigrationSettings(
         preserve_permissions=True,
+        preserve_timestamps=True,
         skip_files_with_extension=["txt", ".mp3"],
         migrate_files_modified_after="2024-01-01T00:00:00",
     )
@@ -17,9 +18,41 @@ def test_settings_map_to_options():
     options = settings.to_options(concurrency=concurrency)
 
     assert options.preserve_permissions is True
+    assert options.preserve_timestamps is True
     assert options.exclude_patterns == ["*.txt", "*.mp3"]
     assert options.modified_after == "2024-01-01T00:00:00"
     assert options.concurrency == concurrency  # overrides win
+
+
+def test_session_applies_settings_options_by_default(tmp_path):
+    session = MigrationSession().register(settings=MigrationSettings(preserve_timestamps=True))
+
+    job = session.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path / "out"))
+
+    assert job.options.preserve_timestamps is True
+
+
+def test_session_explicit_options_override_settings(tmp_path):
+    session = MigrationSession().register(settings=MigrationSettings(preserve_timestamps=True))
+
+    job = session.add_task(
+        FileSystemSource(tmp_path),
+        FileSystemTarget(tmp_path / "out"),
+        options=MigrationOptions(preserve_timestamps=False),
+    )
+
+    assert job.options.preserve_timestamps is False
+
+
+def test_session_constructor_options_override_settings(tmp_path):
+    session = MigrationSession(options=MigrationOptions(preserve_permissions=True)).register(
+        settings=MigrationSettings(preserve_timestamps=True)
+    )
+
+    job = session.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path / "out"))
+
+    assert job.options.preserve_permissions is True
+    assert job.options.preserve_timestamps is False
 
 
 def test_task_from_json_file_share():

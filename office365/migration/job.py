@@ -70,6 +70,11 @@ class MigrationJob:
         return self._stats
 
     @property
+    def options(self) -> MigrationOptions:
+        """The effective options for this job (defaults when none were supplied)."""
+        return self._options
+
+    @property
     def manifest(self) -> Manifest:
         return self._manifest
 
@@ -168,6 +173,16 @@ class MigrationJob:
 
     def status(self) -> MigrationPhase:
         return self.phase
+
+    def fidelity(self):
+        """Describe the requested fidelity this job's adapter pair can honor.
+
+        Purely informational (never raises); use it to report capabilities before
+        :meth:`run`. The run itself still fails fast on an unhonorable flag.
+        """
+        from office365.migration.fidelity import describe_fidelity
+
+        return describe_fidelity(self._source, self._target, self._options)
 
     def verify(self, spot_checks: int = 20):
         """Reconcile source vs target after migration (counts + checksum spot-checks)."""

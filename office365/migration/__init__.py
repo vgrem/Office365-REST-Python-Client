@@ -39,6 +39,7 @@ from office365.migration.base import (
     conflict_to_on_conflict,
 )
 from office365.migration.checkpoint import Checkpoint
+from office365.migration.fidelity import FidelityReport, describe_fidelity
 from office365.migration.job import MigrationJob
 from office365.migration.manifest import Manifest
 from office365.migration.report import MigrationReport, build_report, export_reports
@@ -82,6 +83,7 @@ __all__ = [
     "Checkpoint",
     "ConflictResolution",
     "ExportFormat",
+    "FidelityReport",
     "ItemStatus",
     "Manifest",
     "MigrationItem",
@@ -102,6 +104,7 @@ __all__ = [
     "VerificationReport",
     "build_report",
     "conflict_to_on_conflict",
+    "describe_fidelity",
     "export_reports",
     "scan_pairs",
     "verify",

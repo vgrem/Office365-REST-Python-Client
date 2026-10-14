@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Fidelity reporting and session settings plumbing:** `MigrationJob.fidelity()`
+  (and `MigrationSession.fidelity()`) describe what an adapter pair can actually
+  preserve — timestamps, permissions and versions — returning a `FidelityReport`
+  (`preserved` / `unsupported` / `not_requested` / `notes`, with `summary()` and
+  `to_dict()`). They are informational and never raise; the run still fails fast
+  on an unhonorable flag. `MigrationSettings` gained `preserve_timestamps`, and a
+  registered session now feeds its `to_options()` fidelity flags into every task
+  by default (an explicit `options=` still wins), so
+  `MigrationSettings(preserve_permissions=True)` is no longer silently ignored.
 - **List structure capture for SharePoint migration:**
   `office365.migration.sharepoint.capture_list_structure(sp_list)` returns a
   read-only, JSON-serializable `ListStructure` snapshot of a list's **columns**
