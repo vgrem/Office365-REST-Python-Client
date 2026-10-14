@@ -263,6 +263,7 @@ Azure. It is a learning/debugging aid, not a step you must run first.
 | Operation | File | Required role |
 |---|---|---|
 | Migrate a tree and write one JSON migration report | [`monitor/export_reports.py`](./monitor/export_reports.py) | none (local) |
+| Verify a target list's structure against the source (read-only) | [`monitor/verify_structure.py`](./monitor/verify_structure.py) | Read access (both sites) |
 | Monitor a local migration (live progress, Ctrl-C pause, re-run to resume) | [`monitor/monitor.py`](./monitor/monitor.py) | none (local) |
 | Monitor server-side ingestion jobs concurrently (async) | [`monitor/monitor_async.py`](./monitor/monitor_async.py) | SharePoint admin |
 
@@ -275,6 +276,21 @@ Reports carry SPMT-style summary columns (total/migrated/not-migrated bytes & GB
 items, GB/hour, run id, timestamps) plus per-item `file_name`, `extension`,
 `error`, and `error_code`; the failure report is only written when failures
 occur.
+
+`job.verify()` never looks at the *container*, so pair it with a structure check
+that compares the source and target lists' columns, content types, and views:
+
+```python
+from office365.migration.sharepoint import verify_list_structure
+
+report = verify_list_structure(source_list, target_list)
+print(report.summary())  # "MISMATCH | Projects | columns: 2, content types: 1, views: 0, field links: 1"
+```
+
+```bash
+cd examples/sharepoint/migration/monitor
+python verify_structure.py --list Projects --target-site https://contoso.sharepoint.com/sites/projects-copy
+```
 
 To watch a migration live — progress bars for planning/migrating, and a clean
 SPMT-style pause on **Ctrl-C** (the checkpoint is saved; re-running the same

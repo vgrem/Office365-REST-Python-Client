@@ -24,9 +24,14 @@ MigrationProgress = Optional[Callable[["Progress"], None]]
 class DataSource(ABC):
     """Reads migration items from a source.
 
-    Optional hook (not declared here so ``hasattr`` reflects real support):
-    ``read_permissions(item) -> list[PermissionEntry]`` — the item's ACLs, used
-    for best-effort ``preserve_permissions``. Absent when the source has none.
+    Optional hooks (not declared here so ``hasattr`` reflects real support):
+
+    - ``read_permissions(item) -> list[PermissionEntry]`` — the item's ACLs, used
+      for best-effort ``preserve_permissions`` and for the permission diff;
+    - ``read_metadata(item) -> dict`` — comparable attributes (``created``,
+      ``modified``, ``size_bytes``, ...) the validator diffs against the target.
+
+    Absent when the source does not expose them.
     """
 
     @abstractmethod
@@ -51,7 +56,10 @@ class DataTarget(ABC):
       target can derive per-run policy (e.g. a record target maps
       ``options.conflict_resolution`` onto its ``on_conflict`` mode);
     - ``apply_timestamps(item)`` / ``apply_permissions(item, permissions)`` —
-      best-effort fidelity applied after a successful write.
+      best-effort fidelity applied after a successful write;
+    - ``read_permissions(item)`` / ``read_metadata(item)`` — the read
+      counterparts the validator diffs against the source (needed to *verify*
+      that the requested fidelity actually landed).
     """
 
     @abstractmethod

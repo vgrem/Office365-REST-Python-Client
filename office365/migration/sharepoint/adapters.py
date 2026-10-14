@@ -78,6 +78,24 @@ def taxonomy_internal_names(fields) -> list[str]:
     return list(dict.fromkeys(names))
 
 
+def _read_role_assignments(securable) -> list[PermissionEntry]:
+    """Read a securable object's role assignments into ``PermissionEntry``s.
+
+    One entry per principal (user or group), keyed by login name; the target uses
+    the same shape so the permission diff compares like with like.
+    """
+    assignments = securable.role_assignments.expand(["Member", "RoleDefinitionBindings"]).get().execute_query()
+    result: list[PermissionEntry] = []
+    for assignment in assignments:
+        member = assignment.member
+        name = member.login_name or member.user_principal_name
+        if not name:
+            continue
+        roles = [r.name for r in assignment.role_definition_bindings if r.name]
+        result.append(PermissionEntry(principal_name=name, roles=roles))
+    return result
+
+
 class SharePointListSource:
     """Enumerates a SharePoint list's items into record migration items."""
 
@@ -388,16 +406,18 @@ class SharePointLibrarySource:
         securable = self._securable(item)
         if securable is None:
             return []
-        assignments = securable.role_assignments.expand(["Member", "RoleDefinitionBindings"]).get().execute_query()
-        result: list[PermissionEntry] = []
-        for assignment in assignments:
-            member = assignment.member
-            name = member.login_name or member.user_principal_name
-            if not name:
-                continue
-            roles = [r.name for r in assignment.role_definition_bindings if r.name]
-            result.append(PermissionEntry(principal_name=name, roles=roles))
-        return result
+        return _read_role_assignments(securable)
+
+    def read_metadata(self, item: MigrationItem) -> dict | None:
+        """Comparable attributes of the source item (for the post-run metadata diff)."""
+        file = self._files.get(item.dest_path)
+        if file is None:
+            return None
+        return {
+            "created": iso_or_none(file.time_created),
+            "modified": iso_or_none(file.time_last_modified),
+            "size_bytes": file.length or 0,
+        }
 
     def _securable(self, item: MigrationItem):
         if item.item_type == "folder":
@@ -519,6 +539,22 @@ class SharePointLibraryTarget:
                 if role is not None:
                     securable.add_role_assignment(entry.principal_name, role)
         securable.context.execute_query()
+
+    def read_metadata(self, item: MigrationItem) -> dict | None:
+        """Comparable attributes of the written item (for the metadata diff)."""
+        file = self._folder.context.web.get_file_by_server_relative_url(self._url(item)).get().execute_query()
+        return {
+            "created": iso_or_none(file.time_created),
+            "modified": iso_or_none(file.time_last_modified),
+            "size_bytes": file.length or 0,
+        }
+
+    def read_permissions(self, item: MigrationItem) -> list[PermissionEntry]:
+        """Read the written item's role assignments (for the permission diff)."""
+        securable = self._securable(item)
+        if securable is None:
+            return []
+        return _read_role_assignments(securable)
 
     def _securable(self, item: MigrationItem):
         url = self._url(item).rstrip("/")

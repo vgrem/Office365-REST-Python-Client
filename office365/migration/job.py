@@ -185,11 +185,17 @@ class MigrationJob:
         return describe_fidelity(self._source, self._target, self._options)
 
     def verify(self, spot_checks: int = 20):
-        """Reconcile source vs target after migration (counts + checksum spot-checks)."""
+        """Reconcile source vs target after migration.
+
+        Always checks presence and content checksums; when the run requested
+        fidelity flags, the same sample is diffed for timestamps/permissions via
+        the optional adapter ``read_metadata`` / ``read_permissions`` hooks (see
+        :func:`office365.migration.validators.verify`).
+        """
         from office365.migration.validators import verify as _verify
 
         self._checkpoint.phase = MigrationPhase.VERIFYING
-        report = _verify(self._source, self._target, self._manifest, spot_checks)
+        report = _verify(self._source, self._target, self._manifest, spot_checks, self._options)
         self._checkpoint.phase = MigrationPhase.COMPLETED if report.ok else MigrationPhase.COMPLETED_WITH_ERRORS
         return report
 

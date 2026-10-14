@@ -238,9 +238,12 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
   roles by name. This is a **same-tenant** copy; cross-tenant identity mapping is
   not implemented.
 
-Adapters opt in by implementing optional hooks:
-`DataSource.read_permissions(item)`, `DataTarget.apply_timestamps(item)`, and
-`DataTarget.apply_permissions(item, permissions)`.
+Adapters opt in by implementing optional hooks: `DataSource.read_permissions(item)`,
+`DataTarget.apply_timestamps(item)`, and
+`DataTarget.apply_permissions(item, permissions)`. To *verify* that the requested
+fidelity actually landed, the read counterparts are used too:
+`read_metadata(item)` (comparable `created`/`modified`/`size_bytes`) on both sides,
+and `read_permissions(item)` on the target.
 
 To see what a pair will actually honor **before** a run, ask for a report —
 `MigrationJob.fidelity()`, or `MigrationSession.fidelity()` for every task:
@@ -380,8 +383,48 @@ to the filesystem (see [Fidelity](#fidelity)).
 
 ## Verification & reports
 
-`job.verify()` reconciles item counts and spot-checks content checksums, and
-`job.export_reports(dir)` writes Summary/Item/Failure reports as CSV + JSON.
+`job.verify()` returns a `VerificationReport` and `job.export_reports(dir)`
+writes Summary/Item/Failure reports as CSV + JSON. Verification is layered and
+explicit about what it could not confirm:
+
+| Check | When | Finding bucket |
+|---|---|---|
+| Presence (expected vs found paths) | always | `missing` / `extra` |
+| Content checksums | always, on a `spot_checks` sample | `mismatches` (or `unverifiable` if a side exposes no comparable hash) |
+| Timestamps (`Created`/`Modified`) | when `preserve_timestamps` was requested | `mismatches` / `unverifiable` |
+| Permissions | when `preserve_permissions` was requested | `mismatches` / `unverifiable` |
+| Versions | when `preserve_versions` was requested | always `unverifiable` over REST |
+
+A requested check that could not run lands in `report.unverifiable` — `report.ok`
+is then still True when nothing contradicted it, but `report.complete` is False.
+This is deliberate: a *partial* verification is never silently reported as a pass.
+
+```python
+report = job.verify()
+print(report.summary())  # "OK | ..." / "PARTIAL | ..." / "MISMATCH | ..."
+print(report.to_dict())  # JSON-serializable evidence
+assert report.complete
+```
+
+### Verifying list structure
+
+Content validation never looks at the *container*. To confirm that a target list
+reproduces the source's columns, content types and views (read-only; issue GETs
+only), compare the two captured snapshots:
+
+```python
+from office365.migration.sharepoint import verify_list_structure
+
+report = verify_list_structure(source_list, target_list)
+print(report.summary())  # "MISMATCH | Projects | columns: 2, content types: 1, views: 0, field links: 1"
+if not report.ok:
+    print(report.to_dict())
+```
+
+Only *missing* structure is reported: a freshly created target list legitimately
+carries extra built-in columns, content types and views, so "extra" entries are
+not findings. Field links that could not be attached (the REST limit described
+above) show up as `missing_field_links`.
 
 ## See also
 

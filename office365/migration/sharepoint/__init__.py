@@ -38,6 +38,11 @@ from office365.migration.sharepoint.structure import (
     provision_list_structure,
 )
 from office365.migration.sharepoint.tenant_assessor import MigrationTenantAssessor
+from office365.migration.sharepoint.verify import (
+    StructureReport,
+    compare_list_structures,
+    verify_list_structure,
+)
 
 __all__ = [
     "AssessmentOptions",
@@ -61,9 +66,12 @@ __all__ = [
     "SharePointListTarget",
     "SiteLockedScanner",
     "SiteScanSummary",
+    "StructureReport",
     "ViewDefinition",
     "capture_list_structure",
+    "compare_list_structures",
     "get_scan",
     "provision_list_structure",
     "sharepoint_scan_pairs",
+    "verify_list_structure",
 ]

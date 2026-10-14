@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Deeper post-migration validation:** `MigrationJob.verify()` now reconciles
+  presence, content, and — when the run requested them — timestamps and
+  permissions, using optional `read_metadata(item)` / `read_permissions(item)`
+  adapter hooks. `VerificationReport` gained disjoint `extra` and `unverifiable`
+  buckets plus `complete` and `to_dict()`: a requested check that could not run is
+  now reported as unverifiable (so `complete` is False) instead of being silently
+  skipped. `verify_list_structure(source_list, target_list)` (and
+  `compare_list_structures(...)`) compare captured `ListStructure` snapshots and
+  report source columns/content types/views/field links missing on the target
+  (`StructureReport`).
 - **Fidelity reporting and session settings plumbing:** `MigrationJob.fidelity()`
   (and `MigrationSession.fidelity()`) describe what an adapter pair can actually
   preserve — timestamps, permissions and versions — returning a `FidelityReport`
@@ -199,6 +209,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   display name (falling back to `hint`, then `"(unnamed)"`).
 
 ### Changed
+- **`verify()` reports are more precise:** unexpected target items no longer
+  masquerade as content `mismatches` — they are reported in the new
+  `VerificationReport.extra` bucket, which (like `missing`) makes `ok` False.
+  `summary()` now reports `MISMATCH`, `PARTIAL` (nothing contradicted, but some
+  requested check was unverifiable), or `OK`. The shared report is used by the
+  data pipeline too, whose callers are unaffected (the new fields default empty).
 - **Planner writes:** Planner entities derive from the new `PlannerEntity` base,
   which sends the `If-Match` header from the latest etag on update/delete and
   requests `Prefer: return=representation` so the refreshed etag is captured —
