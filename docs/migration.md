@@ -176,8 +176,36 @@ with open("projects.structure.json", encoding="utf-8") as fh:
     restored = ListStructure.from_dict(json.load(fh))
 ```
 
-A snapshot can be inspected, persisted, and later replayed. Reprovisioning it
-onto a target list is a separate step.
+A snapshot can be inspected, persisted, and later replayed.
+
+### Provisioning list structure
+
+`provision_list_structure(sp_list, structure)` replays a snapshot onto a target
+list: it creates the missing columns from their `SchemaXml`, the custom content
+types (matched by **name**), and the views, and turns content types on when the
+snapshot says so. It is idempotent — running it again with the default
+`on_conflict="skip"` is a no-op — and it executes the requests, so call it right
+after the target list exists and before content is copied:
+
+```python
+from office365.migration.sharepoint import provision_list_structure
+
+warnings = provision_list_structure(target_ctx.web.lists.get_by_title("Projects"), structure)
+for warning in warnings:
+    print("structure warning:", warning)
+```
+
+Two SharePoint Online REST limits are surfaced honestly rather than hidden:
+
+- **Content type identifiers are not preserved.** The server assigns a content
+type its own `Id` and ignores the requested one (at both list and web scope), so
+content types are matched and recreated by **name**.
+- **A fresh column cannot be attached to a custom content type.** Adding a field
+link for a column that is not already inherited or auto-linked is rejected
+(`Column '<name>' does not exist`). Those columns are skipped and returned in the
+`warnings` list (and logged) instead of failing the whole provisioning.
+
+Field-link **order** is restored only when at least one link was actually added.
 
 ## Fidelity
 

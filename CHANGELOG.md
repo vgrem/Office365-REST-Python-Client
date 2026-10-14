@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ListStructure.from_dict(...)`, so it can be inspected, persisted, and later
   provisioned onto a target list before content is copied. It issues GET
   requests only — it never writes.
+- **List structure provisioning for SharePoint migration:**
+  `office365.migration.sharepoint.provision_list_structure(sp_list, structure)`
+  replays a `capture_list_structure` snapshot onto a target list — creating the
+  missing columns from their `SchemaXml`, the custom content types (matched by
+  name), and the views — and returns the list of warnings for anything the
+  server refused (currently an un-linkable content type column). It is
+  idempotent: re-running with `on_conflict="skip"` (the default) changes nothing.
+  Two SharePoint Online REST limits are documented and handled rather than
+  hidden: a content type's `Id` cannot be preserved (the server assigns one, so
+  content types are matched by name), and a fresh column cannot be attached to a
+  custom content type (the write is rejected with *"Column ... does not exist"*,
+  so the column is reported as a warning instead of failing the migration).
 - **Whole-site (same-tenant) SharePoint migration:** `MigrationSession.add_site_task(...)`
   resolves a `MigrationTask(migrate_all=True)` into **one resumable job per list
   or document library** (each with its own manifest/checkpoint), and
@@ -211,6 +223,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Errors are no longer silently swallowed by a stale error handler:** the
+  request `onError` dispatch treated *any* registered handler as "handled", so a
+  scoped handler left behind by an earlier query hid unrelated later failures
+  (for example a rejected content type field link was returned as a stub object
+  as if it had succeeded). A failure is now swallowed only when a handler's
+  `condition` matches; otherwise it is re-raised.
+- **`ContentType.reorder_fields` / `FieldLinkCollection.reorder`:** the
+  `fieldNames` / `internalNames` payloads are now sent as a plain JSON array.
+  They were previously wrapped as an OData `Collection(Edm.String)` object, which
+  the server rejected with *"...a node of type 'StartObject' was read ... however,
+  a 'StartArray' node was expected."*
 - **Migration checkpoints are now crash-safe:** `office365.migration.checkpoint.Checkpoint.save`
   wrote the JSON file in place, so a crash mid-write left a truncated file the
   next run could not resume from. It now uses the same atomic

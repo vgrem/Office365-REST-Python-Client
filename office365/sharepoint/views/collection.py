@@ -8,11 +8,41 @@ from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.views.create_information import ViewCreationInformation
+from office365.sharepoint.views.type import ViewType
 from office365.sharepoint.views.view import View
 
 if TYPE_CHECKING:
     from office365.sharepoint.client_context import ClientContext
     from office365.sharepoint.lists.list import List
+
+#: Maps the REST ``ViewType`` string (returned by a read) to the integer
+#: ``ViewTypeKind`` the ``Add`` service operation expects — and back.
+_VIEW_TYPE_KIND_BY_NAME = {
+    "NONE": ViewType.NoneType,
+    "HTML": ViewType.Html,
+    "GRID": ViewType.Grid,
+    "CALENDAR": ViewType.Calendar,
+    "RECURRENCE": ViewType.Recurrence,
+    "CHART": ViewType.Chart,
+    "GANTT": ViewType.Gantt,
+}
+_VIEW_TYPE_NAME_BY_KIND = {kind: name for name, kind in _VIEW_TYPE_KIND_BY_NAME.items()}
+
+
+def _view_type_kind(view_type: int | str | None) -> int | None:
+    """Normalize a view type (name or integer kind) to the integer kind."""
+    if isinstance(view_type, str):
+        return _VIEW_TYPE_KIND_BY_NAME.get(view_type.upper())
+    return view_type
+
+
+def _view_type_name(view_type: int | str | None) -> str | None:
+    """Normalize a view type (name or integer kind) to the canonical name."""
+    if isinstance(view_type, str):
+        return view_type.upper()
+    if isinstance(view_type, int):
+        return _VIEW_TYPE_NAME_BY_KIND.get(view_type)
+    return None
 
 
 class ViewCollection(EntityCollection[View]):
@@ -57,7 +87,7 @@ class ViewCollection(EntityCollection[View]):
             Title=title,
             ViewFields=StringCollection(fields),
             RowLimit=row_limit,
-            ViewTypeKind=view_type,
+            ViewTypeKind=_view_type_kind(view_type),
             Paged=paged,
             PersonalView=personal_view,
             **kwargs,
@@ -108,7 +138,9 @@ class ViewCollection(EntityCollection[View]):
             title: The display name of the view.
             fields: Internal names of fields to include in the view.
             row_limit: Maximum number of items per page.
-            view_type: View kind (``"HTML"``, ``"Grid"``, ``"Calendar"``).
+            view_type: View kind — either an integer ``ViewTypeKind`` or its name
+                (``"HTML"``, ``"GRID"``, ``"CALENDAR"``, ...). A read returns
+                the name; the ``Add`` operation expects the integer.
             paged: Whether the view supports paging.
             personal_view: If True, creates a personal (user-specific) view.
             **kwargs: Additional ``ViewCreationInformation`` properties.
@@ -144,7 +176,9 @@ class ViewCollection(EntityCollection[View]):
             title: The display name of the view (the match key).
             fields: Internal names of fields to include when creating the view.
             row_limit: Maximum number of items per page.
-            view_type: View kind (``"HTML"``, ``"Grid"``, ``"Calendar"``).
+            view_type: View kind — either an integer ``ViewTypeKind`` or its name
+                (``"HTML"``, ``"GRID"``, ``"CALENDAR"``, ...). A read returns
+                the name; the ``Add`` operation expects the integer.
             paged: Whether the view supports paging.
             personal_view: If True, creates a personal (user-specific) view.
             on_conflict: ``"skip"`` (keep the existing view) or ``"update"``
@@ -167,8 +201,8 @@ class ViewCollection(EntityCollection[View]):
             if row_limit is not None and view.row_limit != row_limit:
                 view.row_limit = row_limit
                 changed = True
-            if view_type is not None and view.view_type != view_type:
-                view.set_property("ViewType", view_type)
+            if view_type is not None and (view.view_type or "").upper() != _view_type_name(view_type):
+                view.set_property("ViewType", _view_type_name(view_type))
                 changed = True
             if paged is not None and view.paged != paged:
                 view.set_property("Paged", paged)
@@ -183,6 +217,9 @@ class ViewCollection(EntityCollection[View]):
             find=return_type.get,
             create_query=lambda: self._build_add_query(info, return_type),
             return_type=return_type,
+            # GetByTitle answers HTTP 200 with an empty body for a missing view
+            # (not 404), so a tolerant predicate is required to create it.
+            missing=lambda view: not view.is_loaded,
             on_conflict=on_conflict,
             reconcile=_reconcile,
         )

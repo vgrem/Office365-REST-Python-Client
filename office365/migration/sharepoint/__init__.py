@@ -35,6 +35,7 @@ from office365.migration.sharepoint.structure import (
     ListStructure,
     ViewDefinition,
     capture_list_structure,
+    provision_list_structure,
 )
 from office365.migration.sharepoint.tenant_assessor import MigrationTenantAssessor
 
@@ -63,5 +64,6 @@ __all__ = [
     "ViewDefinition",
     "capture_list_structure",
     "get_scan",
+    "provision_list_structure",
     "sharepoint_scan_pairs",
 ]

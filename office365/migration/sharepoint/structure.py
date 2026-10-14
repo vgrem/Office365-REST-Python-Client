@@ -1,10 +1,10 @@
-"""Capture a SharePoint list's *structure* (columns, content types, views).
+"""Capture and recreate a SharePoint list's *structure* (columns, content types, views).
 
 A whole-site migration recreates each target list container, but content copied
 into a list whose custom columns/content types/views do not exist yet has nowhere
 to land. This module takes a **read-only, serializable snapshot** of a source
-list's structure, so it can be inspected, persisted, and (in a later step)
-reprovisioned on the target before content is copied.
+list's structure (:func:`capture_list_structure`) and can replay it onto a target
+list (:func:`provision_list_structure`) before content is copied.
 
 ``capture_list_structure`` performs GETs only — it never writes. The snapshot is
 a plain tree of dataclasses that round-trips through :meth:`ListStructure.to_dict`
@@ -20,16 +20,24 @@ Scope, deliberately:
 * **Content types** — non-hidden content types with their ordered field links.
 * **Views** — non-hidden, non-personal views with their ordered columns.
 
-Provisioning the captured structure onto a target list is a separate step.
+Provisioning is idempotent: with ``on_conflict="skip"`` (default) it only creates
+what is missing, so a re-run is a no-op. The server assigns content type
+identifiers, so content types are matched and recreated **by name** (their
+``Id`` cannot be preserved over REST); field links are reconciled best-effort
+and any column the server refuses to link is reported back to the caller.
 """
 
 from __future__ import annotations
 
+import logging
 from dataclasses import asdict, dataclass
 from dataclasses import field as dc_field
 from typing import Any, Dict, List, Optional
 
+from office365.runtime.client_request_exception import ClientRequestException
 from office365.sharepoint.fields.builtin_field_name import SYSTEM_FIELD_NAMES
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "ContentTypeDefinition",
@@ -37,6 +45,7 @@ __all__ = [
     "ListStructure",
     "ViewDefinition",
     "capture_list_structure",
+    "provision_list_structure",
 ]
 
 #: Field properties requested per column. ``SchemaXml`` is explicit because it is
@@ -261,6 +270,16 @@ def _is_capturable_content_type(content_type: Any) -> bool:
     return bool(getattr(content_type, "string_id", None)) and not getattr(content_type, "hidden", False)
 
 
+#: Content types in this length range are base types (Item ``0x01``, Document
+#: ``0x0101``, ...); custom content types append a 32-hex-digit GUID.
+_MIN_CUSTOM_CONTENT_TYPE_ID_LENGTH = 20
+
+
+def _is_provisionable_content_type(definition: ContentTypeDefinition) -> bool:
+    """Skip base content types — they already exist on any target list."""
+    return len(definition.string_id or "") >= _MIN_CUSTOM_CONTENT_TYPE_ID_LENGTH
+
+
 def _schema_for_copy(field: Any) -> Optional[str]:
     """``SchemaXml`` stripped of origin attributes, when the field offers it."""
     copier = getattr(field, "schema_xml_for_copy", None)
@@ -317,3 +336,132 @@ def _view_definition(view: Any, field_names: List[Any]) -> ViewDefinition:
         view_query=getattr(view, "view_query", None),
         field_internal_names=[name for name in field_names if name],
     )
+
+
+def provision_list_structure(sp_list: Any, structure: ListStructure, *, on_conflict: str = "skip") -> List[str]:
+    """Recreate a captured list structure on ``sp_list`` (idempotent).
+
+    Ensures the captured user columns exist (creating missing ones from their
+    ``SchemaXml``), the custom content types exist (with their field links), and
+    the views exist. Existing structure is left intact with ``on_conflict="skip"``
+    (default); ``"update"`` reconciles content type metadata and view settings
+    where supported.
+
+    Unlike the deferred ``ensure_*`` primitives this executes the requests, so it
+    can be called right after creating/resolving the target list and before
+    content is copied. Run it again and it is a no-op.
+
+    Field links are reconciled best-effort: SharePoint Online rejects adding a
+    field link for a column that is not already inherited or auto-linked to the
+    content type (``Column '<name>' does not exist``). Such columns cannot be
+    attached over REST, so they are skipped and returned as warnings rather than
+    failing the whole provisioning.
+
+    Args:
+        sp_list: The target SharePoint list (its container must already exist).
+        structure: A snapshot from :func:`capture_list_structure`.
+        on_conflict: ``"skip"`` (default) or ``"update"``.
+
+    Returns:
+        Human-readable warnings for anything the server would not let us apply
+        (currently only unlinked content type columns); empty when fully applied.
+    """
+    if on_conflict not in ("skip", "update"):
+        raise ValueError(f"on_conflict must be 'skip' or 'update', got {on_conflict!r}")
+
+    warnings: List[str] = []
+
+    if structure.content_types_enabled:
+        _ensure_content_types_enabled(sp_list)
+
+    for definition in structure.fields:
+        if definition.schema_xml:
+            sp_list.fields.ensure_xml(definition.schema_xml, definition.internal_name)
+
+    provisionable = [item for item in structure.content_types if _is_provisionable_content_type(item)]
+    for definition in provisionable:
+        sp_list.content_types.ensure(
+            definition.name,
+            definition.description,
+            definition.group,
+            content_type_id=definition.string_id,
+            on_conflict=on_conflict,
+        )
+
+    if provisionable:
+        # Executes the queued field/content-type creates, then loads the (now
+        # created) content types so their field links can be reconciled.
+        loaded = {ct.name: ct for ct in sp_list.content_types.get().execute_query() if ct.name}
+        for definition in provisionable:
+            target = loaded.get(definition.name)
+            if target is not None and definition.field_internal_names:
+                warnings.extend(_reconcile_field_links(target, definition.field_internal_names))
+
+    for view in structure.views:
+        sp_list.views.ensure_view(
+            view.title,
+            fields=list(view.field_internal_names) or None,
+            row_limit=view.row_limit,
+            view_type=view.view_type,
+            paged=view.paged,
+            personal_view=view.personal_view,
+            on_conflict=on_conflict,
+        )
+
+    sp_list.execute_query()
+    return warnings
+
+
+def _ensure_content_types_enabled(sp_list: Any) -> None:
+    """Turn on content types on the list, only when it is currently off."""
+
+    def _enable(_: Any) -> None:
+        if getattr(sp_list, "content_types_enabled", None) is not True:
+            sp_list.set_property("ContentTypesEnabled", True)
+            sp_list.update()
+
+    sp_list.ensure_property("ContentTypesEnabled").after_execute(_enable)
+
+
+def _reconcile_field_links(content_type: Any, internal_names: List[str]) -> List[str]:
+    """Add any missing field links to a content type and restore their order.
+
+    Returns a list of warnings for columns the server would not link. Adding a
+    link for a ready column is a no-op; adding one for a column SharePoint does
+    not consider part of the content type fails (``Column '<name>' does not
+    exist``), which is a REST limitation rather than a client error, so it is
+    reported instead of raised.
+    """
+    warnings: List[str] = []
+    name = content_type.name or content_type.string_id or "<content type>"
+    try:
+        links = content_type.field_links.get().execute_query()
+    except ClientRequestException as exc:
+        return [f"content type '{name}': field links could not be read: {_message(exc)}"]
+
+    existing = {link.field_internal_name for link in links}
+    added = False
+    for internal_name in internal_names:
+        if internal_name in existing:
+            continue
+        try:
+            content_type.field_links.add(internal_name).execute_query()
+        except ClientRequestException as exc:
+            warning = f"content type '{name}': column '{internal_name}' was not linked: {_message(exc)}"
+            logger.warning(warning)
+            warnings.append(warning)
+            continue
+        added = True
+    if added:
+        try:
+            content_type.field_links.reorder(list(internal_names)).execute_query()
+        except ClientRequestException as exc:
+            warning = f"content type '{name}': field link order was not applied: {_message(exc)}"
+            logger.warning(warning)
+            warnings.append(warning)
+    return warnings
+
+
+def _message(exc: ClientRequestException) -> str:
+    """Best-effort short description of a request failure."""
+    return getattr(exc, "message", None) or str(exc)

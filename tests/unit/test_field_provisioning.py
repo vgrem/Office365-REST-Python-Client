@@ -237,6 +237,41 @@ def test_ensure_creates_rich_field_when_missing():
     assert list(field.choices) == ["A", "C"]
 
 
+# --- schema-XML create path (migration fidelity) -----------------------------
+
+
+_SCHEMA = (
+    '<Field ID="{id}" Name="ProjectType" StaticName="ProjectType" '
+    'DisplayName="Project Type" Type="Choice" Format="Dropdown">'
+    "<CHOICES><CHOICE>Internal</CHOICE><CHOICE>External</CHOICE></CHOICES></Field>"
+)
+
+
+def test_ensure_xml_creates_when_missing():
+    ctx, transport = _sp(
+        [
+            _NOT_FOUND,
+            _existing(Title="Project Type", InternalName="ProjectType", FieldTypeKind=6),
+        ]
+    )
+
+    field = ctx.web.lists.get_by_title("Tasks").fields.ensure_xml(_SCHEMA, "ProjectType").execute_query()
+
+    assert transport.calls == 2  # noqa: PLR2004
+    assert "getByInternalNameOrTitle('ProjectType')" in transport.requests[0].url
+    assert transport.requests[-1].url.endswith("Fields/CreateFieldAsXml")
+    assert field.internal_name == "ProjectType"
+
+
+def test_ensure_xml_keeps_existing_column():
+    ctx, transport = _sp([_existing(Title="Project Type", InternalName="ProjectType", FieldTypeKind=6)])
+
+    field = ctx.web.lists.get_by_title("Tasks").fields.ensure_xml(_SCHEMA, "ProjectType").execute_query()
+
+    assert transport.calls == 1  # looked up only, nothing created
+    assert field.internal_name == "ProjectType"
+
+
 # --- schema copy -------------------------------------------------------------
 
 
