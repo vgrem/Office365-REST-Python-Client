@@ -33,6 +33,7 @@ migration/
 |---|---|---|
 | Assess a site (site + subsites) for migration readiness | [`assess/assess_site.py`](./assess/assess_site.py) | Read access |
 | Bulk-assess a list of sites | [`assess/assess_bulk.py`](./assess/assess_bulk.py) | Read access |
+| Capture a list's structure (columns/content types/views) as JSON | [`assess/capture_structure.py`](./assess/capture_structure.py) | Read access |
 
 ```python
 from office365.migration import MigrationAssessor

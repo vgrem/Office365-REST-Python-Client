@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **List structure capture for SharePoint migration:**
+  `office365.migration.sharepoint.capture_list_structure(sp_list)` returns a
+  read-only, JSON-serializable `ListStructure` snapshot of a list's **columns**
+  (with `SchemaXml` prepared for `CreateFieldAsXml`), **content types** (with
+  their ordered field links), and **views** (with their ordered columns), plus
+  the container metadata. Built-in/system and framework columns (hidden or not
+  deletable), hidden content types, and hidden/personal views are skipped. The
+  snapshot round-trips through `ListStructure.to_dict()` /
+  `ListStructure.from_dict(...)`, so it can be inspected, persisted, and later
+  provisioned onto a target list before content is copied. It issues GET
+  requests only — it never writes.
 - **Whole-site (same-tenant) SharePoint migration:** `MigrationSession.add_site_task(...)`
   resolves a `MigrationTask(migrate_all=True)` into **one resumable job per list
   or document library** (each with its own manifest/checkpoint), and

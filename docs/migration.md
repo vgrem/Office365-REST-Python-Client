@@ -147,9 +147,37 @@ SharePoint infrastructure templates, and non-deletable system lists are skipped.
 
 Target lists are created on demand (by title, with the source template type),
 but **only the container** — fields, content types and views are not recreated
-yet, so items that use custom columns may fail until that structure is
-provisioned. The server-side Migration API path is per-library and not supported
-for a whole-site task.
+by the runner. Use `capture_list_structure` to snapshot that structure (below)
+so it can be provisioned before content is copied. The server-side Migration API
+path is per-library and not supported for a whole-site task.
+
+### Capturing list structure
+
+`capture_list_structure(sp_list)` reads a list's **columns** (with `SchemaXml`
+prepared for `CreateFieldAsXml`), **content types** (with their ordered field
+links), and **views** (with their ordered columns) into a read-only,
+JSON-serializable `ListStructure` snapshot. Built-in/system and framework
+columns, hidden content types, and hidden/personal views are skipped, and only
+GET requests are issued:
+
+```python
+import json
+
+from office365.migration.sharepoint import ListStructure, capture_list_structure
+
+sp_list = source_ctx.web.lists.get_by_title("Projects")
+structure = capture_list_structure(sp_list)
+print(structure.title, len(structure.fields), len(structure.content_types), len(structure.views))
+
+with open("projects.structure.json", "w", encoding="utf-8") as fh:
+    json.dump(structure.to_dict(), fh, indent=2)
+
+with open("projects.structure.json", encoding="utf-8") as fh:
+    restored = ListStructure.from_dict(json.load(fh))
+```
+
+A snapshot can be inspected, persisted, and later replayed. Reprovisioning it
+onto a target list is a separate step.
 
 ## Fidelity
 

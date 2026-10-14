@@ -29,14 +29,24 @@ from office365.migration.sharepoint.scanners import (
     SiteLockedScanner,
     SiteScanSummary,
 )
+from office365.migration.sharepoint.structure import (
+    ContentTypeDefinition,
+    FieldDefinition,
+    ListStructure,
+    ViewDefinition,
+    capture_list_structure,
+)
 from office365.migration.sharepoint.tenant_assessor import MigrationTenantAssessor
 
 __all__ = [
     "AssessmentOptions",
     "BaseScanner",
+    "ContentTypeDefinition",
+    "FieldDefinition",
     "FieldScanner",
     "FileScanner",
     "LargeSitesScanner",
+    "ListStructure",
     "MigrationAssessor",
     "MigrationTenantAssessor",
     "PathScanner",
@@ -50,6 +60,8 @@ __all__ = [
     "SharePointListTarget",
     "SiteLockedScanner",
     "SiteScanSummary",
+    "ViewDefinition",
+    "capture_list_structure",
     "get_scan",
     "sharepoint_scan_pairs",
 ]
