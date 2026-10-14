@@ -26,12 +26,16 @@ original caller and **does not require authentication**; it can even live on a
 different host (e.g. ``api.onedrive.com``). The poller therefore does not attach
 credentials by default — pass ``authenticate=True`` for services such as Azure
 that do require them.
+
+An in-flight wait can be cancelled cooperatively with
+:meth:`OperationPoller.cancel` (or :meth:`OperationPoller.cancel_async`).
 """
 
 from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Awaitable, Callable
@@ -63,6 +67,9 @@ SUCCESS_STATUSES = frozenset({"completed", "succeeded", "success", "finished"})
 
 #: Operation statuses that mean the work finished with a failure.
 FAILURE_STATUSES = frozenset({"failed", "failure", "cancelled", "canceled", "error"})
+
+#: Operation statuses that mean the work was cancelled rather than failed.
+CANCELLED_STATUSES = frozenset({"cancelled", "canceled"})
 
 _PENDING_HTTP = 202
 
@@ -166,6 +173,17 @@ class OperationStatus:
         return self.http_status >= 400  # noqa: PLR2004
 
     @property
+    def is_cancelled(self) -> bool:
+        """Whether the operation was cancelled (by the caller or the service).
+
+        Cancellation is terminal and **not** a rollback: whatever the service
+        already applied remains. A cancelled status also reports
+        :attr:`is_failure` for backward compatibility — use this property to
+        tell the two apart.
+        """
+        return self._status_key in CANCELLED_STATUSES
+
+    @property
     def is_terminal(self) -> bool:
         """Whether no further polling is needed.
 
@@ -251,6 +269,19 @@ class OperationFailedError(OperationError):
         super().__init__(f"Long-running operation failed: status={status.status!r}, error={status.error!r}")
 
 
+class OperationCancelledError(OperationFailedError):
+    """Raised when a polled operation reaches a cancelled terminal status.
+
+    A subclass of :class:`OperationFailedError` so existing handlers keep
+    working; check :attr:`OperationStatus.is_cancelled` to distinguish a
+    cancellation from a failure.
+    """
+
+    def __init__(self, status: OperationStatus) -> None:
+        self.status = status
+        OperationError.__init__(self, f"Long-running operation was cancelled: status={status.status!r}")
+
+
 class OperationTimeoutError(OperationError, TimeoutError):
     """Raised when an operation does not finish before the timeout."""
 
@@ -279,6 +310,9 @@ class OperationPoller:
             different host.
         on_progress: Optional default callback invoked with each
             :class:`OperationStatus` snapshot.
+        cancel_request: Optional request that cancels the operation server-side,
+            sent by :meth:`cancel` / :meth:`cancel_async` (service-specific, e.g.
+            a ``DELETE`` on a Graph operation resource).
         transport: Override the synchronous transport used by :meth:`wait`.
         async_transport: Override the transport used by :meth:`wait_async`.
         clock: Injectable monotonic clock (tests).
@@ -296,6 +330,7 @@ class OperationPoller:
         timeout: float = 1800.0,
         authenticate: bool = False,
         on_progress: OperationCallback | None = None,
+        cancel_request: "RequestOptions | None" = None,
         transport: "BaseTransport | None" = None,
         async_transport: "BaseTransport | None" = None,
         clock: Callable[[], float] = time.monotonic,
@@ -309,12 +344,14 @@ class OperationPoller:
         self._timeout = timeout
         self._authenticate = authenticate
         self._on_progress = on_progress
+        self._cancel_request = cancel_request
         self._transport = transport
         self._async_transport = async_transport
         self._clock = clock
         self._sleep = sleep
         self._async_sleep = async_sleep
         self._status: OperationStatus | None = None
+        self._cancelled = threading.Event()
 
     @classmethod
     def from_response(
@@ -378,6 +415,27 @@ class OperationPoller:
             status=self._status.status if self._status is not None else None,
         )
 
+    def cancel(self) -> None:
+        """Request cancellation of the long-running operation.
+
+        Sends the configured service-side cancel request (``cancel_request``) and
+        signals any in-flight :meth:`wait` — running in another thread — to stop
+        at the next poll boundary, where it raises
+        :class:`OperationCancelledError`. A later :meth:`wait` returns cancelled
+        immediately.
+
+        Cancellation is cooperative and **not** a rollback: work the service
+        already applied remains. Without a ``cancel_request`` this is
+        client-side only and the service operation keeps running.
+        """
+        self._cancelled.set()
+        self._send_cancel()
+
+    async def cancel_async(self) -> None:
+        """Async twin of :meth:`cancel`."""
+        self._cancelled.set()
+        await self._send_cancel_async()
+
     def wait(
         self,
         *,
@@ -401,6 +459,8 @@ class OperationPoller:
         effective_timeout = self._timeout if timeout is None else timeout
         deadline = self._clock() + effective_timeout
         while True:
+            if self._cancelled.is_set():
+                return self._finish(self._cancelled_status(), raise_on_failure)
             status = self._poll_sync(client_request, transport)
             self._record(status, on_progress)
             if status.http_status not in _RETRYABLE_HTTP and status.is_terminal:
@@ -413,24 +473,67 @@ class OperationPoller:
         timeout: float | None = None,
         on_progress: OperationCallback | None = None,
         raise_on_failure: bool = True,
+        cancel_on_task_cancel: bool = False,
     ) -> OperationStatus:
         """Await polling until the operation is terminal, without blocking the loop.
 
         Async twin of :meth:`wait`; the wait between polls yields to the event
         loop so concurrently-running tasks keep making progress.
+
+        Args:
+            cancel_on_task_cancel: When the surrounding task is cancelled, also
+                request server-side cancellation (via ``cancel_request``) before
+                the :class:`asyncio.CancelledError` propagates. Default ``False``
+                — cancelling the task stops *waiting* only; the service operation
+                keeps running.
         """
         client_request = self._context.pending_request()
         transport = self._async_transport or client_request.async_transport
         effective_timeout = self._timeout if timeout is None else timeout
         deadline = self._clock() + effective_timeout
-        while True:
-            status = await self._poll_async(client_request, transport)
-            self._record(status, on_progress)
-            if status.http_status not in _RETRYABLE_HTTP and status.is_terminal:
-                return self._finish(status, raise_on_failure)
-            await self._pause_async(status, deadline, effective_timeout)
+        try:
+            while True:
+                if self._cancelled.is_set():
+                    return self._finish(self._cancelled_status(), raise_on_failure)
+                status = await self._poll_async(client_request, transport)
+                self._record(status, on_progress)
+                if status.http_status not in _RETRYABLE_HTTP and status.is_terminal:
+                    return self._finish(status, raise_on_failure)
+                await self._pause_async(status, deadline, effective_timeout)
+        except asyncio.CancelledError:
+            if cancel_on_task_cancel:
+                try:
+                    await asyncio.shield(self._send_cancel_async())
+                except Exception:  # noqa: BLE001 - best effort; the cancellation must win
+                    pass
+            raise
 
     # -- internals ---------------------------------------------------------
+
+    @staticmethod
+    def _cancelled_status() -> OperationStatus:
+        """A synthetic terminal status for a client-requested cancellation."""
+        return OperationStatus(status="cancelled")
+
+    def _send_cancel(self) -> None:
+        """Send the service-side cancel request, when one was configured."""
+        if self._cancel_request is None:
+            return
+        client_request = self._context.pending_request()
+        transport = self._transport or client_request.transport
+        if self._authenticate:
+            client_request.beforeExecute(self._cancel_request)
+        transport.execute(self._cancel_request)
+
+    async def _send_cancel_async(self) -> None:
+        """Async twin of :meth:`_send_cancel`."""
+        if self._cancel_request is None:
+            return
+        client_request = self._context.pending_request()
+        transport = self._async_transport or client_request.async_transport
+        if self._authenticate:
+            await client_request.before_execute_async(self._cancel_request)
+        await transport.execute_async(self._cancel_request)
 
     def _build_request(self) -> RequestOptions:
         return RequestOptions(url=self._poll_url, method=HttpMethod.Get)
@@ -484,8 +587,11 @@ class OperationPoller:
 
     @staticmethod
     def _finish(status: OperationStatus, raise_on_failure: bool) -> OperationStatus:
-        if raise_on_failure and status.is_failure:
-            raise OperationFailedError(status)
+        if raise_on_failure:
+            if status.is_cancelled:
+                raise OperationCancelledError(status)
+            if status.is_failure:
+                raise OperationFailedError(status)
         return status
 
 
@@ -518,6 +624,7 @@ class LongRunningOperationResult(ClientResult[str]):
         self._authenticate = authenticate
         self._final_state_via = final_state_via
         self._last_status: OperationStatus | None = None
+        self._poller: OperationPoller | None = None
 
     @property
     def monitor_url(self) -> str:
@@ -569,6 +676,7 @@ class LongRunningOperationResult(ClientResult[str]):
     ) -> OperationStatus:
         """Poll (blocking) until the operation is terminal and return the status."""
         poller = self.to_poller(interval=interval, timeout=timeout, on_progress=on_progress)
+        self._poller = poller
         self._last_status = poller.wait(on_progress=on_progress, raise_on_failure=raise_on_failure)
         return self._last_status
 
@@ -582,5 +690,16 @@ class LongRunningOperationResult(ClientResult[str]):
     ) -> OperationStatus:
         """Await the operation to completion and return the terminal status."""
         poller = self.to_poller(interval=interval, timeout=timeout, on_progress=on_progress)
+        self._poller = poller
         self._last_status = await poller.wait_async(on_progress=on_progress, raise_on_failure=raise_on_failure)
         return self._last_status
+
+    def cancel(self) -> None:
+        """Request cancellation of the tracked operation.
+
+        Cancels the poller used by the most recent :meth:`wait` / :meth:`wait_async`
+        call, so an in-flight wait stops at the next poll boundary. See
+        :meth:`OperationPoller.cancel` for the full semantics.
+        """
+        if self._poller is not None:
+            self._poller.cancel()

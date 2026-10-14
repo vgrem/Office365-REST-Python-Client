@@ -155,6 +155,7 @@ if status.is_success:
 | `timeout` | Maximum seconds to wait before `OperationTimeoutError` (default `1800`) |
 | `authenticate` | Attach the context's credentials to each poll. Default `False`: Graph monitor URLs are unauthenticated and may live on another host (`api.onedrive.com`). Pass `True` for services such as Azure that require it |
 | `on_progress` | Called with every `OperationStatus` snapshot |
+| `cancel_request` | Optional request that cancels the operation server-side, sent by `cancel()` / `cancel_async()` |
 | `transport` / `async_transport` | Override the transport used by `wait()` / `wait_async()` |
 | `clock` / `sleep` / `async_sleep` | Injectable timing hooks (tests) |
 
@@ -182,21 +183,58 @@ present — i.e. the response was not an accepted async operation.
 
 `OperationStatus` is a dataclass snapshot: `status`, `http_status`,
 `percentage_complete`, `resource_id`, `resource_location`, `error`, and the raw
-`response`. Its `is_success` / `is_failure` / `is_terminal` predicates normalize
-the service's wording, so Graph (`completed`) and Azure (`Succeeded`) both work:
+`response`. Its `is_success` / `is_failure` / `is_terminal` / `is_cancelled`
+predicates normalize the service's wording, so Graph (`completed`) and Azure
+(`Succeeded`) both work:
 
 ```python
-from office365.runtime.lro import FAILURE_STATUSES, SUCCESS_STATUSES
+from office365.runtime.lro import CANCELLED_STATUSES, FAILURE_STATUSES, SUCCESS_STATUSES
 
 SUCCESS_STATUSES  # {"completed", "succeeded", "success", "finished"}
 FAILURE_STATUSES  # {"failed", "failure", "cancelled", "canceled", "error"}
+CANCELLED_STATUSES  # {"cancelled", "canceled"}
 ```
 
 - A `3xx` (redirect to the final result) is terminal.
 - A terminal failure raises `OperationFailedError(status)` from `wait()` unless
   you pass `raise_on_failure=False`.
-- `OperationError` is the base class of both `OperationFailedError` and
-  `OperationTimeoutError`.
+- A cancelled status also counts as a failure (for backward compatibility); use
+  `status.is_cancelled` to tell the two apart.
+- `OperationCancelledError` (a subclass of `OperationFailedError`) is raised for
+  a cancelled terminal status; `OperationError` is the base of all three.
+
+### Cancellation
+
+`OperationPoller.cancel()` (async: `cancel_async()`) requests cancellation. It
+sets a flag that any in-flight `wait()` / `wait_async()` — typically running in
+another thread or task — honors at the next poll boundary, where it raises
+`OperationCancelledError`. A `wait()` started after cancellation returns
+immediately.
+
+```python
+poller = OperationPoller.from_response(context, response)
+
+# Cancel from another thread while a blocking wait is in progress:
+poller.cancel()
+
+# Or have a cancelled task also stop the operation server-side:
+try:
+    await poller.wait_async(cancel_on_task_cancel=True)
+except asyncio.CancelledError:
+    ...
+```
+
+Cancellation semantics:
+
+- It is **cooperative, not a rollback**: work the service already applied stays.
+- It only reaches the service when a `cancel_request` was configured (a
+  service-specific call such as a `DELETE` on a Graph operation resource).
+  Without it, `cancel()` stops *waiting* only and the operation keeps running.
+- `wait_async(..., cancel_on_task_cancel=True)` forwards a task cancellation to
+  the service before the `asyncio.CancelledError` propagates; the default
+  (`False`) cancels the wait only.
+- Cancellation latency is at most one poll interval; a synthetic
+  `OperationStatus(status="cancelled")` is reported.
 
 ## Resume across processes: continuation tokens
 

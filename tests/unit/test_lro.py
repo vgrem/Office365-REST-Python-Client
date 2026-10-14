@@ -14,9 +14,11 @@ import asyncio
 from typing import Any
 
 import pytest
+from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.lro import (
     ContinuationToken,
+    OperationCancelledError,
     OperationFailedError,
     OperationPoller,
     OperationStatus,
@@ -24,7 +26,12 @@ from office365.runtime.lro import (
     resolve_poll_url,
 )
 from office365.sharepoint.client_context import ClientContext
-from tests._scripted_transport import AsyncScriptedTransport, ScriptedTransport, build_response
+from tests._scripted_transport import (
+    AsyncScriptedTransport,
+    RoutingTransport,
+    ScriptedTransport,
+    build_response,
+)
 
 _MONITOR = "https://api.onedrive.com/monitor/abc"
 
@@ -313,3 +320,128 @@ def test_wait_async_retries_throttled_status():
     status = asyncio.run(poller.wait_async())
     assert status.is_success
     assert clock.t == 4.0  # noqa: PLR2004
+
+
+# -- cancellation -----------------------------------------------------------
+
+
+def test_status_cancelled_is_recognized():
+    status = OperationStatus.from_response(_response(202, {"status": "Cancelled"}))
+    assert status.is_cancelled
+    assert status.is_terminal
+    # Cancelled stays a failure for backward compatibility; is_cancelled distinguishes.
+    assert status.is_failure
+    assert not status.is_success
+
+
+def test_wait_raises_cancelled_error():
+    transport = ScriptedTransport([_lro(202, {"status": "cancelled"})])
+    with pytest.raises(OperationCancelledError) as excinfo:
+        _poller(transport, _Clock()).wait()
+    assert excinfo.value.status.is_cancelled
+    # OperationCancelledError is an OperationFailedError, so old handlers still catch it.
+    assert isinstance(excinfo.value, OperationFailedError)
+
+
+def test_wait_can_return_cancelled_status():
+    transport = ScriptedTransport([_lro(202, {"status": "cancelled"})])
+    status = _poller(transport, _Clock()).wait(raise_on_failure=False)
+    assert status.is_cancelled
+
+
+def test_cancel_before_wait_raises_without_polling():
+    transport = ScriptedTransport([_lro(202, {"status": "completed"})])
+    poller = _poller(transport, _Clock())
+    poller.cancel()
+    with pytest.raises(OperationCancelledError):
+        poller.wait()
+    assert transport.calls == 0
+
+
+def test_cancel_stops_wait_at_poll_boundary():
+    clock = _Clock()
+    transport = ScriptedTransport([_lro(202, {"status": "inProgress"}), _lro(202, {"status": "completed"})])
+    holder: dict[str, OperationPoller] = {}
+
+    def sleepy(_seconds: float) -> None:
+        holder["poller"].cancel()  # simulate another thread cancelling mid-wait
+
+    poller = OperationPoller(_ctx(), _MONITOR, transport=transport, clock=clock.now, sleep=sleepy)
+    holder["poller"] = poller
+    with pytest.raises(OperationCancelledError):
+        poller.wait()
+    assert transport.calls == 1
+
+
+def test_cancel_sends_service_request():
+    clock = _Clock()
+    cancel_url = "https://api.onedrive.com/operations/abc"
+    transport = RoutingTransport(
+        [
+            (_MONITOR, _lro(202, {"status": "inProgress"})),
+            (cancel_url, {"http_status": 204}),
+        ]
+    )
+    cancel_request = RequestOptions(url=cancel_url, method=HttpMethod.Post)
+    poller = OperationPoller(
+        _ctx(),
+        _MONITOR,
+        transport=transport,
+        cancel_request=cancel_request,
+        clock=clock.now,
+        sleep=clock.sleep,
+    )
+    poller.cancel()
+    assert transport.calls == [cancel_url]
+
+
+def test_wait_async_stops_when_cancelled():
+    clock = _Clock()
+    transport = AsyncScriptedTransport([_lro(202, {"status": "completed"})])
+    poller = OperationPoller(_ctx(), _MONITOR, async_transport=transport, clock=clock.now, async_sleep=clock.asleep)
+    poller.cancel()
+    with pytest.raises(OperationCancelledError):
+        asyncio.run(poller.wait_async())
+    assert transport.calls == 0
+
+
+def test_wait_async_forwards_cancel_on_task_cancel():
+    clock = _Clock()
+    transport = AsyncScriptedTransport([_lro(202, {"status": "inProgress"}), {"http_status": 204}])
+    cancel_request = RequestOptions(url="https://api.onedrive.com/operations/abc", method=HttpMethod.Post)
+
+    async def asleep(_seconds: float) -> None:
+        raise asyncio.CancelledError
+
+    poller = OperationPoller(
+        _ctx(),
+        _MONITOR,
+        async_transport=transport,
+        cancel_request=cancel_request,
+        clock=clock.now,
+        async_sleep=asleep,
+    )
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(poller.wait_async(cancel_on_task_cancel=True))
+    assert transport.calls == 2  # noqa: PLR2004 - one poll + one cancel request
+
+
+def test_wait_async_task_cancel_does_not_forward_by_default():
+    clock = _Clock()
+    transport = AsyncScriptedTransport([_lro(202, {"status": "inProgress"})])
+    cancel_request = RequestOptions(url="https://api.onedrive.com/operations/abc", method=HttpMethod.Post)
+
+    async def asleep(_seconds: float) -> None:
+        raise asyncio.CancelledError
+
+    poller = OperationPoller(
+        _ctx(),
+        _MONITOR,
+        async_transport=transport,
+        cancel_request=cancel_request,
+        clock=clock.now,
+        async_sleep=asleep,
+    )
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(poller.wait_async())
+    assert transport.calls == 1
