@@ -119,6 +119,38 @@ filters, user mapping, Azure storage…); the subset the core enforces is mapped
 `to_options()`. Tasks can also be declared as `MigrationTask` objects or parsed
 from the SPMT JSON task format (`MigrationTask.from_json(...)`).
 
+### Whole-site migration
+
+A `MigrationTask(migrate_all=True)` covers **every list and document library** on
+the source site. `session.add_site_task(...)` resolves it into **one job per
+list** — each with its own manifest and checkpoint, so a large site resumes by
+list instead of restarting:
+
+```python
+from office365.migration import MigrationSession, MigrationTask
+
+session = MigrationSession().register(context=target_ctx)
+session.add_site_task(
+    task=MigrationTask.sharepoint(source_site_url, target_site_url, migrate_all=True),
+    exclude=["Site Assets"],
+    manifest_dir="state/manifests",
+    checkpoint_dir="state/checkpoints",
+)
+session.start()
+```
+
+The registered `context` is the **target**; a source on a different site
+collection in the **same tenant** is reached through an authenticated clone
+(`ClientContext.clone`), reusing the registered credentials. Document libraries
+use the file adapters, other lists use the record adapters. Hidden lists,
+SharePoint infrastructure templates, and non-deletable system lists are skipped.
+
+Target lists are created on demand (by title, with the source template type),
+but **only the container** — fields, content types and views are not recreated
+yet, so items that use custom columns may fail until that structure is
+provisioned. The server-side Migration API path is per-library and not supported
+for a whole-site task.
+
 ## Fidelity
 
 | Flag | Client-side runner | Server-side Migration API |

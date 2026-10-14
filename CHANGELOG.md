@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Whole-site (same-tenant) SharePoint migration:** `MigrationSession.add_site_task(...)`
+  resolves a `MigrationTask(migrate_all=True)` into **one resumable job per list
+  or document library** (each with its own manifest/checkpoint), and
+  `office365.migration.sharepoint.resolvers.resolve_site_task(...)` exposes the
+  underlying resolution. The registered `context` is the target; a source on a
+  different site collection in the same tenant is reached through an
+  authenticated `ClientContext.clone`. Document libraries use the file adapters,
+  record lists use the list adapters, and hidden/infrastructure/system lists are
+  skipped (`include`/`exclude` narrow the set). Target lists are created on
+  demand by title with the source template type, but **only the container** —
+  fields, content types and views are not recreated yet. Single-list task
+  resolution now also classifies a source as a library or a record list, and
+  reaches a different source site via a clone.
 - **Cooperative cancellation for long-running operations:**
   `OperationPoller.cancel()` / `cancel_async()` stop an in-flight `wait()` /
   `wait_async()` by raising the new

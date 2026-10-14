@@ -21,6 +21,7 @@ the registered ``ClientContext``).
 from __future__ import annotations
 
 import itertools
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -32,6 +33,24 @@ if TYPE_CHECKING:
     from office365.migration.tasks import MigrationTask
 
 __all__ = ["MigrationSession", "SessionTask"]
+
+
+def _site_list_slug(target) -> str:
+    """A filesystem-safe slug for a resolved target adapter (``library:<url>``)."""
+    label = getattr(target, "label", None)
+    text = str(label()) if callable(label) else type(target).__name__
+    text = text.split(":", 1)[-1]
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "-", text).strip("-")
+    return slug or "list"
+
+
+def _child_path(directory, label: str, name: str):
+    """``<directory>/<label>.<name>`` (or ``None`` when no directory is set)."""
+    if directory is None:
+        return None
+    from pathlib import Path
+
+    return Path(directory) / f"{label}.{name}"
 
 
 def _job_status(job: MigrationJob) -> dict:
@@ -111,6 +130,8 @@ class MigrationSession:
 
             task = MigrationTask(**descriptor)
         if task is not None:
+            if task.migrate_all:
+                raise ValueError("use add_site_task() for a whole-site (migrate_all) task")
             if self._context is None:
                 raise ValueError("register a ClientContext first (session.register(context=ctx))")
             from office365.migration.sharepoint.resolvers import resolve_task
@@ -125,6 +146,49 @@ class MigrationSession:
         )
         self._tasks.append(SessionTask(str(next(self._ids)), job, task))
         return job
+
+    def add_site_task(
+        self,
+        *,
+        task: "MigrationTask | None" = None,
+        options: MigrationOptions | None = None,
+        include=None,
+        exclude=None,
+        manifest_dir=None,
+        checkpoint_dir=None,
+        **descriptor,
+    ) -> list[MigrationJob]:
+        """Add a whole-site (``migrate_all``) task — one job per source list/library.
+
+        Returns the jobs created, in source order. Each job gets its own manifest
+        and checkpoint; pass ``manifest_dir`` / ``checkpoint_dir`` to persist them
+        as ``<index>-<list>.manifest.json`` / ``<index>-<list>.checkpoint.json`` so
+        a large site resumes per list instead of restarting.
+        """
+        if task is None and descriptor:
+            from office365.migration.tasks import MigrationTask
+
+            task = MigrationTask(**descriptor)
+        if task is None:
+            raise ValueError("a site task is required")
+        if self._context is None:
+            raise ValueError("register a ClientContext first (session.register(context=ctx))")
+        from office365.migration.sharepoint.resolvers import resolve_site_task
+
+        pairs = resolve_site_task(task, self._context, self._settings, include=include, exclude=exclude)
+        jobs: list[MigrationJob] = []
+        for index, (source, target) in enumerate(pairs, start=1):
+            label = f"{index:02d}-{_site_list_slug(target)}"
+            job = MigrationJob(
+                source,
+                target,
+                options if options is not None else self._options,
+                manifest_path=_child_path(manifest_dir, label, "manifest.json"),
+                checkpoint_path=_child_path(checkpoint_dir, label, "checkpoint.json"),
+            )
+            self._tasks.append(SessionTask(str(next(self._ids)), job, task))
+            jobs.append(job)
+        return jobs
 
     def remove_task(self, task) -> None:
         """Remove a task by its ``MigrationJob``, ``SessionTask`` or id."""
