@@ -37,9 +37,12 @@ lists, libraries, and content types. A **list column** is scoped to a
 single list. A content type references fields through **field links** that
 define column membership and display order.
 
-> **REST restriction:** a field link can only be added if the field already
-exists on the content type's parent. Add a new site column to a list (or to
-a parent content type) first, then link it to derived content types.
+> **REST restriction:** a field link can only be added if the field is already
+reachable from the content type's parent. SharePoint Online's REST API cannot
+attach a brand-new column to a content type — use CSOM or PnP PowerShell for
+that. Add a new site column to a list (its default content types pick it up
+automatically) or to a parent content type first, then link it to derived
+content types.
 
 ---
 

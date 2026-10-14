@@ -6,6 +6,10 @@ the target site — optionally from the same parent — and re-adds each
 field, creating the site column on the target when it does not exist
 yet (via its schema XML).
 
+Field links are reconciled best-effort: SharePoint Online's REST API cannot
+attach a brand-new column to a content type, so links that the server refuses
+are reported instead of aborting the clone.
+
 https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype
 """
 
@@ -80,7 +84,12 @@ def main():
                 continue
             field = target.web.fields.create_field_as_xml(schema).execute_query()
             print(f"  created field: {field_name}")
-        new_ct.field_links.add(field).execute_query()
+        # SharePoint Online's REST API cannot attach a brand-new column to a
+        # content type; only fields already reachable from the parent link.
+        try:
+            new_ct.field_links.add(field).execute_query()
+        except ClientRequestException as e:
+            print(f"  not linked (REST cannot attach a new column): {field_name} — {e}")
 
     if not args.keep:
         new_ct.delete_object().execute_query()

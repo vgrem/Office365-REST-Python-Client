@@ -75,9 +75,12 @@ It can then be associated with one or more lists.
 | Find which lists use a content type | [`find_usage.py`](./find_usage.py) | Read access | [Usage check](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
 
 > **REST restrictions:** a content type references fields through **field links**.
-> A field can only be linked when it already exists on the content type's
-> **parent** (a site column that is not on the parent cannot be linked via REST),
-> and a field link **inherited** from the parent is not removed by a REST
+> SharePoint Online's REST API cannot attach a **brand-new** column to a content
+> type: `POST .../FieldLinks` only succeeds for a column that is already reachable
+> from the content type's **parent** (and `SchemaXml` supplied when creating a
+> content type is ignored). Use CSOM or PnP PowerShell to attach a new column —
+> the examples here detect and report the refusal instead of failing silently. A
+> field link **inherited** from the parent is likewise not removed by a REST
 > `DELETE` (the server accepts the call but the link remains). A list's **default
 > content type** is the first entry of the list root folder's
 > `UniqueContentTypeOrder`; `ContentType.set_default()` rewrites that order for

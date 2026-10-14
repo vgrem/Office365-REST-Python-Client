@@ -31,7 +31,9 @@ def main():
         raise SystemExit("Failed to create content type")
     print(f"1. Created: {ct.name}  (id: {ct.string_id})")
 
-    # 2. Add a site column (field) to the content type
+    # 2. Add a site column (field) to the content type. 'Title' is inherited
+    #    from the Item parent, so this link is idempotent — SharePoint Online's
+    #    REST API cannot attach a brand-new column to a content type.
     field = ctx.web.fields.get_by_internal_name_or_title("Title")
     ct.field_links.add(field).execute_query()
     print(f"2. Added field: {field.internal_name}")

@@ -1,6 +1,12 @@
 """
 Change the display order of fields in a content type.
 
+Only fields that are **already linked** to the content type can be ordered:
+SharePoint Online's REST API cannot attach a brand-new column to a content
+type, so any requested field that is not linked yet is reported and skipped.
+The requested order is merged with the remaining linked fields so that no link
+is dropped.
+
 https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype
 """
 
@@ -27,17 +33,15 @@ def main():
     created = not existing.is_loaded
     ct = ctx.web.ensure_content_type(name=args.name).execute_query()
 
-    # Link any field that is not already part of the content type
-    current = {link.field_internal_name for link in ct.field_links.get().execute_query()}
-    for field_name in args.order:
-        if field_name in current:
-            continue
-        field = ctx.web.fields.get_by_internal_name_or_title(field_name)
-        ct.field_links.add(field).execute_query()
-        print(f"Field added: {field_name}")
+    linked = [link.field_internal_name for link in ct.field_links.get().execute_query() if link.field_internal_name]
+    missing = [name for name in args.order if name not in linked]
+    if missing:
+        print(f"Not linked (skipped, REST cannot attach a new column): {', '.join(missing)}")
 
-    ct.reorder_fields(args.order).execute_query()
-    print(f"Fields reordered: {' -> '.join(args.order)}")
+    requested = [name for name in args.order if name in linked]
+    new_order = requested + [name for name in linked if name not in requested]
+    ct.reorder_fields(new_order).execute_query()
+    print(f"Fields reordered: {' -> '.join(new_order)}")
 
     if created and not args.keep:
         ct.delete_object().execute_query()
