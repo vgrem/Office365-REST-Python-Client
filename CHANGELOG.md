@@ -184,6 +184,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Migration checkpoints are now crash-safe:** `office365.migration.checkpoint.Checkpoint.save`
+  wrote the JSON file in place, so a crash mid-write left a truncated file the
+  next run could not resume from. It now uses the same atomic
+  (temp file → `fsync` → rename) write as the streaming-import checkpoint, via
+  the new `office365.runtime.persistence.atomic_write_json` / `read_json` helpers
+  (also adopted by `ImportCheckpoint`).
 - **`ContentType.set_default`:** now works. It previously set a `Default`
   property that SharePoint's REST API does not expose on `SP.ContentType` (the
   server rejected the update with *"The property 'Default' does not exist on

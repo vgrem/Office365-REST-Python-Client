@@ -9,13 +9,13 @@ items — a checkpointed, idempotent, at-least-once migration.
 
 from __future__ import annotations
 
-import json
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from office365.migration.base import ItemStatus, MigrationItem, MigrationPhase
 from office365.runtime.converters.scalars import utc_now_iso
+from office365.runtime.persistence import atomic_write_json, read_json
 
 
 @dataclass
@@ -48,25 +48,26 @@ class Checkpoint:
         return sum(1 for v in self.items.values() if v == ItemStatus.DONE.value)
 
     def save(self, path: str | Path) -> None:
-        """Persist the checkpoint as JSON."""
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(
-                {
-                    "run_id": self.run_id,
-                    "phase": self.phase.value,
-                    "updated_at": self.updated_at,
-                    "source_watermark": self.source_watermark,
-                    "items": self.items,
-                },
-                f,
-                indent=2,
-            )
+        """Persist the checkpoint as JSON, atomically (crash-safe write-then-rename).
+
+        A crash mid-save never leaves a truncated file, so a resumed run always
+        reads either the previous or the complete new checkpoint.
+        """
+        atomic_write_json(
+            path,
+            {
+                "run_id": self.run_id,
+                "phase": self.phase.value,
+                "updated_at": self.updated_at,
+                "source_watermark": self.source_watermark,
+                "items": self.items,
+            },
+        )
 
     @classmethod
     def load(cls, path: str | Path) -> "Checkpoint":
         """Load a checkpoint previously persisted with :meth:`save`."""
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = read_json(path)
         return cls(
             run_id=data["run_id"],
             phase=MigrationPhase(data.get("phase", MigrationPhase.CREATED.value)),

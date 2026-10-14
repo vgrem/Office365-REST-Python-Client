@@ -54,6 +54,7 @@ from typing_extensions import Self
 from office365.runtime.client_result import ClientResult
 from office365.runtime.limits import DEFAULT_BATCH_SIZE
 from office365.runtime.operations import OperationStats
+from office365.runtime.persistence import atomic_write_json, read_json
 
 if TYPE_CHECKING:
     from office365.runtime.operations import ProgressCallback
@@ -120,34 +121,24 @@ class ImportCheckpoint:
     updated_at: str = ""
 
     def save(self, path: Union[str, PathLike]) -> None:
-        """Persist the checkpoint as JSON, atomically (write-then-rename).
-
-        The rename is atomic, so a crash mid-write never leaves a truncated file
-        that would break the next resume.
-        """
+        """Persist the checkpoint as JSON, atomically (crash-safe write-then-rename)."""
         self.updated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
-        target = Path(path)
-        tmp = target.with_name(f".{target.name}.tmp")
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(
-                {
-                    "cursor": self.cursor,
-                    "chunks": self.chunks,
-                    "errors": self.errors,
-                    "failures": self.failures,
-                    "signature": self.signature,
-                    "updated_at": self.updated_at,
-                },
-                f,
-                indent=2,
-            )
-        tmp.replace(target)
+        atomic_write_json(
+            path,
+            {
+                "cursor": self.cursor,
+                "chunks": self.chunks,
+                "errors": self.errors,
+                "failures": self.failures,
+                "signature": self.signature,
+                "updated_at": self.updated_at,
+            },
+        )
 
     @classmethod
     def load(cls, path: Union[str, PathLike]) -> "ImportCheckpoint":
         """Load a checkpoint previously persisted with :meth:`save`."""
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = read_json(path)
         return cls(
             cursor=int(data.get("cursor", 0)),
             chunks=int(data.get("chunks", 0)),

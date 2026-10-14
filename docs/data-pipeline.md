@@ -73,7 +73,9 @@ lst.from_dataframe(df, key=["region", "date"], on_conflict="update").execute_bat
 For long runs, add a `checkpoint`: the committed cursor is persisted after each
 chunk and a source **signature** (format, chunk size, key columns) is recorded.
 If the signature changes between runs, the chunk skip is discarded and the source
-is re-scanned — the key keeps it duplicate-free.
+is re-scanned — the key keeps it duplicate-free. Checkpoints are written
+**atomically** (temp file → `fsync` → rename), so a crash mid-save never leaves a
+truncated file that would break the next resume.
 
 The bulk pipeline and the single-entity verb share one `on_conflict` vocabulary
 (`"skip"` / `"update"`): to reconcile **one** entity by a natural key, use

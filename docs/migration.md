@@ -43,7 +43,8 @@ job.export_reports("reports/")
 Runs are **idempotent and resumable**: pass `manifest_path` / `checkpoint_path`
 and a paused or failed run continues where it stopped (`job.resume()`). Set
 `MigrationOptions(incremental=True)` to skip items at or below the persisted
-watermark.
+watermark. Checkpoints are persisted **atomically** (temp file → `fsync` →
+rename), so a crash mid-save never corrupts the file the next run resumes from.
 
 ## Idempotency & conflicts
 
