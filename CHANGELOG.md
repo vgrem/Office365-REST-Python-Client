@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - **Cooperative cancellation for long-running operations:**
   `OperationPoller.cancel()` / `cancel_async()` stop an in-flight `wait()` /
-  `wait_async()` at the next poll boundary by raising the new
+  `wait_async()` by raising the new
   `OperationCancelledError` (a subclass of `OperationFailedError`, so existing
   handlers keep working). Cancellation is cooperative and **not** a rollback:
   work the service already applied remains. Pass a service-specific
@@ -18,7 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   without one, cancellation is client-side only. `OperationStatus.is_cancelled`
   and `CANCELLED_STATUSES` distinguish a cancelled terminal state from a
   failure, and `wait_async(cancel_on_task_cancel=True)` forwards an
-  `asyncio.CancelledError` to the service before it propagates.
+  `asyncio.CancelledError` to the service before it propagates. `cancel()` also
+  **wakes a waiting `wait()` / `wait_async()` immediately** (a blocking `wait()`
+  in another thread, or a running `wait_async()` on its event loop), so even a
+  long `Retry-After` does not delay cancellation.
 - **Unified `upsert` primitive (idempotent create-or-reconcile):**
   - `EntityCollection.upsert(key, value, /, *, on_conflict="update", **properties)`
     is the single-entity counterpart of the keyed bulk import. It finds the

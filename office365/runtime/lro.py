@@ -316,8 +316,12 @@ class OperationPoller:
         transport: Override the synchronous transport used by :meth:`wait`.
         async_transport: Override the transport used by :meth:`wait_async`.
         clock: Injectable monotonic clock (tests).
-        sleep: Injectable synchronous sleep (tests).
-        async_sleep: Injectable asynchronous sleep (tests).
+        sleep: Override the wait between polls. By default the poller waits on
+            an internal event, so :meth:`cancel` wakes a blocking :meth:`wait`
+            immediately; pass a callable to take over the waiting (tests).
+        async_sleep: Override the async wait between polls. By default the
+            poller races the delay against cancellation, so :meth:`cancel` /
+            :meth:`cancel_async` wake :meth:`wait_async` immediately.
     """
 
     def __init__(
@@ -334,8 +338,8 @@ class OperationPoller:
         transport: "BaseTransport | None" = None,
         async_transport: "BaseTransport | None" = None,
         clock: Callable[[], float] = time.monotonic,
-        sleep: Callable[[float], None] = time.sleep,
-        async_sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+        sleep: Callable[[float], None] | None = None,
+        async_sleep: Callable[[float], Awaitable[None]] | None = None,
     ) -> None:
         self._context = context
         self._poll_url = poll_url
@@ -352,6 +356,8 @@ class OperationPoller:
         self._async_sleep = async_sleep
         self._status: OperationStatus | None = None
         self._cancelled = threading.Event()
+        self._loop: asyncio.AbstractEventLoop | None = None
+        self._async_cancelled: asyncio.Event | None = None
 
     @classmethod
     def from_response(
@@ -427,14 +433,31 @@ class OperationPoller:
         Cancellation is cooperative and **not** a rollback: work the service
         already applied remains. Without a ``cancel_request`` this is
         client-side only and the service operation keeps running.
+
+        A blocking :meth:`wait` is woken immediately, even from another thread;
+        a running :meth:`wait_async` is woken on its event loop.
         """
         self._cancelled.set()
+        self._wake_async_waiters()
         self._send_cancel()
 
     async def cancel_async(self) -> None:
         """Async twin of :meth:`cancel`."""
         self._cancelled.set()
+        if self._async_cancelled is not None:
+            self._async_cancelled.set()
         await self._send_cancel_async()
+
+    def _wake_async_waiters(self) -> None:
+        """Signal the async wait loop from any thread (thread-safe)."""
+        event = self._async_cancelled
+        loop = self._loop
+        if event is None or loop is None or loop.is_closed():
+            return
+        try:
+            loop.call_soon_threadsafe(event.set)
+        except RuntimeError:  # loop closed between the check and the call
+            pass
 
     def wait(
         self,
@@ -491,6 +514,10 @@ class OperationPoller:
         transport = self._async_transport or client_request.async_transport
         effective_timeout = self._timeout if timeout is None else timeout
         deadline = self._clock() + effective_timeout
+        self._async_cancelled = asyncio.Event()
+        if self._cancelled.is_set():
+            self._async_cancelled.set()
+        self._loop = asyncio.get_running_loop()
         try:
             while True:
                 if self._cancelled.is_set():
@@ -507,6 +534,9 @@ class OperationPoller:
                 except Exception:  # noqa: BLE001 - best effort; the cancellation must win
                     pass
             raise
+        finally:
+            self._loop = None
+            self._async_cancelled = None
 
     # -- internals ---------------------------------------------------------
 
@@ -577,13 +607,29 @@ class OperationPoller:
         delay = self._delay(status)
         if self._clock() + delay > deadline:
             raise OperationTimeoutError(timeout)
-        self._sleep(delay)
+        if self._sleep is not None:
+            self._sleep(delay)
+        else:
+            # Wake immediately when cancel() is called (including from another thread).
+            self._cancelled.wait(delay)
 
     async def _pause_async(self, status: OperationStatus, deadline: float, timeout: float) -> None:
         delay = self._delay(status)
         if self._clock() + delay > deadline:
             raise OperationTimeoutError(timeout)
-        await self._async_sleep(delay)
+        if self._async_sleep is not None:
+            await self._async_sleep(delay)
+            return
+        event = self._async_cancelled
+        if event is None or delay <= 0:
+            await asyncio.sleep(max(0.0, delay))
+            return
+        try:
+            # Race the delay against cancellation so a long Retry-After doesn't
+            # delay a cancel; asyncio.wait_for cancels the pending wait on timeout.
+            await asyncio.wait_for(event.wait(), timeout=delay)
+        except asyncio.TimeoutError:
+            pass
 
     @staticmethod
     def _finish(status: OperationStatus, raise_on_failure: bool) -> OperationStatus:

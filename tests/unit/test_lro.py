@@ -11,6 +11,8 @@ driven through a native-async transport.
 from __future__ import annotations
 
 import asyncio
+import threading
+import time
 from typing import Any
 
 import pytest
@@ -444,4 +446,56 @@ def test_wait_async_task_cancel_does_not_forward_by_default():
     )
     with pytest.raises(asyncio.CancelledError):
         asyncio.run(poller.wait_async())
+    assert transport.calls == 1
+
+
+def test_cancel_wakes_blocking_wait_promptly():
+    clock = _Clock()
+    transport = ScriptedTransport([_lro(202, {"status": "inProgress"}, {"Retry-After": "2"})])
+    poller = OperationPoller(_ctx(), _MONITOR, transport=transport, clock=clock.now, interval=2)
+
+    timer = threading.Timer(0.05, poller.cancel)
+    timer.start()
+    started = time.monotonic()
+    try:
+        with pytest.raises(OperationCancelledError):
+            poller.wait()
+    finally:
+        timer.cancel()
+    # Would take ~2s (the Retry-After) if the wait were not interruptible.
+    assert time.monotonic() - started < 1.0
+    assert transport.calls == 1
+
+
+def test_cancel_async_wakes_wait_async_promptly():
+    clock = _Clock()
+    transport = AsyncScriptedTransport([_lro(202, {"status": "inProgress"}, {"Retry-After": "2"})])
+    poller = OperationPoller(_ctx(), _MONITOR, async_transport=transport, clock=clock.now, interval=2)
+
+    async def scenario() -> None:
+        task = asyncio.ensure_future(poller.wait_async())
+        await asyncio.sleep(0.05)
+        await poller.cancel_async()
+        with pytest.raises(OperationCancelledError):
+            await asyncio.wait_for(task, timeout=1)
+
+    asyncio.run(scenario())
+    assert transport.calls == 1
+
+
+def test_cancel_from_thread_wakes_wait_async():
+    clock = _Clock()
+    transport = AsyncScriptedTransport([_lro(202, {"status": "inProgress"}, {"Retry-After": "2"})])
+    poller = OperationPoller(_ctx(), _MONITOR, async_transport=transport, clock=clock.now, interval=2)
+
+    async def scenario() -> None:
+        timer = threading.Timer(0.05, poller.cancel)
+        timer.start()
+        try:
+            with pytest.raises(OperationCancelledError):
+                await asyncio.wait_for(poller.wait_async(), timeout=1)
+        finally:
+            timer.cancel()
+
+    asyncio.run(scenario())
     assert transport.calls == 1

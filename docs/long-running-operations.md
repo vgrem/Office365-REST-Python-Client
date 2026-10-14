@@ -157,7 +157,7 @@ if status.is_success:
 | `on_progress` | Called with every `OperationStatus` snapshot |
 | `cancel_request` | Optional request that cancels the operation server-side, sent by `cancel()` / `cancel_async()` |
 | `transport` / `async_transport` | Override the transport used by `wait()` / `wait_async()` |
-| `clock` / `sleep` / `async_sleep` | Injectable timing hooks (tests) |
+| `clock` / `sleep` / `async_sleep` | Injectable timing hooks (tests). By default the poller waits on an interruptible event, so `cancel()` wakes a waiting `wait()` / `wait_async()` immediately |
 
 The poller never sleeps past the deadline: if the next delay would exceed
 `timeout`, it raises `OperationTimeoutError(timeout)` instead of waiting. It
@@ -206,10 +206,12 @@ CANCELLED_STATUSES  # {"cancelled", "canceled"}
 ### Cancellation
 
 `OperationPoller.cancel()` (async: `cancel_async()`) requests cancellation. It
-sets a flag that any in-flight `wait()` / `wait_async()` — typically running in
-another thread or task — honors at the next poll boundary, where it raises
+sets a flag **and wakes any in-flight `wait()` / `wait_async()`** — typically
+running in another thread or task — immediately, where the wait raises
 `OperationCancelledError`. A `wait()` started after cancellation returns
-immediately.
+immediately. Even a long `Retry-After` does not delay cancellation. (Passing a
+custom `sleep` / `async_sleep` takes over the wait, and then cancellation is
+honored only when that callable returns.)
 
 ```python
 poller = OperationPoller.from_response(context, response)
@@ -233,8 +235,9 @@ Cancellation semantics:
 - `wait_async(..., cancel_on_task_cancel=True)` forwards a task cancellation to
   the service before the `asyncio.CancelledError` propagates; the default
   (`False`) cancels the wait only.
-- Cancellation latency is at most one poll interval; a synthetic
-  `OperationStatus(status="cancelled")` is reported.
+- Cancellation is prompt: a blocking `wait()` running in another thread is
+  woken immediately, and a running `wait_async()` is woken on its event loop. A
+  synthetic `OperationStatus(status="cancelled")` is reported.
 
 ## Resume across processes: continuation tokens
 
