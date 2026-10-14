@@ -7,7 +7,6 @@ from typing_extensions import Self
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from office365.sharepoint.contenttypes.fieldlinks.collection import FieldLinkCollection
@@ -70,7 +69,7 @@ class ContentType(Entity):
             field_names (list[str]): Rearranges the collection of fields in the order in which field internal names are
                 specified.
         """
-        payload = {"fieldNames": StringCollection(field_names)}
+        payload = {"fieldNames": list(field_names)}
         qry = ServiceOperationQuery(self, "ReorderFields", None, payload)
         self.context.add_query(qry)
         return self

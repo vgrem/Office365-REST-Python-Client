@@ -7,7 +7,6 @@ from typing_extensions import Self
 from office365.runtime.paths.service_operation import ServiceOperationPath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.types.collections import StringCollection
 from office365.sharepoint.contenttypes.fieldlinks.field_link import FieldLink
 from office365.sharepoint.entity_collection import EntityCollection
 from office365.sharepoint.fields.field import Field
@@ -58,7 +57,7 @@ class FieldLinkCollection(EntityCollection[FieldLink]):
             internal_names (list[str]): Specifies field internal names that are arranged in the order in which the
                 collection of field links is reordered.
         """
-        payload = {"internalNames": StringCollection(internal_names)}
+        payload = {"internalNames": list(internal_names)}
         qry = ServiceOperationQuery(self, "Reorder", None, payload)
         self.context.add_query(qry)
         return self
