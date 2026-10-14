@@ -145,11 +145,13 @@ collection in the **same tenant** is reached through an authenticated clone
 use the file adapters, other lists use the record adapters. Hidden lists,
 SharePoint infrastructure templates, and non-deletable system lists are skipped.
 
-Target lists are created on demand (by title, with the source template type),
-but **only the container** — fields, content types and views are not recreated
-by the runner. Use `capture_list_structure` to snapshot that structure (below)
-so it can be provisioned before content is copied. The server-side Migration API
-path is per-library and not supported for a whole-site task.
+Target lists are created on demand (by title, with the source template type) and,
+by default, each list's **columns, content types and views are replayed** from
+the source before content is copied (`provision_structure=True`) — the same
+snapshot/replay used by `capture_list_structure` / `provision_list_structure`
+(below). Pass `provision_structure=False` to only create the containers. The
+server-side Migration API path is per-library and not supported for a whole-site
+task.
 
 ### Capturing list structure
 

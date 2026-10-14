@@ -154,6 +154,7 @@ class MigrationSession:
         options: MigrationOptions | None = None,
         include=None,
         exclude=None,
+        provision_structure: bool = True,
         manifest_dir=None,
         checkpoint_dir=None,
         **descriptor,
@@ -163,7 +164,9 @@ class MigrationSession:
         Returns the jobs created, in source order. Each job gets its own manifest
         and checkpoint; pass ``manifest_dir`` / ``checkpoint_dir`` to persist them
         as ``<index>-<list>.manifest.json`` / ``<index>-<list>.checkpoint.json`` so
-        a large site resumes per list instead of restarting.
+        a large site resumes per list instead of restarting. With
+        ``provision_structure`` (the default), each target list's columns, content
+        types and views are replayed from the source before content is copied.
         """
         if task is None and descriptor:
             from office365.migration.tasks import MigrationTask
@@ -175,7 +178,14 @@ class MigrationSession:
             raise ValueError("register a ClientContext first (session.register(context=ctx))")
         from office365.migration.sharepoint.resolvers import resolve_site_task
 
-        pairs = resolve_site_task(task, self._context, self._settings, include=include, exclude=exclude)
+        pairs = resolve_site_task(
+            task,
+            self._context,
+            self._settings,
+            include=include,
+            exclude=exclude,
+            provision_structure=provision_structure,
+        )
         jobs: list[MigrationJob] = []
         for index, (source, target) in enumerate(pairs, start=1):
             label = f"{index:02d}-{_site_list_slug(target)}"

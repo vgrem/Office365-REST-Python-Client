@@ -40,8 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   authenticated `ClientContext.clone`. Document libraries use the file adapters,
   record lists use the list adapters, and hidden/infrastructure/system lists are
   skipped (`include`/`exclude` narrow the set). Target lists are created on
-  demand by title with the source template type, but **only the container** —
-  fields, content types and views are not recreated yet. Single-list task
+  demand by title with the source template type, and each list's **columns,
+  content types and views are replayed** from the source before content is
+  copied (pass `provision_structure=False` to only create the containers).
+  Single-list task
   resolution now also classifies a source as a library or a record list, and
   reaches a different source site via a clone.
 - **Cooperative cancellation for long-running operations:**

@@ -15,8 +15,8 @@ nothing. ``--apply`` performs the copy, persisting per-list state under
 and write access to the target.
 
 Only the list *containers* are created on the target — fields, content types and
-views are not recreated yet, so items that use custom columns may fail until that
-structure is provisioned separately.
+views are recreated from the source before content is copied
+(``--no-provision-structure`` to only create the containers).
 """
 
 from __future__ import annotations
@@ -44,6 +44,11 @@ def main():
     parser.add_argument("--include", help="comma-separated list titles to migrate (default: all)")
     parser.add_argument("--exclude", help="comma-separated list titles to skip")
     parser.add_argument("--work", default=".migration", help="folder for manifests/checkpoints (default: .migration)")
+    parser.add_argument(
+        "--no-provision-structure",
+        action="store_true",
+        help="only create target list containers (skip columns/content types/views)",
+    )
     parser.add_argument("--apply", action="store_true", help="perform the migration (default: dry run)")
     args = parser.parse_args()
 
@@ -75,6 +80,7 @@ def main():
         task=MigrationTask.sharepoint(args.source_site, args.target_site, migrate_all=True),
         include=include,
         exclude=exclude,
+        provision_structure=not args.no_provision_structure,
         manifest_dir=work / "manifests",
         checkpoint_dir=work / "checkpoints",
     )

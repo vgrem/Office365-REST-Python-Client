@@ -15,6 +15,7 @@ clone (:meth:`ClientContext.clone`).
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
 from office365.migration.adapters.filesystem import FileSystemSource
@@ -24,10 +25,13 @@ from office365.migration.sharepoint.adapters import (
     SharePointListSource,
     SharePointListTarget,
 )
+from office365.migration.sharepoint.structure import capture_list_structure, provision_list_structure
 from office365.migration.tasks import FILE_SHARE, SHAREPOINT, MigrationTask
 
 if TYPE_CHECKING:
     from office365.migration.settings import MigrationSettings
+
+logger = logging.getLogger(__name__)
 
 __all__ = ["is_document_library", "is_migratable_list", "resolve_site_task", "resolve_task"]
 
@@ -83,15 +87,18 @@ def resolve_site_task(
     *,
     include: Sequence[str] | None = None,
     exclude: Sequence[str] | None = None,
+    provision_structure: bool = True,
 ) -> list[tuple[Any, Any]]:
     """Resolve a whole-site task into one ``(source, target)`` pair per list.
 
-    Walks every migratable list and document library on the source site and pairs
-    it with the target list of the same title, **creating the list container if
-    it is missing**. Only the container is provisioned — fields, content types and
-    views are not recreated yet (see the migration roadmap), so items that use
-    custom columns may fail until that structure is provisioned separately. The
-    registered ``context`` is treated as the target site.
+    Walks every migratable list and document library on the source site, pairs it
+    with the target list of the same title (**creating the list container if it is
+    missing**), and, unless ``provision_structure`` is false, replays the source
+    list's columns, content types and views onto the target before content is
+    copied (:func:`~office365.migration.sharepoint.structure.provision_list_structure`).
+    The registered ``context`` is treated as the target site; a source on a
+    different site collection in the same tenant is reached through an
+    authenticated clone.
 
     Args:
         task: A ``SHAREPOINT`` task; its ``source_list`` is ignored.
@@ -100,6 +107,8 @@ def resolve_site_task(
             supported for whole-site tasks).
         include: If given, only these source list titles are migrated.
         exclude: Source list titles to skip.
+        provision_structure: Recreate the source list's structure on the target
+            list (default). Pass ``False`` to only create the containers.
     """
     if task.kind != SHAREPOINT:
         raise ValueError(f"a site task must be kind {SHAREPOINT!r}, got {task.kind!r}")
@@ -124,8 +133,22 @@ def resolve_site_task(
         if not is_migratable_list(source_list):
             continue
         target_list = _ensure_target_list(target_context, source_list)
+        if provision_structure:
+            _provision_structure(source_list, target_list)
         pairs.append(_list_adapters(source_list, target_list))
     return pairs
+
+
+def _provision_structure(source_list: Any, target_list: Any) -> None:
+    """Capture the source list structure and replay it onto the target list.
+
+    Structure provisioning is best-effort where SharePoint Online constrains it
+    (a fresh column cannot be attached to a custom content type over REST); those
+    columns are reported as warnings rather than aborting the resolution.
+    """
+    structure = capture_list_structure(source_list)
+    for warning in provision_list_structure(target_list, structure):
+        logger.warning("list %r: %s", getattr(source_list, "title", None), warning)
 
 
 def _list_adapters(source_list: Any, target_list: Any) -> tuple[Any, Any]:

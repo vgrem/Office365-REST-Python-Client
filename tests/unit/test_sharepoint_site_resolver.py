@@ -1,6 +1,7 @@
 """Tests for the SharePoint whole-site (migrate_all) resolver and session wiring."""
 
 import unittest
+from unittest import mock
 
 from office365.migration.session import MigrationSession
 from office365.migration.settings import MigrationSettings
@@ -101,6 +102,19 @@ def _context(lists, base_url="https://contoso.sharepoint.com/sites/target"):
     return _Context(base_url, _Lists(lists))
 
 
+class _StructureStub:
+    """Stubs capture/provision so resolver tests need no real list structure."""
+
+    def setUp(self):
+        super().setUp()
+        capture = mock.patch("office365.migration.sharepoint.resolvers.capture_list_structure", return_value=None)
+        provision = mock.patch("office365.migration.sharepoint.resolvers.provision_list_structure", return_value=[])
+        self.capture = capture.start()
+        self.provision = provision.start()
+        self.addCleanup(capture.stop)
+        self.addCleanup(provision.stop)
+
+
 class TestListSelection(unittest.TestCase):
     def test_document_library(self):
         self.assertTrue(is_document_library(_docs()))
@@ -115,7 +129,7 @@ class TestListSelection(unittest.TestCase):
         self.assertFalse(is_migratable_list(_FakeList("System", allow_deletion=False)))
 
 
-class TestResolveSiteTask(unittest.TestCase):
+class TestResolveSiteTask(_StructureStub, unittest.TestCase):
     def test_pairs_library_and_list_and_skips_infrastructure(self):
         source = _context([_docs(), _tasks(), _FakeList("User Information", base_template=112)])
         task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
@@ -160,6 +174,26 @@ class TestResolveSiteTask(unittest.TestCase):
 
         _, template = source.web.lists.ensure_calls[0]
         self.assertEqual(int(template), 101)
+
+    def test_provisions_structure_by_default(self):
+        source = _context([_docs()])
+        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
+
+        resolve_site_task(task, source)
+
+        self.assertEqual(self.capture.call_args[0][0].title, "Documents")
+        target_arg, structure_arg = self.provision.call_args[0]
+        self.assertEqual(target_arg.title, "Documents")
+        self.assertIsNone(structure_arg)
+
+    def test_provision_structure_can_be_disabled(self):
+        source = _context([_docs()])
+        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
+
+        resolve_site_task(task, source, provision_structure=False)
+
+        self.capture.assert_not_called()
+        self.provision.assert_not_called()
 
     def test_rejects_non_sharepoint_task(self):
         task = MigrationTask.file_share("src", "https://contoso.sharepoint.com/sites/target", "Documents")
@@ -212,7 +246,7 @@ class TestResolveSingleListTask(unittest.TestCase):
             resolve_task(task, _context([]))
 
 
-class TestSessionSiteTask(unittest.TestCase):
+class TestSessionSiteTask(_StructureStub, unittest.TestCase):
     def test_add_task_rejects_migrate_all(self):
         session = MigrationSession()
         task = MigrationTask.sharepoint(
@@ -235,6 +269,15 @@ class TestSessionSiteTask(unittest.TestCase):
         self.assertEqual(len({entry.id for entry in session.tasks}), 2)
         self.assertIn("Documents", jobs[0].target_label)
         self.assertIn("Tasks", jobs[1].target_label)
+
+    def test_add_site_task_can_skip_structure_provisioning(self):
+        source = _context([_docs()])
+        session = MigrationSession().register(context=source)
+        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
+
+        session.add_site_task(task=task, provision_structure=False)
+
+        self.capture.assert_not_called()
 
     def test_add_site_task_requires_context(self):
         session = MigrationSession()
