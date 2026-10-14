@@ -14,9 +14,10 @@ from tests.settings import cert_path, cert_thumbprint, client_id, site_url, tena
 
 def main():
     parser = argparse.ArgumentParser(description="Content type end-to-end workflow")
-    parser.add_argument("--name", default="Project Document", help="Content type name")
+    parser.add_argument("--name", default="ZZ ContentType Demo", help="Content type name")
     parser.add_argument("--description", default="For Contoso projects", help="Content type description")
     parser.add_argument("--list-title", default="Documents", help="List to associate the content type with")
+    parser.add_argument("--keep", action="store_true", help="Keep the content type and list binding")
     args = parser.parse_args()
 
     ctx = ClientContext(site_url).with_client_certificate(
@@ -43,6 +44,14 @@ def main():
     # 4. Verify the content types on the list
     list_cts = target_list.content_types.get().execute_query()
     print(f"4. Content types on '{args.list_title}': {[c.name for c in list_cts]}")
+
+    if not args.keep:
+        list_ct = target_list.content_types.find_by_name(args.name)
+        list_ct.execute_query()
+        if list_ct.is_loaded:
+            list_ct.delete_object().execute_query()
+        ct.delete_object().execute_query()
+        print("  (content type and list binding removed after demo)")
 
 
 if __name__ == "__main__":

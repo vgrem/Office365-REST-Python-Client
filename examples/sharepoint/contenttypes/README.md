@@ -60,7 +60,7 @@ It can then be associated with one or more lists.
 | Create a content type | [`create.py`](./create.py) | Site Owner | [Create](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
 | Create a content type from a parent | [`create_from_parent.py`](./create_from_parent.py) | Site Owner | [Create with parent](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
 | Update a content type (description, group) | [`update.py`](./update.py) | Site Owner | [Update](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
-| Add a site column to a content type | [`add_field.py`](./add_field.py) | Site Owner | [Add field link](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
+| Add an existing field to a content type | [`add_field.py`](./add_field.py) | Site Owner | [Add field link](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
 | Remove a field from a content type | [`remove_field.py`](./remove_field.py) | Site Owner | [Remove field link](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
 | Reorder fields in a content type | [`reorder_fields.py`](./reorder_fields.py) | Site Owner | [Reorder fields](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
 | Delete a content type | [`delete.py`](./delete.py) | Site Owner | [Delete](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
@@ -71,8 +71,17 @@ It can then be associated with one or more lists.
 |---|---|---|---|
 | Create a content type and add it to a list | [`add_to_list.py`](./add_to_list.py) | Site Owner on target list | [Add to list](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
 | Add an existing site content type to a list | [`add_available_to_list.py`](./add_available_to_list.py) | Site Owner on target list | [Add available CT](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
-| Set the default content type for a list | [`set_default.py`](./set_default.py) | Site Owner on target list | [Set default](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
+| Set a list's default content type | [`set_default.py`](./set_default.py) | Site Owner on target list | [Default content type](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
 | Find which lists use a content type | [`find_usage.py`](./find_usage.py) | Read access | [Usage check](https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype) |
+
+> **REST restrictions:** a content type references fields through **field links**.
+> A field can only be linked when it already exists on the content type's
+> **parent** (a site column that is not on the parent cannot be linked via REST),
+> and a field link **inherited** from the parent is not removed by a REST
+> `DELETE` (the server accepts the call but the link remains). A list's **default
+> content type** is the first entry of the list root folder's
+> `UniqueContentTypeOrder`; `ContentType.set_default()` rewrites that order for
+> you (it is not a property of `SP.ContentType`).
 
 ### Migration
 

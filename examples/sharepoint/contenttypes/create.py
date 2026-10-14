@@ -15,7 +15,7 @@ def main():
     parser = argparse.ArgumentParser(description="Create a content type")
     parser.add_argument("--name", required=True, help="Content type name")
     parser.add_argument("--description", default="", help="Content type description")
-    parser.add_argument("--group", default="", help="Content type group")
+    parser.add_argument("--group", default=None, help="Content type group")
     parser.add_argument("--keep", action="store_true", help="Keep the content type (default: delete after demo)")
     args = parser.parse_args()
 

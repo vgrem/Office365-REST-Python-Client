@@ -1,5 +1,13 @@
 """
-Set the default content type for a list.
+Set the default content type of a list.
+
+Creates a content type, binds it to a document library and makes it the list's
+default. The content type and its list binding (and the default) are undone
+afterwards unless ``--keep`` is given.
+
+A list's default content type is the first entry of the list root folder's
+``UniqueContentTypeOrder``; :meth:`ContentType.set_default` rewrites that order
+(``set_default(False)`` moves the content type back to the end).
 
 https://learn.microsoft.com/en-us/sharepoint/dev/apis/rest-api/csom/contenttype
 """
@@ -12,17 +20,16 @@ from tests.settings import cert_path, cert_thumbprint, client_id, site_url, tena
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Set the default content type for a list")
-    parser.add_argument("--name", required=True, help="Content type name")
+    parser = argparse.ArgumentParser(description="Set the default content type of a list")
+    parser.add_argument("--name", default="ZZ ContentType Default", help="Content type name")
     parser.add_argument("--list-title", default="Documents", help="Target list")
+    parser.add_argument("--keep", action="store_true", help="Keep the content type and list binding")
     args = parser.parse_args()
 
     ctx = ClientContext(site_url).with_client_certificate(
         tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
     )
-    site_ct = ctx.web.content_types.add(
-        ContentTypeCreationInformation(Name=args.name, Description="For Contoso projects")
-    ).execute_query()
+    site_ct = ctx.web.content_types.add(ContentTypeCreationInformation(Name=args.name)).execute_query()
     if site_ct.string_id is None:
         raise SystemExit("Failed to create content type")
 
@@ -31,9 +38,14 @@ def main():
         ContentTypeCreationInformation(Name=args.name, Id=site_ct.string_id)
     ).execute_query()
 
-    # The default flag lives on the list's content type binding
-    list_ct.set_default(True).update().execute_query()
-    print(f"Default content type set: {list_ct.name} on '{args.list_title}'")
+    list_ct.set_default().execute_query()
+    print(f"Content type '{args.name}' is now the default for list: {args.list_title}")
+
+    if not args.keep:
+        list_ct.set_default(False).execute_query()
+        list_ct.delete_object().execute_query()
+        site_ct.delete_object().execute_query()
+        print("  (content type and list binding removed after demo)")
 
 
 if __name__ == "__main__":

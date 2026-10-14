@@ -40,12 +40,17 @@ def main():
     else:
         lists = ctx.web.lists.get().execute_query()
 
+    # A list stores a list-scoped copy of a site content type: its id is the site
+    # content type's id with the list's GUID appended (e.g. ``0x0101`` ->
+    # ``0x01010026fe...``). So a list uses the content type when its id *starts
+    # with* the site id, not when the two are exactly equal.
+    site_id = ct.string_id or ""
     found = []
     for lst in lists:
         if not args.include_hidden and lst.hidden:
             continue
         list_cts = lst.content_types.get().execute_query()
-        matches = [c.name for c in list_cts if c.string_id == ct.string_id]
+        matches = [c.name for c in list_cts if (c.string_id or "").startswith(site_id)]
         marker = " (hidden)" if lst.hidden else ""
         if matches:
             found.append(lst.title)

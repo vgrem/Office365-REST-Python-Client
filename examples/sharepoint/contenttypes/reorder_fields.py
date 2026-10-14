@@ -14,18 +14,23 @@ def main():
     parser = argparse.ArgumentParser(description="Reorder fields in a content type")
     parser.add_argument("--name", required=True, help="Content type name")
     parser.add_argument("--order", nargs="+", required=True, help="Field internal names in desired order")
-    parser.add_argument("--keep", action="store_true", help="Keep the content type (default: delete after demo)")
+    parser.add_argument(
+        "--keep", action="store_true", help="Keep the content type (default: delete only if created here)"
+    )
     args = parser.parse_args()
 
     ctx = ClientContext(site_url).with_client_certificate(
         tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
     )
+    existing = ctx.web.content_types.find_by_name(args.name)
+    existing.execute_query()
+    created = not existing.is_loaded
     ct = ctx.web.ensure_content_type(name=args.name).execute_query()
 
     # Link any field that is not already part of the content type
-    existing = {link.field_internal_name for link in ct.field_links.get().execute_query()}
+    current = {link.field_internal_name for link in ct.field_links.get().execute_query()}
     for field_name in args.order:
-        if field_name in existing:
+        if field_name in current:
             continue
         field = ctx.web.fields.get_by_internal_name_or_title(field_name)
         ct.field_links.add(field).execute_query()
@@ -34,7 +39,7 @@ def main():
     ct.reorder_fields(args.order).execute_query()
     print(f"Fields reordered: {' -> '.join(args.order)}")
 
-    if not args.keep:
+    if created and not args.keep:
         ct.delete_object().execute_query()
         print("  (content type removed after demo)")
 

@@ -74,10 +74,11 @@ def main():
         except ClientRequestException:
             src_field = source.web.fields.get_by_internal_name_or_title(field_name)
             source.load(src_field, ["SchemaXml"]).execute_query()
-            if not src_field.schema_xml:
+            schema = src_field.schema_xml_for_copy()
+            if not schema:
                 print(f"  skip: no schema for '{field_name}'")
                 continue
-            field = target.web.fields.create_field_as_xml(src_field.schema_xml).execute_query()
+            field = target.web.fields.create_field_as_xml(schema).execute_query()
             print(f"  created field: {field_name}")
         new_ct.field_links.add(field).execute_query()
 

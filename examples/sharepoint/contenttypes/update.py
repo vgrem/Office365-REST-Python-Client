@@ -15,12 +15,17 @@ def main():
     parser.add_argument("--name", required=True, help="Content type name")
     parser.add_argument("--description", required=True, help="New description")
     parser.add_argument("--group", help="New group")
-    parser.add_argument("--keep", action="store_true", help="Keep the content type (default: delete after demo)")
+    parser.add_argument(
+        "--keep", action="store_true", help="Keep the content type (default: delete only if created here)"
+    )
     args = parser.parse_args()
 
     ctx = ClientContext(site_url).with_client_certificate(
         tenant, client_id=client_id, thumbprint=cert_thumbprint, cert_path=cert_path
     )
+    existing = ctx.web.content_types.find_by_name(args.name)
+    existing.execute_query()
+    created = not existing.is_loaded
     ct = ctx.web.ensure_content_type(name=args.name).execute_query()
     ct.set_property("Description", args.description)
     if args.group:
@@ -28,7 +33,7 @@ def main():
     ct.update().execute_query()
     print(f"Content type updated: {ct.name}  (description: {ct.description})")
 
-    if not args.keep:
+    if created and not args.keep:
         ct.delete_object().execute_query()
         print("  (removed after demo)")
 
