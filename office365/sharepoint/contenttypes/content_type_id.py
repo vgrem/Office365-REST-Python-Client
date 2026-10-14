@@ -18,5 +18,9 @@ class ContentTypeId(ClientValue):
 
     StringValue: Optional[str] = None
 
+    @property
+    def entity_type_name(self) -> str:
+        return "SP.ContentTypeId"
+
     def __repr__(self) -> str:
         return str(self.StringValue or self.entity_type_name)

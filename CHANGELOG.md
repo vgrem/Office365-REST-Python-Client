@@ -173,6 +173,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **`ContentType.set_default`:** now works. It previously set a `Default`
+  property that SharePoint's REST API does not expose on `SP.ContentType` (the
+  server rejected the update with *"The property 'Default' does not exist on
+  type 'SP.ContentType'"*). The default content type is actually the first entry
+  of the list root folder's `UniqueContentTypeOrder`, so `set_default()` now
+  loads the folder's current order and rewrites it (target first; `False` moves
+  it to the end). Only meaningful for a list-scoped content type
+  (`list.content_types`).
+- **`ContentTypeId` OData type name:** hand-written `ContentTypeId` now reports
+  `SP.ContentTypeId`, so serializing a `Collection(SP.ContentTypeId)` (for
+  example a root folder's `UniqueContentTypeOrder`) emits the correct
+  `__metadata` type instead of a `Collection(None)` the server rejects.
 - **OData V3 enum serialization:** SharePoint enums are `Edm.Int32` and now
   serialize as their numeric value instead of their member name (which the
   server rejected with *"Cannot convert a primitive value to the expected type
@@ -181,6 +193,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is now bound to the OData `TextField` property, so listing web/list fields no
   longer trips the computed `text_field` getter's assertion
   (`assert text_field_id is not None`).
+- **`FieldLink.field_internal_name` on read:** SharePoint's REST API returns the
+  linked field's internal name in `Name` and leaves `FieldInternalName` (a
+  creation-time property) empty, so the property now falls back to `Name`.
+  Examples that filter or compare field links no longer see `None` for every
+  link.
 - **Migration conflict policy reaches record targets:**
   `MigrationOptions(conflict_resolution=OVERWRITE)` previously did not overwrite
   keyed list records — `SharePointListTarget` kept its own `on_conflict="skip"`

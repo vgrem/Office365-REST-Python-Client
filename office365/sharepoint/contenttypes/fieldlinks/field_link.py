@@ -15,8 +15,14 @@ class FieldLink(Entity):
 
     @property
     def field_internal_name(self) -> Optional[str]:
-        """Gets a value that specifies field internal name"""
-        return self.properties.get("FieldInternalName", None)
+        """Gets a value that specifies the linked field's internal name.
+
+        Note:
+            SharePoint's REST API returns the internal name in ``Name`` and
+            leaves ``FieldInternalName`` (a creation-time property) empty, so this
+            falls back to :attr:`name` for a value read back from the server.
+        """
+        return self.properties.get("FieldInternalName", None) or self.name
 
     @property
     def read_only(self) -> Optional[bool]:
