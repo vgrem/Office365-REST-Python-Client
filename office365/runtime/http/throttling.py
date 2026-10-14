@@ -18,8 +18,9 @@ and :func:`throttle_guard` attach to the request's ``afterExecute`` event and
 never change control flow. Use these when you only want to *know* about
 throttling; use the limiter when you want to *act* on it.
 
-Note: request ``onError`` handlers mark an error as handled (they swallow it —
-see :meth:`ClientRequest.on_error`), so they must not be used for observation.
+Note: a request ``onError`` handler whose condition matches marks the error as
+handled (it swallows it — see :meth:`ClientRequest.on_error`), so handlers must
+not be used for observation.
 """
 
 from __future__ import annotations

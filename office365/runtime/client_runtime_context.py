@@ -287,11 +287,12 @@ class ClientRuntimeContext(ABC):
         return self
 
     def on_error(self, action: Callable[[ClientRequestException], None], once: bool = True) -> Self:
-        """Attach an error handler for the pending query — the error is swallowed.
+        """Attach an error handler for the pending query — a matching error is swallowed.
 
-        This is a control hook (see :meth:`ClientRequest.on_error`): once a
-        handler is attached, a failing query is considered handled and does not
-        re-raise. Use ``after_execute`` / ``throttle_guard`` for observation.
+        This is a control hook (see :meth:`ClientRequest.on_error`): when the
+        pending query fails and this handler's condition matches, the error is
+        considered handled and does not re-raise. Use ``after_execute`` /
+        ``throttle_guard`` for observation.
         """
         if len(self._queries) == 0:
             return self

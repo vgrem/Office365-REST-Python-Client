@@ -44,6 +44,10 @@ class ClientRequest(ABC):
         #: Optional awaitable auth hook (see ``before_execute_async``), used by
         #: requests whose credentials are supplied as an async token callback.
         self._async_authenticate: Optional[Callable[[RequestOptions], Awaitable[None]]] = None
+        # Set by an ``on_error`` wrapper when its condition matches, so
+        # ``execute_query`` can tell a handled failure from a stale handler that
+        # merely happened to be registered (see :meth:`on_error`).
+        self._error_handled = False
         self.beforeExecute: EventHandler[[RequestOptions]] = EventHandler()
         self.afterExecute: EventHandler[[Response]] = EventHandler()
         self.onError: EventHandler[[ClientRequestException]] = EventHandler()
@@ -325,14 +329,26 @@ class ClientRequest(ABC):
             self.afterExecute(response)
         except ClientRequestException as e:
             self._add_permission_hint(e, query)
-            if self.onError:
-                self.onError(e)
+            if self._dispatch_error(e):
                 return
             raise
         except HTTPError as e:
             exc = ClientRequestException.from_response(e.response)
             self._add_permission_hint(exc, query)
             raise exc from e
+
+    def _dispatch_error(self, e: ClientRequestException) -> bool:
+        """Notify error handlers and report whether one of them handled ``e``.
+
+        A failure is swallowed only when a registered handler whose condition
+        matched actually ran; stale scoped handlers no longer hide later,
+        unrelated failures. See :meth:`on_error`.
+        """
+        if not self.onError:
+            return False
+        self._error_handled = False
+        self.onError(e)
+        return self._error_handled
 
     async def execute_query_async(self, query: ClientQuery) -> None:
         """Submits a pending request to the server without blocking the loop.
@@ -349,8 +365,7 @@ class ClientRequest(ABC):
             self.afterExecute(response)
         except ClientRequestException as e:
             self._add_permission_hint(e, query)
-            if self.onError:
-                self.onError(e)
+            if self._dispatch_error(e):
                 return
             raise
         except HTTPError as e:
@@ -385,18 +400,20 @@ class ClientRequest(ABC):
     ) -> Self:
         """Register a handler that **handles** (and therefore swallows) an error.
 
-        Once any handler is registered, :meth:`execute_query` dispatches the
-        error to it and does not re-raise — this powers the library's
-        create-if-not-exists flows. It is a control hook, not an observation
-        hook: do not attach a limiter or a pure reporter here, or request
-        failures will be silently suppressed (breaking retries). Use
-        ``after_execute`` / ``throttle_guard`` for observation.
+        When a query fails and at least one registered handler's ``condition``
+        matches, the error is dispatched to that handler and :meth:`execute_query`
+        does not re-raise — this powers the library's create-if-not-exists flows.
+        If no registered handler matches, the failure is re-raised, so a stale
+        scoped handler can never hide an unrelated later error. It is a control
+        hook, not an observation hook: do not attach a limiter or a pure reporter
+        here, or request failures will be silently suppressed (breaking retries).
+        Use ``after_execute`` / ``throttle_guard`` for observation.
 
         Args:
             action: Callback receiving the error.
             once: Remove the handler after it fires (default True).
             condition: Optional predicate; when it returns False the handler is
-                skipped (but still counts as a registered error handler).
+                skipped and does **not** swallow the error.
         """
 
         def _process_error(e: ClientRequestException):
@@ -404,6 +421,7 @@ class ClientRequest(ABC):
             if matches:
                 if once:
                     self.onError -= _process_error
+                self._error_handled = True
                 action(e)
 
         self.onError += _process_error

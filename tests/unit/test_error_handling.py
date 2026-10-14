@@ -1,0 +1,103 @@
+"""Offline tests for error dispatch in :class:`~office365.runtime.client_request.ClientRequest`.
+
+A failure is swallowed only when a registered ``on_error`` handler's condition
+matches. Before the fix, registering *any* handler made every later failure on
+the request silent — so a scoped handler left behind by a completed query hid
+unrelated errors (e.g. a rejected content-type field link).
+"""
+
+from __future__ import annotations
+
+import asyncio
+
+import pytest
+from office365.runtime.exceptions import ObjectNotFoundException
+from office365.sharepoint.client_context import ClientContext
+from tests import test_site_url
+from tests._scripted_transport import AsyncScriptedTransport, ScriptedTransport
+
+_NOT_FOUND = {
+    "http_status": 404,
+    "body": {"error": {"code": "Request_ResourceNotFound", "message": "Resource not found"}},
+}
+
+_OK = {"d": {"Title": "Site"}}
+
+
+def _sp(payloads):
+    ctx = ClientContext(test_site_url)
+    ctx.pending_request().beforeExecute.clear()
+    ctx.pending_request().transport = ScriptedTransport(payloads)
+    return ctx
+
+
+def test_matching_handler_swallows_error():
+    ctx = _sp([_NOT_FOUND])
+    handled = []
+    ctx.pending_request().on_error(handled.append, condition=lambda: True)
+
+    ctx.web.get().execute_query()  # does not raise
+
+    assert len(handled) == 1
+    assert isinstance(handled[0], ObjectNotFoundException)
+
+
+def test_unmatched_handler_does_not_swallow_error():
+    ctx = _sp([_NOT_FOUND])
+    handled = []
+    ctx.pending_request().on_error(handled.append, condition=lambda: False)
+
+    with pytest.raises(ObjectNotFoundException):
+        ctx.web.get().execute_query()
+
+    assert handled == []
+
+
+def test_scoped_handler_left_by_finished_query_does_not_swallow_later_failure():
+    # q1 succeeds; the handler registered for it stays on the request. q2 then
+    # fails and must propagate because that stale handler no longer matches.
+    ctx = _sp([_OK, _NOT_FOUND])
+    ctx.web.get()
+    ctx.on_error(lambda _e: None)  # scoped to q1
+    ctx.web.get()  # q2
+
+    with pytest.raises(ObjectNotFoundException):
+        ctx.execute_query()
+
+
+def test_scoped_handler_for_failing_query_still_swallows():
+    ctx = _sp([_NOT_FOUND])
+    handled = []
+    ctx.web.get()
+    ctx.on_error(handled.append)
+
+    ctx.execute_query()  # does not raise
+
+    assert len(handled) == 1
+
+
+def test_handler_once_is_removed_after_match():
+    ctx = _sp([_NOT_FOUND, _NOT_FOUND])
+    handled = []
+    ctx.pending_request().on_error(handled.append, once=True, condition=lambda: True)
+
+    ctx.web.get().execute_query()
+    with pytest.raises(ObjectNotFoundException):
+        ctx.web.get().execute_query()
+
+    assert len(handled) == 1
+
+
+def test_unmatched_handler_does_not_swallow_async():
+    ctx = ClientContext(test_site_url)
+    ctx.pending_request().beforeExecute.clear()
+    ctx.pending_request()._async_transport = AsyncScriptedTransport([_NOT_FOUND])
+    handled = []
+    ctx.pending_request().on_error(handled.append, condition=lambda: False)
+
+    async def _run():
+        with pytest.raises(ObjectNotFoundException):
+            await ctx.web.get().execute_query_async()
+
+    asyncio.run(_run())
+    assert handled == []
