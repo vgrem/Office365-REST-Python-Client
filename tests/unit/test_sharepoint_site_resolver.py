@@ -207,7 +207,7 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
             resolve_site_task(task, source, MigrationSettings(use_migration_api=True))
 
 
-class TestResolveSingleListTask(unittest.TestCase):
+class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
     def test_generic_list_uses_record_adapters(self):
         source = _context([_tasks()])
         task = MigrationTask.sharepoint(
@@ -235,6 +235,51 @@ class TestResolveSingleListTask(unittest.TestCase):
 
         self.assertIsInstance(src, SharePointLibrarySource)
         self.assertIsInstance(dst, SharePointLibraryTarget)
+
+    def test_provisions_structure_by_default(self):
+        source = _context([_tasks()])
+        task = MigrationTask.sharepoint(
+            "https://contoso.sharepoint.com/sites/source",
+            source.base_url,
+            source_list="Tasks",
+            target_list="Tasks",
+        )
+
+        resolve_task(task, source)
+
+        self.assertEqual(self.capture.call_args[0][0].title, "Tasks")
+        target_arg, structure_arg = self.provision.call_args[0]
+        self.assertEqual(target_arg.title, "Tasks")
+        self.assertIsNone(structure_arg)
+
+    def test_provision_structure_can_be_disabled(self):
+        source = _context([_tasks()])
+        task = MigrationTask.sharepoint(
+            "https://contoso.sharepoint.com/sites/source",
+            source.base_url,
+            source_list="Tasks",
+            target_list="Tasks",
+        )
+
+        resolve_task(task, source, provision_structure=False)
+
+        self.capture.assert_not_called()
+        self.provision.assert_not_called()
+
+    def test_migration_api_skips_rest_provisioning(self):
+        source = _context([_docs()])
+        task = MigrationTask.sharepoint(
+            "https://contoso.sharepoint.com/sites/source",
+            source.base_url,
+            source_list="Documents",
+            target_list="Documents",
+        )
+
+        with mock.patch("office365.migration.sharepoint.resolvers._package_target", return_value=object()):
+            resolve_task(task, source, MigrationSettings(use_migration_api=True))
+
+        self.capture.assert_not_called()
+        self.provision.assert_not_called()
 
     def test_migrate_all_defers_to_site_resolver(self):
         task = MigrationTask.sharepoint(
@@ -284,6 +329,34 @@ class TestSessionSiteTask(_StructureStub, unittest.TestCase):
         task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", "https://x", migrate_all=True)
         with self.assertRaises(ValueError):
             session.add_site_task(task=task)
+
+    def test_add_task_provisions_structure_by_default(self):
+        source = _context([_tasks()])
+        session = MigrationSession().register(context=source)
+        task = MigrationTask.sharepoint(
+            "https://contoso.sharepoint.com/sites/source",
+            source.base_url,
+            source_list="Tasks",
+            target_list="Tasks",
+        )
+
+        session.add_task(task=task)
+
+        self.assertEqual(self.provision.call_count, 1)
+
+    def test_add_task_can_skip_structure_provisioning(self):
+        source = _context([_tasks()])
+        session = MigrationSession().register(context=source)
+        task = MigrationTask.sharepoint(
+            "https://contoso.sharepoint.com/sites/source",
+            source.base_url,
+            source_list="Tasks",
+            target_list="Tasks",
+        )
+
+        session.add_task(task=task, provision_structure=False)
+
+        self.capture.assert_not_called()
 
 
 if __name__ == "__main__":

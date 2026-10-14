@@ -63,10 +63,18 @@ def is_migratable_list(sp_list: Any) -> bool:
     return getattr(sp_list, "base_template", None) not in _SYSTEM_BASE_TEMPLATES
 
 
-def resolve_task(task: MigrationTask, context: Any, settings: "MigrationSettings | None" = None) -> tuple[Any, Any]:
+def resolve_task(
+    task: MigrationTask,
+    context: Any,
+    settings: "MigrationSettings | None" = None,
+    *,
+    provision_structure: bool = True,
+) -> tuple[Any, Any]:
     """Return a single ``(source, target)`` adapter pair for a task descriptor.
 
-    Use :func:`resolve_site_task` for ``migrate_all`` / whole-site tasks.
+    Use :func:`resolve_site_task` for ``migrate_all`` / whole-site tasks. For a
+    SharePoint task, the target list's structure is replayed from the source
+    before content is copied (``provision_structure=False`` to skip that).
     """
     if task.kind == FILE_SHARE:
         return _file_share(task, context, settings)
@@ -76,7 +84,7 @@ def resolve_task(task: MigrationTask, context: Any, settings: "MigrationSettings
                 "resolve_task resolves one source list; use resolve_site_task (or "
                 "MigrationSession.add_site_task) for a whole-site / migrate_all task"
             )
-        return _sharepoint(task, context, settings)
+        return _sharepoint(task, context, settings, provision_structure=provision_structure)
     raise ValueError(f"unsupported task kind {task.kind!r}")
 
 
@@ -191,12 +199,22 @@ def _file_share(task: MigrationTask, context: Any, settings: "MigrationSettings 
     return source, _build_target(task, target_context, settings, target_list, folder)
 
 
-def _sharepoint(task: MigrationTask, context: Any, settings: "MigrationSettings | None") -> tuple[Any, Any]:
+def _sharepoint(
+    task: MigrationTask,
+    context: Any,
+    settings: "MigrationSettings | None",
+    *,
+    provision_structure: bool = True,
+) -> tuple[Any, Any]:
     source_context = _context_for(context, task.sharepoint_source_site_url)
     target_context = _context_for(context, task.target_site_url)
     source_list = source_context.web.get_list_by_title(task.source_list).get().execute_query()
     source = _list_source(source_list)
     target_list, folder = _target_folder(target_context, task)
+    # The server-side Migration API applies structure from the package, so only
+    # the client-side path needs (and should do) REST structure provisioning.
+    if provision_structure and not (settings is not None and settings.use_migration_api):
+        _provision_structure(source_list, target_list)
     return source, _build_target(task, target_context, settings, target_list, folder)
 
 

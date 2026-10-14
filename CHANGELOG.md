@@ -43,9 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   demand by title with the source template type, and each list's **columns,
   content types and views are replayed** from the source before content is
   copied (pass `provision_structure=False` to only create the containers).
-  Single-list task
-  resolution now also classifies a source as a library or a record list, and
-  reaches a different source site via a clone.
+  Single-list task resolution (`add_task`) also classifies a source as a library
+  or a record list, reaches a different source site via a clone, and replays the
+  source list's structure onto the existing target list (`provision_structure=False`
+  to skip; the server-side Migration API path applies structure from the package).
 - **Cooperative cancellation for long-running operations:**
   `OperationPoller.cancel()` / `cancel_async()` stop an in-flight `wait()` /
   `wait_async()` by raising the new

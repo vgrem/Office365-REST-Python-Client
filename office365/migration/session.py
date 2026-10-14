@@ -116,6 +116,7 @@ class MigrationSession:
         *,
         task: "MigrationTask | None" = None,
         options: MigrationOptions | None = None,
+        provision_structure: bool = True,
         manifest_path=None,
         checkpoint_path=None,
         **descriptor,
@@ -123,7 +124,9 @@ class MigrationSession:
         """Add a task — adapters directly, a ``MigrationTask``, or task kwargs.
 
         Descriptor kwargs (``file_share_source`` / ``target_site_url`` /
-        ``target_list`` …) are resolved against the registered context.
+        ``target_list`` …) are resolved against the registered context. A resolved
+        SharePoint task replays the source list's structure onto the target list
+        before content is copied; pass ``provision_structure=False`` to skip that.
         """
         if task is None and descriptor:
             from office365.migration.tasks import MigrationTask
@@ -136,7 +139,7 @@ class MigrationSession:
                 raise ValueError("register a ClientContext first (session.register(context=ctx))")
             from office365.migration.sharepoint.resolvers import resolve_task
 
-            source, target = resolve_task(task, self._context, self._settings)
+            source, target = resolve_task(task, self._context, self._settings, provision_structure=provision_structure)
         job = MigrationJob(
             source,
             target,

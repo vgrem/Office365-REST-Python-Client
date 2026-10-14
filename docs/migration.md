@@ -117,7 +117,10 @@ session.unregister()
 `MigrationSettings` mirrors `Register-SPMTMigration` (permissions, versions,
 filters, user mapping, Azure storage…); the subset the core enforces is mapped by
 `to_options()`. Tasks can also be declared as `MigrationTask` objects or parsed
-from the SPMT JSON task format (`MigrationTask.from_json(...)`).
+from the SPMT JSON task format (`MigrationTask.from_json(...)`). A resolved
+SharePoint task replays the source list's columns, content types and views onto
+the (existing) target list before content is copied; pass
+`provision_structure=False` to `add_task` / `add_site_task` to skip that.
 
 ### Whole-site migration
 
