@@ -71,10 +71,11 @@ def describe_fidelity(source: Any, target: Any, options: MigrationOptions) -> Fi
     """Describe which requested fidelity flags the adapter pair can honor.
 
     Checks the optional hooks — ``DataSource.read_permissions(item)``,
-    ``DataTarget.apply_timestamps(item)`` and
-    ``DataTarget.apply_permissions(item, permissions)``. Version history is never
-    available client-side (REST cannot restore it), so ``preserve_versions`` is
-    always reported unsupported here and needs the server-side Migration API.
+    ``DataTarget.apply_timestamps(item)``, ``DataTarget.apply_permissions(item,
+    permissions)``. Version history needs both a version-preserving target
+    (``DataTarget.supports_versions``, i.e. the server-side package target) and a
+    source that exposes ``read_version_history``; it is unsupported on the
+    client-side REST path.
 
     Args:
         source: The source adapter.
@@ -101,8 +102,8 @@ def describe_fidelity(source: Any, target: Any, options: MigrationOptions) -> Fi
         (
             "versions",
             options.preserve_versions,
-            False,
-            "the server-side Migration API (MigrationServerJob / SharePointPackageTarget)",
+            bool(getattr(target, "supports_versions", False)) and _supports(source, "read_version_history"),
+            "a version-preserving target (server-side Migration API) and source.read_version_history(item)",
         ),
     )
     for label, requested, supported, requirement in checks:

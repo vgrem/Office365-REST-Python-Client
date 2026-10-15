@@ -200,3 +200,121 @@ def test_incremental_run_uses_watermark():
     runner.run(source, target, source.list_items(), MigrationOptions(incremental=True), second)
     assert target.written == ["a", "b"]
     assert second.source_watermark == "2021-01-01T00:00:00"
+
+
+def test_version_sort_key_orders_labels():
+    from office365.migration.sharepoint.adapters import _version_sort_key
+
+    labels = ["10.0", "2.0", "1.0", "1.10"]
+    assert sorted(labels, key=_version_sort_key) == ["1.0", "1.10", "2.0", "10.0"]
+    assert _version_sort_key("weird") == (0,)  # non-numeric last-resort
+
+
+class _VersionSource(_Source):
+    def __init__(self, items: list[MigrationItem], history) -> None:
+        super().__init__(items)
+        self._history = history
+        self.version_reads: list[str] = []
+
+    def read_version_history(self, item):
+        self.version_reads.append(item.dest_path)
+        return self._history
+
+
+class _VersionTarget(_Target):
+    supports_versions = True
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.labels: list = []
+        self.versions: list = []
+
+    def write(self, item, payload):
+        self.labels.append(item.version_label)
+        self.versions.append(item.versions)
+        super().write(item, payload)
+
+
+def test_runner_loads_and_carries_versions_for_a_version_preserving_target():
+    from office365.migration.checkpoint import Checkpoint
+    from office365.migration.runner import MigrationRunner
+
+    item = MigrationItem("s", "a")
+    history = ("3.0", [("1.0", b"v1"), ("2.0", b"v2")])
+    source, target = _VersionSource([item], history), _VersionTarget()
+
+    MigrationRunner().run(
+        source,
+        target,
+        source.list_items(),
+        MigrationOptions(),
+        Checkpoint.create(),
+    )
+
+    assert target.written == ["a"]
+    assert target.labels == ["3.0"]
+    assert target.versions == [[("1.0", b"v1"), ("2.0", b"v2")]]
+
+
+def test_runner_does_not_read_versions_for_a_client_side_target():
+    from office365.migration.checkpoint import Checkpoint
+    from office365.migration.runner import MigrationRunner
+
+    source, target = _VersionSource([MigrationItem("s", "a")], ("1.0", [])), _Target()
+
+    MigrationRunner().run(source, target, source.list_items(), MigrationOptions(), Checkpoint.create())
+
+    assert source.version_reads == []  # client-side target: version history stays untouched
+
+
+def test_preserve_versions_supported_when_target_and_source_support_it():
+    source, target = _VersionSource([], ("1.0", [])), _VersionTarget()
+    _assert_fidelity_supported(MigrationOptions(preserve_versions=True), source, target)
+
+
+def test_preserve_versions_needs_the_source_history_hook():
+    source, target = _Source([]), _VersionTarget()  # target can preserve, source cannot supply
+    with pytest.raises(NotImplementedError, match="read_version_history"):
+        _assert_fidelity_supported(MigrationOptions(preserve_versions=True), source, target)
+
+
+def test_describe_fidelity_reports_versions_for_a_package_target():
+    from office365.migration.fidelity import describe_fidelity
+
+    report = describe_fidelity(
+        _VersionSource([], ("1.0", [])), _VersionTarget(), MigrationOptions(preserve_versions=True)
+    )
+    assert report.ok
+    assert "versions" in report.preserved
+
+    client_report = describe_fidelity(
+        _VersionSource([], ("1.0", [])), _Target(), MigrationOptions(preserve_versions=True)
+    )
+    assert not client_report.ok
+    assert "versions" in client_report.unsupported
+
+
+def test_library_system_paths_are_excluded():
+    from office365.migration.sharepoint.adapters import _is_system_path
+
+    # SharePoint-owned scaffolding is skipped (collides server-side / clobbers pages)
+    assert _is_system_path("Forms")
+    assert _is_system_path("Forms/AllItems.aspx")
+    assert _is_system_path("Forms/Document/")
+    assert _is_system_path("desktop.ini")
+    # user content is kept
+    assert not _is_system_path("doc.txt")
+    assert not _is_system_path("Reports/Q1.xlsx")
+    assert not _is_system_path("Formsite/notes.txt")  # prefix, not a path segment
+
+
+def test_item_to_dict_is_json_safe_with_version_blobs():
+    import json
+
+    item = MigrationItem("s", "d", version_label="2.0", versions=[("1.0", b"v1")])
+
+    data = item_to_dict(item)
+
+    assert "versions" not in data  # transient blobs are never persisted
+    assert data["version_label"] == "2.0"
+    json.dumps(data)  # must not raise on bytes

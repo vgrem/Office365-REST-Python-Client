@@ -36,7 +36,16 @@ def _resolve_site_url(site, site_url: str | None) -> str:
 
 
 class SharePointPackageTarget:
-    """A ``DataTarget`` that builds a package and submits a server-side ingestion job."""
+    """A ``DataTarget`` that builds a package and submits a server-side ingestion job.
+
+    The only path that preserves version history: the runner reads each file's
+    older versions (``source.read_version_history``) into the item and they ride
+    the manifest's ``<Versions>`` element. Timestamps are carried too; author /
+    ACL metadata is emitted but not applied yet (see the module docstring).
+    """
+
+    # Marks this target as able to restore version history (see DataTarget).
+    supports_versions = True
 
     def __init__(
         self,
@@ -102,6 +111,8 @@ class SharePointPackageTarget:
         self._builder.add_file(
             item.dest_path,
             content,
+            version=item.version_label or "1.0",
+            versions=item.versions or None,
             time_created=item.created,
             time_last_modified=item.modified,
         )

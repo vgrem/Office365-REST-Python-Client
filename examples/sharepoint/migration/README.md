@@ -190,8 +190,11 @@ with `plan()`/`run()`/`verify()` is the primary entry point.
 ### Server-side migration
 
 The adapters above copy bytes over REST. To carry **version history**, the content
-is packaged and ingested by SharePoint **server-side** (the Migration API). ACL and
-author metadata are emitted into the package but **do not take effect** yet. Azure
+is packaged and ingested by SharePoint **server-side** (the Migration API).
+`MigrationJob` now reads a SharePoint library source's version history and carries
+it into the package automatically, so a `SharePointLibrarySource` → package job
+preserves versions; a local-folder source has none to carry. ACL and author
+metadata are emitted into the package but **do not take effect** yet. Azure
 Blob Storage is only the courier, and the containers are **SharePoint-owned** — no
 Azure account is required.
 

@@ -29,7 +29,11 @@ class DataSource(ABC):
     - ``read_permissions(item) -> list[PermissionEntry]`` — the item's ACLs, used
       for best-effort ``preserve_permissions`` and for the permission diff;
     - ``read_metadata(item) -> dict`` — comparable attributes (``created``,
-      ``modified``, ``size_bytes``, ...) the validator diffs against the target.
+      ``modified``, ``size_bytes``, ...) the validator diffs against the target;
+    - ``read_version_history(item) -> (label, older)`` — the current version
+      label and the older versions (oldest first, current excluded), used by a
+      version-preserving target (the server-side package target) so history
+      survives the migration.
 
     Absent when the source does not expose them.
     """
@@ -59,7 +63,12 @@ class DataTarget(ABC):
       best-effort fidelity applied after a successful write;
     - ``read_permissions(item)`` / ``read_metadata(item)`` — the read
       counterparts the validator diffs against the source (needed to *verify*
-      that the requested fidelity actually landed).
+      that the requested fidelity actually landed);
+    - ``supports_versions`` — a class attribute set True by a target that can
+      restore version history (the server-side package target). The runner then
+      reads ``source.read_version_history(item)`` into ``item.version_label`` /
+      ``item.versions`` before the write, so history is preserved whenever the
+      source can supply it.
     """
 
     @abstractmethod

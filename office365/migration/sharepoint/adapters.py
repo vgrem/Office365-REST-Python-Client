@@ -58,6 +58,25 @@ def _sp_timestamp(value: str | None) -> str | None:
     return parsed.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _version_sort_key(label: str) -> tuple[int, ...]:
+    """Sort key for a version label like ``"2.0"`` (numeric parts, non-numeric last)."""
+    try:
+        return tuple(int(part) for part in str(label).split("."))
+    except ValueError:
+        return (0,)
+
+
+#: Library-relative paths SharePoint owns and recreates on the target (its forms
+#: folder and the folder rendering file). Migrating them collides server-side and
+#: clobbers system pages client-side, so the source adapter skips them.
+_LIBRARY_SYSTEM_PATHS = ("Forms", "desktop.ini")
+
+
+def _is_system_path(rel: str) -> bool:
+    """Whether a library-relative path is SharePoint-owned scaffolding, not user content."""
+    return any(rel == entry or rel.startswith(entry + "/") for entry in _LIBRARY_SYSTEM_PATHS)
+
+
 def is_taxonomy_validation(exc: Exception) -> bool:
     """True when a request failed because a Managed Metadata (taxonomy) column
     references a term set / term that no longer exists.
@@ -541,7 +560,7 @@ class SharePointLibrarySource:
         for folder in loaded_folders:
             url = folder.server_relative_url or ""
             rel = _rel(url)
-            if not rel or rel in seen:
+            if not rel or rel in seen or _is_system_path(rel):
                 continue
             seen.add(rel)
             result.append(MigrationItem(source_path=url, dest_path=f"{rel}/", item_type="folder"))
@@ -549,6 +568,8 @@ class SharePointLibrarySource:
         for file in loaded:
             url = file.server_relative_url or ""
             rel = _rel(url)
+            if _is_system_path(rel):
+                continue
             self._files[rel] = file
             result.append(
                 MigrationItem(
@@ -560,6 +581,8 @@ class SharePointLibrarySource:
                     created=iso_or_none(file.time_created),
                     author_id=parse_int(file.author.id),
                     editor_id=parse_int(file.modified_by.id),
+                    source_id=str(file.unique_id) if file.unique_id else None,
+                    version_label=file.ui_version_label,
                 )
             )
             emit_progress(progress, done=len(result), stage="planning", items=[file])
@@ -580,6 +603,31 @@ class SharePointLibrarySource:
 
         file.download_session(buffer, chunk_downloaded=_chunk_downloaded).execute_query()
         return buffer.getvalue()
+
+    def read_version_history(self, item: MigrationItem) -> tuple[str | None, list[tuple[str, bytes]]]:
+        """Read the file's current version label and its older versions.
+
+        Returns ``(current_label, older)`` where ``older`` is oldest-first and
+        excludes the current version (which :meth:`read` already supplies). The
+        current label comes from ``UIVersionLabel``; older content is streamed
+        from each ``File.Versions`` entry. Folders have no version history.
+        """
+        if item.item_type == "folder":
+            return None, []
+        file = self._files.get(item.dest_path)
+        if file is None:
+            raise FileNotFoundError(item.source_path)
+        if file.ui_version_label is None:
+            file.ensure_property("UIVersionLabel").execute_query()
+        older: list[tuple[str, bytes]] = []
+        for version in file.versions.get().execute_query():
+            label = version.version_label
+            if not label:
+                continue
+            data = version.open_binary_stream().execute_query().value
+            older.append((label, data or b""))
+        older.sort(key=lambda row: _version_sort_key(row[0]))
+        return file.ui_version_label, older
 
     def checksum(self, item: MigrationItem) -> str:
         if item.item_type == "folder":

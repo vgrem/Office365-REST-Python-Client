@@ -15,7 +15,7 @@ concurrency, paced by a shared rate limiter.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Iterable
+from typing import TYPE_CHECKING, Callable, Iterable, cast
 
 from office365.migration.adapters import DataTarget, resolve_dest
 from office365.migration.base import (
@@ -42,10 +42,13 @@ def _assert_fidelity_supported(options: MigrationOptions, source, target: DataTa
     expose the matching optional hooks — failing fast beats silently migrating
     without the requested fidelity.
     """
-    if options.preserve_versions:
+    if options.preserve_versions and not (
+        getattr(target, "supports_versions", False) and callable(getattr(source, "read_version_history", None))
+    ):
         raise NotImplementedError(
-            "preserve_versions is not supported by the client-side runner: REST cannot restore "
-            "version history. Use the server-side Migration API (MigrationServerJob) or set "
+            "preserve_versions is not supported by this adapter pair: REST cannot restore version "
+            "history, and even a version-preserving target needs source.read_version_history(item). "
+            "Use the server-side Migration API (MigrationServerJob / SharePointPackageTarget) or set "
             "preserve_versions to False."
         )
     if options.preserve_timestamps and not callable(getattr(target, "apply_timestamps", None)):
@@ -217,6 +220,8 @@ class MigrationRunner:
             if not chunk:
                 return
             payloads = [source.read(item) for item in chunk]
+            for item in chunk:
+                _load_versions(source, target, item)
             failures = target.write_many(chunk, payloads, concurrency=options.concurrency)
             failed = {path: error for path, error in failures}
             for item in chunk:
@@ -288,9 +293,26 @@ class MigrationRunner:
         dest = resolve_dest(item, target, options.conflict_resolution)
         item.dest_path = dest
         payload = source.read(item)
+        _load_versions(source, target, item)
         target.write(item, payload)
         _apply_fidelity(source, target, item, options)
         return True
+
+
+def _load_versions(source, target: DataTarget, item: MigrationItem) -> None:
+    """Populate ``item.version_label`` / ``item.versions`` for a version-preserving target.
+
+    No-op unless the target advertises ``supports_versions`` and the source exposes
+    the optional ``read_version_history`` hook. Version bytes are transient — they
+    live only on the in-flight item and are never checkpointed.
+    """
+    if not getattr(target, "supports_versions", False):
+        return
+    read = getattr(source, "read_version_history", None)
+    if not callable(read):
+        return
+    label, older = cast("tuple[str | None, list[tuple[str, bytes]]]", read(item))
+    item.version_label, item.versions = label, older
 
 
 def _outside_window(item: MigrationItem, options: MigrationOptions) -> bool:

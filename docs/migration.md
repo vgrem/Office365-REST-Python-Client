@@ -30,8 +30,8 @@ different content and deliver different fidelity:
 
 | Axis | Client-side (REST) | Server-side (Migration API) |
 |---|---|---|
-| Content | files + folders, **record lists + attachments**, list structure | **document libraries** (files/folders; versions only if you drive `PackageBuilder` directly) |
-| Version history | ✗ | package carries `<Versions>`; not wired into `MigrationJob` |
+| Content | files + folders, **record lists + attachments**, list structure | **document libraries** (files/folders + version history) |
+| Version history | ✗ | ✓ the runner reads each file's history and the package carries `<Versions>` |
 | Authors / ModifiedBy | not preserved | emitted in the package, **not applied** |
 | Permissions | library: best-effort same-tenant ACL; list: ✗ | emitted in the package, **not applied** (parked) |
 | Columns / content types / views | captured + provisioned over REST | **not emitted** by the builder today |
@@ -45,11 +45,11 @@ library and version history matters. **Mix them**: provision the target's column
 content types, and views client-side, then hand the library's files to the server
 side.
 
-> The server-side engine is **not** a drop-in for `MigrationJob`'s fidelity flags
-> yet: `SharePointPackageTarget` implements none of the optional
-> `apply_timestamps` / `apply_permissions` hooks, and the runner still rejects
-> `preserve_versions` outright. Drive `PackageBuilder` / `SharePointPackageTarget`
-> directly to get versions into a package.
+> The server-side engine reuses the same `MigrationJob` / runner. Version history
+> is preserved automatically when the source exposes `read_version_history` (the
+> SharePoint library source) and the target is `SharePointPackageTarget` — so
+> `preserve_versions` is honored there and rejected only on the client-side REST
+> target. Author / `ModifiedBy` and ACLs are still **emitted but not applied**.
 
 ## Quick start
 
@@ -284,16 +284,18 @@ Field-link **order** is restored only when at least one link was actually added.
 |---|---|---|
 | `preserve_timestamps` | best-effort (`Created`/`Modified`) | declared in the package, **not applied** |
 | `preserve_permissions` | best-effort (same-tenant ACL copy) | emitted in the package, **not applied** |
-| `preserve_versions` | ✗ (raises) | package carries `<Versions>`; **not wired into the runner** |
+| `preserve_versions` | ✗ (raises) | ✓ the runner reads history into the package's `<Versions>` |
 
-The server-side column describes what a Migration API package *can* carry today,
-not a fidelity the runner applies — `SharePointPackageTarget` implements none of
-the optional hooks, so flags still fail fast (see
+The server-side package target is the only one that preserves version history: the
+runner reads each file's older versions (`source.read_version_history`) and passes
+them to `PackageBuilder.add_file`, which the Migration API promotes into a real
+version history. Timestamps ride the same package; author / `ModifiedBy` and ACLs
+are still emitted but **not applied** (see
 [Client-side vs server-side](#client-side-vs-server-side)). REST cannot restore
-version history, so `preserve_versions` always requires a Migration API package,
-driven directly for now. The other two are applied client-side **when the adapters
-support them** — the runner fails fast otherwise, rather than silently migrating
-without the requested fidelity:
+version history, so `preserve_versions` always requires a Migration API package and
+fails fast on the client-side target. Timestamps and permissions are applied
+client-side **when the adapters support them** — the runner fails fast otherwise,
+rather than silently migrating without the requested fidelity:
 
 ```python
 MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve_permissions=True))
@@ -362,14 +364,16 @@ SharePoint-provided containers require. For your own (BYO) containers, omit it a
 use `Site.create_migration_job` instead of the encrypted variant.
 
 The builder covers the **document-library subset** — the library, folders, files,
-and (when passed to `PackageBuilder.add_file`) file versions. It emits **no**
+and file versions. Version history is carried through `MigrationJob` whenever the
+source exposes `read_version_history` (the SharePoint library source does); the
+runner reads it into each item and the package emits `<Versions>`. It emits **no**
 columns, content types, or views: provision those client-side first (see
-[Provisioning list structure](#provisioning-list-structure)). The end-to-end
-import is validated against a live tenant for file/folder content; ACL and author
-metadata are written into the manifest but **do not take effect** yet (the target
-SID a `RoleAssignment` needs is not exposed by the SharePoint Online REST API),
-and versions are carried only when you drive `PackageBuilder` directly rather than
-through `MigrationJob`.
+[Provisioning list structure](#provisioning-list-structure)). The source also
+skips the library's own `Forms/` scaffolding, which SharePoint recreates on the
+target. The end-to-end import is validated against a live tenant for
+file/folder content **and version history**; ACL and author metadata are written
+into the manifest but **do not take effect** yet (the target SID a `RoleAssignment`
+needs is not exposed by the SharePoint Online REST API).
 
 ## Storage & vendor neutrality
 

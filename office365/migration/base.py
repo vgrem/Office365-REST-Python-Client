@@ -79,6 +79,12 @@ class MigrationItem:
     created: str | None = None  # source created (ISO-8601)
     author_id: int | None = None  # source author user id (system ``AuthorId``)
     editor_id: int | None = None  # source last-modified-by user id (system ``EditorId``)
+    source_id: str | None = None  # source item identity (e.g. file UniqueId), for the old→new map
+    version_label: str | None = None  # current version label (e.g. ``"3.0"``)
+    # Older versions, oldest first, as ``(label, content)`` — populated only for a
+    # target that preserves version history (server-side package). Transient: NOT
+    # persisted in the checkpoint (keyed by ``dest_path``), so no blobs on disk.
+    versions: list[tuple[str, bytes]] | None = None
 
 
 @dataclass
@@ -131,8 +137,13 @@ class MigrationOptions:
 
 
 def item_to_dict(item: MigrationItem) -> dict:
-    """Serialize a ``MigrationItem`` to a JSON-safe dict (enum/error by value)."""
+    """Serialize a ``MigrationItem`` to a JSON-safe dict (enum/error by value).
+
+    ``versions`` (transient version blobs, read only during a run) is dropped — it
+    is not JSON-serializable and lives on the in-flight item only.
+    """
     data = asdict(item)
+    data.pop("versions", None)
     data["status"] = item.status.value
     data["error"] = str(item.error) if item.error else None
     return data

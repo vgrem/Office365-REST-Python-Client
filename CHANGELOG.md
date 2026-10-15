@@ -251,6 +251,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Version history was not carried through `MigrationJob`:** the server-side
+  package target could build `<Versions>`, but the runner never fed it any. The
+  runner now reads `source.read_version_history(item)` into each item when the
+  target advertises `supports_versions` (the package target does) and
+  `SharePointPackageTarget` passes labels/versions to `PackageBuilder.add_file`,
+  so a `SharePointLibrarySource` → `SharePointPackageTarget` job preserves file
+  version history end-to-end. `describe_fidelity` / `_assert_fidelity_supported`
+  now honor `preserve_versions` for that pair instead of rejecting it.
+  *Live-validated* (3-version file imported as current 3.0 + history 1.0/2.0).
+- **Document-library migration tried to copy SharePoint's own `Forms/`
+  scaffolding:** `SharePointLibrarySource` enumerated the library's built-in
+  `Forms/` folder (`AllItems.aspx`, `EditForm.aspx`, `template.dotx`, ...), which
+  collides on a fresh target and fails the whole server-side job
+  (`A file with the name .../Forms/AllItems.aspx already exists`). The source now
+  skips the `Forms/` tree and `desktop.ini`, mirroring SPMT.
 - **Server-side package timestamps were emitted as invalid XML dateTime:** the
   manifest serializer rendered `datetime`/`date` attributes with `str(value)`,
   producing the space-separated `2026-10-15 06:57:05+00:00` form that the
