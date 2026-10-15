@@ -251,6 +251,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **SharePoint list-item migration lost every field value and every attachment:**
+  `SharePointListSource` projected the collection's literal `select` (`["*", ...]`)
+  instead of the loaded fields, so records reached the target empty while the run
+  still reported success; attachments were dropped with no warning. The source now
+  projects every readable field (excluding the `AttachmentFiles` navigation),
+  captures attachments as separate manifest items, and the target uploads each
+  attachment to its parent once the records are flushed. To pair the two sides for
+  verification — and make the default `SKIP` policy idempotent on re-runs — the
+  target stamps each item with a `MigrationSourceId` marker column (opt out with
+  `identity_field=None`). List-item record content checksums stay `unverifiable`
+  (honest), while attachments are md5-checked, and `MigrationSession.warnings()`
+  now surfaces adapter-level skips.
 - **Errors are no longer silently swallowed by a stale error handler:** the
   request `onError` dispatch treated *any* registered handler as "handled", so a
   scoped handler left behind by an earlier query hid unrelated later failures

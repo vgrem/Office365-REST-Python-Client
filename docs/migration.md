@@ -82,6 +82,30 @@ pipeline uses (see [Data pipeline](data-pipeline.md)).
 | `SharePointListSource` / `SharePointListTarget` | both | list items as records |
 | `TeamsArchiveSource` / `TeamsArchiveTarget` | both | Teams archives |
 
+### Migrating list items
+
+`SharePointListSource` projects every readable field of each item into the record
+payload (excluding the `AttachmentFiles` navigation, which is captured separately).
+Attachments become their own manifest items and are uploaded to the matching parent
+after the records have been flushed.
+
+To pair source and target items for verification — and to make the default `SKIP`
+policy idempotent, so re-running does not duplicate records — the target stamps
+every item with a source-id marker, `MigrationSourceId` by default. This adds a
+real column to every migrated list; pass `identity_field=None` to
+`SharePointListTarget` to opt out (verification then falls back to target ids and
+can no longer reconcile a re-run).
+
+Two honest limits remain:
+
+- Record **content checksums** are reported as `unverifiable`: field-value
+  normalization and `OData__`-prefixed system keys make a value fingerprint
+  false-mismatch-prone. Item *presence* is still verified via the identity marker,
+  and attachments are content-checked (md5).
+- Per-item **timestamps/permissions** (`preserve_timestamps`/`preserve_permissions`)
+  are not applied by the list adapters yet; requesting them fails fast rather than
+  silently dropping the fidelity.
+
 ## SPMT-style sessions
 
 `MigrationSession` mirrors the
@@ -394,6 +418,11 @@ explicit about what it could not confirm:
 | Timestamps (`Created`/`Modified`) | when `preserve_timestamps` was requested | `mismatches` / `unverifiable` |
 | Permissions | when `preserve_permissions` was requested | `mismatches` / `unverifiable` |
 | Versions | when `preserve_versions` was requested | always `unverifiable` over REST |
+
+For SharePoint list items the source and target are paired by the
+`MigrationSourceId` marker (see [Migrating list items](#migrating-list-items));
+attachment presence *and* content (md5) are checked, while each record's content
+checksum is reported as `unverifiable`.
 
 A requested check that could not run lands in `report.unverifiable` — `report.ok`
 is then still True when nothing contradicted it, but `report.complete` is False.

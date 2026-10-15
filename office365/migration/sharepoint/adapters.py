@@ -14,12 +14,13 @@ import hashlib
 import io
 from collections.abc import Callable
 from datetime import timezone
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from office365.migration.adapters import MigrationProgress
 from office365.migration.base import MigrationItem, PermissionEntry, conflict_to_on_conflict
 from office365.migration.sharepoint.transfer import Failure
 from office365.runtime.converters.json_file import record_to_json
+from office365.runtime.converters.records import records_from_items
 from office365.runtime.converters.scalars import iso_or_none, parse_datetime, parse_int
 from office365.runtime.limits import DEFAULT_BATCH_SIZE
 from office365.runtime.operations import emit_progress
@@ -35,6 +36,10 @@ _TAXONOMY_FIELD_TYPES = {"TaxonomyFieldType", "TaxonomyFieldTypeMulti"}
 
 # Always-projected system metadata (reliable author/editor identity).
 _METADATA_SELECT = ["AuthorId", "EditorId"]
+
+#: Marker column added to a migrated list recording each item's source id. It makes
+#: a re-run idempotent and lets post-run verification pair source and target items.
+DEFAULT_LIST_IDENTITY_FIELD = "MigrationSourceId"
 
 
 def _sp_timestamp(value: str | None) -> str | None:
@@ -103,6 +108,8 @@ class SharePointListSource:
         self._list = source_list
         self._select = select
         self._records: dict[str, dict] = {}
+        self._items: dict[str, Any] = {}
+        self._attachments: dict[str, Any] = {}
         self.warnings: list[str] = []
 
     def label(self) -> str:
@@ -135,7 +142,11 @@ class SharePointListSource:
         # A full read projects ``*`` plus the system metadata so author/editor ids
         # are captured reliably; an explicit/safe projection is honored as-is.
         columns = ["*", *_METADATA_SELECT] if select is None else select
-        return items.select(columns).get_all().execute_query()
+        query = items.select(columns)
+        if select is None:
+            # Expand attachments so they can be migrated alongside their item.
+            query = query.expand(["AttachmentFiles"])
+        return query.get_all().execute_query()
 
     def _safe_select(self) -> list[str]:
         """Fallback projection: visible, non-system columns minus Managed Metadata.
@@ -160,18 +171,17 @@ class SharePointListSource:
         return columns
 
     def _project(self, loaded, progress: MigrationProgress) -> list[MigrationItem]:
-        from office365.runtime.converters.records import iter_records
-
-        # Reuse the shared record projection (raw values, no JSON coercion) so the
-        # migration payload matches the data pipeline's.
-        records = iter_records(loaded, raw=True)
+        records = self._project_records(loaded)
         result: list[MigrationItem] = []
+        pending_attachments: list[tuple[str, Any]] = []
         for item, record in zip(loaded, records):
-            self._records[str(item.id)] = record
+            item_id = str(item.id)
+            self._records[item_id] = record
+            self._items[item_id] = item
             result.append(
                 MigrationItem(
-                    source_path=f"{self._list.title}/{item.id}",
-                    dest_path=str(item.id),
+                    source_path=f"{self._list.title}/{item_id}",
+                    dest_path=item_id,
                     item_type="record",
                     modified=iso_or_none(record.get("Modified")),
                     created=iso_or_none(record.get("Created")),
@@ -179,13 +189,52 @@ class SharePointListSource:
                     editor_id=parse_int(record.get("EditorId")),
                 )
             )
+            for attachment in item.properties.get("AttachmentFiles") or []:
+                pending_attachments.append((item_id, attachment))
             emit_progress(progress, done=len(result), stage="planning", items=[item])
+        # Attachments come after every record so the target can create all parent
+        # items before it resolves and uploads their attachments.
+        for item_id, attachment in pending_attachments:
+            name = getattr(attachment, "file_name", None)
+            if not name:
+                self.warnings.append(f"skipped an attachment without a file name on item {item_id}")
+                continue
+            dest_path = f"{item_id}/{name}"
+            self._attachments[dest_path] = attachment
+            result.append(
+                MigrationItem(
+                    source_path=f"{self._list.title}/{dest_path}",
+                    dest_path=dest_path,
+                    item_type="attachment",
+                )
+            )
+            emit_progress(progress, done=len(result), stage="planning", items=[attachment])
         return result
 
-    def read(self, item: MigrationItem) -> dict:
+    @staticmethod
+    def _project_records(loaded) -> list[dict]:
+        # Project every loaded property — not the collection's literal ``select``.
+        # Passing ``["*", ...]`` straight through emitted ``{"*": None, ...}``, so
+        # migrated records carried no field values at all. ``AttachmentFiles`` is a
+        # navigation property (objects, not a scalar column) and is excluded; the
+        # target writes attachments separately.
+        select = sorted({key for item in loaded for key in item.properties if key != "AttachmentFiles"})
+        return records_from_items(list(loaded), select, set(), raw=True)
+
+    def read(self, item: MigrationItem) -> object:
+        if item.item_type == "attachment":
+            return self._attachment_content(item)
         return self._records.get(item.dest_path, {})
 
+    def _attachment_content(self, item: MigrationItem) -> bytes:
+        attachment = self._attachments.get(item.dest_path)
+        if attachment is None:
+            raise FileNotFoundError(item.source_path)
+        return cast(bytes, attachment.get_content().execute_query().value)
+
     def checksum(self, item: MigrationItem) -> str:
+        if item.item_type == "attachment":
+            return hashlib.md5(self._attachment_content(item)).hexdigest()
         payload = record_to_json(self._records.get(item.dest_path, {}))
         return hashlib.md5(payload.encode("utf-8")).hexdigest()
 
@@ -204,6 +253,12 @@ class SharePointListTarget:
     ``on_conflict`` may be passed explicitly; otherwise it is derived from
     ``MigrationOptions.conflict_resolution`` by :meth:`configure` (the runner calls
     it before writes): ``OVERWRITE`` → ``"update"``, anything else → ``"skip"``.
+
+    Every migrated item also gets a source-id marker (``identity_field``, default
+    ``MigrationSourceId``): the default ``SKIP`` policy then recognizes items already
+    on the target (so re-runs do not duplicate) and :meth:`list_paths` pairs source
+    and target items for verification. Pass ``identity_field=None`` to opt out.
+    List-item attachments are written after their parent records are flushed.
     """
 
     def __init__(
@@ -212,6 +267,7 @@ class SharePointListTarget:
         key: str | list[str] | None = None,
         key_field: str = "MigrationKey",
         on_conflict: str | None = None,
+        identity_field: str | None = DEFAULT_LIST_IDENTITY_FIELD,
     ) -> None:
         self._list = target_list
         self._key_columns = [key] if isinstance(key, str) else (list(key) if key else [])
@@ -220,6 +276,11 @@ class SharePointListTarget:
         self._on_conflict = on_conflict or "skip"
         self._target = None
         self._existing: dict = {}
+        self._identity_field = identity_field
+        self._identity_ensured = False
+        self._identity_index: dict | None = None
+        self._attachment_path_cache: set[str] | None = None
+        self.warnings: list[str] = []
 
     @property
     def on_conflict(self) -> str:
@@ -240,12 +301,23 @@ class SharePointListTarget:
         return f"list:{self._list.title}"
 
     def exists(self, item: MigrationItem) -> bool:
-        # Keyed dedup happens in _queue (the key is derived from the payload, which
-        # exists() doesn't receive); without a key, records are appended.
-        return False
+        # With the identity marker, both records and attachments are recognized on a
+        # re-run, so the default ``SKIP`` policy is genuinely idempotent. Without it
+        # (``identity_field=None``) nothing is recognized and records append.
+        if not self._identity_field:
+            return False
+        self._ensure_identity()
+        if not self._identity_field:
+            return False
+        if item.item_type == "attachment":
+            return str(item.dest_path) in set(self._attachment_paths())
+        return self._find_by_identity(item.dest_path) is not None
 
     def write(self, item: MigrationItem, payload: object) -> None:
-        self._queue([cast(dict, payload)])
+        if item.item_type == "attachment":
+            self._write_attachment(item, payload)
+            return
+        self._queue([self._record_for(item, payload)])
 
     def write_many(
         self,
@@ -257,16 +329,35 @@ class SharePointListTarget:
 
         Flushing per chunk (instead of only at :meth:`commit`) keeps a large list
         migration memory-bounded — the queued creates never accumulate for the
-        whole run.
+        whole run. Attachments in the chunk are written after its records are
+        flushed, so their parent items already exist.
 
         Returns:
             No failures (a batch failure raises; there are no partial successes).
         """
-        self._queue([cast(dict, payload) for payload in payloads])
-        self._flush(len(payloads), concurrency)
+        records: list[dict] = []
+        attachments: list[tuple[MigrationItem, object]] = []
+        for item, payload in zip(items, payloads):
+            if item.item_type == "attachment":
+                attachments.append((item, payload))
+            else:
+                records.append(self._record_for(item, payload))
+        if records:
+            self._queue(records)
+            self._flush(len(records), concurrency)
+        for item, payload in attachments:
+            self._write_attachment(item, payload)
         return []
 
+    def _record_for(self, item: MigrationItem, payload: object) -> dict:
+        """The payload plus the source-id marker (so re-runs and verify can pair items)."""
+        record = cast(dict, payload)
+        if self._identity_field:
+            record[self._identity_field] = item.dest_path
+        return record
+
     def _queue(self, records: list[dict]) -> None:
+        self._ensure_identity()
         if not self._key_columns:
             for record in records:
                 self._list.items.queue_records([record])
@@ -290,11 +381,107 @@ class SharePointListTarget:
             on_conflict=self._on_conflict,
         )
 
+    def _ensure_identity(self) -> None:
+        """Create the source-id marker column (once), best-effort."""
+        if self._identity_ensured or not self._identity_field:
+            return
+        self._identity_ensured = True
+        name = self._identity_field
+        from office365.sharepoint.fields.creation_information import FieldCreationInformation
+        from office365.sharepoint.fields.type import FieldType
+
+        try:
+            self._list.fields.ensure(FieldCreationInformation(name, FieldType.Text)).execute_query()
+        except Exception as e:  # noqa: BLE001 — identity is best-effort; content still migrates
+            self._identity_field = None
+            self.warnings.append(f"could not create the {name!r} identity column: {e}")
+
+    def _write_attachment(self, item: MigrationItem, payload: object) -> None:
+        if not self._identity_field:
+            raise NotImplementedError("attachments need the identity column, which could not be created")
+        parent_id, _, filename = str(item.dest_path).partition("/")
+        if not filename:
+            raise ValueError(f"invalid attachment destination {item.dest_path!r}")
+        self._flush_pending()
+        parent = self._find_by_identity(parent_id)
+        if parent is None:
+            raise ValueError(f"no target item for source id {parent_id!r}; cannot attach {filename!r}")
+        content = payload if isinstance(payload, bytes) else str(payload).encode("utf-8")
+        parent.attachment_files.add({"filename": filename, "content": content}).execute_query()
+        if self._attachment_path_cache is not None:
+            self._attachment_path_cache.add(str(item.dest_path))
+
+    def _flush_pending(self) -> None:
+        if self._list.context.has_pending_request:
+            self._flush(DEFAULT_BATCH_SIZE, 1)
+
+    def _find_by_identity(self, source_id: str):
+        if self._identity_index is None:
+            self._identity_index = self._load_identity_index()
+        return self._identity_index.get(str(source_id))
+
+    def _load_identity_index(self) -> dict:
+        """Map stored source-id -> target item (built once, after records are flushed)."""
+        if not self._identity_field:
+            return {}
+        # A read query would implicitly flush any queued writes on this context;
+        # flush them explicitly first so the cached index stays consistent.
+        self._flush_pending()
+        items = self._list.items.select(["Id", self._identity_field]).get_all().execute_query()
+        index: dict = {}
+        for target_item in items:
+            value = target_item.properties.get(self._identity_field)
+            if value is not None:
+                index[str(value)] = target_item
+        return index
+
+    def _attachment_paths(self) -> list[str]:
+        if not self._identity_field:
+            return []
+        if self._attachment_path_cache is None:
+            self._attachment_path_cache = set(self._query_attachment_paths())
+        return list(self._attachment_path_cache)
+
+    def _query_attachment_paths(self) -> list[str]:
+        if not self._identity_field:
+            return []
+        self._flush_pending()
+        items = (
+            self._list.items.select(["Id", self._identity_field]).expand(["AttachmentFiles"]).get_all().execute_query()
+        )
+        paths: list[str] = []
+        for target_item in items:
+            value = target_item.properties.get(self._identity_field)
+            if value is None:
+                continue
+            for attachment in target_item.properties.get("AttachmentFiles") or []:
+                name = getattr(attachment, "file_name", None)
+                if name:
+                    paths.append(f"{value}/{name}")
+        return paths
+
     def list_paths(self) -> list[str]:
-        return [str(i.id) for i in self._list.items.get().execute_query()]
+        if not self._identity_field:
+            return [str(i.id) for i in self._list.items.get().execute_query()]
+        if self._identity_index is None:
+            self._identity_index = self._load_identity_index()
+        return list(self._identity_index.keys()) + self._attachment_paths()
 
     def checksum(self, item: MigrationItem) -> str:
+        if item.item_type == "attachment":
+            return self._attachment_checksum(item)
         return ""
+
+    def _attachment_checksum(self, item: MigrationItem) -> str:
+        parent_id, _, filename = str(item.dest_path).partition("/")
+        parent = self._find_by_identity(parent_id)
+        if parent is None:
+            return ""
+        try:
+            data = parent.attachment_files.get_by_filename(filename).get_content().execute_query().value
+        except Exception:  # noqa: BLE001 — a missing/unreadable attachment is unverifiable
+            return ""
+        return hashlib.md5(data).hexdigest() if data else ""
 
     def commit(self, options=None) -> None:
         """Flush any remaining queued record writes through an OData batch."""
@@ -307,6 +494,8 @@ class SharePointListTarget:
             return
         self._list.context.execute_batch(items_per_batch=batch_size, concurrency=concurrency)
         self._list.items.clear()
+        # Records were just created/updated, so any cached source-id index is stale.
+        self._identity_index = None
 
     def close(self) -> None:
         pass

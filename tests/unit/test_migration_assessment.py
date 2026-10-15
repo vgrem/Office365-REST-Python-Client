@@ -319,6 +319,9 @@ class _ItemsEndpoint:
         self._select = columns
         return self
 
+    def expand(self, _expands):
+        return self
+
     def get_all(self):
         return _Query(self._load, self._select)
 

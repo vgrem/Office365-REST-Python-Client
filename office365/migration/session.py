@@ -265,6 +265,20 @@ class MigrationSession:
         """Reconcile source vs target for every task after migration."""
         return [entry.job.verify(spot_checks) for entry in self._tasks]
 
+    def warnings(self) -> list[str]:
+        """Adapter warnings accumulated by the tasks (anything not migrated faithfully).
+
+        Adapters may expose a ``warnings`` list; messages collected there (for
+        example an attachment skipped for lack of a file name, or a target column
+        that could not be created) are surfaced here so a run never silently drops
+        data.
+        """
+        messages: list[str] = []
+        for entry in self._tasks:
+            for adapter in (entry.job.source, entry.job.target):
+                messages.extend(getattr(adapter, "warnings", None) or [])
+        return messages
+
     def fidelity(self) -> list[dict]:
         """Per-task fidelity report — what each run will (and won't) preserve.
 

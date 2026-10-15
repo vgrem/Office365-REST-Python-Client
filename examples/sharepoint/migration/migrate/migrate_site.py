@@ -11,8 +11,9 @@ its own manifest and checkpoint, so a large site resumes per list.
 
 Dry-run by default: it lists the lists/libraries that would migrate and creates
 nothing. ``--apply`` performs the copy, persisting per-list state under
-``--work`` so an interrupted run resumes. Requires read access to the source site
-and write access to the target.
+``--work`` so an interrupted run resumes. After a run it reconciles every list
+against the source (presence via the ``MigrationSourceId`` marker, plus attachment
+checksums) and prints any adapter warnings; pass ``--no-verify`` to skip it.
 
 Only the list *containers* are created on the target — fields, content types and
 views are recreated from the source before content is copied
@@ -50,6 +51,7 @@ def main():
         help="only create target list containers (skip columns/content types/views)",
     )
     parser.add_argument("--apply", action="store_true", help="perform the migration (default: dry run)")
+    parser.add_argument("--no-verify", action="store_true", help="skip the post-run source/target reconciliation")
     args = parser.parse_args()
 
     include = _csv(args.include)
@@ -92,6 +94,23 @@ def main():
             f"  [{status['phase']}] {status['source']} -> {status['target']} "
             f"success={stats['success']} skipped={stats['skipped']} errors={stats['errors']}"
         )
+
+    if not args.no_verify:
+        statuses = session.show()
+        print("\nVerifying…", flush=True)
+        for status, report in zip(statuses, session.verify()):
+            print(f"  {status['target']}: {report.summary()}")
+            for path in report.missing[:5]:
+                print(f"      missing: {path}")
+            for path in report.extra[:5]:
+                print(f"      extra:   {path}")
+            for note in report.mismatches[:5]:
+                print(f"      mismatch: {note}")
+            for note in report.unverifiable[:3]:
+                print(f"      unverified: {note}")
+
+    for warning in session.warnings():
+        print(f"  warning: {warning}")
 
 
 if __name__ == "__main__":

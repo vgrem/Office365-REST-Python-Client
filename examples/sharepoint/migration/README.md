@@ -292,6 +292,12 @@ cd examples/sharepoint/migration/monitor
 python verify_structure.py --list Projects --target-site https://contoso.sharepoint.com/sites/projects-copy
 ```
 
+For **record lists**, `job.verify()` pairs source and target items through the
+`MigrationSourceId` marker the target adds to every migrated list (attachments are
+presence- and md5-checked; record content stays `unverifiable`). The same marker
+makes the default `SKIP` policy idempotent, so re-running skips items already on
+the target instead of duplicating them.
+
 To watch a migration live — progress bars for planning/migrating, and a clean
 SPMT-style pause on **Ctrl-C** (the checkpoint is saved; re-running the same
 command resumes) — use the monitor example (any local directories, no

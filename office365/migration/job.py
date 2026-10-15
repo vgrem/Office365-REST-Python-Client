@@ -83,6 +83,16 @@ class MigrationJob:
         return self._checkpoint
 
     @property
+    def source(self):
+        """The source adapter for this job."""
+        return self._source
+
+    @property
+    def target(self):
+        """The target adapter for this job."""
+        return self._target
+
+    @property
     def source_label(self) -> str:
         """A human-readable label for the source (adapter type / root)."""
         label = getattr(self._source, "label", None)

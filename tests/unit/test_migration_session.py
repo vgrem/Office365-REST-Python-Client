@@ -112,3 +112,18 @@ def test_add_task_descriptor_requires_a_context():
     session = MigrationSession()
     with pytest.raises(ValueError, match="register a ClientContext"):
         session.add_task(file_share_source="C:/src", target_site_url="https://x", target_list="Documents")
+
+
+def test_session_surfaces_adapter_warnings(tmp_path):
+    source = FileSystemSource(tmp_path)
+    source.warnings = ["skipped a file without a name"]
+    target = FileSystemTarget(tmp_path / "out")
+    target.warnings = ["could not preserve timestamps"]
+    session = MigrationSession()
+    session.add_task(source, target)
+
+    assert session.warnings() == ["skipped a file without a name", "could not preserve timestamps"]
+
+    fresh = MigrationSession()
+    fresh.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path))
+    assert fresh.warnings() == []
