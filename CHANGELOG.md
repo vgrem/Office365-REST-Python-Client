@@ -276,6 +276,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Site Assets reported a phantom "extra" item (and copied site branding).**
+  Every modern site auto-provisions ``SiteAssets/<web title> Notebook``, which
+  SharePoint recreates on the target under the *target* web's name — so a migrated
+  Site Assets always looked like it had one extra folder and one missing one. The
+  notebook folder and the ``__siteIcon__.png`` site icon (per-site branding) are
+  now treated as Site Assets scaffolding and skipped on both sides, like
+  ``Forms/`` / ``desktop.ini``. *Live-validated: Site Assets `OK`, 0 items, 0 extra.*
 - **Verification flagged valid Office documents as content mismatches.**
   SharePoint re-serializes Office Open XML documents on upload — document property
   promotion/demotion rewrites ``docProps/`` / ``customXml/`` and adds ``[trash]/``

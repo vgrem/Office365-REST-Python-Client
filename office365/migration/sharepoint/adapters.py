@@ -73,10 +73,36 @@ def _version_sort_key(label: str) -> tuple[int, ...]:
 #: clobbers system pages client-side, so the source adapter skips them.
 _LIBRARY_SYSTEM_PATHS = ("Forms", "desktop.ini")
 
+#: SiteAssets is the one library that also holds per-site infrastructure — the
+#: site icon and the auto-provisioned OneNote folder.
+_SITE_ASSETS_URL_SUFFIX = "/SiteAssets"
 
-def _is_system_path(rel: str) -> bool:
+
+def _site_assets_scaffolding(folder) -> tuple[str, ...]:
+    """SiteAssets-only SharePoint-owned entries for this web (empty otherwise).
+
+    Every modern site provisions ``SiteAssets/<web title> Notebook``; migrating
+    it (or reporting it) yields a phantom missing/extra pair because the target's
+    folder carries the *target* web's name. The site icon is site branding whose
+    bytes are meaningless on another site. Both are skipped on each side.
+    """
+    url = (folder.server_relative_url or "").rstrip("/")
+    if not url.endswith(_SITE_ASSETS_URL_SUFFIX):
+        return ()
+    web = folder.context.web
+    if not web.properties.get("Title"):
+        web.ensure_properties(["Title"]).execute_query()
+    title = web.title
+    names = ["__siteIcon__.png"]
+    if title:
+        names.append(f"{title} Notebook")
+    return tuple(names)
+
+
+def _is_system_path(rel: str, extra: tuple[str, ...] = ()) -> bool:
     """Whether a library-relative path is SharePoint-owned scaffolding, not user content."""
-    return any(rel == entry or rel.startswith(entry + "/") for entry in _LIBRARY_SYSTEM_PATHS)
+    entries = (*_LIBRARY_SYSTEM_PATHS, *extra)
+    return any(rel == entry or rel.startswith(entry + "/") for entry in entries)
 
 
 def is_taxonomy_validation(exc: Exception) -> bool:
@@ -632,6 +658,7 @@ class SharePointLibrarySource:
             self._folder.ensure_properties(["ServerRelativeUrl"]).execute_query()
             root = self._folder.server_relative_url or ""
         root = root.rstrip("/")
+        extra = _site_assets_scaffolding(self._folder)
         loaded_folders = self._folder.get_folders(recursive=True).execute_query()
         loaded = self._folder.get_files(recursive=True).execute_query()
         authors = self._file_authors()
@@ -644,7 +671,7 @@ class SharePointLibrarySource:
         for folder in loaded_folders:
             url = folder.server_relative_url or ""
             rel = _rel(url)
-            if not rel or rel in seen or _is_system_path(rel):
+            if not rel or rel in seen or _is_system_path(rel, extra):
                 continue
             seen.add(rel)
             result.append(MigrationItem(source_path=url, dest_path=f"{rel}/", item_type="folder"))
@@ -652,7 +679,7 @@ class SharePointLibrarySource:
         for file in loaded:
             url = file.server_relative_url or ""
             rel = _rel(url)
-            if _is_system_path(rel):
+            if _is_system_path(rel, extra):
                 continue
             self._files[rel] = file
             author_id = parse_int(file.author.id)
@@ -897,15 +924,17 @@ class SharePointLibraryTarget:
 
     def list_paths(self) -> list[str]:
         root = (self._folder.server_relative_url or "").rstrip("/")
+        extra = _site_assets_scaffolding(self._folder)
         loaded_files = self._folder.get_files(recursive=True).execute_query()
         loaded_folders = self._folder.get_folders(recursive=True).execute_query()
         paths = [(f.server_relative_url or "")[len(root) :].lstrip("/") for f in loaded_files]
         paths += [f"{(f.server_relative_url or '')[len(root) :].lstrip('/')}/" for f in loaded_folders]
         # Mirror the source projection: SharePoint-owned scaffolding (``Forms/``,
-        # ``desktop.ini``) is recreated server-side, never migrated, so it must
-        # not be reported as target-only content during verification. Source
-        # folder paths carry a trailing slash; target folder paths mirror that.
-        return [p for p in paths if p != "/" and not _is_system_path(p)]
+        # ``desktop.ini``, and on SiteAssets the site icon + auto-provisioned
+        # notebook) is recreated server-side, never migrated, so it must not be
+        # reported as target-only content during verification. Source folder paths
+        # carry a trailing slash; target folder paths mirror that.
+        return [p for p in paths if p != "/" and not _is_system_path(p, extra)]
 
     def read(self, item: MigrationItem) -> bytes:
         """Download the written item's bytes (used by verification for Office files)."""

@@ -540,6 +540,11 @@ stable. If every part SharePoint does not own matches, the file is reported as a
 `unverifiable` caveat rather than a false mismatch; a difference in any other part
 is still a real `mismatch`.
 
+Presence ignores each library's SharePoint-owned scaffolding on **both** sides —
+`Forms/`, `desktop.ini`, and on Site Assets the `__siteIcon__.png` site icon and
+the auto-provisioned `<web title> Notebook` folder — so it is neither migrated nor
+reported as missing/extra.
+
 A requested check that could not run lands in `report.unverifiable` — `report.ok`
 is then still True when nothing contradicted it, but `report.complete` is False.
 This is deliberate: a *partial* verification is never silently reported as a pass.

@@ -1,17 +1,19 @@
-"""Offline tests for the document-library target adapter.
+"""Offline tests for the document-library adapters.
 
 Covers the verification enumeration: a target library always contains
 SharePoint-owned scaffolding (``Forms/``, ``desktop.ini``) that the source
 projection deliberately skips, so the target must skip it too or every migrated
-library is reported as having "extra" content. Also covers folder items — the
-source plans folders as first-class items, so the target must create them instead
-of trying to upload a file named after the folder.
+library is reported as having "extra" content. On ``SiteAssets`` that scaffolding
+also includes the site icon and the auto-provisioned ``<web title> Notebook``
+folder. Also covers folder items — the source plans folders as first-class items,
+so the target must create them instead of trying to upload a file named after the
+folder.
 """
 
 from __future__ import annotations
 
 from office365.migration.base import MigrationItem
-from office365.migration.sharepoint.adapters import SharePointLibraryTarget
+from office365.migration.sharepoint.adapters import SharePointLibrarySource, SharePointLibraryTarget
 
 
 class _Entry:
@@ -51,6 +53,18 @@ class _Web:
 
     def get_file_by_server_relative_url(self, url: str) -> _Request:
         return _Request(url, url in self._files)
+
+
+class _SiteAssetsWeb(_Web):
+    """A web whose title is available, so the notebook rule can be applied."""
+
+    def __init__(self, title: str, folders=(), files=()) -> None:
+        super().__init__(folders=folders, files=files)
+        self.properties = {"Title": title}
+
+    @property
+    def title(self) -> str:
+        return self.properties["Title"]
 
 
 class _Context:
@@ -192,3 +206,81 @@ def test_library_target_read_folder_returns_empty_bytes():
     target = SharePointLibraryTarget(_TargetFolder())
 
     assert target.read(_folder_item("a/")) == b""
+
+
+def test_library_target_list_paths_skips_site_assets_scaffolding():
+    web = _SiteAssetsWeb("Project")
+    folder = _TargetFolder(
+        files=[
+            _Entry("/sites/x/SiteAssets/__siteIcon__.png"),
+            _Entry("/sites/x/SiteAssets/logo.png"),
+        ],
+        folders=[
+            _Entry("/sites/x/SiteAssets/Project Notebook"),
+            _Entry("/sites/x/SiteAssets/Images"),
+            _Entry("/sites/x/SiteAssets/Forms"),
+        ],
+        context=_Context(web),
+    )
+    folder.server_relative_url = "/sites/x/SiteAssets"
+    target = SharePointLibraryTarget(folder)
+
+    assert target.list_paths() == ["logo.png", "Images/"]
+
+
+def test_site_assets_notebook_rule_does_not_apply_elsewhere():
+    folder = _TargetFolder(folders=[_Entry("/sites/x/Docs/Project Notebook")])
+    target = SharePointLibraryTarget(folder)
+
+    assert target.list_paths() == ["Project Notebook/"]
+
+
+class _ById:
+    id = None
+
+
+class _SourceFile:
+    def __init__(self, url: str) -> None:
+        self.server_relative_url = url
+        self.length = 1
+        self.author = _ById()
+        self.modified_by = _ById()
+        self.time_last_modified = None
+        self.time_created = None
+        self.unique_id = None
+        self.ui_version_label = None
+
+
+class _SourceFolder:
+    def __init__(self, url: str, web, files=(), folders=()) -> None:
+        self.server_relative_url = url
+        self.context = _Context(web)
+        self._files = list(files)
+        self._folders = list(folders)
+
+    def get_files(self, recursive: bool = False) -> _Collection:
+        return _Collection(self._files)
+
+    def get_folders(self, recursive: bool = False) -> _Collection:
+        return _Collection(self._folders)
+
+
+def test_library_source_skips_site_assets_scaffolding():
+    web = _SiteAssetsWeb("Project")
+    folder = _SourceFolder(
+        "/sites/x/SiteAssets",
+        web,
+        files=[
+            _SourceFile("/sites/x/SiteAssets/__siteIcon__.png"),
+            _SourceFile("/sites/x/SiteAssets/logo.png"),
+        ],
+        folders=[
+            _Entry("/sites/x/SiteAssets/Project Notebook"),
+            _Entry("/sites/x/SiteAssets/Images"),
+            _Entry("/sites/x/SiteAssets/Forms"),
+        ],
+    )
+    source = SharePointLibrarySource(folder)
+    source._item_authors = {}
+
+    assert [item.dest_path for item in source.list_items()] == ["Images/", "logo.png"]
