@@ -3,7 +3,7 @@ Export the term store hierarchy to CSV (or JSON).
 
 ``store.get_all_terms()`` queues a deferred traversal (groups -> sets ->
 terms -> children); after ``execute_query()`` the flattened collection can be
-serialized with ``write_csv`` (or ``terms.to_json()`` for the nested tree).
+serialized with ``write_csv`` (or use ``store.export_tree()`` for the nested tree).
 
 Requires application permission ``TermStore.Read.All``.
 

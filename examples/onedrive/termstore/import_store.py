@@ -34,7 +34,7 @@ def main():
     )
     store = client.sites.get_by_url(root_site_url).term_store
 
-    store.from_json(data).execute_query()
+    store.import_tree(data).execute_query()
     print(f"✓ Imported from {args.input}")
 
 

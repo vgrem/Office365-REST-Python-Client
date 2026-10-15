@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Term-store hierarchy export/import, without the payload name clash:**
+  `Store.export_tree()` / `Store.import_tree()` (and `StoreManager.export_tree()`
+  / `StoreManager.import_tree()`) round-trip the whole groups → sets → terms tree
+  to/from a nested list of dicts. They replace the misnamed
+  `StoreManager.to_json()` / `from_json()` on the term-store *hierarchy*, since
+  `to_json` / `from_json` are reserved for wire-payload (de)serialization; the old
+  names remain as `DeprecationWarning` aliases.
 - **Deeper post-migration validation:** `MigrationJob.verify()` now reconciles
   presence, content, and — when the run requested them — timestamps and
   permissions, using optional `read_metadata(item)` / `read_permissions(item)`
@@ -468,6 +475,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `Subscription.expiration_datetime` serializes `expirationDateTime` in UTC `Z`
   form (the generic serializer emitted a numeric offset).
   `client.subscriptions.add(...)` previously produced a payload Graph rejected.
+- **`examples/onedrive/termstore/export_tree.py` crashed:** the script called
+  `Store.to_json()` and then `.execute_query()`, but `Store` inherits the payload
+  `ClientObject.to_json()`, which returns a plain `dict`, so the example raised
+  `AttributeError`. It now uses `Store.export_tree()` / `import_tree()`, matching
+  the documented README snippet.
 
 ### Added
 - **To Do attachment content:** `AttachmentBase.content_bytes` exposes the

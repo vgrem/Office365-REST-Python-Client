@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 from office365.onedrive.termstore.groups.collection import GroupCollection
@@ -17,7 +18,12 @@ class StoreManager:
     All operations are deferred: queries are queued and run with a single
     ``execute_query()``. ``get_all_terms()`` returns a flattened ``TermCollection``
     with each term's ``children`` attached, so the standard collection pipeline
-    (``to_json()``, ``write_csv``) can serialize the full tree.
+    (``write_csv``, or the wire ``to_json()`` payload serializer) can serialize
+    the full tree.
+
+    ``export_tree()`` / ``import_tree()`` handle the *hierarchy* (a nested
+    group -> set -> term tree) and deliberately avoid the ``to_json`` /
+    ``from_json`` names, which are reserved for wire-payload (de)serialization.
     """
 
     def __init__(self, store: Store):
@@ -67,8 +73,8 @@ class StoreManager:
         self.store.groups.get().after_execute(_on_groups_loaded)
         return return_type
 
-    def from_json(self, data: list[dict]) -> Store:
-        """Import a term hierarchy from a list of group dicts.
+    def import_tree(self, data: list[dict]) -> Store:
+        """Import a term hierarchy (a nested tree) from a list of group dicts.
 
         Args:
             data: List of ``{name, sets: [{name, children: [{name, children: []}]}]}``.
@@ -83,14 +89,14 @@ class StoreManager:
                 self._create_terms(term_set.children, set_data.get("children", []))
         return self.store
 
-    def to_json(self) -> ClientResult[list]:
-        """Export the term hierarchy as nested JSON.
+    def export_tree(self) -> ClientResult[list]:
+        """Export the term hierarchy as a nested tree of dicts.
 
         Builds ``[{name, sets: [{name, children: [{name, children: []}]}]}]`` —
-        the symmetric counterpart of :meth:`from_json`. Deferred, like every
+        the symmetric counterpart of :meth:`import_tree`. Deferred, like every
         other operation here: ``execute_query()`` then read ``result.value``.
 
-            >>> result = store_manager.to_json().execute_query()
+            >>> result = store_manager.export_tree().execute_query()
             >>> tree = result.value
         """
         return_type = ClientResult(self.store.context, [])
@@ -121,6 +127,32 @@ class StoreManager:
         self.store.groups.get().after_execute(_on_groups_loaded)
         return_type.set_property("__value", tree)
         return return_type
+
+    def from_json(self, data: list[dict]) -> Store:
+        """Deprecated alias of :meth:`import_tree`.
+
+        ``from_json`` is reserved for wire-payload deserialization; use
+        :meth:`import_tree` for the term-store hierarchy.
+        """
+        warnings.warn(
+            "StoreManager.from_json() is deprecated; use import_tree() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.import_tree(data)
+
+    def to_json(self) -> ClientResult[list]:
+        """Deprecated alias of :meth:`export_tree`.
+
+        ``to_json`` is reserved for wire-payload serialization; use
+        :meth:`export_tree` for the term-store hierarchy.
+        """
+        warnings.warn(
+            "StoreManager.to_json() is deprecated; use export_tree() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.export_tree()
 
     def _create_terms(self, collection: TermCollection, terms: list[dict]) -> None:
         for term_data in terms:

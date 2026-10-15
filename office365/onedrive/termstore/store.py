@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from typing import Optional
 
 from typing_extensions import Self
@@ -10,6 +11,7 @@ from office365.onedrive.termstore.groups.group import Group
 from office365.onedrive.termstore.sets.collection import SetCollection
 from office365.onedrive.termstore.store_manager import StoreManager
 from office365.onedrive.termstore.terms.collection import TermCollection
+from office365.runtime.client_result import ClientResult
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
@@ -30,10 +32,32 @@ class Store(Entity):
         """Flatten the whole term store into a single ``TermCollection`` (deferred)."""
         return StoreManager(self).get_all_terms()
 
-    def from_json(self, data: list[dict]) -> Self:
-        """Import a term hierarchy from a list of group dicts (deferred)."""
-        StoreManager(self).from_json(data)
+    def export_tree(self) -> ClientResult[list]:
+        """Export the whole term hierarchy as a nested tree of dicts (deferred).
+
+        The returned :class:`ClientResult` is populated after ``execute_query()``:
+
+            >>> tree = store.export_tree().execute_query().value
+        """
+        return StoreManager(self).export_tree()
+
+    def import_tree(self, data: list[dict]) -> Self:
+        """Import a term hierarchy (a nested tree) from a list of group dicts (deferred)."""
+        StoreManager(self).import_tree(data)
         return self
+
+    def from_json(self, data: list[dict]) -> Self:
+        """Deprecated alias of :meth:`import_tree`.
+
+        ``from_json`` is reserved for wire-payload deserialization; use
+        :meth:`import_tree` for the term-store hierarchy.
+        """
+        warnings.warn(
+            "Store.from_json() is deprecated; use import_tree() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.import_tree(data)
 
     @property
     def default_language_tag(self) -> Optional[str]:

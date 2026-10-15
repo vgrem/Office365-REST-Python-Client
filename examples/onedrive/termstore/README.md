@@ -21,8 +21,8 @@ term = store.sets.get_by_id(term_set.id).children.add("EMEA").execute_query()
 Round-trip the whole taxonomy to JSON — a backup, or a promotion between tenants.
 
 ```python
-tree = store.export()  # serialize groups → sets → terms
-store.import_hierarchy(tree).execute_query()  # recreate it
+tree = store.export_tree().execute_query().value  # serialize groups → sets → terms
+store.import_tree(tree).execute_query()  # recreate it
 ```
 
 → [`export_store.py`](./export_store.py) · [`export_tree.py`](./export_tree.py) · [`import_store.py`](./import_store.py)
