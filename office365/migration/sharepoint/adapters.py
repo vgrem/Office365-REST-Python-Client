@@ -827,16 +827,32 @@ class SharePointLibraryTarget:
         return f"library:{self._folder.server_relative_url}"
 
     def _url(self, item: MigrationItem) -> str:
-        return f"{(self._folder.server_relative_url or '').rstrip('/')}/{item.dest_path}"
+        return f"{(self._folder.server_relative_url or '').rstrip('/')}/{str(item.dest_path).strip('/')}"
 
     def exists(self, item: MigrationItem) -> bool:
+        url = self._url(item)
         try:
-            self._folder.context.web.get_file_by_server_relative_url(self._url(item)).get().execute_query()
+            if item.item_type == "folder":
+                self._folder.context.web.get_folder_by_server_relative_url(url).get().execute_query()
+            else:
+                self._folder.context.web.get_file_by_server_relative_url(url).get().execute_query()
             return True
-        except Exception:  # noqa: BLE001 — a missing file surfaces as a request error
+        except Exception:  # noqa: BLE001 — a missing item surfaces as a request error
             return False
 
+    def _ensure_folders(self, items: list[MigrationItem]) -> None:
+        """Create folder items (deduplicated to deepest paths) in one round-trip."""
+        paths = [str(item.dest_path).strip("/") for item in items]
+        paths = [path for path in paths if path]
+        if not paths:
+            return
+        self._folder.ensure_folders(paths)
+        self._folder.context.execute_query()
+
     def write(self, item: MigrationItem, payload: object) -> None:
+        if item.item_type == "folder":
+            self._ensure_folders([item])
+            return
         content = payload if isinstance(payload, bytes) else str(payload).encode("utf-8")
         self._folder.upload_file(item.dest_path, content).execute_query()
 
@@ -853,26 +869,47 @@ class SharePointLibraryTarget:
         """
         from office365.migration.sharepoint.transfer import _transfer_files_parallel
 
+        failures: list[Failure] = []
+        folders = [item for item in items if item.item_type == "folder"]
+        if folders:
+            try:
+                self._ensure_folders(folders)
+            except Exception:  # noqa: BLE001 — fall back to per-folder to attribute errors
+                for folder in folders:
+                    try:
+                        self._ensure_folders([folder])
+                    except Exception as e:  # noqa: BLE001
+                        failures.append((folder.dest_path, str(e)))
         files = [
             (item.dest_path, payload if isinstance(payload, bytes) else str(payload).encode("utf-8"))
             for item, payload in zip(items, payloads)
+            if item.item_type != "folder"
         ]
-        return _transfer_files_parallel(
-            self._folder,
-            files,
-            concurrency=concurrency or self._concurrency or 1,
-        )
+        if files:
+            failures.extend(
+                _transfer_files_parallel(
+                    self._folder,
+                    files,
+                    concurrency=concurrency or self._concurrency or 1,
+                )
+            )
+        return failures
 
     def list_paths(self) -> list[str]:
         root = (self._folder.server_relative_url or "").rstrip("/")
-        loaded = self._folder.get_files(recursive=True).execute_query()
-        paths = [(f.server_relative_url or "")[len(root) :].lstrip("/") for f in loaded]
+        loaded_files = self._folder.get_files(recursive=True).execute_query()
+        loaded_folders = self._folder.get_folders(recursive=True).execute_query()
+        paths = [(f.server_relative_url or "")[len(root) :].lstrip("/") for f in loaded_files]
+        paths += [f"{(f.server_relative_url or '')[len(root) :].lstrip('/')}/" for f in loaded_folders]
         # Mirror the source projection: SharePoint-owned scaffolding (``Forms/``,
         # ``desktop.ini``) is recreated server-side, never migrated, so it must
-        # not be reported as target-only content during verification.
-        return [p for p in paths if p and not _is_system_path(p)]
+        # not be reported as target-only content during verification. Source
+        # folder paths carry a trailing slash; target folder paths mirror that.
+        return [p for p in paths if p != "/" and not _is_system_path(p)]
 
     def checksum(self, item: MigrationItem) -> str:
+        if item.item_type == "folder":
+            return hashlib.md5(b"").hexdigest()
         file = self._folder.context.web.get_file_by_server_relative_url(self._url(item)).get().execute_query()
         buffer = io.BytesIO()
         file.download(buffer).execute_query()
@@ -880,6 +917,8 @@ class SharePointLibraryTarget:
 
     def modified(self, item: MigrationItem) -> str:
         """Last-modified of the target file (for incremental migration)."""
+        if item.item_type == "folder":
+            return ""
         file = self._folder.context.web.get_file_by_server_relative_url(self._url(item)).get().execute_query()
         return iso_or_none(file.time_last_modified) or ""
 
@@ -928,6 +967,8 @@ class SharePointLibraryTarget:
 
     def read_metadata(self, item: MigrationItem) -> dict | None:
         """Comparable attributes of the written item (for the metadata diff)."""
+        if item.item_type == "folder":
+            return None
         file = self._folder.context.web.get_file_by_server_relative_url(self._url(item)).get().execute_query()
         return {
             "created": iso_or_none(file.time_created),

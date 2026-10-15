@@ -276,6 +276,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Document-library migration dropped every folder.** The library source plans
+  folders as first-class items (``dest_path`` ending in ``/``), but
+  ``SharePointLibraryTarget`` treated every item as a file upload — so each
+  folder was sent as a file named after the folder and rejected with
+  ``System.ArgumentException: parameters.Url``. On the ``Documents`` library of
+  the acceptance site that failed all 62 folders (`errors=62`). The target now
+  creates folder items (deduplicated, one round-trip via `ensure_folders`),
+  recognizes them in `exists`/`checksum`/`modified`/`read_metadata`, and
+  `list_paths()` enumerates folders (with the same trailing slash and scaffolding
+  filter as the source) so verification pairs them instead of reporting them
+  missing. *Live-validated: `Documents` 151/151 items, `OK` on apply and on an
+  idempotent re-run.*
 - **`ClientContext.clone(url)` sent every request to the original site.** A clone
   correctly stored the new URL on the context, but `reuse()` swaps in the source's
   shared `AuthenticationContext` (to keep one token cache and transport), and
