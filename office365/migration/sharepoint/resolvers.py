@@ -11,6 +11,12 @@ walks the source web's lists and document libraries and returns one adapter pair
 per migratable list. The registered ``context`` is the target; a source on a
 different site collection in the same tenant is reached through an authenticated
 clone (:meth:`ClientContext.clone`).
+
+Subsites are **not** migrated by default: they are detected and reported through
+the resolution ``warnings`` sink (``session.warnings()``). Pass
+``include_subwebs=True`` to provision the matching target subsites and migrate
+their lists too. Every web is addressed through its own clone (a subweb's
+sub-collections resolve against the context root otherwise).
 """
 
 from __future__ import annotations
@@ -28,6 +34,7 @@ from office365.migration.sharepoint.adapters import (
 )
 from office365.migration.sharepoint.structure import capture_list_structure, provision_list_structure
 from office365.migration.tasks import FILE_SHARE, SHAREPOINT, MigrationTask
+from office365.sharepoint.webs.creation_information import WebCreationInformation
 
 if TYPE_CHECKING:
     from office365.migration.settings import MigrationSettings
@@ -97,6 +104,8 @@ def resolve_site_task(
     include: Sequence[str] | None = None,
     exclude: Sequence[str] | None = None,
     provision_structure: bool = True,
+    include_subwebs: bool = False,
+    warnings: list[str] | None = None,
 ) -> list[tuple[Any, Any]]:
     """Resolve a whole-site task into one ``(source, target)`` pair per list.
 
@@ -109,6 +118,11 @@ def resolve_site_task(
     different site collection in the same tenant is reached through an
     authenticated clone.
 
+    By default the source web's **subsites are not migrated**; when any exist a
+    human-readable note is appended to ``warnings`` (and logged). Pass
+    ``include_subwebs=True`` to mirror the subsite tree on the target (creating a
+    missing target subsite with the source's template) and migrate their lists too.
+
     Args:
         task: A ``SHAREPOINT`` task; its ``source_list`` is ignored.
         context: The target ``ClientContext``.
@@ -118,6 +132,8 @@ def resolve_site_task(
         exclude: Source list titles to skip.
         provision_structure: Recreate the source list's structure on the target
             list (default). Pass ``False`` to only create the containers.
+        include_subwebs: Recurse into subsites, creating matching target subsites.
+        warnings: Optional sink for resolution-level notes (subsites skipped).
     """
     if task.kind != SHAREPOINT:
         raise ValueError(f"a site task must be kind {SHAREPOINT!r}, got {task.kind!r}")
@@ -132,6 +148,30 @@ def resolve_site_task(
     exclude_titles = set(exclude) if exclude else set()
 
     pairs: list[tuple[Any, Any]] = []
+    _resolve_web(
+        source_context,
+        target_context,
+        include_titles,
+        exclude_titles,
+        provision_structure,
+        include_subwebs,
+        warnings if warnings is not None else [],
+        pairs,
+    )
+    return pairs
+
+
+def _resolve_web(
+    source_context: Any,
+    target_context: Any,
+    include_titles: set[str] | None,
+    exclude_titles: set[str],
+    provision_structure: bool,
+    include_subwebs: bool,
+    warnings: list[str],
+    pairs: list[tuple[Any, Any]],
+) -> None:
+    """Resolve one web's lists, then recurse into its subsites when requested."""
     source_lists: Iterable[Any] = source_context.web.lists.get().execute_query()
     for source_list in source_lists:
         title = getattr(source_list, "title", None)
@@ -149,7 +189,31 @@ def resolve_site_task(
         source, target = _list_adapters(source_list, target_list, content_type_map=content_type_map)
         _attach_warnings(target, structure_warnings)
         pairs.append((source, target))
-    return pairs
+
+    child_webs = list(source_context.web.webs.get().execute_query())
+    if not child_webs:
+        return
+    if not include_subwebs:
+        names = [getattr(web, "title", None) or _web_identity(web)[0] for web in child_webs]
+        note = (
+            f"{len(child_webs)} subsite(s) were not migrated (pass include_subwebs=True to "
+            f"include them): {', '.join(names)}"
+        )
+        logger.warning(note)
+        warnings.append(note)
+        return
+    for source_child in child_webs:
+        target_child, target_child_context = _ensure_target_web(target_context, source_child)
+        _resolve_web(
+            _context_for(source_context, _web_url(source_child)),
+            target_child_context,
+            include_titles,
+            exclude_titles,
+            provision_structure,
+            include_subwebs,
+            warnings,
+            pairs,
+        )
 
 
 def _provision_structure(source_list: Any, target_list: Any) -> tuple[ContentTypeMap, list[str]]:
@@ -204,6 +268,47 @@ def _ensure_target_list(context: Any, source_list: Any) -> Any:
     target = context.web.lists.ensure_list(source_list.title, template_type=_template_type(source_list))
     target.execute_query()
     return target
+
+
+def _ensure_target_web(parent_context: Any, source_web: Any) -> tuple[Any, Any]:
+    """The target subsite mirroring ``source_web`` (created if absent), plus its context.
+
+    Returns a ``(target_web, target_context)`` pair; ``target_context`` is rooted at
+    the target subsite so its lists resolve there (a subweb's sub-collections resolve
+    against the context root otherwise).
+    """
+    leaf, title, template = _web_identity(source_web)
+    for existing in parent_context.web.webs.get().execute_query():
+        if _web_leaf(existing) == leaf.casefold():
+            return existing, _context_for(parent_context, _web_url(existing))
+    created = parent_context.web.webs.add(WebCreationInformation(Title=title, Url=leaf, WebTemplate=template))
+    created.execute_query()
+    created_url = _web_url(created) or f"{parent_context.base_url.rstrip('/')}/{leaf.strip('/')}"
+    return created, _context_for(parent_context, created_url)
+
+
+def _web_identity(web: Any) -> tuple[str, str, str]:
+    """A web's URL leaf, display title and template (REST-creation inputs)."""
+    raw = _web_url(web)
+    leaf = raw.rstrip("/").rsplit("/", 1)[-1]
+    title = getattr(web, "title", None) or leaf
+    template = getattr(web, "web_template", None) or "STS#3"
+    return leaf, title, template
+
+
+def _web_url(web: Any) -> str:
+    """A web's absolute URL, or its server-relative URL when only that is loaded."""
+    for name in ("Url", "ServerRelativeUrl"):
+        value = web.get_property(name) if hasattr(web, "get_property") else None
+        if value:
+            return value
+    value = getattr(web, "server_relative_url", None) or getattr(web, "url", None)
+    return value or ""
+
+
+def _web_leaf(web: Any) -> str:
+    """A web's URL leaf, case-folded, for identity matching across tenants."""
+    return _web_identity(web)[0].casefold()
 
 
 def _template_type(source_list: Any) -> Any:

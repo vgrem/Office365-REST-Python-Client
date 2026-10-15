@@ -15,6 +15,9 @@ nothing. ``--apply`` performs the copy, persisting per-list state under
 against the source (presence via the ``MigrationSourceId`` marker, plus attachment
 checksums) and prints any adapter warnings; pass ``--no-verify`` to skip it.
 
+Subsites are skipped unless ``--include-subwebs`` is given; the dry run names any
+subsites it would leave behind.
+
 Only the list *containers* are created on the target — fields, content types and
 views are recreated from the source before content is copied
 (``--no-provision-structure`` to only create the containers).
@@ -50,6 +53,11 @@ def main():
         action="store_true",
         help="only create target list containers (skip columns/content types/views)",
     )
+    parser.add_argument(
+        "--include-subwebs",
+        action="store_true",
+        help="also mirror the source's subsites and migrate their lists",
+    )
     parser.add_argument("--apply", action="store_true", help="perform the migration (default: dry run)")
     parser.add_argument("--no-verify", action="store_true", help="skip the post-run source/target reconciliation")
     args = parser.parse_args()
@@ -70,6 +78,10 @@ def main():
     print(f"{args.source_site} -> {args.target_site}")
     for entry in lists:
         print(f"  {'library' if is_document_library(entry) else 'list':7} {entry.title}")
+    subwebs = list(source_ctx.web.webs.get().execute_query())
+    if subwebs:
+        action = "will be mirrored" if args.include_subwebs else "will be skipped (pass --include-subwebs)"
+        print(f"  {len(subwebs)} subsite(s) {action}: {', '.join(web.title for web in subwebs)}")
     if not lists:
         print("  (nothing to migrate)")
     if not args.apply:
@@ -83,6 +95,7 @@ def main():
         include=include,
         exclude=exclude,
         provision_structure=not args.no_provision_structure,
+        include_subwebs=args.include_subwebs,
         manifest_dir=work / "manifests",
         checkpoint_dir=work / "checkpoints",
     )

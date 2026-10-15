@@ -69,8 +69,29 @@ class _Lists:
 
 
 class _Web:
-    def __init__(self, lists):
+    def __init__(self, lists, webs=None, title=None, web_template="STS#3", url=None):
         self.lists = lists
+        self.webs = webs if webs is not None else _WebCollection()
+        self.title = title
+        self.web_template = web_template
+        self._props = {"Url": url} if url else {}
+
+    def get_property(self, name):
+        return self._props.get(name)
+
+    @property
+    def url(self):
+        return self._props.get("Url")
+
+    @property
+    def server_relative_url(self):
+        return self._props.get("ServerRelativeUrl")
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        return self
 
     def get_list_by_title(self, title):
         for entry in self.lists._source_lists:
@@ -79,15 +100,51 @@ class _Web:
         raise KeyError(title)
 
 
+class _WebCollection:
+    """A fake child-site collection that records ``add`` calls."""
+
+    def __init__(self, children=None):
+        self._children = list(children or [])
+        self.add_calls = []
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        return list(self._children)
+
+    def add(self, info):
+        self.add_calls.append(info)
+        created = _Web(_Lists([]), title=info.Title, web_template=info.WebTemplate, url=info.Url)
+        self._children.append(created)
+        return created
+
+
+def _find_web(web, key):
+    """Depth-first search for a web whose URL or URL leaf matches ``key``."""
+    current = (web.get_property("Url") or "").rstrip("/").casefold()
+    if current and (current == key or current.rsplit("/", 1)[-1] == key.rsplit("/", 1)[-1]):
+        return web
+    for child in web.webs._children:
+        found = _find_web(child, key)
+        if found is not None:
+            return found
+    return None
+
+
 class _Context:
-    def __init__(self, base_url, lists):
+    def __init__(self, base_url, web, registry=None):
         self.base_url = base_url
-        self.web = _Web(lists)
+        self.web = web if isinstance(web, _Web) else _Web(web)
+        self._registry = registry if registry is not None else {base_url.rstrip("/").casefold(): self.web}
+        self._registry.setdefault(base_url.rstrip("/").casefold(), self.web)
         self.clones = []
 
     def clone(self, url):
         self.clones.append(url)
-        return _Context(url, self.web.lists)
+        key = (url or "").rstrip("/").casefold()
+        web = self._registry.get(key) or _find_web(self.web, key) or self.web
+        return _Context(url, web, self._registry)
 
 
 def _docs():
@@ -194,6 +251,102 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         pairs = resolve_site_task(task, source)
 
         self.assertEqual(pairs[0][1].warnings, ["content type 'Project': column 'X' was not linked"])
+
+    def test_subwebs_are_detected_and_reported_when_skipped(self):
+        child = _Web(
+            _Lists([_docs()]),
+            title="child",
+            url="https://contoso.sharepoint.com/sites/source/child",
+        )
+        root = _Web(
+            _Lists([_tasks()]),
+            webs=_WebCollection([child]),
+            title="Source",
+            url="https://contoso.sharepoint.com/sites/source",
+        )
+        source = _Context("https://contoso.sharepoint.com/sites/source", root)
+        task = MigrationTask.sharepoint(root.url, root.url, migrate_all=True)
+
+        warnings: list[str] = []
+        pairs = resolve_site_task(task, source, warnings=warnings)
+
+        self.assertEqual(len(pairs), 1)  # root list only
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("child", warnings[0])
+        self.assertIn("include_subwebs=True", warnings[0])
+
+    def test_include_subwebs_provisions_target_subsites_and_recurses(self):
+        source_child = _Web(
+            _Lists([_docs()]),
+            title="child",
+            web_template="GROUP",
+            url="https://contoso.sharepoint.com/sites/source/child",
+        )
+        source_root = _Web(
+            _Lists([_tasks()]),
+            webs=_WebCollection([source_child]),
+            title="Source",
+            url="https://contoso.sharepoint.com/sites/source",
+        )
+        target_root = _Web(
+            _Lists([]),
+            webs=_WebCollection(),
+            title="Target",
+            url="https://contoso.sharepoint.com/sites/target",
+        )
+        registry = {
+            source_root.url.rstrip("/").casefold(): source_root,
+            target_root.url.rstrip("/").casefold(): target_root,
+        }
+        context = _Context(target_root.url, target_root, registry)
+        task = MigrationTask.sharepoint(source_root.url, target_root.url, migrate_all=True)
+
+        pairs = resolve_site_task(task, context, include_subwebs=True)
+
+        # root Tasks + the subsite's Documents
+        self.assertEqual(len(pairs), 2)
+        self.assertEqual([pair[0].label() for pair in pairs], ["list:Tasks", "library:/sites/x/Documents"])
+        created = target_root.webs._children[0]
+        self.assertEqual(target_root.webs.add_calls[0].Url, "child")
+        self.assertEqual(target_root.webs.add_calls[0].WebTemplate, "GROUP")
+        self.assertEqual([call[0] for call in created.lists.ensure_calls], ["Documents"])
+
+    def test_include_subwebs_reuses_an_existing_target_subsite(self):
+        source_child = _Web(
+            _Lists([_docs()]),
+            title="child",
+            url="https://contoso.sharepoint.com/sites/source/child",
+        )
+        source_root = _Web(
+            _Lists([_tasks()]),
+            webs=_WebCollection([source_child]),
+            title="Source",
+            url="https://contoso.sharepoint.com/sites/source",
+        )
+        target_child = _Web(
+            _Lists([]),
+            title="child",
+            url="https://contoso.sharepoint.com/sites/target/child",
+        )
+        target_root = _Web(
+            _Lists([]),
+            webs=_WebCollection([target_child]),
+            title="Target",
+            url="https://contoso.sharepoint.com/sites/target",
+        )
+        registry = {
+            source_root.url.rstrip("/").casefold(): source_root,
+            target_root.url.rstrip("/").casefold(): target_root,
+            target_child.url.rstrip("/").casefold(): target_child,
+        }
+        context = _Context(target_root.url, target_root, registry)
+        task = MigrationTask.sharepoint(source_root.url, target_root.url, migrate_all=True)
+
+        resolve_site_task(task, context, include_subwebs=True)
+
+        # the existing target subsite is reused instead of created
+        self.assertEqual(target_root.webs.add_calls, [])
+        self.assertEqual([call[0] for call in target_child.lists.ensure_calls], ["Documents"])
 
     def test_provision_structure_can_be_disabled(self):
         source = _context([_docs()])
@@ -340,6 +493,26 @@ class TestSessionSiteTask(_StructureStub, unittest.TestCase):
         task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", "https://x", migrate_all=True)
         with self.assertRaises(ValueError):
             session.add_site_task(task=task)
+
+    def test_add_site_task_surfaces_skipped_subsites(self):
+        child = _Web(
+            _Lists([_docs()]),
+            title="child",
+            url="https://contoso.sharepoint.com/sites/source/child",
+        )
+        root = _Web(
+            _Lists([_tasks()]),
+            webs=_WebCollection([child]),
+            title="Source",
+            url="https://contoso.sharepoint.com/sites/source",
+        )
+        context = _Context(root.url, root)
+        session = MigrationSession().register(context=context)
+        task = MigrationTask.sharepoint(root.url, root.url, migrate_all=True)
+
+        session.add_site_task(task=task)
+
+        self.assertTrue(any("subsite" in message for message in session.warnings()))
 
     def test_add_task_provisions_structure_by_default(self):
         source = _context([_tasks()])

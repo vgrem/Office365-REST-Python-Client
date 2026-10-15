@@ -215,6 +215,13 @@ collection in the **same tenant** is reached through an authenticated clone
 use the file adapters, other lists use the record adapters. Hidden lists,
 SharePoint infrastructure templates, and non-deletable system lists are skipped.
 
+**Subsites are not migrated by default.** They are detected and named in
+`session.warnings()`, so a whole-site run never quietly ignores them. Pass
+`include_subwebs=True` to mirror the source subsite tree on the target and migrate
+their lists too: each missing target subsite is created from the source's title
+and web template, and every web is addressed through its own clone (a subweb's
+sub-collections resolve against the context root otherwise).
+
 Target lists are created on demand (by title, with the source template type) and,
 by default, each list's **columns, content types and views are replayed** from
 the source before content is copied (`provision_structure=True`) — the same

@@ -95,6 +95,7 @@ class MigrationSession:
         self._settings = settings
         self._tasks: list[SessionTask] = []
         self._ids = itertools.count(1)
+        self._warnings: list[str] = []
 
     # ── Cmdlets ──────────────────────────────────────────────────
 
@@ -159,6 +160,7 @@ class MigrationSession:
         include=None,
         exclude=None,
         provision_structure: bool = True,
+        include_subwebs: bool = False,
         manifest_dir=None,
         checkpoint_dir=None,
         **descriptor,
@@ -171,6 +173,9 @@ class MigrationSession:
         a large site resumes per list instead of restarting. With
         ``provision_structure`` (the default), each target list's columns, content
         types and views are replayed from the source before content is copied.
+
+        Subsites are detected but skipped unless ``include_subwebs`` is set; a note
+        naming them is surfaced through :meth:`warnings` when they are skipped.
         """
         if task is None and descriptor:
             from office365.migration.tasks import MigrationTask
@@ -189,6 +194,8 @@ class MigrationSession:
             include=include,
             exclude=exclude,
             provision_structure=provision_structure,
+            include_subwebs=include_subwebs,
+            warnings=self._warnings,
         )
         jobs: list[MigrationJob] = []
         for index, (source, target) in enumerate(pairs, start=1):
@@ -246,6 +253,7 @@ class MigrationSession:
     def unregister(self) -> None:
         """Drop all tasks and release the session (``Unregister-SPMTMigration``)."""
         self._tasks.clear()
+        self._warnings.clear()
 
     # ── State ────────────────────────────────────────────────────
 
@@ -271,9 +279,10 @@ class MigrationSession:
         Adapters may expose a ``warnings`` list; messages collected there (for
         example an attachment skipped for lack of a file name, or a target column
         that could not be created) are surfaced here so a run never silently drops
-        data.
+        data. Resolution-level notes (for example subsites skipped by a whole-site
+        task) are included too.
         """
-        messages: list[str] = []
+        messages: list[str] = list(self._warnings)
         for entry in self._tasks:
             for adapter in (entry.job.source, entry.job.target):
                 messages.extend(getattr(adapter, "warnings", None) or [])

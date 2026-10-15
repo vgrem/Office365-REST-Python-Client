@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Opt-in subsite recursion for whole-site tasks:** `resolve_site_task` (and
+  `MigrationSession.add_site_task`) gained `include_subwebs`. By default a
+  whole-site task migrates only the source web's own lists but **detects its
+  subsites** and reports them through `session.warnings()` (they are no longer
+  dropped silently). With `include_subwebs=True` the target subsite tree is
+  mirrored — each missing subsite is created with the source's template and title
+  — and every subsite's lists are migrated too. Each web is addressed through its
+  own authenticated `ClientContext.clone`, since a subweb's sub-collections
+  otherwise resolve against the context root.
 - **Structure-provisioning warnings now reach `session.warnings()`:** when a
   target content type cannot be linked to a source column, the warning the resolver
   already logged is also recorded on the target adapter (list or library), so a
