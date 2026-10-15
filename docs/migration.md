@@ -15,6 +15,42 @@ and SharePoint document libraries.
 | `Checkpoint` | per-item status, incremental watermarks, phase (pause/resume/cancel) |
 | `MigrationServerJob` | server-side Migration API ingestion (submit + monitor) |
 
+## Client-side vs server-side
+
+Two engines ship in this package. They are **not interchangeable** — they move
+different content and deliver different fidelity:
+
+- **Client-side** (`SharePointLibrarySource/Target`, `SharePointListSource/Target`)
+  drives the ordinary SharePoint REST API item by item: files and folders, record
+  lists and their attachments, and — via `capture_list_structure` /
+  `provision_list_structure` — columns, content types, and views. No Azure.
+- **Server-side** (`SharePointPackageTarget` + `MigrationServerJob`) builds a
+  Migration API package in Azure Storage and submits a bulk ingestion job. It is
+  the only path that can carry version history.
+
+| Axis | Client-side (REST) | Server-side (Migration API) |
+|---|---|---|
+| Content | files + folders, **record lists + attachments**, list structure | **document libraries** (files/folders; versions only if you drive `PackageBuilder` directly) |
+| Version history | ✗ | package carries `<Versions>`; not wired into `MigrationJob` |
+| Authors / ModifiedBy | not preserved | emitted in the package, **not applied** |
+| Permissions | library: best-effort same-tenant ACL; list: ✗ | emitted in the package, **not applied** (parked) |
+| Columns / content types / views | captured + provisioned over REST | **not emitted** by the builder today |
+| Azure Storage | not needed | required (SharePoint-owned containers; no Azure account) |
+| Throughput | per-item HTTP, throttle-aware, resumable | bulk server-side ingestion; poll a job |
+| Verification | `job.verify()` — counts, md5, identity marker | job progress/events + `diagnose()` (no content diff) |
+
+**Choose client-side** when you need list items, structure, or verification, and
+can tolerate REST throughput. **Choose server-side** when the content is a document
+library and version history matters. **Mix them**: provision the target's columns,
+content types, and views client-side, then hand the library's files to the server
+side.
+
+> The server-side engine is **not** a drop-in for `MigrationJob`'s fidelity flags
+> yet: `SharePointPackageTarget` implements none of the optional
+> `apply_timestamps` / `apply_permissions` hooks, and the runner still rejects
+> `preserve_versions` outright. Drive `PackageBuilder` / `SharePointPackageTarget`
+> directly to get versions into a package.
+
 ## Quick start
 
 Filesystem → SharePoint document library:
@@ -146,7 +182,11 @@ also be declared as `MigrationTask` objects or parsed
 from the SPMT JSON task format (`MigrationTask.from_json(...)`). A resolved
 SharePoint task replays the source list's columns, content types and views onto
 the (existing) target list before content is copied; pass
-`provision_structure=False` to `add_task` / `add_site_task` to skip that.
+`provision_structure=False` to `add_task` / `add_site_task` to skip that. This
+replay happens even when `MigrationSettings(use_migration_api=True)` routes
+content through a server-side package, because the package builder does not emit
+columns, content types, or views today — the target's structure is still captured
+and replayed over REST first.
 
 ### Whole-site migration
 
@@ -240,14 +280,18 @@ Field-link **order** is restored only when at least one link was actually added.
 
 ## Fidelity
 
-| Flag | Client-side runner | Server-side Migration API |
+| Flag | Client-side runner | Server-side package |
 |---|---|---|
-| `preserve_timestamps` | best-effort (`Created`/`Modified`) | full |
-| `preserve_permissions` | best-effort (same-tenant ACL copy) | full |
-| `preserve_versions` | ✗ (raises) | full |
+| `preserve_timestamps` | best-effort (`Created`/`Modified`) | declared in the package, **not applied** |
+| `preserve_permissions` | best-effort (same-tenant ACL copy) | emitted in the package, **not applied** |
+| `preserve_versions` | ✗ (raises) | package carries `<Versions>`; **not wired into the runner** |
 
-REST cannot restore version history, so `preserve_versions` always requires the
-server-side API. The other two are applied client-side **when the adapters
+The server-side column describes what a Migration API package *can* carry today,
+not a fidelity the runner applies — `SharePointPackageTarget` implements none of
+the optional hooks, so flags still fail fast (see
+[Client-side vs server-side](#client-side-vs-server-side)). REST cannot restore
+version history, so `preserve_versions` always requires a Migration API package,
+driven directly for now. The other two are applied client-side **when the adapters
 support them** — the runner fails fast otherwise, rather than silently migrating
 without the requested fidelity:
 
@@ -282,10 +326,9 @@ The report is informational (it never raises); the run itself still fails fast o
 an unhonorable flag. `MigrationSettings.preserve_timestamps` / `.preserve_permissions`
 feed the matching options into every session task by default.
 
-## Server-side migration (full fidelity)
+## Server-side migration
 
-For version history and true ACL fidelity, content is packaged and ingested
-server-side. The package layer builds the Migration API manifest XML
+For version history, content is packaged and ingested server-side. The package layer builds the Migration API manifest XML
 (`Manifest.xml` / `ExportSettings.xml` / `SystemData.xml` / `UserGroup.xml`)
 from a document library's files and folders:
 
@@ -318,9 +361,15 @@ manifest blob (unique random IV, stored as the base64 `IV` blob property) — wh
 SharePoint-provided containers require. For your own (BYO) containers, omit it and
 use `Site.create_migration_job` instead of the encrypted variant.
 
-The builder covers the **document-library subset** — webs, lists, folders, files,
-and file versions. The generated XML follows the documented format but is **not
-yet verified against a live tenant** (see `office365.migration.package`).
+The builder covers the **document-library subset** — the library, folders, files,
+and (when passed to `PackageBuilder.add_file`) file versions. It emits **no**
+columns, content types, or views: provision those client-side first (see
+[Provisioning list structure](#provisioning-list-structure)). The end-to-end
+import is validated against a live tenant for file/folder content; ACL and author
+metadata are written into the manifest but **do not take effect** yet (the target
+SID a `RoleAssignment` needs is not exposed by the SharePoint Online REST API),
+and versions are carried only when you drive `PackageBuilder` directly rather than
+through `MigrationJob`.
 
 ## Storage & vendor neutrality
 
@@ -332,7 +381,7 @@ Blob Storage; it cannot read from local disk or S3.
 |---|---|---|---|
 | M365 → filesystem / S3 / other | client-side adapters | no | content + best-effort timestamps/ACLs |
 | filesystem / other → M365 | client-side adapters | no | content + best-effort |
-| filesystem / other → M365 | server-side Migration API | **yes** | versions, ACLs, authors |
+| filesystem / other → M365 | server-side Migration API | **yes** | versions (ACLs/authorship not applied yet) |
 | M365 → M365 | either | only for server-side | — |
 
 ### You don't need an Azure account

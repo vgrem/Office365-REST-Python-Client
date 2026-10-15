@@ -104,7 +104,7 @@ Large Sites, Locked Sites, File Versions, Large Excel Files, Checked-out files, 
 | Export a SharePoint list to local JSON records | [`migrate/export_list.py`](./migrate/export_list.py) | Read access |
 | Export/import a document library ↔ local files (`--import`, `--concurrency`) | [`migrate/migrate_library.py`](./migrate/migrate_library.py) | Read/Write access |
 | Migrate local files into a library via a migration session (parallel) | [`migrate/migrate_session.py`](./migrate/migrate_session.py) | Write access |
-| Migrate a local tree into a library **server-side** (full fidelity: versions, ACLs) | [`migrate/migrate_library_serverside.py`](./migrate/migrate_library_serverside.py) | Write access (app-only) |
+| Migrate a local tree into a library **server-side** (Migration API package; version-history capable) | [`migrate/migrate_library_serverside.py`](./migrate/migrate_library_serverside.py) | Write access (app-only) |
 | Build a Migration API package **offline** (inspect the manifest; no tenant) | [`migrate/package_library.py`](./migrate/package_library.py) | none (local) |
 | Run an **SPMT-style session** (register → add task → start → show → unregister) | [`migrate/migrate_spmt.py`](./migrate/migrate_spmt.py) | Write access |
 | Migrate a **whole site** (every list/library, same tenant) — one resumable job per list | [`migrate/migrate_site.py`](./migrate/migrate_site.py) | Read source + Write target |
@@ -187,12 +187,13 @@ print(session.status())
 A single migration needs no session — `MigrationJob(source, target, options)`
 with `plan()`/`run()`/`verify()` is the primary entry point.
 
-### Server-side migration (full fidelity)
+### Server-side migration
 
-The adapters above copy bytes over REST. To also preserve **version history and
-ACLs**, the content is packaged and ingested by SharePoint **server-side** (the
-Migration API). Azure Blob Storage is only the courier, and the containers are
-**SharePoint-owned** — no Azure account is required.
+The adapters above copy bytes over REST. To carry **version history**, the content
+is packaged and ingested by SharePoint **server-side** (the Migration API). ACL and
+author metadata are emitted into the package but **do not take effect** yet. Azure
+Blob Storage is only the courier, and the containers are **SharePoint-owned** — no
+Azure account is required.
 
 ```
 local folder ──▶ package (manifest XML + blobs) ──▶ Azure containers ──▶ library
