@@ -166,6 +166,9 @@ def _read_role_assignments(
 class SharePointListSource:
     """Enumerates a SharePoint list's items into record migration items."""
 
+    # Marks this source as emitting list-item attachments as extra items (see DataSource).
+    supports_attachments = True
+
     def __init__(self, source_list: "SPList", select: list[str] | None = None) -> None:
         self._list = source_list
         self._select = select
@@ -322,6 +325,9 @@ class SharePointListTarget:
     and target items for verification. Pass ``identity_field=None`` to opt out.
     List-item attachments are written after their parent records are flushed.
     """
+
+    # Marks this target as accepting list-item attachments as extra items (see DataTarget).
+    supports_attachments = True
 
     def __init__(
         self,

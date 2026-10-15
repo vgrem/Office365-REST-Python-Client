@@ -188,7 +188,9 @@ class MigrationJob:
         """Describe the requested fidelity this job's adapter pair can honor.
 
         Purely informational (never raises); use it to report capabilities before
-        :meth:`run`. The run itself still fails fast on an unhonorable flag.
+        :meth:`run`. The run itself still fails fast on an unhonorable flag. The
+        report also carries the full per-dimension fidelity matrix
+        (``report.dimensions`` / ``report.matrix_summary()``).
         """
         from office365.migration.fidelity import describe_fidelity
 

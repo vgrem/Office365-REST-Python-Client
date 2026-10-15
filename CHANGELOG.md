@@ -29,10 +29,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (and `MigrationSession.fidelity()`) describe what an adapter pair can actually
   preserve — timestamps, permissions and versions — returning a `FidelityReport`
   (`preserved` / `unsupported` / `not_requested` / `notes`, with `summary()` and
-  `to_dict()`). They are informational and never raise; the run still fails fast
-  on an unhonorable flag. `MigrationSettings` gained `preserve_timestamps`, and a
-  registered session now feeds its `to_options()` fidelity flags into every task
-  by default (an explicit `options=` still wins), so
+  `to_dict()`). The same report carries the full **fidelity matrix**
+  (`report.dimensions` / `matrix_summary()`): every modeled dimension (content,
+  versions, timestamps, authorship, permissions, attachments, structure, content
+  types, typed values, item state, views, navigation, sharing links) reported as
+  `delivered` / `best-effort` / `unsupported` / `handoff` (a new `FidelityStatus`),
+  probed from the adapters' capability attributes (`supports_versions`,
+  `supports_authorship`, `supports_attachments`) and optional hooks, with a reason
+  per non-delivered dimension. They are informational and never raise; the run
+  still fails fast on an unhonorable flag. `MigrationSettings` gained
+  `preserve_timestamps`, and a registered session now feeds its `to_options()`
+  fidelity flags into every task by default (an explicit `options=` still wins), so
   `MigrationSettings(preserve_permissions=True)` is no longer silently ignored.
 - **List structure capture for SharePoint migration:**
   `office365.migration.sharepoint.capture_list_structure(sp_list)` returns a

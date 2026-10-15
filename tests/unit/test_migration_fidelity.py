@@ -313,6 +313,86 @@ def test_describe_fidelity_reports_versions_for_a_package_target():
     assert "versions" in client_report.unsupported
 
 
+def test_fidelity_matrix_reports_every_dimension_conservatively():
+    from office365.migration.fidelity import FidelityStatus, describe_fidelity
+
+    report = describe_fidelity(_Source([]), _Target(), MigrationOptions())
+    dims = report.dimensions
+
+    # The full doc-09 §4 dimension set is always reported — no silent gaps.
+    assert set(dims) == {
+        "content",
+        "versions",
+        "timestamps",
+        "authorship",
+        "permissions",
+        "attachments",
+        "structure",
+        "content_types",
+        "typed_values",
+        "item_state",
+        "views",
+        "navigation",
+        "sharing_links",
+    }
+    assert dims["content"] == FidelityStatus.DELIVERED.value
+    assert dims["navigation"] == FidelityStatus.HANDOFF.value
+    assert dims["versions"] == FidelityStatus.UNSUPPORTED.value
+    # every non-delivered dimension carries a reason
+    for name, status in dims.items():
+        if status != FidelityStatus.DELIVERED.value:
+            assert name in report.dimension_notes
+    assert "content" not in report.dimension_notes
+
+
+def test_fidelity_matrix_reflects_probed_capabilities():
+    from office365.migration.fidelity import FidelityStatus, describe_fidelity
+
+    report = describe_fidelity(
+        _FidelitySource([]), _FidelityTarget(), MigrationOptions(preserve_timestamps=True, preserve_permissions=True)
+    )
+
+    assert report.dimensions["timestamps"] == FidelityStatus.DELIVERED.value
+    assert report.dimensions["permissions"] == FidelityStatus.BEST_EFFORT.value
+    assert report.ok
+
+
+def test_fidelity_matrix_marks_authorship_best_effort_for_a_package_target():
+    from office365.migration.fidelity import FidelityStatus, describe_fidelity
+
+    source, target = _VersionSource([], ("1.0", [])), _VersionTarget()
+    target.supports_authorship = True  # type: ignore[attr-defined]
+
+    report = describe_fidelity(source, target, MigrationOptions())
+
+    assert report.dimensions["versions"] == FidelityStatus.BEST_EFFORT.value
+    assert report.dimensions["authorship"] == FidelityStatus.BEST_EFFORT.value
+    assert "authorship" in report.dimension_notes
+
+
+def test_fidelity_matrix_serializes_and_summarizes():
+    import json
+
+    from office365.migration.fidelity import describe_fidelity
+
+    report = describe_fidelity(_Source([]), _Target(), MigrationOptions())
+
+    data = report.to_dict()
+    json.dumps(data)  # must be JSON-safe
+    assert data["dimensions"] == report.dimensions
+    assert "content=delivered" in report.matrix_summary()
+
+
+def test_sharepoint_adapters_advertise_capabilities():
+    from office365.migration.sharepoint.adapters import SharePointListSource, SharePointListTarget
+    from office365.migration.sharepoint.package_target import SharePointPackageTarget
+
+    assert SharePointListSource.supports_attachments is True
+    assert SharePointListTarget.supports_attachments is True
+    assert SharePointPackageTarget.supports_versions is True
+    assert SharePointPackageTarget.supports_authorship is True
+
+
 def test_library_system_paths_are_excluded():
     from office365.migration.sharepoint.adapters import _is_system_path
 

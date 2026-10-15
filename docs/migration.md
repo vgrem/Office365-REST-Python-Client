@@ -325,12 +325,42 @@ To see what a pair will actually honor **before** a run, ask for a report —
 ```python
 report = MigrationJob(source, target, MigrationOptions(preserve_timestamps=True)).fidelity()
 print(report.summary())  # "not requested: permissions, versions | UNSUPPORTED: timestamps"
+print(report.matrix_summary())  # "content=delivered, versions=unsupported, ..."
 print(report.to_dict())  # JSON-serializable, for reports/status
 ```
 
 The report is informational (it never raises); the run itself still fails fast on
 an unhonorable flag. `MigrationSettings.preserve_timestamps` / `.preserve_permissions`
 feed the matching options into every session task by default.
+
+### Fidelity matrix
+
+`report.dimensions` reports **every** dimension the engine models — each
+`delivered`, `best-effort`, `unsupported`, or `handoff` — so a gap is never
+implicit. The matrix is probed from the adapter pair's capability attributes
+(`supports_versions`, `supports_authorship`, `supports_attachments`) and optional
+hooks (`apply_timestamps`, `read_permissions`/`apply_permissions`); a non-delivered
+dimension always carries a reason in `report.dimension_notes`. The table below is
+the shipped pairs' expected output.
+
+| Dimension | Library → package | Library → REST | List → REST |
+|---|---|---|---|
+| Content | delivered | delivered | delivered |
+| Versions | best-effort (history content; per-version author/time not carried) | unsupported | unsupported |
+| Created/Modified | delivered | delivered | unsupported |
+| Author/Editor | best-effort (resolved PUID users only) | unsupported | unsupported |
+| Permissions | best-effort (same-tenant, resolved users) | best-effort (same-tenant) | unsupported |
+| Attachments | n/a | n/a | delivered (list items) |
+| Columns / content types / views | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
+| Lookup / Person / MMD values | unsupported (values copied verbatim; remap not implemented) | same | same |
+| Check-out / draft / approval state | unsupported | unsupported | unsupported |
+| Navigation / pages / web parts | handoff (detect and remediate out of band) | same | same |
+| Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
+
+> Columns, content types, and views are deliberately *not* carried by the item
+> adapters: they are schema, and the SharePoint resolver replays them over REST
+> with `provision_list_structure` (whole-site and single-list resolution do this
+> by default). The matrix reports the adapter-level truth.
 
 ## Server-side migration
 

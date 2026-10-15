@@ -56,6 +56,9 @@ class SharePointPackageTarget:
 
     # Marks this target as able to restore version history (see DataTarget).
     supports_versions = True
+    # Marks this target as able to restore authorship (Author/ModifiedBy) from
+    # ``item.author``/``item.editor`` (see DataTarget); best-effort (resolved users).
+    supports_authorship = True
 
     def __init__(
         self,

@@ -33,7 +33,9 @@ class DataSource(ABC):
     - ``read_version_history(item) -> (label, older)`` — the current version
       label and the older versions (oldest first, current excluded), used by a
       version-preserving target (the server-side package target) so history
-      survives the migration.
+      survives the migration;
+    - ``supports_attachments`` — a class attribute set True by a source that
+      emits list-item attachments as extra ``item_type="attachment"`` items.
 
     Absent when the source does not expose them.
     """
@@ -68,7 +70,12 @@ class DataTarget(ABC):
       restore version history (the server-side package target). The runner then
       reads ``source.read_version_history(item)`` into ``item.version_label`` /
       ``item.versions`` before the write, so history is preserved whenever the
-      source can supply it.
+      source can supply it;
+    - ``supports_authorship`` — a class attribute set True by a target that
+      restores ``Author``/``ModifiedBy`` from ``item.author`` / ``item.editor``
+      (the server-side package target; best-effort, resolved users only);
+    - ``supports_attachments`` — a class attribute set True by a target that
+      accepts ``item_type="attachment"`` items.
     """
 
     @abstractmethod

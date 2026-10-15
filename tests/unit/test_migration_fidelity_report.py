@@ -78,8 +78,11 @@ def test_report_to_dict_is_serializable():
         "unsupported": ["versions"],
         "not_requested": ["timestamps", "permissions"],
         "notes": report.notes,
+        "dimensions": report.dimensions,
+        "dimension_notes": report.dimension_notes,
         "ok": False,
     }
+    assert report.dimensions["content"] == "delivered"
 
 
 def test_job_exposes_options_and_fidelity(tmp_path):
