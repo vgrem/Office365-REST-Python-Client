@@ -251,6 +251,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Server-side package timestamps were emitted as invalid XML dateTime:** the
+  manifest serializer rendered `datetime`/`date` attributes with `str(value)`,
+  producing the space-separated `2026-10-15 06:57:05+00:00` form that the
+  Migration API rejects with `JobFatalError ... 'TimeCreated' attribute is invalid
+  ... XmlSchemaValidationException`. Date attributes are now serialized as XSD
+  `dateTime` in UTC (``YYYY-MM-DDTHH:MM:SSZ``). *Live-validated.*
+- **Server-side file versions were lost:** `PackageBuilder.add_file(versions=[...])`
+  emitted only the older versions inside `<Versions>` and relied on the outer
+  `<File>` blob for the current one. The Migration API builds history from
+  `<Versions>` and promotes its **last** entry to current — so a 3-version file
+  imported as 1.0/2.0 only and the newest content was dropped. The builder now
+  appends the current version last. *Live-validated.*
+- **Server-side migration silently skipped structure replay:** resolving a
+  single-list task with `MigrationSettings(use_migration_api=True)` skipped
+  `provision_list_structure` on the assumption the package applied the structure,
+  but the package emits no columns/content types/views — so a library with custom
+  columns lost them with no warning. The source list's structure is now captured
+  and replayed over REST for both engines (still toggleable with
+  `provision_structure=False`).
 - **SharePoint list-item migration lost every field value and every attachment:**
   `SharePointListSource` projected the collection's literal `select` (`["*", ...]`)
   instead of the loaded fields, so records reached the target empty while the run
@@ -808,6 +827,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of old completed tasks. Every script runs end to end with argparse defaults,
   keeps output in the temp directory, and turns missing-scope errors into a
   one-line hint.
+- **Migration path guidance and honest server-side limits:** `docs/migration.md`
+  gained a "Client-side vs server-side" section that compares the two engines
+  (content, versions, permissions, structure, Azure, verification) and says when
+  to pick each. The server-side docs no longer claim "full fidelity" — ACL and
+  author metadata are emitted into the package but do not apply yet, the builder
+  emits no columns/content types/views, and `preserve_versions` is not wired
+  through `MigrationJob`. The examples migration README matches.
 
 ### Fixed
 - **Sharing-link expiration rejected as an invalid date:** `ListItem.share_link`

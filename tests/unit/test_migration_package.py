@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import importlib.util
 import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 
 import pytest
 from office365.migration.package import (
@@ -67,7 +68,26 @@ def test_manifest_renders_spobjects_with_file_and_versions():
     assert file_object.get("ParentId") == objects[-3].get("Id")  # the Reports folder
 
     version_rows = _children(_children(file_element, MANIFEST_NS, "Versions")[0], MANIFEST_NS, "File")
-    assert [v.get("Version") for v in version_rows] == ["1.0"]
+    # oldest first, current last (the API promotes the last <Versions> entry)
+    assert [v.get("Version") for v in version_rows] == ["1.0", "2.0"]
+    assert version_rows[-1].get("FileValue") == f"{file_object.get('Id')}.2.0"
+
+
+def test_manifest_normalizes_datetime_attributes_to_xsd_utc():
+    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x", list_title="Documents")
+    builder.add_file(
+        "doc.txt",
+        b"v1",
+        time_created=datetime(2020, 1, 2, 3, 4, 5),  # naive → assume UTC
+        time_last_modified=datetime(2020, 1, 2, 5, 4, 5, tzinfo=timezone.utc),
+    )
+    root = ET.fromstring(builder.build().manifest)
+    file_object = _children(root, MANIFEST_NS, "SPObject")[-2]
+    file_element = _children(file_object, MANIFEST_NS, "File")[0]
+
+    # The Migration API rejects ``str(datetime)`` (space-separated); must be XSD dateTime.
+    assert file_element.get("TimeCreated") == "2020-01-02T03:04:05Z"
+    assert file_element.get("TimeLastModified") == "2020-01-02T05:04:05Z"
 
 
 def test_builder_ids_are_deterministic():
@@ -102,9 +122,10 @@ def test_content_blobs_are_named_after_the_file_guid():
     file_id = builder.add_file("f.txt", b"current", version="2.0", versions=[("1.0", b"old")])
     package = builder.build()
 
-    assert set(package.content) == {file_id, f"{file_id}.1.0"}
+    assert set(package.content) == {file_id, f"{file_id}.1.0", f"{file_id}.2.0"}
     assert package.content[file_id] == b"current"
     assert package.content[f"{file_id}.1.0"] == b"old"
+    assert package.content[f"{file_id}.2.0"] == b"current"
 
 
 def test_package_blobs_and_save(tmp_path):

@@ -266,7 +266,7 @@ class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
         self.capture.assert_not_called()
         self.provision.assert_not_called()
 
-    def test_migration_api_skips_rest_provisioning(self):
+    def test_migration_api_still_provisions_structure(self):
         source = _context([_docs()])
         task = MigrationTask.sharepoint(
             "https://contoso.sharepoint.com/sites/source",
@@ -278,8 +278,10 @@ class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
         with mock.patch("office365.migration.sharepoint.resolvers._package_target", return_value=object()):
             resolve_task(task, source, MigrationSettings(use_migration_api=True))
 
-        self.capture.assert_not_called()
-        self.provision.assert_not_called()
+        # The package builder emits no columns/content types/views, so structure is
+        # still replayed over REST before the package target is used.
+        self.assertEqual(self.capture.call_args[0][0].title, "Documents")
+        self.assertEqual(self.provision.call_args[0][0].title, "Documents")
 
     def test_migrate_all_defers_to_site_resolver(self):
         task = MigrationTask.sharepoint(

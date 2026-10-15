@@ -211,9 +211,11 @@ def _sharepoint(
     source_list = source_context.web.get_list_by_title(task.source_list).get().execute_query()
     source = _list_source(source_list)
     target_list, folder = _target_folder(target_context, task)
-    # The server-side Migration API applies structure from the package, so only
-    # the client-side path needs (and should do) REST structure provisioning.
-    if provision_structure and not (settings is not None and settings.use_migration_api):
+    # Always replay structure over REST. The server-side package path does not
+    # emit columns/content types/views yet, so skipping this would silently drop
+    # them from the target (the package builder only carries the library, folders,
+    # files, and file versions).
+    if provision_structure:
         _provision_structure(source_list, target_list)
     return source, _build_target(task, target_context, settings, target_list, folder)
 

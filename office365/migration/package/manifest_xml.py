@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
+from datetime import date, datetime, timezone
 
 MANIFEST_NS = "urn:deployment-manifest-schema"
 SYSTEM_DATA_NS = "urn:deployment-systemdata-schema"
@@ -83,9 +84,19 @@ def _q(ns: str, tag: str) -> str:
 
 
 def _str(value: object) -> str:
-    """Render an attribute value (booleans as lowercase ``true``/``false``)."""
+    """Render an attribute value (booleans as lowercase ``true``/``false``).
+
+    ``datetime``/``date`` values are emitted as XML-Schema ``dateTime``/``date``
+    (the Migration API rejects Python's ``str(datetime)`` space-separated form with
+    a schema-validation fatal error), normalized to UTC.
+    """
     if isinstance(value, bool):
         return "true" if value else "false"
+    if isinstance(value, datetime):
+        moment = value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+        return moment.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if isinstance(value, date):
+        return value.isoformat()
     return str(value)
 
 

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path, PurePosixPath
 
 from office365.migration.package.manifest_xml import (
@@ -179,8 +180,8 @@ class PackageBuilder:
         self,
         path: str,
         *,
-        time_created: str | None = None,
-        time_last_modified: str | None = None,
+        time_created: datetime | str | None = None,
+        time_last_modified: datetime | str | None = None,
         author: str | None = None,
         editor: str | None = None,
     ) -> str:
@@ -222,8 +223,8 @@ class PackageBuilder:
         path: str,
         content: bytes,
         *,
-        time_created: str | None = None,
-        time_last_modified: str | None = None,
+        time_created: datetime | str | None = None,
+        time_last_modified: datetime | str | None = None,
         version: str = "1.0",
         versions: list[tuple[str, bytes]] | None = None,
         list_item_int_id: int | None = None,
@@ -239,7 +240,11 @@ class PackageBuilder:
             path: Library-relative path.
             content: The current version's bytes.
             version: The current version label (e.g. ``"1.0"``).
-            versions: Older versions as ``(version, content)`` pairs.
+            versions: Older versions as ``(version, content)`` pairs, **oldest
+                first**. The current version (``content``/``version``) is appended
+                automatically: the Migration API builds history from ``<Versions>``
+                and promotes its last entry to the current version (the outer
+                ``File`` blob is ignored once ``<Versions>`` is present).
             list_item_int_id: Optional list-item integer id to preserve.
             author: Original author (a login name in ``UserGroup.xml``).
             editor: Last modified by (a login name in ``UserGroup.xml``).
@@ -251,7 +256,12 @@ class PackageBuilder:
         self._content[file_id] = content
         self._list_item_int_id += 1
         version_rows: list[ManifestElement] = []
-        for older_version, older_content in versions or []:
+        older_versions = list(versions or [])
+        if older_versions:
+            # The API promotes the LAST <Versions> entry to current and ignores the
+            # outer File blob, so the current version must be listed last.
+            older_versions.append((version, content))
+        for older_version, older_content in older_versions:
             blob = f"{file_id}.{older_version}"
             self._content[blob] = older_content
             version_rows.append(
@@ -416,8 +426,8 @@ class PackageBuilder:
         name: str | None = None,
         int_id: int | None = None,
         version: str = "1.0",
-        time_created: str | None = None,
-        time_last_modified: str | None = None,
+        time_created: datetime | str | None = None,
+        time_last_modified: datetime | str | None = None,
         fields: dict[str, str] | None = None,
         shared_with: list[SharedWithEvent] | None = None,
     ) -> str:
