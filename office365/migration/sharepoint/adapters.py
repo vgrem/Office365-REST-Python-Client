@@ -907,13 +907,19 @@ class SharePointLibraryTarget:
         # folder paths carry a trailing slash; target folder paths mirror that.
         return [p for p in paths if p != "/" and not _is_system_path(p)]
 
-    def checksum(self, item: MigrationItem) -> str:
+    def read(self, item: MigrationItem) -> bytes:
+        """Download the written item's bytes (used by verification for Office files)."""
         if item.item_type == "folder":
-            return hashlib.md5(b"").hexdigest()
+            return b""
         file = self._folder.context.web.get_file_by_server_relative_url(self._url(item)).get().execute_query()
         buffer = io.BytesIO()
         file.download(buffer).execute_query()
-        return hashlib.md5(buffer.getvalue()).hexdigest()
+        return buffer.getvalue()
+
+    def checksum(self, item: MigrationItem) -> str:
+        if item.item_type == "folder":
+            return hashlib.md5(b"").hexdigest()
+        return hashlib.md5(self.read(item)).hexdigest()
 
     def modified(self, item: MigrationItem) -> str:
         """Last-modified of the target file (for incremental migration)."""

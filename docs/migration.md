@@ -37,7 +37,7 @@ different content and deliver different fidelity:
 | Columns / content types / views | captured + provisioned over REST | **not emitted** by the builder today |
 | Azure Storage | not needed | required (SharePoint-owned containers; no Azure account) |
 | Throughput | per-item HTTP, throttle-aware, resumable | bulk server-side ingestion; poll a job |
-| Verification | `job.verify()` — counts, md5, identity marker | job progress/events + `diagnose()` (no content diff) |
+| Verification | `job.verify()` — counts, md5 (Office files compared canonically), identity marker | job progress/events + `diagnose()` (no content diff) |
 
 **Choose client-side** when you need list items, structure, or verification, and
 can tolerate REST throughput. **Choose server-side** when the content is a document
@@ -531,6 +531,14 @@ For SharePoint list items the source and target are paired by the
 `MigrationSourceId` marker (see [Migrating list items](#migrating-list-items));
 attachment presence *and* content (md5) are checked, while each record's content
 checksum is reported as `unverifiable`.
+
+Office Open XML documents (`.docx`/`.xlsx`/`.pptx`/…) that md5-differ are compared
+canonically before being called a mismatch: SharePoint re-serializes them on
+upload (document property promotion/demotion rewrites `docProps/`, `customXml/`
+and adds `[trash]/` parts), so a byte hash of a client-side REST round-trip is not
+stable. If every part SharePoint does not own matches, the file is reported as an
+`unverifiable` caveat rather than a false mismatch; a difference in any other part
+is still a real `mismatch`.
 
 A requested check that could not run lands in `report.unverifiable` — `report.ok`
 is then still True when nothing contradicted it, but `report.complete` is False.

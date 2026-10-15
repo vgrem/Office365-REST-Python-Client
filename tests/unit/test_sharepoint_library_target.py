@@ -186,3 +186,9 @@ def test_library_target_folder_checksum_is_empty_hash():
     target = SharePointLibraryTarget(_TargetFolder())
 
     assert target.checksum(_folder_item("a/")) == target.checksum(_folder_item("b/"))
+
+
+def test_library_target_read_folder_returns_empty_bytes():
+    target = SharePointLibraryTarget(_TargetFolder())
+
+    assert target.read(_folder_item("a/")) == b""

@@ -6,6 +6,9 @@ The validator is layered, and honest about what it can and cannot confirm:
    present there (``missing`` / ``extra``); always runs.
 2. **Content** — a checksum spot-check sample (``spot_checks``); skipped entries
    whose adapters expose no comparable checksum are reported as ``unverifiable``.
+   Office Open XML documents that md5-differ are compared canonically (ignoring the
+   ``docProps/`` / ``customXml/`` / ``[trash]/`` parts SharePoint rewrites on
+   upload), so document property promotion is a caveat rather than a false mismatch.
 3. **Fidelity** — when the run requested ``preserve_timestamps`` /
    ``preserve_permissions``, the same sample is diffed via the optional
    ``read_metadata(item)`` / ``read_permissions(item)`` adapter hooks. If an
@@ -20,7 +23,9 @@ A requested check that could not be run therefore shows up in
 
 from __future__ import annotations
 
+import io
 import random
+import zipfile
 from typing import Any
 
 from office365.migration.adapters import DataSource, DataTarget
@@ -32,6 +37,25 @@ from office365.runtime.verification import VerificationReport
 __all__ = ["VerificationReport", "verify"]
 
 _METADATA_KEYS = ("created", "modified")
+
+#: Office Open XML documents SharePoint may re-serialize on upload.
+_OFFICE_OPEN_XML_EXTENSIONS = (
+    ".docx",
+    ".docm",
+    ".dotx",
+    ".dotm",
+    ".xlsx",
+    ".xlsm",
+    ".xltx",
+    ".xltm",
+    ".pptx",
+    ".pptm",
+    ".potx",
+    ".potm",
+)
+
+#: Package parts SharePoint owns during document property promotion/demotion.
+_SERVER_OWNED_OFFICE_PARTS = ("docProps/", "customXml/", "[trash]/")
 
 
 def verify(
@@ -77,6 +101,48 @@ def verify(
     return report
 
 
+def _canonical_office_parts(data: Any) -> dict[str, bytes] | None:
+    """The Office Open XML package parts SharePoint does not own, or ``None``.
+
+    Returns ``None`` when ``data`` is not a readable zip archive (so a corrupt or
+    non-Office payload never compares equal by accident).
+    """
+    if not isinstance(data, (bytes, bytearray)):
+        return None
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            return {
+                name: archive.read(name)
+                for name in archive.namelist()
+                if not name.startswith(_SERVER_OWNED_OFFICE_PARTS)
+            }
+    except Exception:  # noqa: BLE001 — not an Office Open XML package
+        return None
+
+
+def _office_content_equivalent(source: Any, target: Any, item: MigrationItem) -> bool:
+    """Whether two Office documents are equivalent apart from server-owned parts.
+
+    SharePoint re-serializes Office Open XML documents on upload (document
+    property promotion/demotion rewrites ``docProps/``, ``customXml/`` and
+    ``[trash]/``), so a raw md5 of a client-side REST round-trip is not stable.
+    Compare the remaining package parts exactly instead; a difference there is a
+    real mismatch.
+    """
+    source_read = getattr(source, "read", None)
+    target_read = getattr(target, "read", None)
+    if not (callable(source_read) and callable(target_read)):
+        return False
+    if not item.dest_path.lower().endswith(_OFFICE_OPEN_XML_EXTENSIONS):
+        return False
+    try:
+        source_parts = _canonical_office_parts(source_read(item))
+        target_parts = _canonical_office_parts(target_read(item))
+    except Exception:  # noqa: BLE001 — an unreadable side is simply "not equivalent"
+        return False
+    return source_parts is not None and target_parts is not None and source_parts == target_parts
+
+
 def _verify_content(source: DataSource, target: DataTarget, items: list[MigrationItem], report) -> None:
     for item in items:
         try:
@@ -90,8 +156,14 @@ def _verify_content(source: DataSource, target: DataTarget, items: list[Migratio
             report.unverifiable.append(f"content: {item.dest_path} (no checksum)")
             continue
         report.checked += 1
-        if source_sum != target_sum:
-            report.mismatches.append(f"content mismatch: {item.dest_path}")
+        if source_sum == target_sum:
+            continue
+        if _office_content_equivalent(source, target, item):
+            report.unverifiable.append(
+                f"content: {item.dest_path} (Office document re-serialized by SharePoint property promotion)"
+            )
+            continue
+        report.mismatches.append(f"content mismatch: {item.dest_path}")
 
 
 def _verify_metadata(source, target, items: list[MigrationItem], report) -> None:

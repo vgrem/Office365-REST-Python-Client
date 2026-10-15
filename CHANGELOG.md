@@ -276,6 +276,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Verification flagged valid Office documents as content mismatches.**
+  SharePoint re-serializes Office Open XML documents on upload — document property
+  promotion/demotion rewrites ``docProps/`` / ``customXml/`` and adds ``[trash]/``
+  parts — so the md5 of a client-side REST round-trip is never byte-stable
+  (`Financial Sample.xlsx` grew 83418 → 85056 bytes and changed on every upload,
+  while the same bytes stored as ``.zip``/``.bin`` round-tripped exactly). The
+  validator now falls back to a canonical package comparison for Office files,
+  comparing every part **except** those SharePoint owns: an equivalent document is
+  reported as an ``unverifiable`` caveat instead of a false ``content mismatch``,
+  while a difference in any other part is still a real mismatch.
+  `SharePointLibraryTarget` gained a `read(item)` hook to support this.
+  *Live-validated: `Documents` 151/151, 0 issues, 1 honest Office caveat.*
 - **Document-library migration dropped every folder.** The library source plans
   folders as first-class items (``dest_path`` ending in ``/``), but
   ``SharePointLibraryTarget`` treated every item as a file upload — so each
