@@ -293,6 +293,14 @@ content types are matched and recreated by **name**.
 link for a column that is not already inherited or auto-linked is rejected
 (`Column '<name>' does not exist`). Those columns are skipped and returned in the
 `warnings` list (and logged) instead of failing the whole provisioning.
+Captured content types also name every built-in/SharePoint-owned column
+(`Title`, `FileLeafRef`, framework columns) that capture deliberately does not
+recreate; those are left to the target list's own defaults rather than sent as
+guaranteed link failures.
+
+A structure-provisioning warning is also recorded on the resolved target adapter,
+so a whole-site session reports it through `session.warnings()` instead of only in
+the log.
 
 Field-link **order** is restored only when at least one link was actually added.
 

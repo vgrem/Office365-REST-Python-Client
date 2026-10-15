@@ -186,6 +186,15 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         self.assertEqual(target_arg.title, "Documents")
         self.assertIsNone(structure_arg)
 
+    def test_structure_warnings_reach_the_target_adapter(self):
+        self.provision.return_value = ["content type 'Project': column 'X' was not linked"]
+        source = _context([_docs()])
+        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
+
+        pairs = resolve_site_task(task, source)
+
+        self.assertEqual(pairs[0][1].warnings, ["content type 'Project': column 'X' was not linked"])
+
     def test_provision_structure_can_be_disabled(self):
         source = _context([_docs()])
         task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)

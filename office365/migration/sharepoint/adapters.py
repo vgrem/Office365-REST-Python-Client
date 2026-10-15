@@ -849,6 +849,7 @@ class SharePointLibraryTarget:
         self._folder = library_folder
         self._concurrency = concurrency
         self._role_definitions: dict[str, RoleDefinition] | None = None
+        self.warnings: list[str] = []
 
     def label(self) -> str:
         return f"library:{self._folder.server_relative_url}"

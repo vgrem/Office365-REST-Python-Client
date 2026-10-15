@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Structure-provisioning warnings now reach `session.warnings()`:** when a
+  target content type cannot be linked to a source column, the warning the resolver
+  already logged is also recorded on the target adapter (list or library), so a
+  whole-site run reports what it could not reproduce instead of only writing it to
+  the log. `SharePointLibraryTarget` gained the `warnings` list its siblings carry.
 - **Content-type identity map for item migration:** SharePoint assigns a
   recreated list content type a fresh `StringId`, so the `ContentTypeId` carried by
   every source list item no longer exists on the target (SharePoint silently coerces
@@ -276,6 +281,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Content-type field links no longer attempt built-in columns:** a captured
+  content type links every built-in and SharePoint-owned column (`Title`,
+  `FileLeafRef`, framework columns, ...) that `capture_list_structure` deliberately
+  does not recreate, so reconciling them produced one guaranteed `Column '<name>'
+  does not exist` failure each. `provision_list_structure` now links only columns it
+  captured (or that are already linked), leaving the rest to the target list's own
+  defaults, and reorders exactly the links it owns.
 - **Site Assets reported a phantom "extra" item (and copied site branding).**
   Every modern site auto-provisions ``SiteAssets/<web title> Notebook``, which
   SharePoint recreates on the target under the *target* web's name — so a migrated

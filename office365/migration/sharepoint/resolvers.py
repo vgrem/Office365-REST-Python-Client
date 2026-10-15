@@ -143,14 +143,16 @@ def resolve_site_task(
             continue
         target_list = _ensure_target_list(target_context, source_list)
         if provision_structure:
-            content_type_map = _provision_structure(source_list, target_list)
+            content_type_map, structure_warnings = _provision_structure(source_list, target_list)
         else:
-            content_type_map = None
-        pairs.append(_list_adapters(source_list, target_list, content_type_map=content_type_map))
+            content_type_map, structure_warnings = None, []
+        source, target = _list_adapters(source_list, target_list, content_type_map=content_type_map)
+        _attach_warnings(target, structure_warnings)
+        pairs.append((source, target))
     return pairs
 
 
-def _provision_structure(source_list: Any, target_list: Any) -> ContentTypeMap:
+def _provision_structure(source_list: Any, target_list: Any) -> tuple[ContentTypeMap, list[str]]:
     """Capture the source list structure and replay it onto the target list.
 
     Structure provisioning is best-effort where SharePoint Online constrains it
@@ -158,15 +160,29 @@ def _provision_structure(source_list: Any, target_list: Any) -> ContentTypeMap:
     columns are reported as warnings rather than aborting the resolution.
 
     Returns:
-        The content-type identity map built while provisioning: SharePoint
+        The content-type identity map built while provisioning (SharePoint
         assigns recreated list content types a fresh ``StringId``, so items
-        carrying the source ``ContentTypeId`` must be rewritten to the target one.
+        carrying the source ``ContentTypeId`` must be rewritten to the target
+        one) and the human-readable warnings the target did not apply.
     """
     structure = capture_list_structure(source_list)
     entries: dict[str, str] = {}
+    warnings: list[str] = []
     for warning in provision_list_structure(target_list, structure, content_type_map=entries):
         logger.warning("list %r: %s", getattr(source_list, "title", None), warning)
-    return ContentTypeMap(entries)
+        warnings.append(warning)
+    return ContentTypeMap(entries), warnings
+
+
+def _attach_warnings(target: Any, warnings: list[str]) -> None:
+    """Record structure-provisioning warnings on the target adapter for the session."""
+    if not warnings:
+        return
+    bucket = getattr(target, "warnings", None)
+    if bucket is None:
+        target.warnings = list(warnings)
+    else:
+        bucket.extend(warnings)
 
 
 def _list_adapters(
@@ -228,10 +244,12 @@ def _sharepoint(
     # them from the target (the package builder only carries the library, folders,
     # files, and file versions).
     if provision_structure:
-        content_type_map = _provision_structure(source_list, target_list)
+        content_type_map, structure_warnings = _provision_structure(source_list, target_list)
     else:
-        content_type_map = None
-    return source, _build_target(task, target_context, settings, target_list, folder, content_type_map=content_type_map)
+        content_type_map, structure_warnings = None, []
+    target = _build_target(task, target_context, settings, target_list, folder, content_type_map=content_type_map)
+    _attach_warnings(target, structure_warnings)
+    return source, target
 
 
 def _list_source(source_list: Any) -> Any:

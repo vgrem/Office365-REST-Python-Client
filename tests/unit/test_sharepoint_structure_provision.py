@@ -134,7 +134,7 @@ def test_provision_creates_columns_content_type_links_and_view():
     assert any(p.url.endswith("/ContentTypes") for p in _posts(transport))
     # field links are pathed through the reloaded content type id, not the collection
     assert any(u.endswith("/ContentTypes('" + _CT_ID + "')/FieldLinks") for u in urls)
-    assert sum(1 for p in _posts(transport) if p.url.endswith("/FieldLinks")) == 2  # noqa: PLR2004 (2 links)
+    assert sum(1 for p in _posts(transport) if p.url.endswith("/FieldLinks")) == 1  # only the captured column
     assert any(u.endswith("/FieldLinks/Reorder") for u in urls)
     assert any(u.endswith("views/GetByTitle('All Items')") for u in urls)
     assert any(u.endswith("views/Add") for u in urls)
@@ -268,10 +268,35 @@ def test_provision_reports_columns_the_server_refuses_to_link():
 
     warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(views=[]))
 
-    assert len(warnings) == 2  # both captured links were rejected  # noqa: PLR2004
-    assert all("was not linked" in warning for warning in warnings)
+    # ``Title`` is a built-in link left to the target; only the captured column is attempted
+    assert len(warnings) == 1
+    assert "ProjectType" in warnings[0]
+    assert "was not linked" in warnings[0]
     # no reorder is attempted when nothing could be linked
     assert not any(u.endswith("/FieldLinks/Reorder") for u in _urls(transport))
+
+
+def test_provision_skips_links_for_columns_it_did_not_capture():
+    # A content type may link built-in columns (``Title``) that capture deliberately
+    # skips; sending them to the server is a guaranteed ``does not exist`` failure.
+    routes = _link_routes({})
+    ctx, transport = _setup(routes)
+    structure = _structure(
+        views=[],
+        content_types=[
+            ContentTypeDefinition(
+                string_id=_CT_ID,
+                name="Project",
+                field_internal_names=["Title", "ProjectType", "MediaServiceImageTags"],
+            )
+        ],
+    )
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert warnings == []
+    linked = [r.data["FieldInternalName"] for r in _posts(transport) if r.url.endswith("/FieldLinks")]
+    assert linked == ["ProjectType"]
 
 
 def test_provision_reorders_links_with_a_plain_array():
@@ -281,4 +306,5 @@ def test_provision_reorders_links_with_a_plain_array():
 
     reorder = next(r for r in _posts(transport) if r.url.endswith("/FieldLinks/Reorder"))
     assert isinstance(reorder.data["internalNames"], list)
-    assert reorder.data["internalNames"] == ["Title", "ProjectType"]
+    # ``Title`` is not part of the captured structure, so only the captured column is reordered
+    assert reorder.data["internalNames"] == ["ProjectType"]

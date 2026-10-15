@@ -25,6 +25,8 @@ what is missing, so a re-run is a no-op. The server assigns content type
 identifiers, so content types are matched and recreated **by name** (their
 ``Id`` cannot be preserved over REST); field links are reconciled best-effort
 and any column the server refuses to link is reported back to the caller.
+Built-in columns the target list already provides are left alone rather than
+sent as guaranteed link failures.
 """
 
 from __future__ import annotations
@@ -400,6 +402,13 @@ def provision_list_structure(
             on_conflict=on_conflict,
         )
 
+    # Only captured user columns can be (re)linked. A content type's field links
+    # also name every built-in and SharePoint-owned column (``Title``,
+    # ``FileLeafRef``, framework columns, ...) which this module deliberately does
+    # not recreate — attempting to link one is a guaranteed server error, so they
+    # are left to the target list's own defaults.
+    available = {definition.internal_name for definition in structure.fields if definition.internal_name}
+
     if provisionable or content_type_map is not None:
         # Executes the queued field/content-type creates, then loads the (now
         # created) content types so their field links can be reconciled and item
@@ -408,7 +417,7 @@ def provision_list_structure(
         for definition in provisionable:
             target = loaded.get(definition.name)
             if target is not None and definition.field_internal_names:
-                warnings.extend(_reconcile_field_links(target, definition.field_internal_names))
+                warnings.extend(_reconcile_field_links(target, definition.field_internal_names, available))
         if content_type_map is not None:
             content_type_map.update(ContentTypeMap.build(structure.content_types, loaded.values()).entries)
 
@@ -438,8 +447,13 @@ def _ensure_content_types_enabled(sp_list: Any) -> None:
     sp_list.ensure_property("ContentTypesEnabled").after_execute(_enable)
 
 
-def _reconcile_field_links(content_type: Any, internal_names: List[str]) -> List[str]:
+def _reconcile_field_links(content_type: Any, internal_names: List[str], available: set[str]) -> List[str]:
     """Add any missing field links to a content type and restore their order.
+
+    Only columns in ``available`` (the captured user columns) or already linked
+    are attempted; every other captured link names a built-in/SharePoint-owned
+    column the target list provides itself, so it is skipped rather than sent to
+    the server as a guaranteed failure.
 
     Returns a list of warnings for columns the server would not link. Adding a
     link for a ready column is a no-op; adding one for a column SharePoint does
@@ -455,8 +469,18 @@ def _reconcile_field_links(content_type: Any, internal_names: List[str]) -> List
         return [f"content type '{name}': field links could not be read: {_message(exc)}"]
 
     existing = {link.field_internal_name for link in links}
+    skipped = [name_ for name_ in internal_names if name_ not in existing and name_ not in available]
+    if skipped:
+        logger.debug(
+            "content type %r: left %d built-in column(s) to the target list: %s",
+            name,
+            len(skipped),
+            ", ".join(sorted(skipped)),
+        )
+
+    linkable = [name_ for name_ in internal_names if name_ in existing or name_ in available]
     added = False
-    for internal_name in internal_names:
+    for internal_name in linkable:
         if internal_name in existing:
             continue
         try:
@@ -469,7 +493,7 @@ def _reconcile_field_links(content_type: Any, internal_names: List[str]) -> List
         added = True
     if added:
         try:
-            content_type.field_links.reorder(list(internal_names)).execute_query()
+            content_type.field_links.reorder(linkable).execute_query()
         except ClientRequestException as exc:
             warning = f"content type '{name}': field link order was not applied: {_message(exc)}"
             logger.warning(warning)
