@@ -111,6 +111,23 @@ def test_list_source_projects_all_field_values():
     assert first.get("*") is None
 
 
+def test_list_source_drops_non_scalar_values_and_warns():
+    # A full read also returns navigation properties (``ParentList``) and typed
+    # values (``PredecessorsId``) whose JSON objects carry no type name; the REST
+    # create batch rejects them, so the projection drops them and says so.
+    items = [
+        _Item(1, {"Id": 1, "Title": "A", "ParentList": object(), "PredecessorsId": {}}),
+    ]
+    source = SharePointListSource(cast("SPList", _SourceList(items)))
+    planned = source.list_items()
+
+    record = source.read(planned[0])
+    assert record["Title"] == "A"
+    assert "ParentList" not in record
+    assert "PredecessorsId" not in record
+    assert any("non-scalar" in w for w in source.warnings)
+
+
 def test_list_source_captures_attachments_after_records():
     attachment = _Attachment("spec.txt", b"hello")
     items = [

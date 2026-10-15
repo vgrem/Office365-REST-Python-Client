@@ -276,15 +276,31 @@ class SharePointListSource:
             emit_progress(progress, done=len(result), stage="planning", items=[attachment])
         return result
 
-    @staticmethod
-    def _project_records(loaded) -> list[dict]:
+    def _project_records(self, loaded) -> list[dict]:
         # Project every loaded property — not the collection's literal ``select``.
         # Passing ``["*", ...]`` straight through emitted ``{"*": None, ...}``, so
         # migrated records carried no field values at all. ``AttachmentFiles`` is a
         # navigation property (objects, not a scalar column) and is excluded; the
         # target writes attachments separately.
         select = sorted({key for item in loaded for key in item.properties if key != "AttachmentFiles"})
-        return records_from_items(list(loaded), select, set(), raw=True)
+        records = records_from_items(list(loaded), select, set(), raw=True)
+        # A REST item create accepts scalar column values only. A full read also
+        # returns navigation properties (``ParentList``) and typed values
+        # (lookups/persons, e.g. ``PredecessorsId`` / ``AssignedTo``) whose JSON
+        # objects carry no ``__metadata.type`` here, so the create batch is
+        # rejected with ``InvalidClientQueryException``. Typed-value remapping is
+        # not supported yet, so drop them and say so rather than fail the run.
+        dropped: set[str] = set()
+        for record in records:
+            for key, value in list(record.items()):
+                if value is not None and not isinstance(value, (str, int, float, bool)):
+                    record.pop(key)
+                    dropped.add(key)
+        if dropped:
+            self.warnings.append(
+                f"skipped non-scalar column(s) with no typed-value mapping: {', '.join(sorted(dropped))}"
+            )
+        return records
 
     def read(self, item: MigrationItem) -> object:
         if item.item_type == "attachment":
@@ -839,7 +855,11 @@ class SharePointLibraryTarget:
     def list_paths(self) -> list[str]:
         root = (self._folder.server_relative_url or "").rstrip("/")
         loaded = self._folder.get_files(recursive=True).execute_query()
-        return [(f.server_relative_url or "")[len(root) :].lstrip("/") for f in loaded]
+        paths = [(f.server_relative_url or "")[len(root) :].lstrip("/") for f in loaded]
+        # Mirror the source projection: SharePoint-owned scaffolding (``Forms/``,
+        # ``desktop.ini``) is recreated server-side, never migrated, so it must
+        # not be reported as target-only content during verification.
+        return [p for p in paths if p and not _is_system_path(p)]
 
     def checksum(self, item: MigrationItem) -> str:
         file = self._folder.context.web.get_file_by_server_relative_url(self._url(item)).get().execute_query()

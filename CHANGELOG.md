@@ -265,6 +265,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **`ClientContext.clone(url)` sent every request to the original site.** A clone
+  correctly stored the new URL on the context, but `reuse()` swaps in the source's
+  shared `AuthenticationContext` (to keep one token cache and transport), and
+  `SharePointRequest.service_root_url` derived routing from that auth context's
+  `url` — so a clone silently talked to the source site. `base_url` /
+  `service_root_url` now use the request's own base URL (matching
+  `ODataRequest` and the batch requests), while auth stays shared. This broke the
+  whole-site same-tenant resolver (`resolve_site_task` cloned the target context
+  to the source URL, yet listed the target's own lists) and any cross-site read.
+  *Live-validated.*
+- **`Manifest.save()` / `Checkpoint.save()` crashed on a fresh run directory.**
+  The manifest was written with a plain `open()` and the checkpoint's atomic
+  writer did not create the parent directory, so
+  `session.add_site_task(..., manifest_dir=work/"manifests")` failed with
+  `FileNotFoundError` on the first `plan()` — the default `migrate_site.py
+  --work` path. `atomic_write_json` now creates missing parent directories, and
+  `Manifest.save` uses it (same crash-safe write-then-rename as the checkpoint).
+- **List-item create failed on typed values.** A full list read also returns
+  navigation properties (`ParentList`) and typed values (`PredecessorsId`,
+  `AssignedTo`, ...) whose JSON objects carry no `__metadata.type` here, so the
+  create batch was rejected with `InvalidClientQueryException: A value without a
+  type name was found`. Typed-value remapping is not supported yet, so the
+  projection now drops non-scalar values (keeping `str`/`int`/`float`/`bool`/
+  `None`) and reports the skipped columns via `warnings`, instead of failing the
+  whole list migration.
+- **Verification reported migrated libraries as having "extra" content.** The
+  source projection skips SharePoint-owned scaffolding (`Forms/`,
+  `desktop.ini`) but `SharePointLibraryTarget.list_paths()` did not, so every
+  migrated library came back as a false `MISMATCH` with the target's own system
+  files counted as extras. The target now skips the same scaffolding.
 - **Authorship and ACLs now take effect on the server-side package path.** The
   library source resolves each item's `Author`/`ModifiedBy` and role assignments
   (`PermissionEntry` gained `system_id`/`display_name`/`email`/`role_masks`, and
