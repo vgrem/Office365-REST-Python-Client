@@ -31,9 +31,10 @@ def atomic_write_json(path: PathLikeType, payload: Any, *, indent: int = 2) -> N
     flushed and ``fsync``-ed, then moved onto ``path`` with :func:`os.replace`.
     On POSIX the containing directory is also ``fsync``-ed so the rename itself
     survives a crash. A failure while writing removes the temporary file and
-    leaves ``path`` untouched.
+    leaves ``path`` untouched. Missing parent directories are created.
     """
     target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(dir=str(target.parent), prefix=f".{target.name}.", suffix=".tmp")
     tmp = Path(tmp_name)
     try:

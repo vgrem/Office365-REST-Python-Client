@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from office365.migration.base import ItemStatus, MigrationItem, item_from_dict, item_to_dict
+from office365.runtime.persistence import atomic_write_json
 
 if TYPE_CHECKING:
     from office365.runtime.operations import Progress
@@ -60,9 +61,13 @@ class Manifest:
         return iter(self._items)
 
     def save(self, path: str | Path) -> None:
-        """Persist the manifest as a JSON array of items."""
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump([item_to_dict(i) for i in self._items], f, indent=2)
+        """Persist the manifest as a JSON array of items, atomically.
+
+        Uses the same crash-safe write-then-rename as the checkpoint, so a crash
+        mid-save never leaves a truncated manifest, and missing parent
+        directories are created.
+        """
+        atomic_write_json(path, [item_to_dict(i) for i in self._items])
 
     @classmethod
     def load(cls, path: str | Path) -> "Manifest":

@@ -61,6 +61,24 @@ def test_atomic_write_accepts_str_path(tmp_path):
     assert json.loads(target.read_text(encoding="utf-8")) == {"ok": True}
 
 
+def test_atomic_write_creates_missing_parent_directories(tmp_path):
+    target = tmp_path / "state" / "nested" / "checkpoint.json"
+    atomic_write_json(target, {"ok": True})
+    assert read_json(target) == {"ok": True}
+    assert _tmp_files(target.parent) == []
+
+
+def test_manifest_save_creates_missing_directories(tmp_path):
+    from office365.migration.base import MigrationItem
+    from office365.migration.manifest import Manifest
+
+    path = tmp_path / "manifests" / "01-docs.manifest.json"
+    Manifest([MigrationItem(source_path="/a/b.txt", dest_path="b.txt", item_type="file")]).save(path)
+
+    assert Manifest.load(path).by_dest()["b.txt"].source_path == "/a/b.txt"
+    assert _tmp_files(path.parent) == []
+
+
 def test_import_checkpoint_round_trip_is_atomic(tmp_path):
     path = tmp_path / "import.json"
     checkpoint = ImportCheckpoint(cursor=10, chunks=2, errors=1, signature={"format": "csv"})
