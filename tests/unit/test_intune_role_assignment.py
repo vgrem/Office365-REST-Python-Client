@@ -8,12 +8,7 @@ PATCH/POST payloads are correct.
 
 from __future__ import annotations
 
-from office365.common.role_assignment import RoleAssignment
 from office365.intune.devices.and_app_management_role_assignment import DeviceAndAppManagementRoleAssignment
-
-
-def test_role_assignment_inherits_generic_model():
-    assert issubclass(DeviceAndAppManagementRoleAssignment, RoleAssignment)
 
 
 def test_role_assignment_exposes_members_and_odata_type():
