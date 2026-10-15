@@ -272,6 +272,23 @@ Two SharePoint Online REST limits are surfaced honestly rather than hidden:
 - **Content type identifiers are not preserved.** The server assigns a content
 type its own `Id` and ignores the requested one (at both list and web scope), so
 content types are matched and recreated by **name**.
+
+  Because the identifier changes, an item's `ContentTypeId` (which carries the
+  *source* identifier) no longer exists on the target, and SharePoint silently
+  coerces it to the list's default content type. `content_type_map` captures the
+  source→target identifier so the record projection can rewrite it:
+
+  ```python
+  from office365.migration.map import ContentTypeMap
+
+  mapping = {}
+  provision_list_structure(target_list, structure, content_type_map=mapping)
+  target = SharePointListTarget(target_list, content_type_map=ContentTypeMap(mapping))
+  ```
+
+  The whole-site (`resolve_site_task`) and single-list resolvers build and apply
+  the map automatically, so a task-based migration needs nothing extra.
+
 - **A fresh column cannot be attached to a custom content type.** Adding a field
 link for a column that is not already inherited or auto-linked is rejected
 (`Column '<name>' does not exist`). Those columns are skipped and returned in the

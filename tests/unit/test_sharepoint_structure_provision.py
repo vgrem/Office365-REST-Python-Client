@@ -171,6 +171,39 @@ def test_provision_skips_base_content_types():
     assert not any(p.url.endswith("/ContentTypes") for p in _posts(transport))
 
 
+def test_provision_records_content_type_id_map_by_name():
+    # SharePoint assigns a recreated list content type a fresh StringId; the
+    # populated map (source id -> target id) lets item ContentTypeIds be rewritten.
+    target_id = "0x0100ffffffffffffffffffffffff0001"
+    routes = [
+        (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
+        (HttpMethod.Get, "getByInternalNameOrTitle", _NOT_FOUND),
+        (HttpMethod.Post, "CreateFieldAsXml", {"d": {"InternalName": "ProjectType", "FieldTypeKind": 6}}),
+        (HttpMethod.Get, "/FieldLinks", {"d": {"results": []}}),
+        (HttpMethod.Post, "/FieldLinks/Reorder", {}),
+        (HttpMethod.Post, "/FieldLinks", {}),
+        (HttpMethod.Get, "ContentTypes?$filter=", {"d": {"results": []}}),
+        (HttpMethod.Post, "/ContentTypes", {"d": {"Name": "Project", "StringId": target_id}}),
+        (HttpMethod.Get, "/ContentTypes", {"d": {"results": [{"Name": "Project", "StringId": target_id}]}}),
+    ]
+    ctx, _ = _setup(routes)
+
+    mapping: dict = {}
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(views=[]), content_type_map=mapping)
+
+    assert mapping == {_CT_ID: target_id}
+
+
+def test_provision_omits_map_when_ids_are_unchanged():
+    ctx, _ = _setup(_routes())
+
+    mapping: dict = {}
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(), content_type_map=mapping)
+
+    # the scripted target returns the same StringId as the source
+    assert mapping == {}
+
+
 def test_provision_rejects_unknown_conflict_mode():
     ctx, _ = _setup([])
     try:

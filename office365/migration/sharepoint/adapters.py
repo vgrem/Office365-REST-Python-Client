@@ -28,6 +28,7 @@ from office365.sharepoint.fields.builtin_field_name import SYSTEM_FIELD_NAMES
 from office365.sharepoint.principal.type import PrincipalType
 
 if TYPE_CHECKING:
+    from office365.migration.map import ContentTypeMap
     from office365.sharepoint.files.file import File
     from office365.sharepoint.folders.folder import Folder
     from office365.sharepoint.lists.list import List as SPList
@@ -340,6 +341,11 @@ class SharePointListTarget:
     on the target (so re-runs do not duplicate) and :meth:`list_paths` pairs source
     and target items for verification. Pass ``identity_field=None`` to opt out.
     List-item attachments are written after their parent records are flushed.
+
+    Pass ``content_type_map`` (a :class:`~office365.migration.map.ContentTypeMap`)
+    when the target list's content types were recreated with fresh identifiers:
+    every record's ``ContentTypeId`` is rewritten to the target id so items land
+    under the recreated content type instead of the wrong (or a missing) one.
     """
 
     # Marks this target as accepting list-item attachments as extra items (see DataTarget).
@@ -352,6 +358,7 @@ class SharePointListTarget:
         key_field: str = "MigrationKey",
         on_conflict: str | None = None,
         identity_field: str | None = DEFAULT_LIST_IDENTITY_FIELD,
+        content_type_map: "ContentTypeMap | None" = None,
     ) -> None:
         self._list = target_list
         self._key_columns = [key] if isinstance(key, str) else (list(key) if key else [])
@@ -364,6 +371,7 @@ class SharePointListTarget:
         self._identity_ensured = False
         self._identity_index: dict | None = None
         self._attachment_path_cache: set[str] | None = None
+        self._content_type_map = content_type_map
         self.warnings: list[str] = []
 
     @property
@@ -434,8 +442,11 @@ class SharePointListTarget:
         return []
 
     def _record_for(self, item: MigrationItem, payload: object) -> dict:
-        """The payload plus the source-id marker (so re-runs and verify can pair items)."""
-        record = cast(dict, payload)
+        """The payload with the target content-type id and source-id marker applied."""
+        record = dict(cast(dict, payload))
+        if self._content_type_map:
+            content_type_id = record.get("ContentTypeId")
+            record["ContentTypeId"] = self._content_type_map.resolve(content_type_id)
         if self._identity_field:
             record[self._identity_field] = item.dest_path
         return record

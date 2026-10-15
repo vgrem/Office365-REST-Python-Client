@@ -42,6 +42,7 @@ from office365.migration.checkpoint import Checkpoint
 from office365.migration.fidelity import FidelityReport, FidelityStatus, describe_fidelity
 from office365.migration.job import MigrationJob
 from office365.migration.manifest import Manifest
+from office365.migration.map import ContentTypeMap
 from office365.migration.report import MigrationReport, build_report, export_reports
 from office365.migration.runner import MigrationRunner
 from office365.migration.server_job import MigrationServerJob
@@ -82,6 +83,7 @@ __all__ = [
     "AssessmentReport",
     "Checkpoint",
     "ConflictResolution",
+    "ContentTypeMap",
     "ExportFormat",
     "FidelityReport",
     "ItemStatus",

@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Content-type identity map for item migration:** SharePoint assigns a
+  recreated list content type a fresh `StringId`, so the `ContentTypeId` carried by
+  every source list item no longer exists on the target (SharePoint silently coerces
+  it to the list's default content type). `ContentTypeMap`
+  (`office365.migration.map`) records the source→target id, matched **by content
+  type name** (the only stable key across a REST recreate). `provision_list_structure`
+  populates it via the new `content_type_map=` argument, `resolve_site_task` and the
+  single-list resolver thread it into `SharePointListTarget`
+  (`content_type_map=`), and the item projection rewrites `ContentTypeId`
+  before writing — so items land under the recreated content type instead of
+  whichever one SharePoint picks by default.
 - **Term-store hierarchy export/import, without the payload name clash:**
   `Store.export_tree()` / `Store.import_tree()` (and `StoreManager.export_tree()`
   / `StoreManager.import_tree()`) round-trip the whole groups → sets → terms tree

@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from office365.sharepoint.lists.list import List as SPList
 
 from office365.migration.base import MigrationItem
+from office365.migration.map import ContentTypeMap
 from office365.migration.sharepoint.adapters import (
     DEFAULT_LIST_IDENTITY_FIELD,
     SharePointListSource,
@@ -305,3 +306,28 @@ def test_list_target_identity_can_be_opted_out():
     assert target_list.identity_fields == []
     assert target_list.queued == [{"Title": "A"}]
     assert target.list_paths() == ["10"]
+
+
+def test_list_target_remaps_content_type_id_from_the_map():
+    # A recreated list content type gets a fresh server-assigned id, so the source
+    # item's ``ContentTypeId`` must be rewritten before it is written.
+    target_list = _TargetList()
+    mapping = ContentTypeMap({"0x0100SOURCE": "0x0100TARGET"})
+    target = SharePointListTarget(cast("SPList", target_list), content_type_map=mapping)
+
+    payload = {"Title": "A", "ContentTypeId": "0x0100SOURCE"}
+    target.write(MigrationItem("Docs/1", "1", item_type="record"), payload)
+
+    assert target_list.queued == [{"Title": "A", "ContentTypeId": "0x0100TARGET", DEFAULT_LIST_IDENTITY_FIELD: "1"}]
+    # the caller's payload is left untouched
+    assert payload == {"Title": "A", "ContentTypeId": "0x0100SOURCE"}
+
+
+def test_list_target_leaves_unmapped_content_type_id_alone():
+    target_list = _TargetList()
+    mapping = ContentTypeMap({"0x0100SOURCE": "0x0100TARGET"})
+    target = SharePointListTarget(cast("SPList", target_list), content_type_map=mapping)
+
+    target.write(MigrationItem("Docs/1", "1", item_type="record"), {"ContentTypeId": "0x0101"})
+
+    assert target_list.queued == [{"ContentTypeId": "0x0101", DEFAULT_LIST_IDENTITY_FIELD: "1"}]

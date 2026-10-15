@@ -34,6 +34,7 @@ from dataclasses import asdict, dataclass
 from dataclasses import field as dc_field
 from typing import Any, Dict, List, Optional
 
+from office365.migration.map import ContentTypeMap
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.sharepoint.fields.builtin_field_name import SYSTEM_FIELD_NAMES
 
@@ -338,7 +339,13 @@ def _view_definition(view: Any, field_names: List[Any]) -> ViewDefinition:
     )
 
 
-def provision_list_structure(sp_list: Any, structure: ListStructure, *, on_conflict: str = "skip") -> List[str]:
+def provision_list_structure(
+    sp_list: Any,
+    structure: ListStructure,
+    *,
+    on_conflict: str = "skip",
+    content_type_map: Dict[str, str] | None = None,
+) -> List[str]:
     """Recreate a captured list structure on ``sp_list`` (idempotent).
 
     Ensures the captured user columns exist (creating missing ones from their
@@ -361,6 +368,11 @@ def provision_list_structure(sp_list: Any, structure: ListStructure, *, on_confl
         sp_list: The target SharePoint list (its container must already exist).
         structure: A snapshot from :func:`capture_list_structure`.
         on_conflict: ``"skip"`` (default) or ``"update"``.
+        content_type_map: An optional mapping to populate with source→target content
+            type identifiers (only where they differ). SharePoint assigns recreated
+            list content types a fresh ``StringId``, so this lets a caller rewrite an
+            item's ``ContentTypeId`` to the target one (see
+            :class:`~office365.migration.map.ContentTypeMap`).
 
     Returns:
         Human-readable warnings for anything the server would not let us apply
@@ -388,14 +400,17 @@ def provision_list_structure(sp_list: Any, structure: ListStructure, *, on_confl
             on_conflict=on_conflict,
         )
 
-    if provisionable:
+    if provisionable or content_type_map is not None:
         # Executes the queued field/content-type creates, then loads the (now
-        # created) content types so their field links can be reconciled.
+        # created) content types so their field links can be reconciled and item
+        # content-type ids can be rewritten.
         loaded = {ct.name: ct for ct in sp_list.content_types.get().execute_query() if ct.name}
         for definition in provisionable:
             target = loaded.get(definition.name)
             if target is not None and definition.field_internal_names:
                 warnings.extend(_reconcile_field_links(target, definition.field_internal_names))
+        if content_type_map is not None:
+            content_type_map.update(ContentTypeMap.build(structure.content_types, loaded.values()).entries)
 
     for view in structure.views:
         sp_list.views.ensure_view(

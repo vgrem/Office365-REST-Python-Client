@@ -19,6 +19,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
 from office365.migration.adapters.filesystem import FileSystemSource
+from office365.migration.map import ContentTypeMap
 from office365.migration.sharepoint.adapters import (
     SharePointLibrarySource,
     SharePointLibraryTarget,
@@ -142,24 +143,35 @@ def resolve_site_task(
             continue
         target_list = _ensure_target_list(target_context, source_list)
         if provision_structure:
-            _provision_structure(source_list, target_list)
-        pairs.append(_list_adapters(source_list, target_list))
+            content_type_map = _provision_structure(source_list, target_list)
+        else:
+            content_type_map = None
+        pairs.append(_list_adapters(source_list, target_list, content_type_map=content_type_map))
     return pairs
 
 
-def _provision_structure(source_list: Any, target_list: Any) -> None:
+def _provision_structure(source_list: Any, target_list: Any) -> ContentTypeMap:
     """Capture the source list structure and replay it onto the target list.
 
     Structure provisioning is best-effort where SharePoint Online constrains it
     (a fresh column cannot be attached to a custom content type over REST); those
     columns are reported as warnings rather than aborting the resolution.
+
+    Returns:
+        The content-type identity map built while provisioning: SharePoint
+        assigns recreated list content types a fresh ``StringId``, so items
+        carrying the source ``ContentTypeId`` must be rewritten to the target one.
     """
     structure = capture_list_structure(source_list)
-    for warning in provision_list_structure(target_list, structure):
+    entries: dict[str, str] = {}
+    for warning in provision_list_structure(target_list, structure, content_type_map=entries):
         logger.warning("list %r: %s", getattr(source_list, "title", None), warning)
+    return ContentTypeMap(entries)
 
 
-def _list_adapters(source_list: Any, target_list: Any) -> tuple[Any, Any]:
+def _list_adapters(
+    source_list: Any, target_list: Any, *, content_type_map: ContentTypeMap | None = None
+) -> tuple[Any, Any]:
     """Build the source/target adapter pair for one resolved list/library."""
     if is_document_library(source_list):
         source = SharePointLibrarySource(source_list.root_folder, sp_list=source_list)
@@ -167,7 +179,7 @@ def _list_adapters(source_list: Any, target_list: Any) -> tuple[Any, Any]:
         target = SharePointLibraryTarget(folder)
     else:
         source = SharePointListSource(source_list)
-        target = SharePointListTarget(target_list)
+        target = SharePointListTarget(target_list, content_type_map=content_type_map)
     return source, target
 
 
@@ -216,8 +228,10 @@ def _sharepoint(
     # them from the target (the package builder only carries the library, folders,
     # files, and file versions).
     if provision_structure:
-        _provision_structure(source_list, target_list)
-    return source, _build_target(task, target_context, settings, target_list, folder)
+        content_type_map = _provision_structure(source_list, target_list)
+    else:
+        content_type_map = None
+    return source, _build_target(task, target_context, settings, target_list, folder, content_type_map=content_type_map)
 
 
 def _list_source(source_list: Any) -> Any:
@@ -251,12 +265,20 @@ def _target_folder(context: Any, task: MigrationTask) -> tuple[Any, Any]:
     return target_list, folder
 
 
-def _build_target(task: MigrationTask, context: Any, settings, target_list: Any, folder: Any) -> Any:
+def _build_target(
+    task: MigrationTask,
+    context: Any,
+    settings,
+    target_list: Any,
+    folder: Any,
+    *,
+    content_type_map: ContentTypeMap | None = None,
+) -> Any:
     if settings is not None and settings.use_migration_api:
         return _package_target(task, context, target_list)
     if is_document_library(target_list):
         return SharePointLibraryTarget(folder)
-    return SharePointListTarget(target_list)
+    return SharePointListTarget(target_list, content_type_map=content_type_map)
 
 
 def _package_target(task: MigrationTask, context: Any, library: Any) -> Any:
