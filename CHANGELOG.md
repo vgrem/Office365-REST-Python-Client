@@ -251,6 +251,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Authorship and ACLs now take effect on the server-side package path.** The
+  library source resolves each item's `Author`/`ModifiedBy` and role assignments
+  (`PermissionEntry` gained `system_id`/`display_name`/`email`/`role_masks`, and
+  `MigrationItem` gained `author`/`editor` principals), the runner persists them
+  through the manifest, and `SharePointPackageTarget` emits them: authors become
+  `UserGroup.xml` principals (matched by the integer id) and, with
+  `preserve_permissions=True`, each item's ACL becomes a `DeploymentRoles` role +
+  a `DeploymentRoleAssignments` grant. Roles use a fresh non-system id and a
+  decimal `PermMask` (the service matches by `Title`, so no duplicate level is
+  created); grants target the file (`object_type="2"`). ACLs are best-effort
+  same-tenant and cover **resolved users only** — groups and principals without a
+  PUID are skipped and reported via `warnings`. `PackageBuilder.add_role` now
+  rejects a non-decimal `perm_mask`, and the builder exposes `object_id(path)` /
+  `item_url(path)` / `set_include_security(value)`.
 - **Version history was not carried through `MigrationJob`:** the server-side
   package target could build `<Versions>`, but the runner never fed it any. The
   runner now reads `source.read_version_history(item)` into each item when the
@@ -845,10 +859,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Migration path guidance and honest server-side limits:** `docs/migration.md`
   gained a "Client-side vs server-side" section that compares the two engines
   (content, versions, permissions, structure, Azure, verification) and says when
-  to pick each. The server-side docs no longer claim "full fidelity" — ACL and
-  author metadata are emitted into the package but do not apply yet, the builder
-  emits no columns/content types/views, and `preserve_versions` is not wired
-  through `MigrationJob`. The examples migration README matches.
+  to pick each. The builder emits no columns/content types/views (provision those
+  over REST first), and the examples migration README matches.
 
 ### Fixed
 - **Sharing-link expiration rejected as an invalid date:** `ListItem.share_link`

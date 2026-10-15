@@ -162,7 +162,7 @@ def _provision_structure(source_list: Any, target_list: Any) -> None:
 def _list_adapters(source_list: Any, target_list: Any) -> tuple[Any, Any]:
     """Build the source/target adapter pair for one resolved list/library."""
     if is_document_library(source_list):
-        source = SharePointLibrarySource(source_list.root_folder)
+        source = SharePointLibrarySource(source_list.root_folder, sp_list=source_list)
         folder = target_list.root_folder.get().execute_query()
         target = SharePointLibraryTarget(folder)
     else:
@@ -222,7 +222,7 @@ def _sharepoint(
 
 def _list_source(source_list: Any) -> Any:
     if is_document_library(source_list):
-        return SharePointLibrarySource(source_list.root_folder)
+        return SharePointLibrarySource(source_list.root_folder, sp_list=source_list)
     return SharePointListSource(source_list)
 
 

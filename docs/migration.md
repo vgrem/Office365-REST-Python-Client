@@ -32,8 +32,8 @@ different content and deliver different fidelity:
 |---|---|---|
 | Content | files + folders, **record lists + attachments**, list structure | **document libraries** (files/folders + version history) |
 | Version history | ✗ | ✓ the runner reads each file's history and the package carries `<Versions>` |
-| Authors / ModifiedBy | not preserved | emitted in the package, **not applied** |
-| Permissions | library: best-effort same-tenant ACL; list: ✗ | emitted in the package, **not applied** (parked) |
+| Authors / ModifiedBy | not preserved | ✓ applied from `UserGroup.xml` (integer principal id, matched by PUID) |
+| Permissions | library: best-effort same-tenant ACL; list: ✗ | best-effort same-tenant ACL — **resolved users only** (groups / unresolved principals skipped with a warning) |
 | Columns / content types / views | captured + provisioned over REST | **not emitted** by the builder today |
 | Azure Storage | not needed | required (SharePoint-owned containers; no Azure account) |
 | Throughput | per-item HTTP, throttle-aware, resumable | bulk server-side ingestion; poll a job |
@@ -49,7 +49,8 @@ side.
 > is preserved automatically when the source exposes `read_version_history` (the
 > SharePoint library source) and the target is `SharePointPackageTarget` — so
 > `preserve_versions` is honored there and rejected only on the client-side REST
-> target. Author / `ModifiedBy` and ACLs are still **emitted but not applied**.
+> target. Authorship and resolved-user ACLs are applied on the server-side path
+> too — see [Fidelity](#fidelity).
 
 ## Quick start
 
@@ -282,15 +283,16 @@ Field-link **order** is restored only when at least one link was actually added.
 
 | Flag | Client-side runner | Server-side package |
 |---|---|---|
-| `preserve_timestamps` | best-effort (`Created`/`Modified`) | declared in the package, **not applied** |
-| `preserve_permissions` | best-effort (same-tenant ACL copy) | emitted in the package, **not applied** |
+| `preserve_timestamps` | best-effort (`Created`/`Modified`) | ✓ carried per manifest object (`TimeCreated`/`TimeLastModified`) |
+| `preserve_permissions` | best-effort (same-tenant ACL copy) | best-effort — resolves users by PUID; groups / unresolved principals skipped |
 | `preserve_versions` | ✗ (raises) | ✓ the runner reads history into the package's `<Versions>` |
 
 The server-side package target is the only one that preserves version history: the
 runner reads each file's older versions (`source.read_version_history`) and passes
 them to `PackageBuilder.add_file`, which the Migration API promotes into a real
-version history. Timestamps ride the same package; author / `ModifiedBy` and ACLs
-are still emitted but **not applied** (see
+version history. Timestamps ride the same package; authorship (`UserGroup.xml`
+principal ids) and resolved-user ACLs (`DeploymentRoles` +
+`DeploymentRoleAssignments`) are applied by the service (see
 [Client-side vs server-side](#client-side-vs-server-side)). REST cannot restore
 version history, so `preserve_versions` always requires a Migration API package and
 fails fast on the client-side target. Timestamps and permissions are applied
@@ -305,8 +307,10 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
   via `ValidateUpdateListItem` (the same path as `ListItem.system_update`).
 - **Permissions** — the source reads the item's `role_assignments`; the target
   breaks inheritance and recreates them, resolving principals by login name and
-  roles by name. This is a **same-tenant** copy; cross-tenant identity mapping is
-  not implemented.
+  roles by name. On the server-side package target, `preserve_permissions=True`
+  emits `DeploymentRoles`/`DeploymentRoleAssignments` for **resolved users**
+  (matched by PUID; groups/unresolved principals are skipped with a warning).
+  Both are **same-tenant**; cross-tenant identity mapping is not implemented.
 
 Adapters opt in by implementing optional hooks: `DataSource.read_permissions(item)`,
 `DataTarget.apply_timestamps(item)`, and
@@ -371,9 +375,13 @@ columns, content types, or views: provision those client-side first (see
 [Provisioning list structure](#provisioning-list-structure)). The source also
 skips the library's own `Forms/` scaffolding, which SharePoint recreates on the
 target. The end-to-end import is validated against a live tenant for
-file/folder content **and version history**; ACL and author metadata are written
-into the manifest but **do not take effect** yet (the target SID a `RoleAssignment`
-needs is not exposed by the SharePoint Online REST API).
+file/folder content, **version history**, **authorship** (`Author`/`ModifiedBy`),
+and — with `preserve_permissions=True` — **same-tenant ACLs for resolved users**.
+Each `UserGroup.xml` user carries its PUID (`SystemId`); each granted level is
+emitted as a `DeploymentRoles` `<Role>` with a fresh non-system id and a decimal
+`PermMask` and is matched by `Title` to the target's existing permission level, so
+no duplicate is created. Groups and principals that cannot be resolved to a PUID
+are skipped and reported as warnings.
 
 ## Storage & vendor neutrality
 
@@ -385,7 +393,7 @@ Blob Storage; it cannot read from local disk or S3.
 |---|---|---|---|
 | M365 → filesystem / S3 / other | client-side adapters | no | content + best-effort timestamps/ACLs |
 | filesystem / other → M365 | client-side adapters | no | content + best-effort |
-| filesystem / other → M365 | server-side Migration API | **yes** | versions (ACLs/authorship not applied yet) |
+| filesystem / other → M365 | server-side Migration API | **yes** | versions + authorship (ACL best-effort) |
 | M365 → M365 | either | only for server-side | — |
 
 ### You don't need an Azure account

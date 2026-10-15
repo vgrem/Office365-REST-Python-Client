@@ -85,6 +85,36 @@ class MigrationItem:
     # target that preserves version history (server-side package). Transient: NOT
     # persisted in the checkpoint (keyed by ``dest_path``), so no blobs on disk.
     versions: list[tuple[str, bytes]] | None = None
+    # Resolved authorship identities (server-side package path only). Persisted in
+    # the manifest (they are small, JSON-safe dicts), never checkpointed.
+    author: "Principal | None" = None
+    editor: "Principal | None" = None
+
+
+def is_puid(value: "str | None") -> bool:
+    """Whether ``value`` is a usable SharePoint PUID (``UserInfo.UserId.NameId``).
+
+    The Migration API's ``UserGroup.xml`` ``SystemId`` must be a numeric PUID. An
+    ``AadObjectId`` (GUID), a claims login, or the app principal's id makes the
+    ingestion job fail to deserialize the user map (``System.FormatException``),
+    so such principals are treated as unresolved and skipped (best-effort).
+    """
+    return bool(value) and str(value).strip().isdigit()
+
+
+@dataclass
+class Principal:
+    """A resolved user identity, used for authorship and ACL fidelity.
+
+    ``system_id`` is the user's PUID (``UserInfo.UserId.NameId``) — the value the
+    Migration API's ``UserGroup.xml`` ``SystemId`` requires. A GUID or a claims
+    login there fails the ingestion job, so only a resolved PUID is carried.
+    """
+
+    login_name: str
+    system_id: str | None = None
+    display_name: str | None = None
+    email: str | None = None
 
 
 @dataclass
@@ -94,10 +124,22 @@ class PermissionEntry:
     Produced by :meth:`DataSource.read_permissions` and consumed by
     :meth:`DataTarget.apply_permissions`; role names are the target's role
     definition names (e.g. ``"Read"``, ``"Edit"``, ``"Full Control"``).
+
+    The optional identity fields (``system_id``/``display_name``/``email``) and
+    ``role_masks`` let the server-side package target emit a faithful
+    ``UserGroup.xml``/``DeploymentRoles`` payload; the client-side REST path and
+    the permission diff ignore them.
     """
 
     principal_name: str
     roles: list[str] = field(default_factory=list)
+    # PUID (``UserInfo.UserId.NameId``) for a user principal; ``None`` for a group
+    # or an unresolved principal (the package target skips those).
+    system_id: str | None = None
+    display_name: str | None = None
+    email: str | None = None
+    # Role name -> decimal permission mask (e.g. ``"Read" -> "756052856929"``).
+    role_masks: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -154,4 +196,8 @@ def item_from_dict(data: dict) -> MigrationItem:
     kwargs = {f.name: data[f.name] for f in fields(MigrationItem) if f.name in data}
     if "status" in kwargs:
         kwargs["status"] = ItemStatus(kwargs["status"])
+    for principal_field in ("author", "editor"):
+        value = kwargs.get(principal_field)
+        if isinstance(value, dict):
+            kwargs[principal_field] = Principal(**value)
     return MigrationItem(**kwargs)

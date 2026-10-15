@@ -3,7 +3,7 @@
 Unlike the client-side :class:`SharePointLibraryTarget` (which uploads each file
 over REST), this target accumulates files/folders into a Migration API package,
 stages the blobs in Azure Storage, and submits an ingestion job — the only path
-that preserves version history and full ACL fidelity.
+that preserves version history and authorship, plus best-effort same-tenant ACLs.
 
 Content and manifest go to **different** containers; the caller supplies their SAS
 URIs (e.g. from ``Site.provision_migration_containers``).
@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from office365.migration.base import MigrationItem
+from office365.migration.base import MigrationItem, PermissionEntry, Principal, is_puid
 from office365.migration.package.builder import PackageBuilder
 from office365.migration.package.staging import create_staging
 from office365.migration.server_job import MigrationServerJob
@@ -22,6 +22,12 @@ if TYPE_CHECKING:
     from office365.migration.package.builder import Package
 
 __all__ = ["SharePointPackageTarget"]
+
+#: Base for fresh, non-system ``DeploymentRoles`` ids. The service rejects an
+#: update to a *system* role (ids are ``>= 1073741824``), so synthetic ids stay
+#: below that range; the service matches the role by **title** to an existing
+#: permission level and creates no duplicate.
+_SYNTHETIC_ROLE_BASE = 1073000000
 
 
 def _resolve_site_url(site, site_url: str | None) -> str:
@@ -40,8 +46,12 @@ class SharePointPackageTarget:
 
     The only path that preserves version history: the runner reads each file's
     older versions (``source.read_version_history``) into the item and they ride
-    the manifest's ``<Versions>`` element. Timestamps are carried too; author /
-    ACL metadata is emitted but not applied yet (see the module docstring).
+    the manifest's ``<Versions>`` element. Authorship and ACLs are carried too:
+    ``Author``/``ModifiedBy`` become ``UserGroup.xml`` principals (matched by the
+    integer id), and — with ``preserve_permissions`` — each item's role
+    assignments become ``DeploymentRoles``/``DeploymentRoleAssignments`` grants for
+    resolved users (best-effort, same-tenant; groups/unresolved principals are
+    skipped with a warning).
     """
 
     # Marks this target as able to restore version history (see DataTarget).
@@ -89,22 +99,42 @@ class SharePointPackageTarget:
         )
         self.job_id: str | None = None
         self._package: "Package | None" = None
+        self._web_url = web_url
+        self._users: dict[str, int] = {}
+        self._unresolved: set[str] = set()
+        self._roles: dict[str, str] = {}
+        self._role_seq = 0
+        # Non-fatal fidelity gaps (skipped groups / roles), surfaced by the session.
+        self.warnings: list[str] = []
 
     def label(self) -> str:
         return f"migration-package:{self._list_title}"
 
     # ── DataTarget ───────────────────────────────────────────────
 
+    def configure(self, options) -> None:
+        """Derive per-run policy from the options before writes start.
+
+        A requested ``preserve_permissions`` switches ``ExportSettings`` to
+        ``IncludeSecurity="All"`` so the service consumes the emitted ACLs.
+        """
+        if getattr(options, "preserve_permissions", False):
+            self._builder.set_include_security("All")
+
     def exists(self, item: MigrationItem) -> bool:
         # The server-side API handles overwrite/merge; nothing is checked client-side.
         return False
 
     def write(self, item: MigrationItem, payload: object) -> None:
+        author = self._ensure_user(item.author)
+        editor = self._ensure_user(item.editor)
         if item.item_type == "folder":
             self._builder.add_folder(
                 item.dest_path,
                 time_created=item.created,
                 time_last_modified=item.modified,
+                author=author,
+                editor=editor,
             )
             return
         content = payload if isinstance(payload, bytes) else str(payload).encode("utf-8")
@@ -115,7 +145,92 @@ class SharePointPackageTarget:
             versions=item.versions or None,
             time_created=item.created,
             time_last_modified=item.modified,
+            author=author,
+            editor=editor,
         )
+
+    def apply_timestamps(self, item: MigrationItem) -> None:
+        """No-op: the package carries ``TimeCreated``/``TimeLastModified`` per object."""
+
+    def apply_permissions(self, item: MigrationItem, permissions: list[PermissionEntry]) -> None:
+        """Emit a ``DeploymentRoleAssignments`` grant for a written file/folder.
+
+        Only a **resolved user** (a PUID ``system_id``) can be granted server-side;
+        groups and unresolved principals are skipped with a warning rather than
+        failing the job. A role without a decimal mask is skipped likewise.
+        """
+        object_id = self._builder.object_id(item.dest_path)
+        if object_id is None:
+            return
+        assignments: list[tuple[str, int]] = []
+        for entry in permissions:
+            if not is_puid(entry.system_id):
+                self.warnings.append(
+                    f"permission for {entry.principal_name!r} skipped: no usable PUID "
+                    "(only resolved users carry ACLs on the server-side path)"
+                )
+                continue
+            principal_id = self._register_user(entry.principal_name, entry.system_id, entry.display_name, entry.email)
+            for role in entry.roles:
+                role_id = self._ensure_role(role, entry.role_masks.get(role))
+                if role_id is not None:
+                    assignments.append((role_id, principal_id))
+        if not assignments:
+            return
+        self._builder.add_role_assignment(
+            object_id=object_id,
+            object_url=self._builder.item_url(item.dest_path),
+            object_type="2",
+            role_def_web_id=self._web_id,
+            role_def_web_url=self._web_url,
+            assignments=assignments,
+        )
+
+    def _ensure_user(self, principal: "Principal | None") -> str | None:
+        """Register a principal in ``UserGroup.xml`` (by login + PUID); returns its id string."""
+        if principal is None or not principal.login_name:
+            return None
+        if not is_puid(principal.system_id):
+            # Only a numeric PUID is accepted by ``UserGroup.xml``; anything else
+            # (a GUID, a claims login, the app principal) fails the whole job.
+            if principal.login_name not in self._unresolved:
+                self._unresolved.add(principal.login_name)
+                self.warnings.append(f"principal {principal.login_name!r} skipped: no usable PUID")
+            return None
+        return str(
+            self._register_user(principal.login_name, principal.system_id, principal.display_name, principal.email)
+        )
+
+    def _register_user(
+        self,
+        login: str,
+        system_id: str | None,
+        display_name: str | None = None,
+        email: str | None = None,
+    ) -> int:
+        if login in self._users:
+            return self._users[login]
+        user_id = self._builder.add_user(
+            login,
+            name=display_name or login,
+            email=email,
+            system_id=system_id,
+        )
+        self._users[login] = user_id
+        return user_id
+
+    def _ensure_role(self, name: str, mask: str | None) -> str | None:
+        """Register a synthetic-``RoleId`` ``<Role>`` for a permission level (cached)."""
+        if name in self._roles:
+            return self._roles[name]
+        if not mask:
+            self.warnings.append(f"role {name!r} skipped: no permission mask available")
+            return None
+        self._role_seq += 1
+        role_id = str(_SYNTHETIC_ROLE_BASE + self._role_seq)
+        self._roles[name] = role_id
+        self._builder.add_role(role_id, name, mask)
+        return role_id
 
     def list_paths(self) -> list[str]:
         return []

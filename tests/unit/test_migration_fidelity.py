@@ -10,6 +10,7 @@ from office365.migration.base import (
     MigrationItem,
     MigrationOptions,
     PermissionEntry,
+    Principal,
     item_from_dict,
     item_to_dict,
 )
@@ -39,6 +40,24 @@ def test_migration_item_metadata_round_trips():
     assert restored.modified == "2021-01-01T00:00:00"
     assert restored.author_id == 1
     assert restored.editor_id == 2  # noqa: PLR2004
+
+
+def test_migration_item_principal_round_trips_json_safely():
+    import json
+
+    item = MigrationItem(
+        "src",
+        "dst",
+        author=Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice", "a@contoso.com"),
+        editor=Principal("i:0#.f|membership|b@contoso.com", "2003200065102863"),
+    )
+
+    data = item_to_dict(item)
+    json.dumps(data)  # nested principals must be JSON-safe
+    restored = item_from_dict(data)
+
+    assert restored.author == Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice", "a@contoso.com")
+    assert restored.editor is not None and restored.editor.system_id == "2003200065102863"
 
 
 def test_preserve_versions_always_needs_the_server_side_api():

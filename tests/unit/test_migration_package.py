@@ -208,6 +208,46 @@ def test_builder_emits_shared_with_events():
     assert [m.get("SharedWithId") for m in members] == ["2"]
 
 
+def test_add_role_requires_a_decimal_perm_mask():
+    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
+    with pytest.raises(ValueError, match="decimal"):
+        builder.add_role("1073000001", "Read", "0xb008431061")
+
+    builder.add_role("1073000001", "Read", "756052856929")
+    root = ET.fromstring(builder.build().manifest)
+    roles_object = next(o for o in _children(root, MANIFEST_NS, "SPObject") if o.get("ObjectType") == "DeploymentRoles")
+    role = _children(_children(roles_object, MANIFEST_NS, "Roles")[0], MANIFEST_NS, "Role")[0]
+    assert role.get("Title") == "Read"
+    assert role.get("PermMask") == "756052856929"
+
+
+def test_add_user_requires_a_numeric_puid_system_id():
+    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
+    with pytest.raises(ValueError, match="PUID"):
+        builder.add_user("i:0i.t|00000003-0000-0ff1-ce00-000000000000|app@sharepoint", system_id="app@sharepoint")
+    with pytest.raises(ValueError, match="PUID"):
+        builder.add_user("i:0#.f|membership|jane@contoso.com", system_id="f310f81b-4066-4591-bcf3-e88804b12315")
+
+    uid = builder.add_user("i:0#.f|membership|jane@contoso.com", system_id="1003200065102863")
+    user = _children(ET.fromstring(builder.build().user_group_map), USER_GROUP_MAP_NS, "Users")[0][0]
+    assert uid == 1
+    assert user.get("SystemId") == "1003200065102863"
+
+
+def test_object_id_and_item_url_and_include_security_helpers():
+    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x", list_title="Documents")
+    file_id = builder.add_file("a/b.txt", b"hi")
+    builder.add_folder("c")
+
+    assert builder.object_id("a/b.txt") == file_id
+    assert builder.object_id("a\\b.txt") == file_id  # separators are normalized
+    assert builder.object_id("missing.txt") is None
+    assert builder.item_url("a/b.txt").endswith("Documents/a/b.txt")
+
+    builder.set_include_security("All")
+    assert ET.fromstring(builder.build().export_settings).get("IncludeSecurity") == "All"
+
+
 def test_export_settings_carries_source_type_and_list_object():
     builder = PackageBuilder(
         "https://contoso.sharepoint.com/sites/x",

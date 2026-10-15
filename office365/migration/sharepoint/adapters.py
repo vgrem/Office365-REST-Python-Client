@@ -17,7 +17,7 @@ from datetime import timezone
 from typing import TYPE_CHECKING, Any, cast
 
 from office365.migration.adapters import MigrationProgress
-from office365.migration.base import MigrationItem, PermissionEntry, conflict_to_on_conflict
+from office365.migration.base import MigrationItem, PermissionEntry, Principal, conflict_to_on_conflict, is_puid
 from office365.migration.sharepoint.transfer import Failure
 from office365.runtime.converters.json_file import record_to_json
 from office365.runtime.converters.records import records_from_items
@@ -25,6 +25,7 @@ from office365.runtime.converters.scalars import iso_or_none, parse_datetime, pa
 from office365.runtime.limits import DEFAULT_BATCH_SIZE
 from office365.runtime.operations import emit_progress
 from office365.sharepoint.fields.builtin_field_name import SYSTEM_FIELD_NAMES
+from office365.sharepoint.principal.type import PrincipalType
 
 if TYPE_CHECKING:
     from office365.sharepoint.files.file import File
@@ -102,11 +103,38 @@ def taxonomy_internal_names(fields) -> list[str]:
     return list(dict.fromkeys(names))
 
 
-def _read_role_assignments(securable) -> list[PermissionEntry]:
+def _perm_mask(role_definition: Any) -> str | None:
+    """The decimal ``PermMask`` of a role definition (``BasePermissions`` High/Low)."""
+    base = getattr(role_definition, "base_permissions", None)
+    if base is None:
+        return None
+    try:
+        return str((int(base.High) << 32) | int(base.Low))
+    except (TypeError, ValueError):
+        return None
+
+
+def _is_user_principal(member: Any) -> bool:
+    """Whether a role-assignment member is a user (not a group)."""
+    ptype = getattr(member, "principal_type", None)
+    if ptype is None:
+        return False
+    if ptype == PrincipalType.User:
+        return True
+    # ``PrincipalType`` is a plain ``Enum`` (not ``IntEnum``); accept a raw int too.
+    return getattr(ptype, "value", ptype) == PrincipalType.User.value
+
+
+def _read_role_assignments(
+    securable, resolve: Callable[[Any], "Principal | None"] | None = None
+) -> list[PermissionEntry]:
     """Read a securable object's role assignments into ``PermissionEntry``s.
 
     One entry per principal (user or group), keyed by login name; the target uses
-    the same shape so the permission diff compares like with like.
+    the same shape so the permission diff compares like with like. Role names are
+    paired with their decimal ``PermMask`` (``role_masks``), and — when ``resolve``
+    is supplied — a user principal is enriched with its PUID/display name/email so
+    the server-side package target can emit a faithful ``UserGroup.xml`` entry.
     """
     assignments = securable.role_assignments.expand(["Member", "RoleDefinitionBindings"]).get().execute_query()
     result: list[PermissionEntry] = []
@@ -115,8 +143,23 @@ def _read_role_assignments(securable) -> list[PermissionEntry]:
         name = member.login_name or member.user_principal_name
         if not name:
             continue
-        roles = [r.name for r in assignment.role_definition_bindings if r.name]
-        result.append(PermissionEntry(principal_name=name, roles=roles))
+        roles: list[str] = []
+        role_masks: dict[str, str] = {}
+        for role in assignment.role_definition_bindings:
+            if not role.name:
+                continue
+            roles.append(role.name)
+            mask = _perm_mask(role)
+            if mask is not None:
+                role_masks[role.name] = mask
+        entry = PermissionEntry(principal_name=name, roles=roles, role_masks=role_masks)
+        if resolve is not None and _is_user_principal(member):
+            principal = resolve(getattr(member, "id", None))
+            if principal is not None:
+                entry.system_id = principal.system_id
+                entry.display_name = principal.display_name
+                entry.email = principal.email
+        result.append(entry)
     return result
 
 
@@ -531,9 +574,16 @@ class SharePointLibrarySource:
         self,
         library_folder: "Folder",
         on_bytes: Callable[[int, int | None], None] | None = None,
+        sp_list: "SPList | None" = None,
     ) -> None:
         self._folder = library_folder
+        # The parent list, when known — author/editor ids (``AuthorId``/``EditorId``)
+        # are not exposed on the ``File`` resource and must be read from its items.
+        self._sp_list = sp_list
         self._files: dict[str, "File"] = {}
+        self._users: dict[int, "Principal | None"] = {}
+        self._item_authors: dict[str, tuple[int | None, int | None]] | None = None
+        self.warnings: list[str] = []
         # Optional hook invoked while a file downloads: (bytes_read, file_size)
         self.on_bytes = on_bytes
 
@@ -551,6 +601,7 @@ class SharePointLibrarySource:
         root = root.rstrip("/")
         loaded_folders = self._folder.get_folders(recursive=True).execute_query()
         loaded = self._folder.get_files(recursive=True).execute_query()
+        authors = self._file_authors()
 
         def _rel(url: str) -> str:
             return url[len(root) :].lstrip("/") if root else url.lstrip("/")
@@ -571,20 +622,27 @@ class SharePointLibrarySource:
             if _is_system_path(rel):
                 continue
             self._files[rel] = file
-            result.append(
-                MigrationItem(
-                    source_path=url,
-                    dest_path=rel,
-                    size_bytes=file.length or 0,
-                    item_type="file",
-                    modified=iso_or_none(file.time_last_modified),
-                    created=iso_or_none(file.time_created),
-                    author_id=parse_int(file.author.id),
-                    editor_id=parse_int(file.modified_by.id),
-                    source_id=str(file.unique_id) if file.unique_id else None,
-                    version_label=file.ui_version_label,
-                )
+            author_id = parse_int(file.author.id)
+            editor_id = parse_int(file.modified_by.id)
+            if author_id is None and editor_id is None:
+                author_id, editor_id = authors.get(url, (None, None))
+            item = MigrationItem(
+                source_path=url,
+                dest_path=rel,
+                size_bytes=file.length or 0,
+                item_type="file",
+                modified=iso_or_none(file.time_last_modified),
+                created=iso_or_none(file.time_created),
+                author_id=author_id,
+                editor_id=editor_id,
+                source_id=str(file.unique_id) if file.unique_id else None,
+                version_label=file.ui_version_label,
             )
+            if author_id is not None:
+                item.author = self._principal_for(author_id)
+            if editor_id is not None:
+                item.editor = self._principal_for(editor_id)
+            result.append(item)
             emit_progress(progress, done=len(result), stage="planning", items=[file])
         return result
 
@@ -643,7 +701,7 @@ class SharePointLibrarySource:
         securable = self._securable(item)
         if securable is None:
             return []
-        return _read_role_assignments(securable)
+        return _read_role_assignments(securable, resolve=self._principal_for)
 
     def read_metadata(self, item: MigrationItem) -> dict | None:
         """Comparable attributes of the source item (for the post-run metadata diff)."""
@@ -661,6 +719,60 @@ class SharePointLibrarySource:
             return self._folder.context.web.get_folder_by_server_relative_path(item.source_path).list_item_all_fields
         file = self._files.get(item.dest_path)
         return file.listItemAllFields if file is not None else None
+
+    def _principal_for(self, user_id: Any) -> "Principal | None":
+        """Resolve a site-user id to a :class:`Principal` (login + PUID), cached."""
+        key = parse_int(user_id)
+        if key is None:
+            return None
+        if key in self._users:
+            return self._users[key]
+        principal: "Principal | None" = None
+        try:
+            user = self._folder.context.web.site_users.get_by_id(cast("str", key)).get().execute_query()
+            user_id_info = user.properties.get("UserId")
+            system_id = str(getattr(user_id_info, "NameId", None) or "") or None
+            if system_id is not None and not is_puid(system_id):
+                # e.g. the app principal, whose ``UserId.NameId`` is not a PUID.
+                # Emitting it would fail the whole ingestion job, so drop it.
+                self.warnings.append(
+                    f"user {key} ({user.login_name!r}) has no usable PUID; authorship and ACL are skipped for it"
+                )
+                system_id = None
+            principal = Principal(
+                login_name=user.login_name or "",
+                system_id=system_id,
+                display_name=user.title,
+                email=user.properties.get("Email"),
+            )
+        except Exception as e:  # noqa: BLE001 — a missing user degrades to no authorship
+            self.warnings.append(f"user {key} could not be resolved: {e}")
+        self._users[key] = principal
+        return principal
+
+    def _file_authors(self) -> dict[str, tuple[int | None, int | None]]:
+        """Author/editor ids by server-relative file URL (one list-items read).
+
+        ``File.Author``/``ModifiedBy`` is a non-expandable navigation on the File
+        resource, so the ids come from the parent library's list items.
+        """
+        if self._item_authors is not None:
+            return self._item_authors
+        authors: dict[str, tuple[int | None, int | None]] = {}
+        if self._sp_list is not None:
+            try:
+                items = self._sp_list.items.select(["FileRef", "AuthorId", "EditorId"]).get_all().execute_query()
+                for item in items:
+                    ref = item.properties.get("FileRef")
+                    if ref:
+                        authors[ref] = (
+                            parse_int(item.properties.get("AuthorId")),
+                            parse_int(item.properties.get("EditorId")),
+                        )
+            except Exception as e:  # noqa: BLE001 — authorship is best-effort
+                self.warnings.append(f"author/editor read failed: {e}")
+        self._item_authors = authors
+        return authors
 
     def close(self) -> None:
         pass

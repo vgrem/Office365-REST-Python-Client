@@ -6,7 +6,7 @@ import json
 import xml.etree.ElementTree as ET
 
 import pytest
-from office365.migration.base import MigrationItem
+from office365.migration.base import MigrationItem, MigrationOptions, PermissionEntry, Principal
 from office365.migration.package import FileSystemStaging
 from office365.migration.sharepoint.package_target import SharePointPackageTarget
 
@@ -145,3 +145,127 @@ def test_target_stages_to_disk_without_azure(tmp_path):
     assert len(package.content) == 1
     with pytest.raises(ValueError, match="required to submit"):
         target.commit()
+
+
+def test_write_registers_author_and_editor_in_usergroup(tmp_path):
+    target = _target(tmp_path)
+    item = MigrationItem(
+        "src/b.txt",
+        "b.txt",
+        item_type="file",
+        author=Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice", "a@contoso.com"),
+        editor=Principal("i:0#.f|membership|b@contoso.com", "2003200065102863", "Bob"),
+    )
+
+    target.write(item, b"hi")
+    package = target.build()
+
+    file_object = next(o for o in ET.fromstring(package.manifest) if o.get("ObjectType") == "SPFile")
+    file_element = file_object.find("{urn:deployment-manifest-schema}File")
+    assert file_element is not None
+    assert file_element.get("Author") == "1"
+    assert file_element.get("ModifiedBy") == "2"
+    user_group = package.user_group_map.decode()
+    assert 'SystemId="1003200065102863"' in user_group
+    assert "i:0#.f|membership|a@contoso.com" in user_group
+
+
+def test_write_skips_author_without_a_puid(tmp_path):
+    target = _target(tmp_path)
+    item = MigrationItem(
+        "src/b.txt",
+        "b.txt",
+        item_type="file",
+        author=Principal("i:0i.t|00000003-0000-0ff1-ce00-000000000000|app@sharepoint", "app@sharepoint"),
+        editor=Principal("i:0i.t|00000003-0000-0ff1-ce00-000000000000|app@sharepoint", "app@sharepoint"),
+    )
+
+    target.write(item, b"hi")
+
+    assert sum("principal" in w and "PUID" in w for w in target.warnings) == 1  # deduped
+    assert b"app@sharepoint" not in target.build().user_group_map
+
+
+def test_configure_enables_include_security_for_permissions(tmp_path):
+    target = _target(tmp_path)
+    target.configure(MigrationOptions(preserve_permissions=True))
+    target.write(MigrationItem("src/b.txt", "b.txt", item_type="file"), b"hi")
+
+    assert b'IncludeSecurity="All"' in target.build().export_settings
+
+
+def test_apply_permissions_emits_role_and_assignment(tmp_path):
+    target = _target(tmp_path)
+    target.configure(MigrationOptions(preserve_permissions=True))
+    item = MigrationItem("src/b.txt", "b.txt", item_type="file")
+    target.write(item, b"hi")
+    target.apply_permissions(
+        item,
+        [
+            PermissionEntry(
+                principal_name="i:0#.f|membership|a@contoso.com",
+                roles=["Read"],
+                system_id="1003200065102863",
+                role_masks={"Read": "756052856929"},
+            )
+        ],
+    )
+
+    package = target.build()
+    root = ET.fromstring(package.manifest)
+    object_types = [o.get("ObjectType") for o in root]
+    assert "DeploymentRoles" in object_types
+    assert "DeploymentRoleAssignments" in object_types
+    xml = package.manifest.decode()
+    assert 'Title="Read"' in xml
+    assert 'PermMask="756052856929"' in xml
+    assert 'ObjectType="2"' in xml  # targets the file, not its parent web
+
+
+def test_apply_permissions_skips_principal_without_a_puid(tmp_path):
+    target = _target(tmp_path)
+    item = MigrationItem("src/b.txt", "b.txt", item_type="file")
+    target.write(item, b"hi")
+
+    target.apply_permissions(item, [PermissionEntry(principal_name="Team Owners", roles=["Read"])])
+
+    assert any("PUID" in w for w in target.warnings)
+    assert b"DeploymentRoleAssignments" not in target.build().manifest
+
+
+def test_apply_permissions_skips_a_non_puid_system_id(tmp_path):
+    target = _target(tmp_path)
+    item = MigrationItem("src/b.txt", "b.txt", item_type="file")
+    target.write(item, b"hi")
+
+    target.apply_permissions(
+        item,
+        [
+            PermissionEntry(
+                principal_name="i:0#.f|membership|jane@contoso.com",
+                roles=["Read"],
+                system_id="f310f81b-4066-4591-bcf3-e88804b12315",
+                role_masks={"Read": "756052856929"},
+            )
+        ],
+    )
+
+    assert any("PUID" in w for w in target.warnings)
+    assert b"DeploymentRoleAssignments" not in target.build().manifest
+
+
+def test_package_target_reports_full_fidelity_when_requested(tmp_path):
+    from office365.migration.fidelity import describe_fidelity
+
+    class _Source:
+        def read_permissions(self, item):
+            return []
+
+        def read_version_history(self, item):
+            return []
+
+    options = MigrationOptions(preserve_timestamps=True, preserve_permissions=True, preserve_versions=True)
+    report = describe_fidelity(_Source(), _target(tmp_path), options)
+
+    assert sorted(report.preserved) == ["permissions", "timestamps", "versions"]
+    assert report.unsupported == []
