@@ -97,7 +97,7 @@ class ClientContext(ClientRuntimeContext):
         ctx = ClientContext(root_site_url)
 
         def _init_context(return_type):
-            ctx.pending_request().authentication_context.url = return_type.value
+            ctx.pending_request().set_base_url(return_type.value)
 
         Web.get_web_url_from_page_url(ctx, full_url).after_execute(_init_context)
         return ctx

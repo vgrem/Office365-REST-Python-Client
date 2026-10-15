@@ -380,9 +380,17 @@ class SharePointRequest(ODataRequest):
     @property
     def base_url(self) -> str:
         """Represents Base Url"""
-        return self._auth_context.url
+        return self._base_url
 
     @property
     def service_root_url(self) -> str:
-        """Get the SharePoint REST API service root URL"""
-        return f"{self._auth_context.url}/_api"
+        """Get the SharePoint REST API service root URL
+
+        Routing is derived from this request's own base URL, not from the
+        authentication context. :meth:`reuse` shares the auth context by
+        reference (so clones keep the same token cache and transport), which
+        means ``authentication_context.url`` still points at the *source* site
+        after a cross-site :meth:`ClientContext.clone`. Using it here would
+        route every cloned request back to the source site.
+        """
+        return f"{self._base_url}/_api"

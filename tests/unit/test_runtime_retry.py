@@ -1021,6 +1021,13 @@ class TestThreadSafety(unittest.TestCase):
         self.assertIs(clone_request.transport, source_request.transport)
         self.assertFalse(clone.has_pending_request)
         self.assertTrue(ctx.has_pending_request)
+        # Routing follows the clone URL even though the auth context (whose
+        # ``url`` is the source site) is shared by reference; deriving the
+        # service root from the auth context silently sent clone requests to
+        # the source site.
+        self.assertEqual(clone_request.base_url, "https://contoso-admin.sharepoint.com")
+        self.assertEqual(clone_request.service_root_url, "https://contoso-admin.sharepoint.com/_api")
+        self.assertEqual(source_request.service_root_url, "https://contoso.sharepoint.com/_api")
 
     def test_clone_keeps_pending_queries(self):
         ctx = ClientContext("https://contoso.sharepoint.com")
