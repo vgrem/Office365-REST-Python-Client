@@ -136,11 +136,11 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
     else:
         set_("timestamps", status.UNSUPPORTED, "target.apply_timestamps(item) is not implemented")
 
-    if getattr(target, "supports_authorship", False):
+    if callable(getattr(target, "apply_authorship", None)) or getattr(target, "supports_authorship", False):
         set_(
             "authorship",
             status.BEST_EFFORT,
-            "Author/ModifiedBy are applied for resolved users; principals without a PUID are skipped",
+            "Author/ModifiedBy are applied for resolved users; principals without a known login are skipped",
         )
     else:
         set_("authorship", status.UNSUPPORTED, "needs an authorship-preserving target (server-side Migration API)")
@@ -189,11 +189,13 @@ def describe_fidelity(source: Any, target: Any, options: MigrationOptions) -> Fi
     """Describe which requested fidelity flags the adapter pair can honor, plus the matrix.
 
     Checks the optional hooks — ``DataSource.read_permissions(item)``,
-    ``DataTarget.apply_timestamps(item)``, ``DataTarget.apply_permissions(item,
-    permissions)``. Version history needs both a version-preserving target
-    (``DataTarget.supports_versions``, i.e. the server-side package target) and a
-    source that exposes ``read_version_history``; it is unsupported on the
-    client-side REST path. Authorship needs ``DataTarget.supports_authorship``.
+    ``DataTarget.apply_timestamps(item)``, ``DataTarget.apply_authorship(item)``,
+    ``DataTarget.apply_permissions(item, permissions)``. Version history needs both
+    a version-preserving target (``DataTarget.supports_versions``, i.e. the
+    server-side package target) and a source that exposes ``read_version_history``;
+    it is unsupported on the client-side REST path. Authorship needs
+    ``DataTarget.apply_authorship`` (client-side) or ``supports_authorship`` (the
+    server-side package target).
 
     Args:
         source: The source adapter.
@@ -216,6 +218,12 @@ def describe_fidelity(source: Any, target: Any, options: MigrationOptions) -> Fi
             options.preserve_permissions,
             _supports(source, "read_permissions") and _supports(target, "apply_permissions"),
             "source.read_permissions(item) and target.apply_permissions(item, permissions)",
+        ),
+        (
+            "authorship",
+            options.preserve_authorship,
+            _supports(target, "apply_authorship") or bool(getattr(target, "supports_authorship", False)),
+            "target.apply_authorship(item) or a supports_authorship target (server-side Migration API)",
         ),
         (
             "versions",

@@ -10,11 +10,12 @@ The validator is layered, and honest about what it can and cannot confirm:
    ``docProps/`` / ``customXml/`` / ``[trash]/`` parts SharePoint rewrites on
    upload), so document property promotion is a caveat rather than a false mismatch.
 3. **Fidelity** — when the run requested ``preserve_timestamps`` /
-   ``preserve_permissions``, the same sample is diffed via the optional
-   ``read_metadata(item)`` / ``read_permissions(item)`` adapter hooks. If an
-   adapter does not expose the hook the check is reported as ``unverifiable``,
-   never silently skipped. ``preserve_versions`` cannot be verified over REST and
-   is always reported as ``unverifiable``.
+   ``preserve_authorship`` / ``preserve_permissions``, the same sample is diffed
+   via the optional ``read_metadata(item)`` / ``read_authorship(item)`` /
+   ``read_permissions(item)`` adapter hooks. If an adapter does not expose the
+   hook the check is reported as ``unverifiable``, never silently skipped.
+   ``preserve_versions`` cannot be verified over REST and is always reported as
+   ``unverifiable``.
 
 A requested check that could not be run therefore shows up in
 ``VerificationReport.unverifiable`` and makes ``complete`` false while leaving
@@ -92,6 +93,8 @@ def verify(
     if options is not None:
         if options.preserve_timestamps:
             _verify_metadata(source, target, sample, report)
+        if options.preserve_authorship:
+            _verify_authorship(source, target, sample, report)
         if options.preserve_permissions:
             _verify_permissions(source, target, sample, report)
         if options.preserve_versions:
@@ -185,6 +188,23 @@ def _verify_metadata(source, target, items: list[MigrationItem], report) -> None
         for key in _METADATA_KEYS:
             if key in source_meta and key in target_meta and not _same_time(source_meta[key], target_meta[key]):
                 report.mismatches.append(f"timestamp mismatch ({key}): {item.dest_path}")
+
+
+def _verify_authorship(source, target, items: list[MigrationItem], report) -> None:
+    source_read = getattr(source, "read_authorship", None)
+    target_read = getattr(target, "read_authorship", None)
+    if not (callable(source_read) and callable(target_read)):
+        report.unverifiable.append("authorship: adapters do not implement read_authorship(item)")
+        return
+    for item in items:
+        try:
+            source_authors: Any = source_read(item)
+            target_authors: Any = target_read(item)
+        except Exception as e:  # noqa: BLE001
+            report.unverifiable.append(f"authorship: {item.dest_path} ({e})")
+            continue
+        if source_authors != target_authors:
+            report.mismatches.append(f"authorship mismatch: {item.dest_path}")
 
 
 def _verify_permissions(source, target, items: list[MigrationItem], report) -> None:

@@ -6,10 +6,12 @@ per-item status in the checkpoint (persisted after each batch), and collects
 :class:`MigrationStats`. Interruptions (pause/cancel) stop cleanly at the next
 batch boundary and can be resumed from the checkpoint.
 
-With ``MigrationOptions.concurrency > 1`` and a target that supports a bulk
-``write_many`` hook (e.g. the SharePoint library target), items are uploaded in
-parallel chunks — file bytes can't ride an OData batch, so throughput comes from
-concurrency, paced by a shared rate limiter.
+When a target batches its writes — ``concurrency > 1``, or a target whose single
+``write`` is deferred until a flush (``deferred_writes``, e.g. the record target)
+— items are written in chunks via the ``write_many`` hook (e.g. the SharePoint
+library target): file bytes can't ride an OData batch, so throughput comes from
+concurrency, paced by a shared rate limiter. Each chunk is flushed before its
+items are recorded ``DONE``, so a checkpoint never runs ahead of the target.
 """
 
 from __future__ import annotations
@@ -37,10 +39,10 @@ def _assert_fidelity_supported(options: MigrationOptions, source, target: DataTa
     """Reject fidelity flags the adapter pair cannot honor.
 
     ``preserve_versions`` always needs the server-side Migration API (REST can't
-    restore version history). ``preserve_timestamps`` / ``preserve_permissions``
-    are applied client-side on a best-effort basis, but only when the adapters
-    expose the matching optional hooks — failing fast beats silently migrating
-    without the requested fidelity.
+    restore version history). ``preserve_timestamps`` / ``preserve_authorship`` /
+    ``preserve_permissions`` are applied client-side on a best-effort basis, but
+    only when the adapters expose the matching optional hooks — failing fast beats
+    silently migrating without the requested fidelity.
     """
     if options.preserve_versions and not (
         getattr(target, "supports_versions", False) and callable(getattr(source, "read_version_history", None))
@@ -55,6 +57,13 @@ def _assert_fidelity_supported(options: MigrationOptions, source, target: DataTa
         raise NotImplementedError(
             "preserve_timestamps is not supported by this target: it does not implement apply_timestamps(item)."
         )
+    if options.preserve_authorship and not (
+        callable(getattr(target, "apply_authorship", None)) or getattr(target, "supports_authorship", False)
+    ):
+        raise NotImplementedError(
+            "preserve_authorship is not supported by this target: it does not implement apply_authorship(item) "
+            "nor advertise supports_authorship."
+        )
     if options.preserve_permissions and not (
         callable(getattr(source, "read_permissions", None)) and callable(getattr(target, "apply_permissions", None))
     ):
@@ -65,13 +74,15 @@ def _assert_fidelity_supported(options: MigrationOptions, source, target: DataTa
 
 
 def _apply_fidelity(source, target: DataTarget, item: MigrationItem, options: MigrationOptions) -> None:
-    """Best-effort fidelity after a successful write (timestamps / ACLs).
+    """Best-effort fidelity after a successful write (timestamps / authorship / ACLs).
 
     Failures propagate (and are captured per-item by the caller) so a requested
     fidelity that couldn't be applied is visible and the item stays resumable.
     """
     if options.preserve_timestamps:
         _call_optional(target, "apply_timestamps", item)
+    if options.preserve_authorship:
+        _call_optional(target, "apply_authorship", item)
     if options.preserve_permissions:
         permissions = source.read_permissions(item)
         if permissions:
@@ -123,12 +134,17 @@ class MigrationRunner:
         # start (e.g. a record target maps ``conflict_resolution`` -> ``on_conflict``).
         _call_optional(target, "configure", options)
         watermark = _Watermark(checkpoint) if options.incremental else None
-        parallel = (
-            options.concurrency > 1
-            and hasattr(target, "write_many")
+        # Chunked writes are the norm whenever the target batches: parallel chunks
+        # (``concurrency > 1``), or a target whose single ``write`` is deferred
+        # until a flush (``deferred_writes`` — the record target queues creates).
+        # Chunking keeps memory bounded and records ``DONE`` only after the chunk
+        # is durable, so a crash cannot leave the checkpoint ahead of the target.
+        chunked = (
+            hasattr(target, "write_many")
             and options.conflict_resolution != ConflictResolution.RENAME
+            and (options.concurrency > 1 or getattr(target, "deferred_writes", False))
         )
-        if parallel:
+        if chunked:
             stats = self._run_parallel(
                 source, target, items, options, checkpoint, checkpoint_path, progress, stop_event, watermark
             )

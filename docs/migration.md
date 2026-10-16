@@ -139,9 +139,13 @@ Two honest limits remain:
   normalization and `OData__`-prefixed system keys make a value fingerprint
   false-mismatch-prone. Item *presence* is still verified via the identity marker,
   and attachments are content-checked (md5).
-- Per-item **timestamps/permissions** (`preserve_timestamps`/`preserve_permissions`)
-  are not applied by the list adapters yet; requesting them fails fast rather than
-  silently dropping the fidelity.
+- Per-item **timestamps/permissions/authorship**
+  (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
+  by the list adapters on a best-effort basis: timestamps and authorship are
+  written with `ValidateUpdateListItem`; only items with a **unique** source ACL
+  are copied. Unresolved principals and unhonorable facets surface as
+  `mismatches`/`unverifiable` in the post-run verification, never as a silent
+  drop.
 
 ## SPMT-style sessions
 
@@ -316,6 +320,7 @@ Field-link **order** is restored only when at least one link was actually added.
 | Flag | Client-side runner | Server-side package |
 |---|---|---|
 | `preserve_timestamps` | best-effort (`Created`/`Modified`) | ✓ carried per manifest object (`TimeCreated`/`TimeLastModified`) |
+| `preserve_authorship` | best-effort (`Author`/`Editor` via `EnsureUser`) | best-effort — resolved PUID users only |
 | `preserve_permissions` | best-effort (same-tenant ACL copy) | best-effort — resolves users by PUID; groups / unresolved principals skipped |
 | `preserve_versions` | ✗ (raises) | ✓ the runner reads history into the package's `<Versions>` |
 
@@ -335,21 +340,30 @@ rather than silently migrating without the requested fidelity:
 MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve_permissions=True))
 ```
 
-- **Timestamps** — the SharePoint library target restores `Created`/`Modified`
-  via `ValidateUpdateListItem` (the same path as `ListItem.system_update`).
+- **Timestamps** — the client-side targets restore `Created`/`Modified`
+  via `ValidateUpdateListItem` (`datesInUTC=True`; the same path as
+  `ListItem.system_update`).
+- **Authorship** — the client-side targets restore `Author`/`Editor` by resolving
+  each source principal through `web.ensure_user` and writing a `FieldUserValue`.
+  Principals `EnsureUser` cannot resolve are skipped (the verification reports the
+  resulting mismatch); the server-side package emits `UserGroup.xml` ids instead.
 - **Permissions** — the source reads the item's `role_assignments`; the target
   breaks inheritance and recreates them, resolving principals by login name and
-  roles by name. On the server-side package target, `preserve_permissions=True`
-  emits `DeploymentRoles`/`DeploymentRoleAssignments` for **resolved users**
-  (matched by PUID; groups/unresolved principals are skipped with a warning).
-  Both are **same-tenant**; cross-tenant identity mapping is not implemented.
+  roles by name. Only items with an **unique** ACL are copied — the REST surface
+  reports inherited role assignments too, and copying those would break
+  inheritance on every item and duplicate the parent ACL. On the server-side
+  package target, `preserve_permissions=True` emits
+  `DeploymentRoles`/`DeploymentRoleAssignments` for **resolved users** (matched by
+  PUID; groups/unresolved principals are skipped with a warning). Both are
+  **same-tenant**; cross-tenant identity mapping is not implemented.
 
 Adapters opt in by implementing optional hooks: `DataSource.read_permissions(item)`,
-`DataTarget.apply_timestamps(item)`, and
+`DataTarget.apply_timestamps(item)`, `DataTarget.apply_authorship(item)`, and
 `DataTarget.apply_permissions(item, permissions)`. To *verify* that the requested
 fidelity actually landed, the read counterparts are used too:
-`read_metadata(item)` (comparable `created`/`modified`/`size_bytes`) on both sides,
-and `read_permissions(item)` on the target.
+`read_metadata(item)` (comparable `created`/`modified`/`size_bytes`) and
+`read_authorship(item)` on both sides, and `read_permissions(item)` on the target.
+Both the document-library and record-list REST adapters implement all of them.
 
 To see what a pair will actually honor **before** a run, ask for a report —
 `MigrationJob.fidelity()`, or `MigrationSession.fidelity()` for every task:
@@ -379,9 +393,9 @@ the shipped pairs' expected output.
 |---|---|---|---|
 | Content | delivered | delivered | delivered |
 | Versions | best-effort (history content; per-version author/time not carried) | unsupported | unsupported |
-| Created/Modified | delivered | delivered | unsupported |
-| Author/Editor | best-effort (resolved PUID users only) | unsupported | unsupported |
-| Permissions | best-effort (same-tenant, resolved users) | best-effort (same-tenant) | unsupported |
+| Created/Modified | delivered | delivered | delivered |
+| Author/Editor | best-effort (resolved PUID users only) | best-effort (resolved users only) | best-effort (resolved users only) |
+| Permissions | best-effort (same-tenant, resolved users) | best-effort (same-tenant) | best-effort (same-tenant, unique ACLs only) |
 | Attachments | n/a | n/a | delivered (list items) |
 | Columns / content types / views | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim; remap not implemented) | same | same |
@@ -539,6 +553,7 @@ explicit about what it could not confirm:
 | Presence (expected vs found paths) | always | `missing` / `extra` |
 | Content checksums | always, on a `spot_checks` sample | `mismatches` (or `unverifiable` if a side exposes no comparable hash) |
 | Timestamps (`Created`/`Modified`) | when `preserve_timestamps` was requested | `mismatches` / `unverifiable` |
+| Authorship (`Author`/`Editor`) | when `preserve_authorship` was requested | `mismatches` / `unverifiable` |
 | Permissions | when `preserve_permissions` was requested | `mismatches` / `unverifiable` |
 | Versions | when `preserve_versions` was requested | always `unverifiable` over REST |
 

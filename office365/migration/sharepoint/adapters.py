@@ -25,6 +25,7 @@ from office365.runtime.converters.scalars import iso_or_none, parse_datetime, pa
 from office365.runtime.limits import DEFAULT_BATCH_SIZE
 from office365.runtime.operations import emit_progress
 from office365.sharepoint.fields.builtin_field_name import SYSTEM_FIELD_NAMES
+from office365.sharepoint.fields.user_value import FieldUserValue
 from office365.sharepoint.principal.type import PrincipalType
 
 if TYPE_CHECKING:
@@ -152,6 +153,95 @@ def _is_user_principal(member: Any) -> bool:
     return getattr(ptype, "value", ptype) == PrincipalType.User.value
 
 
+def _has_unique_role_assignments(securable) -> bool:
+    """Whether a securable has unique (broken-inheritance) role assignments.
+
+    SharePoint REST returns *inherited* role assignments too, so reading them
+    verbatim would break inheritance on every item and replicate the parent ACL.
+    Only items with unique assignments are read/applied (and compared by the
+    verifier); inherited items stay inherited on the target.
+    """
+    unique = getattr(securable, "has_unique_role_assignments", None)
+    if unique is None:
+        try:
+            securable.ensure_property("HasUniqueRoleAssignments").execute_query()
+        except Exception:  # noqa: BLE001 — an unreadable flag is treated as "not unique"
+            return False
+        unique = getattr(securable, "has_unique_role_assignments", None)
+    return bool(unique)
+
+
+def _user_login(web, user_id: Any, cache: dict[int, str | None]) -> str | None:
+    """Resolve a target user id to its login name, cached."""
+    key = parse_int(user_id)
+    if key is None:
+        return None
+    if key in cache:
+        return cache[key]
+    login: str | None = None
+    try:
+        user = web.site_users.get_by_id(key).get().execute_query()
+        login = user.login_name or None
+    except Exception:  # noqa: BLE001 — an unresolvable id yields no login
+        login = None
+    cache[key] = login
+    return login
+
+
+class _TargetPrincipals:
+    """Resolve source principals and role definitions on a target web (cached).
+
+    Users are ensured on the site (``EnsureUser``) so their numeric id can be used
+    for authorship and role assignments; groups are matched by name. Anything that
+    cannot be resolved is skipped with a warning (same-tenant, best-effort).
+    """
+
+    def __init__(self, web, warnings: list[str]) -> None:
+        self._web = web
+        self._warnings = warnings
+        self._users: dict[str, Any] = {}
+        self._roles: "dict[str, RoleDefinition] | None" = None
+
+    @staticmethod
+    def _strip_claims(name: str) -> str:
+        return name.rsplit("|", 1)[-1] if name.startswith("i:0#") else name
+
+    def user(self, login: str | None):
+        """Ensure a user login on the target site and return its ``User`` object."""
+        if not login:
+            return None
+        login = self._strip_claims(login)
+        if login in self._users:
+            return self._users[login]
+        obj = None
+        try:
+            obj = self._web.ensure_user(login).execute_query()
+        except Exception as e:  # noqa: BLE001 — an unresolvable principal is skipped
+            self._warnings.append(f"could not ensure target user {login!r}: {e}")
+        self._users[login] = obj
+        return obj
+
+    def principal(self, name: str):
+        """Resolve a source principal (user or group) to a target principal object."""
+        if not name:
+            return None
+        login = self._strip_claims(name)
+        if "@" in login:
+            return self.user(login)
+        try:
+            return self._web.site_groups.get_by_name(login).get().execute_query()
+        except Exception as e:  # noqa: BLE001 — a missing group is skipped
+            self._warnings.append(f"could not resolve principal {name!r} on the target: {e}")
+            return None
+
+    def role(self, name: str) -> "RoleDefinition | None":
+        """Resolve (and cache) a target role definition by name."""
+        if self._roles is None:
+            loaded = self._web.role_definitions.get().execute_query()
+            self._roles = {rd.name: rd for rd in loaded if rd.name}
+        return self._roles.get(name)
+
+
 def _read_role_assignments(
     securable, resolve: Callable[[Any], "Principal | None"] | None = None
 ) -> list[PermissionEntry]:
@@ -202,6 +292,7 @@ class SharePointListSource:
         self._records: dict[str, dict] = {}
         self._items: dict[str, Any] = {}
         self._attachments: dict[str, Any] = {}
+        self._users: dict[int, Principal | None] = {}
         self.warnings: list[str] = []
 
     def label(self) -> str:
@@ -270,17 +361,24 @@ class SharePointListSource:
             item_id = str(item.id)
             self._records[item_id] = record
             self._items[item_id] = item
-            result.append(
-                MigrationItem(
-                    source_path=f"{self._list.title}/{item_id}",
-                    dest_path=item_id,
-                    item_type="record",
-                    modified=iso_or_none(record.get("Modified")),
-                    created=iso_or_none(record.get("Created")),
-                    author_id=parse_int(record.get("AuthorId")),
-                    editor_id=parse_int(record.get("EditorId")),
-                )
+            author_id = parse_int(record.get("AuthorId"))
+            editor_id = parse_int(record.get("EditorId"))
+            planned = MigrationItem(
+                source_path=f"{self._list.title}/{item_id}",
+                dest_path=item_id,
+                item_type="record",
+                modified=iso_or_none(record.get("Modified")),
+                created=iso_or_none(record.get("Created")),
+                author_id=author_id,
+                editor_id=editor_id,
             )
+            # Resolve the source author/editor once so an authorship-preserving
+            # target can restore them by login name (ids are tenant-local).
+            if author_id is not None:
+                planned.author = self._principal_for(author_id)
+            if editor_id is not None:
+                planned.editor = self._principal_for(editor_id)
+            result.append(planned)
             for attachment in item.properties.get("AttachmentFiles") or []:
                 pending_attachments.append((item_id, attachment))
             emit_progress(progress, done=len(result), stage="planning", items=[item])
@@ -346,6 +444,60 @@ class SharePointListSource:
         payload = record_to_json(self._records.get(item.dest_path, {}))
         return hashlib.md5(payload.encode("utf-8")).hexdigest()
 
+    def read_metadata(self, item: MigrationItem) -> dict | None:
+        """Comparable attributes of the source item (for the post-run metadata diff)."""
+        source_item = self._items.get(item.dest_path)
+        if source_item is None:
+            return None
+        properties = source_item.properties
+        return {
+            "created": iso_or_none(properties.get("Created")),
+            "modified": iso_or_none(properties.get("Modified")),
+        }
+
+    def read_authorship(self, item: MigrationItem) -> tuple[str | None, str | None]:
+        """The source author/editor login names (for the authorship diff)."""
+        return (
+            item.author.login_name if item.author else None,
+            item.editor.login_name if item.editor else None,
+        )
+
+    def read_permissions(self, item: MigrationItem) -> list[PermissionEntry]:
+        """Read the item's *unique* role assignments (best-effort ACL preservation).
+
+        Inherited items return ``[]`` — REST would otherwise report the parent's
+        ACL, and copying it would break inheritance on every item.
+        """
+        source_item = self._items.get(item.dest_path)
+        if source_item is None or not _has_unique_role_assignments(source_item):
+            return []
+        return _read_role_assignments(source_item, resolve=self._principal_for)
+
+    def _principal_for(self, user_id: Any) -> "Principal | None":
+        """Resolve a site-user id to a :class:`Principal` (login + PUID), cached."""
+        key = parse_int(user_id)
+        if key is None:
+            return None
+        if key in self._users:
+            return self._users[key]
+        principal: "Principal | None" = None
+        try:
+            user = self._list.context.web.site_users.get_by_id(cast("str", key)).get().execute_query()
+            user_id_info = user.properties.get("UserId")
+            system_id = str(getattr(user_id_info, "NameId", None) or "") or None
+            if system_id is not None and not is_puid(system_id):
+                system_id = None
+            principal = Principal(
+                login_name=user.login_name or "",
+                system_id=system_id,
+                display_name=user.title,
+                email=user.properties.get("Email"),
+            )
+        except Exception as e:  # noqa: BLE001 — a missing user degrades to no authorship
+            self.warnings.append(f"user {key} could not be resolved: {e}")
+        self._users[key] = principal
+        return principal
+
     def close(self) -> None:
         pass
 
@@ -377,6 +529,12 @@ class SharePointListTarget:
     # Marks this target as accepting list-item attachments as extra items (see DataTarget).
     supports_attachments = True
 
+    #: The single-item :meth:`write` only queues a create; a chunk must be flushed
+    #: before it is durable. The runner therefore routes this target through the
+    #: chunked path even at ``concurrency == 1``, so checkpoints never record
+    #: ``DONE`` ahead of the actual write.
+    deferred_writes = True
+
     def __init__(
         self,
         target_list: "SPList",
@@ -396,9 +554,13 @@ class SharePointListTarget:
         self._identity_field = identity_field
         self._identity_ensured = False
         self._identity_index: dict | None = None
+        self._identity_index_stale = False
+        self._identity_index_max_id = 0
         self._attachment_path_cache: set[str] | None = None
         self._content_type_map = content_type_map
+        self._login_cache: dict[int, str | None] = {}
         self.warnings: list[str] = []
+        self._principals_cache: _TargetPrincipals | None = None
 
     @property
     def on_conflict(self) -> str:
@@ -537,24 +699,49 @@ class SharePointListTarget:
             self._flush(DEFAULT_BATCH_SIZE, 1)
 
     def _find_by_identity(self, source_id: str):
-        if self._identity_index is None:
-            self._identity_index = self._load_identity_index()
-        return self._identity_index.get(str(source_id))
+        if self._identity_index is None or self._identity_index_stale:
+            self._refresh_identity_index()
+        return self._identity_index.get(str(source_id)) if self._identity_index else None
 
-    def _load_identity_index(self) -> dict:
-        """Map stored source-id -> target item (built once, after records are flushed)."""
+    def _refresh_identity_index(self) -> None:
+        """Load, or incrementally extend, the source-id -> target item map.
+
+        After a chunk is flushed only the newly created items are re-read
+        (``Id gt <max>``) instead of re-scanning the whole list, so refreshing the
+        index per chunk stays linear rather than O(n²).
+        """
         if not self._identity_field:
-            return {}
+            self._identity_index = {}
+            return
+        if self._identity_index is not None and self._identity_index_max_id > 0:
+            self._index_identity_items(self._query_identity_items(f"Id gt {self._identity_index_max_id}"))
+            return
+        self._identity_index = {}
+        self._identity_index_max_id = 0
+        self._index_identity_items(self._query_identity_items())
+
+    def _query_identity_items(self, filter_expr: str | None = None):
         # A read query would implicitly flush any queued writes on this context;
         # flush them explicitly first so the cached index stays consistent.
         self._flush_pending()
-        items = self._list.items.select(["Id", self._identity_field]).get_all().execute_query()
-        index: dict = {}
+        columns = ["Id", self._identity_field, "Created", "Modified", "AuthorId", "EditorId"]
+        query = self._list.items.select(columns)
+        if filter_expr:
+            query = query.filter(filter_expr)
+        return query.get_all().execute_query()
+
+    def _index_identity_items(self, items) -> None:
+        if self._identity_index is None:
+            self._identity_index = {}
         for target_item in items:
             value = target_item.properties.get(self._identity_field)
-            if value is not None:
-                index[str(value)] = target_item
-        return index
+            if value is None:
+                continue
+            self._identity_index[str(value)] = target_item
+            item_id = parse_int(getattr(target_item, "id", None))
+            if item_id is not None and item_id > self._identity_index_max_id:
+                self._identity_index_max_id = item_id
+        self._identity_index_stale = False
 
     def _attachment_paths(self) -> list[str]:
         if not self._identity_field:
@@ -584,9 +771,10 @@ class SharePointListTarget:
     def list_paths(self) -> list[str]:
         if not self._identity_field:
             return [str(i.id) for i in self._list.items.get().execute_query()]
-        if self._identity_index is None:
-            self._identity_index = self._load_identity_index()
-        return list(self._identity_index.keys()) + self._attachment_paths()
+        if self._identity_index is None or self._identity_index_stale:
+            self._refresh_identity_index()
+        index = self._identity_index or {}
+        return list(index.keys()) + self._attachment_paths()
 
     def checksum(self, item: MigrationItem) -> str:
         if item.item_type == "attachment":
@@ -615,8 +803,122 @@ class SharePointListTarget:
             return
         self._list.context.execute_batch(items_per_batch=batch_size, concurrency=concurrency)
         self._list.items.clear()
-        # Records were just created/updated, so any cached source-id index is stale.
-        self._identity_index = None
+        # Records were just created/updated, so the cached source-id index needs an
+        # incremental refresh (new items only) before the next lookup.
+        if self._identity_index is not None:
+            self._identity_index_stale = True
+
+    def _principals(self) -> _TargetPrincipals:
+        """The (lazily built) target principal/role resolver."""
+        if self._principals_cache is None:
+            self._principals_cache = _TargetPrincipals(self._list.context.web, self.warnings)
+        return self._principals_cache
+
+    def _target_item(self, item: MigrationItem):
+        """The written target item for a record (``None`` for attachments/folders)."""
+        if item.item_type == "attachment":
+            return None
+        return self._find_by_identity(item.dest_path)
+
+    def apply_timestamps(self, item: MigrationItem) -> None:
+        """Best-effort: restore ``Created``/``Modified`` on the written item.
+
+        Uses ``ValidateUpdateListItem`` (the only REST path that can set these
+        system fields); ``datesInUTC=True`` requires the ``...Z`` UTC form.
+        """
+        target_item = self._target_item(item)
+        if target_item is None:
+            return
+        form_values: dict[str, str] = {}
+        created = _sp_timestamp(item.created)
+        modified = _sp_timestamp(item.modified)
+        if created:
+            form_values["Created"] = created
+        if modified:
+            form_values["Modified"] = modified
+        if form_values:
+            target_item.validate_update_list_item(form_values, dates_in_utc=True).execute_query()
+
+    def apply_authorship(self, item: MigrationItem) -> None:
+        """Best-effort: restore ``Author``/``Editor`` from the source principals.
+
+        A principal is applied only when its login name resolves to a target user
+        (``EnsureUser``); unresolved principals are skipped (same-tenant only).
+        """
+        target_item = self._target_item(item)
+        if target_item is None:
+            return
+        author = self._principals().user(item.author.login_name if item.author else None)
+        editor = self._principals().user(item.editor.login_name if item.editor else None)
+        if author is None and editor is None:
+            return
+        form_values: dict[str, FieldUserValue] = {}
+        if author is not None:
+            form_values["Author"] = FieldUserValue(author.id, author.login_name)
+        if editor is not None:
+            form_values["Editor"] = FieldUserValue(editor.id, editor.login_name)
+        target_item.validate_update_list_item(form_values, dates_in_utc=True).execute_query()
+
+    def apply_permissions(self, item: MigrationItem, permissions: list[PermissionEntry]) -> None:
+        """Best-effort: break inheritance and recreate the source's unique ACLs.
+
+        Principals are resolved on the target by login name (users via
+        ``EnsureUser``, groups by name); unresolved principals and roles are
+        skipped. Same-tenant only — cross-tenant identity mapping is out of scope.
+        """
+        target_item = self._target_item(item)
+        if target_item is None:
+            return
+        target_item.break_role_inheritance(copy_role_assignments=False, clear_sub_scopes=False)
+        for entry in permissions:
+            principal = self._principals().principal(entry.principal_name)
+            if principal is None:
+                continue
+            for role_name in entry.roles:
+                role = self._principals().role(role_name)
+                if role is not None:
+                    target_item.add_role_assignment(principal, role)
+        self._list.context.execute_query()
+
+    def _fresh_target_item(self, item: MigrationItem):
+        """The written target item with freshly-read properties (verification hooks).
+
+        The cached identity-index object predates the fidelity writes
+        (``apply_timestamps``/``apply_authorship``), so re-read it before diffing.
+        """
+        target_item = self._target_item(item)
+        if target_item is not None:
+            target_item.get().execute_query()
+        return target_item
+
+    def read_metadata(self, item: MigrationItem) -> dict | None:
+        """Comparable attributes of the written item (for the metadata diff)."""
+        target_item = self._fresh_target_item(item)
+        if target_item is None:
+            return None
+        properties = target_item.properties
+        return {
+            "created": iso_or_none(properties.get("Created")),
+            "modified": iso_or_none(properties.get("Modified")),
+        }
+
+    def read_authorship(self, item: MigrationItem) -> tuple[str | None, str | None]:
+        """The written item's author/editor login names (for the authorship diff)."""
+        target_item = self._fresh_target_item(item)
+        if target_item is None:
+            return (None, None)
+        properties = target_item.properties
+        return (
+            _user_login(self._list.context.web, properties.get("AuthorId"), self._login_cache),
+            _user_login(self._list.context.web, properties.get("EditorId"), self._login_cache),
+        )
+
+    def read_permissions(self, item: MigrationItem) -> list[PermissionEntry]:
+        """Read the written item's *unique* role assignments (for the permission diff)."""
+        target_item = self._fresh_target_item(item)
+        if target_item is None or not _has_unique_role_assignments(target_item):
+            return []
+        return _read_role_assignments(target_item)
 
     def close(self) -> None:
         pass
@@ -759,7 +1061,7 @@ class SharePointLibrarySource:
         by login name; empty for items with no unique assignments.
         """
         securable = self._securable(item)
-        if securable is None:
+        if securable is None or not _has_unique_role_assignments(securable):
             return []
         return _read_role_assignments(securable, resolve=self._principal_for)
 
@@ -773,6 +1075,13 @@ class SharePointLibrarySource:
             "modified": iso_or_none(file.time_last_modified),
             "size_bytes": file.length or 0,
         }
+
+    def read_authorship(self, item: MigrationItem) -> tuple[str | None, str | None]:
+        """The source author/editor login names (for the authorship diff)."""
+        return (
+            item.author.login_name if item.author else None,
+            item.editor.login_name if item.editor else None,
+        )
 
     def _securable(self, item: MigrationItem):
         if item.item_type == "folder":
@@ -848,8 +1157,15 @@ class SharePointLibraryTarget:
     def __init__(self, library_folder: "Folder", concurrency: int = 1) -> None:
         self._folder = library_folder
         self._concurrency = concurrency
-        self._role_definitions: dict[str, RoleDefinition] | None = None
         self.warnings: list[str] = []
+        self._login_cache: dict[int, str | None] = {}
+        self._principals_cache: _TargetPrincipals | None = None
+
+    def _principals(self) -> _TargetPrincipals:
+        """The (lazily built) target principal/role resolver."""
+        if self._principals_cache is None:
+            self._principals_cache = _TargetPrincipals(self._folder.context.web, self.warnings)
+        return self._principals_cache
 
     def label(self) -> str:
         return f"library:{self._folder.server_relative_url}"
@@ -983,22 +1299,49 @@ class SharePointLibraryTarget:
             new_document_update=item.item_type != "folder",
         ).execute_query()
 
+    def apply_authorship(self, item: MigrationItem) -> None:
+        """Best-effort: restore ``Author``/``Editor`` from the source principals.
+
+        A principal is applied only when its login name resolves to a target user
+        (``EnsureUser``); unresolved principals are skipped (same-tenant only).
+        """
+        securable = self._securable(item)
+        if securable is None:
+            return
+        author = self._principals().user(item.author.login_name if item.author else None)
+        editor = self._principals().user(item.editor.login_name if item.editor else None)
+        if author is None and editor is None:
+            return
+        form_values: dict[str, FieldUserValue] = {}
+        if author is not None:
+            form_values["Author"] = FieldUserValue(author.id, author.login_name)
+        if editor is not None:
+            form_values["Editor"] = FieldUserValue(editor.id, editor.login_name)
+        securable.validate_update_list_item(
+            form_values,
+            dates_in_utc=True,
+            new_document_update=item.item_type != "folder",
+        ).execute_query()
+
     def apply_permissions(self, item: MigrationItem, permissions: list[PermissionEntry]) -> None:
         """Best-effort: break inheritance and recreate the source role assignments.
 
-        Principals are resolved by login name on the target; roles that don't exist
-        there are skipped. This is a same-tenant copy — cross-tenant identity
-        mapping is out of scope.
+        Principals are resolved on the target by login name (users via
+        ``EnsureUser``, groups by name); unresolved principals and roles are
+        skipped. Same-tenant only — cross-tenant identity mapping is out of scope.
         """
         securable = self._securable(item)
         if securable is None:
             return
         securable.break_role_inheritance(copy_role_assignments=False, clear_sub_scopes=False)
         for entry in permissions:
+            principal = self._principals().principal(entry.principal_name)
+            if principal is None:
+                continue
             for role_name in entry.roles:
-                role = self._role_definition(role_name)
+                role = self._principals().role(role_name)
                 if role is not None:
-                    securable.add_role_assignment(entry.principal_name, role)
+                    securable.add_role_assignment(principal, role)
         securable.context.execute_query()
 
     def read_metadata(self, item: MigrationItem) -> dict | None:
@@ -1013,24 +1356,28 @@ class SharePointLibraryTarget:
         }
 
     def read_permissions(self, item: MigrationItem) -> list[PermissionEntry]:
-        """Read the written item's role assignments (for the permission diff)."""
+        """Read the written item's *unique* role assignments (for the permission diff)."""
         securable = self._securable(item)
-        if securable is None:
+        if securable is None or not _has_unique_role_assignments(securable):
             return []
         return _read_role_assignments(securable)
+
+    def read_authorship(self, item: MigrationItem) -> tuple[str | None, str | None]:
+        """The written item's author/editor login names (for the authorship diff)."""
+        securable = self._securable(item)
+        if securable is None:
+            return (None, None)
+        properties = securable.properties
+        return (
+            _user_login(self._folder.context.web, properties.get("AuthorId"), self._login_cache),
+            _user_login(self._folder.context.web, properties.get("EditorId"), self._login_cache),
+        )
 
     def _securable(self, item: MigrationItem):
         url = self._url(item).rstrip("/")
         if item.item_type == "folder":
             return self._folder.context.web.get_folder_by_server_relative_path(url).list_item_all_fields
         return self._folder.context.web.get_file_by_server_relative_url(url).listItemAllFields
-
-    def _role_definition(self, name: str) -> "RoleDefinition | None":
-        """Resolve (and cache) a target role definition by name."""
-        if self._role_definitions is None:
-            loaded = self._folder.context.web.role_definitions.get().execute_query()
-            self._role_definitions = {rd.name: rd for rd in loaded if rd.name}
-        return self._role_definitions.get(name)
 
     def commit(self, options=None) -> None:
         pass

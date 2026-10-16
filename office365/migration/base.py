@@ -159,15 +159,17 @@ class MigrationStats(OperationStats):
 class MigrationOptions:
     conflict_resolution: ConflictResolution = ConflictResolution.SKIP
     incremental: bool = False  # skip items at/below the persisted watermark (and target-newer ones)
-    # Fidelity flags. ``preserve_timestamps`` and ``preserve_permissions`` are
-    # applied client-side on a best-effort basis when the adapters support it
-    # (see ``DataSource.read_permissions`` / ``DataTarget.apply_timestamps`` /
+    # Fidelity flags. ``preserve_timestamps``, ``preserve_authorship`` and
+    # ``preserve_permissions`` are applied client-side on a best-effort basis when
+    # the adapters support it (see ``DataSource.read_permissions`` /
+    # ``DataTarget.apply_timestamps`` / ``DataTarget.apply_authorship`` /
     # ``DataTarget.apply_permissions``); REST cannot restore version history, so
     # ``preserve_versions`` requires the server-side Migration API
     # (``MigrationServerJob``). Defaults are False so they are honest no-ops
     # rather than silently doing nothing.
     preserve_timestamps: bool = False
     preserve_permissions: bool = False
+    preserve_authorship: bool = False
     preserve_versions: bool = False
     include_patterns: list[str] = field(default_factory=list)
     exclude_patterns: list[str] = field(default_factory=list)

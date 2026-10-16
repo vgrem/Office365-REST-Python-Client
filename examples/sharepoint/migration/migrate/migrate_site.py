@@ -21,6 +21,13 @@ subsites it would leave behind.
 Only the list *containers* are created on the target — fields, content types and
 views are recreated from the source before content is copied
 (``--no-provision-structure`` to only create the containers).
+
+By default items get fresh target timestamps, authorship and inherited
+descriptions. ``--preserve`` (or the individual ``--preserve-timestamps`` /
+``--preserve-authorship`` / ``--preserve-permissions``) restores them from the
+source on a best-effort basis; ``--preserve-permissions`` only copies items whose
+source ACL is unique (inherited ACLs are left inheriting). A post-run
+verification flags anything a requested facet could not restore.
 """
 
 from __future__ import annotations
@@ -58,12 +65,35 @@ def main():
         action="store_true",
         help="also mirror the source's subsites and migrate their lists",
     )
+    parser.add_argument(
+        "--preserve",
+        action="store_true",
+        help="best-effort restore of item timestamps, authorship and unique permissions",
+    )
+    parser.add_argument(
+        "--preserve-timestamps",
+        action="store_true",
+        help="restore each item's Created/Modified (client-side, best-effort)",
+    )
+    parser.add_argument(
+        "--preserve-authorship",
+        action="store_true",
+        help="restore each item's Author/Editor (client-side, best-effort)",
+    )
+    parser.add_argument(
+        "--preserve-permissions",
+        action="store_true",
+        help="copy a source item's *unique* role assignments (inherited ACLs are left as-is)",
+    )
     parser.add_argument("--apply", action="store_true", help="perform the migration (default: dry run)")
     parser.add_argument("--no-verify", action="store_true", help="skip the post-run source/target reconciliation")
     args = parser.parse_args()
 
     include = _csv(args.include)
     exclude = _csv(args.exclude)
+    preserve_timestamps = args.preserve or args.preserve_timestamps
+    preserve_authorship = args.preserve or args.preserve_authorship
+    preserve_permissions = args.preserve or args.preserve_permissions
 
     ctx = ClientContext(args.target_site).with_client_certificate(tenant, client_id, cert_thumbprint, cert_path)
 
@@ -84,12 +114,28 @@ def main():
         print(f"  {len(subwebs)} subsite(s) {action}: {', '.join(web.title for web in subwebs)}")
     if not lists:
         print("  (nothing to migrate)")
+    preserving = [
+        name
+        for name, on in (
+            ("timestamps", preserve_timestamps),
+            ("authorship", preserve_authorship),
+            ("permissions", preserve_permissions),
+        )
+        if on
+    ]
+    if preserving:
+        print(f"  preserving (best-effort): {', '.join(preserving)}")
     if not args.apply:
         print(f"\nDry run — {len(lists)} list(s). Re-run with --apply to migrate (--include/--exclude to narrow).")
         return
 
     work = Path(args.work)
-    session = MigrationSession().register(context=ctx, settings=MigrationSettings())
+    fidelity = MigrationSettings(
+        preserve_timestamps=preserve_timestamps,
+        preserve_authorship=preserve_authorship,
+        preserve_permissions=preserve_permissions,
+    )
+    session = MigrationSession().register(context=ctx, settings=fidelity)
     session.add_site_task(
         task=MigrationTask.sharepoint(args.source_site, args.target_site, migrate_all=True),
         include=include,

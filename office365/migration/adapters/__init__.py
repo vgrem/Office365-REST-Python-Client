@@ -61,8 +61,9 @@ class DataTarget(ABC):
     - ``configure(options)`` — called once by the runner before any write, so a
       target can derive per-run policy (e.g. a record target maps
       ``options.conflict_resolution`` onto its ``on_conflict`` mode);
-    - ``apply_timestamps(item)`` / ``apply_permissions(item, permissions)`` —
-      best-effort fidelity applied after a successful write;
+    - ``apply_timestamps(item)`` / ``apply_authorship(item)`` /
+      ``apply_permissions(item, permissions)`` — best-effort fidelity applied
+      after a successful write;
     - ``read_permissions(item)`` / ``read_metadata(item)`` — the read
       counterparts the validator diffs against the source (needed to *verify*
       that the requested fidelity actually landed);
@@ -72,8 +73,9 @@ class DataTarget(ABC):
       ``item.versions`` before the write, so history is preserved whenever the
       source can supply it;
     - ``supports_authorship`` — a class attribute set True by a target that
-      restores ``Author``/``ModifiedBy`` from ``item.author`` / ``item.editor``
-      (the server-side package target; best-effort, resolved users only);
+      restores ``Author``/``ModifiedBy`` while building the payload (the
+      server-side package target); client-side targets expose ``apply_authorship``
+      instead (both best-effort, resolved users only);
     - ``supports_attachments`` — a class attribute set True by a target that
       accepts ``item_type="attachment"`` items.
     """

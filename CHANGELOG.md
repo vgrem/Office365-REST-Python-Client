@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Record-list item fidelity (timestamps, authorship, permissions):** the
+  client-side list adapters now implement the fidelity hooks for *record lists*,
+  matching what the document-library adapters already did. `preserve_timestamps`
+  restores `Created`/`Modified` via `ValidateUpdateListItem` (`datesInUTC=True`),
+  the new `preserve_authorship` restores `Author`/`Editor` by resolving each source
+  principal through `web.ensure_user` and writing a `FieldUserValue`, and
+  `preserve_permissions` copies an item's role assignments after breaking
+  inheritance. `MigrationSettings` gained `preserve_authorship` and feeds it into
+  every task; `MigrationJob.verify()` now also diffs authorship, over the new
+  optional `DataTarget.apply_authorship(item)` / `read_authorship(item)` hooks.
+  Only items with a **unique** source ACL are copied — the REST surface reports
+  inherited role assignments too, so copying those would break inheritance on
+  every item and duplicate the parent ACL; unresolved principals and unhonorable
+  facets surface as `mismatches`/`unverifiable`, never a silent drop.
 - **Opt-in subsite recursion for whole-site tasks:** `resolve_site_task` (and
   `MigrationSession.add_site_task`) gained `include_subwebs`. By default a
   whole-site task migrates only the source web's own lists but **detects its
@@ -290,6 +304,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Record-list writes are flushed (and checkpointed) per chunk.**
+  `SharePointListTarget` queues each item's create until a flush, so a large list
+  migration at `concurrency=1` accumulated every entity and recorded the item as
+  `DONE` *before* the write was ever sent — memory grew unbounded and the
+  checkpoint ran ahead of the durable write. It now declares
+  `deferred_writes = True`, so the runner takes the chunked (write-then-record)
+  path even with a single worker, plus an incremental identity index (`Id gt
+  <max>`) so idempotency checks don't rebuild the whole index on every chunk.
 - **Content-type field links no longer attempt built-in columns:** a captured
   content type links every built-in and SharePoint-owned column (`Title`,
   `FileLeafRef`, framework columns, ...) that `capture_list_structure` deliberately

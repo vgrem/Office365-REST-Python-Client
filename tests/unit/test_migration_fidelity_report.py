@@ -33,8 +33,8 @@ def test_default_options_are_content_only():
     assert report.ok
     assert report.preserved == []
     assert report.unsupported == []
-    assert report.not_requested == ["timestamps", "permissions", "versions"]
-    assert report.summary() == "not requested: timestamps, permissions, versions"
+    assert report.not_requested == ["timestamps", "permissions", "authorship", "versions"]
+    assert report.summary() == "not requested: timestamps, permissions, authorship, versions"
 
 
 def test_supported_requested_flags_are_preserved():
@@ -76,7 +76,7 @@ def test_report_to_dict_is_serializable():
     assert report.to_dict() == {
         "preserved": [],
         "unsupported": ["versions"],
-        "not_requested": ["timestamps", "permissions"],
+        "not_requested": ["timestamps", "permissions", "authorship"],
         "notes": report.notes,
         "dimensions": report.dimensions,
         "dimension_notes": report.dimension_notes,
@@ -106,4 +106,4 @@ def test_session_fidelity_is_empty_until_tasks_are_added(tmp_path):
 
     entry = session.fidelity()[0]
     assert entry["ok"] is True
-    assert entry["not_requested"] == ["timestamps", "permissions", "versions"]
+    assert entry["not_requested"] == ["timestamps", "permissions", "authorship", "versions"]
