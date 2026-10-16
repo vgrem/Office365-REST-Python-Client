@@ -609,6 +609,16 @@ def test_content_checksum_is_order_independent_and_excludes_bookkeeping():
     assert _content_checksum(first) != _content_checksum({"Title": "A", "Quantity": 3})
 
 
+def test_content_checksum_treats_a_null_column_as_absent():
+    # The source drops an empty multi-value column while the target reads it back
+    # as ``None``; the two must reconcile as "no value", not a mismatch.
+    assert _content_checksum({"Title": "A", "MultiDeptId": None}) == _content_checksum({"Title": "A"})
+    # A real value on one side and null on the other is still a difference.
+    assert _content_checksum({"Title": "A", "MultiDeptId": [1]}) != _content_checksum(
+        {"Title": "A", "MultiDeptId": None}
+    )
+
+
 # ── Typed values: lookup column value remapping ───────────────────────────────
 
 _LOOKUP_LIST_ID = "ed0abd71-7d64-429a-9de7-7dfabbac6aa7"

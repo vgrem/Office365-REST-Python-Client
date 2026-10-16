@@ -103,14 +103,17 @@ def _content_checksum(record: dict, extra_excluded: "frozenset[str]" = frozenset
     The list source and target both use this so record content can be reconciled:
     only scalar and multi-value columns are hashed (navigation properties and
     excluded keys are dropped) and keys are sorted, so the two sides agree
-    regardless of property iteration order.
+    regardless of property iteration order. A null column is treated as absent:
+    the source drops an empty multi-value column while the target reads it back as
+    ``None``, and both mean "no value".
     """
     content = {
         key: value
         for key, value in record.items()
         if key not in _CONTENT_EXCLUDED
         and key not in extra_excluded
-        and (value is None or isinstance(value, (str, int, float, bool, list, tuple)))
+        and value is not None
+        and isinstance(value, (str, int, float, bool, list, tuple))
     }
     payload = json.dumps(content, sort_keys=True, default=str)
     return hashlib.md5(payload.encode("utf-8")).hexdigest()

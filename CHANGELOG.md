@@ -321,6 +321,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **A list item with an empty multi-value Lookup/Person column reported a
+  content mismatch on verification.** The source drops an empty multi-value column
+  while the target reads the column back as `None`, and the content checksum
+  treated an absent key and an explicit `None` as different. A null column is now
+  normalized to "absent" in the checksum, so an empty multi-value column verifies
+  as equal, while a value on one side and null on the other is still a mismatch.
 - **Bulk list-item creates now adopt the list's entity type annotation.** The
   `add_item` path resolved `ListItemEntityTypeFullName` (so a collection-valued
   column such as a multi-lookup/person serializes with its expected type), but
