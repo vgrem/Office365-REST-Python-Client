@@ -19,6 +19,13 @@ from office365.migration.sharepoint.navigation import (
     verify_navigation,
 )
 from office365.migration.sharepoint.options import SharePointAssessmentOptions
+from office365.migration.sharepoint.pages import (
+    PageHandoff,
+    PageInfo,
+    PageLibrary,
+    detect_page_handoff,
+    page_handoff_note,
+)
 from office365.migration.sharepoint.registry import (
     SHAREPOINT_SCANS,
     get_scan,
@@ -68,6 +75,9 @@ __all__ = [
     "MigrationAssessor",
     "MigrationTenantAssessor",
     "NavNode",
+    "PageHandoff",
+    "PageInfo",
+    "PageLibrary",
     "PathScanner",
     "PermissionScanner",
     "SHAREPOINT_SCANS",
@@ -88,7 +98,9 @@ __all__ = [
     "capture_navigation",
     "capture_site_groups",
     "compare_list_structures",
+    "detect_page_handoff",
     "get_scan",
+    "page_handoff_note",
     "provision_list_structure",
     "sharepoint_scan_pairs",
     "verify_list_structure",

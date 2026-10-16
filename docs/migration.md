@@ -423,7 +423,7 @@ the shipped pairs' expected output.
 | Columns / content types / views | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD dropped) |
 | Check-out / draft / approval state | unsupported | unsupported | unsupported |
-| Navigation / pages / web parts | pages/web parts not migrated; quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
+| Navigation / pages / web parts | pages/web parts not migrated (the resolver reports each skipped page library as a handoff); quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
 > Columns, content types, and views are deliberately *not* carried by the item
@@ -444,7 +444,11 @@ the shipped pairs' expected output.
 > target; dynamic nodes such as *Recent* are skipped), and
 > `verify_navigation(source_web, target_web)` reconciles the copyable links.
 > Pages and web parts are **not** migrated — the `navigation` dimension stays
-> `handoff` for that reason.
+> `handoff` for that reason. The resolver makes that gap visible:
+> `detect_page_handoff(source_lists)` finds the skipped page libraries (Site
+> Pages, wiki/publishing pages) and `page_handoff_note` appends a warning naming
+> the pages and their client-side web-part count, so a run never silently drops
+> them (`detect_page_handoff` / `page_handoff_note` are also exported for reuse).
 
 ## Server-side migration
 

@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Page / web-part handoff:** the whole-site resolver no longer skips page
+  libraries silently. The new `office365.migration.sharepoint.pages` module
+  (`detect_page_handoff`, `page_handoff_note`) finds each source web's Site Pages,
+  wiki and publishing page libraries, lists their pages, and counts the
+  client-side web parts a modern page serializes in its canvas; the resolver
+  appends the note to `session.warnings()`. Pages and web parts are still **not**
+  migrated (page transformation belongs to external tools), but the gap is now
+  explicit and reported instead of silent.
 - **Web navigation replication:** the whole-site resolver now copies each web's
   **Quick Launch** and **top navigation bar** onto the target when
   `MigrationSettings.migrate_navigation` is on (the default). The new

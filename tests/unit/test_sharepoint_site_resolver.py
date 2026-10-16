@@ -78,6 +78,38 @@ class _Lists:
         )
 
 
+class _PageItem:
+    def __init__(self, name, canvas=""):
+        self.properties = {"FileLeafRef": name, "CanvasContent1": canvas}
+
+
+class _PageItems:
+    def __init__(self, items):
+        self._items = list(items)
+
+    def get(self):
+        return self
+
+    def select(self, fields):
+        return self
+
+    def execute_query(self):
+        return list(self._items)
+
+
+class _PageList:
+    """A Site Pages library (template 119) whose items the handoff detector inspects."""
+
+    def __init__(self, pages, title="Site Pages", template=119):
+        self.title = title
+        self.base_type = 1
+        self.base_template = template
+        self.hidden = False
+        self.allow_deletion = True
+        self.items = _PageItems(pages)
+        self.properties = {"Id": _guid_for(title)}
+
+
 class _Web:
     def __init__(self, lists, webs=None, title=None, web_template="STS#3", url=None):
         self.lists = lists
@@ -278,6 +310,24 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         pairs = resolve_site_task(task, source)
 
         self.assertEqual(pairs[0][1].warnings, ["content type 'Project': column 'X' was not linked"])
+
+    def test_page_library_is_reported_as_handoff(self):
+        pages = _PageList(
+            [
+                _PageItem("Home.aspx"),
+                _PageItem("CollabHome.aspx", canvas='data-sp-controldata="{&quot;controlType&quot;:4}"'),
+            ]
+        )
+        source = _context([_docs(), pages])
+        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
+
+        warnings: list[str] = []
+        pairs = resolve_site_task(task, source, warnings=warnings)
+
+        self.assertEqual(len(pairs), 1)  # the page library is not a content pair
+        note = next(message for message in warnings if "pages/web parts are not migrated" in message)
+        self.assertIn("Site Pages (2 page(s): Home.aspx, CollabHome.aspx)", note)
+        self.assertIn("1 web part(s)", note)
 
     def test_subwebs_are_detected_and_reported_when_skipped(self):
         child = _Web(

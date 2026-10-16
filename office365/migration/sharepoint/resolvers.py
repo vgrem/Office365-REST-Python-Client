@@ -33,6 +33,7 @@ from office365.migration.sharepoint.adapters import (
     SharePointListTarget,
 )
 from office365.migration.sharepoint.navigation import apply_navigation
+from office365.migration.sharepoint.pages import detect_page_handoff, page_handoff_note
 from office365.migration.sharepoint.security import apply_site_security
 from office365.migration.sharepoint.structure import (
     capture_list_structure,
@@ -147,7 +148,8 @@ def resolve_site_task(
         migrate_navigation: Best-effort copy each web's Quick Launch and top
             navigation (source links rewritten to the target). Additive and
             idempotent; dynamic nodes are skipped.
-        warnings: Optional sink for resolution-level notes (subsites skipped).
+        warnings: Optional sink for resolution-level notes (subsites skipped,
+            page libraries detected but not migrated).
     """
     if task.kind != SHAREPOINT:
         raise ValueError(f"a site task must be kind {SHAREPOINT!r}, got {task.kind!r}")
@@ -177,6 +179,17 @@ def resolve_site_task(
     return pairs
 
 
+def _report_page_handoff(source_lists: Iterable[Any], source_web: Any, warnings: list[str]) -> None:
+    """Append a handoff note for the page libraries the adapters skip (best-effort)."""
+    try:
+        note = page_handoff_note(detect_page_handoff(source_lists))
+    except Exception as e:  # noqa: BLE001 — page detection is best-effort; never abort list resolution
+        warnings.append(f"page detection failed for {_web_url(source_web)}: {e}")
+        return
+    if note:
+        warnings.append(note)
+
+
 def _resolve_web(
     source_context: Any,
     target_context: Any,
@@ -201,6 +214,9 @@ def _resolve_web(
         except Exception as e:  # noqa: BLE001 — navigation is best-effort; never abort list resolution
             warnings.append(f"navigation replication failed for {_web_url(source_context.web)}: {e}")
     source_lists: Iterable[Any] = source_context.web.lists.get().execute_query()
+    # A page library (Site Pages, wiki/publishing pages) holds .aspx pages, not
+    # documents; the adapters skip it, so report it as an explicit handoff.
+    _report_page_handoff(source_lists, source_context.web, warnings)
     selected: list[Any] = []
     for source_list in source_lists:
         title = getattr(source_list, "title", None)

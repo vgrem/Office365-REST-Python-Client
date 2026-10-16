@@ -12,5 +12,5 @@ the job model, incremental re-runs and the server-side five-step flow.
 | Files → library via a session | [`migrate_session.py`](./migrate_session.py) | Parallel workers |
 | Files → library server-side | [`migrate_library_serverside.py`](./migrate_library_serverside.py) | Versions + ACLs |
 | SPMT-style session | [`migrate_spmt.py`](./migrate_spmt.py) | Register → task → start |
-| Whole-site (same tenant) | [`migrate_site.py`](./migrate_site.py) | `migrate_all` → one job per list; `--preserve` for best-effort timestamps/authorship/ACLs; also copies web navigation |
+| Whole-site (same tenant) | [`migrate_site.py`](./migrate_site.py) | `migrate_all` → one job per list; `--preserve` for best-effort timestamps/authorship/ACLs; also copies web navigation and reports skipped page libraries as a handoff |
 | Build a package offline | [`package_library.py`](./package_library.py) | Inspect the manifest, no tenant |
