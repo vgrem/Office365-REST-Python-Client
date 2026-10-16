@@ -65,6 +65,11 @@ DEFAULT_LIST_IDENTITY_FIELD = "MigrationSourceId"
 # Editor companion columns are neither content nor Person values to remap.
 _PERSON_EXCLUDED = frozenset({"Author", "Editor"})
 
+#: Multi-value typed columns. Their ``<name>Id`` companion is a collection of ids
+#: that a ``*`` projection omits (LookupMulti entirely; UserMulti unreliably), so the
+#: source selects them explicitly and the target writes ``{"results": [...]}``.
+_MULTI_VALUE_TYPES = frozenset({"LookupMulti", "UserMulti"})
+
 #: Record columns excluded from the content checksum: server-assigned identity
 #: (``Id``/``GUID``), facets verified separately (timestamps, authorship,
 #: permissions), values the target remaps (``ContentTypeId``), and bookkeeping
@@ -87,26 +92,60 @@ _CONTENT_EXCLUDED = frozenset(
         "ServerRedirectedEmbedUri",
         "ServerRedirectedEmbedUrl",
         "ParentList",
+        "AttachmentFiles",
     }
 )
 
 
 def _content_checksum(record: dict, extra_excluded: "frozenset[str]" = frozenset()) -> str:
-    """MD5 of an item's scalar content columns in a stable, order-independent form.
+    """MD5 of an item's content columns in a stable, order-independent form.
 
     The list source and target both use this so record content can be reconciled:
-    only scalar, non-excluded columns are hashed and keys are sorted, so the two
-    sides agree regardless of property iteration order.
+    only scalar and multi-value columns are hashed (navigation properties and
+    excluded keys are dropped) and keys are sorted, so the two sides agree
+    regardless of property iteration order.
     """
     content = {
         key: value
         for key, value in record.items()
         if key not in _CONTENT_EXCLUDED
         and key not in extra_excluded
-        and (value is None or isinstance(value, (str, int, float, bool)))
+        and (value is None or isinstance(value, (str, int, float, bool, list, tuple)))
     }
     payload = json.dumps(content, sort_keys=True, default=str)
     return hashlib.md5(payload.encode("utf-8")).hexdigest()
+
+
+def _id_list(value: Any) -> list[Any] | None:
+    """Normalize a multi-value ``...Id`` collection into a plain list of ids.
+
+    A live read returns the collection as a positional mapping (``{0: 1, 1: 2}``);
+    a payload this client built may hold ``{"results": [...]}``. Both reduce to the
+    same list, which is the form the checksum and the remap work with.
+    """
+    if isinstance(value, dict):
+        if "results" in value:
+            value = value["results"]
+        else:
+            try:
+                return [value[i] for i in range(len(value))]
+            except (KeyError, TypeError):
+                return list(value.values())
+    if isinstance(value, (list, tuple)):
+        return list(value)
+    return None
+
+
+def _collection_payload(ids: list[int]) -> dict:
+    """The JSON shape SharePoint accepts when *creating* a multi-value column.
+
+    Live-probed: a bare array is rejected on create
+    (``InvalidClientQueryException``: "a 'PrimitiveValue' or 'StartObject' node was
+    expected") while ``{"results": [...]}`` is accepted. A MERGE *update* is the
+    opposite — it accepts the bare array and rejects ``{"results": [...]}`` — so
+    only the create path goes through this helper.
+    """
+    return {"results": ids}
 
 
 def _sp_utc_timestamp(value: str | None) -> str | None:
@@ -298,6 +337,35 @@ def _user_login(web, user_id: Any, cache: dict[int, str | None]) -> str | None:
     return login
 
 
+class _MultiValueCreateTarget:
+    """An upsert target that reshapes multi-value columns only when creating.
+
+    A multi-value Lookup/Person column is created with the ``{"results": [...]}``
+    wire shape but updated with a bare array (live-probed), so ``keyed_queue`` needs
+    to reshape the creates and leave the updates alone. Everything else delegates.
+    """
+
+    def __init__(self, target: Any, reshape: Callable[[dict], dict]) -> None:
+        self._target = target
+        self._reshape = reshape
+
+    @property
+    def key_field(self) -> str:
+        return self._target.key_field
+
+    def ensure_key_field(self) -> None:
+        self._target.ensure_key_field()
+
+    def load_keys(self) -> Any:
+        return self._target.load_keys()
+
+    def create_records(self, records: list[dict]) -> None:
+        self._target.create_records([self._reshape(record) for record in records])
+
+    def update_record(self, item_id: Any, record: dict) -> None:
+        self._target.update_record(item_id, record)
+
+
 class _DefaultGroups:
     """Maps a web's associated default groups (Owners/Members/Visitors).
 
@@ -483,6 +551,8 @@ class SharePointListSource:
         self._users: dict[int, Principal | None] = {}
         self._default_groups: _DefaultGroups | None = None
         self._user_columns_cache: set[str] | None = None
+        self._multi_columns_cache: dict[str, str] | None = None
+        self._skipped_columns_cache: set[str] | None = None
         self.warnings: list[str] = []
 
     def label(self) -> str:
@@ -515,12 +585,18 @@ class SharePointListSource:
         # A full read projects ``*`` plus the system metadata so author/editor ids
         # and the unique-ACL flag are captured in one query (``*`` omits them);
         # an explicit/safe projection is honored as-is.
-        columns = ["*", *_METADATA_SELECT] if select is None else select
-        query = items.select(columns)
         if select is None:
+            columns = ["*", *_METADATA_SELECT]
+            # A ``*`` projection also omits multi-value Lookup ids (and returns
+            # multi-person ids only inconsistently); select each ``<name>Id``
+            # explicitly so the values are not silently lost.
+            for name in self._multi_columns():
+                key = f"{name}Id"
+                if key not in columns:
+                    columns.append(key)
             # Expand attachments so they can be migrated alongside their item.
-            query = query.expand(["AttachmentFiles"])
-        return query.get_all().execute_query()
+            return items.select(columns).expand(["AttachmentFiles"]).get_all().execute_query()
+        return items.select(select).get_all().execute_query()
 
     def _safe_select(self) -> list[str]:
         """Fallback projection: visible, non-system columns minus Managed Metadata.
@@ -609,8 +685,12 @@ class SharePointListSource:
         # rejected with ``InvalidClientQueryException``. Typed-value remapping is
         # not supported yet, so drop them and say so rather than fail the run.
         dropped: set[str] = set()
+        multi = self._multi_columns()
+        multi_keys = {f"{name}Id" for name in multi} | {f"{name}StringId" for name in multi}
         for record in records:
             for key, value in list(record.items()):
+                if key in multi_keys:
+                    continue  # handled by ``_normalize_multi_values``
                 if value is not None and not isinstance(value, (str, int, float, bool)):
                     record.pop(key)
                     if key not in _NAVIGATION_SELECT:
@@ -619,26 +699,68 @@ class SharePointListSource:
             self.warnings.append(
                 f"skipped non-scalar column(s) with no typed-value mapping: {', '.join(sorted(dropped))}"
             )
+        # Structure provisioning skips hidden columns, so their typed values (and
+        # the text companion) have nowhere to land on the target; drop both rather
+        # than fail the create on an unknown column.
+        skipped = self._skipped_columns()
+        if skipped:
+            skipped_keys = {f"{name}Id" for name in skipped} | {f"{name}StringId" for name in skipped}
+            for record in records:
+                for key in skipped_keys:
+                    record.pop(key, None)
+            self.warnings.append(
+                f"skipped hidden typed column(s) not replicated by structure provisioning: {', '.join(sorted(skipped))}"
+            )
+        self._normalize_multi_values(records)
         self._annotate_person_logins(records)
         return records
 
-    def _user_columns(self) -> set[str]:
-        """The source's single-value Person columns (internal names)."""
-        if self._user_columns_cache is None:
-            columns: set[str] = set()
+    def _typed_columns(self) -> tuple[set[str], dict[str, str], set[str]]:
+        """The source's Person and multi-value columns, read once.
+
+        Returns ``(single-value User columns, {multi-value column: field type},
+        hidden typed columns)``. The field type tells a multi-lookup (remapped by
+        item id) from a multi-person (remapped by login). Hidden typed columns are
+        reported separately because structure provisioning does not replicate them.
+        """
+        if self._user_columns_cache is None or self._multi_columns_cache is None or self._skipped_columns_cache is None:
+            users: set[str] = set()
+            multi: dict[str, str] = {}
+            skipped: set[str] = set()
             try:
                 for field in self._list.fields.get().execute_query():
                     internal_name = getattr(field, "internal_name", None)
-                    if (
-                        getattr(field, "type_as_string", None) == "User"
-                        and internal_name
-                        and internal_name not in _PERSON_EXCLUDED
-                    ):
-                        columns.add(internal_name)
-            except Exception as e:  # noqa: BLE001 — without field types persons stay as raw ids
-                self.warnings.append(f"could not read source columns for person remapping: {e}")
-            self._user_columns_cache = columns
-        return self._user_columns_cache
+                    if not internal_name or internal_name in _PERSON_EXCLUDED:
+                        continue
+                    field_type = getattr(field, "type_as_string", None)
+                    if field_type != "User" and field_type not in _MULTI_VALUE_TYPES:
+                        continue
+                    # Structure replay skips hidden columns, so the target never
+                    # gets them; projecting their values would fail the write.
+                    if getattr(field, "hidden", None) is True:
+                        skipped.add(internal_name)
+                    elif field_type == "User":
+                        users.add(internal_name)
+                    else:
+                        multi[internal_name] = field_type
+            except Exception as e:  # noqa: BLE001 — without field types ids stay raw
+                self.warnings.append(f"could not read source columns for typed-value remapping: {e}")
+            self._user_columns_cache = users
+            self._multi_columns_cache = multi
+            self._skipped_columns_cache = skipped
+        return self._user_columns_cache, self._multi_columns_cache, self._skipped_columns_cache
+
+    def _user_columns(self) -> set[str]:
+        """The source's single-value Person columns (internal names)."""
+        return self._typed_columns()[0]
+
+    def _multi_columns(self) -> dict[str, str]:
+        """The source's multi-value Lookup/Person columns (internal name -> field type)."""
+        return self._typed_columns()[1]
+
+    def _skipped_columns(self) -> set[str]:
+        """The source's hidden Person/multi-value columns (not replicated on the target)."""
+        return self._typed_columns()[2]
 
     def _annotate_person_logins(self, records: list[dict]) -> None:
         """Replace each Person column's site-user id with the user's login name.
@@ -671,6 +793,49 @@ class SharePointListSource:
                     self.warnings.append(
                         f"person column '{name}' value {user_id} could not be resolved to a login; left empty"
                     )
+
+    def _normalize_multi_values(self, records: list[dict]) -> None:
+        """Project each multi-value column's ids as a plain list the target can remap.
+
+        A multi-person column additionally carries the portable login names instead
+        of the site-local ids, matching the single-value Person handling.
+        """
+        multi = self._multi_columns()
+        if not multi:
+            return
+        for record in records:
+            for name, field_type in multi.items():
+                record.pop(f"{name}StringId", None)
+                key = f"{name}Id"
+                ids = _id_list(record.get(key))
+                parsed: list[int] = []
+                for value in ids or []:
+                    user_id = parse_int(value)
+                    if user_id is None:
+                        parsed = []
+                        break
+                    parsed.append(user_id)
+                if not parsed:
+                    record.pop(key, None)
+                    continue
+                if field_type == "UserMulti":
+                    logins: list[str] = []
+                    for user_id in parsed:
+                        principal = self._principal_for(user_id)
+                        login = principal.login_name if principal else None
+                        if login:
+                            logins.append(login)
+                        else:
+                            self.warnings.append(
+                                f"multi-person column '{name}' value {user_id} could not be resolved "
+                                "to a login; the value was left out"
+                            )
+                    if logins:
+                        record[key] = logins
+                    else:
+                        record.pop(key, None)
+                else:
+                    record[key] = parsed
 
     def read(self, item: MigrationItem) -> object:
         if item.item_type == "attachment":
@@ -826,7 +991,7 @@ class SharePointListTarget:
         # Lookup and Person columns carry an id that is only meaningful on the
         # source (list-local item id / site-user id). The target remaps each to its
         # own value on write and back to the source value on verification.
-        self._columns_cache: tuple[dict[str, str], set[str]] | None = None
+        self._columns_cache: tuple[dict[str, str], set[str], dict[str, str], set[str]] | None = None
         self._lookup_indexes: dict[str, tuple[dict[int, int], dict[int, int]]] = {}
         self._unresolved_lookups: set[tuple[str, int]] = set()
         self._unresolved_users: set[tuple[str, str]] = set()
@@ -914,7 +1079,7 @@ class SharePointListTarget:
         self._remap_typed_values(records)
         if not self._key_columns:
             for record in records:
-                self._list.items.queue_records([record])
+                self._list.items.queue_records([self._multi_value_create(record)])
             return
         from office365.runtime.converters.upsert import keyed_queue
         from office365.sharepoint.fields.name import internal_field_name
@@ -928,12 +1093,35 @@ class SharePointListTarget:
             self._target = target
         key_columns = [internal_field_name(c) for c in self._key_columns]
         keyed_queue(
-            target,
+            _MultiValueCreateTarget(target, self._multi_value_create),
             records,
             key_columns=key_columns,
             existing=self._existing,
             on_conflict=self._on_conflict,
         )
+
+    def _multi_id_keys(self) -> set[str]:
+        """The ``...Id`` record keys of the multi-value Lookup/Person columns."""
+        names = (*self._multi_lookup_columns(), *self._multi_user_columns())
+        return {f"{name}Id" for name in names}
+
+    def _multi_value_create(self, record: dict) -> dict:
+        """Reshape multi-value columns for a *create* (``{"results": [...]}``).
+
+        A bare list is the semantic value the source records and the checksum work
+        with, and it is also what a MERGE update wants; only a create needs the
+        ``{"results": [...]}`` wrapper (live-probed). Lists without multi-value
+        columns are passed through untouched.
+        """
+        id_keys = self._multi_id_keys()
+        if not id_keys:
+            return record
+        wrapped = dict(record)
+        for key in id_keys:
+            ids = _id_list(wrapped.get(key))
+            if ids is not None:
+                wrapped[key] = _collection_payload(ids)
+        return wrapped
 
     def _ensure_identity(self) -> None:
         """Create the source-id marker column (once), best-effort."""
@@ -950,8 +1138,12 @@ class SharePointListTarget:
             self._identity_field = None
             self.warnings.append(f"could not create the {name!r} identity column: {e}")
 
-    def _columns(self) -> tuple[dict[str, str], set[str]]:
-        """The target's typed columns: ``(lookup: name -> referenced list id, user names)``."""
+    def _columns(self) -> tuple[dict[str, str], set[str], dict[str, str], set[str]]:
+        """The target's typed columns.
+
+        Returns ``(lookup: name -> referenced list id, user names, multi-lookup:
+        name -> referenced list id, multi-user names)``.
+        """
         if self._columns_cache is None:
             self._columns_cache = self._load_columns()
         return self._columns_cache
@@ -962,27 +1154,40 @@ class SharePointListTarget:
     def _user_columns(self) -> set[str]:
         return self._columns()[1]
 
-    def _load_columns(self) -> tuple[dict[str, str], set[str]]:
+    def _multi_lookup_columns(self) -> dict[str, str]:
+        return self._columns()[2]
+
+    def _multi_user_columns(self) -> set[str]:
+        return self._columns()[3]
+
+    def _load_columns(self) -> tuple[dict[str, str], set[str], dict[str, str], set[str]]:
         lookups: dict[str, str] = {}
         users: set[str] = set()
+        multi_lookups: dict[str, str] = {}
+        multi_users: set[str] = set()
         try:
             fields = self._list.fields.select(["InternalName", "TypeAsString", "LookupList"]).get().execute_query()
         except Exception as e:  # noqa: BLE001 — without columns we cannot remap; content still migrates
             self.warnings.append(f"could not read target columns for typed-value remapping: {e}")
-            return lookups, users
+            return lookups, users, multi_lookups, multi_users
         for field in fields:
             internal_name = getattr(field, "internal_name", None)
-            if not internal_name:
+            if not internal_name or internal_name in _PERSON_EXCLUDED:
                 continue
             field_type = getattr(field, "type_as_string", None)
-            if field_type == "Lookup":
+            if field_type in ("Lookup", "LookupMulti"):
                 list_id = normalize_guid(field.properties.get("LookupList"))
-                if list_id:
+                if not list_id:
+                    continue
+                if field_type == "Lookup":
                     lookups[internal_name] = list_id
+                else:
+                    multi_lookups[internal_name] = list_id
             elif field_type == "User":
-                if internal_name not in _PERSON_EXCLUDED:
-                    users.add(internal_name)
-        return lookups, users
+                users.add(internal_name)
+            elif field_type == "UserMulti":
+                multi_users.add(internal_name)
+        return lookups, users, multi_lookups, multi_users
 
     def _lookup_index(self, target_list_id: str) -> tuple[dict[int, int], dict[int, int]]:
         """``(source id -> target id, target id -> source id)`` for a referenced list."""
@@ -1018,6 +1223,8 @@ class SharePointListTarget:
         """
         self._remap_lookups(records)
         self._remap_users(records)
+        self._remap_multi_lookups(records)
+        self._remap_multi_users(records)
 
     def _remap_lookups(self, records: list[dict]) -> None:
         columns = self._lookup_columns()
@@ -1053,6 +1260,54 @@ class SharePointListTarget:
                     self._report_unresolved_user(internal_name, login)
                     continue
                 record[key] = user.id
+
+    def _remap_multi_lookups(self, records: list[dict]) -> None:
+        columns = self._multi_lookup_columns()
+        if not columns:
+            return
+        for record in records:
+            for internal_name, target_list_id in columns.items():
+                key = f"{internal_name}Id"
+                source_ids = _id_list(record.get(key))
+                if not source_ids:
+                    continue
+                forward, _ = self._lookup_index(target_list_id)
+                target_ids: list[int] = []
+                for value in source_ids:
+                    source_id = parse_int(value)
+                    target_id = forward.get(source_id) if source_id is not None else None
+                    if target_id is None:
+                        if source_id is not None:
+                            self._report_unresolved_lookup(internal_name, source_id)
+                        continue
+                    target_ids.append(target_id)
+                if target_ids:
+                    record[key] = target_ids
+                else:
+                    record.pop(key, None)
+
+    def _remap_multi_users(self, records: list[dict]) -> None:
+        columns = self._multi_user_columns()
+        if not columns:
+            return
+        for record in records:
+            for internal_name in columns:
+                key = f"{internal_name}Id"
+                logins = record.get(key)
+                if not isinstance(logins, (list, tuple)) or not logins:
+                    continue
+                target_ids: list[int] = []
+                for login in logins:
+                    user = self._principals().user(login) if isinstance(login, str) and login else None
+                    user_id = getattr(user, "id", None)
+                    if user is None or user_id is None:
+                        self._report_unresolved_user(internal_name, str(login))
+                        continue
+                    target_ids.append(user_id)
+                if target_ids:
+                    record[key] = target_ids
+                else:
+                    record.pop(key, None)
 
     def _report_unresolved_user(self, internal_name: str, login: str) -> None:
         marker = (internal_name, login)
@@ -1104,13 +1359,22 @@ class SharePointListTarget:
             source_id = backward.get(target_id)
             if source_id is not None:
                 properties[key] = source_id
+        for internal_name, target_list_id in self._multi_lookup_columns().items():
+            key = f"{internal_name}Id"
+            target_ids = _id_list(properties.get(key))
+            if not target_ids:
+                continue
+            _, backward = self._lookup_index(target_list_id)
+            mapped: list[Any] = []
+            for value in target_ids:
+                target_id = parse_int(value)
+                mapped.append(backward.get(target_id, value) if target_id is not None else value)
+            properties[key] = mapped
 
     def _canonicalize_users(self, properties: dict) -> None:
         """Rewrite target person ids back to the login names the source recorded."""
         columns = self._user_columns()
-        if not columns:
-            return
-        logins = self._target_user_logins()
+        logins = self._target_user_logins() if columns or self._multi_user_columns() else {}
         for internal_name in columns:
             key = f"{internal_name}Id"
             user_id = parse_int(properties.get(key))
@@ -1119,6 +1383,16 @@ class SharePointListTarget:
             login = logins.get(user_id)
             if login is not None:
                 properties[key] = login
+        for internal_name in self._multi_user_columns():
+            key = f"{internal_name}Id"
+            user_ids = _id_list(properties.get(key))
+            if not user_ids:
+                continue
+            mapped_logins: list[Any] = []
+            for value in user_ids:
+                user_id = parse_int(value)
+                mapped_logins.append(logins.get(user_id, value) if user_id is not None else value)
+            properties[key] = mapped_logins
 
     def _write_attachment(self, item: MigrationItem, payload: object) -> None:
         if not self._identity_field:
@@ -1230,6 +1504,7 @@ class SharePointListTarget:
         # The target derives its own ``<name>StringId`` companion; it is not part of
         # the source's canonical content.
         extra.update(f"{name}StringId" for name in self._user_columns())
+        extra.update(f"{name}StringId" for name in self._multi_user_columns())
         return _content_checksum(properties, frozenset(extra))
 
     def _attachment_checksum(self, item: MigrationItem) -> str:

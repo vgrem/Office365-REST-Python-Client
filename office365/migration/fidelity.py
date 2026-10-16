@@ -177,8 +177,8 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
         set_(
             "typed_values",
             status.BEST_EFFORT,
-            "Lookup values are remapped across migrated lists and Person values by login; "
-            "multi-value Lookup/Person and managed-metadata values are not carried",
+            "Lookup values are remapped across migrated lists and Person values by login, "
+            "including multi-value columns; managed-metadata and nested values are not carried",
         )
     else:
         set_(

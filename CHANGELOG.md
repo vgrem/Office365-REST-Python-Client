@@ -20,9 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   replay structure); an unresolvable reference is skipped with a warning instead
   of creating a broken column. The verifier compares lookups by source id and
   persons by login on **both** sides, so remapped content still verifies. This
-  covers single-value Lookup/Person columns; multi-value and Managed Metadata
-  values are still dropped (the fidelity matrix now reports `typed_values` as
-  `best-effort` when both adapters advertise `supports_typed_values`).
+  covers single- **and** multi-value Lookup/Person columns (a multi-value column
+  is selected explicitly on the source — a `*` projection omits the ids — and
+  written as `{"results": [...]}` on the target); Managed Metadata values are
+  still dropped (the fidelity matrix now reports `typed_values` as `best-effort`
+  when both adapters advertise `supports_typed_values`).
 - **Record-list item fidelity (timestamps, authorship, permissions):** the
   client-side list adapters now implement the fidelity hooks for *record lists*,
   matching what the document-library adapters already did. `preserve_timestamps`
@@ -319,6 +321,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Bulk list-item creates now adopt the list's entity type annotation.** The
+  `add_item` path resolved `ListItemEntityTypeFullName` (so a collection-valued
+  column such as a multi-lookup/person serializes with its expected type), but
+  `ListItemCollection.queue_records` / `from_records` did not, so a bulk create
+  carrying a multi-value column was rejected with `InvalidClientQueryException`.
+  `_import_records` now resolves the annotation once (before the creates) and
+  stamps every queued item.
+- **`ListItem.set_property` persisted multi-value Lookup values but silently
+  dropped multi-value Person values.** It special-cased `FieldMultiLookupValue`
+  when deriving the writable `<name>Id` column (and the transient `<name>`) but not
+  `FieldMultiUserValue`, so `item.set_property("Owners", FieldMultiUserValue([...]))`
+  looked successful yet wrote nothing (the existing integration test only asserted
+  the non-persisted property map, which masked it). Both value types are handled
+  alike now.
 - **Record fidelity writes now use a system update, so they no longer create
   versions.** `ValidateUpdateListItem` was called with
   `bNewDocumentUpdate=False`, which creates a new version for every

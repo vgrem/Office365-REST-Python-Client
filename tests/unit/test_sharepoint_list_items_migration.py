@@ -27,6 +27,7 @@ from office365.migration.sharepoint.adapters import (
     SharePointListSource,
     SharePointListTarget,
     _content_checksum,
+    _MultiValueCreateTarget,
 )
 
 
@@ -195,6 +196,45 @@ def test_list_source_drops_a_person_value_it_cannot_resolve():
     record = source.read(planned[0])
     assert "OwnerId" not in record
     assert any("Owner" in w for w in source.warnings)
+
+
+def test_list_source_projects_multi_lookup_ids_as_a_list():
+    # A ``*`` read omits multi-value Lookup ids; the source selects them and
+    # flattens the positional mapping into a plain list the target can remap.
+    items = [_Item(1, {"Id": 1, "Title": "A", "MultiDeptId": {0: 1, 1: 2}})]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=[_Field("MultiDept", "LookupMulti")])))
+
+    record = source.read(source.list_items()[0])
+    assert record["MultiDeptId"] == [1, 2]
+
+
+def test_list_source_annotates_multi_person_columns_with_logins():
+    items = [_Item(1, {"Id": 1, "Title": "A", "MultiOwnerId": {0: 12, 1: 7}, "MultiOwnerStringId": "12;7"})]
+    source = SharePointListSource(
+        cast(
+            "SPList",
+            _SourceList(
+                items,
+                fields=[_Field("MultiOwner", "UserMulti")],
+                users={12: _LOGIN, 7: "mdoe@mediadev8.onmicrosoft.com"},
+            ),
+        )
+    )
+
+    record = source.read(source.list_items()[0])
+    assert record["MultiOwnerId"] == [_LOGIN, "mdoe@mediadev8.onmicrosoft.com"]
+    assert "MultiOwnerStringId" not in record
+
+
+def test_list_source_drops_a_multi_person_value_it_cannot_resolve():
+    items = [_Item(1, {"Id": 1, "Title": "A", "MultiOwnerId": {0: 42}})]
+    source = SharePointListSource(
+        cast("SPList", _SourceList(items, fields=[_Field("MultiOwner", "UserMulti")], users={7: _LOGIN}))
+    )
+
+    record = source.read(source.list_items()[0])
+    assert "MultiOwnerId" not in record
+    assert any("MultiOwner" in w for w in source.warnings)
 
 
 def test_list_source_drops_non_scalar_values_and_warns():
@@ -695,3 +735,112 @@ def test_list_target_content_checksum_canonicalizes_person_id_to_login():
     checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
 
     assert checksum == _content_checksum({"Title": "Alpha", "OwnerId": _LOGIN})
+
+
+# ── Typed values: multi-value Lookup/Person columns ──────────────────────────
+
+_MDOE = "mdoe@mediadev8.onmicrosoft.com"
+
+
+def test_list_target_remaps_multi_lookup_ids_to_target_ids():
+    # Source items 2 and 3 were migrated as target ids 1 and 2, so each id in the
+    # collection is rewritten; the column is written as ``{"results": [...]}``,
+    # the only shape the create batch accepts for a multi-value column.
+    referenced = [
+        _Item(1, {DEFAULT_LIST_IDENTITY_FIELD: "2"}),
+        _Item(2, {DEFAULT_LIST_IDENTITY_FIELD: "3"}),
+    ]
+    fields = [_Field("MultiDept", "LookupMulti", _LOOKUP_SCHEMA_LIST_ID)]
+    target_list, target = _lookup_target(referenced=referenced, fields=fields)
+
+    target.write(MigrationItem("Docs/1", "1", item_type="record"), {"Title": "A", "MultiDeptId": [2, 3]})
+
+    assert target_list.queued == [{"Title": "A", "MultiDeptId": {"results": [1, 2]}, DEFAULT_LIST_IDENTITY_FIELD: "1"}]
+
+
+def test_list_target_remaps_multi_person_logins_to_target_ids():
+    web = _Web(users={7: _LOGIN, 12: _MDOE})
+    fields = [_Field("MultiOwner", "UserMulti", _USERINFO_LIST_ID)]
+    target_list = _TargetList(fields=fields, web=web)
+    target = SharePointListTarget(cast("SPList", target_list))
+
+    target.write(
+        MigrationItem("Docs/1", "1", item_type="record"),
+        {"Title": "A", "MultiOwnerId": [_LOGIN, _MDOE]},
+    )
+
+    assert target_list.queued == [{"Title": "A", "MultiOwnerId": {"results": [7, 12]}, DEFAULT_LIST_IDENTITY_FIELD: "1"}]
+
+
+def test_list_target_content_checksum_canonicalizes_multi_values():
+    # Verification compares like for like: the target's multi-value ids are mapped
+    # back to source ids / logins before the content hashes are compared.
+    referenced = [
+        _Item(1, {DEFAULT_LIST_IDENTITY_FIELD: "2"}),
+        _Item(2, {DEFAULT_LIST_IDENTITY_FIELD: "3"}),
+    ]
+    fields = [
+        _Field("MultiDept", "LookupMulti", _LOOKUP_SCHEMA_LIST_ID),
+        _Field("MultiOwner", "UserMulti", _USERINFO_LIST_ID),
+    ]
+    row = _TargetRow(
+        10,
+        "1",
+        properties={
+            "Title": "Alpha",
+            "MultiDeptId": {0: 1, 1: 2},
+            "MultiOwnerId": {0: 7, 1: 12},
+            "MultiOwnerStringId": "7;12",
+        },
+    )
+    web = _Web({_LOOKUP_LIST_ID: referenced}, users={7: _LOGIN, 12: _MDOE})
+    target_list = _TargetList(rows=[row], fields=fields, web=web)
+    target = SharePointListTarget(cast("SPList", target_list))
+
+    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
+
+    assert checksum == _content_checksum({"Title": "Alpha", "MultiDeptId": [2, 3], "MultiOwnerId": [_LOGIN, _MDOE]})
+
+
+class _RecordingUpsertTarget:
+    """A minimal `UpsertTarget` that records what keyed_queue would send."""
+
+    key_field = "Key"
+
+    def __init__(self):
+        self.created = []
+        self.updated = []
+
+    def ensure_key_field(self):
+        pass
+
+    def load_keys(self):
+        return {}
+
+    def create_records(self, records):
+        self.created.extend(records)
+
+    def update_record(self, item_id, record):
+        self.updated.append((item_id, record))
+
+
+def test_list_target_reshapes_multi_values_only_when_creating():
+    # A create needs {"results": [...]} but a MERGE update rejects that shape and
+    # wants the bare array, so the wrapper reshapes the create path alone.
+    referenced = [
+        _Item(1, {DEFAULT_LIST_IDENTITY_FIELD: "2"}),
+        _Item(2, {DEFAULT_LIST_IDENTITY_FIELD: "3"}),
+    ]
+    fields = [_Field("MultiDept", "LookupMulti", _LOOKUP_SCHEMA_LIST_ID)]
+    _, target = _lookup_target(referenced=referenced, fields=fields)
+
+    inner = _RecordingUpsertTarget()
+    wrapper = _MultiValueCreateTarget(inner, target._multi_value_create)
+    record = {"Title": "A", "MultiDeptId": [2, 3]}
+
+    wrapper.create_records([record])
+    wrapper.update_record(7, record)
+
+    assert inner.created == [{"Title": "A", "MultiDeptId": {"results": [2, 3]}}]
+    assert inner.updated == [(7, {"Title": "A", "MultiDeptId": [2, 3]})]
+    assert wrapper.key_field == "Key"
