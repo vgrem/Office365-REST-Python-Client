@@ -34,6 +34,34 @@ class ListItemCollection(EntityCollection[ListItem]):
 
         return self._import_records(coerce_records(self._item_type, records, allow_unknown=True), progress=progress)
 
+    def _import_records(self, records: list[dict], progress: "ProgressCallback | None" = None) -> Self:
+        """Queue the creates and adopt the list's entity type annotation first.
+
+        The server needs the typed name (``SP.Data.<List>ListItem``) to interpret
+        collection-valued columns; without it a create carrying a multi-lookup or
+        multi-person value lacks the expected type and is rejected. ``List.add_item``
+        resolves the annotation explicitly, so bulk record creation must do the same.
+        One list read (skipped once the property is cached) stamps every item, and it
+        is queued before the creates so the annotation is in place when they serialize.
+        """
+        parent = self._parent
+        if parent is not None and records:
+            from office365.runtime.queries.deferred import DeferredOperationQuery
+
+            def _stamp(_) -> None:
+                name = parent.properties.get("ListItemEntityTypeFullName")
+                if not name:
+                    return
+                for item in self._data:
+                    if item._entity_type_name is None:
+                        item._entity_type_name = name
+
+            parent.ensure_property("ListItemEntityTypeFullName").after_execute(_stamp)
+            # A barrier splits the type-name read into its own round so the
+            # annotation is resolved before the creates are serialized.
+            parent.context.add_query(DeferredOperationQuery(parent.context))
+        return super()._import_records(records, progress)
+
     def upsert_target(self, *, key_field: str = "MigrationKey", enforce_unique: bool = False) -> "UpsertTarget":
         """The keyed skip/upsert target for this list (see ``from_records(key=...)``)."""
         from office365.sharepoint.listitems.upsert import ListItemUpsertTarget

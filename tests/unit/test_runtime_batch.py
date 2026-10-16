@@ -850,6 +850,26 @@ def test_add_item_reuses_cached_entity_type_without_reading_it_again():
     assert "SP.Data.MyListListItem" in transport.payloads[0]
 
 
+def test_queue_records_resolves_entity_type_before_create_round():
+    """Bulk record creates must adopt the list's entity type too.
+
+    A collection-valued column (multi-lookup/person) needs the typed annotation so
+    the server can resolve it; without it the ``$batch`` entry is rejected as an
+    untyped value. ``queue_records`` is the bulk sibling of ``add_item``.
+    """
+    transport = _ScriptedBatchTransport([[_LIST_TYPE_BODY], [{"d": {}}]])
+    ctx = _sharepoint_ctx(transport)
+    lst = ctx.web.lists.get_by_title("MyList")
+
+    lst.items.queue_records([{"Title": "A1"}])
+    ctx.execute_batch()
+
+    assert len(transport.rounds) == 2, transport.rounds  # noqa: PLR2004
+    assert transport.rounds[0][0].startswith("GET ")
+    assert transport.rounds[1][0].startswith("POST ")
+    assert "SP.Data.MyListListItem" in transport.payloads[1]
+
+
 def test_document_set_create_drains_all_rounds_async():
     """Async twin of the multi-phase ``DocumentSet.create`` batch chain."""
     transport = _ScriptedBatchTransport([[_FOLDER_BODY], [_LIST_BODY]], single_bodies=[_CREATE_BODY])

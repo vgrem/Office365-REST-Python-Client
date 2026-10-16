@@ -78,6 +78,23 @@ def test_none_and_unknown_pass_through():
     assert coerce_field_value(FieldType.Text, "text") == "text"
 
 
+def test_listitem_persists_multi_user_and_lookup_ids():
+    from office365.sharepoint.client_context import ClientContext
+    from office365.sharepoint.listitems.listitem import ListItem
+
+    item = ListItem(ClientContext("https://contoso.sharepoint.com/sites/x"))
+    item.set_property("MultiOwner", FieldMultiUserValue([FieldUserValue(12), FieldUserValue(7)]))
+    item.set_property("MultiDept", FieldMultiLookupValue([FieldLookupValue(2), FieldLookupValue(3)]))
+
+    # A multi-value column persists its ``<name>Id`` collection; ``<name>`` itself
+    # is transient. ``FieldMultiUserValue`` must be handled like ``FieldMultiLookupValue``
+    # (regression: it used to be written as ``<name>`` only, so the user ids were lost).
+    assert list(item.properties["MultiOwnerId"]) == [12, 7]
+    assert list(item.properties["MultiDeptId"]) == [2, 3]
+    assert item.to_json()["MultiOwnerId"] == [12, 7]
+    assert item.to_json()["MultiDeptId"] == [2, 3]
+
+
 def test_already_typed_value_passes_through():
     typed = FieldLookupValue(LookupId=5)
 

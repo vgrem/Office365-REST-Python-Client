@@ -25,6 +25,7 @@ from office365.sharepoint.fields.image_value import ImageFieldValue
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
 from office365.sharepoint.fields.multi_choice_value import FieldMultiChoiceValue
 from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue
+from office365.sharepoint.fields.multi_user_value import FieldMultiUserValue
 from office365.sharepoint.fields.string_values import FieldStringValues
 from office365.sharepoint.fields.url_value import FieldUrlValue
 from office365.sharepoint.files.system_object_type import FileSystemObjectType
@@ -760,7 +761,7 @@ class ListItem(SecurableObject):
         value = super().get_property(name, default_value)
         if self.is_property_available(name[:-2]):
             lookup_value = super().get_property(name[:-2], default_value)
-            if isinstance(lookup_value, FieldMultiLookupValue):
+            if isinstance(lookup_value, (FieldMultiLookupValue, FieldMultiUserValue)):
                 return ClientValueCollection(int, [v.LookupId for v in lookup_value])
             elif isinstance(lookup_value, FieldLookupValue):
                 return lookup_value.LookupId
@@ -772,7 +773,7 @@ class ListItem(SecurableObject):
                 self._set_taxonomy_field_value(name, value)
             elif isinstance(value, ImageFieldValue):
                 super().set_property(name, json.dumps(value.to_json()), persist_changes)
-            elif isinstance(value, FieldMultiLookupValue):
+            elif isinstance(value, (FieldMultiLookupValue, FieldMultiUserValue)):
                 collection = ClientValueCollection(int, [v.LookupId for v in value])
                 super().set_property(f"{name}Id", collection)
                 super().set_property(name, value, False)
