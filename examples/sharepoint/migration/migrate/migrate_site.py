@@ -26,8 +26,10 @@ By default items get fresh target timestamps, authorship and inherited
 descriptions. ``--preserve`` (or the individual ``--preserve-timestamps`` /
 ``--preserve-authorship`` / ``--preserve-permissions``) restores them from the
 source on a best-effort basis; ``--preserve-permissions`` only copies items whose
-source ACL is unique (inherited ACLs are left inheriting). A post-run
-verification flags anything a requested facet could not restore.
+source ACL is unique (inherited ACLs are left inheriting), and additionally
+re-creates the site's custom groups, their membership and the web-level role
+assignments. A post-run verification flags anything a requested facet could not
+restore.
 """
 
 from __future__ import annotations
@@ -83,7 +85,7 @@ def main():
     parser.add_argument(
         "--preserve-permissions",
         action="store_true",
-        help="copy a source item's *unique* role assignments (inherited ACLs are left as-is)",
+        help="copy item *unique* role assignments and re-create the site's groups/role assignments",
     )
     parser.add_argument("--apply", action="store_true", help="perform the migration (default: dry run)")
     parser.add_argument("--no-verify", action="store_true", help="skip the post-run source/target reconciliation")
@@ -167,9 +169,19 @@ def main():
                 print(f"      mismatch: {note}")
             for note in report.unverifiable[:3]:
                 print(f"      unverified: {note}")
+        if preserve_permissions:
+            _verify_site_security(source_ctx, ctx)
 
     for warning in session.warnings():
         print(f"  warning: {warning}")
+
+
+def _verify_site_security(source_ctx, ctx) -> None:
+    """Reconcile the migrated web's groups/role assignments against the source."""
+    from office365.migration.sharepoint.security import verify_site_security
+
+    for note in verify_site_security(source_ctx.web, ctx.web):
+        print(f"  site: {note}")
 
 
 if __name__ == "__main__":

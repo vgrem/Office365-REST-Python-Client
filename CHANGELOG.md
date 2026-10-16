@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Web (site) security replication:** `preserve_permissions` now covers the web
+  scope, not just per-item ACLs. `resolve_site_task(..., preserve_permissions=True)`
+  re-creates each source web's **custom site groups** (flags + membership) and its
+  **web-level role assignments** through the new
+  `office365.migration.sharepoint.security` module (`capture_site_groups`,
+  `apply_site_security`, `verify_site_security`). The three associated groups
+  (Owners/Members/Visitors) are mapped by name onto the target web's, so a renamed
+  association still lines up; their membership is left to the underlying Microsoft
+  365 group and is **not** copied. Custom groups are created only when missing and
+  an already-present assignment is left alone, so runs are idempotent; unresolvable
+  principals are reported (never silently dropped). `migrate_site.py` runs the
+  verification after a preserving run and prints any unrecovered note.
 - **Lookup and Person value remapping for list migration:** a Lookup column used
   to be copied verbatim, so it pointed at the source list (and kept source item
   ids) and a Person column kept the source site-user id — both meaningless on the

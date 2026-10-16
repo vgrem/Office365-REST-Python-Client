@@ -33,7 +33,7 @@ different content and deliver different fidelity:
 | Content | files + folders, **record lists + attachments**, list structure | **document libraries** (files/folders + version history) |
 | Version history | ✗ | ✓ the runner reads each file's history and the package carries `<Versions>` |
 | Authors / ModifiedBy | not preserved | ✓ applied from `UserGroup.xml` (integer principal id, matched by PUID) |
-| Permissions | library: best-effort same-tenant ACL; list: ✗ | best-effort same-tenant ACL — **resolved users only** (groups / unresolved principals skipped with a warning) |
+| Permissions | library: best-effort same-tenant ACL; list: ✗; **web groups/role assignments** with `--preserve-permissions` | best-effort same-tenant ACL — **resolved users only** (groups / unresolved principals skipped with a warning) |
 | Columns / content types / views | captured + provisioned over REST | **not emitted** by the builder today |
 | Azure Storage | not needed | required (SharePoint-owned containers; no Azure account) |
 | Throughput | per-item HTTP, throttle-aware, resumable | bulk server-side ingestion; poll a job |
@@ -368,6 +368,16 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
   `DeploymentRoles`/`DeploymentRoleAssignments` for **resolved users** (matched by
   PUID; groups/unresolved principals are skipped with a warning). Both are
   **same-tenant**; cross-tenant identity mapping is not implemented.
+- **Site security (web scope)** — with `preserve_permissions`, the SharePoint
+  resolver also re-creates each web's **custom site groups** (flags + membership)
+  and its **web-level role assignments**. The three associated groups
+  (Owners/Members/Visitors) are mapped by name onto the target web's, so a renamed
+  association still lines up; their *membership* is left to the Microsoft 365 group
+  behind the team site and is **not** copied. Custom groups are created only when
+  missing, and an assignment already present is left alone — so re-running is
+  idempotent. Same-tenant, matched by login (`EnsureUser` for users, group name for
+  groups); anything unresolvable is reported via `session.warnings()` and by
+  `verify_site_security`, never silently dropped.
 
 Adapters opt in by implementing optional hooks: `DataSource.read_permissions(item)`,
 `DataTarget.apply_timestamps(item)`, `DataTarget.apply_authorship(item)`, and
@@ -408,6 +418,7 @@ the shipped pairs' expected output.
 | Created/Modified | delivered | delivered | delivered |
 | Author/Editor | best-effort (resolved PUID users only) | best-effort (resolved users only) | best-effort (resolved users only) |
 | Permissions | best-effort (same-tenant, resolved users) | best-effort (same-tenant) | best-effort (same-tenant, unique ACLs only) |
+| Site groups / web role assignments | n/a (whole-site resolver only) | n/a | best-effort (same-tenant; custom groups + membership, associated-group membership excluded) |
 | Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
 | Columns / content types / views | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD dropped) |
@@ -419,6 +430,13 @@ the shipped pairs' expected output.
 > adapters: they are schema, and the SharePoint resolver replays them over REST
 > with `provision_list_structure` (whole-site and single-list resolution do this
 > by default). The matrix reports the adapter-level truth.
+
+> Site groups and web-level role assignments are likewise **not** an adapter
+> dimension: `describe_fidelity` models a source/target *pair*, whereas site
+> security is a **web** concern applied by the resolver
+> (`resolve_site_task(..., preserve_permissions=True)` → `apply_site_security`).
+> It is therefore listed here for completeness but is not part of
+> `report.dimensions`; `verify_site_security(source_web, target_web)` reconciles it.
 
 ## Server-side migration
 

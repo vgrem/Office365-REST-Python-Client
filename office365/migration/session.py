@@ -187,6 +187,7 @@ class MigrationSession:
             raise ValueError("register a ClientContext first (session.register(context=ctx))")
         from office365.migration.sharepoint.resolvers import resolve_site_task
 
+        effective = self._effective_options(options)
         pairs = resolve_site_task(
             task,
             self._context,
@@ -195,6 +196,7 @@ class MigrationSession:
             exclude=exclude,
             provision_structure=provision_structure,
             include_subwebs=include_subwebs,
+            preserve_permissions=bool(effective and effective.preserve_permissions),
             warnings=self._warnings,
         )
         jobs: list[MigrationJob] = []

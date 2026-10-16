@@ -32,6 +32,7 @@ from office365.migration.sharepoint.adapters import (
     SharePointListSource,
     SharePointListTarget,
 )
+from office365.migration.sharepoint.security import apply_site_security
 from office365.migration.sharepoint.structure import (
     capture_list_structure,
     normalize_guid,
@@ -109,6 +110,7 @@ def resolve_site_task(
     exclude: Sequence[str] | None = None,
     provision_structure: bool = True,
     include_subwebs: bool = False,
+    preserve_permissions: bool = False,
     warnings: list[str] | None = None,
 ) -> list[tuple[Any, Any]]:
     """Resolve a whole-site task into one ``(source, target)`` pair per list.
@@ -137,6 +139,9 @@ def resolve_site_task(
         provision_structure: Recreate the source list's structure on the target
             list (default). Pass ``False`` to only create the containers.
         include_subwebs: Recurse into subsites, creating matching target subsites.
+        preserve_permissions: Best-effort re-create each web's security scope —
+            custom site groups, their membership, and web-level role assignments
+            (same-tenant, by login). Unresolvable principals are reported.
         warnings: Optional sink for resolution-level notes (subsites skipped).
     """
     if task.kind != SHAREPOINT:
@@ -159,6 +164,7 @@ def resolve_site_task(
         exclude_titles,
         provision_structure,
         include_subwebs,
+        preserve_permissions,
         warnings if warnings is not None else [],
         pairs,
     )
@@ -172,10 +178,16 @@ def _resolve_web(
     exclude_titles: set[str],
     provision_structure: bool,
     include_subwebs: bool,
+    preserve_permissions: bool,
     warnings: list[str],
     pairs: list[tuple[Any, Any]],
 ) -> None:
     """Resolve one web's lists, then recurse into its subsites when requested."""
+    if preserve_permissions:
+        try:
+            apply_site_security(source_context.web, target_context.web, warnings)
+        except Exception as e:  # noqa: BLE001 — site security is best-effort; never abort list resolution
+            warnings.append(f"site security replication failed for {_web_url(source_context.web)}: {e}")
     source_lists: Iterable[Any] = source_context.web.lists.get().execute_query()
     selected: list[Any] = []
     for source_list in source_lists:
@@ -234,6 +246,7 @@ def _resolve_web(
             exclude_titles,
             provision_structure,
             include_subwebs,
+            preserve_permissions,
             warnings,
             pairs,
         )

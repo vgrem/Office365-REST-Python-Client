@@ -29,6 +29,11 @@ from office365.migration.sharepoint.scanners import (
     SiteLockedScanner,
     SiteScanSummary,
 )
+from office365.migration.sharepoint.security import (
+    apply_site_security,
+    capture_site_groups,
+    verify_site_security,
+)
 from office365.migration.sharepoint.structure import (
     ContentTypeDefinition,
     FieldDefinition,
@@ -68,10 +73,13 @@ __all__ = [
     "SiteScanSummary",
     "StructureReport",
     "ViewDefinition",
+    "apply_site_security",
     "capture_list_structure",
+    "capture_site_groups",
     "compare_list_structures",
     "get_scan",
     "provision_list_structure",
     "sharepoint_scan_pairs",
     "verify_list_structure",
+    "verify_site_security",
 ]
