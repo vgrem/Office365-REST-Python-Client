@@ -400,7 +400,7 @@ the shipped pairs' expected output.
 | Created/Modified | delivered | delivered | delivered |
 | Author/Editor | best-effort (resolved PUID users only) | best-effort (resolved users only) | best-effort (resolved users only) |
 | Permissions | best-effort (same-tenant, resolved users) | best-effort (same-tenant) | best-effort (same-tenant, unique ACLs only) |
-| Attachments | n/a | n/a | delivered (list items) |
+| Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
 | Columns / content types / views | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim; remap not implemented) | same | same |
 | Check-out / draft / approval state | unsupported | unsupported | unsupported |
@@ -556,7 +556,7 @@ explicit about what it could not confirm:
 |---|---|---|
 | Presence (expected vs found paths) | always | `missing` / `extra` |
 | Content checksums | always, on a `spot_checks` sample | `mismatches` (or `unverifiable` if a side exposes no comparable hash) |
-| Timestamps (`Created`/`Modified`) | when `preserve_timestamps` was requested | `mismatches` / `unverifiable` |
+| Timestamps (`Created`/`Modified`) | when `preserve_timestamps` was requested | `mismatches` / `unverifiable` (attachments: content-only, reported once) |
 | Authorship (`Author`/`Editor`) | when `preserve_authorship` was requested | `mismatches` / `unverifiable` |
 | Permissions | when `preserve_permissions` was requested | `mismatches` / `unverifiable` |
 | Versions | when `preserve_versions` was requested | always `unverifiable` over REST |
@@ -566,6 +566,18 @@ For SharePoint list items the source and target are paired by the
 attachment presence *and* content (md5) are checked, and each record's scalar
 content columns are hashed on both sides, so a field-value difference is a real
 `mismatch` rather than an `unverifiable` caveat.
+
+Record timestamps and authorship are written as a **system update** — CSOM
+`ListItem.UpdateOverwriteVersion`, exposed over REST as
+`ValidateUpdateListItem(..., bNewDocumentUpdate=True)`. That writes
+`Created`/`Modified`/`Author`/`Editor` *without* creating a new version, so a
+migrated record keeps the single version it arrived with instead of gaining one
+version per fidelity write. (Passing `bNewDocumentUpdate=False` would create a
+new version for every write.) Because SharePoint has no client-side path to set
+an attachment's own system metadata (an attachment has no backing list item),
+attachments are migrated **content-only**: they are presence- and md5-checked, and
+the timestamp/authorship/permission diffs exclude them with a single
+`unverifiable` note rather than one caveat per attachment.
 
 Office Open XML documents (`.docx`/`.xlsx`/`.pptx`/…) that md5-differ are compared
 canonically before being called a mismatch: SharePoint re-serializes them on

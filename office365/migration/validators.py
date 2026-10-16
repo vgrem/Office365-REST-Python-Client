@@ -12,10 +12,12 @@ The validator is layered, and honest about what it can and cannot confirm:
 3. **Fidelity** — when the run requested ``preserve_timestamps`` /
    ``preserve_authorship`` / ``preserve_permissions``, the same sample is diffed
    via the optional ``read_metadata(item)`` / ``read_authorship(item)`` /
-   ``read_permissions(item)`` adapter hooks. If an adapter does not expose the
-   hook the check is reported as ``unverifiable``, never silently skipped.
-   ``preserve_versions`` cannot be verified over REST and is always reported as
-   ``unverifiable``.
+   ``read_permissions(item)`` adapter hooks. List-item attachments are
+   content-only (their system metadata has no client-settable backing), so they
+   are excluded from these diffs and reported once as ``unverifiable``. If an
+   adapter does not expose the hook the check is reported as ``unverifiable``,
+   never silently skipped. ``preserve_versions`` cannot be verified over REST and
+   is always reported as ``unverifiable``.
 
 A requested check that could not be run therefore shows up in
 ``VerificationReport.unverifiable`` and makes ``complete`` false while leaving
@@ -91,12 +93,27 @@ def verify(
 
     _verify_content(source, target, sample, report)
     if options is not None:
+        wants_fidelity = (
+            options.preserve_timestamps
+            or options.preserve_authorship
+            or options.preserve_permissions
+            or options.preserve_versions
+        )
+        # Attachments are content-only: SharePoint exposes no client-side path to
+        # set an attachment's own system metadata (it has no backing list item),
+        # so the fidelity diffs run on records/files and the gap is stated once.
+        fidelity_sample = [item for item in sample if item.item_type != "attachment"] if wants_fidelity else sample
+        if wants_fidelity and len(fidelity_sample) < len(sample):
+            report.unverifiable.append(
+                f"attachments: {len(sample) - len(fidelity_sample)} sampled attachment(s) are "
+                "content-only (their system metadata cannot be set over REST)"
+            )
         if options.preserve_timestamps:
-            _verify_metadata(source, target, sample, report)
+            _verify_metadata(source, target, fidelity_sample, report)
         if options.preserve_authorship:
-            _verify_authorship(source, target, sample, report)
+            _verify_authorship(source, target, fidelity_sample, report)
         if options.preserve_permissions:
-            _verify_permissions(source, target, sample, report)
+            _verify_permissions(source, target, fidelity_sample, report)
         if options.preserve_versions:
             report.unverifiable.append(
                 "versions: REST cannot verify version history (needs the server-side Migration API)"

@@ -399,7 +399,8 @@ def test_apply_timestamps_uses_validated_update_with_utc_dates():
     form_values, dates_in_utc, new_document_update = row.updates[0]
     assert form_values == {"Created": "2019-03-04T05:06:07Z", "Modified": "2020-04-05T06:07:08Z"}
     assert dates_in_utc is True
-    assert new_document_update is False
+    # bNewDocumentUpdate=True is a system update: no new version is created.
+    assert new_document_update is True
 
 
 def test_read_metadata_refreshes_the_item_before_diffing():
@@ -413,9 +414,9 @@ def test_read_metadata_refreshes_the_item_before_diffing():
     assert row.get_calls == 1  # apply_timestamps wrote after the index was built
 
 
-def test_timestamps_fold_in_pending_authorship_so_editor_is_not_reset():
-    # The timestamp write runs last; REST would otherwise bump ``Editor`` to the
-    # caller, so the pending Author/Editor values must ride along in that write.
+def test_timestamps_fold_in_pending_authorship_for_one_final_write():
+    # The timestamp write runs last; the pending Author/Editor values ride along
+    # so both land atomically (and neither is lost to a later write).
     login = "vgrem@mediadev8.onmicrosoft.com"
     row = _TargetListItem(10, "1")
     web = _Web(users=[_SiteUser(9, login, title="Vadim")])
@@ -466,6 +467,7 @@ def test_apply_authorship_resolves_users_and_sets_person_fields():
     assert form_values["Author"].LookupId == 9  # noqa: PLR2004
     assert form_values["Editor"].LookupId == 9  # noqa: PLR2004
     assert form_values["Author"].LookupValue == login
+    assert row.updates[0][2] is True  # a system update (no new version)
 
 
 def test_apply_authorship_skips_unresolved_principals():

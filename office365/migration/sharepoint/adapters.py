@@ -1026,11 +1026,13 @@ class SharePointListTarget:
     def apply_timestamps(self, item: MigrationItem) -> None:
         """Best-effort: restore ``Created``/``Modified`` on the written item.
 
-        Uses ``ValidateUpdateListItem`` (the only REST path that can set these
-        system fields); ``datesInUTC=True`` requires the ``...Z`` UTC form. When
-        authorship was applied for the same item, its ``Author``/``Editor`` values
-        are folded into this final write -- otherwise the update would silently
-        reset ``Editor`` to the caller's identity.
+        Uses ``ValidateUpdateListItem`` with ``bNewDocumentUpdate=True`` -- a
+        system update (the CSOM ``UpdateOverwriteVersion`` path), so the metadata
+        lands **without** creating a new version and a migrated record keeps its
+        original version instead of accumulating one version per fidelity write.
+        ``datesInUTC=True`` requires the ``...Z`` UTC form. When authorship was
+        applied for the same item, its ``Author``/``Editor`` values are folded into
+        this final write so the two land atomically.
         """
         target_item = self._target_item(item)
         if target_item is None:
@@ -1044,7 +1046,9 @@ class SharePointListTarget:
             form_values["Modified"] = modified
         form_values.update(self._pending_authorship.pop(item.dest_path, {}))
         if form_values:
-            result = target_item.validate_update_list_item(form_values, dates_in_utc=True).execute_query()
+            result = target_item.validate_update_list_item(
+                form_values, dates_in_utc=True, new_document_update=True
+            ).execute_query()
             _report_rejected_fields(result, self.warnings, f"timestamps {item.dest_path}")
 
     def apply_authorship(self, item: MigrationItem) -> None:
@@ -1052,6 +1056,8 @@ class SharePointListTarget:
 
         A principal is applied only when its login name resolves to a target user
         (``EnsureUser``); unresolved principals are skipped (same-tenant only).
+        Written as a system update (``bNewDocumentUpdate=True``) so it does not
+        create a new version; the values are also cached for the timestamp write.
         """
         target_item = self._target_item(item)
         if target_item is None:
@@ -1070,7 +1076,9 @@ class SharePointListTarget:
         if editor is not None:
             form_values["Editor"] = FieldUserValue(editor.id, editor.login_name)
         self._pending_authorship[item.dest_path] = dict(form_values)
-        result = target_item.validate_update_list_item(form_values, dates_in_utc=True).execute_query()
+        result = target_item.validate_update_list_item(
+            form_values, dates_in_utc=True, new_document_update=True
+        ).execute_query()
         _report_rejected_fields(result, self.warnings, f"authorship {item.dest_path}")
 
     def apply_permissions(self, item: MigrationItem, permissions: list[PermissionEntry]) -> None:
@@ -1571,9 +1579,11 @@ class SharePointLibraryTarget:
     def apply_timestamps(self, item: MigrationItem) -> None:
         """Best-effort: restore ``Created``/``Modified`` on the written item.
 
-        Uses ``ValidateUpdateListItem`` (the same mechanism as
-        ``ListItem.system_update``), which is the only REST path that can set these
-        system fields. ``preserve_versions`` still needs the server-side API.
+        Uses ``ValidateUpdateListItem``, the only REST path that can set these
+        system fields. For files it runs as a system update
+        (``bNewDocumentUpdate=True``, the CSOM ``UpdateOverwriteVersion`` path) so
+        the metadata lands without creating a new version; folders have no version
+        history. ``preserve_versions`` still needs the server-side API.
         """
         form_values: dict = {}
         created, modified = self._utc_to_local(item.created, item.modified)

@@ -304,6 +304,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Record fidelity writes now use a system update, so they no longer create
+  versions.** `ValidateUpdateListItem` was called with
+  `bNewDocumentUpdate=False`, which creates a new version for every
+  `Created`/`Modified`/`Author`/`Editor` write — a migrated record arrived at
+  `1.0` and left at `2.0`/`3.0`. It is now called with
+  `bNewDocumentUpdate=True` (CSOM `ListItem.UpdateOverwriteVersion`), which
+  overwrites those fields *without* a version bump (live-probed: `False` -> `2.0`,
+  `True` -> `1.0`). An item gains at most one version, and only for a genuinely
+  unique ACL, since breaking role inheritance is itself a change.
+- **List-item attachments are migrated content-only and no longer noise up the
+  fidelity report.** SharePoint exposes no client-side path to set an
+  attachment's own system metadata (an attachment has no backing list item to
+  `ValidateUpdateListItem`), so timestamps/authorship/permissions cannot be
+  restored for it. The timestamp/authorship/permission diffs now exclude
+  attachments and report the gap once as `unverifiable` instead of a misleading
+  per-item `(no metadata)`; attachment presence and md5 content are still checked.
 - **List and library fidelity writes now land truthfully.** A live
   same-tenant run (`team_in` -> `team_out`) with
   `--preserve-timestamps/--preserve-authorship/--preserve-permissions` surfaced

@@ -211,6 +211,29 @@ def test_metadata_check_unverifiable_without_target_hook():
     assert not report.complete
 
 
+def test_attachment_system_metadata_reported_once_not_per_item():
+    record = MigrationItem(source_path="/src/r", dest_path="r")
+    attachment = MigrationItem(source_path="/src/r/att.txt", dest_path="r/att.txt", item_type="attachment")
+    manifest = Manifest([record, attachment])
+    source = _Source(
+        manifest.items,
+        checksums={"r": "x", "r/att.txt": "y"},
+        metadata={"r": {"modified": "2020-01-01T00:00:00Z"}},
+    )
+    target = _Target(
+        ["r", "r/att.txt"],
+        checksums={"r": "x", "r/att.txt": "y"},
+        metadata={"r": {"modified": "2020-01-01T00:00:00Z"}},
+    )
+
+    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
+
+    assert report.mismatches == []
+    assert report.ok  # the record's timestamp matched; the attachment is content-only
+    assert not any("no metadata" in entry for entry in report.unverifiable)
+    assert any(entry.startswith("attachments:") for entry in report.unverifiable)
+
+
 def test_permission_mismatch_reported_when_requested():
     manifest = _manifest("a.txt")
     source = _Source(
