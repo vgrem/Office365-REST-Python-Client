@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Web navigation replication:** the whole-site resolver now copies each web's
+  **Quick Launch** and **top navigation bar** onto the target when
+  `MigrationSettings.migrate_navigation` is on (the default). The new
+  `office365.migration.sharepoint.navigation` module exposes `capture_navigation`,
+  `apply_navigation` and `verify_navigation`; the copy is **additive** (a source
+  node already present on the target by title is left alone, its children are
+  reconciled), so runs are idempotent and a target's own links are never destroyed,
+  and source links are rewritten from the source web's path to the target's.
+  Dynamic nodes without a URL (the *Recent* node and its computed children) and
+  audience targeting are out of scope; pages and web parts remain *handoff*.
 - **Web (site) security replication:** `preserve_permissions` now covers the web
   scope, not just per-item ACLs. `resolve_site_task(..., preserve_permissions=True)`
   re-creates each source web's **custom site groups** (flags + membership) and its

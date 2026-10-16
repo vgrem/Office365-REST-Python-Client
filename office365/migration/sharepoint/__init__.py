@@ -11,6 +11,13 @@ from office365.migration.sharepoint.adapters import (
     SharePointListTarget,
 )
 from office365.migration.sharepoint.assessor import MigrationAssessor
+from office365.migration.sharepoint.navigation import (
+    NavNode,
+    WebNavigation,
+    apply_navigation,
+    capture_navigation,
+    verify_navigation,
+)
 from office365.migration.sharepoint.options import SharePointAssessmentOptions
 from office365.migration.sharepoint.registry import (
     SHAREPOINT_SCANS,
@@ -60,6 +67,7 @@ __all__ = [
     "ListStructure",
     "MigrationAssessor",
     "MigrationTenantAssessor",
+    "NavNode",
     "PathScanner",
     "PermissionScanner",
     "SHAREPOINT_SCANS",
@@ -73,13 +81,17 @@ __all__ = [
     "SiteScanSummary",
     "StructureReport",
     "ViewDefinition",
+    "WebNavigation",
+    "apply_navigation",
     "apply_site_security",
     "capture_list_structure",
+    "capture_navigation",
     "capture_site_groups",
     "compare_list_structures",
     "get_scan",
     "provision_list_structure",
     "sharepoint_scan_pairs",
     "verify_list_structure",
+    "verify_navigation",
     "verify_site_security",
 ]

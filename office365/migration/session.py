@@ -197,6 +197,7 @@ class MigrationSession:
             provision_structure=provision_structure,
             include_subwebs=include_subwebs,
             preserve_permissions=bool(effective and effective.preserve_permissions),
+            migrate_navigation=bool(self._settings and self._settings.migrate_navigation),
             warnings=self._warnings,
         )
         jobs: list[MigrationJob] = []

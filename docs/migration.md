@@ -423,7 +423,7 @@ the shipped pairs' expected output.
 | Columns / content types / views | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD dropped) |
 | Check-out / draft / approval state | unsupported | unsupported | unsupported |
-| Navigation / pages / web parts | handoff (detect and remediate out of band) | same | same |
+| Navigation / pages / web parts | pages/web parts not migrated; quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
 > Columns, content types, and views are deliberately *not* carried by the item
@@ -437,6 +437,14 @@ the shipped pairs' expected output.
 > (`resolve_site_task(..., preserve_permissions=True)` → `apply_site_security`).
 > It is therefore listed here for completeness but is not part of
 > `report.dimensions`; `verify_site_security(source_web, target_web)` reconciles it.
+
+> Navigation is also a **web** concern applied by the resolver: with
+> `migrate_navigation` on (the default), `apply_navigation` copies each web's
+> Quick Launch and top navigation bar additively (source links rewritten to the
+> target; dynamic nodes such as *Recent* are skipped), and
+> `verify_navigation(source_web, target_web)` reconciles the copyable links.
+> Pages and web parts are **not** migrated — the `navigation` dimension stays
+> `handoff` for that reason.
 
 ## Server-side migration
 

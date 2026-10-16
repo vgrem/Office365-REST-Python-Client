@@ -30,6 +30,10 @@ source ACL is unique (inherited ACLs are left inheriting), and additionally
 re-creates the site's custom groups, their membership and the web-level role
 assignments. A post-run verification flags anything a requested facet could not
 restore.
+
+The source site's navigation (Quick Launch and top bar) is copied onto the target
+(additively, source links rewritten to the target) unless the settings disable it;
+a post-run reconciliation reports any link that did not land.
 """
 
 from __future__ import annotations
@@ -169,11 +173,18 @@ def main():
                 print(f"      mismatch: {note}")
             for note in report.unverifiable[:3]:
                 print(f"      unverified: {note}")
-        if preserve_permissions:
-            _verify_site_security(source_ctx, ctx)
+        _verify_web_scope(source_ctx, ctx, preserve_permissions, fidelity.migrate_navigation)
 
     for warning in session.warnings():
         print(f"  warning: {warning}")
+
+
+def _verify_web_scope(source_ctx, ctx, preserve_permissions: bool, migrate_navigation: bool) -> None:
+    """Reconcile the resolver-level web concerns (site security, navigation) with the source."""
+    if preserve_permissions:
+        _verify_site_security(source_ctx, ctx)
+    if migrate_navigation:
+        _verify_navigation(source_ctx, ctx)
 
 
 def _verify_site_security(source_ctx, ctx) -> None:
@@ -182,6 +193,14 @@ def _verify_site_security(source_ctx, ctx) -> None:
 
     for note in verify_site_security(source_ctx.web, ctx.web):
         print(f"  site: {note}")
+
+
+def _verify_navigation(source_ctx, ctx) -> None:
+    """Reconcile the migrated web's navigation against the source."""
+    from office365.migration.sharepoint.navigation import verify_navigation
+
+    for note in verify_navigation(source_ctx.web, ctx.web):
+        print(f"  nav: {note}")
 
 
 if __name__ == "__main__":

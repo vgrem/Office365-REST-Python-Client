@@ -188,7 +188,12 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
         )
     set_("item_state", status.UNSUPPORTED, "check-out/draft/approval state is not carried")
     set_("views", status.UNSUPPORTED, "views are not carried by the adapters; replay them with provision_list_structure")
-    set_("navigation", status.HANDOFF, "navigation/pages/web parts are detected and handed off for remediation")
+    set_(
+        "navigation",
+        status.HANDOFF,
+        "pages/web parts are not migrated; the whole-site resolver copies quick-launch/top-nav links "
+        "(migrate_navigation), rewriting source links to the target",
+    )
     set_("sharing_links", status.UNSUPPORTED, "sharing links follow the tenant policy; they are not recreated per item")
     return dims, notes
 
