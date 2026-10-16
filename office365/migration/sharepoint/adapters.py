@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
 from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, cast
@@ -19,7 +20,6 @@ from typing import TYPE_CHECKING, Any, cast
 from office365.migration.adapters import MigrationProgress
 from office365.migration.base import MigrationItem, PermissionEntry, Principal, conflict_to_on_conflict, is_puid
 from office365.migration.sharepoint.transfer import Failure
-from office365.runtime.converters.json_file import record_to_json
 from office365.runtime.converters.records import records_from_items
 from office365.runtime.converters.scalars import iso_or_none, parse_datetime, parse_int
 from office365.runtime.limits import DEFAULT_BATCH_SIZE
@@ -42,9 +42,67 @@ _METADATA_SELECT = ["AuthorId", "EditorId", "HasUniqueRoleAssignments"]
 #: Projected system metadata that is read-only and must not be written back.
 _NON_WRITABLE_SELECT = frozenset({"HasUniqueRoleAssignments"})
 
+#: Navigation properties a ``*`` read returns that carry no scalar content and can
+#: never be written back; they are dropped silently. A genuine typed value we
+#: cannot remap (a lookup/person column) is still surfaced as a warning.
+_NAVIGATION_SELECT = frozenset(
+    {
+        "ParentList",
+        "ContentType",
+        "Folder",
+        "File",
+        "FieldValuesAsHtml",
+        "FieldValuesAsText",
+        "FieldValuesForEdit",
+    }
+)
+
 #: Marker column added to a migrated list recording each item's source id. It makes
 #: a re-run idempotent and lets post-run verification pair source and target items.
 DEFAULT_LIST_IDENTITY_FIELD = "MigrationSourceId"
+
+#: Record columns excluded from the content checksum: server-assigned identity
+#: (``Id``/``GUID``), facets verified separately (timestamps, authorship,
+#: permissions), values the target remaps (``ContentTypeId``), and bookkeeping
+#: (version label, server-derived embed URLs, the navigation ``ParentList``). What
+#: remains is the item's *content* columns, which a faithful copy preserves.
+_CONTENT_EXCLUDED = frozenset(
+    {
+        "Id",
+        "ID",
+        "GUID",
+        "FileSystemObjectType",
+        "Created",
+        "Modified",
+        "AuthorId",
+        "EditorId",
+        "HasUniqueRoleAssignments",
+        "ContentTypeId",
+        "OData__UIVersionString",
+        "_UIVersionString",
+        "ServerRedirectedEmbedUri",
+        "ServerRedirectedEmbedUrl",
+        "ParentList",
+    }
+)
+
+
+def _content_checksum(record: dict, extra_excluded: "frozenset[str]" = frozenset()) -> str:
+    """MD5 of an item's scalar content columns in a stable, order-independent form.
+
+    The list source and target both use this so record content can be reconciled:
+    only scalar, non-excluded columns are hashed and keys are sorted, so the two
+    sides agree regardless of property iteration order.
+    """
+    content = {
+        key: value
+        for key, value in record.items()
+        if key not in _CONTENT_EXCLUDED
+        and key not in extra_excluded
+        and (value is None or isinstance(value, (str, int, float, bool)))
+    }
+    payload = json.dumps(content, sort_keys=True, default=str)
+    return hashlib.md5(payload.encode("utf-8")).hexdigest()
 
 
 def _sp_utc_timestamp(value: str | None) -> str | None:
@@ -546,7 +604,8 @@ class SharePointListSource:
             for key, value in list(record.items()):
                 if value is not None and not isinstance(value, (str, int, float, bool)):
                     record.pop(key)
-                    dropped.add(key)
+                    if key not in _NAVIGATION_SELECT:
+                        dropped.add(key)
         if dropped:
             self.warnings.append(
                 f"skipped non-scalar column(s) with no typed-value mapping: {', '.join(sorted(dropped))}"
@@ -567,8 +626,7 @@ class SharePointListSource:
     def checksum(self, item: MigrationItem) -> str:
         if item.item_type == "attachment":
             return hashlib.md5(self._attachment_content(item)).hexdigest()
-        payload = record_to_json(self._records.get(item.dest_path, {}))
-        return hashlib.md5(payload.encode("utf-8")).hexdigest()
+        return _content_checksum(self._records.get(item.dest_path, {}))
 
     def read_metadata(self, item: MigrationItem) -> dict | None:
         """Comparable attributes of the source item (for the post-run metadata diff)."""
@@ -919,7 +977,11 @@ class SharePointListTarget:
     def checksum(self, item: MigrationItem) -> str:
         if item.item_type == "attachment":
             return self._attachment_checksum(item)
-        return ""
+        target_item = self._fresh_target_item(item)
+        if target_item is None:
+            return ""
+        extra = frozenset({self._identity_field}) if self._identity_field else frozenset()
+        return _content_checksum(target_item.properties, extra)
 
     def _attachment_checksum(self, item: MigrationItem) -> str:
         parent_id, _, filename = str(item.dest_path).partition("/")

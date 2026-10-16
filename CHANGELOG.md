@@ -304,6 +304,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **List and library fidelity writes now land truthfully.** A live
+  same-tenant run (`team_in` -> `team_out`) with
+  `--preserve-timestamps/--preserve-authorship/--preserve-permissions` surfaced
+  several defects, all fixed: fidelity facets are applied in order
+  (permissions, then authorship, then timestamps) so the last write owns the
+  fields SharePoint auto-bumps, and the pending `Author`/`Editor` are folded into
+  the timestamp write (a `ValidateUpdateListItem` call with only
+  `Created`/`Modified` silently reset `Editor` to the caller). System/app
+  principals are skipped in authorship because a rejected field rolls the whole
+  `ValidateUpdateListItem` batch back even though the response reports
+  `HasException=False` per field; rejected fields are now surfaced as warnings,
+  and the site's default Owners/Members/Visitors groups are normalized to a stable
+  token so the permission diff compares like with like across sites.
+- **Timestamps now restore the exact instant on both list and document items.**
+  Live probes showed list items honor ISO `...Z` as UTC while document items
+  ignore `datesInUTC` and reject `Z`, parsing the space form as *web-local* (a
+  `--preserve` of a document then shifted the instant by the web's offset). The
+  canonical value stays UTC; the library target converts it to web-local at write
+  time through the server's `RegionalSettings.TimeZone.UTCToLocalTime`, so DST is
+  handled server-side. To make that function call work, `ODataPathBuilder` now
+  serializes a `datetime` argument as an OData v3 `datetime'...'` literal (and a
+  `date` as `date'...'`); it previously fell through to `quote(str(value))` and
+  produced an invalid path.
+- **Verification read stale properties after a fidelity write.** The library
+  target's `read_authorship` reused the securable snapshot taken before the write,
+  so it reported no author/editor and flagged a false authorship mismatch. The
+  library target now re-reads the written item before diffing, matching what the
+  list target already did.
+- **`is_puid` rejected legitimate users whose PUID contains hex letters.**
+  SharePoint renders `UserInfo.UserId.NameId` as a 16-character hex string, so a
+  decimal-only check dropped e.g. user 7 (`100320006514b083`) from the
+  server-side user map and logged a misleading skip. It now accepts the hex form.
+- **Record-list content is now verified instead of reported `unverifiable`.**
+  The list target's `checksum` used to return an empty hash, so live runs showed
+  `unverifiable: content` for every record. The source and target now hash the
+  item's scalar content columns with the same stable, order-independent
+  projection (server-assigned identity, separately-checked timestamps/authorship/
+  permissions, the remapped `ContentTypeId`, version bookkeeping and navigation
+  properties are excluded), so a field-value difference is a real `mismatch`.
+  Navigation properties (`ParentList`) are dropped silently; only typed columns
+  that cannot be remapped keep a warning.
 - **Record-list writes are flushed (and checkpointed) per chunk.**
   `SharePointListTarget` queues each item's create until a flush, so a large list
   migration at `concurrency=1` accumulated every entity and recorded the item as

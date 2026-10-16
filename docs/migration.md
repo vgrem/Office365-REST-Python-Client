@@ -135,10 +135,14 @@ can no longer reconcile a re-run).
 
 Two honest limits remain:
 
-- Record **content checksums** are reported as `unverifiable`: field-value
-  normalization and `OData__`-prefixed system keys make a value fingerprint
-  false-mismatch-prone. Item *presence* is still verified via the identity marker,
-  and attachments are content-checked (md5).
+- Record **content** is verified over the item's scalar content columns: the
+  source fingerprint and the target read-back hash the same fields, so a value
+  difference is a real `mismatch`. Server-assigned identity (`Id`/`GUID`), the
+  separately-checked timestamps/authorship/permissions, the remapped
+  `ContentTypeId`, and version bookkeeping are excluded by design. **Typed
+  columns** (lookup/person/Managed Metadata) are dropped rather than remapped, so
+  they are outside the content check — the target write warns when they are
+  skipped.
 - Per-item **timestamps/permissions/authorship**
   (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
   by the list adapters on a best-effort basis: timestamps and authorship are
@@ -559,8 +563,9 @@ explicit about what it could not confirm:
 
 For SharePoint list items the source and target are paired by the
 `MigrationSourceId` marker (see [Migrating list items](#migrating-list-items));
-attachment presence *and* content (md5) are checked, while each record's content
-checksum is reported as `unverifiable`.
+attachment presence *and* content (md5) are checked, and each record's scalar
+content columns are hashed on both sides, so a field-value difference is a real
+`mismatch` rather than an `unverifiable` caveat.
 
 Office Open XML documents (`.docx`/`.xlsx`/`.pptx`/…) that md5-differ are compared
 canonically before being called a mismatch: SharePoint re-serializes them on

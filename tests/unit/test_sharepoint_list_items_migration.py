@@ -26,6 +26,7 @@ from office365.migration.sharepoint.adapters import (
     DEFAULT_LIST_IDENTITY_FIELD,
     SharePointListSource,
     SharePointListTarget,
+    _content_checksum,
 )
 
 
@@ -184,7 +185,7 @@ class _TargetAttachments:
 
 
 class _TargetRow:
-    def __init__(self, target_id, identity, attachments=()):
+    def __init__(self, target_id, identity, attachments=(), properties=None):
         self.id = target_id
         entries = list(attachments)
         self.properties = {
@@ -192,7 +193,14 @@ class _TargetRow:
             DEFAULT_LIST_IDENTITY_FIELD: identity,
             "AttachmentFiles": entries,
         }
+        if properties:
+            self.properties.update(properties)
         self.attachment_files = _TargetAttachments(entries=entries)
+        self.get_calls = 0
+
+    def get(self):
+        self.get_calls += 1
+        return _Executable()
 
 
 class _TargetItems:
@@ -331,3 +339,46 @@ def test_list_target_leaves_unmapped_content_type_id_alone():
     target.write(MigrationItem("Docs/1", "1", item_type="record"), {"ContentTypeId": "0x0101"})
 
     assert target_list.queued == [{"ContentTypeId": "0x0101", DEFAULT_LIST_IDENTITY_FIELD: "1"}]
+
+
+def test_list_target_content_checksum_matches_source_for_equal_content():
+    # Server-assigned, remapped and separately-verified columns must not make the
+    # read-back disagree with the source's content projection.
+    row = _TargetRow(
+        10,
+        "1",
+        properties={
+            "Title": "Alpha",
+            "Quantity": 3,
+            "GUID": "target-guid",
+            "ContentTypeId": "0x0100TARGET",
+            "Created": "2020-01-01T00:00:00Z",
+            "Modified": "2026-01-01T00:00:00Z",
+            "AuthorId": 99,
+            "EditorId": 99,
+            "OData__UIVersionString": "7.0",
+        },
+    )
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
+
+    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
+
+    assert checksum == _content_checksum({"Title": "Alpha", "Quantity": 3})
+    assert row.get_calls == 1
+
+
+def test_list_target_content_checksum_detects_a_content_difference():
+    row = _TargetRow(10, "1", properties={"Title": "Alpha"})
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
+
+    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
+
+    assert checksum != _content_checksum({"Title": "Beta"})
+
+
+def test_content_checksum_is_order_independent_and_excludes_bookkeeping():
+    first = {"Title": "A", "Id": 1, "GUID": "x", "Quantity": 2}
+    second = {"Quantity": 2, "Title": "A", "GUID": "y", "Id": 99}
+
+    assert _content_checksum(first) == _content_checksum(second)
+    assert _content_checksum(first) != _content_checksum({"Title": "A", "Quantity": 3})
