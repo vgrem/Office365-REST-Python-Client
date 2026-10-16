@@ -361,6 +361,19 @@ def test_fidelity_matrix_reflects_probed_capabilities():
     assert report.ok
 
 
+def test_fidelity_matrix_marks_typed_values_best_effort_when_remapping_is_supported():
+    from office365.migration.fidelity import FidelityStatus, describe_fidelity
+
+    source, target = _Source([]), _Target()
+    source.supports_typed_values = True  # type: ignore[attr-defined]
+    target.supports_typed_values = True  # type: ignore[attr-defined]
+
+    report = describe_fidelity(source, target, MigrationOptions())
+
+    assert report.dimensions["typed_values"] == FidelityStatus.BEST_EFFORT.value
+    assert "typed_values" in report.dimension_notes
+
+
 def test_fidelity_matrix_marks_authorship_best_effort_for_a_package_target():
     from office365.migration.fidelity import FidelityStatus, describe_fidelity
 
@@ -393,6 +406,8 @@ def test_sharepoint_adapters_advertise_capabilities():
 
     assert SharePointListSource.supports_attachments is True
     assert SharePointListTarget.supports_attachments is True
+    assert SharePointListSource.supports_typed_values is True
+    assert SharePointListTarget.supports_typed_values is True
     assert SharePointPackageTarget.supports_versions is True
     assert SharePointPackageTarget.supports_authorship is True
 

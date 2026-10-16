@@ -470,6 +470,10 @@ class SharePointListSource:
     # Marks this source as emitting list-item attachments as extra items (see DataSource).
     supports_attachments = True
 
+    # Marks this source as annotating Person columns with a portable login name so the
+    # target can resolve them (see ``_annotate_person_logins``).
+    supports_typed_values = True
+
     def __init__(self, source_list: "SPList", select: list[str] | None = None) -> None:
         self._list = source_list
         self._select = select
@@ -778,6 +782,10 @@ class SharePointListTarget:
 
     # Marks this target as accepting list-item attachments as extra items (see DataTarget).
     supports_attachments = True
+
+    # Marks this target as remapping Lookup values across migrated lists and Person
+    # values by login (see ``_remap_typed_values``).
+    supports_typed_values = True
 
     #: The single-item :meth:`write` only queues a create; a chunk must be flushed
     #: before it is durable. The runner therefore routes this target through the

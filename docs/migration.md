@@ -140,9 +140,14 @@ Two honest limits remain:
   difference is a real `mismatch`. Server-assigned identity (`Id`/`GUID`), the
   separately-checked timestamps/authorship/permissions, the remapped
   `ContentTypeId`, and version bookkeeping are excluded by design. **Typed
-  columns** (lookup/person/Managed Metadata) are dropped rather than remapped, so
-  they are outside the content check — the target write warns when they are
-  skipped.
+  columns** are remapped rather than dropped where the target can: a **Lookup**
+  value is translated from the source list's item id to the matching target item
+  through each migrated list's `MigrationSourceId` marker, and a **Person** value
+  is carried as a login name and resolved to the target's own site-user id with
+  `EnsureUser`. Single-value Lookup/Person columns are covered; **multi-value
+  Lookup/Person and Managed Metadata** values are still dropped, and a value that
+  cannot be resolved (a lookup into a list outside this migration, an unknown
+  login) is dropped with a warning rather than written wrong.
 - Per-item **timestamps/permissions/authorship**
   (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
   by the list adapters on a best-effort basis: timestamps and authorship are
@@ -402,7 +407,7 @@ the shipped pairs' expected output.
 | Permissions | best-effort (same-tenant, resolved users) | best-effort (same-tenant) | best-effort (same-tenant, unique ACLs only) |
 | Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
 | Columns / content types / views | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
-| Lookup / Person / MMD values | unsupported (values copied verbatim; remap not implemented) | same | same |
+| Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single-value Lookup remapped across migrated lists; Person by login; MMD and multi-value dropped) |
 | Check-out / draft / approval state | unsupported | unsupported | unsupported |
 | Navigation / pages / web parts | handoff (detect and remediate out of band) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |

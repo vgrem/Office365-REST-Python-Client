@@ -173,11 +173,19 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
         status.UNSUPPORTED,
         "content types are not carried by the adapters; replay them with provision_list_structure (the resolver does)",
     )
-    set_(
-        "typed_values",
-        status.UNSUPPORTED,
-        "record values are copied verbatim; user/lookup/MMD value remapping is not implemented",
-    )
+    if getattr(source, "supports_typed_values", False) and getattr(target, "supports_typed_values", False):
+        set_(
+            "typed_values",
+            status.BEST_EFFORT,
+            "Lookup values are remapped across migrated lists and Person values by login; "
+            "multi-value Lookup/Person and managed-metadata values are not carried",
+        )
+    else:
+        set_(
+            "typed_values",
+            status.UNSUPPORTED,
+            "record values are copied verbatim; lookup/person value remapping is not implemented",
+        )
     set_("item_state", status.UNSUPPORTED, "check-out/draft/approval state is not carried")
     set_("views", status.UNSUPPORTED, "views are not carried by the adapters; replay them with provision_list_structure")
     set_("navigation", status.HANDOFF, "navigation/pages/web parts are detected and handed off for remediation")

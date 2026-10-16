@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Lookup and Person value remapping for list migration:** a Lookup column used
+  to be copied verbatim, so it pointed at the source list (and kept source item
+  ids) and a Person column kept the source site-user id — both meaningless on the
+  target. `SharePointListTarget` now translates each Lookup value through the
+  referenced target list's `MigrationSourceId` index, and each Person value is
+  carried by `SharePointListSource` as a portable **login name** and resolved with
+  `web.ensure_user` to the target's own id. A Lookup column's *schema* is repointed
+  at the matching target list by `rewrite_lookup_schema` (whole-site resolution is
+  now two-pass: create the container lists, build the source→target id map, then
+  replay structure); an unresolvable reference is skipped with a warning instead
+  of creating a broken column. The verifier compares lookups by source id and
+  persons by login on **both** sides, so remapped content still verifies. This
+  covers single-value Lookup/Person columns; multi-value and Managed Metadata
+  values are still dropped (the fidelity matrix now reports `typed_values` as
+  `best-effort` when both adapters advertise `supports_typed_values`).
 - **Record-list item fidelity (timestamps, authorship, permissions):** the
   client-side list adapters now implement the fidelity hooks for *record lists*,
   matching what the document-library adapters already did. `preserve_timestamps`
