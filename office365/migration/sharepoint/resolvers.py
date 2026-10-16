@@ -32,7 +32,11 @@ from office365.migration.sharepoint.adapters import (
     SharePointListSource,
     SharePointListTarget,
 )
-from office365.migration.sharepoint.structure import capture_list_structure, provision_list_structure
+from office365.migration.sharepoint.structure import (
+    capture_list_structure,
+    normalize_guid,
+    provision_list_structure,
+)
 from office365.migration.tasks import FILE_SHARE, SHAREPOINT, MigrationTask
 from office365.sharepoint.webs.creation_information import WebCreationInformation
 
@@ -173,6 +177,7 @@ def _resolve_web(
 ) -> None:
     """Resolve one web's lists, then recurse into its subsites when requested."""
     source_lists: Iterable[Any] = source_context.web.lists.get().execute_query()
+    selected: list[Any] = []
     for source_list in source_lists:
         title = getattr(source_list, "title", None)
         if not title or title in exclude_titles:
@@ -181,9 +186,27 @@ def _resolve_web(
             continue
         if not is_migratable_list(source_list):
             continue
-        target_list = _ensure_target_list(target_context, source_list)
+        selected.append(source_list)
+
+    # Create/resolve every target container *before* replaying any structure: a
+    # lookup column names the list it points at, so that list must already exist
+    # (and have a known target id) when the referencing list's fields are replayed.
+    resolved = [(source_list, _ensure_target_list(target_context, source_list)) for source_list in selected]
+    list_id_map = _list_id_map_from_pairs(resolved)
+    # A lookup may reference a list that is *not* in the include/exclude scope but
+    # is already present on the target; match those by title so their values can
+    # still be remapped instead of being dropped.
+    targets_by_title = _target_list_ids_by_title(target_context.web)
+    for source_list in source_lists:
+        source_id = normalize_guid(_property(source_list, "Id"))
+        title = getattr(source_list, "title", None)
+        target_id = targets_by_title.get(title) if title else None
+        if source_id and target_id and source_id not in list_id_map:
+            list_id_map[source_id] = target_id
+
+    for source_list, target_list in resolved:
         if provision_structure:
-            content_type_map, structure_warnings = _provision_structure(source_list, target_list)
+            content_type_map, structure_warnings = _provision_structure(source_list, target_list, list_id_map)
         else:
             content_type_map, structure_warnings = None, []
         source, target = _list_adapters(source_list, target_list, content_type_map=content_type_map)
@@ -216,12 +239,21 @@ def _resolve_web(
         )
 
 
-def _provision_structure(source_list: Any, target_list: Any) -> tuple[ContentTypeMap, list[str]]:
+def _provision_structure(
+    source_list: Any, target_list: Any, list_id_map: dict[str, str] | None = None
+) -> tuple[ContentTypeMap, list[str]]:
     """Capture the source list structure and replay it onto the target list.
 
     Structure provisioning is best-effort where SharePoint Online constrains it
     (a fresh column cannot be attached to a custom content type over REST); those
     columns are reported as warnings rather than aborting the resolution.
+
+    Args:
+        source_list: The source list whose structure is captured.
+        target_list: The target list to replay it onto (container must exist).
+        list_id_map: Normalized source list id -> target list id, used to repoint
+            lookup columns at the target list (see
+            :func:`~office365.migration.sharepoint.structure.rewrite_lookup_schema`).
 
     Returns:
         The content-type identity map built while provisioning (SharePoint
@@ -232,10 +264,56 @@ def _provision_structure(source_list: Any, target_list: Any) -> tuple[ContentTyp
     structure = capture_list_structure(source_list)
     entries: dict[str, str] = {}
     warnings: list[str] = []
-    for warning in provision_list_structure(target_list, structure, content_type_map=entries):
+    for warning in provision_list_structure(target_list, structure, content_type_map=entries, list_id_map=list_id_map):
         logger.warning("list %r: %s", getattr(source_list, "title", None), warning)
         warnings.append(warning)
     return ContentTypeMap(entries), warnings
+
+
+def _list_id_map_from_pairs(resolved: Sequence[tuple[Any, Any]]) -> dict[str, str]:
+    """Normalized source->target list ids for the lists resolved for one web."""
+    result: dict[str, str] = {}
+    for source_list, target_list in resolved:
+        source_id = normalize_guid(_property(source_list, "Id"))
+        target_id = normalize_guid(_property(target_list, "Id"))
+        if source_id and target_id:
+            result[source_id] = target_id
+    return result
+
+
+def _list_id_map(source_web: Any, target_web: Any) -> dict[str, str]:
+    """Match lists across two webs by title, keyed by normalized source list id.
+
+    Used by the single-list resolver, which only ever provisions one list and so
+    cannot build the map from the resolved pairs. A lookup referencing a list that
+    exists on both sides is repointed; one referencing a list absent from the
+    target is left unresolved (and skipped with a warning).
+    """
+    targets_by_title = _target_list_ids_by_title(target_web)
+    result: dict[str, str] = {}
+    for source_list in source_web.lists.get().execute_query():
+        source_id = normalize_guid(_property(source_list, "Id"))
+        title = getattr(source_list, "title", None)
+        target_id = targets_by_title.get(title) if title else None
+        if source_id and target_id:
+            result[source_id] = target_id
+    return result
+
+
+def _target_list_ids_by_title(target_web: Any) -> dict[str, str]:
+    """Normalized target list ids keyed by list title for one target web."""
+    result: dict[str, str] = {}
+    for target_list in target_web.lists.get().execute_query():
+        title = getattr(target_list, "title", None)
+        target_id = normalize_guid(_property(target_list, "Id"))
+        if title and target_id:
+            result[title] = target_id
+    return result
+
+
+def _property(obj: Any, name: str) -> Any:
+    properties = getattr(obj, "properties", None)
+    return properties.get(name) if properties is not None else None
 
 
 def _attach_warnings(target: Any, warnings: list[str]) -> None:
@@ -349,7 +427,8 @@ def _sharepoint(
     # them from the target (the package builder only carries the library, folders,
     # files, and file versions).
     if provision_structure:
-        content_type_map, structure_warnings = _provision_structure(source_list, target_list)
+        list_id_map = _list_id_map(source_context.web, target_context.web)
+        content_type_map, structure_warnings = _provision_structure(source_list, target_list, list_id_map)
     else:
         content_type_map, structure_warnings = None, []
     target = _build_target(task, target_context, settings, target_list, folder, content_type_map=content_type_map)

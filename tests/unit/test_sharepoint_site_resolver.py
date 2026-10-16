@@ -1,5 +1,6 @@
 """Tests for the SharePoint whole-site (migrate_all) resolver and session wiring."""
 
+import hashlib
 import unittest
 from unittest import mock
 
@@ -17,6 +18,7 @@ from office365.migration.sharepoint.resolvers import (
     resolve_site_task,
     resolve_task,
 )
+from office365.migration.sharepoint.structure import normalize_guid
 from office365.migration.tasks import MigrationTask
 
 _DOCUMENT_LIBRARY_TEMPLATE = 101
@@ -33,19 +35,25 @@ class _Folder:
 
 
 class _FakeList:
-    def __init__(self, title, base_type=0, base_template=100, hidden=False, allow_deletion=True):
+    def __init__(self, title, base_type=0, base_template=100, hidden=False, allow_deletion=True, list_id=None):
         self.title = title
         self.base_type = base_type
         self.base_template = base_template
         self.hidden = hidden
         self.allow_deletion = allow_deletion
         self.root_folder = _Folder()
+        self.properties = {"Id": list_id if list_id is not None else _guid_for(title)}
 
     def get(self):
         return self
 
     def execute_query(self):
         return self
+
+
+def _guid_for(title):
+    digest = hashlib.md5(title.encode()).hexdigest()
+    return f"{{{digest[0:8]}-{digest[8:12]}-{digest[12:16]}-{digest[16:20]}-{digest[20:32]}}}"
 
 
 class _Lists:
@@ -65,7 +73,9 @@ class _Lists:
     def ensure_list(self, title, template_type=None):
         self.ensure_calls.append((title, template_type))
         base_type = 1 if int(template_type) == _DOCUMENT_LIBRARY_TEMPLATE else 0
-        return _FakeList(title, base_type=base_type, base_template=int(template_type))
+        return _FakeList(
+            title, base_type=base_type, base_template=int(template_type), list_id=_guid_for("target:" + title)
+        )
 
 
 class _Web:
@@ -231,6 +241,23 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
 
         _, template = source.web.lists.ensure_calls[0]
         self.assertEqual(int(template), 101)
+
+    def test_lookup_list_ids_are_threaded_into_provisioning(self):
+        source = _context([_FakeList("Depts"), _FakeList("TypedSrc")])
+        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
+
+        resolve_site_task(task, source)
+
+        # Every container is created first, then structure is replayed with the
+        # source->target list-id map so lookup columns can be repointed.
+        expected = {
+            normalize_guid(_guid_for("Depts")): normalize_guid(_guid_for("target:Depts")),
+            normalize_guid(_guid_for("TypedSrc")): normalize_guid(_guid_for("target:TypedSrc")),
+        }
+        provided = [call.kwargs["list_id_map"] for call in self.provision.call_args_list]
+        self.assertEqual(len(provided), 2)
+        self.assertEqual(provided[0], expected)
+        self.assertEqual(provided[1], expected)
 
     def test_provisions_structure_by_default(self):
         source = _context([_docs()])

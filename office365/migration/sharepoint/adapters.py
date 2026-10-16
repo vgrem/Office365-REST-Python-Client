@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from office365.migration.adapters import MigrationProgress
 from office365.migration.base import MigrationItem, PermissionEntry, Principal, conflict_to_on_conflict, is_puid
+from office365.migration.sharepoint.structure import normalize_guid
 from office365.migration.sharepoint.transfer import Failure
 from office365.runtime.converters.records import records_from_items
 from office365.runtime.converters.scalars import iso_or_none, parse_datetime, parse_int
@@ -60,6 +61,9 @@ _NAVIGATION_SELECT = frozenset(
 #: Marker column added to a migrated list recording each item's source id. It makes
 #: a re-run idempotent and lets post-run verification pair source and target items.
 DEFAULT_LIST_IDENTITY_FIELD = "MigrationSourceId"
+# Authorship has its own fidelity path (``apply_authorship``); the built-in Author/
+# Editor companion columns are neither content nor Person values to remap.
+_PERSON_EXCLUDED = frozenset({"Author", "Editor"})
 
 #: Record columns excluded from the content checksum: server-assigned identity
 #: (``Id``/``GUID``), facets verified separately (timestamps, authorship,
@@ -474,6 +478,7 @@ class SharePointListSource:
         self._attachments: dict[str, Any] = {}
         self._users: dict[int, Principal | None] = {}
         self._default_groups: _DefaultGroups | None = None
+        self._user_columns_cache: set[str] | None = None
         self.warnings: list[str] = []
 
     def label(self) -> str:
@@ -610,7 +615,58 @@ class SharePointListSource:
             self.warnings.append(
                 f"skipped non-scalar column(s) with no typed-value mapping: {', '.join(sorted(dropped))}"
             )
+        self._annotate_person_logins(records)
         return records
+
+    def _user_columns(self) -> set[str]:
+        """The source's single-value Person columns (internal names)."""
+        if self._user_columns_cache is None:
+            columns: set[str] = set()
+            try:
+                for field in self._list.fields.get().execute_query():
+                    internal_name = getattr(field, "internal_name", None)
+                    if (
+                        getattr(field, "type_as_string", None) == "User"
+                        and internal_name
+                        and internal_name not in _PERSON_EXCLUDED
+                    ):
+                        columns.add(internal_name)
+            except Exception as e:  # noqa: BLE001 — without field types persons stay as raw ids
+                self.warnings.append(f"could not read source columns for person remapping: {e}")
+            self._user_columns_cache = columns
+        return self._user_columns_cache
+
+    def _annotate_person_logins(self, records: list[dict]) -> None:
+        """Replace each Person column's site-user id with the user's login name.
+
+        A site-user id is only meaningful inside its own site collection, so it is
+        meaningless on the target. The login *is* portable, and the target resolves
+        it back to (a possibly different) target site-user id with ``EnsureUser``.
+        A person the source cannot resolve is dropped and reported rather than
+        copied as a wrong id.
+        """
+        columns = self._user_columns()
+        if not columns:
+            return
+        for record in records:
+            for name in columns:
+                # ``<name>StringId`` is a read-only text companion holding the user
+                # id; leaving it in the payload makes REST ignore the remapped
+                # ``<name>Id`` and keep the source id.
+                record.pop(f"{name}StringId", None)
+                key = f"{name}Id"
+                user_id = parse_int(record.get(key))
+                if user_id is None:
+                    continue
+                principal = self._principal_for(user_id)
+                login = principal.login_name if principal else None
+                if login:
+                    record[key] = login
+                else:
+                    record.pop(key, None)
+                    self.warnings.append(
+                        f"person column '{name}' value {user_id} could not be resolved to a login; left empty"
+                    )
 
     def read(self, item: MigrationItem) -> object:
         if item.item_type == "attachment":
@@ -759,6 +815,14 @@ class SharePointListTarget:
         self._pending_authorship: dict[str, dict] = {}
         self.warnings: list[str] = []
         self._principals_cache: _TargetPrincipals | None = None
+        # Lookup and Person columns carry an id that is only meaningful on the
+        # source (list-local item id / site-user id). The target remaps each to its
+        # own value on write and back to the source value on verification.
+        self._columns_cache: tuple[dict[str, str], set[str]] | None = None
+        self._lookup_indexes: dict[str, tuple[dict[int, int], dict[int, int]]] = {}
+        self._unresolved_lookups: set[tuple[str, int]] = set()
+        self._unresolved_users: set[tuple[str, str]] = set()
+        self._user_logins: dict[int, str] | None = None
 
     @property
     def on_conflict(self) -> str:
@@ -839,6 +903,7 @@ class SharePointListTarget:
 
     def _queue(self, records: list[dict]) -> None:
         self._ensure_identity()
+        self._remap_typed_values(records)
         if not self._key_columns:
             for record in records:
                 self._list.items.queue_records([record])
@@ -876,6 +941,176 @@ class SharePointListTarget:
         except Exception as e:  # noqa: BLE001 — identity is best-effort; content still migrates
             self._identity_field = None
             self.warnings.append(f"could not create the {name!r} identity column: {e}")
+
+    def _columns(self) -> tuple[dict[str, str], set[str]]:
+        """The target's typed columns: ``(lookup: name -> referenced list id, user names)``."""
+        if self._columns_cache is None:
+            self._columns_cache = self._load_columns()
+        return self._columns_cache
+
+    def _lookup_columns(self) -> dict[str, str]:
+        return self._columns()[0]
+
+    def _user_columns(self) -> set[str]:
+        return self._columns()[1]
+
+    def _load_columns(self) -> tuple[dict[str, str], set[str]]:
+        lookups: dict[str, str] = {}
+        users: set[str] = set()
+        try:
+            fields = self._list.fields.select(["InternalName", "TypeAsString", "LookupList"]).get().execute_query()
+        except Exception as e:  # noqa: BLE001 — without columns we cannot remap; content still migrates
+            self.warnings.append(f"could not read target columns for typed-value remapping: {e}")
+            return lookups, users
+        for field in fields:
+            internal_name = getattr(field, "internal_name", None)
+            if not internal_name:
+                continue
+            field_type = getattr(field, "type_as_string", None)
+            if field_type == "Lookup":
+                list_id = normalize_guid(field.properties.get("LookupList"))
+                if list_id:
+                    lookups[internal_name] = list_id
+            elif field_type == "User":
+                if internal_name not in _PERSON_EXCLUDED:
+                    users.add(internal_name)
+        return lookups, users
+
+    def _lookup_index(self, target_list_id: str) -> tuple[dict[int, int], dict[int, int]]:
+        """``(source id -> target id, target id -> source id)`` for a referenced list."""
+        cached = self._lookup_indexes.get(target_list_id)
+        if cached is not None:
+            return cached
+        forward: dict[int, int] = {}
+        backward: dict[int, int] = {}
+        self._flush_pending()
+        try:
+            referenced = self._list.context.web.lists.get_by_id(target_list_id)
+            items = referenced.items.select(["Id", DEFAULT_LIST_IDENTITY_FIELD]).get_all().execute_query()
+        except Exception as e:  # noqa: BLE001 — an unreadable referenced list is reported, not fatal
+            self.warnings.append(f"lookup target list {target_list_id} could not be read: {e}")
+            items = []
+        for referenced_item in items:
+            source_id = parse_int(referenced_item.properties.get(DEFAULT_LIST_IDENTITY_FIELD))
+            target_id = parse_int(referenced_item.id)
+            if source_id is None or target_id is None:
+                continue
+            forward[source_id] = target_id
+            backward[target_id] = source_id
+        self._lookup_indexes[target_list_id] = (forward, backward)
+        return forward, backward
+
+    def _remap_typed_values(self, records: list[dict]) -> None:
+        """Translate each record's source lookup/person ids into target values.
+
+        A lookup references another migrated list (matched on its items' source-id
+        marker); a person carries the *login name* the source annotated, resolved
+        here with ``EnsureUser``. Either value with no match is dropped and reported
+        once rather than written as a wrong id.
+        """
+        self._remap_lookups(records)
+        self._remap_users(records)
+
+    def _remap_lookups(self, records: list[dict]) -> None:
+        columns = self._lookup_columns()
+        if not columns:
+            return
+        for record in records:
+            for internal_name, target_list_id in columns.items():
+                key = f"{internal_name}Id"
+                source_id = parse_int(record.get(key))
+                if source_id is None:
+                    continue
+                forward, _ = self._lookup_index(target_list_id)
+                target_id = forward.get(source_id)
+                if target_id is None:
+                    record.pop(key, None)
+                    self._report_unresolved_lookup(internal_name, source_id)
+                    continue
+                record[key] = target_id
+
+    def _remap_users(self, records: list[dict]) -> None:
+        columns = self._user_columns()
+        if not columns:
+            return
+        for record in records:
+            for internal_name in columns:
+                key = f"{internal_name}Id"
+                login = record.get(key)
+                if not isinstance(login, str) or not login:
+                    continue
+                user = self._principals().user(login)
+                if user is None or getattr(user, "id", None) is None:
+                    record.pop(key, None)
+                    self._report_unresolved_user(internal_name, login)
+                    continue
+                record[key] = user.id
+
+    def _report_unresolved_user(self, internal_name: str, login: str) -> None:
+        marker = (internal_name, login)
+        if marker in self._unresolved_users:
+            return
+        self._unresolved_users.add(marker)
+        self.warnings.append(
+            f"person column '{internal_name}' login {login!r} could not be resolved on the target; "
+            "the value was left empty"
+        )
+
+    def _target_user_logins(self) -> dict[int, str]:
+        """The target web's ``{site-user id: login name}`` map (cached)."""
+        if self._user_logins is None:
+            mapping: dict[int, str] = {}
+            try:
+                for site_user in self._list.context.web.site_users.get().execute_query():
+                    user_id = parse_int(site_user.id)
+                    if user_id is not None and site_user.login_name:
+                        mapping[user_id] = site_user.login_name
+            except Exception as e:  # noqa: BLE001 — without the map persons are left as ids
+                self.warnings.append(f"could not read target site users for person verification: {e}")
+            self._user_logins = mapping
+        return self._user_logins
+
+    def _report_unresolved_lookup(self, internal_name: str, source_id: int) -> None:
+        marker = (internal_name, source_id)
+        if marker in self._unresolved_lookups:
+            return
+        self._unresolved_lookups.add(marker)
+        self.warnings.append(
+            f"lookup column '{internal_name}' value {source_id} could not be mapped to a target item "
+            "(the referenced list's items were not migrated first); the value was left empty"
+        )
+
+    def _canonicalize_lookups(self, properties: dict) -> None:
+        """Rewrite target lookup ids back to the source ids (symmetric to the write).
+
+        The source checksum holds the source item id; the target's fresh item holds
+        the target id. Mapping the latter back lets the content spot-check compare
+        the two like for like instead of reporting a false mismatch.
+        """
+        for internal_name, target_list_id in self._lookup_columns().items():
+            key = f"{internal_name}Id"
+            target_id = parse_int(properties.get(key))
+            if target_id is None:
+                continue
+            _, backward = self._lookup_index(target_list_id)
+            source_id = backward.get(target_id)
+            if source_id is not None:
+                properties[key] = source_id
+
+    def _canonicalize_users(self, properties: dict) -> None:
+        """Rewrite target person ids back to the login names the source recorded."""
+        columns = self._user_columns()
+        if not columns:
+            return
+        logins = self._target_user_logins()
+        for internal_name in columns:
+            key = f"{internal_name}Id"
+            user_id = parse_int(properties.get(key))
+            if user_id is None:
+                continue
+            login = logins.get(user_id)
+            if login is not None:
+                properties[key] = login
 
     def _write_attachment(self, item: MigrationItem, payload: object) -> None:
         if not self._identity_field:
@@ -980,8 +1215,14 @@ class SharePointListTarget:
         target_item = self._fresh_target_item(item)
         if target_item is None:
             return ""
-        extra = frozenset({self._identity_field}) if self._identity_field else frozenset()
-        return _content_checksum(target_item.properties, extra)
+        properties = dict(target_item.properties)
+        self._canonicalize_lookups(properties)
+        self._canonicalize_users(properties)
+        extra = {self._identity_field} if self._identity_field else set()
+        # The target derives its own ``<name>StringId`` companion; it is not part of
+        # the source's canonical content.
+        extra.update(f"{name}StringId" for name in self._user_columns())
+        return _content_checksum(properties, frozenset(extra))
 
     def _attachment_checksum(self, item: MigrationItem) -> str:
         parent_id, _, filename = str(item.dest_path).partition("/")

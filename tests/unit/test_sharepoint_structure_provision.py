@@ -13,7 +13,9 @@ from office365.migration.sharepoint.structure import (
     FieldDefinition,
     ListStructure,
     ViewDefinition,
+    normalize_guid,
     provision_list_structure,
+    rewrite_lookup_schema,
 )
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.transport.base import BaseTransport
@@ -308,3 +310,92 @@ def test_provision_reorders_links_with_a_plain_array():
     assert isinstance(reorder.data["internalNames"], list)
     # ``Title`` is not part of the captured structure, so only the captured column is reordered
     assert reorder.data["internalNames"] == ["ProjectType"]
+
+
+# --- lookup columns: repoint the schema at the target list --------------------
+
+_SOURCE_LIST_ID = "a6879990-804b-4064-bf5d-f0c5c65ef768"
+_TARGET_LIST_ID = "ed0abd71-7d64-429a-9de7-7dfabbac6aa7"
+_LOOKUP_SCHEMA = (
+    '<Field Type="Lookup" List="{A6879990-804B-4064-BF5D-F0C5C65EF768}" '
+    'ShowField="Title" StaticName="Dept" Name="Dept"/>'
+)
+
+
+def test_rewrite_lookup_schema_repoints_list_attribute():
+    rewritten, unresolved = rewrite_lookup_schema(_LOOKUP_SCHEMA, {_SOURCE_LIST_ID: _TARGET_LIST_ID})
+
+    assert unresolved is None
+    assert 'List="{ed0abd71-7d64-429a-9de7-7dfabbac6aa7}"' in rewritten
+    assert "A6879990" not in rewritten
+
+
+def test_rewrite_lookup_schema_reports_unresolved_list():
+    rewritten, unresolved = rewrite_lookup_schema(_LOOKUP_SCHEMA, {})
+
+    assert rewritten is None
+    assert unresolved == _SOURCE_LIST_ID
+
+
+def test_rewrite_lookup_schema_leaves_user_info_keyword_alone():
+    schema = '<Field Type="User" List="UserInfo" Name="Owner"/>'
+
+    assert rewrite_lookup_schema(schema, {}) == (schema, None)
+
+
+def test_rewrite_lookup_schema_ignores_non_lookup_field():
+    schema = '<Field Type="Choice" List="{A6879990-804B-4064-BF5D-F0C5C65EF768}"/>'
+
+    assert rewrite_lookup_schema(schema, {}) == (schema, None)
+
+
+def test_normalize_guid_strips_braces_and_lowercases():
+    assert normalize_guid("{A6879990-804B-4064-BF5D-F0C5C65EF768}") == _SOURCE_LIST_ID
+    assert normalize_guid(_SOURCE_LIST_ID) == _SOURCE_LIST_ID
+    assert normalize_guid("UserInfo") is None
+    assert normalize_guid(None) is None
+
+
+def _lookup_routes():
+    return [
+        (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
+        (HttpMethod.Get, "getByInternalNameOrTitle", _NOT_FOUND),
+        (HttpMethod.Post, "CreateFieldAsXml", {"d": {"InternalName": "Dept", "FieldTypeKind": 7}}),
+    ]
+
+
+def _lookup_structure():
+    return _structure(
+        fields=[FieldDefinition(internal_name="Dept", title="Dept", type_as_string="Lookup", schema_xml=_LOOKUP_SCHEMA)],
+        content_types=[],
+        views=[],
+    )
+
+
+def test_provision_creates_lookup_column_pointed_at_target_list():
+    ctx, transport = _setup(_lookup_routes())
+
+    warnings = provision_list_structure(
+        ctx.web.lists.get_by_title("Tasks"), _lookup_structure(), list_id_map={_SOURCE_LIST_ID: _TARGET_LIST_ID}
+    )
+
+    assert warnings == []
+    create = next(p for p in _posts(transport) if p.url.endswith("Fields/CreateFieldAsXml"))
+    body = str(create.data)
+    assert _TARGET_LIST_ID in body
+    assert "A6879990" not in body
+
+
+def test_provision_skips_lookup_into_a_list_outside_the_migration():
+    ctx, transport = _setup(
+        [
+            (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
+        ]
+    )
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _lookup_structure(), list_id_map={})
+
+    assert len(warnings) == 1
+    assert "Dept" in warnings[0]
+    assert _SOURCE_LIST_ID in warnings[0]
+    assert not any(p.url.endswith("Fields/CreateFieldAsXml") for p in _posts(transport))

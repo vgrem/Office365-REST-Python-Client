@@ -16,7 +16,10 @@ Scope, deliberately:
 * **Fields** — user-defined list columns with their ``SchemaXml`` prepared for
   ``CreateFieldAsXml`` (see :meth:`~office365.sharepoint.fields.field.Field.schema_xml_for_copy`).
   Built-in/system columns and framework columns injected by SharePoint features
-  (hidden, or not deletable) are skipped — a target list already has them.
+  (hidden, or not deletable) are skipped — a target list already has them. A
+  **lookup** column's schema names the list it points at; replayed verbatim it
+  would name the *source* list id, so it is repointed at the matching target list
+  (or skipped with a warning when that list is not part of the migration).
 * **Content types** — non-hidden content types with their ordered field links.
 * **Views** — non-hidden, non-personal views with their ordered columns.
 
@@ -32,6 +35,7 @@ sent as guaranteed link failures.
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import asdict, dataclass
 from dataclasses import field as dc_field
 from typing import Any, Dict, List, Optional
@@ -48,7 +52,9 @@ __all__ = [
     "ListStructure",
     "ViewDefinition",
     "capture_list_structure",
+    "normalize_guid",
     "provision_list_structure",
+    "rewrite_lookup_schema",
 ]
 
 #: Field properties requested per column. ``SchemaXml`` is explicit because it is
@@ -277,6 +283,61 @@ def _is_capturable_content_type(content_type: Any) -> bool:
 #: ``0x0101``, ...); custom content types append a 32-hex-digit GUID.
 _MIN_CUSTOM_CONTENT_TYPE_ID_LENGTH = 20
 
+#: A GUID, optionally wrapped in the braces SharePoint uses in ``SchemaXml``.
+_GUID_RE = re.compile(r"^\{?[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\}?$")
+#: ``Type="Lookup"`` / ``Type="LookupMulti"`` — the columns that name their list.
+_LOOKUP_TYPE_RE = re.compile(r'\bType="Lookup(?:Multi)?"')
+#: The ``List="..."`` attribute a lookup column carries in its ``SchemaXml``.
+_LIST_ATTR_RE = re.compile(r'\sList="([^"]*)"')
+
+
+def normalize_guid(value: Any) -> Optional[str]:
+    """A lower-cased, brace-stripped GUID, or ``None`` when not a GUID.
+
+    Lookup schemas carry ``List="{...}"`` while the migration threads list ids
+    around as plain strings; normalizing both sides keeps the lookup keyed by the
+    same value regardless of case or brace style.
+    """
+    if value is None:
+        return None
+    text = str(value).strip()
+    if text.startswith("{") and text.endswith("}"):
+        text = text[1:-1]
+    return text.lower() if _GUID_RE.match(text) else None
+
+
+def rewrite_lookup_schema(
+    schema_xml: Optional[str], list_id_map: Dict[str, str] | None
+) -> tuple[Optional[str], Optional[str]]:
+    """Repoint a lookup column's ``SchemaXml`` at the target list.
+
+    A lookup column is recreated from its source ``SchemaXml``, which names the
+    *source* list (``List="{source-guid}"``). Replayed verbatim onto another site
+    the target column points at a list id that does not exist there, so the column
+    is broken and every value written to it is silently dropped. Given a
+    ``list_id_map`` (normalized source list id -> normalized target list id) this
+    rewrites the attribute to the target list.
+
+    Returns ``(schema, unresolved)``: the rewritten schema (or ``None`` when the
+    field must be skipped), and the unresolved source list id when the referenced
+    list is not part of the migration (so the caller can warn).
+    """
+    if not schema_xml or not _LOOKUP_TYPE_RE.search(schema_xml):
+        return schema_xml, None
+    match = _LIST_ATTR_RE.search(schema_xml)
+    if match is None:
+        return schema_xml, None
+    referenced = normalize_guid(match.group(1))
+    if referenced is None:
+        # ``List="UserInfo"`` (the User column's user-information list) is a
+        # keyword, portable as-is.
+        return schema_xml, None
+    target = (list_id_map or {}).get(referenced)
+    if target is None:
+        return None, referenced
+    rewritten = f'{schema_xml[: match.start()]} List="{{{target}}}"{schema_xml[match.end() :]}'
+    return rewritten, None
+
 
 def _is_provisionable_content_type(definition: ContentTypeDefinition) -> bool:
     """Skip base content types — they already exist on any target list."""
@@ -347,6 +408,7 @@ def provision_list_structure(
     *,
     on_conflict: str = "skip",
     content_type_map: Dict[str, str] | None = None,
+    list_id_map: Dict[str, str] | None = None,
 ) -> List[str]:
     """Recreate a captured list structure on ``sp_list`` (idempotent).
 
@@ -375,10 +437,16 @@ def provision_list_structure(
             list content types a fresh ``StringId``, so this lets a caller rewrite an
             item's ``ContentTypeId`` to the target one (see
             :class:`~office365.migration.map.ContentTypeMap`).
+        list_id_map: An optional mapping of **normalized** source list ids to target
+            list ids, used to repoint a lookup column's ``SchemaXml`` at the target
+            list (see :func:`rewrite_lookup_schema`). When a lookup references a list
+            absent from the map, the column is skipped and reported as a warning
+            rather than created broken.
 
     Returns:
         Human-readable warnings for anything the server would not let us apply
-        (currently only unlinked content type columns); empty when fully applied.
+        (unlinked content type columns, or lookup columns into a list that is not
+        part of the migration); empty when fully applied.
     """
     if on_conflict not in ("skip", "update"):
         raise ValueError(f"on_conflict must be 'skip' or 'update', got {on_conflict!r}")
@@ -389,8 +457,18 @@ def provision_list_structure(
         _ensure_content_types_enabled(sp_list)
 
     for definition in structure.fields:
-        if definition.schema_xml:
-            sp_list.fields.ensure_xml(definition.schema_xml, definition.internal_name)
+        if not definition.schema_xml:
+            continue
+        schema_xml, unresolved = rewrite_lookup_schema(definition.schema_xml, list_id_map)
+        if unresolved is not None:
+            warning = (
+                f"column '{definition.internal_name}' was not recreated: it is a lookup into "
+                f"list {{{unresolved}}}, which is not part of this migration"
+            )
+            logger.warning(warning)
+            warnings.append(warning)
+            continue
+        sp_list.fields.ensure_xml(schema_xml, definition.internal_name)
 
     provisionable = [item for item in structure.content_types if _is_provisionable_content_type(item)]
     for definition in provisionable:
