@@ -13,7 +13,7 @@ from __future__ import annotations
 import hashlib
 import io
 from collections.abc import Callable
-from datetime import timezone
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, cast
 
 from office365.migration.adapters import MigrationProgress
@@ -38,27 +38,61 @@ if TYPE_CHECKING:
 _TAXONOMY_FIELD_TYPES = {"TaxonomyFieldType", "TaxonomyFieldTypeMulti"}
 
 # Always-projected system metadata (reliable author/editor identity).
-_METADATA_SELECT = ["AuthorId", "EditorId"]
+_METADATA_SELECT = ["AuthorId", "EditorId", "HasUniqueRoleAssignments"]
+#: Projected system metadata that is read-only and must not be written back.
+_NON_WRITABLE_SELECT = frozenset({"HasUniqueRoleAssignments"})
 
 #: Marker column added to a migrated list recording each item's source id. It makes
 #: a re-run idempotent and lets post-run verification pair source and target items.
 DEFAULT_LIST_IDENTITY_FIELD = "MigrationSourceId"
 
 
-def _sp_timestamp(value: str | None) -> str | None:
-    """Normalize an ISO-8601 timestamp to the ``...Z`` UTC form SharePoint expects.
+def _sp_utc_timestamp(value: str | None) -> str | None:
+    """Normalize a timestamp to the UTC form a *list item* honors.
 
-    ``ValidateUpdateListItem`` (``datesInUTC=True``) rejects the ``+00:00`` offset
-    form the migration items carry, so convert to a naive UTC ``Z`` string.
+    Live-probed: ``ValidateUpdateListItem`` on a plain list item parses an
+    ISO-8601 value with a trailing ``Z`` as UTC (and ``datesInUTC=True`` keeps it
+    that way), so this form round-trips the exact instant.
     """
     if not value:
         return None
     parsed = parse_datetime(value)
     if parsed is None:
         return value
-    if parsed.tzinfo is not None:
-        parsed = parsed.astimezone(timezone.utc).replace(tzinfo=None)
-    return parsed.strftime("%Y-%m-%dT%H:%M:%SZ")
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _sp_local_timestamp(value: datetime | str | None) -> str | None:
+    """Format a *web-local* value as the date form a document item accepts.
+
+    Live-probed: document-library items ignore ``datesInUTC`` and parse every date
+    string in the web's locale, rejecting a trailing ``Z`` (``...must specify a
+    valid date within the range of 1/1/1900 and 12/31/8900.``). The space-separated
+    ``YYYY-MM-DD HH:MM:SS`` form is accepted and interpreted as local wall-clock,
+    so callers must pass the instant already converted to web-local time (see
+    ``SharePointLibraryTarget._local_timestamp``).
+    """
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.strftime("%Y-%m-%d %H:%M:%S")
+    return str(value)
+
+
+def _report_rejected_fields(result, warnings: list[str], label: str) -> None:
+    """Warn about ``ValidateUpdateListItem`` fields the server rejected.
+
+    A rejected field does not raise over HTTP — the response carries a per-field
+    ``HasException``/``ErrorMessage`` — and worse, SharePoint rolls the whole batch
+    back, so a sibling ``Created``/``Modified`` write is discarded too. Surfacing it
+    keeps that invisible loss honest (and testable).
+    """
+    values = getattr(result, "value", None) or []
+    for value in values:
+        if getattr(value, "HasException", False):
+            warnings.append(f"{label}: {value.FieldName} rejected ({value.ErrorMessage})")
 
 
 def _version_sort_key(label: str) -> tuple[int, ...]:
@@ -153,6 +187,20 @@ def _is_user_principal(member: Any) -> bool:
     return getattr(ptype, "value", ptype) == PrincipalType.User.value
 
 
+def _is_system_principal(user: Any) -> bool:
+    """Whether a resolved user is a tenant system/app account.
+
+    The Migration API cannot set ``Author``/``Editor`` to a system account, and a
+    ``ValidateUpdateListItem`` batch containing one is rejected wholesale — which
+    would silently discard the ``Created``/``Modified`` restoration we send in the
+    same call. Items created by the migration app itself are authored by such an
+    account, so setting it is a no-op anyway; skipping it keeps the timestamp write
+    intact.
+    """
+    login = (getattr(user, "login_name", None) or "").lower()
+    return "app@sharepoint" in login or "sharepoint\\system" in login
+
+
 def _has_unique_role_assignments(securable) -> bool:
     """Whether a securable has unique (broken-inheritance) role assignments.
 
@@ -188,12 +236,63 @@ def _user_login(web, user_id: Any, cache: dict[int, str | None]) -> str | None:
     return login
 
 
+class _DefaultGroups:
+    """Maps a web's associated default groups (Owners/Members/Visitors).
+
+    Default groups are titled after the site (``team Owners``), so a source and
+    target in the same tenant rarely share the exact name. These groups are used
+    both to resolve a source name onto the target *and* to normalize the name to a
+    canonical ``default:<Kind>`` token so the permission diff compares like with
+    like (a renamed site still verifies as preserved). Loaded once, lazily.
+    """
+
+    ATTRS = (
+        ("Owners", "associated_owner_group"),
+        ("Members", "associated_member_group"),
+        ("Visitors", "associated_visitor_group"),
+    )
+
+    def __init__(self, web) -> None:
+        self._web = web
+        self._by_kind: dict[str, Any] | None = None
+        self._by_title: dict[str, str] = {}
+
+    def _load(self) -> None:
+        if self._by_kind is not None:
+            return
+        self._by_kind = {}
+        for kind, attr in self.ATTRS:
+            group = getattr(self._web, attr, None)
+            if group is None:
+                continue
+            try:
+                group.get().execute_query()
+            except Exception:  # noqa: BLE001 — an unreadable group is skipped
+                continue
+            self._by_kind[kind] = group
+            title = getattr(group, "title", None) or getattr(group, "login_name", None)
+            if title:
+                self._by_title[title] = kind
+
+    def group(self, kind: str):
+        self._load()
+        return self._by_kind.get(kind) if self._by_kind else None
+
+    def normalize(self, name: str) -> str:
+        self._load()
+        kind = self._by_title.get(name)
+        return f"default:{kind}" if kind else name
+
+
 class _TargetPrincipals:
     """Resolve source principals and role definitions on a target web (cached).
 
     Users are ensured on the site (``EnsureUser``) so their numeric id can be used
-    for authorship and role assignments; groups are matched by name. Anything that
-    cannot be resolved is skipped with a warning (same-tenant, best-effort).
+    for authorship and role assignments; groups are matched by name, and the
+    default SharePoint groups (Owners/Members/Visitors) fall back to the target
+    web's associated groups so a renamed site (``team`` -> ``team_out``) still
+    maps its role assignments. Anything that cannot be resolved is skipped with a
+    warning (same-tenant, best-effort).
     """
 
     def __init__(self, web, warnings: list[str]) -> None:
@@ -201,10 +300,15 @@ class _TargetPrincipals:
         self._warnings = warnings
         self._users: dict[str, Any] = {}
         self._roles: "dict[str, RoleDefinition] | None" = None
+        self._defaults = _DefaultGroups(web)
 
     @staticmethod
     def _strip_claims(name: str) -> str:
         return name.rsplit("|", 1)[-1] if name.startswith("i:0#") else name
+
+    def normalize(self, name: str) -> str:
+        """Canonical principal name (default groups collapse to ``default:<Kind>``)."""
+        return self._defaults.normalize(name)
 
     def user(self, login: str | None):
         """Ensure a user login on the target site and return its ``User`` object."""
@@ -226,13 +330,23 @@ class _TargetPrincipals:
         if not name:
             return None
         login = self._strip_claims(name)
+        if login.startswith("default:"):
+            return self._defaults.group(login.split(":", 1)[1])
         if "@" in login:
             return self.user(login)
+        group = None
         try:
-            return self._web.site_groups.get_by_name(login).get().execute_query()
-        except Exception as e:  # noqa: BLE001 — a missing group is skipped
-            self._warnings.append(f"could not resolve principal {name!r} on the target: {e}")
-            return None
+            group = self._web.site_groups.get_by_name(login).get().execute_query()
+        except Exception:  # noqa: BLE001 — fall back to the default groups below
+            group = None
+        if group is None:
+            kind = login.rsplit(" ", 1)[-1]
+            if kind in {"Owners", "Members", "Visitors"}:
+                group = self._defaults.group(kind)
+        if group is not None:
+            return group
+        self._warnings.append(f"could not resolve principal {name!r} on the target")
+        return None
 
     def role(self, name: str) -> "RoleDefinition | None":
         """Resolve (and cache) a target role definition by name."""
@@ -243,12 +357,16 @@ class _TargetPrincipals:
 
 
 def _read_role_assignments(
-    securable, resolve: Callable[[Any], "Principal | None"] | None = None
+    securable,
+    resolve: Callable[[Any], "Principal | None"] | None = None,
+    normalize: Callable[[str], str] | None = None,
 ) -> list[PermissionEntry]:
     """Read a securable object's role assignments into ``PermissionEntry``s.
 
     One entry per principal (user or group), keyed by login name; the target uses
-    the same shape so the permission diff compares like with like. Role names are
+    the same shape so the permission diff compares like with like. ``normalize``
+    (when supplied) canonicalizes a principal name — default groups collapse to
+    ``default:<Kind>`` so a renamed site still compares as preserved. Role names are
     paired with their decimal ``PermMask`` (``role_masks``), and — when ``resolve``
     is supplied — a user principal is enriched with its PUID/display name/email so
     the server-side package target can emit a faithful ``UserGroup.xml`` entry.
@@ -269,7 +387,11 @@ def _read_role_assignments(
             mask = _perm_mask(role)
             if mask is not None:
                 role_masks[role.name] = mask
-        entry = PermissionEntry(principal_name=name, roles=roles, role_masks=role_masks)
+        entry = PermissionEntry(
+            principal_name=normalize(name) if normalize is not None else name,
+            roles=roles,
+            role_masks=role_masks,
+        )
         if resolve is not None and _is_user_principal(member):
             principal = resolve(getattr(member, "id", None))
             if principal is not None:
@@ -293,6 +415,7 @@ class SharePointListSource:
         self._items: dict[str, Any] = {}
         self._attachments: dict[str, Any] = {}
         self._users: dict[int, Principal | None] = {}
+        self._default_groups: _DefaultGroups | None = None
         self.warnings: list[str] = []
 
     def label(self) -> str:
@@ -323,7 +446,8 @@ class SharePointListSource:
     def _load_items(self, select: list[str] | None):
         items = self._list.items
         # A full read projects ``*`` plus the system metadata so author/editor ids
-        # are captured reliably; an explicit/safe projection is honored as-is.
+        # and the unique-ACL flag are captured in one query (``*`` omits them);
+        # an explicit/safe projection is honored as-is.
         columns = ["*", *_METADATA_SELECT] if select is None else select
         query = items.select(columns)
         if select is None:
@@ -407,7 +531,9 @@ class SharePointListSource:
         # migrated records carried no field values at all. ``AttachmentFiles`` is a
         # navigation property (objects, not a scalar column) and is excluded; the
         # target writes attachments separately.
-        select = sorted({key for item in loaded for key in item.properties if key != "AttachmentFiles"})
+        select = sorted(
+            {key for item in loaded for key in item.properties if key != "AttachmentFiles"} - _NON_WRITABLE_SELECT
+        )
         records = records_from_items(list(loaded), select, set(), raw=True)
         # A REST item create accepts scalar column values only. A full read also
         # returns navigation properties (``ParentList``) and typed values
@@ -462,6 +588,16 @@ class SharePointListSource:
             item.editor.login_name if item.editor else None,
         )
 
+    def _normalize_name(self, name: str) -> str:
+        """Canonicalize a principal name (default groups -> ``default:<Kind>``)."""
+        context = getattr(self._list, "context", None)
+        web = getattr(context, "web", None) if context is not None else None
+        if web is None:
+            return name
+        if self._default_groups is None:
+            self._default_groups = _DefaultGroups(web)
+        return self._default_groups.normalize(name)
+
     def read_permissions(self, item: MigrationItem) -> list[PermissionEntry]:
         """Read the item's *unique* role assignments (best-effort ACL preservation).
 
@@ -471,7 +607,7 @@ class SharePointListSource:
         source_item = self._items.get(item.dest_path)
         if source_item is None or not _has_unique_role_assignments(source_item):
             return []
-        return _read_role_assignments(source_item, resolve=self._principal_for)
+        return _read_role_assignments(source_item, resolve=self._principal_for, normalize=self._normalize_name)
 
     def _principal_for(self, user_id: Any) -> "Principal | None":
         """Resolve a site-user id to a :class:`Principal` (login + PUID), cached."""
@@ -559,6 +695,10 @@ class SharePointListTarget:
         self._attachment_path_cache: set[str] | None = None
         self._content_type_map = content_type_map
         self._login_cache: dict[int, str | None] = {}
+        # Author/Editor values already written by ``apply_authorship`` but pending a
+        # shared final write (see ``apply_timestamps``); avoids the ValidateUpdateListItem
+        # call that restores timestamps silently resetting ``Editor`` to the caller.
+        self._pending_authorship: dict[str, dict] = {}
         self.warnings: list[str] = []
         self._principals_cache: _TargetPrincipals | None = None
 
@@ -797,6 +937,7 @@ class SharePointListTarget:
         batch_size = getattr(options, "batch_size", None) or DEFAULT_BATCH_SIZE
         concurrency = getattr(options, "concurrency", None) or 1
         self._flush(batch_size, concurrency)
+        self._pending_authorship.clear()
 
     def _flush(self, batch_size: int, concurrency: int) -> None:
         if not self._list.context.has_pending_request:
@@ -824,20 +965,25 @@ class SharePointListTarget:
         """Best-effort: restore ``Created``/``Modified`` on the written item.
 
         Uses ``ValidateUpdateListItem`` (the only REST path that can set these
-        system fields); ``datesInUTC=True`` requires the ``...Z`` UTC form.
+        system fields); ``datesInUTC=True`` requires the ``...Z`` UTC form. When
+        authorship was applied for the same item, its ``Author``/``Editor`` values
+        are folded into this final write -- otherwise the update would silently
+        reset ``Editor`` to the caller's identity.
         """
         target_item = self._target_item(item)
         if target_item is None:
             return
-        form_values: dict[str, str] = {}
-        created = _sp_timestamp(item.created)
-        modified = _sp_timestamp(item.modified)
+        form_values: dict = {}
+        created = _sp_utc_timestamp(item.created)
+        modified = _sp_utc_timestamp(item.modified)
         if created:
             form_values["Created"] = created
         if modified:
             form_values["Modified"] = modified
+        form_values.update(self._pending_authorship.pop(item.dest_path, {}))
         if form_values:
-            target_item.validate_update_list_item(form_values, dates_in_utc=True).execute_query()
+            result = target_item.validate_update_list_item(form_values, dates_in_utc=True).execute_query()
+            _report_rejected_fields(result, self.warnings, f"timestamps {item.dest_path}")
 
     def apply_authorship(self, item: MigrationItem) -> None:
         """Best-effort: restore ``Author``/``Editor`` from the source principals.
@@ -850,6 +996,10 @@ class SharePointListTarget:
             return
         author = self._principals().user(item.author.login_name if item.author else None)
         editor = self._principals().user(item.editor.login_name if item.editor else None)
+        if author is not None and _is_system_principal(author):
+            author = None
+        if editor is not None and _is_system_principal(editor):
+            editor = None
         if author is None and editor is None:
             return
         form_values: dict[str, FieldUserValue] = {}
@@ -857,7 +1007,9 @@ class SharePointListTarget:
             form_values["Author"] = FieldUserValue(author.id, author.login_name)
         if editor is not None:
             form_values["Editor"] = FieldUserValue(editor.id, editor.login_name)
-        target_item.validate_update_list_item(form_values, dates_in_utc=True).execute_query()
+        self._pending_authorship[item.dest_path] = dict(form_values)
+        result = target_item.validate_update_list_item(form_values, dates_in_utc=True).execute_query()
+        _report_rejected_fields(result, self.warnings, f"authorship {item.dest_path}")
 
     def apply_permissions(self, item: MigrationItem, permissions: list[PermissionEntry]) -> None:
         """Best-effort: break inheritance and recreate the source's unique ACLs.
@@ -918,7 +1070,7 @@ class SharePointListTarget:
         target_item = self._fresh_target_item(item)
         if target_item is None or not _has_unique_role_assignments(target_item):
             return []
-        return _read_role_assignments(target_item)
+        return _read_role_assignments(target_item, normalize=self._principals().normalize)
 
     def close(self) -> None:
         pass
@@ -943,7 +1095,9 @@ class SharePointLibrarySource:
         self._sp_list = sp_list
         self._files: dict[str, "File"] = {}
         self._users: dict[int, "Principal | None"] = {}
+        self._default_groups: _DefaultGroups | None = None
         self._item_authors: dict[str, tuple[int | None, int | None]] | None = None
+        self._item_unique: dict[str, bool] | None = None
         self.warnings: list[str] = []
         # Optional hook invoked while a file downloads: (bytes_read, file_size)
         self.on_bytes = on_bytes
@@ -1061,9 +1215,27 @@ class SharePointLibrarySource:
         by login name; empty for items with no unique assignments.
         """
         securable = self._securable(item)
-        if securable is None or not _has_unique_role_assignments(securable):
+        if securable is None:
             return []
-        return _read_role_assignments(securable, resolve=self._principal_for)
+        # Files: reuse the unique-ACL flag read with the authorship pass (the
+        # ``File``/``ListItem`` resources do not expose it without an extra GET).
+        if item.item_type != "folder" and self._item_unique is not None:
+            unique = self._item_unique.get(item.source_path)
+            if unique is not None:
+                securable.properties["HasUniqueRoleAssignments"] = unique
+        if not _has_unique_role_assignments(securable):
+            return []
+        return _read_role_assignments(securable, resolve=self._principal_for, normalize=self._normalize_name)
+
+    def _normalize_name(self, name: str) -> str:
+        """Canonicalize a principal name (default groups -> ``default:<Kind>``)."""
+        context = getattr(self._folder, "context", None)
+        web = getattr(context, "web", None) if context is not None else None
+        if web is None:
+            return name
+        if self._default_groups is None:
+            self._default_groups = _DefaultGroups(web)
+        return self._default_groups.normalize(name)
 
     def read_metadata(self, item: MigrationItem) -> dict | None:
         """Comparable attributes of the source item (for the post-run metadata diff)."""
@@ -1100,12 +1272,14 @@ class SharePointLibrarySource:
         try:
             user = self._folder.context.web.site_users.get_by_id(cast("str", key)).get().execute_query()
             user_id_info = user.properties.get("UserId")
-            system_id = str(getattr(user_id_info, "NameId", None) or "") or None
+            raw_id = getattr(user_id_info, "NameId", None)
+            system_id = str(raw_id or "") or None
             if system_id is not None and not is_puid(system_id):
                 # e.g. the app principal, whose ``UserId.NameId`` is not a PUID.
                 # Emitting it would fail the whole ingestion job, so drop it.
                 self.warnings.append(
-                    f"user {key} ({user.login_name!r}) has no usable PUID; authorship and ACL are skipped for it"
+                    f"user {key} ({user.login_name!r}) has no usable PUID ({system_id!r}); "
+                    "it is omitted from the server-side user map"
                 )
                 system_id = None
             principal = Principal(
@@ -1128,9 +1302,14 @@ class SharePointLibrarySource:
         if self._item_authors is not None:
             return self._item_authors
         authors: dict[str, tuple[int | None, int | None]] = {}
+        unique: dict[str, bool] = {}
         if self._sp_list is not None:
             try:
-                items = self._sp_list.items.select(["FileRef", "AuthorId", "EditorId"]).get_all().execute_query()
+                items = (
+                    self._sp_list.items.select(["FileRef", "AuthorId", "EditorId", "HasUniqueRoleAssignments"])
+                    .get_all()
+                    .execute_query()
+                )
                 for item in items:
                     ref = item.properties.get("FileRef")
                     if ref:
@@ -1138,9 +1317,11 @@ class SharePointLibrarySource:
                             parse_int(item.properties.get("AuthorId")),
                             parse_int(item.properties.get("EditorId")),
                         )
+                        unique[ref] = bool(item.properties.get("HasUniqueRoleAssignments"))
             except Exception as e:  # noqa: BLE001 — authorship is best-effort
                 self.warnings.append(f"author/editor read failed: {e}")
         self._item_authors = authors
+        self._item_unique = unique
         return authors
 
     def close(self) -> None:
@@ -1160,6 +1341,57 @@ class SharePointLibraryTarget:
         self.warnings: list[str] = []
         self._login_cache: dict[int, str | None] = {}
         self._principals_cache: _TargetPrincipals | None = None
+        # Author/Editor values written by ``apply_authorship`` and folded into the
+        # final timestamp write so ``Editor`` isn't reset by the latter.
+        self._pending_authorship: dict[str, dict] = {}
+        # Target web time zone (lazily loaded) and a UTC->local conversion cache.
+        self._time_zone = None
+        self._local_cache: dict[str, str] = {}
+
+    def _utc_to_local(self, *values: str | None) -> list[str | None]:
+        """Convert UTC timestamp strings to web-local wall-clock (one round trip).
+
+        Document items parse form dates in the web's locale, so the desired UTC
+        instant must be converted to local wall-clock first. The conversion runs
+        server-side (``TimeZone.UTCToLocalTime``) so DST is handled correctly.
+        Results are cached by the exact UTC value.
+        """
+        if self._time_zone is None:
+            self._time_zone = self._folder.context.web.regional_settings.time_zone
+        outputs: list[str | None] = [None] * len(values)
+        pending: dict[str, object] = {}
+        assignments: list[tuple[int, str]] = []
+        for index, value in enumerate(values):
+            if not value:
+                continue
+            utc = _sp_utc_timestamp(value)
+            if utc is None:
+                continue
+            if not utc.endswith("Z"):
+                # Unparseable value: pass it through unchanged so a rejection is
+                # surfaced by ``_report_rejected_fields`` rather than silently lost.
+                outputs[index] = str(value)
+                continue
+            cached = self._local_cache.get(utc)
+            if cached is not None:
+                outputs[index] = cached
+                continue
+            instant = parse_datetime(utc)
+            if instant is None:
+                outputs[index] = str(value)
+                continue
+            if utc not in pending:
+                pending[utc] = self._time_zone.utc_to_local_time(instant)
+            assignments.append((index, utc))
+        if pending:
+            self._folder.context.execute_query()
+            for utc, result in pending.items():
+                local = _sp_local_timestamp(getattr(result, "value", None))
+                if local is not None:
+                    self._local_cache[utc] = local
+            for index, utc in assignments:
+                outputs[index] = self._local_cache.get(utc)
+        return outputs
 
     def _principals(self) -> _TargetPrincipals:
         """The (lazily built) target principal/role resolver."""
@@ -1281,23 +1513,24 @@ class SharePointLibraryTarget:
         ``ListItem.system_update``), which is the only REST path that can set these
         system fields. ``preserve_versions`` still needs the server-side API.
         """
-        form_values: dict[str, str] = {}
-        created = _sp_timestamp(item.created)
-        modified = _sp_timestamp(item.modified)
+        form_values: dict = {}
+        created, modified = self._utc_to_local(item.created, item.modified)
         if created:
             form_values["Created"] = created
         if modified:
             form_values["Modified"] = modified
+        form_values.update(self._pending_authorship.pop(item.dest_path, {}))
         if not form_values:
             return
         securable = self._securable(item)
         if securable is None:
             return
-        securable.validate_update_list_item(
+        result = securable.validate_update_list_item(
             form_values,
             dates_in_utc=True,
             new_document_update=item.item_type != "folder",
         ).execute_query()
+        _report_rejected_fields(result, self.warnings, f"timestamps {item.dest_path}")
 
     def apply_authorship(self, item: MigrationItem) -> None:
         """Best-effort: restore ``Author``/``Editor`` from the source principals.
@@ -1310,6 +1543,10 @@ class SharePointLibraryTarget:
             return
         author = self._principals().user(item.author.login_name if item.author else None)
         editor = self._principals().user(item.editor.login_name if item.editor else None)
+        if author is not None and _is_system_principal(author):
+            author = None
+        if editor is not None and _is_system_principal(editor):
+            editor = None
         if author is None and editor is None:
             return
         form_values: dict[str, FieldUserValue] = {}
@@ -1317,11 +1554,13 @@ class SharePointLibraryTarget:
             form_values["Author"] = FieldUserValue(author.id, author.login_name)
         if editor is not None:
             form_values["Editor"] = FieldUserValue(editor.id, editor.login_name)
-        securable.validate_update_list_item(
+        self._pending_authorship[item.dest_path] = dict(form_values)
+        result = securable.validate_update_list_item(
             form_values,
             dates_in_utc=True,
             new_document_update=item.item_type != "folder",
         ).execute_query()
+        _report_rejected_fields(result, self.warnings, f"authorship {item.dest_path}")
 
     def apply_permissions(self, item: MigrationItem, permissions: list[PermissionEntry]) -> None:
         """Best-effort: break inheritance and recreate the source role assignments.
@@ -1360,11 +1599,18 @@ class SharePointLibraryTarget:
         securable = self._securable(item)
         if securable is None or not _has_unique_role_assignments(securable):
             return []
-        return _read_role_assignments(securable)
+        return _read_role_assignments(securable, normalize=self._principals().normalize)
+
+    def _fresh_securable(self, item: MigrationItem):
+        """Re-read the written item so its properties reflect what was applied."""
+        securable = self._securable(item)
+        if securable is not None:
+            securable.get().execute_query()
+        return securable
 
     def read_authorship(self, item: MigrationItem) -> tuple[str | None, str | None]:
         """The written item's author/editor login names (for the authorship diff)."""
-        securable = self._securable(item)
+        securable = self._fresh_securable(item)
         if securable is None:
             return (None, None)
         properties = securable.properties
@@ -1380,7 +1626,8 @@ class SharePointLibraryTarget:
         return self._folder.context.web.get_file_by_server_relative_url(url).listItemAllFields
 
     def commit(self, options=None) -> None:
-        pass
+        self._pending_authorship.clear()
+        self._local_cache.clear()
 
     def close(self) -> None:
         pass

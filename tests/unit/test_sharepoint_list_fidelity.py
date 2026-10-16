@@ -77,6 +77,9 @@ class _Group:
         self.login_name = name
         self.principal_type = PrincipalType.SecurityGroup
 
+    def get(self):
+        return _Get(self)
+
 
 class _RoleDefinition:
     def __init__(self, name):
@@ -100,10 +103,14 @@ class _RoleDefinitions:
 
 
 class _Web:
-    def __init__(self, users=(), groups=(), roles=()):
+    def __init__(self, users=(), groups=(), roles=(), associated_groups=None):
         self.site_users = _SiteUsers(list(users))
         self.site_groups = _SiteGroups(list(groups))
         self.role_definitions = _RoleDefinitions(roles)
+        associated_groups = associated_groups or {}
+        self.associated_owner_group = associated_groups.get("Owners")
+        self.associated_member_group = associated_groups.get("Members")
+        self.associated_visitor_group = associated_groups.get("Visitors")
         self._by_login = {}
         for user in users:
             self._by_login[user.login_name] = user
@@ -406,6 +413,37 @@ def test_read_metadata_refreshes_the_item_before_diffing():
     assert row.get_calls == 1  # apply_timestamps wrote after the index was built
 
 
+def test_timestamps_fold_in_pending_authorship_so_editor_is_not_reset():
+    # The timestamp write runs last; REST would otherwise bump ``Editor`` to the
+    # caller, so the pending Author/Editor values must ride along in that write.
+    login = "vgrem@mediadev8.onmicrosoft.com"
+    row = _TargetListItem(10, "1")
+    web = _Web(users=[_SiteUser(9, login, title="Vadim")])
+    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
+
+    from office365.migration.base import Principal
+
+    item = MigrationItem(
+        "Docs/1",
+        "1",
+        item_type="record",
+        created="2019-03-04T05:06:07+00:00",
+        modified="2020-04-05T06:07:08+00:00",
+    )
+    item.author = Principal(login, "1003200065102863", "Vadim")
+    item.editor = Principal(login, "1003200065102863", "Vadim")
+
+    target.apply_authorship(item)
+    target.apply_timestamps(item)
+
+    final, dates_in_utc, _ = row.updates[-1]
+    assert final["Created"] == "2019-03-04T05:06:07Z"
+    assert final["Modified"] == "2020-04-05T06:07:08Z"
+    assert final["Author"].LookupId == 9  # noqa: PLR2004
+    assert final["Editor"].LookupId == 9  # noqa: PLR2004
+    assert dates_in_utc is True
+
+
 # ── Authorship ───────────────────────────────────────────────────────────────
 
 
@@ -511,6 +549,45 @@ def test_apply_permissions_breaks_inheritance_and_resolves_principals():
     assert principals[0] is group
     assert principals[1].login_name == admin.login_name
     assert [r for _, r in row.assignments_added] == [read, read]
+
+
+def test_apply_permissions_maps_a_default_group_by_role_kind():
+    # Default groups are titled after the site, so the source name rarely matches
+    # the target's; the trailing Owners/Members/Visitors kind maps to the target's
+    # associated group instead (team Members -> team_out Members).
+    target_group = _Group("team_out Members")
+    read = _RoleDefinition("Read")
+    web = _Web(roles=[read], associated_groups={"Members": target_group})
+    row = _TargetListItem(10, "1")
+    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
+
+    from office365.migration.base import PermissionEntry
+
+    target.apply_permissions(
+        MigrationItem("Docs/1", "1", item_type="record"),
+        [PermissionEntry(principal_name="team Members", roles=["Read"])],
+    )
+
+    assert [p for p, _ in row.assignments_added] == [target_group]
+    assert target.warnings == []
+
+
+def test_default_group_names_normalize_and_resolve_from_the_token():
+    # Both sides canonicalize a default group's title to ``default:<Kind>`` so a
+    # renamed site (team Visitors -> team_out Visitors) still verifies as preserved;
+    # the token is also resolvable back onto the target's associated group.
+    from office365.migration.sharepoint.adapters import _DefaultGroups, _TargetPrincipals
+
+    visitors = _Group("team_out Visitors")
+    web = _Web(associated_groups={"Visitors": visitors})
+
+    defaults = _DefaultGroups(web)
+    assert defaults.normalize("team_out Visitors") == "default:Visitors"
+    assert defaults.normalize("Custom Team") == "Custom Team"
+
+    principals = _TargetPrincipals(web, [])
+    assert principals.normalize("team_out Visitors") == "default:Visitors"
+    assert principals.principal("default:Visitors") is visitors
 
 
 # ── Verification (authorship diff) ───────────────────────────────────────────

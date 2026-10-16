@@ -4,6 +4,7 @@ Shared types and enums for the migration toolkit.
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict, dataclass, field, fields
 from enum import Enum
 
@@ -91,15 +92,23 @@ class MigrationItem:
     editor: "Principal | None" = None
 
 
+# SharePoint Online renders ``UserInfo.UserId.NameId`` as a 16-character hex PUID
+# (e.g. ``100320006514b083``). A GUID (dashed), a claims login, or the app
+# principal's id must be rejected: emitting one makes the Migration API ingestion
+# job fail to deserialize the user map (``System.FormatException``).
+_PUID_PATTERN = re.compile(r"^(?:0x)?[0-9a-fA-F]{16}$")
+
+
 def is_puid(value: "str | None") -> bool:
     """Whether ``value`` is a usable SharePoint PUID (``UserInfo.UserId.NameId``).
 
-    The Migration API's ``UserGroup.xml`` ``SystemId`` must be a numeric PUID. An
-    ``AadObjectId`` (GUID), a claims login, or the app principal's id makes the
-    ingestion job fail to deserialize the user map (``System.FormatException``),
-    so such principals are treated as unresolved and skipped (best-effort).
+    The Migration API's ``UserGroup.xml`` ``SystemId`` carries the user's PUID,
+    which SharePoint Online exposes as a 16-character hex string (the digits may
+    include ``a``-``f``). A GUID, a claims login, or the app principal's id makes
+    the ingestion job fail to deserialize the user map, so such principals are
+    treated as unresolved and skipped (best-effort).
     """
-    return bool(value) and str(value).strip().isdigit()
+    return bool(value) and bool(_PUID_PATTERN.match(str(value).strip()))
 
 
 @dataclass

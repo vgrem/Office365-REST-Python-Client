@@ -179,6 +179,22 @@ def test_odata_literal_encodes_special_chars_once():
     assert ODataPathBuilder._encode_string("50% + 1 & #2?*") == "'50%25 %2B 1 %26 %232%3F%2A'"
 
 
+def test_odata_function_datetime_argument_uses_datetime_literal():
+    """A datetime function argument becomes an OData v3 ``datetime'...'`` literal.
+
+    Before this branch a ``datetime`` fell through to ``quote(str(value))``, which
+    produced an invalid path (e.g. for ``TimeZone.UTCToLocalTime``).
+    """
+    from datetime import date, datetime, timezone
+
+    assert ODataPathBuilder._encode_odata_value(datetime(2021, 6, 1, 15, 0, 0)) == "datetime'2021-06-01T15:00:00'"
+    assert (
+        ODataPathBuilder._encode_odata_value(datetime(2021, 6, 1, 15, 0, 0, tzinfo=timezone.utc))
+        == "datetime'2021-06-01T15:00:00'"
+    )
+    assert ODataPathBuilder._encode_odata_value(date(2021, 6, 1)) == "date'2021-06-01'"
+
+
 def test_move_file_by_path_sends_paths_in_body():
     """MoveCopyUtil.MoveFileByPath carries both paths in the request body, not the URL."""
     from office365.sharepoint.utilities.move_copy_options import MoveCopyOptions

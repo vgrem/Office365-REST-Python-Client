@@ -1,5 +1,6 @@
 import json
 import re
+from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 from urllib.parse import quote
 
@@ -95,7 +96,7 @@ class ODataPathBuilder:
         return ""
 
     @staticmethod
-    def _encode_odata_value(value: Any) -> str:
+    def _encode_odata_value(value: Any) -> str:  # noqa: PLR0911 - one return per OData literal kind
         """
         Encodes a value for safe inclusion in an OData URL.
 
@@ -111,6 +112,13 @@ class ODataPathBuilder:
             return str(value).lower()
         elif isinstance(value, (int, float)):
             return str(value)
+        elif isinstance(value, datetime):
+            # OData v3 datetime literal (UTC); ``datetime`` is a subclass of
+            # ``date`` so it must be checked first. Without this branch a datetime
+            # argument was URL-quoted via ``str()`` and produced an invalid path.
+            return f"datetime'{value.strftime('%Y-%m-%dT%H:%M:%S')}'"
+        elif isinstance(value, date):
+            return f"date'{value.isoformat()}'"
         elif value is None:
             return "null"
         else:

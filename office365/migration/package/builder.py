@@ -354,12 +354,13 @@ class PackageBuilder:
     ) -> int:
         """Register a user in ``UserGroup.xml``; returns its integer id.
 
-        ``system_id`` (when given) must be the user's numeric PUID
-        (``UserInfo.UserId.NameId``); the service rejects a GUID, a claims login,
-        or the app principal with a ``System.FormatException`` that fails the job.
+        ``system_id`` (when given) must be the user's PUID
+        (``UserInfo.UserId.NameId``, a 16-character hex string); the service
+        rejects a GUID, a claims login, or the app principal with a
+        ``System.FormatException`` that fails the job.
         """
         if system_id is not None and not is_puid(system_id):
-            raise ValueError(f"system_id must be a numeric PUID, got {system_id!r}")
+            raise ValueError(f"system_id must be a PUID (16-char hex), got {system_id!r}")
         user_id = self._next_principal_id()
         self._user_group_map.add_user(
             User(

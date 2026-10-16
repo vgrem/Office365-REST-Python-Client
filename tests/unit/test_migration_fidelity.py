@@ -102,12 +102,16 @@ def test_runner_applies_fidelity_hooks_after_write():
 
 
 def test_sp_timestamp_normalizes_offsets_for_sharepoint():
-    from office365.migration.sharepoint.adapters import _sp_timestamp
+    from office365.migration.sharepoint.adapters import _sp_local_timestamp, _sp_utc_timestamp
 
-    assert _sp_timestamp(None) is None
-    assert _sp_timestamp("") is None
-    assert _sp_timestamp("2021-01-01T00:00:00+00:00") == "2021-01-01T00:00:00Z"
-    assert _sp_timestamp("2021-01-01T00:00:00") == "2021-01-01T00:00:00Z"
+    assert _sp_utc_timestamp(None) is None
+    assert _sp_utc_timestamp("") is None
+    # List items honor the ``...Z`` UTC form.
+    assert _sp_utc_timestamp("2021-01-01T00:00:00+00:00") == "2021-01-01T00:00:00Z"
+    assert _sp_utc_timestamp("2021-01-01T00:00:00") == "2021-01-01T00:00:00Z"
+    # Document items take an already-converted web-local wall-clock.
+    assert _sp_local_timestamp(None) is None
+    assert _sp_local_timestamp(datetime.datetime(2021, 1, 1, 8, 0, 0)) == "2021-01-01 08:00:00"
 
 
 def test_filesystem_source_captures_timestamps(tmp_path):

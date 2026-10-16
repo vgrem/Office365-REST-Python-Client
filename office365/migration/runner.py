@@ -79,14 +79,16 @@ def _apply_fidelity(source, target: DataTarget, item: MigrationItem, options: Mi
     Failures propagate (and are captured per-item by the caller) so a requested
     fidelity that couldn't be applied is visible and the item stays resumable.
     """
-    if options.preserve_timestamps:
-        _call_optional(target, "apply_timestamps", item)
-    if options.preserve_authorship:
-        _call_optional(target, "apply_authorship", item)
     if options.preserve_permissions:
         permissions = source.read_permissions(item)
         if permissions:
             _call_optional(target, "apply_permissions", item, permissions)
+    if options.preserve_authorship:
+        _call_optional(target, "apply_authorship", item)
+    # Timestamps last: the authorship/ACL writes above touch the item and would
+    # otherwise bump ``Modified`` past the value we are trying to restore.
+    if options.preserve_timestamps:
+        _call_optional(target, "apply_timestamps", item)
 
 
 class _Watermark:

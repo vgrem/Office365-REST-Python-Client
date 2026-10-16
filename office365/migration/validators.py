@@ -234,5 +234,9 @@ def _same_time(a: Any, b: Any) -> bool:
         return a == b
     left, right = parse_datetime(a), parse_datetime(b)
     if left is not None and right is not None:
+        if left.tzinfo is None and right.tzinfo is not None:
+            left = left.replace(tzinfo=right.tzinfo)
+        elif right.tzinfo is None and left.tzinfo is not None:
+            right = right.replace(tzinfo=left.tzinfo)
         return left == right
     return str(a) == str(b)

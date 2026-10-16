@@ -97,7 +97,14 @@ def test_read_role_assignments_captures_masks_and_resolves_users_only():
 
 def test_is_puid():
     assert is_puid("1003200065102863")
+    # SharePoint exposes the PUID as hex; the digits may include a-f (e.g. user 7,
+    # whose NameId is 100320006514b083) and must not be mistaken for non-numeric.
+    assert is_puid("100320006514b083")
+    assert is_puid("100320006514B083")
+    assert is_puid("0x100320006514b083")
     assert not is_puid("f310f81b-4066-4591-bcf3-e88804b12315")
+    assert not is_puid("f310f81b40664591bcf3e88804b12315")  # GUID without dashes
+    assert not is_puid("10032000651")  # too short
     assert not is_puid("i:0#.f|membership|jane@contoso.com")
     assert not is_puid("app@sharepoint")
     assert not is_puid(None)
