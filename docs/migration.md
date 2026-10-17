@@ -230,9 +230,20 @@ Two honest limits remain:
   same read on both sides — so the source reports it instead: one warning per run,
   naming the files (`N checked-out file(s) were copied from their last checked-in
   version (in-progress edits are not visible over REST): …`). The `CheckoutUser`
-  detection rides the single item read that already supplies the author ids. An
-  **un-published minor version** on a library with minor-versioning enabled is the
-  same class of invisible content and is *not* detected.
+  detection rides the single item read that already supplies the author ids.
+- A file on an **un-published (minor) version** is copied as its **draft**, and that
+  is the honest half of the story: REST returns the draft content (live-probed — a
+  file at `1.1` returns the draft, not the published `1.0`), so the copy matches
+  what the source reports, while the published version the draft supersedes stays
+  behind — client-side SP→SP does not restore version history. Verification again
+  compares the same read and cannot notice, so the source reports it: one warning
+  per run naming the files (`N file(s) are on an un-published (minor) version: the
+  draft content is copied, the published version it supersedes is not (version
+  history is not preserved): …`). The signal rides the file listing the source
+  already reads (`MinorVersion`): a published file is `x.0`, a draft `x.n` with
+  `n > 0`. The draft *state* itself is not lost — the approval state carries it
+  when the target library moderates — so the warning names the version history,
+  not the content.
 - Per-item **timestamps/permissions/authorship**
   (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
   by the list adapters on a best-effort basis: timestamps and authorship are
@@ -545,7 +556,7 @@ the shipped pairs' expected output.
 | Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
 | Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
-| Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and reported as a warning, since only that version is readable) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
+| Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and a file on an **un-published (minor) version** is copied as its draft — both reported as warnings, since the readable version is all REST exposes) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | pages/web parts not migrated (the resolver reports each skipped page library as a handoff); quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
@@ -716,7 +727,7 @@ explicit about what it could not confirm:
 | Check | When | Finding bucket |
 |---|---|---|
 | Presence (expected vs found paths) | always | `missing` / `extra` |
-| Content checksums | always, on a `spot_checks` sample | `mismatches` (or `unverifiable` if a side exposes no comparable hash); a checked-out source file's pending edits are invisible to both sides and are reported by the source instead |
+| Content checksums | always, on a `spot_checks` sample | `mismatches` (or `unverifiable` if a side exposes no comparable hash); a checked-out source file's pending edits, and the published version an un-published draft supersedes, are invisible to both sides and are reported by the source instead |
 | Timestamps (`Created`/`Modified`) | when `preserve_timestamps` was requested | `mismatches` / `unverifiable` (attachments: content-only, reported once; folders: compared on the folder resource, applied last) |
 | Authorship (`Author`/`Editor`) | when `preserve_authorship` was requested | `mismatches` / `unverifiable` |
 | Permissions | when `preserve_permissions` was requested | `mismatches` / `unverifiable` |

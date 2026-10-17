@@ -2394,6 +2394,7 @@ class SharePointLibrarySource:
             result.append(item)
             emit_progress(progress, done=len(result), stage="planning", items=[file])
         self._report_checkouts(result)
+        self._report_drafts(result)
         return result
 
     def _report_checkouts(self, items: list[MigrationItem]) -> None:
@@ -2414,6 +2415,38 @@ class SharePointLibrarySource:
         self.warnings.append(
             f"{len(checked)} checked-out file(s) were copied from their last checked-in version "
             f"(in-progress edits are not visible over REST): {shown}"
+        )
+
+    def _report_drafts(self, items: list[MigrationItem]) -> None:
+        """Warn about files whose current version is an un-published (minor) draft.
+
+        REST returns the *draft* content, so the copy is faithful to the version the
+        source reports — but version history is not preserved, so the published
+        version a draft supersedes never reaches the target and the copy keeps the
+        draft alone. Verification compares the same read and cannot see the
+        difference, so the loss is reported here instead of passing silently.
+
+        The signal rides the file listing (``MinorVersion``), so this costs no extra
+        request: a published file is ``x.0``, a draft ``x.n`` with ``n > 0``.
+        """
+        drafts: list[str] = []
+        for item in items:
+            if item.item_type == "folder":
+                continue
+            file = self._files.get(item.dest_path)
+            if file is None or not file.minor_version:
+                continue
+            drafts.append(item.dest_path)
+        if not drafts:
+            return
+        drafts.sort()
+        shown = ", ".join(drafts[:_WARNING_SAMPLE])
+        if len(drafts) > _WARNING_SAMPLE:
+            shown = f"{shown} and {len(drafts) - _WARNING_SAMPLE} more"
+        self.warnings.append(
+            f"{len(drafts)} file(s) are on an un-published (minor) version: the draft content "
+            f"is copied, the published version it supersedes is not (version history is not "
+            f"preserved): {shown}"
         )
 
     def read(self, item: MigrationItem) -> object:

@@ -310,7 +310,7 @@ class _ById:
 
 
 class _SourceFile:
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, minor_version: int = 0) -> None:
         self.server_relative_url = url
         self.length = 1
         self.author = _ById()
@@ -319,6 +319,7 @@ class _SourceFile:
         self.time_created = None
         self.unique_id = None
         self.ui_version_label = None
+        self.minor_version = minor_version
 
 
 class _SourceFolder:
@@ -800,6 +801,52 @@ def test_library_source_does_not_warn_when_nothing_is_checked_out():
 def test_library_source_summarizes_a_long_checked_out_list():
     urls = [f"/sites/x/Docs/f{index}.txt" for index in range(7)]
     source, _ = _checkout_source(urls, set(urls))
+
+    source.list_items()
+
+    assert len(source.warnings) == 1
+    assert source.warnings[0].endswith(": f0.txt, f1.txt, f2.txt, f3.txt, f4.txt and 2 more")
+
+
+# ── Un-published (minor) versions (the draft hides its published predecessor) ──
+
+
+def _draft_source(urls: list[str], drafts: set[str]):
+    """A source over the given files, the draft ones reporting a minor version."""
+    folder = _SourceFolder(
+        "/sites/x/Docs",
+        _Web(),
+        files=[_SourceFile(url, minor_version=1 if url in drafts else 0) for url in urls],
+    )
+    lst = _ModerationList([_ModerationItem({"FileRef": url}) for url in urls], moderation=False)
+    return SharePointLibrarySource(folder, sp_list=lst), lst
+
+
+def test_library_source_warns_about_an_un_published_draft():
+    # REST returns the draft content, so the copy matches what the source reports,
+    # but the published version the draft supersedes is not migrated — verification
+    # compares the same read and cannot see the difference.
+    source, _ = _draft_source(["/sites/x/Docs/a.txt", "/sites/x/Docs/b.txt"], {"/sites/x/Docs/b.txt"})
+
+    source.list_items()
+
+    assert source.warnings == [
+        "1 file(s) are on an un-published (minor) version: the draft content is copied, "
+        "the published version it supersedes is not (version history is not preserved): b.txt"
+    ]
+
+
+def test_library_source_does_not_warn_when_every_file_is_published():
+    source, _ = _draft_source(["/sites/x/Docs/a.txt"], set())
+
+    source.list_items()
+
+    assert source.warnings == []
+
+
+def test_library_source_summarizes_a_long_draft_list():
+    urls = [f"/sites/x/Docs/f{index}.txt" for index in range(7)]
+    source, _ = _draft_source(urls, set(urls))
 
     source.list_items()
 

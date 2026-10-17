@@ -21,8 +21,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   **and** the field is expanded (a bare `$select=CheckoutUser` is rejected with
   *The query to field 'CheckoutUser' is not valid*), so the projection grows by
   `CheckoutUser/Id`/`CheckoutUser/Title` plus `$expand=CheckoutUser` and costs no
-  extra request. An un-published minor version — the same class of invisible
-  content — is still not detected.
+  extra request.
+- **Files on an un-published (minor) version are reported too:** with minor
+  versioning enabled a document can sit at `1.1` — a draft whose published `1.0`
+  predecessor is what readers see. REST returns the *draft* content for it
+  (live-probed: `get_content()` on a `1.1` file returns the draft), so the copy
+  matches the version the source reports and the draft *state* survives — the
+  approval status carries it — but the published version it supersedes does not,
+  because client-side SP→SP does not restore version history. `verify()` compares
+  the same read and cannot notice, so the library source reports it once per run:
+  *N file(s) are on an un-published (minor) version: the draft content is copied,
+  the published version it supersedes is not (version history is not preserved): …*
+  (first five paths, then a count). The signal rides the recursive file listing the
+  source already reads, so detection costs no extra request: a published file is
+  `x.0`, a draft `x.n` with `n > 0` (`MajorVersion`/`Level` agree — on a moderated
+  library `publish`+`approve` lands on `1.0`/level 1 and a minor check-in on
+  `1.1`/level 2).
 - **Document library folder system metadata:** a migrated folder was created with
   the migration's own `Created`/`Modified` (and its author), so every funnel's
   "last updated" date was wrong while `verify()` — which excluded folders from the
