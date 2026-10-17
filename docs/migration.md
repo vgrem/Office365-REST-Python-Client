@@ -700,14 +700,13 @@ skips the library's own `Forms/` scaffolding, which SharePoint recreates on the
 target. The end-to-end import is validated against a live tenant for
 file/folder content, **version history**, **authorship** (`Author`/`ModifiedBy`),
 and — with `preserve_permissions=True` — **same-tenant ACLs for resolved users**.
-Each `UserGroup.xml` user carries its PUID (`SystemId`), written in its canonical
-16-digit hex form — `normalize_puid` strips a client's `0x` prefix or stray
-whitespace rather than carrying it into an attribute the service parses as a
-number; each granted level is
-emitted as a `DeploymentRoles` `<Role>` with a fresh non-system id and a decimal
-`PermMask` and is matched by `Title` to the target's existing permission level, so
-no duplicate is created. Groups and principals that cannot be resolved to a PUID
-are skipped and reported as warnings.
+Each `UserGroup.xml` user carries its PUID (`SystemId`) in its canonical 16-digit
+hex form: `normalize_puid` strips a `0x` prefix or stray whitespace rather than
+carrying it into an attribute the service parses as a number. Each granted level
+is emitted as a `DeploymentRoles` `<Role>` with a fresh non-system id and a
+decimal `PermMask`, and is matched by `Title` to the target's existing permission
+level, so no duplicate is created. Groups and principals that cannot be resolved
+to a PUID are skipped and reported as warnings.
 
 ## Storage & vendor neutrality
 

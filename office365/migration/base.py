@@ -95,7 +95,9 @@ class MigrationItem:
 # SharePoint Online renders ``UserInfo.UserId.NameId`` as a 16-character hex PUID
 # (e.g. ``100320006514b083``). A GUID (dashed), a claims login, or the app
 # principal's id must be rejected: emitting one makes the Migration API ingestion
-# job fail to deserialize the user map (``System.FormatException``).
+# job fail to deserialize the user map (``System.FormatException`` — the service
+# schema's documented behaviour; this rejection was not re-probed on the lab
+# tenant, whose own user map ingests fine).
 _PUID_PATTERN = re.compile(r"^[0-9a-fA-F]{16}$")
 #: Not part of the PUID: some clients render the value as a ``0x``-prefixed
 #: literal, and a value read from a payload may carry surrounding whitespace.

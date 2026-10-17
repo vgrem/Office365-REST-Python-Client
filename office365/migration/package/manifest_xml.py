@@ -8,8 +8,10 @@ folders, files, and file versions — plus the small, fully-specified
 
 The full ``DeploymentManifest`` schema has 100+ elements (content types, views,
 web parts, list items, taxonomy, ...); only what a document-library migration
-needs is modeled here. The generated XML follows the documented format but is
-**not yet verified against a live tenant**.
+needs is modeled here. That subset is ingested end-to-end on a live tenant —
+content, version history, authorship and permissions (see
+``docs/migration.md``) — so the format below is exercised, not merely documented;
+everything outside it is unmodeled rather than unverified.
 
 References:
 - https://learn.microsoft.com/en-us/sharepoint/dev/apis/migration-manifest
