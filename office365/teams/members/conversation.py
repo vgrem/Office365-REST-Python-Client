@@ -32,4 +32,7 @@ class ConversationMember(Entity):
     def entity_type_name(self) -> str:
         # Graph rejects the abstract ``conversationMember`` type on writes and
         # expects the concrete AAD user type (Teams members are always AAD users).
+        # The claim is therefore shared with ``aad_user_conversation.py``, which is
+        # deliberate: the generator reports both claimants, and every Teams member
+        # is an AAD user, so either class produces the same ``@odata.type``.
         return "microsoft.graph.AadUserConversationMember"

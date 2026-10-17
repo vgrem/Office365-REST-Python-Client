@@ -531,12 +531,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   must be updated: `from office365.directory.security.alerts... import ...`
   becomes `from office365.security.alerts... import ...`. `client.security` is
   unchanged.
+- **Duplicate model modules now re-export the canonical class.** Twelve modules
+  declared a *second* class for an OData type that another module already
+  models — leftovers of hand-written modules that the generator later placed
+  elsewhere. Both files stayed importable, so the class you got depended on the
+  import path, and the generator reported both modules as claimants of the same
+  type (the same hazard that had `--force` writing `SP.Field` members into a
+  hand-written file). Each duplicate now re-exports the canonical class, so every
+  existing import keeps working and there is one class per type:
+  `office365.communications.onlinemeetings.chatmode`,
+  `office365.outlook.attachment_info`, `office365.partners.partnertenanttype`,
+  `office365.reports.partners`,
+  `office365.onedrive.operations.public_inner_error`,
+  `office365.common.task_file_attachment`,
+  `office365.onedrive.wellknown_list_name`,
+  `office365.teams.operations.asyncoperationtype`,
+  `office365.directory.permissions.identity_set`,
+  `office365.security.attribute_mapping`, `office365.todo.attachments.type`
+  (`microsoft.graph.attachmentType` additionally gained `unknownFutureValue`) and
+  `office365.externalconnectors.content_category` (which now models the connector
+  enum, see below). The generator's duplicate-name report for Graph went from 14
+  types to 1 — `ConversationMember` deliberately writes as
+  `AadUserConversationMember`, so the shared claim is documented in place.
 - **`TaskStatus` moved to `office365.todo.tasks.taskstatus`** (was
   `office365.intune.print.taskstatus`). The enum models the Microsoft To Do task
   status and is only used by `TodoTask`, so it now sits next to its consumer.
   Update imports accordingly.
 
 ### Fixed
+- **Two models claimed the wrong OData type name.** `office365.security.security.Security`
+  returned `microsoft.graph.security.alert` (a copy-paste from `Alert`), so the
+  root security entity serialized with `Alert`'s `@odata.type`;
+  `office365.externalconnectors.content_category.ContentCategory` claimed the
+  base `microsoft.graph.ContentCategory` while modelling the connector enum that
+  Graph names `microsoft.graph.externalConnectors.contentCategory`, which made
+  `SearchConnection.content_category` default to `ContentCategory.none` — a member
+  that only the *base* enum has. The connector enum now matches the service
+  metadata (`uncategorized` … `unknownFutureValue`) and the default is
+  `uncategorized`; the lifecycle-workflow enum keeps the base name.
 - **A PUID's `0x` prefix (or stray whitespace) reached `UserGroup.xml` verbatim.**
   `is_puid` accepted `0x100320006514b083` as a legitimate PUID — the digits are
   what the Migration API's `SystemId` carries, but the prefix is not: the service

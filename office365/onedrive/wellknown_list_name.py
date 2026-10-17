@@ -1,14 +1,11 @@
+"""Compatibility import for the canonical ``WellknownListName``.
+
+``microsoft.graph.wellknownListName`` is a single Graph enum; the canonical
+model lives with the To Do lists.
+"""
+
 from __future__ import annotations
 
-from enum import Enum
+from office365.todo.tasks.wellknownlistname import WellknownListName
 
-
-class WellknownListName(Enum):
-    none = "0"
-    defaultList = "1"
-    flaggedEmails = "2"
-    unknownFutureValue = "3"
-
-    @property
-    def entity_type_name(self) -> str:
-        return "microsoft.graph.WellknownListName"
+__all__ = ["WellknownListName"]

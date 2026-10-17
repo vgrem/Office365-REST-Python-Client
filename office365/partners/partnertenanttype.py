@@ -1,15 +1,11 @@
-from enum import Enum
+"""Compatibility import for the canonical ``PartnerTenantType``.
 
+``microsoft.graph.partnerTenantType`` is a single Graph enum; the canonical
+model lives with the tenant information models.
+"""
 
-class PartnerTenantType(Enum):
-    microsoftSupport = "1"
-    syndicatePartner = "2"
-    breadthPartner = "3"
-    breadthPartnerDelegatedAdmin = "4"
-    resellerPartnerDelegatedAdmin = "5"
-    valueAddedResellerPartnerDelegatedAdmin = "6"
-    unknownFutureValue = "7"
+from __future__ import annotations
 
-    @property
-    def entity_type_name(self):
-        return "microsoft.graph.PartnerTenantType"
+from office365.directory.tenantinformation.partner_tenant_type import PartnerTenantType
+
+__all__ = ["PartnerTenantType"]

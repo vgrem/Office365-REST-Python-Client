@@ -1,12 +1,11 @@
-from enum import Enum
+"""Compatibility import for the canonical ``MeetingChatMode``.
 
+``microsoft.graph.meetingChatMode`` is a single Graph enum; the canonical
+model lives with the other ``meeting`` models.
+"""
 
-class MeetingChatMode(Enum):
-    enabled = "0"
-    disabled = "1"
-    limited = "2"
-    unknownFutureValue = "3"
+from __future__ import annotations
 
-    @property
-    def entity_type_name(self):
-        return "microsoft.graph.MeetingChatMode"
+from office365.communications.meetings.chatmode import MeetingChatMode
+
+__all__ = ["MeetingChatMode"]

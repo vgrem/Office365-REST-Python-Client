@@ -56,7 +56,7 @@ class ExternalConnection(Entity):
         """Gets the contentCategory property"""
         from office365.externalconnectors.content_category import ContentCategory
 
-        return self.properties.get("contentCategory", ContentCategory.none)
+        return self.properties.get("contentCategory", ContentCategory.uncategorized)
 
     @property
     def description(self) -> Optional[str]:

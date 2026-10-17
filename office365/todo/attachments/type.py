@@ -1,14 +1,11 @@
-from enum import Enum
+"""Compatibility import for :class:`office365.outlook.mail.attachments.type.AttachmentType`.
 
+``microsoft.graph.attachmentType`` is a single Graph enum shared by Outlook and
+To Do attachments; the canonical model lives with the Outlook attachments.
+"""
 
-class AttachmentType(Enum):
-    """The type of a Microsoft To Do attachment."""
+from __future__ import annotations
 
-    file = "file"
-    item = "item"
-    reference = "reference"
-    unknownFutureValue = "unknownFutureValue"
+from office365.outlook.mail.attachments.type import AttachmentType
 
-    @property
-    def entity_type_name(self) -> str:
-        return "microsoft.graph.attachmentType"
+__all__ = ["AttachmentType"]

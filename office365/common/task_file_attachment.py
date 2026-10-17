@@ -1,16 +1,11 @@
+"""Compatibility import for the canonical ``TaskFileAttachment``.
+
+``microsoft.graph.taskFileAttachment`` is a single Graph attachment subtype;
+the canonical model lives with the To Do attachments.
+"""
+
 from __future__ import annotations
 
-from typing import Optional
+from office365.todo.attachments.task_file import TaskFileAttachment
 
-from office365.entity import Entity
-
-
-class TaskFileAttachment(Entity):
-    @property
-    def content_bytes(self) -> Optional[bytes]:
-        """Gets the contentBytes property"""
-        return self.properties.get("contentBytes", None)
-
-    @property
-    def entity_type_name(self) -> str:
-        return "microsoft.graph.TaskFileAttachment"
+__all__ = ["TaskFileAttachment"]

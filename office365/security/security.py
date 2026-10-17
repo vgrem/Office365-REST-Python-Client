@@ -168,7 +168,7 @@ class Security(Entity):
 
     @property
     def entity_type_name(self) -> str:
-        return "microsoft.graph.security.alert"
+        return "microsoft.graph.security.Security"
 
     @property
     def identities(self) -> IdentityContainer:

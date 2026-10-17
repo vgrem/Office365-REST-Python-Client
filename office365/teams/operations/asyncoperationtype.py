@@ -1,18 +1,13 @@
-from enum import Enum
+"""Compatibility import for the canonical ``TeamsAsyncOperationType``.
 
+``microsoft.graph.teamsAsyncOperationType`` is a single Graph enum; the
+canonical model lives next to the async operations. Graph serializes the member
+*name* (``cloneTeam``), so the surviving model carries names rather than the
+CSDL ordinals.
+"""
 
-class TeamsAsyncOperationType(Enum):
-    invalid = "0"
-    cloneTeam = "1"
-    archiveTeam = "2"
-    unarchiveTeam = "3"
-    createTeam = "4"
-    unknownFutureValue = "5"
-    teamifyGroup = "6"
-    createChannel = "7"
-    archiveChannel = "8"
-    unarchiveChannel = "9"
+from __future__ import annotations
 
-    @property
-    def entity_type_name(self):
-        return "microsoft.graph.TeamsAsyncOperationType"
+from office365.teams.operations.type import TeamsAsyncOperationType
+
+__all__ = ["TeamsAsyncOperationType"]
