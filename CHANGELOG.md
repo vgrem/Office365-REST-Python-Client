@@ -791,6 +791,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **A provisioned library no longer reports field links it could never have.** A
+  content type's `FieldLinks` also name built-in and SharePoint-owned columns
+  (`Title`, `FileLeafRef`, and the framework columns SharePoint provisions for
+  itself — `MediaServiceMetadata`, `MetaInfo`, `_VirusStatus`, …). Those are hidden
+  or non-deletable, so structure provisioning neither recreates nor links them
+  (linking one is a guaranteed server error), yet the structure comparison counted
+  them as missing: every full-site `verify_structure` run ended with
+  `[MISMATCH] Site Assets: field links: 6` for the six `MediaService*` columns
+  alone. `capture_list_structure` now keeps a content type's links only for columns
+  the snapshot can actually recreate (the same set `_reconcile_field_links` links),
+  logging the dropped names at debug level, so the comparison measures what the
+  migration can deliver. Live-verified on SharePoint Online: the full-site
+  `--all` run that previously ended in that mismatch is now `[OK]` for every list,
+  *Site Assets* included.
 - **An item's ACL could be applied blind: empty, broken twice, or misreported.**
   `apply_permissions` broke inheritance first and only then resolved what to grant,
   on both the record-list and the document-library target. A source ACL whose

@@ -1158,6 +1158,15 @@ carries extra built-in columns, content types and views, so "extra" entries are
 not findings. Field links that could not be attached (the REST limit described
 above) show up as `missing_field_links`.
 
+That comparison is limited to the columns the migration can **recreate**. A content
+type's links also name built-in and SharePoint-owned columns — `Title`,
+`FileLeafRef`, and the framework columns SharePoint provisions for itself
+(`MediaServiceMetadata`, `MetaInfo`, `_VirusStatus`, …) — which are hidden or
+non-deletable and therefore neither copied nor linked: linking one is a guaranteed
+server error. Those names are dropped at capture time (and logged at debug level),
+so a library like *Site Assets* reports `field links: 0` instead of a permanent
+handful of links to columns no migration was ever going to create.
+
 A column that both lists have is compared **attribute by attribute**, not just by
 name: the type, `Required`/`Indexed`/`EnforceUniqueValues` flags, length, format,
 rich text, the choice list, the default value, a calculated or validation formula

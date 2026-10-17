@@ -284,10 +284,11 @@ class TestCaptureListStructure(unittest.TestCase):
 
     def test_captures_content_types_and_skips_hidden(self):
         lst = _List(
+            fields=[_Field("ProjectType")],
             content_types=[
                 _ContentType("0x0100abc", name="Project", group="Custom", links=["Title", "ProjectType"]),
                 _ContentType("0x01", name="Item", hidden=True, links=["Title"]),
-            ]
+            ],
         )
 
         structure = capture_list_structure(lst)
@@ -295,7 +296,29 @@ class TestCaptureListStructure(unittest.TestCase):
         self.assertEqual([ct.name for ct in structure.content_types], ["Project"])
         project = structure.content_types[0]
         self.assertEqual(project.string_id, "0x0100abc")
-        self.assertEqual(project.field_internal_names, ["Title", "ProjectType"])
+        # ``Title`` is a built-in column the migration never recreates or links, so
+        # keeping it would make every provisioned library report a missing link.
+        self.assertEqual(project.field_internal_names, ["ProjectType"])
+
+    def test_a_content_type_link_to_a_column_that_cannot_be_recreated_is_dropped(self):
+        lst = _List(
+            fields=[
+                _Field("ProjectType"),
+                _Field("Framework", from_base_type=False, can_be_deleted=False),
+                _Field("HiddenUser", from_base_type=False, can_be_deleted=True, hidden=True),
+            ],
+            content_types=[
+                _ContentType(
+                    "0x0100abc",
+                    name="Project",
+                    links=["Title", "MetaInfo", "MediaServiceMetadata", "ProjectType", "Framework", "HiddenUser"],
+                )
+            ],
+        )
+
+        structure = capture_list_structure(lst)
+
+        self.assertEqual(structure.content_types[0].field_internal_names, ["ProjectType"])
 
     def test_captures_views_in_order_and_skips_hidden_and_personal(self):
         lst = _List(

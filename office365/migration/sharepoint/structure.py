@@ -20,7 +20,11 @@ Scope, deliberately:
   **lookup** column's schema names the list it points at; replayed verbatim it
   would name the *source* list id, so it is repointed at the matching target list
   (or skipped with a warning when that list is not part of the migration).
-* **Content types** — non-hidden content types with their ordered field links.
+* **Content types** — non-hidden content types with their ordered field links, kept
+  to the columns the migration can actually recreate. A link to a framework column
+  (``MediaService*``, ``MetaInfo``, ...) is not replayed — the column itself is
+  hidden and server-provisioned — so comparing it would report a gap on every
+  library the migration provisioned.
 * **Views** — non-hidden, non-personal views with their ordered columns.
 * **List settings** — the container's own policy (versioning and its limits,
   content approval and draft visibility, attachments, item-level read/write
@@ -384,12 +388,13 @@ def capture_list_structure(sp_list: SPList) -> ListStructure:
 
     loaded_fields = sp_list.fields.select(list(_FIELD_SELECT)).get().execute_query()
     structure.fields = [_field_definition(field) for field in loaded_fields if _is_capturable_field(field)]
+    replayable = {field.internal_name for field in structure.fields if field.internal_name}
 
     for content_type in sp_list.content_types.get().execute_query():
         if not _is_capturable_content_type(content_type):
             continue
         links = content_type.field_links.get().execute_query()
-        structure.content_types.append(_content_type_definition(content_type, links))
+        structure.content_types.append(_content_type_definition(content_type, links, replayable))
 
     for view in sp_list.views.get().execute_query():
         if getattr(view, "hidden", False) or getattr(view, "personal_view", False):
@@ -610,7 +615,28 @@ def _component_id(field: Field) -> Optional[str]:
     return str(value)
 
 
-def _content_type_definition(content_type: ContentType, links: Iterable[FieldLink]) -> ContentTypeDefinition:
+def _content_type_definition(
+    content_type: ContentType, links: Iterable[FieldLink], replayable: Optional[set] = None
+) -> ContentTypeDefinition:
+    """A content type snapshot, with the links this migration can replay.
+
+    ``replayable`` is the set of internal names the snapshot can recreate on another
+    list. A link naming anything else (a built-in column, a server-provisioned
+    framework column such as ``MediaServiceMetadata``) is dropped: the column is not
+    provisioned either, so keeping the link would make every provisioned library
+    report a field link it was never going to have.
+    """
+    names = [name for name in (link.field_internal_name for link in links) if name]
+    if replayable is not None:
+        dropped = [name for name in names if name not in replayable]
+        if dropped:
+            logger.debug(
+                "content type %r: %d field link(s) name a column the migration cannot recreate: %s",
+                content_type.name,
+                len(dropped),
+                ", ".join(sorted(dropped)),
+            )
+        names = [name for name in names if name in replayable]
     return ContentTypeDefinition(
         string_id=content_type.string_id or "",
         name=content_type.name,
@@ -619,7 +645,7 @@ def _content_type_definition(content_type: ContentType, links: Iterable[FieldLin
         hidden=content_type.hidden,
         sealed=content_type.sealed,
         read_only=content_type.read_only,
-        field_internal_names=[name for name in (link.field_internal_name for link in links) if name],
+        field_internal_names=names,
     )
 
 
