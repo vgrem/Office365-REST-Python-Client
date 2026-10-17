@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from office365.migration.base import Principal, is_puid
+from office365.migration.base import Principal, is_puid, normalize_puid
 from office365.migration.sharepoint.adapters import (
     SharePointLibrarySource,
     _is_user_principal,
@@ -109,6 +109,30 @@ def test_is_puid():
     assert not is_puid("app@sharepoint")
     assert not is_puid(None)
     assert not is_puid("")
+
+
+def test_normalize_puid_strips_the_literal_prefix_and_whitespace():
+    # Only the digits belong in ``SystemId``: the service parses it as a number,
+    # so a client's ``0x`` rendering must not be carried through verbatim.
+    assert normalize_puid("100320006514b083") == "100320006514b083"
+    assert normalize_puid("0x100320006514b083") == "100320006514b083"
+    assert normalize_puid("  0X1003200065102863\n") == "1003200065102863"
+    assert normalize_puid("100320006514B083") == "100320006514B083"  # case is preserved
+    assert normalize_puid("f310f81b-4066-4591-bcf3-e88804b12315") is None
+    assert normalize_puid("0x") is None
+    assert normalize_puid(None) is None
+    assert normalize_puid("") is None
+
+
+def test_principal_for_canonicalizes_a_prefixed_puid():
+    folder = _Folder({10: _User("i:0#.f|membership|jane@contoso.com", "0x100320006514b083", "Jane")})
+    source = SharePointLibrarySource(folder)
+
+    principal = source._principal_for(10)
+
+    assert principal is not None
+    assert principal.system_id == "100320006514b083"
+    assert source.warnings == []
 
 
 class _NameId:

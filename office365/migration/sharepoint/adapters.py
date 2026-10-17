@@ -20,7 +20,13 @@ from typing import TYPE_CHECKING, Any, cast
 from typing_extensions import TypeAlias
 
 from office365.migration.adapters import MigrationProgress
-from office365.migration.base import MigrationItem, PermissionEntry, Principal, conflict_to_on_conflict, is_puid
+from office365.migration.base import (
+    MigrationItem,
+    PermissionEntry,
+    Principal,
+    conflict_to_on_conflict,
+    normalize_puid,
+)
 from office365.migration.sharepoint.structure import normalize_guid
 from office365.migration.sharepoint.transfer import Failure
 from office365.runtime.converters.records import records_from_items
@@ -1369,9 +1375,7 @@ class SharePointListSource:
         try:
             user = self._list.context.web.site_users.get_by_id(cast("str", key)).get().execute_query()
             user_id_info = user.properties.get("UserId")
-            system_id = str(getattr(user_id_info, "NameId", None) or "") or None
-            if system_id is not None and not is_puid(system_id):
-                system_id = None
+            system_id = normalize_puid(getattr(user_id_info, "NameId", None))
             principal = Principal(
                 login_name=user.login_name or "",
                 system_id=system_id,
@@ -2594,15 +2598,14 @@ class SharePointLibrarySource:
             user = self._folder.context.web.site_users.get_by_id(cast("str", key)).get().execute_query()
             user_id_info = user.properties.get("UserId")
             raw_id = getattr(user_id_info, "NameId", None)
-            system_id = str(raw_id or "") or None
-            if system_id is not None and not is_puid(system_id):
+            system_id = normalize_puid(raw_id)
+            if raw_id and system_id is None:
                 # e.g. the app principal, whose ``UserId.NameId`` is not a PUID.
                 # Emitting it would fail the whole ingestion job, so drop it.
                 self.warnings.append(
-                    f"user {key} ({user.login_name!r}) has no usable PUID ({system_id!r}); "
+                    f"user {key} ({user.login_name!r}) has no usable PUID ({raw_id!r}); "
                     "it is omitted from the server-side user map"
                 )
-                system_id = None
             principal = Principal(
                 login_name=user.login_name or "",
                 system_id=system_id,

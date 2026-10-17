@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path, PurePosixPath
 
-from office365.migration.base import is_puid
+from office365.migration.base import normalize_puid
 from office365.migration.package.manifest_xml import (
     LOOKUP_LIST_MAP_NS,
     REQUIREMENTS_NS,
@@ -351,9 +351,11 @@ class PackageBuilder:
         ``system_id`` (when given) must be the user's PUID
         (``UserInfo.UserId.NameId``, a 16-character hex string); the service
         rejects a GUID, a claims login, or the app principal with a
-        ``System.FormatException`` that fails the job.
+        ``System.FormatException`` that fails the job. A ``0x`` prefix or stray
+        whitespace is stripped, so only the digits reach ``SystemId``.
         """
-        if system_id is not None and not is_puid(system_id):
+        puid = normalize_puid(system_id)
+        if system_id is not None and puid is None:
             raise ValueError(f"system_id must be a PUID (16-char hex), got {system_id!r}")
         user_id = self._next_principal_id()
         self._user_group_map.add_user(
@@ -362,7 +364,7 @@ class PackageBuilder:
                 name=name or login,
                 login=login,
                 email=email,
-                system_id=system_id,
+                system_id=puid,
                 is_site_admin=is_site_admin,
             )
         )

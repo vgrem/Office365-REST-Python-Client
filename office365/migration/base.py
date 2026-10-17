@@ -96,7 +96,29 @@ class MigrationItem:
 # (e.g. ``100320006514b083``). A GUID (dashed), a claims login, or the app
 # principal's id must be rejected: emitting one makes the Migration API ingestion
 # job fail to deserialize the user map (``System.FormatException``).
-_PUID_PATTERN = re.compile(r"^(?:0x)?[0-9a-fA-F]{16}$")
+_PUID_PATTERN = re.compile(r"^[0-9a-fA-F]{16}$")
+#: Not part of the PUID: some clients render the value as a ``0x``-prefixed
+#: literal, and a value read from a payload may carry surrounding whitespace.
+_PUID_PREFIXES = ("0x", "0X")
+
+
+def normalize_puid(value: "str | None") -> "str | None":
+    """The PUID carried by ``value`` (its 16 hex digits), or ``None``.
+
+    The digits are what ``UserGroup.xml``'s ``SystemId`` carries, so a ``0x``
+    prefix and surrounding whitespace are stripped here rather than written into
+    the attribute: the service parses the value as a number, not as a Python-style
+    literal. The digits' case is preserved (the service reads them as hex either
+    way, and a needless rewrite would obscure a surprising source value).
+    """
+    if not value:
+        return None
+    text = str(value).strip()
+    for prefix in _PUID_PREFIXES:
+        if text.startswith(prefix):
+            text = text[len(prefix) :]
+            break
+    return text if _PUID_PATTERN.match(text) else None
 
 
 def is_puid(value: "str | None") -> bool:
@@ -108,7 +130,7 @@ def is_puid(value: "str | None") -> bool:
     the ingestion job fail to deserialize the user map, so such principals are
     treated as unresolved and skipped (best-effort).
     """
-    return bool(value) and bool(_PUID_PATTERN.match(str(value).strip()))
+    return normalize_puid(value) is not None
 
 
 @dataclass
@@ -116,8 +138,9 @@ class Principal:
     """A resolved user identity, used for authorship and ACL fidelity.
 
     ``system_id`` is the user's PUID (``UserInfo.UserId.NameId``) — the value the
-    Migration API's ``UserGroup.xml`` ``SystemId`` requires. A GUID or a claims
-    login there fails the ingestion job, so only a resolved PUID is carried.
+    Migration API's ``UserGroup.xml`` ``SystemId`` requires, in its canonical
+    form (see :func:`normalize_puid`). A GUID or a claims login there fails the
+    ingestion job, so only a resolved PUID is carried.
     """
 
     login_name: str

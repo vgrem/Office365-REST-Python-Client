@@ -24,6 +24,7 @@ from office365.migration.package import (
     Package,
     PackageBuilder,
     SharedWithEvent,
+    User,
     UserGroupMap,
     create_staging,
 )
@@ -234,6 +235,15 @@ def test_add_user_requires_a_numeric_puid_system_id():
     assert user.get("SystemId") == "1003200065102863"
 
 
+def test_add_user_canonicalizes_the_puid_it_writes():
+    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
+    builder.add_user("i:0#.f|membership|jane@contoso.com", system_id=" 0x100320006514b083 ")
+    user = _children(ET.fromstring(builder.build().user_group_map), USER_GROUP_MAP_NS, "Users")[0][0]
+
+    # Only the digits reach the attribute; a ``0x`` literal would not parse.
+    assert user.get("SystemId") == "100320006514b083"
+
+
 def test_object_id_and_item_url_and_include_security_helpers():
     builder = PackageBuilder("https://contoso.sharepoint.com/sites/x", list_title="Documents")
     file_id = builder.add_file("a/b.txt", b"hi")
@@ -295,6 +305,18 @@ def test_user_group_map_renders_users():
     assert users[0].get("Name") == "Jane"
     assert users[0].get("Login") == "i:0#.f|membership|jane@contoso.com"
     assert users[0].get("IsSiteAdmin") == "false"
+
+
+def test_user_group_map_normalizes_a_hand_built_system_id():
+    # ``to_xml`` is the last place before the service sees the value, so a user
+    # model built by hand is normalized too (the attribute is required).
+    model = UserGroupMap(
+        users=[User(id=1, name="Jane", login="i:0#.f|membership|jane@contoso.com", system_id="0x1003200065102863")]
+    )
+    root = ET.fromstring(model.to_xml())
+    user = _children(_children(root, USER_GROUP_MAP_NS, "Users")[0], USER_GROUP_MAP_NS, "User")[0]
+
+    assert user.get("SystemId") == "1003200065102863"
 
 
 def test_user_group_map_renders_group_members():

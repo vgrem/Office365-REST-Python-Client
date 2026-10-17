@@ -22,6 +22,8 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 
+from office365.migration.base import normalize_puid
+
 MANIFEST_NS = "urn:deployment-manifest-schema"
 SYSTEM_DATA_NS = "urn:deployment-systemdata-schema"
 EXPORT_SETTINGS_NS = "urn:deployment-exportsettings-schema"
@@ -483,7 +485,7 @@ class UserGroupMap:
                     "IsDomainGroup": user.is_domain_group,
                     "IsSiteAdmin": user.is_site_admin,
                     # the service schema requires the attribute even when unknown
-                    "SystemId": user.system_id or "",
+                    "SystemId": normalize_puid(user.system_id) or "",
                     "IsDeleted": user.is_deleted,
                 },
             )

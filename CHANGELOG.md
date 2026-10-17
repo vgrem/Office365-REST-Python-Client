@@ -537,6 +537,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **A PUID's `0x` prefix (or stray whitespace) reached `UserGroup.xml` verbatim.**
+  `is_puid` accepted `0x100320006514b083` as a legitimate PUID — the digits are
+  what the Migration API's `SystemId` carries, but the prefix is not: the service
+  parses the attribute as a number, so a prefixed or space-padded value was
+  validated and then written through unchanged. `office365.migration.base` now
+  exposes `normalize_puid`, which returns the 16 hex digits (prefix and whitespace
+  stripped, case preserved) or `None`; `is_puid` is defined in terms of it, and it
+  is applied wherever a PUID enters the payload — `PackageBuilder.add_user` (which
+  still rejects a GUID or a claims login) and `UserGroupMap.to_xml` as the last
+  chokepoint before the service sees the value, plus both SharePoint adapters'
+  principal resolution, so `Principal.system_id` is canonical throughout.
 - **The model generator could write into hand-written files.** Two classes that
   are not model types used to claim an OData name through the
   `<namespace>.<ClassName>` fallback and shadow the real class, so `--force`
