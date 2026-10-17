@@ -1326,6 +1326,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the FULL/INCREMENTAL choice is `MigrationOptions.incremental` and the UPSERT
   behavior is `MigrationOptions.conflict_resolution`. This is a breaking import
   change.
+- **Three stale duplicate model modules:** `office365.onenote.operations.operation`
+  (whose `Operation` claimed `microsoft.graph.partners.billing.Operation` — the
+  wrong type entirely, and the second claimer of `microsoft.graph.Operation`),
+  `office365.sharepoint.customactions.action` (a second `UserCustomAction`, next
+  to the canonical `office365.sharepoint.usercustomactions.action` — the generator
+  had been updating *this* copy, so the canonical class was frozen as the thin
+  one) and
+  `office365.sharepoint.contentcenter.machinelearning.publications.result`
+  (whose `SPMachineLearningPublicationsResult` claimed the *singular*
+  `…SPMachineLearningPublicationResult` name, i.e. it masqueraded as its own
+  element type). Each is an old-layout leftover: a forced regeneration of both
+  models now plans **0 created, 0 updated**, and `--report-duplicates` no longer
+  lists `microsoft.graph.Operation`. Replacement imports are one line —
+  `office365.common.operation`, `office365.sharepoint.usercustomactions.action`
+  and `office365.sharepoint.contentcenter.sp_machine_learning_publications_result`.
+  The canonical `UserCustomAction` gained the 20 properties the generator had been
+  writing into the duplicate (including `id`, `rights`, `description_resource` and
+  `title_resource`), and `OnenoteOperation` now derives from the real
+  `microsoft.graph.Operation`, so its `status` is an `OperationStatus`. This is a
+  breaking import change.
 
 ### Documentation
 - **Microsoft Purview guided tour:** `examples/purview/` is reorganised by

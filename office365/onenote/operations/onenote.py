@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+from office365.common.operation import Operation
 from office365.onenote.operations.onenote_operation_error import OnenoteOperationError
-from office365.onenote.operations.operation import Operation
 
 
 class OnenoteOperation(Operation):
