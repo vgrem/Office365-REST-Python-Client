@@ -739,7 +739,17 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
   breaks inheritance and recreates them, resolving principals by login name and
   roles by name. Only items with an **unique** ACL are copied — the REST surface
   reports inherited role assignments too, and copying those would break
-  inheritance on every item and duplicate the parent ACL. On the server-side
+  inheritance on every item and duplicate the parent ACL. That flag is *not* part
+  of a plain entity read, so an item loaded before its ACL changed keeps a stale
+  value; the target therefore re-reads it explicitly rather than trusting the
+  cached copy, which would otherwise break inheritance on an item that is already
+  unique (wiping the assignments it was meant to keep). Every principal and role
+  is resolved **before** anything is written, and inheritance is only broken when
+  at least one assignment resolved: an item whose principals are all unresolvable
+  (cross-tenant accounts, an app principal) would otherwise end up with an
+  **empty** ACL — inheritance broken, nobody granted — so it is left inheriting
+  and reported instead. A re-run adds only what is missing and never removes an
+  assignment the source does not grant. On the server-side
   package target, `preserve_permissions=True` emits
   `DeploymentRoles`/`DeploymentRoleAssignments` for **resolved users** (matched by
   PUID; groups/unresolved principals are skipped with a warning). Both are

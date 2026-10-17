@@ -177,8 +177,28 @@ class _RoleAssignments:
 
 
 class _TargetListItem:
-    def __init__(self, target_id, identity=None, *, author_id=None, editor_id=None, unique=None, assignments=()):
+    """A list item whose *plain* read does not return ``HasUniqueRoleAssignments``.
+
+    That mirrors SharePoint: the flag is absent from a default entity payload, so a
+    value cached before an ACL write stays in ``properties`` until a projection asks
+    for it — which is what ``server_unique`` models.
+    """
+
+    def __init__(
+        self,
+        target_id,
+        identity=None,
+        *,
+        author_id=None,
+        editor_id=None,
+        unique=None,
+        assignments=(),
+        server_unique=None,
+    ):
         self.id = target_id
+        self._server_unique = server_unique
+        self._select: list | None = None
+        self.query_options = SimpleNamespace(select=[])
         self.properties: dict[str, object] = {"Id": target_id}
         if identity is not None:
             self.properties[DEFAULT_LIST_IDENTITY_FIELD] = identity
@@ -199,8 +219,16 @@ class _TargetListItem:
     def has_unique_role_assignments(self):
         return self.properties.get("HasUniqueRoleAssignments", None)
 
+    def select(self, columns):
+        self._select = list(columns)
+        self.query_options.select = list(columns)
+        return self
+
     def get(self):
         self.get_calls += 1
+        if self._select == ["HasUniqueRoleAssignments"] and self._server_unique is not None:
+            self.properties["HasUniqueRoleAssignments"] = self._server_unique
+        self._select = None
         return self
 
     def execute_query(self):
@@ -558,6 +586,58 @@ def test_authorship_replays_approval_state_when_no_timestamps_follow():
 # ── Permissions ──────────────────────────────────────────────────────────────
 
 
+def test_has_unique_role_assignments_refreshes_a_stale_flag():
+    class _Item:
+        def __init__(self):
+            self.properties: dict = {"HasUniqueRoleAssignments": False}
+            self.query_options = SimpleNamespace(select=["Title"])
+            self.reads = 0
+
+        @property
+        def has_unique_role_assignments(self):
+            return self.properties.get("HasUniqueRoleAssignments")
+
+        def select(self, columns):
+            self.query_options.select = list(columns)
+            return self
+
+        def get(self):
+            return self
+
+        def execute_query(self):
+            self.reads += 1
+            self.properties["HasUniqueRoleAssignments"] = True  # the ACL was applied
+            return self
+
+    item = _Item()
+
+    # A cached value costs no request...
+    assert _has_unique_role_assignments(item) is False
+    assert item.reads == 0
+    # ...while a refresh asks the server, and does not leave the projection behind.
+    assert _has_unique_role_assignments(item, refresh=True) is True
+    assert item.reads == 1
+    assert item.query_options.select == ["Title"]
+
+
+def test_read_permissions_sees_an_acl_applied_after_the_item_was_loaded():
+    # The target item was loaded before its ACL was applied, so its cached flag says
+    # "inherits"; only a projected read reveals the assignments that did land.
+    row = _TargetListItem(
+        10,
+        "1",
+        unique=False,
+        server_unique=True,
+        assignments=[_Assignment(_Member("i:0#.f|membership|anna@contoso.com"), ["Read"])],
+    )
+    target = SharePointListTarget(cast("SPList", _TargetList([row], web=_Web())))
+
+    entries = target.read_permissions(MigrationItem("Docs/1", "1", item_type="record"))
+
+    assert len(entries) == 1
+    assert row.get_calls > 1  # the full read, then the explicit flag re-read
+
+
 def test_has_unique_role_assignments_reads_and_defaults_to_not_unique():
     assert _has_unique_role_assignments(SimpleNamespace(has_unique_role_assignments=True)) is True
     assert _has_unique_role_assignments(SimpleNamespace(has_unique_role_assignments=False)) is False
@@ -684,3 +764,65 @@ def test_verify_authorship_is_unverifiable_without_the_hooks():
 
     assert report.mismatches == []
     assert report.unverifiable == ["authorship: adapters do not implement read_authorship(item)"]
+
+
+def test_apply_permissions_leaves_inheritance_alone_when_no_principal_resolves():
+    # A cross-tenant account or an app principal has no target counterpart: breaking
+    # inheritance would leave the item with an empty ACL — nobody granted — so the
+    # item keeps inheriting and the gap is reported instead.
+    read = _RoleDefinition("Read")
+    web = _Web(roles=[read], users=[])
+    row = _TargetListItem(10, "1", unique=False)
+    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
+
+    from office365.migration.base import PermissionEntry
+
+    target.apply_permissions(
+        MigrationItem("Docs/1", "1", item_type="record"),
+        [PermissionEntry(principal_name="i:0#.f|membership|stranger@other.onmicrosoft.com", roles=["Read"])],
+    )
+
+    assert row.broke_inheritance is None
+    assert row.assignments_added == []
+    assert len(target.warnings) == 1
+    assert "were not restored: no assignment could be resolved" in target.warnings[0]
+    assert "empty ACL" in target.warnings[0]
+
+
+def test_apply_permissions_does_not_break_inheritance_twice():
+    # A re-run (or a target item an administrator already restricted) must not be
+    # stripped and rebuilt: the assignments are added to whatever is there.
+    admin = _SiteUser(6, "i:0#.f|membership|admin@mediadev8.onmicrosoft.com")
+    read = _RoleDefinition("Read")
+    web = _Web(users=[admin], roles=[read])
+    row = _TargetListItem(10, "1", unique=True)
+    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
+
+    from office365.migration.base import PermissionEntry
+
+    target.apply_permissions(
+        MigrationItem("Docs/1", "1", item_type="record"),
+        [PermissionEntry(principal_name=admin.login_name, roles=["Read"])],
+    )
+
+    assert row.broke_inheritance is None
+    assert [r for _, r in row.assignments_added] == [read]
+
+
+def test_apply_permissions_reports_a_role_the_target_lacks():
+    group = _Group("Project Members")
+    web = _Web(groups=[group], roles=[])
+    row = _TargetListItem(10, "1")
+    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
+
+    from office365.migration.base import PermissionEntry
+
+    target.apply_permissions(
+        MigrationItem("Docs/1", "1", item_type="record"),
+        [PermissionEntry(principal_name=group.name, roles=["NoDownload"])],
+    )
+
+    assert row.broke_inheritance is None
+    assert row.assignments_added == []
+    assert target.warnings[0] == "permissions 1: could not resolve role 'NoDownload'"
+    assert "empty ACL" in target.warnings[-1]

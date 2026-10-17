@@ -574,22 +574,79 @@ def _is_system_principal(user: Any) -> bool:
     return "app@sharepoint" in login or "sharepoint\\system" in login
 
 
-def _has_unique_role_assignments(securable) -> bool:
+def _has_unique_role_assignments(securable, *, refresh: bool = False) -> bool:
     """Whether a securable has unique (broken-inheritance) role assignments.
 
     SharePoint REST returns *inherited* role assignments too, so reading them
     verbatim would break inheritance on every item and replicate the parent ACL.
     Only items with unique assignments are read/applied (and compared by the
     verifier); inherited items stay inherited on the target.
+
+    A plain entity read does not return the flag, so an object loaded *before* its
+    ACL changed keeps a stale value. The target side passes ``refresh=True``: this
+    value decides whether an ACL is applied or compared at all, so a stale
+    ``False`` would break inheritance on an item that is already unique (wiping the
+    assignments it was supposed to keep) and a stale ``False`` read back after a
+    write would report a permission mismatch for an ACL that did land.
     """
     unique = getattr(securable, "has_unique_role_assignments", None)
-    if unique is None:
-        try:
-            securable.ensure_property("HasUniqueRoleAssignments").execute_query()
-        except Exception:  # noqa: BLE001 — an unreadable flag is treated as "not unique"
-            return False
-        unique = getattr(securable, "has_unique_role_assignments", None)
-    return bool(unique)
+    if unique is not None and not refresh:
+        return bool(unique)
+    options = getattr(securable, "query_options", None)
+    previous = list(getattr(options, "select", None) or [])
+    try:
+        securable.select(["HasUniqueRoleAssignments"]).get().execute_query()
+    except Exception:  # noqa: BLE001 — an unreadable flag is treated as "not unique"
+        return False
+    finally:
+        if options is not None:
+            # The projection lives on the object's query options: leaving it on
+            # would narrow every later read of the same item.
+            options.select = previous
+    return bool(securable.properties.get("HasUniqueRoleAssignments"))
+
+
+def _replay_role_assignments(
+    securable,
+    principals: "_TargetPrincipals",
+    permissions: list[PermissionEntry],
+    warnings: list[str],
+    label: str,
+) -> None:
+    """Replay an item's unique ACLs onto a target item: additive, never destructive.
+
+    Every principal is resolved on the target first (users via ``EnsureUser``,
+    groups by name, default groups by role kind). Inheritance is broken only when
+    the target item still inherits *and* at least one assignment resolved: an item
+    whose every principal is unresolvable (a cross-tenant account, an app
+    principal) would otherwise end up with an **empty** ACL — inheritance broken,
+    nobody granted — which is worse than leaving it inheriting, so that case is
+    reported and the item is left alone.
+
+    A re-run therefore adds only what is missing and never removes an assignment
+    the source does not grant. The caller executes the queued requests.
+    """
+    resolved: list[tuple[Any, Any]] = []
+    for entry in permissions:
+        principal = principals.principal(entry.principal_name)
+        if principal is None:
+            continue
+        for role_name in entry.roles:
+            role = principals.role(role_name)
+            if role is None:
+                warnings.append(f"permissions {label}: could not resolve role {role_name!r}")
+                continue
+            resolved.append((principal, role))
+    if not resolved:
+        warnings.append(
+            f"permissions for {label!r} were not restored: no assignment could be resolved on the "
+            "target, and breaking inheritance would leave the item with an empty ACL — it still inherits"
+        )
+        return
+    if not _has_unique_role_assignments(securable, refresh=True):
+        securable.break_role_inheritance(copy_role_assignments=False, clear_sub_scopes=False)
+    for principal, role in resolved:
+        securable.add_role_assignment(principal, role)
 
 
 def _user_login(web, user_id: Any, cache: dict[int, str | None]) -> str | None:
@@ -2219,24 +2276,16 @@ class SharePointListTarget:
         _report_rejected_fields(result, self.warnings, f"authorship {item.dest_path}")
 
     def apply_permissions(self, item: MigrationItem, permissions: list[PermissionEntry]) -> None:
-        """Best-effort: break inheritance and recreate the source's unique ACLs.
+        """Best-effort: replay the source item's unique ACLs onto the target item.
 
-        Principals are resolved on the target by login name (users via
-        ``EnsureUser``, groups by name); unresolved principals and roles are
-        skipped. Same-tenant only — cross-tenant identity mapping is out of scope.
+        Same-tenant only — cross-tenant identity mapping is out of scope. See
+        :func:`_replay_role_assignments` for what happens to principals, roles and
+        inheritance that cannot be resolved.
         """
         target_item = self._target_item(item)
         if target_item is None:
             return
-        target_item.break_role_inheritance(copy_role_assignments=False, clear_sub_scopes=False)
-        for entry in permissions:
-            principal = self._principals().principal(entry.principal_name)
-            if principal is None:
-                continue
-            for role_name in entry.roles:
-                role = self._principals().role(role_name)
-                if role is not None:
-                    target_item.add_role_assignment(principal, role)
+        _replay_role_assignments(target_item, self._principals(), permissions, self.warnings, item.dest_path)
         self._list.context.execute_query()
 
     def _fresh_target_item(self, item: MigrationItem):
@@ -2275,7 +2324,7 @@ class SharePointListTarget:
     def read_permissions(self, item: MigrationItem) -> list[PermissionEntry]:
         """Read the written item's *unique* role assignments (for the permission diff)."""
         target_item = self._fresh_target_item(item)
-        if target_item is None or not _has_unique_role_assignments(target_item):
+        if target_item is None or not _has_unique_role_assignments(target_item, refresh=True):
             return []
         return _read_role_assignments(target_item, normalize=self._principals().normalize)
 
@@ -3019,24 +3068,16 @@ class SharePointLibraryTarget:
         _report_rejected_fields(result, self.warnings, f"authorship {item.dest_path}")
 
     def apply_permissions(self, item: MigrationItem, permissions: list[PermissionEntry]) -> None:
-        """Best-effort: break inheritance and recreate the source role assignments.
+        """Best-effort: replay a file's or folder's unique ACLs onto the target item.
 
-        Principals are resolved on the target by login name (users via
-        ``EnsureUser``, groups by name); unresolved principals and roles are
-        skipped. Same-tenant only — cross-tenant identity mapping is out of scope.
+        Same-tenant only — cross-tenant identity mapping is out of scope. See
+        :func:`_replay_role_assignments` for what happens to principals, roles and
+        inheritance that cannot be resolved.
         """
         securable = self._securable(item)
         if securable is None:
             return
-        securable.break_role_inheritance(copy_role_assignments=False, clear_sub_scopes=False)
-        for entry in permissions:
-            principal = self._principals().principal(entry.principal_name)
-            if principal is None:
-                continue
-            for role_name in entry.roles:
-                role = self._principals().role(role_name)
-                if role is not None:
-                    securable.add_role_assignment(principal, role)
+        _replay_role_assignments(securable, self._principals(), permissions, self.warnings, item.dest_path)
         securable.context.execute_query()
 
     def apply_item_state(self, item: MigrationItem, state: dict) -> None:
@@ -3106,7 +3147,7 @@ class SharePointLibraryTarget:
     def read_permissions(self, item: MigrationItem) -> list[PermissionEntry]:
         """Read the written item's *unique* role assignments (for the permission diff)."""
         securable = self._securable(item)
-        if securable is None or not _has_unique_role_assignments(securable):
+        if securable is None or not _has_unique_role_assignments(securable, refresh=True):
             return []
         return _read_role_assignments(securable, normalize=self._principals().normalize)
 

@@ -765,6 +765,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **An item's ACL could be applied blind: empty, broken twice, or misreported.**
+  `apply_permissions` broke inheritance first and only then resolved what to grant,
+  on both the record-list and the document-library target. A source ACL whose
+  principals all fail to resolve on the target (a cross-tenant account, an app
+  principal, a renamed group) therefore ended up as an item with inheritance
+  broken and **nobody granted** — less accessible than leaving it alone; and
+  because the `HasUniqueRoleAssignments` flag is *not* part of a plain entity
+  read, an item loaded before its ACL was written kept a stale `False`, so a
+  re-run broke inheritance on an item that was already unique and the run's own
+  verification read `[]` back and reported a permission **mismatch** for an ACL
+  that had in fact landed. Both targets now share
+  `_replay_role_assignments(...)`, which resolves every principal and role
+  *before* writing anything, warns about each role the target does not have,
+  breaks inheritance only when the item still inherits **and** at least one
+  assignment resolved, and otherwise leaves the item inheriting with
+  `permissions for '…' were not restored: no assignment could be resolved on the
+  target …` — add-only and idempotent either way, so a re-run adds only what is
+  missing and never removes a grant the source does not carry.
+  `_has_unique_role_assignments(securable, refresh=True)` re-reads that flag with
+  a projection (restoring the object's query options afterwards) instead of
+  trusting the cached copy. Live-verified on SharePoint Online: a record list with
+  one restricted item and one inheriting item, plus a library with a restricted
+  folder and an inheriting one, migrated with
+  `list:AclList: OK … issues: 0` / `library:…/AclLib: OK … issues: 0`, the target
+  reading back exactly the source's assignments (normalized members) and the
+  inheriting items still inheriting.
 - **Generated Graph enums sent their CSDL ordinal instead of the member name.**
   The generator renders a CSDL enum member as `name = "<Value>"`, so a large part
   of the Graph model carries ordinals rather than wire values — `TaskStatus`
