@@ -71,7 +71,11 @@ import argparse
 from pathlib import Path
 
 from office365.migration import MigrationSession, MigrationSettings
-from office365.migration.sharepoint.pages import PAGE_LIBRARY_TEMPLATE, capture_site_pages
+from office365.migration.sharepoint.pages import (
+    PAGE_LIBRARY_TEMPLATE,
+    capture_home_page,
+    capture_site_pages,
+)
 from office365.migration.sharepoint.resolvers import is_document_library, is_migratable_list
 from office365.migration.tasks import MigrationTask
 from office365.sharepoint.client_context import ClientContext
@@ -162,7 +166,7 @@ def main():
     print(f"{args.source_site} -> {args.target_site}")
     for entry in lists:
         print(f"  {'library' if is_document_library(entry) else 'list':7} {entry.title}")
-    _print_pages(all_lists, copy=not args.no_pages, duplicate=args.duplicate_pages)
+    _print_pages(source_ctx.web, all_lists, copy=not args.no_pages, duplicate=args.duplicate_pages)
     if subwebs:
         action = (
             "will be mirrored (including their nested subsites)"
@@ -239,7 +243,7 @@ def _report_verification(session, source_ctx, ctx, preserve_permissions: bool, s
     _verify_web(source_ctx, ctx, preserve_permissions=preserve_permissions, settings=settings)
 
 
-def _print_pages(all_lists, *, copy: bool, duplicate: str) -> None:
+def _print_pages(source_web, all_lists, *, copy: bool, duplicate: str) -> None:
     """Print how many site pages the run would copy (dry run reads only)."""
     if not copy:
         return
@@ -255,6 +259,9 @@ def _print_pages(all_lists, *, copy: bool, duplicate: str) -> None:
         if classic:
             detail += f" ({classic} classic wiki)"
         print(f"  pages:   {detail} (duplicates: {duplicate})")
+    home = capture_home_page(source_web)
+    if home:
+        print(f"  home:    {home} will follow the copy")
 
 
 def _print_delta(session) -> None:

@@ -206,8 +206,9 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
         status.BEST_EFFORT,
         "navigation and site pages are web-scope concerns the adapters do not carry: the whole-site "
         "resolver copies quick-launch/top-nav links (migrate_navigation) and both modern site pages "
-        "(their canvas) and classic wiki pages (their WikiField body) with migrate_pages; publishing "
-        "pages, pages with no copyable body and web-part data bindings remain handoff",
+        "(their canvas) and classic wiki pages (their WikiField body) with migrate_pages, and points "
+        "the target web's home page at the copy of the source's; publishing pages, pages with no "
+        "copyable body and web-part data bindings remain handoff",
     )
     set_(
         "site_settings",

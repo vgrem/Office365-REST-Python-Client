@@ -33,7 +33,11 @@ Two facts this module relies on, both live-verified on a SharePoint Online tenan
   value back round-trips byte-identical, so a copy reuses the source value
   instead of re-authoring the body;
 * a created wiki page is a draft (``Level`` 2, status 3), and
-  ``item.file.publish(comment)`` — not a moderation-status MERGE — publishes it.
+  ``item.file.publish(comment)`` — not a moderation-status MERGE — publishes it;
+* a web's home page designation is reachable as ``WelcomePage``, but a MERGE of it
+  **on the web is silently ignored** — the write that takes effect goes to the
+  root folder (``Folder.update()`` on ``/_api/web/rootfolder``), which is what
+  :func:`apply_home_page` does.
 
 Copies are add-only: an existing target page is never deleted, and the duplicate
 behaviour is explicit (``RENAME`` by default, as SPMT does; ``SKIP`` and
@@ -227,6 +231,8 @@ class PageCopyReport:
     web_part_pages: list[str] = field(default_factory=list)
     #: Classic wiki pages copied through their ``WikiField`` body.
     wiki: list[str] = field(default_factory=list)
+    #: The target web-relative path the source's home page was copied to, if any.
+    home_page: Optional[str] = None
 
     @property
     def page_count(self) -> int:
@@ -254,6 +260,8 @@ class PageCopyReport:
             parts.append(f"{len(self.skipped)} left as they were")
         if self.published:
             parts.append(f"{len(self.published)} published")
+        if self.home_page:
+            parts.append(f"home page is now {self.home_page}")
         return "page copy: " + ", ".join(parts)
 
 
@@ -545,6 +553,7 @@ def copy_site_pages(
                 written[target_name] = (0, page.canvas)
         _verify(report, target_list, written)
     notes.extend(_gap_notes(report))
+    report.home_page = apply_home_page(source_web, target_web, renamed=dict(report.renamed), warnings=notes)
     return report
 
 
@@ -570,6 +579,89 @@ def _gap_notes(report: "PageCopyReport") -> list[str]:
             f"bindings (list/library identifiers) are not remapped: {_shown(report.web_part_pages)}"
         )
     return notes
+
+
+def capture_home_page(web: "Web") -> Optional[str]:
+    """A web's home page as a web-relative path (``SitePages/Home.aspx``), or ``None`` (read-only)."""
+    web = web.select(["WelcomePage"]).get().execute_query()
+    return web.properties.get("WelcomePage") or None
+
+
+def _page_name(path: Optional[str]) -> str:
+    """The case-folded file name of a web-relative page path."""
+    return (path or "").rsplit("/", 1)[-1].casefold()
+
+
+def _target_refs(target_web: "Web") -> dict:
+    """``file name -> FileRef`` for every page in the target's page libraries (one read each)."""
+    return {
+        _page_name(str(item.properties.get("FileLeafRef") or "")): str(item.properties.get("FileRef") or "")
+        for sp_list in _page_libraries(target_web.lists.get().execute_query())
+        for item in sp_list.items.select(["FileLeafRef", "FileRef"]).get().execute_query()
+    }
+
+
+def apply_home_page(
+    source_web: "Web",
+    target_web: "Web",
+    *,
+    renamed: Optional[dict] = None,
+    warnings: Optional[list[str]] = None,
+) -> Optional[str]:
+    """Point the target web's home page at the copy of the source web's home page.
+
+    A migrated site that opens on a different page than its source is not migrated,
+    and nothing else in a copy moves the home page designation. The source's
+    ``WelcomePage`` is resolved through the copy's renames (a page copied as
+    ``Home-1.aspx`` becomes the home page), then written onto the target's *root
+    folder* — a MERGE of ``WelcomePage`` on the web itself is silently ignored.
+    Nothing is written when the target already matches.
+
+    Args:
+        source_web: The web whose home page is the reference (read-only).
+        target_web: The web that should open on the copy.
+        renamed: ``{source name: target name}`` pairs from the copy (any case).
+        warnings: Collected notes; a home page that was not copied is appended here.
+
+    Returns:
+        The target web-relative path written, or ``None`` when nothing was written.
+    """
+    source_path = capture_home_page(source_web)
+    if not source_path:
+        return None
+    notes = warnings if warnings is not None else []
+    mapping = {_page_name(source): target for source, target in (renamed or {}).items()}
+    target_name = mapping.get(_page_name(source_path), _page_name(source_path))
+    ref = _target_refs(target_web).get(_page_name(target_name))
+    if not ref:
+        notes.append(
+            f"page copy: the source web's home page '{source_path}' was not copied — the target keeps its own home page"
+        )
+        return None
+    folder = target_web.root_folder.select(["ServerRelativeUrl", "WelcomePage"]).get().execute_query()
+    origin = str(folder.properties.get("ServerRelativeUrl") or "")
+    path = ref[len(origin) :].lstrip("/") if origin and ref.lower().startswith(origin.lower()) else ref.lstrip("/")
+    if folder.properties.get("WelcomePage") == path:
+        return None
+    folder.set_property("WelcomePage", path)
+    folder.update()
+    target_web.context.execute_query()
+    return path
+
+
+def _home_page_notes(source_web: "Web", target_web: "Web", source_pages: list, target_bodies: dict) -> list[str]:
+    """Notes for a target whose home page is not the copy of the source's (read-only)."""
+    source_path = capture_home_page(source_web)
+    source_page = next((page for page in source_pages if page.name.casefold() == _page_name(source_path)), None)
+    if source_page is None:
+        return []
+    target_path = capture_home_page(target_web)
+    if target_bodies.get(_page_name(target_path)) == source_page.content:
+        return []
+    return [
+        f"the target's home page is '{target_path or ''}', not the copy of '{source_path}' — "
+        f"a migrated site opens on the wrong page"
+    ]
 
 
 def verify_page_copy(source_web: "Web", target_web: "Web") -> list[str]:
@@ -611,6 +703,7 @@ def verify_page_copy(source_web: "Web", target_web: "Web") -> list[str]:
         notes.append(f"{len(missing)} page(s) have no target counterpart: {_shown(missing)}")
     if drifted:
         notes.append(f"{len(drifted)} page(s) differ from the source: {_shown(drifted)}")
+    notes.extend(_home_page_notes(source_web, target_web, source_pages, target_bodies))
     return notes
 
 
@@ -691,7 +784,9 @@ __all__ = [
     "PageInfo",
     "PageLibrary",
     "PagePayload",
+    "apply_home_page",
     "apply_page_payload",
+    "capture_home_page",
     "capture_page",
     "capture_site_pages",
     "copy_site_pages",

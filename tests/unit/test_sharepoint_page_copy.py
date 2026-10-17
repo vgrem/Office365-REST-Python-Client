@@ -8,7 +8,9 @@ from office365.migration.sharepoint.pages import (
     DUPLICATE_SKIP,
     PAGE_LIBRARY_TEMPLATE,
     PagePayload,
+    apply_home_page,
     apply_page_payload,
+    capture_home_page,
     capture_site_pages,
     copy_site_pages,
     detect_page_handoff,
@@ -150,6 +152,7 @@ class _PageList:
         self.store[page_id] = {
             "Id": page_id,
             "FileLeafRef": name,
+            "FileRef": f"/sites/target/SitePages/{name}",
             "WikiField": body,
             "CanvasContent1": None,
             "OData__ModerationStatus": 3,
@@ -187,8 +190,36 @@ class _PageHandle:
         return self.web.context.execute_query()
 
 
+class _RootFolder:
+    """``Web.root_folder``: the endpoint that actually carries a ``WelcomePage`` write."""
+
+    def __init__(self, web):
+        self.web = web
+        self.written: dict = {}
+        self.properties = {
+            "ServerRelativeUrl": self.web.properties.get("ServerRelativeUrl", "/sites/target"),
+            "WelcomePage": self.web.properties.get("WelcomePage"),
+        }
+
+    def select(self, fields):
+        return self
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        return self
+
+    def set_property(self, name, value):
+        self.written[name] = value
+
+    def update(self):
+        self.web.properties["WelcomePage"] = self.written.get("WelcomePage")
+        return self
+
+
 class _Web:
-    def __init__(self, *lists, store=None):
+    def __init__(self, *lists, store=None, welcome_page=None):
         self._lists = list(lists)
         self.lists = _Lists(self._lists)
         self.context = _Context()
@@ -196,8 +227,19 @@ class _Web:
         self.published: list[int] = []
         self.wiki_created: list[tuple[str, str]] = []
         self.fail_create: set[str] = set()
+        self.properties = {"ServerRelativeUrl": "/sites/target", "WelcomePage": welcome_page}
+        self.root_folder = _RootFolder(self)
         for sp_list in self._lists:
             sp_list.web = self
+
+    def select(self, fields):
+        return self
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        return self
 
     def add_site_page(self, name, title=None):
         if name in self.fail_create:
@@ -206,6 +248,7 @@ class _Web:
         self.store[page_id] = {
             "Id": page_id,
             "FileLeafRef": name,
+            "FileRef": f"/sites/target/SitePages/{name}",
             "Title": title or name,
             "CanvasContent1": "",
             "OData__ModerationStatus": 3,
@@ -216,14 +259,14 @@ class _Web:
         return _PageHandle(self, page_id)
 
 
-def _source_web(*pages):
+def _source_web(*pages, welcome_page=None):
     store = _PageStore({index: dict(page) for index, page in enumerate(pages, start=1)})
-    return _Web(_PageList("Site Pages", store), store=store)
+    return _Web(_PageList("Site Pages", store), store=store, welcome_page=welcome_page)
 
 
-def _target_web(*pages):
+def _target_web(*pages, welcome_page=None):
     store = _PageStore({index: dict(page) for index, page in enumerate(pages, start=1)})
-    return _Web(_PageList("Site Pages", store), store=store)
+    return _Web(_PageList("Site Pages", store), store=store, welcome_page=welcome_page)
 
 
 def _wiki_page_props(name, body, status=0):
@@ -234,6 +277,7 @@ def _page_props(name, canvas="<div>hi</div>", content_type=_SITE_PAGE_CONTENT_TY
     properties = {
         "Id": 1,
         "FileLeafRef": name,
+        "FileRef": f"/sites/target/SitePages/{name}",
         "Title": name.rsplit(".", 1)[0],
         "ContentTypeId": content_type,
         "CanvasContent1": canvas,
@@ -549,6 +593,91 @@ class TestVerifyPageCopy(unittest.TestCase):
         target = _target_web({"Id": 1, "FileLeafRef": "Guide.aspx", "WikiField": "<p>other</p>"})
 
         self.assertEqual(verify_page_copy(source, target), ["1 page(s) differ from the source: Guide.aspx"])
+
+
+class TestHomePage(unittest.TestCase):
+    """A migrated site must open on the copy of the source's home page."""
+
+    def test_the_home_page_is_read_as_a_web_relative_path(self):
+        self.assertEqual(capture_home_page(_source_web(welcome_page="SitePages/Home.aspx")), "SitePages/Home.aspx")
+        self.assertIsNone(capture_home_page(_source_web()))
+
+    def test_the_home_page_follows_the_copy(self):
+        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
+        target = _target_web()
+
+        report = copy_site_pages(source, target)
+
+        self.assertEqual(report.home_page, "SitePages/Home.aspx")
+        self.assertEqual(target.properties["WelcomePage"], "SitePages/Home.aspx")
+        self.assertEqual(target.root_folder.written, {"WelcomePage": "SitePages/Home.aspx"})
+        self.assertIn("home page is now SitePages/Home.aspx", report.summary())
+
+    def test_a_renamed_home_page_is_followed(self):
+        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
+        target = _target_web(_page_props("Home.aspx", canvas="<div>other</div>"))
+
+        report = copy_site_pages(source, target)
+
+        self.assertEqual(report.renamed, [("Home.aspx", "Home-1.aspx")])
+        self.assertEqual(report.home_page, "SitePages/Home-1.aspx")
+        self.assertEqual(target.properties["WelcomePage"], "SitePages/Home-1.aspx")
+
+    def test_a_matching_home_page_is_not_rewritten(self):
+        # A re-run that finds the page already there (SKIP) leaves the home page alone.
+        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
+        target = _target_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
+
+        report = copy_site_pages(source, target, duplicate_behavior=DUPLICATE_SKIP)
+
+        self.assertIsNone(report.home_page)
+        self.assertEqual(target.root_folder.written, {})
+        self.assertNotIn("home page", report.summary() or "")
+
+    def test_the_home_page_write_goes_through_the_root_folder(self):
+        # A MERGE of WelcomePage on the web itself is silently ignored by the service,
+        # so the copy must not route the write through the web object.
+        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
+        target = _target_web(_page_props("Home.aspx", canvas="<div>hi</div>"), welcome_page="SitePages/Other.aspx")
+
+        apply_home_page(source, target)
+
+        self.assertEqual(target.root_folder.written, {"WelcomePage": "SitePages/Home.aspx"})
+
+    def test_a_home_page_that_was_not_copied_is_reported(self):
+        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
+        target = _target_web()
+        notes: list[str] = []
+
+        applied = apply_home_page(source, target, warnings=notes)
+
+        self.assertIsNone(applied)
+        self.assertEqual(target.root_folder.written, {})
+        self.assertEqual(len(notes), 1)
+        self.assertIn("home page 'SitePages/Home.aspx' was not copied", notes[0])
+
+    def test_a_web_without_a_home_page_is_left_alone(self):
+        self.assertIsNone(apply_home_page(_source_web(_page_props("Home.aspx")), _target_web()))
+
+    def test_the_home_page_check_passes_when_the_copy_is_the_home_page(self):
+        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
+        target = _target_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
+
+        self.assertEqual(verify_page_copy(source, target), [])
+
+    def test_the_home_page_check_names_a_target_home_that_is_not_the_copy(self):
+        source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"), welcome_page="SitePages/Home.aspx")
+        target = _target_web(
+            _page_props("Home.aspx", canvas="<div>source</div>"),
+            _page_props("Other.aspx", canvas="<div>target</div>"),
+            welcome_page="SitePages/Other.aspx",
+        )
+
+        notes = verify_page_copy(source, target)
+
+        self.assertEqual(len(notes), 1)
+        self.assertIn("the target's home page is 'SitePages/Other.aspx'", notes[0])
+        self.assertIn("'SitePages/Home.aspx'", notes[0])
 
 
 if __name__ == "__main__":

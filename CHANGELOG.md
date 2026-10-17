@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **A migrated site opens on the copy of its source's home page.** Copying pages
+  never moved a web's home page designation, so the migrated site landed on
+  whatever page the target web already pointed at — the first thing a user sees.
+  `pages.py` now carries it: `apply_home_page(source_web, target_web, renamed=...)`
+  reads the source's `WelcomePage`, resolves it through the copy's renames (a page
+  copied as `Home-1.aspx` becomes the home page), and writes the target path onto
+  the target web's **root folder** — only when it differs, so a re-run writes
+  nothing. `capture_home_page(web)` is the read-only half,
+  `copy_site_pages` calls it at the end (recording `PageCopyReport.home_page`,
+  which `summary()` reports as `home page is now …`) and a source home page that
+  was not copied is *reported* — the target keeps its own home page rather than
+  being pointed at a guess. `verify_page_copy` now also names a target whose home
+  page is not the copy of the source's. The reason this needed its own function:
+  a MERGE of `WelcomePage` **on the web is silently ignored** by the service (it
+  returns success and changes nothing), while the same MERGE on
+  `/_api/web/rootfolder` moves the home page — both live-verified on SharePoint
+  Online, the write path proven before it was coded. `apply_home_page` and
+  `capture_home_page` are exported from `office365.migration.sharepoint`.
 - **Classic wiki pages are copied too, not handed off.** `pages.py` treated every
   non-modern page as transformation work, yet a wiki page's body lives in
   `WikiField`, which is readable *and* writable over REST.

@@ -632,16 +632,26 @@ reachable over REST, so the whole-site resolver copies them
 5. publish it when the source page was published — for a modern page
    `POST /_api/sitepages/pages(<id>)/publish`, for a wiki page
    `item.file.publish(comment)` — then read the body back once to confirm it
-   landed.
+   landed;
+6. point the target web's **home page** at the copy of the source's
+   (`apply_home_page`, called at the end of `copy_site_pages`): the source's
+   `WelcomePage` is resolved through the copy's renames — a page copied as
+   `Home-1.aspx` becomes the home page — and written onto the target's *root
+   folder* only when it differs. A source home page that was not copied is
+   reported, not guessed at, and the target keeps its own.
 
-Three server facts this relies on are **live-verified** on SharePoint Online: a
+Four server facts this relies on are **live-verified** on SharePoint Online: a
 page created that way is a *draft* until the publish operation runs (a MERGE of
 `OData__ModerationStatus` does **not** publish either kind of page), a page's
 `CanvasContent1` round-trips byte-identical through an item MERGE (the source
-canvas is stored already entity-encoded, so no normalization is needed), and a
+canvas is stored already entity-encoded, so no normalization is needed), a
 `WikiField` body does too — the server normalizes a body once on create (it wraps
 it in an `ExternalClass` div and entity-encodes braces), so a copy reuses the
-*source* value verbatim instead of re-authoring the body.
+*source* value verbatim instead of re-authoring the body — and a web's
+`WelcomePage` is **not** writable through the web: a MERGE of it on `/_api/web`
+returns success and changes nothing, while the same MERGE on `/_api/web/rootfolder`
+moves the home page. That trap is why `apply_home_page` writes the root folder
+(`Web.root_folder`) rather than `Web.set_property("WelcomePage", ...)`.
 
 Copies are **add-only** — an existing target page is never deleted. The duplicate
 behaviour is explicit, using the SPMT vocabulary
@@ -650,7 +660,8 @@ example): `RENAME` (default: `Home.aspx` → `Home-1.aspx`, never reusing a take
 name), `SKIP` (leave the target page as it is) or `OVERWRITE` (MERGE onto the
 existing page). `verify_page_copy(source_web, target_web)` reconciles the result
 read-only: a source page counts as delivered when the target has the same name or
-an identical canvas, and anything else is reported as `missing` or `drifted`.
+an identical canvas, anything else is reported as `missing` or `drifted`, and a
+target whose home page is not the copy of the source's is named as such.
 
 What a copy still cannot do, stated plainly:
 
@@ -675,7 +686,11 @@ These points were exercised live: a run over a source web with three pages copie
 two — one modern page renamed around an existing target page, and one classic wiki
 page whose `WikiField` body (162 characters, braces and an internal link included)
 read back byte-identical and published to `1.0` — and reported the third as failed
-because its target name was held by another user's check-out.
+because its target name was held by another user's check-out. That same run left
+the target's own home page alone and said so, because the source's home page
+(`SitePages/CollabHome.aspx`) was the page the check-out blocked; a second run
+with a copyable home page moved the target web's `WelcomePage` onto the copy and
+`verify_site` confirmed it.
 
 ## Fidelity
 
