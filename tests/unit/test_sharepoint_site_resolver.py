@@ -143,13 +143,60 @@ class _WorkflowAssociations:
         return list(self._associations)
 
 
+class _Field:
+    """A web field as the web-scope comparison sees it."""
+
+    def __init__(self, internal_name, hidden=False, from_base_type=False, can_be_deleted=True, sealed=False):
+        self.internal_name = internal_name
+        self.hidden = hidden
+        self.from_base_type = from_base_type
+        self.can_be_deleted = can_be_deleted
+        self.sealed = sealed
+
+
+class _ContentType:
+    """A web content type as the web-scope comparison sees it."""
+
+    def __init__(self, name, hidden=False):
+        self.name = name
+        self.hidden = hidden
+
+
+class _WebCollectionView:
+    """A projected ``web.fields`` / ``web.content_types`` collection."""
+
+    def __init__(self, entries):
+        self._entries = list(entries)
+
+    def select(self, fields):
+        return self
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        return list(self._entries)
+
+
 class _Web:
-    def __init__(self, lists, webs=None, title=None, web_template="STS#3", url=None, workflows=None):
+    def __init__(
+        self,
+        lists,
+        webs=None,
+        title=None,
+        web_template="STS#3",
+        url=None,
+        workflows=None,
+        fields=None,
+        content_types=None,
+    ):
         self.lists = lists
         self.webs = webs if webs is not None else _WebCollection()
         self.title = title
         self.web_template = web_template
         self.workflow_associations = _WorkflowAssociations(workflows)
+        self.fields = _WebCollectionView(fields or [])
+        self.content_types = _WebCollectionView(content_types or [])
         self._props = {"Url": url} if url else {}
 
     def get_property(self, name):
@@ -488,6 +535,82 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         # the existing target subsite is reused instead of created
         self.assertEqual(target_root.webs.add_calls, [])
         self.assertEqual([call[0] for call in target_child.lists.ensure_calls], ["Documents"])
+
+    def test_include_subwebs_reports_web_scope_structure_the_target_lacks(self):
+        source_child = _Web(
+            _Lists([_docs()]),
+            title="child",
+            url="https://contoso.sharepoint.com/sites/source/child",
+            fields=[_Field("RegionCol")],
+            content_types=[_ContentType("Contract")],
+        )
+        source_root = _Web(
+            _Lists([_tasks()]),
+            webs=_WebCollection([source_child]),
+            title="Source",
+            url="https://contoso.sharepoint.com/sites/source",
+        )
+        target_root = _Web(
+            _Lists([]),
+            webs=_WebCollection(),
+            title="Target",
+            url="https://contoso.sharepoint.com/sites/target",
+        )
+        registry = {
+            source_root.url.rstrip("/").casefold(): source_root,
+            target_root.url.rstrip("/").casefold(): target_root,
+        }
+        context = _Context(target_root.url, target_root, registry)
+        task = MigrationTask.sharepoint(source_root.url, target_root.url, migrate_all=True)
+
+        warnings: list[str] = []
+        resolve_site_task(task, context, include_subwebs=True, warnings=warnings)
+
+        # A created subsite gets its lists replayed, not the web-scope definitions.
+        note = next(message for message in warnings if "web-scope structure is not replayed" in message)
+        self.assertIn("1 column(s): RegionCol", note)
+        self.assertIn("1 content type(s): Contract", note)
+        self.assertIn("list-scoped copy", note)
+
+    def test_web_scope_structure_note_is_quiet_when_the_target_matches(self):
+        source_child = _Web(
+            _Lists([_docs()]),
+            title="child",
+            url="https://contoso.sharepoint.com/sites/source/child",
+            fields=[_Field("RegionCol")],
+            content_types=[_ContentType("Contract")],
+        )
+        source_root = _Web(
+            _Lists([_tasks()]),
+            webs=_WebCollection([source_child]),
+            title="Source",
+            url="https://contoso.sharepoint.com/sites/source",
+        )
+        target_child = _Web(
+            _Lists([]),
+            title="child",
+            url="https://contoso.sharepoint.com/sites/target/child",
+            fields=[_Field("RegionCol")],
+            content_types=[_ContentType("Contract")],
+        )
+        target_root = _Web(
+            _Lists([]),
+            webs=_WebCollection([target_child]),
+            title="Target",
+            url="https://contoso.sharepoint.com/sites/target",
+        )
+        registry = {
+            source_root.url.rstrip("/").casefold(): source_root,
+            target_root.url.rstrip("/").casefold(): target_root,
+            target_child.url.rstrip("/").casefold(): target_child,
+        }
+        context = _Context(target_root.url, target_root, registry)
+        task = MigrationTask.sharepoint(source_root.url, target_root.url, migrate_all=True)
+
+        warnings: list[str] = []
+        resolve_site_task(task, context, include_subwebs=True, warnings=warnings)
+
+        self.assertEqual([message for message in warnings if "web-scope structure" in message], [])
 
     def test_provision_structure_can_be_disabled(self):
         source = _context([_docs()])

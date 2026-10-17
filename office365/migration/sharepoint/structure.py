@@ -28,6 +28,14 @@ Scope, deliberately:
   check-out), replayed per property so a setting the target list type cannot
   accept is reported (as a warning) instead of failing the list.
 
+Replay is **per list**, because that is as far as REST reaches: a *site* column or
+a *site* content type is a web-level definition, and ``FieldLinks`` refuses to
+attach a column that is not reachable from the list (``Column '<name>' does not
+exist``) while the server assigns content types their own identifiers. A list that
+uses one still gets a list-scoped copy; :func:`compare_web_scope_structure` reports
+the web-level definitions the target web therefore lacks, so the gap is named
+instead of silent.
+
 Provisioning is idempotent: with ``on_conflict="skip"`` (default) it only creates
 what is missing, so a re-run is a no-op. The server assigns content type
 identifiers, so content types are matched and recreated **by name** (their
@@ -43,7 +51,7 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from dataclasses import field as dc_field
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set
 from xml.etree import ElementTree
 
 from office365.migration.map import ContentTypeMap
@@ -56,6 +64,7 @@ if TYPE_CHECKING:
     from office365.sharepoint.fields.field import Field
     from office365.sharepoint.lists.list import List as SPList
     from office365.sharepoint.views.view import View
+    from office365.sharepoint.webs.web import Web
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +73,13 @@ __all__ = [
     "FieldDefinition",
     "ListStructure",
     "ViewDefinition",
+    "WebScopeStructure",
     "capture_list_structure",
+    "compare_web_scope_structure",
     "normalize_guid",
     "provision_list_structure",
     "rewrite_lookup_schema",
+    "web_scope_note",
 ]
 
 #: Field properties requested per column. ``SchemaXml`` is explicit because it is
@@ -888,3 +900,128 @@ def _reconcile_field_links(content_type: ContentType, internal_names: List[str],
 def _message(exc: ClientRequestException) -> str:
     """Best-effort short description of a request failure."""
     return getattr(exc, "message", None) or str(exc)
+
+
+# --- web scope ---------------------------------------------------------------
+#
+# A site column and a site content type live at *web* scope. REST can create both
+# (`web.fields` / `web.content_types`), but it cannot *link* a fresh site column to
+# a content type (`FieldLinks` answers `Column '<name>' does not exist`), and the
+# server assigns content types their own identifiers. Provisioning therefore
+# replays a source list's structure onto the target *list*, which is faithful for
+# the list and lossy for the web. These helpers name the loss.
+
+#: Web field properties needed to tell a user-facing column from a system one.
+_WEB_FIELD_SELECT = ["InternalName", "Group", "Hidden", "FromBaseType", "CanBeDeleted", "Sealed"]
+
+#: Web content type properties needed to compare presence (ids are not preserved).
+_WEB_CONTENT_TYPE_SELECT = ["Name", "Hidden"]
+
+#: Names listed inline in a note before it is truncated.
+_MAX_WEB_SCOPE_NAMES = 5
+
+
+@dataclass
+class WebScopeStructure:
+    """Web-scope definitions the target web lacks after a per-list replay.
+
+    Attributes:
+        columns: Internal names of source web columns with no counterpart on the target web.
+        content_types: Names of source web content types absent from the target web.
+    """
+
+    columns: List[str] = dc_field(default_factory=list)
+    content_types: List[str] = dc_field(default_factory=list)
+
+    @property
+    def is_empty(self) -> bool:
+        """Whether the target web already carries every web-scope definition."""
+        return not self.columns and not self.content_types
+
+    def to_dict(self) -> Dict[str, Any]:
+        """A JSON-serializable form."""
+        return {"columns": list(self.columns), "content_types": list(self.content_types)}
+
+
+def _is_web_scope_column(column: Field) -> bool:
+    """Whether a web field is a user-facing column rather than platform plumbing."""
+    name = column.internal_name
+    if not name or name in SYSTEM_FIELD_NAMES:
+        return False
+    if column.hidden is True or column.from_base_type is True or column.sealed is True:
+        return False
+    return column.can_be_deleted is not False
+
+
+def _web_scope_columns(web: Web) -> List[str]:
+    """The user-facing column names registered on ``web`` (one projected GET)."""
+    loaded = web.fields.select(_WEB_FIELD_SELECT).get().execute_query()
+    names: Set[str] = set()
+    for column in loaded:
+        name = column.internal_name
+        if name and _is_web_scope_column(column):
+            names.add(name)
+    return sorted(names)
+
+
+def _web_scope_content_types(web: Web) -> List[str]:
+    """The content type names registered on ``web`` (one projected GET)."""
+    loaded = web.content_types.select(_WEB_CONTENT_TYPE_SELECT).get().execute_query()
+    return sorted(
+        {content_type.name for content_type in loaded if content_type.name and content_type.hidden is not True}
+    )
+
+
+def compare_web_scope_structure(source_web: Web, target_web: Web) -> WebScopeStructure:
+    """Web-scope columns/content types of ``source_web`` that ``target_web`` lacks.
+
+    Two projected GETs per web, read-only. The comparison is *by presence*:
+    columns by internal name, content types by name-casefolded (a content type's
+    ``string_id`` is assigned by the server and is not preserved by a copy, so it
+    cannot be the key).
+
+    Args:
+        source_web: The web the migration reads structure from.
+        target_web: The web the migration replays it onto.
+    """
+    source_columns = _web_scope_columns(source_web)
+    target_columns = set(_web_scope_columns(target_web))
+    source_content_types = _web_scope_content_types(source_web)
+    target_content_types = {name.casefold() for name in _web_scope_content_types(target_web)}
+    return WebScopeStructure(
+        columns=[name for name in source_columns if name not in target_columns],
+        content_types=[name for name in source_content_types if name.casefold() not in target_content_types],
+    )
+
+
+def _sample_names(names: List[str]) -> str:
+    """Name a few entries inline, counting the rest."""
+    shown = ", ".join(names[:_MAX_WEB_SCOPE_NAMES])
+    if len(names) <= _MAX_WEB_SCOPE_NAMES:
+        return shown
+    return f"{shown} (+{len(names) - _MAX_WEB_SCOPE_NAMES} more)"
+
+
+def web_scope_note(missing: WebScopeStructure, source_url: Optional[str] = None) -> Optional[str]:
+    """A warning line for the web-scope gap, or ``None`` when there is none.
+
+    Args:
+        missing: The result of :func:`compare_web_scope_structure`.
+        source_url: The *source* web's URL. The note names the affected target by
+            its source, because the target web handle is often not URL-loaded and
+            one note is emitted per web pair anyway.
+    """
+    if missing.is_empty:
+        return None
+    parts: List[str] = []
+    if missing.columns:
+        parts.append(f"{len(missing.columns)} column(s): {_sample_names(missing.columns)}")
+    if missing.content_types:
+        parts.append(f"{len(missing.content_types)} content type(s): {_sample_names(missing.content_types)}")
+    return (
+        f"web-scope structure is not replayed: the target of {source_url or 'this web'} lacks "
+        + "; ".join(parts)
+        + " — a migrated list that uses one still gets a list-scoped copy, but the web-level "
+        "definition and its inheritance by the web's other lists are missing; create it out of "
+        "band (CSOM/PnP) if anything else depends on it"
+    )

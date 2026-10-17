@@ -42,8 +42,10 @@ from office365.migration.sharepoint.navigation import apply_navigation
 from office365.migration.sharepoint.security import apply_site_security
 from office365.migration.sharepoint.structure import (
     capture_list_structure,
+    compare_web_scope_structure,
     normalize_guid,
     provision_list_structure,
+    web_scope_note,
 )
 from office365.migration.tasks import FILE_SHARE, SHAREPOINT, MigrationTask
 from office365.sharepoint.lists.base_type import BaseType
@@ -212,6 +214,19 @@ def _report_handoff(source_web: Web, source_lists: Iterable[SPList], warnings: l
     warnings.extend(notes)
 
 
+def _report_web_scope_structure(source_web: Web, target_web: Web, warnings: list[str]) -> None:
+    """Append a note naming the web-scope structure the target web lacks (best-effort)."""
+    try:
+        missing = compare_web_scope_structure(source_web, target_web)
+    except Exception as e:  # noqa: BLE001 — comparison is best-effort; never abort resolution
+        warnings.append(f"web-scope structure comparison failed for {_web_url(target_web)}: {e}")
+        return
+    note = web_scope_note(missing, _web_url(source_web))
+    if note:
+        logger.warning(note)
+        warnings.append(note)
+
+
 def _resolve_web(
     source_context: ClientContext,
     target_context: ClientContext,
@@ -239,6 +254,9 @@ def _resolve_web(
     # Pages, workflows, InfoPath forms and BCS external lists are outside what a
     # client-side copy can carry; report them rather than dropping them silently.
     _report_handoff(source_context.web, source_lists, warnings)
+    # Structure provisioning replays each list's columns/content types onto the
+    # target *list*; say which web-level definitions that leaves behind.
+    _report_web_scope_structure(source_context.web, target_context.web, warnings)
     selected: list[SPList] = []
     for source_list in source_lists:
         title = source_list.title

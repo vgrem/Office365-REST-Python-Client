@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Web-scope structure gaps are named instead of silent.** Structure replay is
+  per *list*, because that is as far as REST reaches: `FieldLinks` refuses to
+  attach a column that is not reachable from the list (`Column '<name>' does not
+  exist`) and the server assigns content types their own identifiers, so a *site*
+  column or a *site* content type is reproduced only on the lists that use it and
+  never registered at web scope. The new
+  `office365.migration.sharepoint.structure.compare_web_scope_structure` (with
+  `WebScopeStructure` and `web_scope_note`, also exported from
+  `office365.migration.sharepoint`) reads both webs' `fields` and `content_types`
+  (two projected GETs each, read-only) and reports what the target web lacks —
+  *web-scope structure is not replayed: the target of <url> lacks N column(s):
+  …* — while saying that a migrated list that uses one still gets a list-scoped
+  copy and that the web-level definition has to be created out of band
+  (CSOM/PnP). The whole-site resolver emits one note per web pair, so a subsite
+  that was just created is called out too. Comparison is by internal name for
+  columns and by name for content types (ids are not preserved), and
+  system/hidden/framework/sealed columns are excluded so the note names real gaps
+  rather than platform plumbing. It counts *definitions* — app- and
+  feature-provisioned site columns appear in it too — so the note reads as "the
+  target web is not a schema clone", not as a to-do list of N columns.
 - **Delta re-runs: the drift a copy cannot reconcile is named.** A manifest is the
   persisted plan, but a re-run only ever reconciled *content* — an item deleted at
   the source left an orphan on the target, and a rename/move looked like a new item

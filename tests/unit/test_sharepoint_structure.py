@@ -5,7 +5,10 @@ import unittest
 
 from office365.migration.sharepoint.structure import (
     ListStructure,
+    WebScopeStructure,
     capture_list_structure,
+    compare_web_scope_structure,
+    web_scope_note,
 )
 from office365.sharepoint.fields.type import FieldType
 
@@ -26,6 +29,7 @@ class _Field:
         group=None,
         description=None,
         type_as_string=None,
+        sealed=False,
     ):
         self.internal_name = internal_name
         self.title = title
@@ -39,6 +43,7 @@ class _Field:
         self.group = group
         self.description = description
         self.type_as_string = type_as_string
+        self.sealed = sealed
 
     def schema_xml_for_copy(self):
         if self._schema is None:
@@ -104,6 +109,9 @@ class _ContentType:
 class _ContentTypes:
     def __init__(self, content_types):
         self._content_types = list(content_types)
+
+    def select(self, props):
+        return self
 
     def get(self):
         return self
@@ -414,6 +422,77 @@ class TestListStructureSerialization(unittest.TestCase):
         empty = ListStructure(title="Empty")
 
         self.assertEqual(ListStructure.from_dict(empty.to_dict()), empty)
+
+
+class _Web:
+    """A web as the web-scope comparison sees it (two projected collections)."""
+
+    def __init__(self, fields=(), content_types=()):
+        self.fields = _Fields(fields)
+        self.content_types = _ContentTypes(content_types)
+
+
+class TestCompareWebScopeStructure(unittest.TestCase):
+    """A per-list replay leaves web-scope definitions behind; the helpers name them."""
+
+    def test_reports_the_columns_and_content_types_the_target_lacks(self):
+        source = _Web(
+            fields=[_Field("Region"), _Field("Cost Centre")],
+            content_types=[_ContentType("0x0100ABCDEF0123456789ABCDEF0123456789", name="Contract")],
+        )
+        target = _Web(fields=[_Field("Region")])
+
+        missing = compare_web_scope_structure(source, target)
+
+        self.assertEqual(missing.columns, ["Cost Centre"])
+        self.assertEqual(missing.content_types, ["Contract"])
+        self.assertFalse(missing.is_empty)
+
+    def test_matches_columns_by_internal_name_and_content_types_by_name(self):
+        # A content type's string_id is assigned by the server, so the same type on
+        # the target carries a different one — it must still count as present.
+        source = _Web(content_types=[_ContentType("0x0100AAAA", name="Contract")])
+        target = _Web(content_types=[_ContentType("0x0100BBBB", name="contract")])
+
+        missing = compare_web_scope_structure(source, target)
+
+        self.assertTrue(missing.is_empty)
+
+    def test_skips_hidden_framework_sealed_and_protected_columns(self):
+        source = _Web(
+            fields=[
+                _Field("Hidden", hidden=True),
+                _Field("Framework", from_base_type=True),
+                _Field("SealedColumn", sealed=True),
+                _Field("Protected", can_be_deleted=False),
+                _Field("FileRef"),
+                _Field("UserColumn"),
+            ]
+        )
+
+        missing = compare_web_scope_structure(source, _Web())
+
+        self.assertEqual(missing.columns, ["UserColumn"])
+
+    def test_skips_hidden_content_types(self):
+        source = _Web(content_types=[_ContentType("0x0100AA", name="Internal", hidden=True)])
+
+        missing = compare_web_scope_structure(source, _Web())
+
+        self.assertEqual(missing.content_types, [])
+
+    def test_note_names_a_sample_and_counts_the_rest(self):
+        missing = WebScopeStructure(columns=["A", "B", "C", "D", "E", "F", "G"])
+
+        note = web_scope_note(missing, "https://contoso.sharepoint.com/sites/target")
+
+        self.assertIsNotNone(note)
+        self.assertIn("7 column(s): A, B, C, D, E (+2 more)", note)
+        self.assertIn("the target of https://contoso.sharepoint.com/sites/target", note)
+        self.assertIn("list-scoped copy", note)
+
+    def test_note_is_none_when_the_target_has_every_definition(self):
+        self.assertIsNone(web_scope_note(compare_web_scope_structure(_Web(), _Web())))
 
 
 if __name__ == "__main__":

@@ -62,8 +62,11 @@ from office365.migration.sharepoint.structure import (
     FieldDefinition,
     ListStructure,
     ViewDefinition,
+    WebScopeStructure,
     capture_list_structure,
+    compare_web_scope_structure,
     provision_list_structure,
+    web_scope_note,
 )
 from office365.migration.sharepoint.tenant_assessor import MigrationTenantAssessor
 from office365.migration.sharepoint.verify import (
@@ -104,6 +107,7 @@ __all__ = [
     "StructureReport",
     "ViewDefinition",
     "WebNavigation",
+    "WebScopeStructure",
     "WorkflowFinding",
     "apply_navigation",
     "apply_site_security",
@@ -111,6 +115,7 @@ __all__ = [
     "capture_navigation",
     "capture_site_groups",
     "compare_list_structures",
+    "compare_web_scope_structure",
     "detect_handoff",
     "detect_page_handoff",
     "get_scan",
@@ -122,4 +127,5 @@ __all__ = [
     "verify_list_structure",
     "verify_navigation",
     "verify_site_security",
+    "web_scope_note",
 ]

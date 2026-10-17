@@ -471,16 +471,29 @@ Captured content types also name every built-in/SharePoint-owned column
 recreate; those are left to the target list's own defaults rather than sent as
 guaranteed link failures.
 - **Structure is replayed per list, not at web scope.** A **site column**
-(scope `/`) and a **site content type** are only ever seen *through the lists that
-use them*: a column a list already carries is recreated on the target list from
+(one whose `Scope` is the web's server-relative URL, e.g. `/sites/team_in`, not the
+list's) and a **site content type** are only ever seen *through the lists that use
+them*: a column a list already carries is recreated on the target list from
 that list's `SchemaXml` (its web-level `Scope`/`Group` registration is left
 behind), and a custom content type a list carries is recreated on the target list
-from its name/description/group with the source's `string_id`. Nothing is
+by name, description and group — SharePoint Online assigns the new content type
+its own identifier, so the source's `string_id` is not preserved. Nothing is
 registered at the web level, so a column or content type that no migrated list
 uses — and its inheritance by the target web's *other* lists — is not reproduced;
 create those out of band (CSOM/PnP). Attaching a *fresh* site column to a content
 type is impossible over REST anyway: `FieldLinks` rejects it (`Column '<name>'
 does not exist`) until the column is reachable from the list.
+
+  The gap is reported rather than left silent: the resolver compares the two webs
+  (`compare_web_scope_structure`) and appends what the target web lacks —
+  `web-scope structure is not replayed: the target of <url> lacks 1 column(s):
+  RegWeb — …`. That comparison is read-only (two projected GETs per web), matches
+  columns by internal name and content types by name, and ignores hidden,
+  system, framework and sealed columns, so a note names real gaps rather than
+  platform plumbing. It counts *definitions*, not user intent: a site collection
+  root also carries app- and feature-provisioned site columns (compliance,
+  taxonomy, community, tenant "modern" UI columns), so a long list means "the
+  target web is not a schema clone of the source web", not "recreate N columns".
 
 A structure-provisioning warning is also recorded on the resolved target adapter,
 so a whole-site session reports it through `session.warnings()` instead of only in
@@ -630,7 +643,8 @@ the shipped pairs' expected output.
 > carried by the item adapters: they are schema/policy, and the SharePoint resolver
 > replays them over REST with `provision_list_structure` (whole-site and single-list
 > resolution do this by default). The matrix reports the adapter-level truth.
-> Replay is **per list**: a site column (`Scope="/"`) used by a list is recreated
+> Replay is **per list**: a site column (its `Scope` names the web, not the list)
+> that a list carries is recreated
 > from that list's `SchemaXml` (its web-level registration is not), and a custom
 > content type used by the list is recreated on the target list. A site column or
 > content type that no migrated list uses is not created, and REST would not let a
