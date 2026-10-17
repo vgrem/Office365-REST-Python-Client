@@ -70,6 +70,41 @@ _PERSON_EXCLUDED = frozenset({"Author", "Editor"})
 #: source selects them explicitly and the target writes ``{"results": [...]}``.
 _MULTI_VALUE_TYPES = frozenset({"LookupMulti", "UserMulti"})
 
+#: Typed columns whose values are remapped (lookup item ids, person logins).
+_TYPED_VALUE_TYPES = frozenset({"Lookup", "LookupMulti", "User", "UserMulti"})
+
+#: Properties the source column scans need. Selecting them explicitly keeps the read
+#: independent of whatever ``$select`` a previous caller left on the shared
+#: ``fields`` collection — ``List.fields`` survives a ``capture_list_structure``
+#: read (which selects a different, narrower set), and a field payload that omits
+#: ``AllowMultipleValues`` makes a multi-value column look single-value.
+_SOURCE_FIELD_SELECT = [
+    "Id",
+    "InternalName",
+    "TypeAsString",
+    "SchemaXml",
+    "Hidden",
+    "TextField",
+    "AllowMultipleValues",
+]
+
+
+def _allows_multiple_values(field: Any) -> bool:
+    """Whether a Lookup/Person column holds many values.
+
+    ``TypeAsString`` is not authoritative here. A column created from a
+    ``Type="Lookup" Mult="TRUE"`` (or ``Type="User" Mult="TRUE"``) schema keeps that
+    spelling, so SharePoint reports the *single-value* type and only
+    ``AllowMultipleValues`` tells the truth (live-verified). Classifying such a
+    column as single-value left its collection of ids unremapped: a multi-lookup
+    kept source item ids and a multi-person kept source site-user ids on the target,
+    and verification could not see the difference.
+    """
+    if getattr(field, "type_as_string", None) in _MULTI_VALUE_TYPES:
+        return True
+    return field.properties.get("AllowMultipleValues") is True
+
+
 #: Record columns excluded from the content checksum: server-assigned identity
 #: (``Id``/``GUID``), facets verified separately (timestamps, authorship,
 #: permissions), values the target remaps (``ContentTypeId``), and bookkeeping
@@ -790,7 +825,7 @@ class SharePointListSource:
     def _source_fields(self) -> list[Any]:
         """The source list's field definitions, read once and shared by every scan."""
         if self._source_fields_cache is None:
-            self._source_fields_cache = list(self._list.fields.get().execute_query())
+            self._source_fields_cache = list(self._list.fields.select(list(_SOURCE_FIELD_SELECT)).get().execute_query())
         return self._source_fields_cache
 
     def _taxonomy_columns(self) -> dict[str, bool]:
@@ -865,16 +900,19 @@ class SharePointListSource:
                     if not internal_name or internal_name in _PERSON_EXCLUDED:
                         continue
                     field_type = getattr(field, "type_as_string", None)
-                    if field_type != "User" and field_type not in _MULTI_VALUE_TYPES:
+                    if field_type not in _TYPED_VALUE_TYPES:
                         continue
                     # Structure replay skips hidden columns, so the target never
                     # gets them; projecting their values would fail the write.
                     if getattr(field, "hidden", None) is True:
                         skipped.add(internal_name)
-                    elif field_type == "User":
-                        users.add(internal_name)
-                    else:
-                        multi[internal_name] = field_type
+                    elif field_type.startswith("User"):
+                        if _allows_multiple_values(field):
+                            multi[internal_name] = "UserMulti"
+                        else:
+                            users.add(internal_name)
+                    elif _allows_multiple_values(field):
+                        multi[internal_name] = "LookupMulti"
             except Exception as e:  # noqa: BLE001 — without field types ids stay raw
                 self.warnings.append(f"could not read source columns for typed-value remapping: {e}")
             self._user_columns_cache = users
@@ -1308,7 +1346,9 @@ class SharePointListTarget:
         taxonomy: dict[str, tuple[bool, str | None]] = {}
         try:
             fields = (
-                self._list.fields.select(["InternalName", "TypeAsString", "LookupList", "Id", "TextField"])
+                self._list.fields.select(
+                    ["InternalName", "TypeAsString", "LookupList", "Id", "TextField", "AllowMultipleValues"]
+                )
                 .get()
                 .execute_query()
             )
@@ -1327,18 +1367,21 @@ class SharePointListTarget:
                 # ``TextField`` id.
                 note_name = by_id.get(normalize_guid(field.properties.get("TextField")))
                 taxonomy[internal_name] = (field_type == "TaxonomyFieldTypeMulti", note_name)
-            elif field_type in ("Lookup", "LookupMulti"):
-                list_id = normalize_guid(field.properties.get("LookupList"))
-                if not list_id:
-                    continue
-                if field_type == "Lookup":
-                    lookups[internal_name] = list_id
+            elif field_type in _TYPED_VALUE_TYPES:
+                multiple = _allows_multiple_values(field)
+                if field_type.startswith("User"):
+                    if multiple:
+                        multi_users.add(internal_name)
+                    else:
+                        users.add(internal_name)
                 else:
-                    multi_lookups[internal_name] = list_id
-            elif field_type == "User":
-                users.add(internal_name)
-            elif field_type == "UserMulti":
-                multi_users.add(internal_name)
+                    list_id = normalize_guid(field.properties.get("LookupList"))
+                    if not list_id:
+                        continue
+                    if multiple:
+                        multi_lookups[internal_name] = list_id
+                    else:
+                        lookups[internal_name] = list_id
         return lookups, users, multi_lookups, multi_users, taxonomy
 
     def _lookup_index(self, target_list_id: str) -> tuple[dict[int, int], dict[int, int]]:

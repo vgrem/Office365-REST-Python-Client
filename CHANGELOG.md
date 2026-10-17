@@ -376,6 +376,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **A multi-value Lookup/Person column spelled `Type="Lookup" Mult="TRUE"` was
+  migrated as if it were single-value.** SharePoint keeps the declared spelling and
+  reports `TypeAsString` as `Lookup`/`User`, so classifying a column by its type
+  string alone treated its `<name>Id` collection as a single id: a
+  `MultiDeptId = [2, 3]` never reached the target, a multi-person kept source
+  site-user ids, and verification agreed with the wrong result because the column
+  had been dropped before the checksum. Classification now also consults
+  `AllowMultipleValues` (live-verified), which is the only reliable signal. The
+  source column read also selects that property explicitly: a preceding structure
+  capture leaves a narrower `$select` on the shared `List.fields` collection, and a
+  field payload without `AllowMultipleValues` silently re-broke the detection.
 - **Structure provisioning skipped a nameless content type instead of sending a
   null name.** `provision_list_structure` handed the captured name straight to
   `ContentTypeCollection.ensure`, so a capture without one would have posted a

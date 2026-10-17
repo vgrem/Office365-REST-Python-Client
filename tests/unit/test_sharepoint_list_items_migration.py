@@ -92,6 +92,11 @@ class _SourceItems:
 class _SourceFields:
     def __init__(self, fields=None):
         self._fields = fields or []
+        self._select = None
+
+    def select(self, columns):
+        self._select = list(columns)
+        return self
 
     def get(self):
         return self
@@ -371,6 +376,7 @@ class _Field:
         text_field_id=None,
         schema_xml=None,
         hidden=None,
+        allow_multiple_values=None,
     ):
         self.properties = {"InternalName": internal_name, "TypeAsString": type_as_string}
         if lookup_list is not None:
@@ -381,6 +387,8 @@ class _Field:
             self.properties["TextField"] = text_field_id
         if hidden is not None:
             self.properties["Hidden"] = hidden
+        if allow_multiple_values is not None:
+            self.properties["AllowMultipleValues"] = allow_multiple_values
         self._schema_xml = schema_xml
 
     @property
@@ -780,6 +788,41 @@ def test_list_target_content_checksum_canonicalizes_person_id_to_login():
 _MDOE = "mdoe@mediadev8.onmicrosoft.com"
 
 
+def test_list_source_treats_lookup_mult_true_as_a_multi_value_column():
+    # SharePoint keeps a ``Type="Lookup" Mult="TRUE"`` schema as written and then
+    # reports ``TypeAsString == "Lookup"``, so only ``AllowMultipleValues`` says the
+    # column holds many values (live-verified). Reading it as single-value dropped
+    # the whole collection: the ids never reached the target.
+    items = [_Item(1, {"Id": 1, "Title": "A", "MultiDeptId": {0: 1, 1: 2}})]
+    fields = [_Field("MultiDept", "Lookup", allow_multiple_values=True)]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields)))
+
+    assert source._multi_columns() == {"MultiDept": "LookupMulti"}
+    assert source.read(source.list_items()[0])["MultiDeptId"] == [1, 2]
+
+
+def test_list_source_reads_the_multiplicity_flag_explicitly():
+    # ``List.fields`` is a shared collection: reading the structure for provisioning
+    # leaves a narrower ``$select`` on it. Reading the source columns without
+    # ``AllowMultipleValues`` then made every multi-value column look single-value
+    # and the whole collection of ids was dropped on the way to the target.
+    fields = [_Field("MultiDept", "Lookup", allow_multiple_values=True)]
+    source = SharePointListSource(cast("SPList", _SourceList([], fields=fields)))
+
+    assert source._source_fields()
+    assert "AllowMultipleValues" in source._list.fields._select
+
+
+def test_list_source_treats_user_mult_true_as_a_multi_person_column():
+    items = [_Item(1, {"Id": 1, "Title": "A", "MultiOwnerId": {0: 12, 1: 7}})]
+    fields = [_Field("MultiOwner", "User", allow_multiple_values=True)]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields, users={12: _LOGIN, 7: _MDOE})))
+
+    assert source._multi_columns() == {"MultiOwner": "UserMulti"}
+    assert source._user_columns() == set()
+    assert source.read(source.list_items()[0])["MultiOwnerId"] == [_LOGIN, _MDOE]
+
+
 def test_list_target_remaps_multi_lookup_ids_to_target_ids():
     # Source items 2 and 3 were migrated as target ids 1 and 2, so each id in the
     # collection is rewritten; the column is written as ``{"results": [...]}``,
@@ -799,6 +842,35 @@ def test_list_target_remaps_multi_lookup_ids_to_target_ids():
 def test_list_target_remaps_multi_person_logins_to_target_ids():
     web = _Web(users={7: _LOGIN, 12: _MDOE})
     fields = [_Field("MultiOwner", "UserMulti", _USERINFO_LIST_ID)]
+    target_list = _TargetList(fields=fields, web=web)
+    target = SharePointListTarget(cast("SPList", target_list))
+
+    target.write(
+        MigrationItem("Docs/1", "1", item_type="record"),
+        {"Title": "A", "MultiOwnerId": [_LOGIN, _MDOE]},
+    )
+
+    assert target_list.queued == [{"Title": "A", "MultiOwnerId": {"results": [7, 12]}, DEFAULT_LIST_IDENTITY_FIELD: "1"}]
+
+
+def test_list_target_remaps_a_lookup_mult_true_column_as_multi_value():
+    # Same column, `Type="Lookup"` spelling: the ids must still be remapped and
+    # written in the create shape, not passed through as source ids.
+    referenced = [
+        _Item(1, {DEFAULT_LIST_IDENTITY_FIELD: "2"}),
+        _Item(2, {DEFAULT_LIST_IDENTITY_FIELD: "3"}),
+    ]
+    fields = [_Field("MultiDept", "Lookup", _LOOKUP_SCHEMA_LIST_ID, allow_multiple_values=True)]
+    target_list, target = _lookup_target(referenced=referenced, fields=fields)
+
+    target.write(MigrationItem("Docs/1", "1", item_type="record"), {"Title": "A", "MultiDeptId": [2, 3]})
+
+    assert target_list.queued == [{"Title": "A", "MultiDeptId": {"results": [1, 2]}, DEFAULT_LIST_IDENTITY_FIELD: "1"}]
+
+
+def test_list_target_remaps_a_user_mult_true_column_as_multi_person():
+    web = _Web(users={7: _LOGIN, 12: _MDOE})
+    fields = [_Field("MultiOwner", "User", _USERINFO_LIST_ID, allow_multiple_values=True)]
     target_list = _TargetList(fields=fields, web=web)
     target = SharePointListTarget(cast("SPList", target_list))
 
