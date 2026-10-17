@@ -484,6 +484,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **The model generator could write into hand-written files.** Two classes that
+  are not model types used to claim an OData name through the
+  `<namespace>.<ClassName>` fallback and shadow the real class, so `--force`
+  injected generated members into them: the CAML DSL `Field` in
+  `office365/sharepoint/listitems/caml/expressions.py` claimed `SP.Field` (281
+  lines of `SP.Field` accessors, caught by pyright), and the migration package
+  `@dataclass Package` in `office365/migration/package/builder.py` claimed
+  `microsoft.graph.Package` (a stray `type` field and an `entity_type_name`
+  property, committed by accident). A class with **no base classes** is now never
+  a resolution candidate unless it *declares* `entity_type_name` — every generated
+  model class inherits `Entity`/`ClientValue`/`Enum`/… — so both collisions are
+  gone structurally. The accidental `Package.type` / `Package.entity_type_name`
+  members are removed (never released, never used).
 - **Hyperlink column values were dropped on migration.** A `URL` column reads as a
   `{"Url": ..., "Description": ...}` object — not a scalar — so the source
   projection dropped it with the same "skipped non-scalar column" warning and

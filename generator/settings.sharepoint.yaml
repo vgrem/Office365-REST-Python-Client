@@ -23,6 +23,7 @@ filters:
     - Microsoft.SharePoint.QuickActionMessageCard.*
     - Microsoft.SharePoint.News.DataModel.*
     - Microsoft.SharePoint.KnowledgeSite.Models.*
+    - Microsoft.SharePoint.MicroService.Notify.*
     - SP.WorkManagement.OM.*
     - OData__*
     - SP.Data.*

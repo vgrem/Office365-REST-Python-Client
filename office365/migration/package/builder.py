@@ -129,12 +129,6 @@ class Package:
             written.append(path)
         return written
 
-    type: str | None = None
-
-    @property
-    def entity_type_name(self) -> str:
-        return "microsoft.graph.Package"
-
 
 class PackageBuilder:
     """Assembles a document-library migration package."""

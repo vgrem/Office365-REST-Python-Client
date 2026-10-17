@@ -157,11 +157,19 @@ class SymbolIndex:
         for node in tree.body:
             if not isinstance(node, ast.ClassDef):
                 continue
+            self._files[(module_path, node.name)] = str(path)
+            odata_name = self._entity_type_name(node)
+            if not node.bases and odata_name is None:
+                # A class without a base is not a model type (every generated class
+                # inherits Entity/ClientValue/Enum/...), so it must never claim a
+                # fallback ``<namespace>.<ClassName>`` name or shadow the real class:
+                # ``class Package:`` in the migration package builder is not
+                # ``microsoft.graph.Package``, nor the CAML DSL ``Field`` ``SP.Field``.
+                continue
             bucket = self._by_name.setdefault(node.name, [])
             if module_path not in bucket:
                 bucket.append(module_path)
-            self._files[(module_path, node.name)] = str(path)
-            odata_name = self._entity_type_name(node) or (f"{self._namespace}.{node.name}" if self._namespace else "")
+            odata_name = odata_name or (f"{self._namespace}.{node.name}" if self._namespace else "")
             if odata_name:
                 key = normalize_type_name(odata_name) or odata_name
                 self._by_odata.setdefault(key, []).append((node.name, module_path))
@@ -259,16 +267,18 @@ def _distinctive_segments(key: str) -> list[str]:
 def _consistency_score(key: str, module: str) -> int:
     """How plausibly ``module`` holds the type ``key`` (0 = unrelated).
 
-    Rewards a matching namespace segment and a parent directory matching the
-    class-name prefix; penalizes the plain ``snake_case`` module the generator
-    itself would create, so an existing hand-named module wins.
+    Rewards a matching namespace segment and a parent directory naming the type
+    (as a prefix of the class name); penalizes the plain ``snake_case`` module the
+    generator itself would create, so an existing hand-named module wins.
     """
     short = key.rsplit(".", 1)[-1].lower().replace("_", "")
     module_lower = module.lower()
     score = sum(2 for seg in _distinctive_segments(key) if seg.lower().replace("_", "") in module_lower)
     for parent in module_lower.rsplit(".", 1)[0].split("."):
         normalized = parent.replace("_", "")
-        if normalized not in ("office365", "microsoft", "graph") and normalized and short.startswith(normalized):
+        if not normalized or normalized in ("office365", "microsoft", "graph"):
+            continue
+        if short.startswith(normalized):
             score += 3
     if module_lower.rsplit(".", 1)[-1] == to_snake_case(key.rsplit(".", 1)[-1], avoid_keywords=False):
         score -= 1
