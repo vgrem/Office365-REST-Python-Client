@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **One report answers "did this web migrate?".** A whole-site run touches a web on
+  several axes, each with its own verifier, so the example called four of them by
+  hand — easy to forget one, impossible to summarize. The new read-only
+  `office365.migration.sharepoint.site_verify.verify_site(source_context,
+  target_context, ...)` folds them into a `SiteVerificationReport` (`verify_site`
+  and `SiteVerificationReport`, also exported from
+  `office365.migration.sharepoint`): web `Title`/`Description`, web-scope
+  structure, navigation, modern pages, site security, and — via
+  `lists=[(source, target), …]` — per-list structure. Checks are opt-in so only
+  what a run claimed is compared; `ok` turns False as soon as a check contradicts
+  the target, while `complete` stays False when a check could not run (an access
+  denied is recorded in `unverifiable`, never swallowed and never counted as a
+  pass). `summary()` gives the one-line verdict with per-dimension counts,
+  `issues` flattens the findings, and `to_dict()` is JSON-serializable for an
+  evidence pack. `migrate_site.py` now prints that single report in place of its
+  four ad-hoc verification helpers.
 - **Each web's `Title` and `Description` are copied, and the settings a run
   cannot honor are no longer silent.** Replaying a list's structure never touched
   the *web* that hosts it, so a migrated site kept the target web's identity where

@@ -1088,6 +1088,39 @@ findings: pages with no counterpart, and pages whose canvas differs from the
 source's. Classic pages are not compared at all; they are handoff, and
 `page_handoff_note` names them.
 
+### Verifying a whole site
+
+A whole-site run touches a web on several axes, and each has its own verifier.
+`verify_site` folds them into one report with one verdict — so "did this web
+migrate?" is a value, not a reading exercise:
+
+```python
+from office365.migration.sharepoint import verify_site
+
+report = verify_site(
+    source_ctx,
+    target_ctx,
+    pages=True,
+    security=True,
+)
+print(report.summary())  # "MISMATCH | https://…/sites/team_out | settings: 1, web-scope structure: 0, pages: 2"
+print(report.ok, report.complete)
+for note in report.issues:
+    print(note)
+```
+
+The checks are opt-in, matching what a run claimed to do: `settings` and
+`web_scope_structure` are on by default, `navigation`, `pages` and `security` are
+passed when the corresponding run flags were set, and `lists=[(source, target), …]`
+adds per-list structure reconciliation (the same comparison as
+`verify_list_structure`). Everything is read-only.
+
+Two verdicts, deliberately separate: `ok` is False as soon as any check
+contradicts the target, while `complete` is False when a check *could not run*
+(access denied on a site groups read, for instance) — a partial verification never
+reads as a pass. `to_dict()` is the JSON-serializable form for an evidence pack,
+and the example's post-run reconciliation prints exactly this report.
+
 ## See also
 
 - [Data pipeline](data-pipeline.md) — tabular import/export

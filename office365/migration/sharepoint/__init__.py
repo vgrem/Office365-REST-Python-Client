@@ -71,6 +71,7 @@ from office365.migration.sharepoint.site_settings import (
     parse_site_settings_mode,
     verify_web_settings,
 )
+from office365.migration.sharepoint.site_verify import SiteVerificationReport, verify_site
 from office365.migration.sharepoint.structure import (
     ContentTypeDefinition,
     FieldDefinition,
@@ -122,6 +123,7 @@ __all__ = [
     "SiteHandoff",
     "SiteLockedScanner",
     "SiteScanSummary",
+    "SiteVerificationReport",
     "StructureReport",
     "ViewDefinition",
     "WebNavigation",
@@ -152,6 +154,7 @@ __all__ = [
     "verify_navigation",
     "verify_page_copy",
     "verify_web_settings",
+    "verify_site",
     "verify_site_security",
     "web_scope_note",
 ]

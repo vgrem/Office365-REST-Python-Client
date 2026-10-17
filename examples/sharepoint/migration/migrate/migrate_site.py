@@ -234,11 +234,7 @@ def _report_verification(session, source_ctx, ctx, preserve_permissions: bool, s
             print(f"      mismatch: {note}")
         for note in report.unverifiable[:3]:
             print(f"      unverified: {note}")
-    _verify_web_scope(source_ctx, ctx, preserve_permissions, settings.migrate_navigation)
-    if settings.migrate_site_settings != "NONE":
-        _verify_site_settings(source_ctx, ctx)
-    if settings.migrate_pages:
-        _verify_pages(source_ctx, ctx)
+    _verify_web(source_ctx, ctx, preserve_permissions=preserve_permissions, settings=settings)
 
 
 def _print_pages(all_lists, *, copy: bool, duplicate: str) -> None:
@@ -262,44 +258,23 @@ def _print_delta(session) -> None:
             print(f"  delta: {note}")
 
 
-def _verify_web_scope(source_ctx, ctx, preserve_permissions: bool, migrate_navigation: bool) -> None:
-    """Reconcile the resolver-level web concerns (site security, navigation) with the source."""
-    if preserve_permissions:
-        _verify_site_security(source_ctx, ctx)
-    if migrate_navigation:
-        _verify_navigation(source_ctx, ctx)
+def _verify_web(source_ctx, ctx, *, preserve_permissions: bool, settings) -> None:
+    """Reconcile every web-level concern the run claimed, in one report."""
+    from office365.migration.sharepoint.site_verify import verify_site
 
-
-def _verify_site_security(source_ctx, ctx) -> None:
-    """Reconcile the migrated web's groups/role assignments against the source."""
-    from office365.migration.sharepoint.security import verify_site_security
-
-    for note in verify_site_security(source_ctx.web, ctx.web):
-        print(f"  site: {note}")
-
-
-def _verify_site_settings(source_ctx, ctx) -> None:
-    """Reconcile the target web's Title/Description against the source."""
-    from office365.migration.sharepoint.site_settings import verify_web_settings
-
-    for note in verify_web_settings(source_ctx.web, ctx.web):
-        print(f"  {note}")
-
-
-def _verify_pages(source_ctx, ctx) -> None:
-    """Reconcile the migrated web's modern site pages against the source."""
-    from office365.migration.sharepoint.pages import verify_page_copy
-
-    for note in verify_page_copy(source_ctx.web, ctx.web):
-        print(f"  pages: {note}")
-
-
-def _verify_navigation(source_ctx, ctx) -> None:
-    """Reconcile the migrated web's navigation against the source."""
-    from office365.migration.sharepoint.navigation import verify_navigation
-
-    for note in verify_navigation(source_ctx.web, ctx.web):
-        print(f"  nav: {note}")
+    report = verify_site(
+        source_ctx,
+        ctx,
+        settings=settings.migrate_site_settings != "NONE",
+        navigation=settings.migrate_navigation,
+        pages=settings.migrate_pages,
+        security=preserve_permissions,
+    )
+    print(f"  site: {report.summary()}")
+    for note in report.issues:
+        print(f"      {note}")
+    for note in report.unverifiable:
+        print(f"      unverified: {note}")
 
 
 if __name__ == "__main__":
