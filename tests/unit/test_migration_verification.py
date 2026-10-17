@@ -276,6 +276,39 @@ def test_permission_check_unverifiable_without_target_hook():
     assert not report.complete
 
 
+def _folder_manifest(*dests):
+    return Manifest([MigrationItem(source_path=f"/src/{d}", dest_path=d, item_type="folder") for d in dests])
+
+
+def test_a_folder_whose_values_were_migrated_is_content_checked():
+    # A document library folder carries its own column values: a document set's
+    # metadata is part of what was migrated, not an attribute of the container.
+    manifest = _folder_manifest("Area/")
+    source = _Source(manifest.items, checksums={"Area/": "src"})
+    target = _Target(["Area/"], checksums={"Area/": "dst"})
+    source.supports_folder_records = True
+    target.supports_folder_records = True
+
+    report = verify(source, target, manifest)
+
+    assert report.mismatches == ["content mismatch: Area/"]
+    assert not report.ok
+
+
+def test_a_folder_is_not_content_checked_without_folder_value_support():
+    # The filesystem pair and any adapter that does not carry folder values must not
+    # report a folder as unverifiable content — it only has a structure.
+    manifest = _folder_manifest("Area/")
+    source = _Source(manifest.items, checksums={"Area/": ""})
+    target = _Target(["Area/"], checksums={"Area/": ""})
+
+    report = verify(source, target, manifest)
+
+    assert report.ok
+    assert report.unverifiable == []
+    assert report.checked == 0
+
+
 def test_versions_are_always_unverifiable():
     manifest = _manifest("a.txt")
     source = _Source(manifest.items, checksums={"a.txt": "x"})

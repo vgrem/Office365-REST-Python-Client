@@ -470,3 +470,152 @@ def test_library_target_caches_time_zone_conversions():
 
     assert len(time_zone.calls) == 1  # converted once, then cached
     assert time_zone.calls[0].replace(tzinfo=None) == datetime(2021, 6, 1, 15, 0, 0)
+
+
+# ── Folder column values (a folder is a list item too) ────────────────────────
+
+
+class _Column:
+    """A library column as returned by a ``fields`` projection."""
+
+    def __init__(self, internal_name: str, type_as_string: str = "Text", *, hidden=False, read_only=False) -> None:
+        self.properties = {
+            "InternalName": internal_name,
+            "TypeAsString": type_as_string,
+            "Hidden": hidden,
+            "ReadOnlyField": read_only,
+        }
+        self.id = None
+        self.schema_xml = None
+
+    @property
+    def internal_name(self) -> str:
+        return self.properties["InternalName"]
+
+    @property
+    def type_as_string(self) -> str:
+        return self.properties["TypeAsString"]
+
+    @property
+    def hidden(self) -> bool:
+        return self.properties["Hidden"]
+
+    @property
+    def read_only_field(self) -> bool:
+        return self.properties["ReadOnlyField"]
+
+
+class _Fields:
+    def __init__(self, columns: list[_Column]) -> None:
+        self._columns = columns
+
+    def select(self, _columns) -> "_Fields":
+        return self
+
+    def get(self) -> "_Fields":
+        return self
+
+    def execute_query(self) -> list[_Column]:
+        return self._columns
+
+
+class _Library:
+    def __init__(self, columns: list[_Column]) -> None:
+        self.fields = _Fields(columns)
+
+
+class _FolderItem:
+    """A folder's underlying list item (MERGE target and read-back source)."""
+
+    def __init__(self, properties: dict | None = None, error: str | None = None) -> None:
+        self.properties = dict(properties or {})
+        self.written: dict = {}
+        self.updated = 0
+        self._error = error
+
+    def select(self, columns) -> "_FolderItem":
+        self._select = list(columns)
+        return self
+
+    def get(self) -> "_FolderItem":
+        return self
+
+    def set_property(self, name: str, value) -> "_FolderItem":
+        self.written[name] = value
+        return self
+
+    def update(self) -> "_FolderItem":
+        if self._error is not None:
+            raise ValueError(self._error)
+        self.updated += 1
+        return self
+
+    def execute_query(self) -> "_FolderItem":
+        return self
+
+
+class _FolderHandle:
+    def __init__(self, item: _FolderItem) -> None:
+        self.list_item_all_fields = item
+
+
+class _FolderWeb:
+    def __init__(self, items: dict[str, _FolderItem]) -> None:
+        self._items = items
+
+    def get_folder_by_server_relative_path(self, url: str) -> _FolderHandle:
+        return _FolderHandle(self._items.setdefault(url, _FolderItem()))
+
+
+def _folder_target(web: _FolderWeb, columns: list[_Column] | None = None) -> SharePointLibraryTarget:
+    folder = _TargetFolder(context=_Context(web=web))
+    return SharePointLibraryTarget(folder, sp_list=_Library(columns or [_Column("Region", "Choice")]))
+
+
+def test_library_target_applies_folder_column_values_to_its_item():
+    item = _FolderItem()
+    web = _FolderWeb({"/sites/x/Docs/Area1": item})
+    target = _folder_target(web)
+
+    target.write(
+        _folder_item("Area1/"),
+        # ``FileRef``/``FSObjType`` are the folder's identity, and an empty value is
+        # no value — none of them can be written.
+        {"Region": "North", "ContentTypeId": "0x0120", "FileRef": "/sites/x/Docs/Area1", "Title": ""},
+    )
+
+    assert item.written == {"Region": "North", "ContentTypeId": "0x0120"}
+    assert item.updated == 1
+
+
+def test_library_target_reports_folder_values_it_could_not_write():
+    item = _FolderItem(error="Access denied")
+    target = _folder_target(_FolderWeb({"/sites/x/Docs/Area1": item}))
+
+    target.write(_folder_item("Area1/"), {"Region": "North"})
+
+    assert any("folder column values for 'Area1/'" in warning for warning in target.warnings)
+
+
+def test_library_target_folder_checksum_compares_read_back_values():
+    matching = _folder_target(_FolderWeb({"/sites/x/Docs/Area1": _FolderItem({"Region": "North"})}))
+    differing = _folder_target(_FolderWeb({"/sites/x/Docs/Area1": _FolderItem({"Region": "South"})}))
+    same_folder_elsewhere = _folder_target(_FolderWeb({"/sites/x/Docs/Area2": _FolderItem({"Region": "North"})}))
+
+    assert matching.checksum(_folder_item("Area1/"))  # a real hash, so the check can run
+    assert matching.checksum(_folder_item("Area1/")) == same_folder_elsewhere.checksum(_folder_item("Area2/"))
+    assert differing.checksum(_folder_item("Area1/")) != matching.checksum(_folder_item("Area1/"))
+
+
+def test_library_target_without_the_library_cannot_compare_folder_values():
+    plain = SharePointLibraryTarget(_TargetFolder())
+
+    assert plain.supports_folder_records is False
+    assert plain.checksum(_folder_item("Area1/")) == ""
+    assert _folder_target(_FolderWeb({})).supports_folder_records is True
+
+
+def test_library_source_without_the_library_reports_no_folder_records():
+    folder = _SourceFolder("/sites/x/Docs", _Web())
+
+    assert SharePointLibrarySource(folder).supports_folder_records is False

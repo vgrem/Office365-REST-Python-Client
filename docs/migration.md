@@ -116,7 +116,7 @@ pipeline uses (see [Data pipeline](data-pipeline.md)).
 |---|---|---|
 | `FileSystemSource` / `FileSystemTarget` | both | files + folders |
 | `JsonFileSource` / `JsonFileTarget` | both | record payloads (one JSON file per item) |
-| `SharePointLibrarySource` / `SharePointLibraryTarget` | both | files + folders (recursive) |
+| `SharePointLibrarySource` / `SharePointLibraryTarget` | both | files + folders (recursive) + folder column values |
 | `SharePointListSource` / `SharePointListTarget` | both | list items as records |
 | `TeamsArchiveSource` / `TeamsArchiveTarget` | both | Teams archives |
 
@@ -171,6 +171,26 @@ Two honest limits remain:
   read and a create accepts as-is. Other value objects — an image/thumbnail, a
   geolocation point — are still dropped with a warning instead of being sent in a
   shape the server may reject.
+- **Document library folders** are list items too, so their own column values — a
+  document set's metadata, a managed folder's department — travel as the folder's
+  payload. A library adapter built with its library (`sp_list=`, which the site
+  resolvers always pass) reads them with an **explicit projection** of the
+  folder's writable columns — a `*` read fails on a library, which has no
+  `Attachments` column — and the target MERGEs them onto the folder's list item
+  once the structure exists. *Writable* means non-hidden, not
+  underscore-prefixed (SharePoint's storage columns are not projectable), not
+  read-only and not a computed type (`Computed`/`File`/`Attachments`/
+  `WorkflowStatus`, i.e. `LinkFilename`, `DocIcon`, …); the target drops the same
+  columns from its read-back so the fingerprints are comparable. The folder's
+  `ContentTypeId` is carried (a `MERGE` does change a folder's content type —
+  live-checked) but stays out of the fingerprint, as for item records, and an
+  empty value counts as absent on both sides. A failed value write is a warning,
+  never fatal: the folder's structure matters more than its metadata. Verification
+  samples folders for the content check alongside items, and only when both
+  adapters were built with their library — a filesystem pair carries no folder
+  values and stays silent rather than reporting them as unverifiable. A folder
+  that already exists on the target is skipped like an existing file, so a resumed
+  run does not back-fill its values.
 - Per-item **timestamps/permissions/authorship**
   (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
   by the list adapters on a best-effort basis: timestamps and authorship are

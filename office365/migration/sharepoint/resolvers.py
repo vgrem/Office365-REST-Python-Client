@@ -377,7 +377,7 @@ def _list_adapters(
     if is_document_library(source_list):
         source = SharePointLibrarySource(source_list.root_folder, sp_list=source_list)
         folder = target_list.root_folder.get().execute_query()
-        target = SharePointLibraryTarget(folder)
+        target = SharePointLibraryTarget(folder, sp_list=target_list, content_type_map=content_type_map)
     else:
         source = SharePointListSource(source_list)
         target = SharePointListTarget(target_list, content_type_map=content_type_map)
@@ -524,7 +524,7 @@ def _build_target(
     if settings is not None and settings.use_migration_api:
         return _package_target(task, context, target_list)
     if is_document_library(target_list):
-        return SharePointLibraryTarget(folder)
+        return SharePointLibraryTarget(folder, sp_list=target_list, content_type_map=content_type_map)
     return SharePointListTarget(target_list, content_type_map=content_type_map)
 
 

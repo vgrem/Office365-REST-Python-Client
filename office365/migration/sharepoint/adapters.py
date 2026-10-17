@@ -103,6 +103,7 @@ _SOURCE_FIELD_SELECT = [
     "TypeAsString",
     "SchemaXml",
     "Hidden",
+    "ReadOnlyField",
     "TextField",
     "AllowMultipleValues",
 ]
@@ -197,6 +198,48 @@ _CONTENT_EXCLUDED = frozenset(
     }
 )
 
+#: Field types whose value is server-derived: a computed column (a link filename, a
+#: doc icon) is a view of the item's identity, not metadata a folder carries.
+_FOLDER_COMPUTED_TYPES = frozenset({"Attachments", "Computed", "File", "WorkflowStatus"})
+
+
+def _folder_value_columns(fields: list[Any]) -> set[str]:
+    """The columns a folder's own metadata can live in (writable, non-system).
+
+    A read of a folder also returns computed and read-only columns (link filenames,
+    compliance flags, version labels); writing those is rejected and comparing them
+    would only echo the folder's own name back.
+    """
+    return {
+        field.internal_name
+        for field in fields
+        if field.internal_name
+        # An underscore-prefixed internal name is SharePoint's own storage column; it
+        # is not reliably projectable (the same rule the safe fallback projection uses).
+        and not field.internal_name.startswith("_")
+        and not field.hidden
+        and not field.read_only_field
+        and field.type_as_string not in _FOLDER_COMPUTED_TYPES
+        and field.internal_name not in _FOLDER_RECORD_EXCLUDED
+    }
+
+
+#: Folder (document library) record columns that never travel to the target: the
+#: server-assigned identity and path columns, system metadata (restored by the
+#: fidelity steps), and the folder-specific bookkeeping a read projects. A
+#: ``ContentTypeId`` is kept — a document set's content type is part of what makes
+#: the folder what it is.
+_FOLDER_RECORD_EXCLUDED = (_CONTENT_EXCLUDED - {"ContentTypeId"}) | {
+    "FileRef",
+    "FileDirRef",
+    "FileLeafRef",
+    "FSObjType",
+    "UniqueId",
+    "SortBehavior",
+    "SMTotalFileStreamSize",
+    "SMTotalFileCount",
+}
+
 
 def _content_checksum(record: dict, extra_excluded: "frozenset[str]" = frozenset()) -> str:
     """MD5 of an item's content columns in a stable, order-independent form.
@@ -220,6 +263,19 @@ def _content_checksum(record: dict, extra_excluded: "frozenset[str]" = frozenset
             content[key] = mapping
     payload = json.dumps(content, sort_keys=True, default=str)
     return hashlib.md5(payload.encode("utf-8")).hexdigest()
+
+
+def _folder_record_values(record: dict) -> dict:
+    """The column values of a folder item that travel to (or compare with) the target.
+
+    The projection already narrows the read to the folder's own writable columns; here
+    only the identity/system columns are dropped, and an empty value is treated as
+    absent on both sides — a source read reports ``""`` where a target read reports
+    ``None``, and both mean "no value".
+    """
+    return {
+        key: value for key, value in record.items() if key not in _FOLDER_RECORD_EXCLUDED and value not in (None, "")
+    }
 
 
 def _id_list(value: Any) -> list[Any] | None:
@@ -741,6 +797,7 @@ class SharePointListSource:
         self._taxonomy_note_columns_cache: set[str] | None = None
         self._multi_choice_columns_cache: set[str] | None = None
         self._value_object_columns_cache: set[str] | None = None
+        self._folder_records_cache: dict[str, dict] | None = None
         self.warnings: list[str] = []
 
     def label(self) -> str:
@@ -768,7 +825,7 @@ class SharePointListSource:
                 loaded = self._load_items(["Id", "Title"])
         return self._project(loaded, progress)
 
-    def _load_items(self, select: list[str] | None):
+    def _load_items(self, select: list[str] | None, folder_only: bool = False):
         items = self._list.items
         # A full read projects ``*`` plus the system metadata so author/editor ids
         # and the unique-ACL flag are captured in one query (``*`` omits them);
@@ -783,8 +840,14 @@ class SharePointListSource:
                 if key not in columns:
                     columns.append(key)
             # Expand attachments so they can be migrated alongside their item.
-            return items.select(columns).expand(["AttachmentFiles"]).get_all().execute_query()
-        return items.select(select).get_all().execute_query()
+            query = items.select(columns).expand(["AttachmentFiles"])
+            if folder_only:
+                query = query.filter("FSObjType eq 1")
+            return query.get_all().execute_query()
+        query = items.select(select)
+        if folder_only:
+            query = query.filter("FSObjType eq 1")
+        return query.get_all().execute_query()
 
     def _safe_select(self) -> list[str]:
         """Fallback projection: visible, non-system columns minus Managed Metadata.
@@ -856,7 +919,7 @@ class SharePointListSource:
             emit_progress(progress, done=len(result), stage="planning", items=[attachment])
         return result
 
-    def _project_records(self, loaded) -> list[dict]:
+    def _project_records(self, loaded, report_skipped: bool = True) -> list[dict]:
         # Project every loaded property — not the collection's literal ``select``.
         # Passing ``["*", ...]`` straight through emitted ``{"*": None, ...}``, so
         # migrated records carried no field values at all. ``AttachmentFiles`` is a
@@ -906,14 +969,75 @@ class SharePointListSource:
             for record in records:
                 for key in skipped_keys:
                     record.pop(key, None)
-            self.warnings.append(
-                f"skipped hidden typed column(s) not replicated by structure provisioning: {', '.join(sorted(skipped))}"
-            )
+            if report_skipped:
+                self.warnings.append(
+                    f"skipped hidden typed column(s) not replicated by structure provisioning: "
+                    f"{', '.join(sorted(skipped))}"
+                )
         self._project_taxonomy_values(records)
         self._normalize_multi_values(records)
         self._normalize_multi_choice_values(records)
         self._annotate_person_logins(records)
         return records
+
+    def folder_records(self) -> dict[str, dict]:
+        """Column values of this list's folders, keyed by their server-relative URL.
+
+        A document library's folders are list items too: a document set or a managed
+        folder carries its own column values, so a target that only created the empty
+        folder would silently lose them. The values go through the same projection as
+        an item's (typed values normalized, system and navigation columns dropped), so
+        the target can write them onto the folder's underlying item. The read is
+        narrowed to the folder's writable columns (see :meth:`folder_projection`): a
+        ``*`` read also returns system and computed columns (compliance flags, link
+        filenames, version labels) that an update would reject and that carry no
+        portable value.
+        """
+        if self._folder_records_cache is None:
+            records: dict[str, dict] = {}
+            try:
+                loaded = self._load_items(self.folder_projection(), folder_only=True)
+            except Exception as e:  # noqa: BLE001 — folder values are best-effort
+                self.warnings.append(f"folder column values could not be read: {e}")
+                loaded = []
+            # The folder projection already excluded the columns an item record would
+            # report as unmigratable, so those messages would describe nothing.
+            for record in self._project_records(loaded, report_skipped=False) if loaded else []:
+                url = record.get("FileRef")
+                if not isinstance(url, str) or not url:
+                    continue
+                values = _folder_record_values(record)
+                if values:
+                    records[url.rstrip("/")] = values
+            self._folder_records_cache = records
+        return self._folder_records_cache
+
+    def folder_projection(self) -> list[str]:
+        """The columns that carry a folder's own metadata, plus what typed values need.
+
+        A folder has no separate create payload: its values are read back as a record,
+        written onto the folder's item and compared the same way — so the projection
+        must include the companions the typed-value normalization reads (``<name>Id``
+        for Lookup/Person values, the hidden note of a Managed Metadata column).
+        """
+        writable = _folder_value_columns(self._source_fields())
+        # ``FileRef`` keys the record (it is the folder's identity, not a value).
+        columns = ["ContentTypeId", "FileRef", *sorted(writable)]
+        # Lookup and Person values are carried as item ids / logins under
+        # ``<name>Id``; the column itself is carried in the record too.
+        single_lookups = {
+            field.internal_name
+            for field in self._source_fields()
+            if field.internal_name and field.type_as_string == "Lookup" and not _allows_multiple_values(field)
+        }
+        for name in sorted((single_lookups | self._user_columns() | set(self._multi_columns())) & writable):
+            key = f"{name}Id"
+            if key not in columns:
+                columns.append(key)
+        for note in self._taxonomy_note_columns():
+            if note not in columns:
+                columns.append(note)
+        return columns
 
     def _source_fields(self) -> list[Any]:
         """The source list's field definitions, read once and shared by every scan."""
@@ -1403,6 +1527,24 @@ class SharePointListTarget:
         if approval:
             self._pending_approval[item.dest_path] = approval
         return record
+
+    def translate_record(self, record: dict) -> dict:
+        """A source record mapped onto this list without writing it.
+
+        A document library folder is a list item that already exists on the target,
+        so its column values cannot go through the create queue: the record is mapped
+        here (target content-type id, Lookup ids, Person logins, multi-value shapes)
+        and applied with an update instead.
+        """
+        mapped = dict(record)
+        if self._content_type_map:
+            resolved = self._content_type_map.resolve(mapped.get("ContentTypeId"))
+            if resolved:
+                mapped["ContentTypeId"] = resolved
+            else:
+                mapped.pop("ContentTypeId", None)
+        self._remap_typed_values([mapped])
+        return mapped
 
     def _queue(self, records: list[dict]) -> None:
         self._ensure_identity()
@@ -1920,7 +2062,15 @@ class SharePointListTarget:
         target_item = self._fresh_target_item(item)
         if target_item is None:
             return ""
-        properties = _canonicalize_taxonomy_record(dict(target_item.properties))
+        return self.content_checksum(dict(target_item.properties))
+
+    def content_checksum(self, properties: dict) -> str:
+        """The comparable content hash of an item's read-back properties.
+
+        Used for both a written record and a folder's item, so a library folder's
+        column values can be reconciled against the source record that produced them.
+        """
+        properties = _canonicalize_taxonomy_record(dict(properties))
         self._canonicalize_lookups(properties)
         self._canonicalize_users(properties)
         self._canonicalize_multi_choices(properties)
@@ -2106,7 +2256,9 @@ class SharePointLibrarySource:
     """Enumerates a document library's files and folders (recursively) for migration.
 
     Folder entries (``item_type="folder"``, trailing ``/`` on the destination)
-    preserve the folder structure — including **empty** folders — on the target.
+    preserve the folder structure — including **empty** folders — on the target, and
+    carry the folder's own column values (a document set's metadata, a managed
+    folder's department) as their payload when the parent list is known.
     """
 
     def __init__(
@@ -2119,6 +2271,10 @@ class SharePointLibrarySource:
         # The parent list, when known — author/editor ids (``AuthorId``/``EditorId``)
         # are not exposed on the ``File`` resource and must be read from its items.
         self._sp_list = sp_list
+        # Folder column values come from the list's items and are projected exactly
+        # like a record's (typed values normalized), so that code is reused here.
+        self._list_source = SharePointListSource(sp_list) if sp_list is not None else None
+        self._folder_payloads: dict[str, dict] | None = None
         self._files: dict[str, "File"] = {}
         self._users: dict[int, "Principal | None"] = {}
         self._default_groups: _DefaultGroups | None = None
@@ -2188,9 +2344,10 @@ class SharePointLibrarySource:
             emit_progress(progress, done=len(result), stage="planning", items=[file])
         return result
 
-    def read(self, item: MigrationItem) -> bytes:
+    def read(self, item: MigrationItem) -> object:
         if item.item_type == "folder":
-            return b""
+            # A folder's payload is its column values (empty when it carries none).
+            return self._folder_values(item) or b""
         file = self._files.get(item.dest_path)
         if file is None:
             raise FileNotFoundError(item.source_path)
@@ -2229,10 +2386,30 @@ class SharePointLibrarySource:
         older.sort(key=lambda row: _version_sort_key(row[0]))
         return file.ui_version_label, older
 
+    @property
+    def supports_folder_records(self) -> bool:
+        """Whether a folder's column values are migrated *and* comparable."""
+        return self._list_source is not None
+
     def checksum(self, item: MigrationItem) -> str:
         if item.item_type == "folder":
-            return hashlib.md5(b"").hexdigest()
-        return hashlib.md5(self.read(item)).hexdigest()
+            return _content_checksum(_canonicalize_taxonomy_record(self._folder_values(item)))
+        return hashlib.md5(cast(bytes, self.read(item))).hexdigest()
+
+    def _folder_values(self, item: MigrationItem) -> dict:
+        """The source folder's column values (empty when it carries none)."""
+        if self._folder_payloads is None:
+            payloads: dict[str, dict] = {}
+            if self._sp_list is None or self._list_source is None:
+                self.warnings.append(
+                    "folder column values were not read: the parent library is unknown "
+                    "(pass sp_list to SharePointLibrarySource)"
+                )
+            else:
+                payloads.update(self._list_source.folder_records())
+                self.warnings.extend(self._list_source.warnings)
+            self._folder_payloads = payloads
+        return self._folder_payloads.get(str(item.source_path).rstrip("/"), {})
 
     def read_permissions(self, item: MigrationItem) -> list[PermissionEntry]:
         """Read the item's role assignments (for best-effort ACL preservation).
@@ -2359,11 +2536,29 @@ class SharePointLibraryTarget:
 
     Uses the simple upload for files up to ~4MB; ``write_many`` (parallel,
     ``concurrency > 1``) uses ``create_upload_session`` for larger files.
+
+    Pass ``sp_list`` (the target library) to also replay a folder's column values: a
+    folder is a list item, so a document set's metadata or a managed folder's
+    department is written onto the created folder's item. ``content_type_map``
+    rewrites the folder's content type id to its target counterpart, exactly as it
+    does for an item record.
     """
 
-    def __init__(self, library_folder: "Folder", concurrency: int = 1) -> None:
+    def __init__(
+        self,
+        library_folder: "Folder",
+        concurrency: int = 1,
+        sp_list: "SPList | None" = None,
+        content_type_map: "ContentTypeMap | None" = None,
+    ) -> None:
         self._folder = library_folder
         self._concurrency = concurrency
+        # The folder-record mapping is the record mapping: reuse the list target so a
+        # folder's Lookup/Person/taxonomy/choice values resolve the same way.
+        self._sp_list = sp_list
+        self._list_target = (
+            SharePointListTarget(sp_list, content_type_map=content_type_map) if sp_list is not None else None
+        )
         self.warnings: list[str] = []
         self._login_cache: dict[int, str | None] = {}
         self._principals_cache: _TargetPrincipals | None = None
@@ -2373,6 +2568,7 @@ class SharePointLibraryTarget:
         # Target web time zone (lazily loaded) and a UTC->local conversion cache.
         self._time_zone = None
         self._local_cache: dict[str, str] = {}
+        self._field_scan: SharePointListSource | None = None
 
     def _utc_to_local(self, *values: str | None) -> list[str | None]:
         """Convert UTC timestamp strings to web-local wall-clock (one round trip).
@@ -2454,9 +2650,45 @@ class SharePointLibraryTarget:
     def write(self, item: MigrationItem, payload: object) -> None:
         if item.item_type == "folder":
             self._ensure_folders([item])
+            if isinstance(payload, dict):
+                self._apply_folder_values(item, payload)
             return
         content = payload if isinstance(payload, bytes) else str(payload).encode("utf-8")
         self._folder.upload_file(item.dest_path, content).execute_query()
+
+    @property
+    def supports_folder_records(self) -> bool:
+        """Whether a folder's column values are migrated *and* comparable."""
+        return self._list_target is not None
+
+    def _apply_folder_values(self, item: MigrationItem, record: dict) -> None:
+        """Write a folder's column values onto the folder's underlying list item."""
+        assert self._list_target is not None
+        values = _folder_record_values(record)
+        if not values:
+            return
+        values = self._list_target.translate_record(values)
+        folder_item = self._securable(item)
+        for key, value in values.items():
+            folder_item.set_property(key, value)
+        try:
+            folder_item.update().execute_query()
+        except Exception as e:  # noqa: BLE001 — a folder's structure is worth more than its values
+            self.warnings.append(f"folder column values for {item.dest_path!r} could not be written: {e}")
+
+    def _folder_projection(self) -> list[str]:
+        """The target's folder columns (read once) — the set the source projected."""
+        if self._sp_list is None:
+            return []
+        if self._field_scan is None:
+            # Field definitions are read by the same code on both sides: structure
+            # provisioning keeps the internal names, so the projections line up.
+            self._field_scan = SharePointListSource(self._sp_list)
+        try:
+            return self._field_scan.folder_projection()
+        except Exception as e:  # noqa: BLE001 — without a projection no folder values move
+            self.warnings.append(f"could not read the target columns for folder values: {e}")
+            return []
 
     def write_many(
         self,
@@ -2482,6 +2714,11 @@ class SharePointLibraryTarget:
                         self._ensure_folders([folder])
                     except Exception as e:  # noqa: BLE001
                         failures.append((folder.dest_path, str(e)))
+        # A folder's column values can only be written once its item exists, so they
+        # follow the (batched) folder creation.
+        for item, payload in zip(items, payloads):
+            if item.item_type == "folder" and isinstance(payload, dict):
+                self._apply_folder_values(item, payload)
         files = [
             (item.dest_path, payload if isinstance(payload, bytes) else str(payload).encode("utf-8"))
             for item, payload in zip(items, payloads)
@@ -2522,8 +2759,19 @@ class SharePointLibraryTarget:
 
     def checksum(self, item: MigrationItem) -> str:
         if item.item_type == "folder":
-            return hashlib.md5(b"").hexdigest()
+            values = self._target_folder_values(item)
+            if values is None or self._list_target is None:
+                return ""
+            return self._list_target.content_checksum(values)
         return hashlib.md5(self.read(item)).hexdigest()
+
+    def _target_folder_values(self, item: MigrationItem) -> dict | None:
+        """The target folder's column values as they read back (``None`` if unknown)."""
+        columns = self._folder_projection()
+        if not columns:
+            return None
+        list_item = self._securable(item).select(columns).get().execute_query()
+        return _folder_record_values(dict(list_item.properties))
 
     def modified(self, item: MigrationItem) -> str:
         """Last-modified of the target file (for incremental migration)."""

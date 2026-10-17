@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Document library folder column values:** a folder is a list item too — a
+  document set's metadata, a managed folder's department — but the library
+  adapters created folders as pure structure, so those values were lost while the
+  library still verified as `OK` (`verify()` sampled items only). A
+  `SharePointLibrarySource` built with its library now reads each folder's
+  **writable** columns with an explicit projection (a `*` read fails on a library:
+  a library has no `Attachments` column) and travels them as the folder's payload;
+  a `SharePointLibraryTarget` built with its library MERGEs them onto the created
+  folder's list item, `ContentTypeId` included (a `MERGE` does change a folder's
+  content type). Writable means non-hidden, not underscore-prefixed, not
+  read-only and not a computed type — the same rule the target applies to its
+  read-back — and an empty value counts as absent on both sides. `verify()` now
+  samples folders for the content check, but only when both adapters were built
+  with their library, so a filesystem pair carries no folder values and reports
+  nothing instead of "unverifiable". A failed value write is a warning, never
+  fatal; a folder that already exists on the target is skipped like a file, so a
+  resumed run does not back-fill its values.
 - **Attribute-level column verification:** `verify_list_structure` compared columns
   by **name** only, so a column that reached the target without its policy — a lost
   `Required`/`Indexed` flag, a truncated choice list, a dropped validation formula —

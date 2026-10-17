@@ -74,12 +74,17 @@ class _SourceItems:
     def __init__(self, items):
         self._items = items
         self._select = None
+        self._filter = None
 
     def select(self, columns):
         self._select = list(columns)
         return self
 
     def expand(self, _expands):
+        return self
+
+    def filter(self, expression):
+        self._filter = expression
         return self
 
     def get_all(self):
@@ -240,6 +245,65 @@ def test_list_source_drops_a_multi_person_value_it_cannot_resolve():
     record = source.read(source.list_items()[0])
     assert "MultiOwnerId" not in record
     assert any("MultiOwner" in w for w in source.warnings)
+
+
+# ── Folder column values (document libraries) ───────────────────────────────
+
+
+def test_folder_records_are_read_with_a_folder_filter_and_keyed_by_url():
+    # A document library folder is a list item too: its own column values (a document
+    # set's metadata, a managed folder's department) must travel with the folder.
+    fields = [_Field("Region", "Choice"), _Field("Title", "Text")]
+    items = [
+        _Item(11, {"FileRef": "/sites/x/Docs/North", "FSObjType": 1, "Region": "North", "Title": ""}),
+        _Item(12, {"FileRef": "/sites/x/Docs/South", "FSObjType": 1, "Region": "South", "Title": "t"}),
+    ]
+    lst = _SourceList(items, fields=fields)
+    source = SharePointListSource(cast("SPList", lst))
+
+    records = source.folder_records()
+
+    assert lst.items._filter == "FSObjType eq 1"
+    assert records == {
+        "/sites/x/Docs/North": {"Region": "North"},
+        "/sites/x/Docs/South": {"Region": "South", "Title": "t"},
+    }
+    # the projection is the folder's writable columns, not a ``*`` read
+    assert "FSObjType" not in lst.items._select
+    assert {"ContentTypeId", "FileRef", "Region", "Title"} <= set(lst.items._select)
+
+
+def test_folder_records_skip_computed_and_read_only_columns():
+    fields = [
+        _Field("Region", "Choice"),
+        _Field("LinkFilename", "Computed"),
+        _Field("Author", "User", read_only=True),
+        _Field("Created", "DateTime", read_only=True),
+        _Field("Secret", "Note", hidden=True),
+    ]
+    items = [_Item(11, {"FileRef": "/sites/x/Docs/North", "Region": "North"})]
+    lst = _SourceList(items, fields=fields)
+
+    SharePointListSource(cast("SPList", lst)).folder_records()
+
+    projection = set(lst.items._select)
+    assert "LinkFilename" not in projection
+    assert "AuthorId" not in projection  # a read-only person column cannot be written
+    assert "Created" not in projection
+    assert "Secret" not in projection
+
+
+def test_folder_records_degrade_to_no_values_when_the_read_fails():
+    class _Failing(list):
+        def execute_query(self):
+            raise ValueError("Access denied")
+
+    lst = _SourceList([])
+    lst.items = _Failing()  # a collection whose read raises
+    source = SharePointListSource(cast("SPList", lst))
+
+    assert source.folder_records() == {}
+    assert any("folder column values could not be read" in warning for warning in source.warnings)
 
 
 def test_list_source_drops_non_scalar_values_and_warns():
@@ -452,8 +516,11 @@ class _Field:
         schema_xml=None,
         hidden=None,
         allow_multiple_values=None,
+        read_only=None,
     ):
         self.properties = {"InternalName": internal_name, "TypeAsString": type_as_string}
+        if read_only is not None:
+            self.properties["ReadOnlyField"] = read_only
         if lookup_list is not None:
             self.properties["LookupList"] = lookup_list
         if field_id is not None:
@@ -485,6 +552,10 @@ class _Field:
     @property
     def hidden(self):
         return self.properties.get("Hidden")
+
+    @property
+    def read_only_field(self):
+        return self.properties.get("ReadOnlyField")
 
 
 class _TargetFields:

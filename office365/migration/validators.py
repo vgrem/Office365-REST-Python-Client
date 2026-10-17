@@ -92,6 +92,16 @@ def verify(
     sample = random.sample(candidates, min(spot_checks, len(candidates)))
 
     _verify_content(source, target, sample, report)
+    folder_candidates = [
+        item for item in manifest.items if item.dest_path in target_paths and item.item_type == "folder"
+    ]
+    if folder_candidates:
+        # A folder's column values are content too: a document set's metadata is part
+        # of what was migrated, not an attribute of the container. Only adapters that
+        # carry and can compare them are checked, so the filesystem pair stays silent.
+        if getattr(source, "supports_folder_records", False) and getattr(target, "supports_folder_records", False):
+            folder_sample = random.sample(folder_candidates, min(spot_checks, len(folder_candidates)))
+            _verify_content(source, target, folder_sample, report)
     if options is not None:
         wants_fidelity = (
             options.preserve_timestamps
