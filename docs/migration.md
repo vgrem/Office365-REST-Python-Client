@@ -34,7 +34,7 @@ different content and deliver different fidelity:
 | Content | files + folders, **record lists + attachments**, list structure | **document libraries** (files/folders + version history) |
 | Version history | ✗ | ✓ the runner reads each file's history and the package carries `<Versions>` |
 | Authors / ModifiedBy | not preserved | ✓ applied from `UserGroup.xml` (integer principal id, matched by PUID) |
-| Permissions | best-effort same-tenant ACLs at all three container scopes: **items**, a **list's own ACLs** and **web groups/role assignments** (with `--preserve-permissions`) | best-effort same-tenant ACL — **resolved users only** (groups / unresolved principals skipped with a warning) |
+| Permissions | best-effort same-tenant ACLs at all three container scopes: **items**, a **list's own ACLs** and **web permission levels, groups and role assignments** (with `--preserve-permissions`) | best-effort same-tenant ACL — **resolved users only** (groups / unresolved principals skipped with a warning) |
 | Columns / content types / views | captured + provisioned over REST | **not emitted** by the builder today |
 | Azure Storage | not needed | required (SharePoint-owned containers; no Azure account) |
 | Throughput | per-item HTTP, throttle-aware, resumable | bulk server-side ingestion; poll a job |
@@ -698,7 +698,7 @@ with a copyable home page moved the target web's `WelcomePage` onto the copy and
 |---|---|---|
 | `preserve_timestamps` | best-effort (`Created`/`Modified` on files, folders and list items) | ✓ carried per manifest object (`TimeCreated`/`TimeLastModified`) |
 | `preserve_authorship` | best-effort (`Author`/`Editor` via `EnsureUser`) | best-effort — resolved PUID users only |
-| `preserve_permissions` | best-effort (same-tenant ACLs: items, a list's own ACLs via `apply_site_list_security`, web groups/role assignments) | best-effort — resolves users by PUID; groups / unresolved principals skipped |
+| `preserve_permissions` | best-effort (same-tenant ACLs: items, a list's own ACLs via `apply_site_list_security`, web permission levels/groups/role assignments) | best-effort — resolves users by PUID; groups / unresolved principals skipped |
 | `preserve_versions` | ✗ (raises) | ✓ the runner reads history into the package's `<Versions>` |
 
 The server-side package target is the only one that preserves version history: the
@@ -735,8 +735,19 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
   PUID; groups/unresolved principals are skipped with a warning). Both are
   **same-tenant**; cross-tenant identity mapping is not implemented.
 - **Site security (web scope)** — with `preserve_permissions`, the SharePoint
-  resolver also re-creates each web's **custom site groups** (flags + membership)
-  and its **web-level role assignments**. The three associated groups
+  resolver also creates each web's **custom permission levels**, re-creates its
+  **custom site groups** (flags + membership) and its **web-level role
+  assignments**. A permission level is what an assignment *names*, so a target that
+  lacks it cannot restore that grant at all: `capture_permission_levels(web)` reads
+  each level's `BasePermissions` as a decimal mask (plus description and order) and
+  a level the site defined itself (`RoleTypeKind` 0) is created when missing — same
+  mask, same name. Two things are deliberately never written: a **built-in** level
+  (every site has one; it is matched by `RoleTypeKind` as well as by name, so a
+  localized target still lines up, and it is *reported* if genuinely absent rather
+  than created), and an existing level whose mask **differs** — rewriting what a
+  target site's "Contribute" means would silently change everyone's access, so it
+  is reported and left as-is. Hidden levels ("Limited Access") are skipped: the
+  service grants those itself whenever a scope is broken. The three associated groups
   (Owners/Members/Visitors) are mapped by name onto the target web's, so a renamed
   association still lines up; their *membership* is left to the Microsoft 365 group
   behind the team site and is **not** copied. Custom groups are created only when

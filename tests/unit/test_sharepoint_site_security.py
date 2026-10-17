@@ -15,10 +15,12 @@ from office365.migration.sharepoint.security import (
     apply_site_list_security,
     apply_site_security,
     capture_list_security,
+    capture_permission_levels,
     capture_site_groups,
     verify_list_security,
     verify_site_security,
 )
+from office365.sharepoint.permissions.base_permissions import BasePermissions
 from office365.sharepoint.principal.type import PrincipalType
 
 
@@ -77,20 +79,38 @@ class _Group:
 
 
 class _Role:
-    def __init__(self, name: str, role_id: int) -> None:
+    def __init__(self, name: str, role_id: int, mask: int = 0, kind=None, description=None, hidden=False) -> None:
         self.name = name
         self.id = role_id
+        self.role_type_kind = kind
+        self.description = description
+        self.hidden = hidden
+        self.order = 1
+        self.base_permissions = BasePermissions(High=mask >> 32, Low=mask & 0xFFFFFFFF)
 
 
 class _RoleDefinitions:
     def __init__(self, roles) -> None:
         self._roles = list(roles)
+        self.added: list[tuple] = []
 
     def get(self):
         return self
 
     def execute_query(self):
         return list(self._roles)
+
+    def add(self, base_permissions, name, description=None, order=None):
+        self.added.append((base_permissions, name, description, order))
+        self._roles.append(
+            _Role(
+                name,
+                600,
+                (int(base_permissions.High) << 32) | int(base_permissions.Low),
+                description=description,
+            )
+        )
+        return self._roles[-1]
 
 
 class _Assignment:
@@ -485,3 +505,83 @@ def test_verify_is_clean_when_the_list_acls_match():
     target_web = _list_web(_restricted_list())
 
     assert verify_list_security(source_web, target_web) == []
+
+
+def _levels_web(roles, *, assignments=(), groups=None):
+    web = _Web(list(groups or []), {}, assignments, roles=roles)
+    return web
+
+
+def test_permission_levels_are_read_and_hidden_ones_skipped():
+    web = _levels_web(
+        [
+            _Role("Read", 1, 756052856929, kind=2, description="Can view"),
+            _Role("Limited Access", 2, 206292717568, kind=1, hidden=True),
+            _Role("Custom Reader", 3, 5, kind=0, description="ours"),
+        ]
+    )
+
+    levels = capture_permission_levels(web)
+
+    assert [(level.name, level.mask, level.is_custom) for level in levels] == [
+        ("Read", "756052856929", False),
+        ("Custom Reader", "5", True),
+    ]
+
+
+def test_a_custom_level_the_target_lacks_is_created_with_its_mask():
+    source = _levels_web([_Role("Read", 1, 8, kind=2), _Role("Custom Reader", 2, 5, kind=0, description="ours")])
+    target = _levels_web([_Role("Read", 1, 8, kind=2)])
+    warnings: list[str] = []
+
+    apply_site_security(source, target, warnings)
+
+    ((base_permissions, name, description, _order),) = target.role_definitions.added
+    assert name == "Custom Reader"
+    assert description == "ours"
+    assert (base_permissions.High, base_permissions.Low) == (0, 5)
+    assert warnings == []
+
+
+def test_a_built_in_level_is_never_created_by_the_migration():
+    source = _levels_web([_Role("Read", 1, 8, kind=2)])
+    target = _levels_web([])
+    warnings: list[str] = []
+
+    apply_site_security(source, target, warnings)
+
+    assert target.role_definitions.added == []
+    assert warnings == ["permission level 'Read' (a built-in level) is missing on the target"]
+
+
+def test_a_built_in_level_matches_by_kind_across_a_renamed_target():
+    source = _levels_web([_Role("Read", 1, 8, kind=2)])
+    target = _levels_web([_Role("Lecture", 1, 8, kind=2)])
+    warnings: list[str] = []
+
+    apply_site_security(source, target, warnings)
+
+    assert warnings == []
+
+
+def test_a_differing_mask_is_reported_and_left_alone():
+    source = _levels_web([_Role("Contribute", 1, 8, kind=3)])
+    target = _levels_web([_Role("Contribute", 1, 16, kind=3)])
+    warnings: list[str] = []
+
+    apply_site_security(source, target, warnings)
+
+    assert target.role_definitions.added == []
+    assert warnings == [
+        "permission level 'Contribute' exists on the target with a different permission set (16 vs 8) — left as-is"
+    ]
+
+
+def test_verify_names_a_missing_and_a_diverging_level():
+    source = _levels_web([_Role("Custom Reader", 1, 5, kind=0), _Role("Contribute", 2, 8, kind=3)])
+    target = _levels_web([_Role("Contribute", 2, 16, kind=3)])
+
+    issues = verify_site_security(source, target)
+
+    assert issues[0] == "permission level 'Custom Reader' was not created on the target"
+    assert issues[1].startswith("permission level 'Contribute' exists on the target with a different permission set")

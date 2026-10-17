@@ -61,9 +61,11 @@ from office365.migration.sharepoint.scanners import (
 )
 from office365.migration.sharepoint.security import (
     ListSecurityReport,
+    PermissionLevel,
     apply_site_list_security,
     apply_site_security,
     capture_list_security,
+    capture_permission_levels,
     capture_site_groups,
     verify_list_security,
     verify_site_security,
@@ -131,6 +133,7 @@ __all__ = [
     "SiteScanSummary",
     "LIST_SECURITY",
     "ListSecurityReport",
+    "PermissionLevel",
     "SiteVerificationReport",
     "StructureReport",
     "ViewDefinition",
@@ -146,6 +149,7 @@ __all__ = [
     "apply_web_settings",
     "capture_list_structure",
     "capture_navigation",
+    "capture_permission_levels",
     "capture_site_groups",
     "apply_home_page",
     "capture_home_page",

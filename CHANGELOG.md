@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **A site's custom permission levels are carried, so a grant that names one can be
+  restored at all.** `preserve_permissions` replayed role assignments by *name*,
+  and a name the target did not have was skipped with a warning — so a site that
+  ships its own permission level lost every grant that used it, on the web and on
+  every restricted list. `security.py` now reads them:
+  `capture_permission_levels(web)` returns `PermissionLevel` records (name,
+  description, order, decimal `BasePermissions` mask, and the service's
+  `RoleTypeKind`), `apply_site_security` creates the missing **custom** ones on the
+  target before it restores any assignment, and `verify_site_security` names a
+  level that was not created or whose mask diverges. Two guards are deliberate: a
+  **built-in** level is never created (every site has one — it is matched by
+  `RoleTypeKind` too, so a localized target still lines up, and is reported rather
+  than invented if genuinely absent), and an existing target level with a
+  **different mask** is reported and left as-is, because rewriting what a target
+  site's "Contribute" means would silently change everyone's access. Hidden levels
+  ("Limited Access") are skipped — the service grants those itself. Live-verified:
+  a custom level (`High=1, Low=17`) granted on a locally restricted list was
+  created on the target with the identical mask, description and order, the list's
+  assignment resolved to it, and both `verify_site_security` and
+  `verify_list_security` came back clean.
 - **A list's own permissions are replayed, so a restricted library does not arrive
   readable.** Permissions were restored at two scopes — per item by the adapters,
   and per web (site groups + web role assignments) by `apply_site_security` — which
