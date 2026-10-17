@@ -130,3 +130,66 @@ def test_verify_list_structure_reports_snapshot_differences():
 
     assert report.list_title == "Source Projects"
     assert report.missing_columns == ["Status"]
+
+
+# --- container settings -------------------------------------------------------
+
+
+def test_identical_settings_are_ok():
+    source = ListStructure(title="Projects", settings={"EnableModeration": True, "MajorVersionLimit": 12})
+    target = ListStructure(title="Projects", settings={"EnableModeration": True, "MajorVersionLimit": 12})
+
+    report = compare_list_structures(source, target)
+
+    assert report.ok
+    assert report.settings_mismatches == []
+
+
+def test_differing_setting_is_reported():
+    source = ListStructure(title="Projects", settings={"EnableModeration": True, "ReadSecurity": 2})
+    target = ListStructure(title="Projects", settings={"EnableModeration": False, "ReadSecurity": 2})
+
+    report = compare_list_structures(source, target)
+
+    assert report.settings_mismatches == ["EnableModeration: source=True, target=False"]
+    assert not report.ok
+    assert "settings: 1" in report.summary()
+
+
+def test_setting_absent_on_the_target_is_reported():
+    source = ListStructure(title="Projects", settings={"EnableAttachments": False})
+
+    report = compare_list_structures(source, ListStructure(title="Projects"))
+
+    assert report.settings_mismatches == ["EnableAttachments: source=False, target=None"]
+
+
+def test_validation_formula_is_compared_without_its_decoration():
+    # SharePoint stores "=IF([Title]="",TRUE,FALSE)" as "=IF(Title="",TRUE,FALSE)"
+    source = ListStructure(title="Projects", settings={"ValidationFormula": '=IF([Title]="",TRUE,FALSE)'})
+    target = ListStructure(title="Projects", settings={"ValidationFormula": '=IF(Title="", TRUE, FALSE)'})
+
+    report = compare_list_structures(source, target)
+
+    assert report.settings_mismatches == []
+    assert report.ok
+
+
+def test_different_validation_formula_is_reported():
+    source = ListStructure(title="Projects", settings={"ValidationFormula": '=IF([Title]="",TRUE,FALSE)'})
+    target = ListStructure(title="Projects", settings={"ValidationFormula": '=IF(Title="",FALSE,TRUE)'})
+
+    report = compare_list_structures(source, target)
+
+    assert len(report.settings_mismatches) == 1
+    assert "ValidationFormula" in report.settings_mismatches[0]
+
+
+def test_settings_are_reported_in_the_json_form():
+    source = ListStructure(title="Projects", settings={"EnableModeration": True})
+    target = ListStructure(title="Projects")
+
+    payload = compare_list_structures(source, target).to_dict()
+
+    assert payload["ok"] is False
+    assert payload["settings_mismatches"] == ["EnableModeration: source=True, target=None"]

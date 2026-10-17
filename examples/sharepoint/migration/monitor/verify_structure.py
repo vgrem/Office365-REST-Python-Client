@@ -1,10 +1,12 @@
 """
 Verify that a target list reproduces the source list's structure (read-only).
 
-Compares the **columns**, **content types**, and **views** captured from the
-source and target lists and reports what the target is missing — a post-migration
-check that content-level verification (item counts / checksums) cannot see.
-Nothing is written; only GET requests are issued.
+Compares the **columns**, **content types**, **views** and **container settings**
+(versioning, moderation, attachments, item-level read/write security, draft
+visibility, list validation, library minor versions / required check-out) captured
+from the source and target lists and reports what the target is missing — a
+post-migration check that content-level verification (item counts / checksums)
+cannot see. Nothing is written; only GET requests are issued.
 
     python verify_structure.py --list Projects --target-site https://contoso.sharepoint.com/sites/projects-copy
     python verify_structure.py --all --source-site https://contoso.sharepoint.com/sites/src --target-site https://contoso.sharepoint.com/sites/dst
@@ -68,6 +70,7 @@ def main():
                 ("missing content type", report.missing_content_types),
                 ("missing view", report.missing_views),
                 ("missing field link", report.missing_field_links),
+                ("differing setting", report.settings_mismatches),
             ):
                 for item in items:
                     print(f"    {label}: {item}")

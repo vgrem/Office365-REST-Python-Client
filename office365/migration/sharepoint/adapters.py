@@ -65,6 +65,16 @@ DEFAULT_LIST_IDENTITY_FIELD = "MigrationSourceId"
 # Editor companion columns are neither content nor Person values to remap.
 _PERSON_EXCLUDED = frozenset({"Author", "Editor"})
 
+#: Content-approval state: record key (OData escaped form) -> ``ValidateUpdateListItem``
+#: field name. It is ordinary record content, but a *system update* re-approves the
+#: item, so every metadata write that restores timestamps/authorship would silently
+#: discard it; the captured state is therefore folded into that same write
+#: (live-probed: both fields are accepted, and no version is created).
+_APPROVAL_FIELDS = {
+    "OData__ModerationStatus": "_ModerationStatus",
+    "OData__ModerationComments": "_ModerationComments",
+}
+
 #: Multi-value typed columns. Their ``<name>Id`` companion is a collection of ids
 #: that a ``*`` projection omits (LookupMulti entirely; UserMulti unreliably), so the
 #: source selects them explicitly and the target writes ``{"results": [...]}``.
@@ -1122,6 +1132,11 @@ class SharePointListTarget:
     # values by login (see ``_remap_typed_values``).
     supports_typed_values = True
 
+    # Marks this target as replaying a list item's approval state (``_ModerationStatus``
+    # and its comments) in the metadata write, which a system update would otherwise
+    # reset. Check-out and draft-version state are still not carried.
+    supports_item_state = True
+
     #: The single-item :meth:`write` only queues a create; a chunk must be flushed
     #: before it is durable. The runner therefore routes this target through the
     #: chunked path even at ``concurrency == 1``, so checkpoints never record
@@ -1156,6 +1171,9 @@ class SharePointListTarget:
         # shared final write (see ``apply_timestamps``); avoids the ValidateUpdateListItem
         # call that restores timestamps silently resetting ``Editor`` to the caller.
         self._pending_authorship: dict[str, dict] = {}
+        # Approval state read from the payload, replayed in the metadata write (a
+        # system update approves the item); same pending-then-pop lifecycle as above.
+        self._pending_approval: dict[str, dict[str, str]] = {}
         self.warnings: list[str] = []
         self._principals_cache: _TargetPrincipals | None = None
         # Lookup and Person columns carry an id that is only meaningful on the
@@ -1244,6 +1262,13 @@ class SharePointListTarget:
             record["ContentTypeId"] = self._content_type_map.resolve(content_type_id)
         if self._identity_field:
             record[self._identity_field] = item.dest_path
+        approval = {
+            field_name: str(record[record_key])
+            for record_key, field_name in _APPROVAL_FIELDS.items()
+            if record.get(record_key) is not None
+        }
+        if approval:
+            self._pending_approval[item.dest_path] = approval
         return record
 
     def _queue(self, records: list[dict]) -> None:
@@ -1772,6 +1797,7 @@ class SharePointListTarget:
         concurrency = getattr(options, "concurrency", None) or 1
         self._flush(batch_size, concurrency)
         self._pending_authorship.clear()
+        self._pending_approval.clear()
 
     def _flush(self, batch_size: int, concurrency: int) -> None:
         if not self._list.context.has_pending_request:
@@ -1817,6 +1843,7 @@ class SharePointListTarget:
         if modified:
             form_values["Modified"] = modified
         form_values.update(self._pending_authorship.pop(item.dest_path, {}))
+        form_values.update(self._pending_approval.pop(item.dest_path, {}))
         if form_values:
             result = target_item.validate_update_list_item(
                 form_values, dates_in_utc=True, new_document_update=True
@@ -1840,13 +1867,16 @@ class SharePointListTarget:
             author = None
         if editor is not None and _is_system_principal(editor):
             editor = None
-        if author is None and editor is None:
+        if author is None and editor is None and not self._pending_approval.get(item.dest_path):
             return
-        form_values: dict[str, FieldUserValue] = {}
+        form_values: dict = {}
         if author is not None:
             form_values["Author"] = FieldUserValue(author.id, author.login_name)
         if editor is not None:
             form_values["Editor"] = FieldUserValue(editor.id, editor.login_name)
+        # Replay the approval state here too: this write is itself a system update, so
+        # on a run that restores authorship without timestamps it is the last one.
+        form_values.update(self._pending_approval.get(item.dest_path, {}))
         self._pending_authorship[item.dest_path] = dict(form_values)
         result = target_item.validate_update_list_item(
             form_values, dates_in_utc=True, new_document_update=True

@@ -485,3 +485,179 @@ def test_provision_multi_taxonomy_column_sets_the_mult_flag():
     taxonomy_schema = str([p for p in _posts(transport) if p.url.endswith("CreateFieldAsXml")][-1].data)
     assert 'Type="TaxonomyFieldTypeMulti"' in taxonomy_schema
     assert 'Mult="TRUE"' in taxonomy_schema
+
+
+# --- container settings (versioning, moderation, item-level policy, ...) -------
+
+
+class _RejectingSettingTransport(_MethodRoutingTransport):
+    """Rejects the one MERGE that carries ``rejected``; every other route succeeds."""
+
+    def __init__(self, routes, rejected):
+        super().__init__(routes)
+        self._rejected = rejected
+
+    def execute(self, request):
+        if isinstance(request.data, dict) and self._rejected in request.data:
+            self.requests.append(request)
+            return build_response(
+                request,
+                {
+                    "http_status": 400,
+                    "body": {
+                        "error": {
+                            "code": "-2146232832, Microsoft.SharePoint.SPException",
+                            "message": {"value": "The list does not support minor versioning."},
+                        }
+                    },
+                },
+            )
+        return super().execute(request)
+
+
+def _empty_structure(**overrides):
+    base = {
+        "title": "Tasks",
+        "base_template": 100,
+        "base_type": 0,
+        "content_types_enabled": None,
+        "fields": [],
+        "content_types": [],
+        "views": [],
+    }
+    base.update(overrides)
+    return ListStructure(**base)
+
+
+def _merges(transport):
+    return [p for p in _posts(transport) if p.headers.get("X-HTTP-Method") == "MERGE"]
+
+
+def _settings_written(transport):
+    """The setting each MERGE carried, without the OData type annotation."""
+    return [{k: v for k, v in p.data.items() if k != "__metadata"} for p in _merges(transport)]
+
+
+def _setting_routes(current=None):
+    """A GET reporting the target's current settings, then the per-setting MERGEs."""
+    return [
+        (HttpMethod.Get, "GetByTitle('Tasks')", {"d": current or {}}),
+        (HttpMethod.Post, "GetByTitle('Tasks')", {}),
+    ]
+
+
+def test_provision_applies_each_container_setting_by_title():
+    ctx, transport = _setup(_setting_routes())
+    structure = _empty_structure(settings={"EnableVersioning": True, "MajorVersionLimit": 12})
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert _settings_written(transport) == [{"EnableVersioning": True}, {"MajorVersionLimit": 12}]
+    assert all(m.url.endswith("lists/GetByTitle('Tasks')") for m in _merges(transport))
+
+
+def test_provision_applies_settings_even_with_skip_conflict_mode():
+    ctx, transport = _setup(_setting_routes())
+    structure = _empty_structure(settings={"EnableModeration": True})
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure, on_conflict="skip")
+
+    assert _settings_written(transport) == [{"EnableModeration": True}]
+
+
+def test_provision_leaves_settings_the_target_already_carries_alone():
+    # A list created from its template already carries most settings; re-MERGEing an
+    # equal value is a needless write (and SharePoint rejects some of them outright:
+    # a version limit with versioning off, a system library that grants no write).
+    ctx, transport = _setup(
+        _setting_routes({"EnableVersioning": True, "MajorVersionLimit": 12, "EnableModeration": False})
+    )
+    structure = _empty_structure(settings={"EnableVersioning": True, "MajorVersionLimit": 12, "EnableModeration": False})
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert _merges(transport) == []
+
+
+def test_provision_writes_only_the_settings_that_differ():
+    ctx, transport = _setup(_setting_routes({"EnableVersioning": True, "MajorVersionLimit": 500}))
+    structure = _empty_structure(settings={"EnableVersioning": True, "MajorVersionLimit": 12})
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert _settings_written(transport) == [{"MajorVersionLimit": 12}]
+
+
+def test_provision_skips_a_version_limit_while_its_versioning_is_off():
+    # The server rejects the limit outright ("Versioning must be enabled and the
+    # number of major versions must be between 1 and 50000"), so it is not sent.
+    ctx, transport = _setup(
+        _setting_routes(
+            {
+                "EnableVersioning": False,
+                "EnableMinorVersions": False,
+                "MajorVersionLimit": 500,
+                "MajorWithMinorVersionsLimit": 5,
+            }
+        )
+    )
+    structure = _empty_structure(
+        settings={
+            "EnableVersioning": False,
+            "MajorVersionLimit": 12,
+            "EnableMinorVersions": False,
+            "MajorWithMinorVersionsLimit": 3,
+        }
+    )
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert _merges(transport) == []
+
+
+def test_provision_applies_list_validation_after_the_columns_exist():
+    ctx, transport = _setup([*_routes(), *_setting_routes()])
+    structure = _structure(settings={"ValidationFormula": '=IF([Title]="",TRUE,FALSE)'})
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    create = next(i for i, r in enumerate(transport.requests) if r.url.endswith("Fields/CreateFieldAsXml"))
+    formula = next(
+        i
+        for i, r in enumerate(transport.requests)
+        if isinstance(r.data, dict) and r.data.get("ValidationFormula") == '=IF([Title]="",TRUE,FALSE)'
+    )
+    assert formula > create
+
+
+def test_provision_reports_a_rejected_setting_as_a_warning():
+    transport = _RejectingSettingTransport(_setting_routes(), "EnableMinorVersions")
+    ctx = ClientContext(test_site_url)
+    ctx.pending_request().beforeExecute.clear()
+    ctx.pending_request().transport = transport
+    structure = _empty_structure(base_type=1, settings={"EnableMinorVersions": True, "ForceCheckout": True})
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert len(warnings) == 1
+    assert "EnableMinorVersions" in warnings[0]
+    # the rejected setting does not stop the ones after it
+    assert {"ForceCheckout": True} in _settings_written(transport)
+
+
+def test_provision_skips_library_only_settings_for_a_plain_list():
+    ctx, transport = _setup([])
+    structure = _empty_structure(base_type=0, settings={"ForceCheckout": True})
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert _merges(transport) == []
+
+
+def test_provision_skips_settings_when_the_list_has_no_title():
+    ctx, transport = _setup([])
+    structure = _empty_structure(title=None, settings={"EnableVersioning": True})
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert _merges(transport) == []

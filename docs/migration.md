@@ -23,7 +23,8 @@ different content and deliver different fidelity:
 - **Client-side** (`SharePointLibrarySource/Target`, `SharePointListSource/Target`)
   drives the ordinary SharePoint REST API item by item: files and folders, record
   lists and their attachments, and — via `capture_list_structure` /
-  `provision_list_structure` — columns, content types, and views. No Azure.
+  `provision_list_structure` — columns, content types, views and list container
+  settings. No Azure.
 - **Server-side** (`SharePointPackageTarget` + `MigrationServerJob`) builds a
   Migration API package in Azure Storage and submits a bulk ingestion job. It is
   the only path that can carry version history.
@@ -248,21 +249,23 @@ and web template, and every web is addressed through its own clone (a subweb's
 sub-collections resolve against the context root otherwise).
 
 Target lists are created on demand (by title, with the source template type) and,
-by default, each list's **columns, content types and views are replayed** from
-the source before content is copied (`provision_structure=True`) — the same
-snapshot/replay used by `capture_list_structure` / `provision_list_structure`
-(below). Pass `provision_structure=False` to only create the containers. The
-server-side Migration API path is per-library and not supported for a whole-site
-task.
+by default, each list's **columns, content types, views and container settings
+are replayed** from the source before content is copied (`provision_structure=True`)
+— the same snapshot/replay used by `capture_list_structure` /
+`provision_list_structure` (below). Pass `provision_structure=False` to only
+create the containers. The server-side Migration API path is per-library and not
+supported for a whole-site task.
 
 ### Capturing list structure
 
 `capture_list_structure(sp_list)` reads a list's **columns** (with `SchemaXml`
 prepared for `CreateFieldAsXml`), **content types** (with their ordered field
-links), and **views** (with their ordered columns) into a read-only,
-JSON-serializable `ListStructure` snapshot. Built-in/system and framework
-columns, hidden content types, and hidden/personal views are skipped, and only
-GET requests are issued:
+links), **views** (with their ordered columns) and **container settings**
+(versioning and its limits, moderation, draft visibility, attachments, item-level
+read/write security, list validation, and — for a document library — minor
+versions and required check-out) into a read-only, JSON-serializable
+`ListStructure` snapshot. Built-in/system and framework columns, hidden content
+types, and hidden/personal views are skipped, and only GET requests are issued:
 
 ```python
 import json
@@ -286,10 +289,11 @@ A snapshot can be inspected, persisted, and later replayed.
 
 `provision_list_structure(sp_list, structure)` replays a snapshot onto a target
 list: it creates the missing columns from their `SchemaXml`, the custom content
-types (matched by **name**), and the views, and turns content types on when the
-snapshot says so. It is idempotent — running it again with the default
-`on_conflict="skip"` is a no-op — and it executes the requests, so call it right
-after the target list exists and before content is copied:
+types (matched by **name**), and the views, applies the captured container
+settings, and turns content types on when the snapshot says so. It is idempotent —
+running it again with the default `on_conflict="skip"` is a no-op — and it
+executes the requests, so call it right after the target list exists and before
+content is copied:
 
 ```python
 from office365.migration.sharepoint import provision_list_structure
@@ -335,6 +339,43 @@ so a whole-site session reports it through `session.warnings()` instead of only 
 the log.
 
 Field-link **order** is restored only when at least one link was actually added.
+
+### List container settings
+
+The snapshot also carries the list's own policy — `EnableVersioning`,
+`MajorVersionLimit`, `EnableModeration`, `DraftVersionVisibility`,
+`EnableAttachments`, `ReadSecurity`, `WriteSecurity`, `ValidationFormula` /
+`ValidationMessage`, plus `EnableMinorVersions`,
+`MajorWithMinorVersionsLimit` and `ForceCheckout` on a document library — and
+provisioning replays it as per-property `MERGE` requests. Four details are
+worth knowing, all live-verified:
+
+- **Only differing settings are written.** The target's current values are read
+  first (one `GET`), so a list created from the same template — which already
+  carries most of them — is left alone and a re-run writes nothing. This is not
+  only an optimisation: SharePoint rejects some writes whose value is *already*
+  correct (a version limit while versioning is off, a system library that grants
+  no write), which would otherwise surface as warnings about settings that match.
+- **Settings are applied regardless of `on_conflict`.** The snapshot *is* the
+  wanted policy, and the item copy depends on it: an item's approval status only
+  exists on a list that enables moderation, so enabling it after the items landed
+  would be too late.
+- **Order matters.** Versioning is applied before its limits, versioning and
+  moderation before the draft-visibility policy, and validation **after** the
+  columns exist (its formula names them). A version limit whose versioning flag is
+  off in the snapshot is not sent at all — the server rejects it outright
+  (`Versioning must be enabled and the number of major versions must be between 1
+  and 50000`).
+- **A setting the list cannot accept is a warning, not a failure.** A plain list
+  rejects minor versions, their limit and required check-out (`The list does not
+  support minor versioning.`), which is why those three are captured and applied
+  only for a document library. Each setting is sent through its own handle so one
+  rejection cannot leak into the next.
+
+The server canonicalizes a validation formula (`=IF([Title]="",FALSE,TRUE)` reads
+back as `=IF(Title="",FALSE,TRUE)`), so `verify_list_structure` compares it with
+whitespace and brackets stripped and reports any other difference as a
+`settings_mismatch`.
 
 ## Fidelity
 
@@ -429,16 +470,16 @@ the shipped pairs' expected output.
 | Permissions | best-effort (same-tenant, resolved users) | best-effort (same-tenant) | best-effort (same-tenant, unique ACLs only) |
 | Site groups / web role assignments | n/a (whole-site resolver only) | n/a | best-effort (same-tenant; custom groups + membership, associated-group membership excluded) |
 | Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
-| Columns / content types / views | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
+| Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD dropped) |
-| Check-out / draft / approval state | unsupported | unsupported | unsupported |
+| Check-out / draft / approval state | unsupported | unsupported | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | pages/web parts not migrated (the resolver reports each skipped page library as a handoff); quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
-> Columns, content types, and views are deliberately *not* carried by the item
-> adapters: they are schema, and the SharePoint resolver replays them over REST
-> with `provision_list_structure` (whole-site and single-list resolution do this
-> by default). The matrix reports the adapter-level truth.
+> Columns, content types, views and container settings are deliberately *not*
+> carried by the item adapters: they are schema/policy, and the SharePoint resolver
+> replays them over REST with `provision_list_structure` (whole-site and single-list
+> resolution do this by default). The matrix reports the adapter-level truth.
 
 > Site groups and web-level role assignments are likewise **not** an adapter
 > dimension: `describe_fidelity` models a source/target *pair*, whereas site

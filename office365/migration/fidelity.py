@@ -166,7 +166,8 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
     set_(
         "structure",
         status.UNSUPPORTED,
-        "columns are not carried by the adapters; replay them with provision_list_structure (the resolver does)",
+        "columns, content types, views and list container settings are not carried by the adapters; "
+        "replay them with provision_list_structure (the resolver does)",
     )
     set_(
         "content_types",
@@ -187,7 +188,15 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
             status.UNSUPPORTED,
             "record values are copied verbatim; lookup/person value remapping is not implemented",
         )
-    set_("item_state", status.UNSUPPORTED, "check-out/draft/approval state is not carried")
+    if getattr(target, "supports_item_state", False):
+        set_(
+            "item_state",
+            status.BEST_EFFORT,
+            "approval status and its comments are carried for list items (the list must enable moderation); "
+            "check-out and draft-version state are not",
+        )
+    else:
+        set_("item_state", status.UNSUPPORTED, "check-out/draft/approval state is not carried")
     set_("views", status.UNSUPPORTED, "views are not carried by the adapters; replay them with provision_list_structure")
     set_(
         "navigation",

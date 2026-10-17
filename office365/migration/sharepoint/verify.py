@@ -22,7 +22,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from office365.migration.sharepoint.structure import ListStructure, capture_list_structure
+from office365.migration.sharepoint.structure import ListStructure, capture_list_structure, comparable_setting
 
 if TYPE_CHECKING:
     from office365.sharepoint.lists.list import List as SPList
@@ -39,19 +39,26 @@ class StructureReport:
     missing_content_types: list[str] = field(default_factory=list)
     missing_views: list[str] = field(default_factory=list)
     missing_field_links: list[str] = field(default_factory=list)
+    settings_mismatches: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
         """Whether every captured source element is present on the target."""
-        return not (self.missing_columns or self.missing_content_types or self.missing_views or self.missing_field_links)
+        return not (
+            self.missing_columns
+            or self.missing_content_types
+            or self.missing_views
+            or self.missing_field_links
+            or self.settings_mismatches
+        )
 
     def summary(self) -> str:
         status = "OK" if self.ok else "MISMATCH"
         return (
             f"{status} | {self.list_title or 'list'} | columns: {len(self.missing_columns)}, "
             f"content types: {len(self.missing_content_types)}, views: {len(self.missing_views)}, "
-            f"field links: {len(self.missing_field_links)}"
+            f"field links: {len(self.missing_field_links)}, settings: {len(self.settings_mismatches)}"
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -62,6 +69,7 @@ class StructureReport:
             "missing_content_types": list(self.missing_content_types),
             "missing_views": list(self.missing_views),
             "missing_field_links": list(self.missing_field_links),
+            "settings_mismatches": list(self.settings_mismatches),
             "notes": list(self.notes),
             "ok": self.ok,
         }
@@ -121,5 +129,11 @@ def compare_list_structures(
             if internal_name not in existing:
                 report.missing_field_links.append(f"{content_type.name}: {internal_name}")
     report.missing_field_links.sort()
+
+    for name, value in source.settings.items():
+        target_value = target.settings.get(name)
+        if comparable_setting(name, target_value) != comparable_setting(name, value):
+            report.settings_mismatches.append(f"{name}: source={value!r}, target={target_value!r}")
+    report.settings_mismatches.sort()
 
     return report

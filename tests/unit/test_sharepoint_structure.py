@@ -159,6 +159,21 @@ class _Views:
         return self._views
 
 
+_DEFAULT_SETTINGS = {
+    "EnableVersioning": True,
+    "MajorVersionLimit": 50,
+    "EnableModeration": False,
+    "DraftVersionVisibility": 0,
+    "EnableAttachments": True,
+    "ReadSecurity": 1,
+    "WriteSecurity": 1,
+    "ValidationFormula": "",
+    "ValidationMessage": "",
+    "EnableMinorVersions": False,
+    "MajorWithMinorVersionsLimit": 0,
+}
+
+
 class _List:
     def __init__(
         self,
@@ -168,6 +183,7 @@ class _List:
         base_type=0,
         description="A list",
         content_types_enabled=True,
+        settings=None,
         fields=(),
         content_types=(),
         views=(),
@@ -177,13 +193,14 @@ class _List:
         self.base_type = base_type
         self.description = description
         self.content_types_enabled = content_types_enabled
+        self.properties = dict(_DEFAULT_SETTINGS if settings is None else settings)
         self.fields = _Fields(fields)
         self.content_types = _ContentTypes(content_types)
         self.views = _Views(views)
         self.ensured = None
 
     def ensure_properties(self, names):
-        self.ensured = list(names)
+        self.ensured = [*(self.ensured or []), *names]
         return self
 
     def execute_query(self):
@@ -299,6 +316,73 @@ class TestCaptureListStructure(unittest.TestCase):
         structure = capture_list_structure(library)
 
         self.assertTrue(structure.is_document_library)
+
+
+class TestCaptureListSettings(unittest.TestCase):
+    def test_captures_container_settings(self):
+        lst = _List(
+            settings={
+                "EnableVersioning": True,
+                "MajorVersionLimit": 12,
+                "EnableModeration": True,
+                "DraftVersionVisibility": 2,
+                "EnableAttachments": False,
+                "ReadSecurity": 2,
+                "WriteSecurity": 2,
+                "ValidationFormula": '=IF([Title]="",TRUE,FALSE)',
+                "ValidationMessage": "Title is required",
+            }
+        )
+
+        structure = capture_list_structure(lst)
+
+        self.assertEqual(structure.settings["MajorVersionLimit"], 12)
+        self.assertTrue(structure.settings["EnableModeration"])
+        self.assertFalse(structure.settings["EnableAttachments"])
+        self.assertEqual(structure.settings["ReadSecurity"], 2)
+        self.assertEqual(structure.settings["ValidationMessage"], "Title is required")
+
+    def test_does_not_capture_library_only_settings_on_a_list(self):
+        lst = _List(
+            base_type=0,
+            settings={"EnableMinorVersions": True, "MajorWithMinorVersionsLimit": 7, "ForceCheckout": True},
+        )
+
+        structure = capture_list_structure(lst)
+
+        self.assertEqual(structure.settings, {})
+
+    def test_captures_library_only_settings_on_a_document_library(self):
+        lst = _List(
+            base_type=1,
+            settings={
+                "EnableVersioning": True,
+                "EnableMinorVersions": True,
+                "MajorWithMinorVersionsLimit": 7,
+                "ForceCheckout": True,
+            },
+        )
+
+        structure = capture_list_structure(lst)
+
+        self.assertTrue(structure.settings["EnableMinorVersions"])
+        self.assertEqual(structure.settings["MajorWithMinorVersionsLimit"], 7)
+        self.assertTrue(structure.settings["ForceCheckout"])
+
+    def test_skips_settings_the_list_does_not_report(self):
+        lst = _List(settings={"EnableVersioning": True})
+
+        structure = capture_list_structure(lst)
+
+        self.assertEqual(structure.settings, {"EnableVersioning": True})
+
+    def test_requests_every_setting_explicitly(self):
+        lst = _List()
+
+        capture_list_structure(lst)
+
+        for name in ("EnableVersioning", "EnableModeration", "ValidationFormula"):
+            self.assertIn(name, lst.ensured)
 
 
 class TestListStructureSerialization(unittest.TestCase):

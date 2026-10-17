@@ -8,6 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **List container settings + approval state:** a list snapshot used to carry its
+  columns, content types and views only, so the target list was recreated with
+  stock policy (no versioning, no content approval, no item-level permissions).
+  `capture_list_structure` now also reads the list's own settings —
+  `EnableVersioning` / `MajorVersionLimit`, `EnableModeration` /
+  `DraftVersionVisibility`, `EnableAttachments`, `ReadSecurity` / `WriteSecurity`,
+  `ValidationFormula` / `ValidationMessage`, and on a document library
+  `EnableMinorVersions` / `MajorWithMinorVersionsLimit` / `ForceCheckout` — and
+  `provision_list_structure` replays them as per-property `MERGE` requests in a
+  dependency order (versioning before its limits, validation after the columns
+  exist), writing only the ones that differ from the target's current values (a
+  limit whose versioning flag is off is not sent at all — the server rejects it).
+  They are applied regardless of `on_conflict` because the item copy
+  depends on them, each through its own handle so one rejection cannot leak into
+  the next, and a setting the list cannot accept (a plain list rejects minor
+  versions, their limit and required check-out) becomes a warning instead of a
+  failure. `verify_list_structure` compares the settings too and reports a
+  `settings_mismatch`; a validation formula is compared with whitespace and
+  brackets stripped because the server canonicalizes it.
+
+  Item **approval state** now travels as well: `OData__ModerationStatus` and its
+  comments are record content, but every fidelity write that restores
+  timestamps/authorship is a *system update*, which re-approves the item — so the
+  captured state is folded into that same write (live-probed to be accepted and to
+  create no new version). `item_state` is therefore a best-effort dimension for a
+  list pair instead of unsupported; check-out and in-progress draft state are
+  still not carried.
 - **Managed Metadata (taxonomy) value migration:** a `TaxonomyFieldType` /
   `TaxonomyFieldTypeMulti` column used to be copied verbatim or dropped. The list
   adapters now carry the portable identity of each term — its `TermGuid` — and

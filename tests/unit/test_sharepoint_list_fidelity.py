@@ -495,6 +495,66 @@ def test_read_authorship_resolves_author_and_editor_logins():
     assert target.read_authorship(MigrationItem("Docs/1", "1", item_type="record")) == (login, login)
 
 
+# ── Approval state ───────────────────────────────────────────────────────────
+
+
+def test_record_for_stashes_approval_state_from_the_payload():
+    # Approval status is record content, but the metadata system update re-approves
+    # the item, so the captured values must ride along with that write.
+    target = SharePointListTarget(cast("SPList", _TargetList([_TargetListItem(10, "1")])))
+    item = MigrationItem("Docs/1", "1", item_type="record")
+    record = {"Title": "Pending", "OData__ModerationStatus": 0, "OData__ModerationComments": "Needs review"}
+
+    written = target._record_for(item, record)
+
+    assert written["OData__ModerationStatus"] == 0
+    assert target._pending_approval == {
+        item.dest_path: {"_ModerationStatus": "0", "_ModerationComments": "Needs review"}
+    }
+
+
+def test_record_for_ignores_absent_approval_state():
+    target = SharePointListTarget(cast("SPList", _TargetList([_TargetListItem(10, "1")])))
+
+    target._record_for(MigrationItem("Docs/1", "1", item_type="record"), {"Title": "Plain"})
+
+    assert target._pending_approval == {}
+
+
+def test_timestamps_replay_approval_state_and_consume_it():
+    row = _TargetListItem(10, "1")
+    target = SharePointListTarget(cast("SPList", _TargetList([row])))
+    item = MigrationItem(
+        "Docs/1",
+        "1",
+        item_type="record",
+        created="2019-03-04T05:06:07+00:00",
+        modified="2020-04-05T06:07:08+00:00",
+    )
+    target._record_for(item, {"OData__ModerationStatus": 1})
+
+    target.apply_timestamps(item)
+
+    form_values, _, _ = row.updates[-1]
+    assert form_values["_ModerationStatus"] == "1"
+    assert form_values["Created"] == "2019-03-04T05:06:07Z"
+    assert target._pending_approval == {}  # consumed by the final metadata write
+
+
+def test_authorship_replays_approval_state_when_no_timestamps_follow():
+    # Authorship is its own system update, so an authorship-only run must restore
+    # the approval state itself instead of losing it.
+    row = _TargetListItem(10, "1")
+    target = SharePointListTarget(cast("SPList", _TargetList([row], web=_Web(users=[]))))
+    item = MigrationItem("Docs/1", "1", item_type="record")
+    target._record_for(item, {"OData__ModerationStatus": 1})
+
+    target.apply_authorship(item)
+
+    form_values, _, _ = row.updates[0]
+    assert form_values == {"_ModerationStatus": "1"}
+
+
 # ── Permissions ──────────────────────────────────────────────────────────────
 
 

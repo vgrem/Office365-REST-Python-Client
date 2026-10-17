@@ -22,6 +22,11 @@ Scope, deliberately:
   (or skipped with a warning when that list is not part of the migration).
 * **Content types** — non-hidden content types with their ordered field links.
 * **Views** — non-hidden, non-personal views with their ordered columns.
+* **List settings** — the container's own policy (versioning and its limits,
+  content approval and draft visibility, attachments, item-level read/write
+  permissions, list validation, and on a library minor versions and required
+  check-out), replayed per property so a setting the target list type cannot
+  accept is reported (as a warning) instead of failing the list.
 
 Provisioning is idempotent: with ``on_conflict="skip"`` (default) it only creates
 what is missing, so a re-run is a no-op. The server assigns content type
@@ -81,6 +86,57 @@ _FIELD_SELECT = [
     "Group",
     "Description",
 ]
+
+#: List container settings captured with the structure, in the order they must be
+#: applied (versioning before its limits, moderation and versioning before the
+#: draft-item policy). Every name is live-verified writable over REST.
+_LIST_SETTING_ORDER = (
+    "EnableVersioning",
+    "EnableMinorVersions",
+    "MajorVersionLimit",
+    "MajorWithMinorVersionsLimit",
+    "ForceCheckout",
+    "EnableModeration",
+    "DraftVersionVisibility",
+    "EnableAttachments",
+    "ReadSecurity",
+    "WriteSecurity",
+)
+
+#: Minor versions, their limit and required check-out only exist on document
+#: libraries - a plain list rejects them ("The list does not support minor
+#: versioning"), so they are captured only where they can be replayed.
+_LIBRARY_SETTING_NAMES = frozenset({"EnableMinorVersions", "MajorWithMinorVersionsLimit", "ForceCheckout"})
+
+#: List validation names columns in its formula, so it is applied only once the
+#: columns have been created.
+_VALIDATION_SETTING_NAMES = ("ValidationFormula", "ValidationMessage")
+
+#: A version limit only exists while the matching versioning flavour is on; the
+#: server rejects the write outright ("Versioning must be enabled and the number of
+#: major versions must be between 1 and 50000"), so a limit whose flag is off in the
+#: snapshot is skipped instead of sent to bounce.
+_SETTING_DEPENDS_ON = {
+    "MajorVersionLimit": "EnableVersioning",
+    "MajorWithMinorVersionsLimit": "EnableMinorVersions",
+}
+
+#: SharePoint rewrites a list validation formula on write (it dropped the brackets
+#: around a column reference: ``=IF([Title]="",TRUE,FALSE)`` was stored as
+#: ``=IF(Title="",TRUE,FALSE)``), so both sides are compared without decoration.
+_FORMULA_NOISE = re.compile(r"[\s\[\]]")
+
+
+def comparable_setting(name: str, value: Any) -> Any:
+    """A list setting value in the form its own read-back is expected to take."""
+    if name == "ValidationFormula" and value is not None:
+        return _FORMULA_NOISE.sub("", str(value))
+    return value
+
+
+def _setting_names(base_type: Optional[int]) -> List[str]:
+    """The container settings worth capturing for a list of this base type."""
+    return [name for name in _LIST_SETTING_ORDER if base_type == 1 or name not in _LIBRARY_SETTING_NAMES]
 
 
 @dataclass
@@ -192,6 +248,7 @@ class ListStructure:
     base_type: Optional[int] = None
     description: Optional[str] = None
     content_types_enabled: Optional[bool] = None
+    settings: Dict[str, Any] = dc_field(default_factory=dict)
     fields: List[FieldDefinition] = dc_field(default_factory=list)
     content_types: List[ContentTypeDefinition] = dc_field(default_factory=list)
     views: List[ViewDefinition] = dc_field(default_factory=list)
@@ -214,6 +271,7 @@ class ListStructure:
             base_type=data.get("base_type"),
             description=data.get("description"),
             content_types_enabled=data.get("content_types_enabled"),
+            settings=dict(data.get("settings") or {}),
             fields=[FieldDefinition.from_dict(item) for item in data.get("fields") or []],
             content_types=[ContentTypeDefinition.from_dict(item) for item in data.get("content_types") or []],
             views=[ViewDefinition.from_dict(item) for item in data.get("views") or []],
@@ -233,9 +291,13 @@ def capture_list_structure(sp_list: SPList) -> ListStructure:
     Returns:
         A fully-populated, serializable snapshot.
     """
-    sp_list.ensure_properties(
-        ["Title", "BaseTemplate", "BaseType", "Description", "ContentTypesEnabled"]
-    ).execute_query()
+    sp_list.ensure_properties(["Title", "BaseTemplate", "BaseType", "Description", "ContentTypesEnabled"])
+    # Container settings (versioning, content approval, attachments, item-level
+    # permissions, validation) travel with the columns: a target list created from
+    # its template alone keeps the template defaults, so a moderated or
+    # version-limited source would lose that policy.
+    setting_names = [*_LIST_SETTING_ORDER, *_VALIDATION_SETTING_NAMES]
+    sp_list.ensure_properties(setting_names).execute_query()
 
     structure = ListStructure(
         title=sp_list.title,
@@ -243,6 +305,11 @@ def capture_list_structure(sp_list: SPList) -> ListStructure:
         base_type=sp_list.base_type,
         description=sp_list.description,
         content_types_enabled=sp_list.content_types_enabled,
+        settings={
+            name: value
+            for name in [*_setting_names(sp_list.base_type), *_VALIDATION_SETTING_NAMES]
+            if (value := sp_list.properties.get(name)) is not None
+        },
     )
 
     loaded_fields = sp_list.fields.select(list(_FIELD_SELECT)).get().execute_query()
@@ -489,6 +556,17 @@ def provision_list_structure(
     (default); ``"update"`` reconciles content type metadata and view settings
     where supported.
 
+    The captured container settings (versioning, content approval, attachments,
+    item-level read/write policy, list validation, and on libraries minor versions
+    and required check-out) are applied as well, one ``MERGE`` per setting so a
+    single rejected setting is reported instead of failing the list. Only settings
+    that differ from the target's own values are written, so a list created from the
+    same template (and a re-run) writes nothing. They are applied regardless of
+    ``on_conflict`` because the snapshot *is* the wanted policy and the item copy
+    depends on it: an item's approval status is only stored on a list that has
+    content approval enabled. Settings the target list type does not support come
+    back as warnings.
+
     Unlike the deferred ``ensure_*`` primitives this executes the requests, so it
     can be called right after creating/resolving the target list and before
     content is copied. Run it again and it is a no-op.
@@ -523,6 +601,8 @@ def provision_list_structure(
         raise ValueError(f"on_conflict must be 'skip' or 'update', got {on_conflict!r}")
 
     warnings: List[str] = []
+
+    _apply_list_settings(sp_list, structure, warnings, validation=False)
 
     if structure.content_types_enabled:
         _ensure_content_types_enabled(sp_list)
@@ -599,8 +679,71 @@ def provision_list_structure(
             on_conflict=on_conflict,
         )
 
+    _apply_list_settings(sp_list, structure, warnings, validation=True)
+
     sp_list.execute_query()
     return warnings
+
+
+def _apply_list_settings(sp_list: SPList, structure: ListStructure, warnings: List[str], *, validation: bool) -> None:
+    """Apply the captured container settings the target does not already carry.
+
+    Only *differing* settings are written (one GET reads the target's current
+    values first): a target created from the list template already carries most of
+    them, and blindly ``MERGE``-ing an equal value is both a needless request and a
+    false alarm — SharePoint rejects some of those writes for policy reasons (a
+    version limit with versioning off, a system library that grants no write) even
+    though the target is already correct.
+
+    Each remaining setting is written by its own throw-away list handle (addressed
+    by title), so a server rejection of one setting cannot leak into the next
+    ``MERGE`` and the caller's own list object keeps no half-applied state. Failure
+    reasons are collected as warnings: a policy the target list type cannot express
+    (minor versions on a plain list, for instance) is a fidelity note, not an error.
+    """
+    title = structure.title or sp_list.title
+    if not title:
+        return
+    wanted = {
+        name: value
+        for name, value in structure.settings.items()
+        if (name in _VALIDATION_SETTING_NAMES) is validation
+        and not (name in _LIBRARY_SETTING_NAMES and structure.base_type != 1)
+        and _setting_is_expressible(name, structure.settings)
+    }
+    if not wanted:
+        return
+    current = _current_settings(sp_list, list(wanted))
+    for name, value in wanted.items():
+        if name in current and comparable_setting(name, current[name]) == comparable_setting(name, value):
+            continue
+        handle = sp_list.context.web.lists.get_by_title(title)
+        handle.set_property(name, value)
+        try:
+            handle.update().execute_query()
+        except Exception as exc:  # noqa: BLE001 - any rejection is a fidelity note
+            warning = f"list setting '{name}' was not applied: {_rejection_reason(exc)}"
+            logger.warning(warning)
+            warnings.append(warning)
+
+
+def _setting_is_expressible(name: str, settings: Dict[str, Any]) -> bool:
+    """Whether a captured setting can be applied given the snapshot's other values."""
+    dependency = _SETTING_DEPENDS_ON.get(name)
+    return dependency is None or bool(settings.get(dependency))
+
+
+def _current_settings(sp_list: SPList, names: List[str]) -> Dict[str, Any]:
+    """The target list's current values for the settings about to be applied."""
+    sp_list.ensure_properties(names)
+    sp_list.get().execute_query()
+    return {name: sp_list.properties.get(name) for name in names if sp_list.properties.get(name) is not None}
+
+
+def _rejection_reason(exc: Exception) -> str:
+    """The server's own wording for a rejected write, trimmed for a warning."""
+    message = getattr(exc, "message", None) or str(exc)
+    return message.strip()[:200]
 
 
 def _ensure_content_types_enabled(sp_list: SPList) -> None:
