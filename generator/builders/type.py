@@ -264,10 +264,16 @@ class TypeBuilder(ast.NodeTransformer):
         Only for **attached** types: a new type has no existing class, and
         resolving its members by bare name could pick a same-named unrelated
         class and wrongly reserve its member names (a one-run convergence bug).
+
+        The on-disk names carry their declared spelling — a dataclass field is
+        ``displayName`` while the CSDL property becomes ``display_name`` — so they
+        are snake-cased before being keyed, otherwise an inherited field would not
+        match and get re-declared as a shadowing field with a ``None`` default.
         """
         if not self._ensure_placement().is_attached:
             return set(base)
-        return set(base) | self._resolver.members_of(self._schema.FullName)
+        on_disk = self._resolver.members_of(self._schema.FullName)
+        return set(base) | {to_snake_case(name, avoid_builtins=False) for name in on_disk}
 
     def visit_FunctionDef(self, node):
         if node.name == "__init__":

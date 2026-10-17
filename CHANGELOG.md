@@ -561,6 +561,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   model class inherits `Entity`/`ClientValue`/`Enum`/… — so both collisions are
   gone structurally. The accidental `Package.type` / `Package.entity_type_name`
   members are removed (never released, never used).
+- **A forced regeneration re-declared inherited dataclass fields.** The
+  hand-written `graph.keyCredential` / `graph.passwordCredential` dataclasses
+  inherit `displayName` / `keyId` / `startDateTime` / `endDateTime` from
+  `Credential`, yet their CSDL type is a *root* complex type that declares those
+  four properties itself, so `--force` appended them to each subclass — shadowing
+  the inherited values with `None` defaults. The reserved-member set is now
+  snake-cased before it is keyed: the on-disk spelling (`displayName`) and the
+  CSDL spelling (`display_name`) differ, so an inherited field reserved nothing
+  and was re-declared. A forced regeneration of both models now plans **0 created,
+  0 updated** (it planned 2 updates before).
 - **Hyperlink column values were dropped on migration.** A `URL` column reads as a
   `{"Url": ..., "Description": ...}` object — not a scalar — so the source
   projection dropped it with the same "skipped non-scalar column" warning and

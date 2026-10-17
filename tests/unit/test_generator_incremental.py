@@ -108,6 +108,30 @@ def test_inherited_members_are_not_redeclared(tmp_path: Path, monkeypatch):
     assert builder.status is None
 
 
+def test_inherited_dataclass_field_arent_redeclared(tmp_path: Path, monkeypatch):
+    """A camelCase dataclass field inherited from an on-disk base is not re-added.
+
+    The on-disk class declares ``displayName`` while the CSDL property is keyed as
+    ``display_name``; keying the two without snake-casing reserves nothing, and the
+    field is re-declared as a subclass field shadowing the base value with ``None``.
+    """
+    schema = TypeInformation(BaseTypeFullName="ComplexType", FullName="graph.TestValue", IsValueObject=False)
+    schema.add_property(PropertyInformation(Name="displayName", TypeName="Edm.String"))
+    target = tmp_path / "test_value.py"
+    target.write_text("class TestValue:\n    pass\n", encoding="utf8")
+    monkeypatch.setattr(placement, "module_file", lambda name: str(target))
+
+    inherited = TypeBuilder(schema, _options(tmp_path), resolver=_StubResolver(members={"displayName"}))
+    inherited.build()
+    assert inherited.status is None
+    assert "displayName" not in target.read_text(encoding="utf8")
+
+    fresh = TypeBuilder(schema, _options(tmp_path), resolver=_StubResolver())
+    fresh.build()
+    fresh.save()
+    assert "displayName: str | None = None" in target.read_text(encoding="utf8")
+
+
 def test_rejects_duplicate_top_level_class():
     builder = TypeBuilder(_schema(), {"modules": "office365.sharepoint"}, resolver=_StubResolver())
     builder._placement = Placement(state="attached", file="x.py", routed=True)
