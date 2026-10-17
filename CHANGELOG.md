@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Workflows, InfoPath forms and BCS external lists are reported as handoffs:**
+  a client-side copy cannot produce any of them — a workflow is server-side state,
+  an InfoPath form is an `.xsn` template plus per-list form URLs, and an external
+  list is a view over a BDC model — yet the whole-site resolver only named skipped
+  **page libraries**. It now names all four categories through the new
+  `office365.migration.sharepoint.handoff` module
+  (`detect_handoff(web, lists)` / `handoff_notes(handoff)`, also exported from
+  `office365.migration.sharepoint`). Detection costs two reads per web — the web's
+  `workflow_associations` and one *projected* lists read carrying each list's
+  declared form URLs plus its expanded `WorkflowAssociations` — and each detector
+  is best-effort: a failure becomes a note (`… detection failed for <url>: …`)
+  instead of aborting resolution. InfoPath is matched on the canonical markers
+  (`FormServer.aspx`, `XsnLocation=`, `.xsn`) so the stock platform forms
+  (`Forms/Upload.aspx`, `Lists/X/NewForm.aspx`, `_layouts/15/aclinv.aspx`) never
+  flag a normal list; a BCS list is recognised by `BaseTemplate == 600`, and is now
+  **skipped** by `is_migratable_list` (creating a hollow list would be worse than a
+  handoff). A `BusinessData` **column** inside a list that *is* migrated is skipped
+  by the structure replay with its own warning, since replaying its schema would
+  create a column that resolves nothing on the target.
 - **Checked-out files are reported, not silently mis-copied:** a checked-out
   document exposes only its last *checked-in* version over REST, so the migrated
   copy was faithful to what the source returned while the author's in-progress

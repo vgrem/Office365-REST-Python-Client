@@ -43,7 +43,12 @@ class _FakeList:
         self.hidden = hidden
         self.allow_deletion = allow_deletion
         self.root_folder = _Folder()
-        self.properties = {"Id": list_id if list_id is not None else _guid_for(title)}
+        self.properties = {
+            "Id": list_id if list_id is not None else _guid_for(title),
+            "Title": title,
+            "BaseTemplate": base_template,
+            "Hidden": hidden,
+        }
 
     @property
     def id(self):
@@ -67,6 +72,12 @@ class _Lists:
         self.ensure_calls = []
 
     def get(self):
+        return self
+
+    def select(self, names):
+        return self
+
+    def expand(self, names):
         return self
 
     def execute_query(self):
@@ -119,12 +130,26 @@ class _PageList:
         return self.properties["Id"]
 
 
+class _WorkflowAssociations:
+    """Site-level workflow associations (empty unless a test seeds them)."""
+
+    def __init__(self, associations=None):
+        self._associations = list(associations or [])
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        return list(self._associations)
+
+
 class _Web:
-    def __init__(self, lists, webs=None, title=None, web_template="STS#3", url=None):
+    def __init__(self, lists, webs=None, title=None, web_template="STS#3", url=None, workflows=None):
         self.lists = lists
         self.webs = webs if webs is not None else _WebCollection()
         self.title = title
         self.web_template = web_template
+        self.workflow_associations = _WorkflowAssociations(workflows)
         self._props = {"Url": url} if url else {}
 
     def get_property(self, name):
@@ -236,6 +261,10 @@ class TestListSelection(unittest.TestCase):
         self.assertFalse(is_migratable_list(_FakeList("Site Pages", base_template=119)))
         self.assertFalse(is_migratable_list(_FakeList("System", allow_deletion=False)))
 
+    def test_skips_business_data_external_list(self):
+        # A BCS external list is a view over a BDC model: a copy cannot provision it.
+        self.assertFalse(is_migratable_list(_FakeList("Customers", base_template=600)))
+
 
 class TestResolveSiteTask(_StructureStub, unittest.TestCase):
     def test_pairs_library_and_list_and_skips_infrastructure(self):
@@ -337,6 +366,32 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         note = next(message for message in warnings if "pages/web parts are not migrated" in message)
         self.assertIn("Site Pages (2 page(s): Home.aspx, CollabHome.aspx)", note)
         self.assertIn("1 web part(s)", note)
+
+    def test_workflows_forms_and_external_lists_are_reported_as_handoff(self):
+        forms = _FakeList("Requests")
+        forms.properties.update(
+            {
+                "DefaultNewFormUrl": "/_layouts/15/FormServer.aspx?XsnLocation=/sites/x/Requests.xsn",
+                "WorkflowAssociations": {"results": [{"Name": "Approval"}]},
+            }
+        )
+        bcs = _FakeList("Customers", base_template=600)
+        source = _context([forms, bcs])
+        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
+
+        warnings: list[str] = []
+        resolve_site_task(task, source, warnings=warnings)
+
+        # The external list is not a content pair, but it is named.
+        self.assertEqual([call[0] for call in source.web.lists.ensure_calls], ["Requests"])
+        self.assertIn("1 workflow(s) are not migrated — remediate out of band: Approval (Requests)", warnings)
+        self.assertIn(
+            "1 list(s) use an InfoPath form, which is not migrated — remediate out of band: Requests (1 form(s))",
+            warnings,
+        )
+        self.assertIn(
+            "1 business-data (BCS) external list(s) are not migrated — remediate out of band: Customers", warnings
+        )
 
     def test_subwebs_are_detected_and_reported_when_skipped(self):
         child = _Web(

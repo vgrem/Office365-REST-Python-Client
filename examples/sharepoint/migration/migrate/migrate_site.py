@@ -34,6 +34,10 @@ restore.
 The source site's navigation (Quick Launch and top bar) is copied onto the target
 (additively, source links rewritten to the target) unless the settings disable it;
 a post-run reconciliation reports any link that did not land.
+
+Resolution also reports what a copy cannot carry — pages/web parts, workflow
+associations, InfoPath forms and business-data (BCS) external lists — as one
+warning per category in the run's warning list.
 """
 
 from __future__ import annotations

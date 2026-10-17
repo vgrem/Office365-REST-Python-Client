@@ -331,6 +331,17 @@ their lists too: each missing target subsite is created from the source's title
 and web template, and every web is addressed through its own clone (a subweb's
 sub-collections resolve against the context root otherwise).
 
+**Artifacts a copy cannot carry are named, never dropped silently.** Four of them
+are outside what a client-side copy can produce — pages/web parts, workflow
+associations, InfoPath forms and business-data (BCS) external lists — so the
+resolver appends a handoff note for each one it finds (see
+`detect_handoff(web, lists)` / `handoff_notes(handoff)` in
+`office365.migration.sharepoint.handoff`, also exported from
+`office365.migration.sharepoint`). Detection is cheap and best-effort: two extra
+reads per web (the web's workflow associations, then one *projected* lists read
+that carries each list's declared form URLs and its workflow associations), and a
+detector that fails degrades to a note instead of aborting the run.
+
 Target lists are created on demand (by title, with the source template type) and,
 by default, each list's **columns, content types, views and container settings
 are replayed** from the source before content is copied (`provision_structure=True`)
@@ -558,6 +569,7 @@ the shipped pairs' expected output.
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
 | Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and a file on an **un-published (minor) version** is copied as its draft — both reported as warnings, since the readable version is all REST exposes) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | pages/web parts not migrated (the resolver reports each skipped page library as a handoff); quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
+| Workflows / InfoPath forms / BCS external lists | not migrated (the resolver reports every association, InfoPath form and external list as a handoff) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
 > Columns, content types, views and container settings are deliberately *not*
@@ -583,6 +595,32 @@ the shipped pairs' expected output.
 > Pages, wiki/publishing pages) and `page_handoff_note` appends a warning naming
 > the pages and their client-side web-part count, so a run never silently drops
 > them (`detect_page_handoff` / `page_handoff_note` are also exported for reuse).
+
+The three other handoff categories are detected the same way, by
+`detect_handoff(web, lists)`:
+
+- **Workflows** — the web's `workflow_associations` plus each visible list's
+  `WorkflowAssociations` (expanded on the same projected read). A workflow
+  definition, its association and its running instances are all server-side
+  state; nothing about them is copyable over REST.
+- **InfoPath forms** — a list whose declared new/edit/display form URL points at
+  `FormServer.aspx`, carries an `XsnLocation=` parameter, or names a `.xsn`
+  template. The stock platform forms (`Forms/Upload.aspx`,
+  `Lists/X/NewForm.aspx`, `_layouts/15/aclinv.aspx`, the `_catalogs` pages) are
+  matched out, so a normal library is never flagged. The `.xsn` template itself
+  lives in the site's form templates and is not carried either.
+- **BCS external lists** — a list whose `BaseTemplate` is `600`
+  (`EXTERNAL_LIST_TEMPLATE`). It is a view over a BDC model, so the resolver
+  skips it (it does not even create a hollow list) and reports it; a
+  `BusinessData` **column** inside a migrated list is likewise skipped by the
+  structure replay with its own warning — replaying its schema would create a
+  column that resolves nothing on the target.
+
+All notes are aggregated per web, sample the first five names and end with
+`and N more`, and name the remediation (`remediate out of band`): the migration
+reports the gap rather than pretending a copy is complete. Like site security and
+navigation, these are **web** concerns applied by the resolver, so they are listed
+here for completeness but are not part of `report.dimensions`.
 
 ## Server-side migration
 

@@ -11,6 +11,10 @@ Detection is read-only and verifiable: it names the page libraries, their pages,
 and how many client-side web parts a modern page serializes in its canvas (the
 canvas itself is parsed by
 :func:`office365.sharepoint.publishing.pages.canvas.parse_canvas_controls`).
+
+:mod:`office365.migration.sharepoint.handoff` composes this module with the other
+uncopyable artifacts (workflows, InfoPath forms, BCS external lists) and is what
+the whole-site resolver actually calls.
 """
 
 from __future__ import annotations

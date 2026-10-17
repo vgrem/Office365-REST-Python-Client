@@ -475,6 +475,19 @@ def _is_taxonomy_definition(definition: FieldDefinition) -> bool:
     return "TaxonomyFieldType" in schema and "<Name>TermSetId</Name>" in schema
 
 
+#: A column bound to an external (BCS) content type. The generated ``FieldType``
+#: model does not carry this member, so the ``TypeAsString``/``SchemaXml``
+#: spelling is what identifies it.
+_EXTERNAL_DATA_TYPE = "BusinessData"
+
+
+def _is_external_data_definition(definition: FieldDefinition) -> bool:
+    """Whether a captured column reads its values from an external (BCS) source."""
+    if (definition.type_as_string or "") == _EXTERNAL_DATA_TYPE:
+        return True
+    return f'Type="{_EXTERNAL_DATA_TYPE}"' in (definition.schema_xml or "")
+
+
 def _taxonomy_property(schema_xml: Optional[str], name: str) -> Optional[str]:
     """Read a value from a taxonomy column's ``<Customization>`` property bag."""
     if not schema_xml:
@@ -663,6 +676,17 @@ def provision_list_structure(
             continue
         if _is_taxonomy_definition(definition):
             taxonomy_definitions.append(definition)
+            continue
+        if _is_external_data_definition(definition):
+            # An external-data column is a *reference* into a BDC model: replaying
+            # its schema would create a column that resolves nothing on the target,
+            # so it is reported instead (the list itself is reported as a handoff).
+            warning = (
+                f"column '{definition.internal_name}' was not recreated: it is bound to an "
+                "external (BCS) content type, which a client-side migration cannot provision"
+            )
+            logger.warning(warning)
+            warnings.append(warning)
             continue
         schema_xml, unresolved = rewrite_lookup_schema(definition.schema_xml, list_id_map)
         if unresolved is not None:

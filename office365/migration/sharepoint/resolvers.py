@@ -17,6 +17,11 @@ the resolution ``warnings`` sink (``session.warnings()``). Pass
 ``include_subwebs=True`` to provision the matching target subsites and migrate
 their lists too. Every web is addressed through its own clone (a subweb's
 sub-collections resolve against the context root otherwise).
+
+The artifacts a client-side copy cannot carry — pages/web parts, workflow
+associations, InfoPath forms and business-data (BCS) external lists — are
+reported through the same sink (see
+:mod:`office365.migration.sharepoint.handoff`).
 """
 
 from __future__ import annotations
@@ -32,8 +37,8 @@ from office365.migration.sharepoint.adapters import (
     SharePointListSource,
     SharePointListTarget,
 )
+from office365.migration.sharepoint.handoff import EXTERNAL_LIST_TEMPLATE, detect_handoff, handoff_notes
 from office365.migration.sharepoint.navigation import apply_navigation
-from office365.migration.sharepoint.pages import detect_page_handoff, page_handoff_note
 from office365.migration.sharepoint.security import apply_site_security
 from office365.migration.sharepoint.structure import (
     capture_list_structure,
@@ -81,11 +86,16 @@ def is_migratable_list(sp_list: SPList) -> bool:
     """Whether a list/library takes part in a whole-site migration.
 
     Skips hidden lists, SharePoint infrastructure templates, and system lists
-    that cannot be deleted (e.g. ``User Information``).
+    that cannot be deleted (e.g. ``User Information``). A business-data (BCS)
+    external list is skipped too: it is a view over a BDC model that a copy
+    cannot provision, so :func:`~office365.migration.sharepoint.handoff.detect_handoff`
+    reports it instead of the structure replay creating a hollow list.
     """
     if sp_list.hidden:
         return False
     if sp_list.allow_deletion is False:
+        return False
+    if sp_list.base_template == EXTERNAL_LIST_TEMPLATE:
         return False
     return sp_list.base_template not in _SYSTEM_BASE_TEMPLATES
 
@@ -161,7 +171,8 @@ def resolve_site_task(
             navigation (source links rewritten to the target). Additive and
             idempotent; dynamic nodes are skipped.
         warnings: Optional sink for resolution-level notes (subsites skipped,
-            page libraries detected but not migrated).
+            pages/web parts, workflows, InfoPath forms and BCS external lists
+            detected but not migrated).
     """
     if task.kind != SHAREPOINT:
         raise ValueError(f"a site task must be kind {SHAREPOINT!r}, got {task.kind!r}")
@@ -191,15 +202,14 @@ def resolve_site_task(
     return pairs
 
 
-def _report_page_handoff(source_lists: Iterable[SPList], source_web: Web, warnings: list[str]) -> None:
-    """Append a handoff note for the page libraries the adapters skip (best-effort)."""
+def _report_handoff(source_web: Web, source_lists: Iterable[SPList], warnings: list[str]) -> None:
+    """Append handoff notes for the artifacts the adapters cannot carry (best-effort)."""
     try:
-        note = page_handoff_note(detect_page_handoff(source_lists))
-    except Exception as e:  # noqa: BLE001 — page detection is best-effort; never abort list resolution
-        warnings.append(f"page detection failed for {_web_url(source_web)}: {e}")
+        notes = handoff_notes(detect_handoff(source_web, source_lists))
+    except Exception as e:  # noqa: BLE001 — handoff detection is best-effort; never abort resolution
+        warnings.append(f"handoff detection failed for {_web_url(source_web)}: {e}")
         return
-    if note:
-        warnings.append(note)
+    warnings.extend(notes)
 
 
 def _resolve_web(
@@ -226,9 +236,9 @@ def _resolve_web(
         except Exception as e:  # noqa: BLE001 — navigation is best-effort; never abort list resolution
             warnings.append(f"navigation replication failed for {_web_url(source_context.web)}: {e}")
     source_lists: Iterable[SPList] = source_context.web.lists.get().execute_query()
-    # A page library (Site Pages, wiki/publishing pages) holds .aspx pages, not
-    # documents; the adapters skip it, so report it as an explicit handoff.
-    _report_page_handoff(source_lists, source_context.web, warnings)
+    # Pages, workflows, InfoPath forms and BCS external lists are outside what a
+    # client-side copy can carry; report them rather than dropping them silently.
+    _report_handoff(source_context.web, source_lists, warnings)
     selected: list[SPList] = []
     for source_list in source_lists:
         title = source_list.title

@@ -401,6 +401,35 @@ def test_provision_skips_lookup_into_a_list_outside_the_migration():
     assert not any(p.url.endswith("Fields/CreateFieldAsXml") for p in _posts(transport))
 
 
+def test_provision_skips_an_external_data_column():
+    """A BCS column references a BDC model: replaying its schema creates a dead column."""
+    ctx, transport = _setup(
+        [
+            (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
+        ]
+    )
+    structure = _structure(
+        fields=[
+            FieldDefinition(
+                internal_name="CustomerName",
+                title="Customer",
+                field_type_kind=10,
+                type_as_string="BusinessData",
+                schema_xml='<Field Type="BusinessData" Name="CustomerName" StaticName="CustomerName"/>',
+            )
+        ],
+        content_types=[],
+        views=[],
+    )
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert len(warnings) == 1
+    assert "CustomerName" in warnings[0]
+    assert "external (BCS) content type" in warnings[0]
+    assert not any(p.url.endswith("Fields/CreateFieldAsXml") for p in _posts(transport))
+
+
 # ── Managed Metadata (taxonomy) columns ──────────────────────────────────────
 
 _TAXONOMY_SCHEMA = (
