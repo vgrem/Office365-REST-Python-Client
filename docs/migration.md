@@ -116,7 +116,7 @@ pipeline uses (see [Data pipeline](data-pipeline.md)).
 |---|---|---|
 | `FileSystemSource` / `FileSystemTarget` | both | files + folders |
 | `JsonFileSource` / `JsonFileTarget` | both | record payloads (one JSON file per item) |
-| `SharePointLibrarySource` / `SharePointLibraryTarget` | both | files + folders (recursive) + folder column values |
+| `SharePointLibrarySource` / `SharePointLibraryTarget` | both | files + folders (recursive) + folder column values and system metadata |
 | `SharePointListSource` / `SharePointListTarget` | both | list items as records |
 | `TeamsArchiveSource` / `TeamsArchiveTarget` | both | Teams archives |
 
@@ -188,9 +188,24 @@ Two honest limits remain:
   never fatal: the folder's structure matters more than its metadata. Verification
   samples folders for the content check alongside items, and only when both
   adapters were built with their library — a filesystem pair carries no folder
-  values and stays silent rather than reporting them as unverifiable. A folder
-  that already exists on the target is skipped like an existing file, so a resumed
-  run does not back-fill its values.
+  values and stays silent rather than reporting them as unverifiable.
+- A folder's **own system metadata** — `Created`/`Modified` and `Author`/`Editor` —
+  is carried as well: a folder is a list item with a timestamp just like a file, so
+  the same diff reports it. It is read back from the **folder resource** on both
+  sides (the recursive listing already returns tz-aware timestamps, while a list
+  item's form values are web-local naive strings and would never compare equal).
+  Two live-probed details shape the implementation:
+  - The stamps are applied in a **post-content pass**, after all content has been
+    written, not item by item: a folder's `Modified` follows its children, so
+    uploading a file into it — or creating a subfolder — resets it to now. Stamping
+    a parent before its subtree exists silently loses the value.
+  - An **existing** folder is *not* skipped the way an existing file is. A folder
+    holds no content to duplicate, and a resumed run has to re-apply its metadata,
+    otherwise a re-verify reports every untouched folder as drifted. Files keep the
+    skip: a re-run neither re-uploads nor re-stamps content that is already there.
+  Folder fidelity rides on the same `supports_folder_records` capability as the
+  folder values, so a filesystem pair stays silent instead of reporting it as
+  unverifiable.
 - A **document library file's approval state** (content moderation) is carried when
   the library enables it: the source reads `OData__ModerationStatus`/
   `OData__ModerationComments` alongside the author ids (one extra projection on the
@@ -428,7 +443,7 @@ whitespace and brackets stripped and reports any other difference as a
 
 | Flag | Client-side runner | Server-side package |
 |---|---|---|
-| `preserve_timestamps` | best-effort (`Created`/`Modified`) | ✓ carried per manifest object (`TimeCreated`/`TimeLastModified`) |
+| `preserve_timestamps` | best-effort (`Created`/`Modified` on files, folders and list items) | ✓ carried per manifest object (`TimeCreated`/`TimeLastModified`) |
 | `preserve_authorship` | best-effort (`Author`/`Editor` via `EnsureUser`) | best-effort — resolved PUID users only |
 | `preserve_permissions` | best-effort (same-tenant ACL copy) | best-effort — resolves users by PUID; groups / unresolved principals skipped |
 | `preserve_versions` | ✗ (raises) | ✓ the runner reads history into the package's `<Versions>` |
@@ -451,7 +466,8 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
 
 - **Timestamps** — the client-side targets restore `Created`/`Modified`
   via `ValidateUpdateListItem` (`datesInUTC=True`; the same path as
-  `ListItem.system_update`).
+  `ListItem.system_update`). This covers files, folder list items and record list
+  items alike.
 - **Authorship** — the client-side targets restore `Author`/`Editor` by resolving
   each source principal through `web.ensure_user` and writing a `FieldUserValue`.
   Principals `EnsureUser` cannot resolve are skipped (the verification reports the
@@ -691,7 +707,7 @@ explicit about what it could not confirm:
 |---|---|---|
 | Presence (expected vs found paths) | always | `missing` / `extra` |
 | Content checksums | always, on a `spot_checks` sample | `mismatches` (or `unverifiable` if a side exposes no comparable hash) |
-| Timestamps (`Created`/`Modified`) | when `preserve_timestamps` was requested | `mismatches` / `unverifiable` (attachments: content-only, reported once) |
+| Timestamps (`Created`/`Modified`) | when `preserve_timestamps` was requested | `mismatches` / `unverifiable` (attachments: content-only, reported once; folders: compared on the folder resource, applied last) |
 | Authorship (`Author`/`Editor`) | when `preserve_authorship` was requested | `mismatches` / `unverifiable` |
 | Permissions | when `preserve_permissions` was requested | `mismatches` / `unverifiable` |
 | Versions | when `preserve_versions` was requested | always `unverifiable` over REST |

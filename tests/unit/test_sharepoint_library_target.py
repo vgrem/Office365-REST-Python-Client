@@ -12,7 +12,7 @@ folder.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from office365.migration.base import MigrationItem
 from office365.migration.sharepoint.adapters import SharePointLibrarySource, SharePointLibraryTarget
@@ -21,6 +21,8 @@ from office365.migration.sharepoint.adapters import SharePointLibrarySource, Sha
 class _Entry:
     def __init__(self, server_relative_url: str) -> None:
         self.server_relative_url = server_relative_url
+        self.time_created = None
+        self.time_last_modified = None
 
 
 class _Collection:
@@ -234,6 +236,8 @@ class _AuthorSecurableFile:
 class _AuthorUser:
     def __init__(self, login_name: str) -> None:
         self.login_name = login_name
+        self.title = None
+        self.properties: dict = {}
 
 
 class _AuthorUserQuery:
@@ -555,16 +559,35 @@ class _FolderItem:
 
 
 class _FolderHandle:
+    """A deferred ``Folder``: its list item carries the column values, the folder
+    resource reports the system metadata that the timestamp write lands on."""
+
     def __init__(self, item: _FolderItem) -> None:
         self.list_item_all_fields = item
+        self.time_created = None
+        self.time_last_modified = None
+        self.reads = 0
+
+    def get(self) -> "_FolderHandle":
+        self.reads += 1
+        return self
+
+    def execute_query(self) -> "_FolderHandle":
+        return self
 
 
 class _FolderWeb:
     def __init__(self, items: dict[str, _FolderItem]) -> None:
         self._items = items
+        self._handles: dict[str, _FolderHandle] = {}
 
     def get_folder_by_server_relative_path(self, url: str) -> _FolderHandle:
-        return _FolderHandle(self._items.setdefault(url, _FolderItem()))
+        if url not in self._handles:
+            self._handles[url] = _FolderHandle(self._items.setdefault(url, _FolderItem()))
+        return self._handles[url]
+
+    def handle(self, url: str) -> _FolderHandle:
+        return self.get_folder_by_server_relative_path(url)
 
 
 def _folder_target(web: _FolderWeb, columns: list[_Column] | None = None) -> SharePointLibraryTarget:
@@ -605,6 +628,20 @@ def test_library_target_folder_checksum_compares_read_back_values():
     assert matching.checksum(_folder_item("Area1/"))  # a real hash, so the check can run
     assert matching.checksum(_folder_item("Area1/")) == same_folder_elsewhere.checksum(_folder_item("Area2/"))
     assert differing.checksum(_folder_item("Area1/")) != matching.checksum(_folder_item("Area1/"))
+
+
+def test_library_target_reads_a_folders_metadata_back_from_the_folder_resource():
+    # The folder's list item is where the timestamp write lands; the folder resource
+    # reports the same instant, and it is what the source side reads too.
+    web = _FolderWeb({"/sites/x/Docs/Area1": _FolderItem({"Region": "North"})})
+    handle = web.handle("/sites/x/Docs/Area1")
+    handle.time_created = datetime(2021, 3, 4, 5, 6, 7, tzinfo=timezone.utc)
+    handle.time_last_modified = datetime(2021, 3, 5, 6, 7, 8, tzinfo=timezone.utc)
+
+    metadata = _folder_target(web).read_metadata(_folder_item("Area1/"))
+
+    assert metadata == {"created": "2021-03-04T05:06:07+00:00", "modified": "2021-03-05T06:07:08+00:00"}
+    assert handle.reads == 1
 
 
 def test_library_target_without_the_library_cannot_compare_folder_values():
@@ -714,6 +751,48 @@ def test_library_source_without_the_library_cannot_read_approval_state():
 
     assert source.supports_item_state is False
     assert source.read_item_state(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt")) is None
+
+
+# ── Folder system metadata (a folder is an item too) ─────────────────────────
+
+
+def _folder_source(properties: dict, web=None) -> SharePointLibrarySource:
+    """A source over one folder, whose list reports its author ids."""
+    entry = _Entry("/sites/x/Docs/Area1")
+    entry.time_created = datetime(2021, 3, 4, 5, 6, 7, tzinfo=timezone.utc)
+    entry.time_last_modified = datetime(2021, 3, 5, 6, 7, 8, tzinfo=timezone.utc)
+    root = _SourceFolder("/sites/x/Docs", web or _Web(), folders=[entry])
+    return SharePointLibrarySource(root, sp_list=_ModerationList([_ModerationItem(properties)], moderation=False))
+
+
+def test_library_source_carries_a_folders_timestamps_and_authorship():
+    # A folder is an item too: its own Created/Modified come from the recursive
+    # folder read, its Author/Editor from the same item pass that serves the files.
+    source = _folder_source(
+        {"FileRef": "/sites/x/Docs/Area1", "AuthorId": 3, "EditorId": 4},
+        web=_AuthorshipWeb({3: "vgrem@x", 4: "mdoe@x"}),
+    )
+
+    item = source.list_items()[0]
+
+    assert item.item_type == "folder"
+    assert item.dest_path == "Area1/"
+    assert (item.created, item.modified) == ("2021-03-04T05:06:07+00:00", "2021-03-05T06:07:08+00:00")
+    assert (item.author_id, item.editor_id) == (3, 4)
+    assert (item.author.login_name, item.editor.login_name) == ("vgrem@x", "mdoe@x")
+    assert source.read_authorship(item) == ("vgrem@x", "mdoe@x")
+
+
+def test_library_source_reads_a_folders_metadata_back_for_the_diff():
+    source = _folder_source({"FileRef": "/sites/x/Docs/Area1"})
+    item = source.list_items()[0]
+
+    assert source.read_metadata(item) == {
+        "created": "2021-03-04T05:06:07+00:00",
+        "modified": "2021-03-05T06:07:08+00:00",
+    }
+    # a folder has no approval state and no content length to compare
+    assert "moderation_status" not in source.read_metadata(item)
 
 
 def _state_target():

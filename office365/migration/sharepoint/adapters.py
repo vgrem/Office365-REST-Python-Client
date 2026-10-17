@@ -2300,6 +2300,9 @@ class SharePointLibrarySource:
         self._list_source = SharePointListSource(sp_list) if sp_list is not None else None
         self._folder_payloads: dict[str, dict] | None = None
         self._files: dict[str, "File"] = {}
+        # Folder resources by library-relative path, so their own system metadata
+        # (``TimeCreated``/``TimeLastModified``) can be diffed after the run.
+        self._folders: dict[str, "Folder"] = {}
         self._users: dict[int, "Principal | None"] = {}
         self._default_groups: _DefaultGroups | None = None
         self._item_authors: dict[str, tuple[int | None, int | None]] | None = None
@@ -2340,7 +2343,22 @@ class SharePointLibrarySource:
             if not rel or rel in seen or _is_system_path(rel, extra):
                 continue
             seen.add(rel)
-            result.append(MigrationItem(source_path=url, dest_path=f"{rel}/", item_type="folder"))
+            self._folders[rel] = folder
+            author_id, editor_id = authors.get(url, (None, None))
+            folder_item = MigrationItem(
+                source_path=url,
+                dest_path=f"{rel}/",
+                item_type="folder",
+                modified=iso_or_none(folder.time_last_modified),
+                created=iso_or_none(folder.time_created),
+                author_id=author_id,
+                editor_id=editor_id,
+            )
+            if author_id is not None:
+                folder_item.author = self._principal_for(author_id)
+            if editor_id is not None:
+                folder_item.editor = self._principal_for(editor_id)
+            result.append(folder_item)
             emit_progress(progress, done=len(result), stage="planning", items=[folder])
         for file in loaded:
             url = file.server_relative_url or ""
@@ -2470,6 +2488,14 @@ class SharePointLibrarySource:
 
     def read_metadata(self, item: MigrationItem) -> dict | None:
         """Comparable attributes of the source item (for the post-run metadata diff)."""
+        if item.item_type == "folder":
+            folder = self._folders.get(str(item.dest_path).rstrip("/"))
+            if folder is None:
+                return None
+            return {
+                "created": iso_or_none(folder.time_created),
+                "modified": iso_or_none(folder.time_last_modified),
+            }
         file = self._files.get(item.dest_path)
         if file is None:
             return None
@@ -2967,7 +2993,17 @@ class SharePointLibraryTarget:
     def read_metadata(self, item: MigrationItem) -> dict | None:
         """Comparable attributes of the written item (for the metadata diff)."""
         if item.item_type == "folder":
-            return None
+            # A folder is an item too: the timestamp system update lands on its list
+            # item, and the folder resource reflects it (same read as for a file).
+            folder = (
+                self._folder.context.web.get_folder_by_server_relative_path(self._url(item).rstrip("/"))
+                .get()
+                .execute_query()
+            )
+            return {
+                "created": iso_or_none(folder.time_created),
+                "modified": iso_or_none(folder.time_last_modified),
+            }
         file = self._folder.context.web.get_file_by_server_relative_url(self._url(item)).get().execute_query()
         metadata = {
             "created": iso_or_none(file.time_created),

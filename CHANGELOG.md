@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Document library folder system metadata:** a migrated folder was created with
+  the migration's own `Created`/`Modified` (and its author), so every funnel's
+  "last updated" date was wrong while `verify()` — which excluded folders from the
+  sample — still reported `OK`. Folder items now carry their timestamps (read off
+  the recursive folder listing, which already returns tz-aware datetimes) and their
+  authorship, and both sides read them back from the **folder resource** rather
+  than from the list item's form values, which are web-local naive strings and
+  would never compare equal. Two live-probed details shape the write:
+  - Folder fidelity runs in a **post-content pass**, after everything has been
+    written. A folder's `Modified` follows its children — uploading a file into it,
+    or creating a subfolder, resets it to now — so stamping a parent while its
+    subtree is still being created silently discarded the value (found live: the
+    child folder round-tripped, the parent came back as the migration time).
+  - An **existing** folder is no longer skipped the way an existing file is: a
+    folder holds no content to duplicate, and a resumed run has to re-apply its
+    metadata, otherwise a re-verify reported every untouched folder as drifted
+    (36 phantom `timestamp mismatch` issues on the lab library). Files keep the
+    skip — a re-run does not re-upload or re-stamp content already there.
+  After the fix a full library re-run verifies `OK | issues: 0`.
 - **Document library file approval state:** a draft or rejected file migrated into a
   moderation-enabled library landed **approved**. An upload starts out approved, and
   worse, every `ValidateUpdateListItem` write on a document approves it again — so
@@ -40,8 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   samples folders for the content check, but only when both adapters were built
   with their library, so a filesystem pair carries no folder values and reports
   nothing instead of "unverifiable". A failed value write is a warning, never
-  fatal; a folder that already exists on the target is skipped like a file, so a
-  resumed run does not back-fill its values.
+  fatal, and a pre-existing folder is not skipped, so a resumed run re-applies its
+  values (see *folder system metadata* above).
 - **Attribute-level column verification:** `verify_list_structure` compared columns
   by **name** only, so a column that reached the target without its policy — a lost
   `Required`/`Indexed` flag, a truncated choice list, a dropped validation formula —

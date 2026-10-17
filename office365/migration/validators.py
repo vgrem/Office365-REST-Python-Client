@@ -95,6 +95,7 @@ def verify(
     folder_candidates = [
         item for item in manifest.items if item.dest_path in target_paths and item.item_type == "folder"
     ]
+    folder_sample: list[MigrationItem] = []
     if folder_candidates:
         # A folder's column values are content too: a document set's metadata is part
         # of what was migrated, not an attribute of the container. Only adapters that
@@ -118,6 +119,12 @@ def verify(
                 f"attachments: {len(sample) - len(fidelity_sample)} sampled attachment(s) are "
                 "content-only (their system metadata cannot be set over REST)"
             )
+        if wants_fidelity:
+            # A folder is an item too: the timestamps/authorship/ACL writes land on
+            # its list item, so the same diffs run over the folder sample — only for
+            # the pairs that carry folder records, which are the ones that report
+            # folder fidelity at all.
+            fidelity_sample.extend(folder_sample)
         if options.preserve_timestamps:
             _verify_metadata(source, target, fidelity_sample, report)
         if options.preserve_authorship:

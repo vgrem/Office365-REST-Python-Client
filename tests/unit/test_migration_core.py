@@ -756,6 +756,96 @@ class TestRunnerParallel(unittest.TestCase):
         self.assertEqual(stats.success, 2)  # noqa: PLR2004
         self.assertEqual(items[0].error, "boom")
 
+    def test_folder_fidelity_is_applied_after_all_content(self):
+        # A folder's ``Modified`` follows its children — uploading a file into it (or
+        # creating a subfolder) resets it — so its timestamps can only be restored
+        # once the whole content pass is done.
+        calls: list[str] = []
+        items = [
+            MigrationItem("/s/Area", "Area/", item_type="folder"),
+            MigrationItem("/s/Area/doc.txt", "Area/doc.txt"),
+        ]
+        source = _FakeSource(items)
+
+        class _Target(_FakeTarget):
+            def write(self, item, payload):
+                calls.append(f"write:{item.dest_path}")
+                super().write(item, payload)
+
+            def apply_timestamps(self, item):
+                calls.append(f"apply_timestamps:{item.dest_path}")
+
+        stats = MigrationRunner().run(  # type: ignore[arg-type]
+            source, _Target(), items, MigrationOptions(preserve_timestamps=True), Checkpoint.create()
+        )
+
+        self.assertEqual(stats.success, 2)  # noqa: PLR2004
+        self.assertEqual(
+            calls,
+            [
+                "write:Area/",
+                "write:Area/doc.txt",
+                "apply_timestamps:Area/doc.txt",
+                "apply_timestamps:Area/",
+            ],
+        )
+
+    def test_a_deferred_fidelity_failure_is_reported_against_its_folder(self):
+        items = [MigrationItem("/s/Area", "Area/", item_type="folder")]
+        source = _FakeSource(items)
+
+        class _Target(_FakeTarget):
+            def apply_timestamps(self, item):
+                raise ValueError("You must specify a valid date")
+
+        stats = MigrationRunner().run(  # type: ignore[arg-type]
+            source, _Target(), items, MigrationOptions(preserve_timestamps=True), Checkpoint.create()
+        )
+
+        self.assertEqual((stats.success, stats.errors), (0, 1))
+        self.assertEqual(items[0].error_code, "ValueError")
+
+
+class TestRunnerExistingTargets(unittest.TestCase):
+    """Skip-on-conflict versus folders: a folder's metadata is always re-applied."""
+
+    def _run(self, items):
+        class _Target(_FakeTarget):
+            written = []
+
+            def exists(self, item):
+                return True
+
+            def write(self, item, payload):
+                self.written.append(item.dest_path)
+
+            def apply_timestamps(self, item):
+                self.written.append(f"timestamps:{item.dest_path}")
+
+        target = _Target()
+        stats = MigrationRunner().run(  # type: ignore[arg-type]
+            _FakeSource(items), target, items, MigrationOptions(preserve_timestamps=True), Checkpoint.create()
+        )
+        return stats, target.written
+
+    def test_an_existing_folder_is_reapplied_not_skipped(self):
+        # A folder holds no content to duplicate, and a resumed run still has to
+        # restore its metadata — otherwise a re-verify reports it as drifted.
+        items = [MigrationItem("/s/Area", "Area/", item_type="folder")]
+
+        stats, written = self._run(items)
+
+        self.assertEqual(stats.success, 1)
+        self.assertEqual(written, ["Area/", "timestamps:Area/"])
+
+    def test_an_existing_file_is_still_skipped(self):
+        items = [MigrationItem("/s/doc.txt", "doc.txt")]
+
+        stats, written = self._run(items)
+
+        self.assertEqual(stats.skipped, 1)
+        self.assertEqual(written, [])
+
 
 class TestApplyFidelity(unittest.TestCase):
     """Order of the post-write fidelity steps, and which optional hooks drive them."""

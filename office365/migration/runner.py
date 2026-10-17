@@ -154,14 +154,37 @@ class MigrationRunner:
             and options.conflict_resolution != ConflictResolution.RENAME
             and (options.concurrency > 1 or getattr(target, "deferred_writes", False))
         )
+        # Folder fidelity is deferred: a folder's ``Modified`` follows its children, so
+        # it can only be restored once everything inside it has been written.
+        deferred: list[MigrationItem] = []
         if chunked:
             stats = self._run_parallel(
-                source, target, items, options, checkpoint, checkpoint_path, progress, stop_event, watermark
+                source,
+                target,
+                items,
+                options,
+                checkpoint,
+                checkpoint_path,
+                progress,
+                stop_event,
+                watermark,
+                deferred,
             )
         else:
             stats = self._run_sequential(
-                source, target, items, options, checkpoint, checkpoint_path, progress, stop_event, watermark
+                source,
+                target,
+                items,
+                options,
+                checkpoint,
+                checkpoint_path,
+                progress,
+                stop_event,
+                watermark,
+                deferred,
             )
+        # Before ``commit``: a record target drops its pending per-item state there.
+        self._apply_deferred_fidelity(source, target, deferred, options, checkpoint, stats)
         _call_optional(target, "commit", options)
 
         if checkpoint.phase != MigrationPhase.PAUSED:
@@ -171,6 +194,33 @@ class MigrationRunner:
         _call_optional(source, "close")
         _call_optional(target, "close")
         return stats
+
+    @staticmethod
+    def _apply_deferred_fidelity(
+        source,
+        target: DataTarget,
+        items: list[MigrationItem],
+        options: MigrationOptions,
+        checkpoint: Checkpoint,
+        stats: MigrationStats,
+    ) -> None:
+        """Apply fidelity to folders once all of their content exists.
+
+        A folder's ``Modified`` follows its children: adding a file to it — or
+        creating a subfolder — resets it to now. Restoring a folder's timestamps is
+        therefore only meaningful after the whole run has written everything inside
+        it, so the step is deferred past the content pass.
+        """
+        for item in items:
+            try:
+                _apply_fidelity(source, target, item, options)
+            except Exception as e:  # noqa: BLE001 — per-item errors are captured, not fatal
+                item.error = str(e)
+                item.error_code = type(e).__name__
+                checkpoint.record(item, ItemStatus.FAILED)
+                # the folder itself was written, so it was counted as a success
+                stats.success -= 1
+                stats.errors += 1
 
     def _run_sequential(
         self,
@@ -183,6 +233,7 @@ class MigrationRunner:
         progress: Callable[["Progress"], None] | None,
         stop_event: Callable[[], bool] | None,
         watermark: _Watermark | None = None,
+        deferred: list[MigrationItem] | None = None,
     ) -> MigrationStats:
         items = list(items)
         stats = MigrationStats(total=len(items))
@@ -202,7 +253,7 @@ class MigrationRunner:
                 continue
             checkpoint.record(item, ItemStatus.IN_PROGRESS)
             try:
-                if self._migrate(source, target, item, options):
+                if self._migrate(source, target, item, options, deferred):
                     checkpoint.record(item, ItemStatus.DONE)
                     stats.success += 1
                     stats.bytes_transferred += item.size_bytes
@@ -232,6 +283,7 @@ class MigrationRunner:
         progress: Callable[["Progress"], None] | None,
         stop_event: Callable[[], bool] | None,
         watermark: _Watermark | None = None,
+        deferred: list[MigrationItem] | None = None,
     ) -> MigrationStats:
         items = list(items)
         stats = MigrationStats(total=len(items))
@@ -258,7 +310,7 @@ class MigrationRunner:
                     stats.errors += 1
                 else:
                     try:
-                        _apply_fidelity(source, target, item, options)
+                        _defer_or_apply_fidelity(source, target, item, options, deferred)
                     except Exception as e:  # noqa: BLE001 — per-item errors are captured, not fatal
                         item.error = str(e)
                         item.error_code = type(e).__name__
@@ -291,7 +343,7 @@ class MigrationRunner:
             if options.incremental and _target_up_to_date(source, target, item):
                 _skip(item)
                 continue
-            if options.conflict_resolution == ConflictResolution.SKIP and target.exists(item):
+            if _excluded_by_conflict(target, item, options):
                 checkpoint.record(item, ItemStatus.SKIPPED)
                 stats.skipped += 1
                 self._report_progress(progress, stats, item)
@@ -308,21 +360,43 @@ class MigrationRunner:
         emit_progress(progress, done=processed, total=stats.total, stage="migrating", items=[item])
 
     @staticmethod
-    def _migrate(source, target: DataTarget, item: MigrationItem, options: MigrationOptions) -> bool:
+    def _migrate(source, target: DataTarget, item: MigrationItem, options: MigrationOptions, deferred=None) -> bool:
         """Move one item; returns ``False`` when skipped (conflict/incremental/window)."""
         if _outside_window(item, options):
             return False
         if options.incremental and _target_up_to_date(source, target, item):
             return False
-        if options.conflict_resolution == ConflictResolution.SKIP and target.exists(item):
+        if _excluded_by_conflict(target, item, options):
             return False
         dest = resolve_dest(item, target, options.conflict_resolution)
         item.dest_path = dest
         payload = source.read(item)
         _load_versions(source, target, item)
         target.write(item, payload)
-        _apply_fidelity(source, target, item, options)
+        _defer_or_apply_fidelity(source, target, item, options, deferred)
         return True
+
+
+def _excluded_by_conflict(target: DataTarget, item: MigrationItem, options: MigrationOptions) -> bool:
+    """Whether an existing target item means "nothing to do" for a SKIP policy.
+
+    A folder is never nothing to do: it holds no content to duplicate, and a resumed
+    run has to re-apply its metadata (column values, timestamps, ACLs) to a folder
+    that already exists just as much as to a fresh one.
+    """
+    if item.item_type == "folder":
+        return False
+    return options.conflict_resolution == ConflictResolution.SKIP and target.exists(item)
+
+
+def _defer_or_apply_fidelity(
+    source, target: DataTarget, item: MigrationItem, options: MigrationOptions, deferred: list[MigrationItem] | None
+) -> None:
+    """Apply the fidelity steps now, or queue the folder for the post-content pass."""
+    if deferred is not None and item.item_type == "folder":
+        deferred.append(item)
+        return
+    _apply_fidelity(source, target, item, options)
 
 
 def _load_versions(source, target: DataTarget, item: MigrationItem) -> None:

@@ -350,6 +350,56 @@ def test_a_folder_is_not_content_checked_without_folder_value_support():
     assert report.checked == 0
 
 
+def test_a_folders_system_metadata_is_verified_with_the_folder_sample():
+    # A folder is an item too: the timestamp/authorship/ACL writes land on its list
+    # item, so the folder sample joins the fidelity diffs of a pair that carries it.
+    manifest = _folder_manifest("Area/")
+    same = {"created": "2021-03-04T05:06:07+00:00", "modified": "2021-03-05T06:07:08+00:00"}
+    source = _Source(manifest.items, checksums={"Area/": "x"}, metadata={"Area/": same})
+    target = _Target(["Area/"], checksums={"Area/": "x"}, metadata={"Area/": same})
+    source.supports_folder_records = True
+    target.supports_folder_records = True
+
+    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
+
+    assert report.ok
+    assert report.complete
+
+
+def test_a_folders_system_metadata_mismatch_is_reported():
+    manifest = _folder_manifest("Area/")
+    source = _Source(
+        manifest.items,
+        checksums={"Area/": "x"},
+        metadata={"Area/": {"created": "2021-03-04T05:06:07+00:00", "modified": "2021-03-05T06:07:08+00:00"}},
+    )
+    target = _Target(
+        ["Area/"],
+        checksums={"Area/": "x"},
+        metadata={"Area/": {"created": "2021-03-04T05:06:07+00:00", "modified": "2022-01-01T00:00:00+00:00"}},
+    )
+    source.supports_folder_records = True
+    target.supports_folder_records = True
+
+    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
+
+    assert report.mismatches == ["timestamp mismatch (modified): Area/"]
+    assert not report.ok
+
+
+def test_folders_are_not_fidelity_checked_without_folder_record_support():
+    # The filesystem pair has no folder metadata to compare, so a folder must not
+    # turn into an unverifiable fidelity entry there.
+    manifest = _folder_manifest("Area/")
+    source = _Source(manifest.items, checksums={"Area/": ""}, metadata={"Area/": {"created": None}})
+    target = _Target(["Area/"], checksums={"Area/": ""}, metadata={"Area/": {"created": "2021-03-04T05:06:07+00:00"}})
+
+    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
+
+    assert report.ok
+    assert report.unverifiable == []
+
+
 def test_versions_are_always_unverifiable():
     manifest = _manifest("a.txt")
     source = _Source(manifest.items, checksums={"a.txt": "x"})
