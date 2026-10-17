@@ -67,6 +67,7 @@ def main():
         if not report.ok:
             for label, items in (
                 ("missing column", report.missing_columns),
+                ("differing column", report.column_mismatches),
                 ("missing content type", report.missing_content_types),
                 ("missing view", report.missing_views),
                 ("missing field link", report.missing_field_links),

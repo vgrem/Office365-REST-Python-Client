@@ -711,7 +711,7 @@ only), compare the two captured snapshots:
 from office365.migration.sharepoint import verify_list_structure
 
 report = verify_list_structure(source_list, target_list)
-print(report.summary())  # "MISMATCH | Projects | columns: 2, content types: 1, views: 0, field links: 1"
+print(report.summary())  # "MISMATCH | Projects | columns: 2, content types: 1, views: 0, field links: 1, ..."
 if not report.ok:
     print(report.to_dict())
 ```
@@ -720,6 +720,17 @@ Only *missing* structure is reported: a freshly created target list legitimately
 carries extra built-in columns, content types and views, so "extra" entries are
 not findings. Field links that could not be attached (the REST limit described
 above) show up as `missing_field_links`.
+
+A column that both lists have is compared **attribute by attribute**, not just by
+name: the type, `Required`/`Indexed`/`EnforceUniqueValues` flags, length, format,
+rich text, the choice list, the default value, a calculated or validation formula
+and its message, and a calculated column's field references are read out of each
+`SchemaXml` and must match, otherwise the difference lands in `column_mismatches`.
+Only attributes that describe the *containing* site or are assigned by the server
+are ignored — the owning list id, a lookup's target list, a taxonomy column's
+hidden note list, the column id and its storage column/ordinal — because a faithful
+re-create legitimately changes those. A formula is compared with brackets and
+whitespace stripped, the form its own read-back takes.
 
 ## See also
 

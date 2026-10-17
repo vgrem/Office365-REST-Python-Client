@@ -44,6 +44,7 @@ import re
 from dataclasses import asdict, dataclass
 from dataclasses import field as dc_field
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from xml.etree import ElementTree
 
 from office365.migration.map import ContentTypeMap
 from office365.runtime.client_request_exception import ClientRequestException
@@ -126,12 +127,61 @@ _SETTING_DEPENDS_ON = {
 #: ``=IF(Title="",TRUE,FALSE)``), so both sides are compared without decoration.
 _FORMULA_NOISE = re.compile(r"[\s\[\]]")
 
+#: ``SchemaXml`` attributes a faithful re-create legitimately changes: they name the
+#: *containing* site (the owning list, a lookup's target list, a taxonomy column's
+#: hidden note list and its web) or are assigned by the server (column id, storage
+#: column/ordinal). Everything else — type, required/indexed/unique flags, length,
+#: format, rich text, choice list, default, formula, validation — must reproduce.
+_SCHEMA_ATTRIBUTE_NOISE = frozenset({"SourceID", "List", "ListId", "WebId", "TextField", "ID", "ColName", "RowOrdinal"})
+
 
 def comparable_setting(name: str, value: Any) -> Any:
     """A list setting value in the form its own read-back is expected to take."""
     if name == "ValidationFormula" and value is not None:
         return _FORMULA_NOISE.sub("", str(value))
     return value
+
+
+def _comparable_attribute(name: str, value: str) -> Any:
+    """A schema attribute in the form its own read-back is expected to take."""
+    if name in {"ValidationFormula", "Formula"}:
+        return _FORMULA_NOISE.sub("", value)
+    return value
+
+
+def comparable_schema(schema_xml: Optional[str]) -> Dict[str, Any]:
+    """A column's ``SchemaXml`` reduced to the parts a faithful copy reproduces.
+
+    Returns the column's attributes and its value-bearing child elements
+    (``Default``, ``CHOICES``, ``Formula``, ``FieldRefs``) keyed by name, with the
+    site-specific and server-assigned attributes dropped (see
+    :data:`_SCHEMA_ATTRIBUTE_NOISE`). Values are normalized the way their own
+    read-back comes back: a formula without brackets/whitespace and a choice list as
+    a tuple of its options. Unparsable schema yields an empty mapping, so an
+    unreadable column is never reported as a difference.
+    """
+    if not schema_xml:
+        return {}
+    try:
+        root = ElementTree.fromstring(schema_xml)
+    except ElementTree.ParseError:
+        return {}
+    comparable: Dict[str, Any] = {
+        f"attribute {name}": _comparable_attribute(name, value)
+        for name, value in sorted(root.attrib.items())
+        if name not in _SCHEMA_ATTRIBUTE_NOISE
+    }
+    for child in root:
+        tag = child.tag.upper()
+        if tag == "CHOICES":
+            comparable["choices"] = tuple(choice.text or "" for choice in child)
+        elif tag == "FIELDREFS":
+            comparable["field references"] = tuple(ref.attrib.get("Name") or "" for ref in child)
+        elif tag in {"FORMULA", "VALIDATIONFORMULA"}:
+            comparable[tag.lower()] = _FORMULA_NOISE.sub("", child.text or "")
+        else:
+            comparable[tag.lower()] = (child.text or "").strip()
+    return comparable
 
 
 def _setting_names(base_type: Optional[int]) -> List[str]:

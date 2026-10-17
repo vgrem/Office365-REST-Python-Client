@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Attribute-level column verification:** `verify_list_structure` compared columns
+  by **name** only, so a column that reached the target without its policy — a lost
+  `Required`/`Indexed` flag, a truncated choice list, a dropped validation formula —
+  was reported as `OK`. It now also compares what each column's `SchemaXml`
+  declares: type, the required/indexed/unique flags, length, format, rich text, the
+  choice list, the default value, a calculated or validation formula (with brackets
+  and whitespace stripped, the form its own read-back takes) and a calculated
+  column's field references, reported as `column_mismatches` (and in `summary()` /
+  `to_dict()`). Attributes that describe the containing site or are assigned by the
+  server are ignored — the owning list id, a lookup's target list, a taxonomy
+  column's hidden note list, the column id and its storage column/ordinal — because
+  a faithful re-create legitimately changes them. A live whole-site run reports
+  zero such differences across every library and list in the lab.
 - **List container settings + approval state:** a list snapshot used to carry its
   columns, content types and views only, so the target list was recreated with
   stock policy (no versioning, no content approval, no item-level permissions).

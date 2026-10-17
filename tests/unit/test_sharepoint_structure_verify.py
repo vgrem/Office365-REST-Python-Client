@@ -86,10 +86,85 @@ def test_extra_target_structure_is_not_a_finding():
     assert report.ok
 
 
+def _column_structure(name, schema_xml, title="Projects"):
+    return ListStructure(title=title, fields=[FieldDefinition(internal_name=name, schema_xml=schema_xml)])
+
+
+def test_column_policy_difference_is_reported():
+    source = _column_structure("Code", '<Field Type="Text" Name="Code" Required="TRUE" MaxLength="50"/>')
+    target = _column_structure("Code", '<Field Type="Text" Name="Code" Required="FALSE" MaxLength="50"/>')
+
+    report = compare_list_structures(source, target)
+
+    assert report.missing_columns == []
+    assert report.column_mismatches == ["Code: attribute Required source='TRUE', target='FALSE'"]
+    assert not report.ok
+    assert "column attributes: 1" in report.summary()
+
+
+def test_column_choices_and_default_are_compared():
+    source = _column_structure(
+        "Category",
+        '<Field Type="Choice" Name="Category"><Default>B</Default>'
+        "<CHOICES><CHOICE>A</CHOICE><CHOICE>B</CHOICE></CHOICES></Field>",
+    )
+    target = _column_structure(
+        "Category",
+        '<Field Type="Choice" Name="Category"><Default>B</Default><CHOICES><CHOICE>A</CHOICE></CHOICES></Field>',
+    )
+
+    report = compare_list_structures(source, target)
+
+    assert report.column_mismatches == ["Category: choices source=('A', 'B'), target=('A',)"]
+
+
+def test_column_formula_is_compared_without_decoration():
+    # SharePoint drops the brackets around a column reference when it stores a
+    # formula, so an equal formula must not be reported as a difference.
+    source = _column_structure(
+        "Score", '<Field Type="Number" Name="Score" ValidationFormula="=AND([Score]&gt;=0,[Score]&lt;=10)"/>'
+    )
+    target = _column_structure(
+        "Score", '<Field Type="Number" Name="Score" ValidationFormula="=AND(Score&gt;=0,Score&lt;=10)"/>'
+    )
+
+    report = compare_list_structures(source, target)
+
+    assert report.column_mismatches == []
+
+
+def test_lookup_target_list_and_server_assigned_identity_are_not_differences():
+    # A re-created lookup column names the *target* list, and SourceID/ID/ColName are
+    # assigned by the server: none of them is a fidelity finding.
+    source = _column_structure(
+        "Dept",
+        '<Field Type="Lookup" Name="Dept" List="{source}" ID="{one}" SourceID="{s}" ColName="int1" RowOrdinal="0"/>',
+    )
+    target = _column_structure(
+        "Dept",
+        '<Field Type="Lookup" Name="Dept" List="{target}" ID="{two}" SourceID="{t}" ColName="int2" RowOrdinal="0"/>',
+    )
+
+    report = compare_list_structures(source, target)
+
+    assert report.column_mismatches == []
+
+
+def test_unparsable_column_schema_is_not_a_finding():
+    source = _column_structure("Broken", "not xml")
+    target = _column_structure("Broken", '<Field Type="Text" Name="Broken"/>')
+
+    report = compare_list_structures(source, target)
+
+    assert report.column_mismatches == []
+    assert report.ok
+
+
 def test_to_dict_is_serializable():
     report = StructureReport(
         list_title="Projects",
         missing_columns=["Owner"],
+        column_mismatches=["Code: attribute Required source='TRUE', target='FALSE'"],
         missing_content_types=["Task"],
         missing_views=["By Owner"],
         missing_field_links=["Task: Owner"],
@@ -99,6 +174,7 @@ def test_to_dict_is_serializable():
 
     assert data["list_title"] == "Projects"
     assert data["missing_columns"] == ["Owner"]
+    assert data["column_mismatches"] == ["Code: attribute Required source='TRUE', target='FALSE'"]
     assert data["missing_field_links"] == ["Task: Owner"]
     assert data["ok"] is False
 
