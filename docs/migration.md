@@ -191,6 +191,23 @@ Two honest limits remain:
   values and stays silent rather than reporting them as unverifiable. A folder
   that already exists on the target is skipped like an existing file, so a resumed
   run does not back-fill its values.
+- A **document library file's approval state** (content moderation) is carried when
+  the library enables it: the source reads `OData__ModerationStatus`/
+  `OData__ModerationComments` alongside the author ids (one extra projection on the
+  read it already does) and the target restores them. Only a **draft/pending or
+  rejected** file needs this — a fresh upload lands *approved* — so an approved file
+  costs no extra write. Two live-probed details shape the implementation:
+  - It is a **separate, final write**, not folded into the timestamp one: a document
+    rejects a moderation change together with other properties (*You cannot change
+    moderation status and set other item properties at that same time*).
+  - Every `ValidateUpdateListItem` write on a document **approves** it (whatever its
+    `bNewDocumentUpdate` flag), which is exactly why the state has to be written
+    last. The moderation write still moves the list item's own `Modified` (it cannot
+    be combined with anything else), so a draft file reports the *migration* time
+    there — its `File.TimeLastModified`, the value the metadata diff compares, keeps
+    the source timestamp.
+  A failed state write is a warning, never fatal. Check-out and in-progress draft
+  version state are still not carried.
 - Per-item **timestamps/permissions/authorship**
   (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
   by the list adapters on a best-effort basis: timestamps and authorship are
@@ -502,7 +519,7 @@ the shipped pairs' expected output.
 | Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
 | Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
-| Check-out / draft / approval state | unsupported | unsupported | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
+| Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; check-out and in-progress draft state are not; a draft file's `Modified` cannot be restored with it) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | pages/web parts not migrated (the resolver reports each skipped page library as a handoff); quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 

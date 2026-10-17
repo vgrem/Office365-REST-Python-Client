@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Document library file approval state:** a draft or rejected file migrated into a
+  moderation-enabled library landed **approved**. An upload starts out approved, and
+  worse, every `ValidateUpdateListItem` write on a document approves it again — so
+  restoring timestamps silently published a draft. The library source now reads
+  `OData__ModerationStatus`/`OData__ModerationComments` alongside the author ids it
+  already reads (one extra projection, only when the library enables moderation,
+  because selecting a column the list does not have fails) and the target restores
+  them in a **separate, final write** — a document rejects a moderation change
+  together with other item properties (*You cannot change moderation status and set
+  other item properties at that same time*). Only a non-approved status is carried:
+  an upload is already approved, so an approved file costs no extra round trip. A
+  failed state write is a warning, never fatal. The write still moves the *list
+  item's* own `Modified` (SharePoint will not combine it with anything else), so a
+  draft file reports the migration time there, while its `File.TimeLastModified` —
+  the value the metadata diff compares — keeps the source timestamp; `verify()` also
+  compares the approval status itself, so a draft that lands approved is a
+  `mismatch`, not a silent loss.
 - **Document library folder column values:** a folder is a list item too — a
   document set's metadata, a managed folder's department — but the library
   adapters created folders as pure structure, so those values were lost while the

@@ -20,7 +20,7 @@ from office365.migration import (
 from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget, JsonFileSource, JsonFileTarget
 from office365.migration.base import ItemStatus, MigrationItem
 from office365.migration.checkpoint import Checkpoint
-from office365.migration.runner import MigrationRunner
+from office365.migration.runner import MigrationRunner, _apply_fidelity
 from office365.migration.sharepoint.transfer import _transfer_files_parallel
 from office365.runtime.types.event_handler import EventHandler
 from office365.sharepoint.client_context import ClientContext
@@ -755,6 +755,73 @@ class TestRunnerParallel(unittest.TestCase):
         self.assertEqual(stats.errors, 1)
         self.assertEqual(stats.success, 2)  # noqa: PLR2004
         self.assertEqual(items[0].error, "boom")
+
+
+class TestApplyFidelity(unittest.TestCase):
+    """Order of the post-write fidelity steps, and which optional hooks drive them."""
+
+    def _options(self) -> MigrationOptions:
+        return MigrationOptions(preserve_timestamps=True, preserve_authorship=True, preserve_permissions=True)
+
+    def test_approval_state_is_applied_after_the_timestamp_write(self):
+        # A document's system update re-approves the item, so approval has to be
+        # restored last (and separately: a moderated document refuses to change
+        # moderation together with other properties).
+        calls: list[str] = []
+
+        class _Source:
+            def read_permissions(self, item):
+                calls.append("read_permissions")
+                return []
+
+            def read_item_state(self, item):
+                calls.append("read_item_state")
+                return {"_ModerationStatus": "0"}
+
+        class _Target:
+            def apply_authorship(self, item):
+                calls.append("apply_authorship")
+
+            def apply_timestamps(self, item):
+                calls.append("apply_timestamps")
+
+            def apply_item_state(self, item, state):
+                calls.append(f"apply_item_state:{state['_ModerationStatus']}")
+
+        _apply_fidelity(_Source(), _Target(), MigrationItem("/s/doc", "doc"), self._options())
+
+        self.assertEqual(calls[-1], "apply_item_state:0")
+        self.assertLess(calls.index("apply_timestamps"), calls.index("apply_item_state:0"))
+
+    def test_an_approved_item_is_not_rewritten(self):
+        calls: list[str] = []
+
+        class _Source:
+            def read_item_state(self, item):
+                return None
+
+        class _Target:
+            def apply_item_state(self, item, state):
+                calls.append("apply_item_state")
+
+        _apply_fidelity(_Source(), _Target(), MigrationItem("/s/doc", "doc"), MigrationOptions())
+
+        self.assertEqual(calls, [])
+
+    def test_the_approval_step_needs_both_hooks(self):
+        calls: list[str] = []
+
+        class _Source:
+            def read_item_state(self, item):
+                calls.append("read_item_state")
+                return {"_ModerationStatus": "0"}
+
+        class _Target:
+            pass
+
+        _apply_fidelity(_Source(), _Target(), MigrationItem("/s/doc", "doc"), MigrationOptions())
+
+        self.assertEqual(calls, [])
 
 
 def uploadfolder__folder() -> Folder:

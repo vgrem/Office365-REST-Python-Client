@@ -215,6 +215,13 @@ def _verify_metadata(source, target, items: list[MigrationItem], report) -> None
         for key in _METADATA_KEYS:
             if key in source_meta and key in target_meta and not _same_time(source_meta[key], target_meta[key]):
                 report.mismatches.append(f"timestamp mismatch ({key}): {item.dest_path}")
+        expected_status = source_meta.get("moderation_status")
+        if expected_status is not None:
+            actual_status = target_meta.get("moderation_status")
+            if actual_status is None:
+                report.unverifiable.append(f"approval state: {item.dest_path} (target reports none)")
+            elif expected_status != actual_status:
+                report.mismatches.append(f"approval state mismatch: {item.dest_path}")
 
 
 def _verify_authorship(source, target, items: list[MigrationItem], report) -> None:

@@ -619,3 +619,206 @@ def test_library_source_without_the_library_reports_no_folder_records():
     folder = _SourceFolder("/sites/x/Docs", _Web())
 
     assert SharePointLibrarySource(folder).supports_folder_records is False
+
+
+# ── Content-approval (moderation) state ───────────────────────────────────────
+
+
+class _ModerationItem:
+    def __init__(self, properties: dict) -> None:
+        self.properties = properties
+
+
+class _ModerationItems:
+    """The library's items collection, which records the projection it was given."""
+
+    def __init__(self, items: list[_ModerationItem]) -> None:
+        self._items = items
+        self.selects: list[list[str]] = []
+
+    def select(self, columns) -> "_ModerationItems":
+        self.selects.append(list(columns))
+        return self
+
+    def get_all(self) -> "_ModerationItems":
+        return self
+
+    def execute_query(self) -> "_ModerationItems":
+        return self
+
+    def __iter__(self):
+        return iter(self._items)
+
+
+class _ModerationList:
+    def __init__(self, items: list[_ModerationItem], moderation: bool = True) -> None:
+        self.items = _ModerationItems(items)
+        self.properties = {"EnableModeration": moderation}
+        self.ensured: list[list[str]] = []
+
+    def ensure_properties(self, names) -> "_ModerationList":
+        self.ensured.append(list(names))
+        return self
+
+    def get(self) -> "_ModerationList":
+        return self
+
+    def execute_query(self) -> "_ModerationList":
+        return self
+
+
+def _library_source(state: dict | None, moderation: bool = True):
+    """A source over one file, whose list reports the given approval columns."""
+    url = "/sites/x/Docs/doc.txt"
+    folder = _SourceFolder("/sites/x/Docs", _Web(), files=[_SourceFile(url)])
+    properties = {"FileRef": url}
+    properties.update(state or {})
+    lst = _ModerationList([_ModerationItem(properties)], moderation=moderation)
+    return SharePointLibrarySource(folder, sp_list=lst), lst
+
+
+def test_library_source_reads_a_draft_files_approval_state():
+    # An uploaded file starts out approved, so only a draft/pending or rejected
+    # source file needs its state carried — with its approval comments.
+    source, _ = _library_source({"OData__ModerationStatus": 0, "OData__ModerationComments": "wip"})
+    item = source.list_items()[0]
+
+    assert source.read_item_state(item) == {"_ModerationStatus": "0", "_ModerationComments": "wip"}
+    # the same read feeds the verification diff, which needs the status even when
+    # nothing had to be written
+    assert source.read_metadata(item)["moderation_status"] == "0"
+
+
+def test_library_source_does_not_carry_an_approved_files_state():
+    source, _ = _library_source({"OData__ModerationStatus": 2})
+    item = source.list_items()[0]
+
+    assert source.read_item_state(item) is None
+    assert source.read_metadata(item)["moderation_status"] == "2"
+
+
+def test_library_source_does_not_read_moderation_columns_without_moderation():
+    # Selecting a column the list does not have fails outright, so the projection
+    # only grows when the library enables content approval.
+    source, lst = _library_source({}, moderation=False)
+    item = source.list_items()[0]
+
+    assert source.read_item_state(item) is None
+    assert "moderation_status" not in source.read_metadata(item)
+    assert "OData__ModerationStatus" not in lst.items.selects[-1]
+    assert lst.ensured == [["EnableModeration"]]
+
+
+def test_library_source_without_the_library_cannot_read_approval_state():
+    source = SharePointLibrarySource(_SourceFolder("/sites/x/Docs", _Web()))
+
+    assert source.supports_item_state is False
+    assert source.read_item_state(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt")) is None
+
+
+def _state_target():
+    web = _TimestampWeb(_FakeTimeZone(offset_hours=-7))
+    return SharePointLibraryTarget(_TimestampFolder(_TimestampContext(web))), web
+
+
+def test_library_target_restores_a_files_approval_state_in_its_own_write():
+    # A moderated document rejects a moderation change combined with other item
+    # properties, so this is a write of its own, sent after the timestamps.
+    target, web = _state_target()
+    item = MigrationItem("/sites/x/Docs/doc.txt", "doc.txt")
+
+    target.apply_item_state(item, {"_ModerationStatus": "0", "_ModerationComments": "wip"})
+
+    file = web.get_file_by_server_relative_url("/sites/x/Docs/doc.txt")
+    assert file.listItemAllFields.updates == [({"_ModerationStatus": "0", "_ModerationComments": "wip"}, True, True)]
+
+
+def test_library_target_skips_approval_state_for_folders():
+    target, web = _state_target()
+    item = MigrationItem("/sites/x/Docs/Area1", "Area1/", item_type="folder")
+
+    target.apply_item_state(item, {"_ModerationStatus": "0"})
+
+    assert web._files == {}
+
+
+def test_library_target_reports_an_approval_state_it_could_not_restore():
+    target, web = _state_target()
+    file = web.get_file_by_server_relative_url("/sites/x/Docs/doc.txt")
+
+    class _Rejected:
+        def validate_update_list_item(self, form_values, **_kwargs):
+            raise ValueError("You cannot change moderation status and set other item properties")
+
+    file.listItemAllFields = _Rejected()
+
+    target.apply_item_state(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt"), {"_ModerationStatus": "0"})
+
+    assert any("approval state for 'doc.txt'" in warning for warning in target.warnings)
+
+
+class _MetaListItem:
+    """The file's list item: the only place its approval status is exposed."""
+
+    def __init__(self, status, fails: bool = False) -> None:
+        self._status = status
+        self._fails = fails
+        self.selected: list[str] = []
+        self.properties: dict = {}
+
+    def select(self, columns) -> "_MetaListItem":
+        self.selected = list(columns)
+        return self
+
+    def get(self) -> "_MetaListItem":
+        return self
+
+    def execute_query(self) -> "_MetaListItem":
+        if self._fails:
+            raise ValueError("Column 'OData__ModerationStatus' does not exist")
+        self.properties = {"OData__ModerationStatus": self._status}
+        return self
+
+
+class _MetaFile:
+    def __init__(self, item: _MetaListItem) -> None:
+        self.time_created = None
+        self.time_last_modified = None
+        self.length = 3
+        self.listItemAllFields = item
+
+    def get(self) -> "_MetaFile":
+        return self
+
+    def execute_query(self) -> "_MetaFile":
+        return self
+
+
+class _MetaWeb:
+    def __init__(self, item: _MetaListItem) -> None:
+        self._item = item
+
+    def get_file_by_server_relative_url(self, _url: str) -> _MetaFile:
+        return _MetaFile(self._item)
+
+
+def _meta_target(item: _MetaListItem) -> SharePointLibraryTarget:
+    return SharePointLibraryTarget(_TargetFolder(context=_Context(web=_MetaWeb(item))))
+
+
+def test_library_target_reads_back_the_written_approval_state():
+    target = _meta_target(_MetaListItem(1))
+
+    metadata = target.read_metadata(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt"))
+
+    assert metadata["moderation_status"] == "1"
+
+
+def test_library_target_omits_the_approval_state_it_cannot_read():
+    # A library without moderation enabled has no such column: the difference is
+    # unknown, not a mismatch.
+    target = _meta_target(_MetaListItem(None, fails=True))
+
+    metadata = target.read_metadata(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt"))
+
+    assert "moderation_status" not in metadata

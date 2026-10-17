@@ -192,7 +192,8 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
         set_(
             "item_state",
             status.BEST_EFFORT,
-            "approval status and its comments are carried for list items (the list must enable moderation); "
+            "approval status and its comments are carried for list items and document library files "
+            "(the list/library must enable moderation); "
             "check-out and draft-version state are not",
         )
     else:

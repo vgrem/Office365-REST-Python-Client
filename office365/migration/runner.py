@@ -89,6 +89,14 @@ def _apply_fidelity(source, target: DataTarget, item: MigrationItem, options: Mi
     # otherwise bump ``Modified`` past the value we are trying to restore.
     if options.preserve_timestamps:
         _call_optional(target, "apply_timestamps", item)
+    # Content-approval state goes after the timestamps: a document's system update
+    # re-approves it, and a moderation change cannot share a write with other
+    # properties. Only a pair that can read *and* apply it takes this step.
+    state_reader = getattr(source, "read_item_state", None)
+    if callable(state_reader) and callable(getattr(target, "apply_item_state", None)):
+        state = state_reader(item)
+        if state:
+            _call_optional(target, "apply_item_state", item, state)
 
 
 class _Watermark:

@@ -200,6 +200,47 @@ def test_timestamps_compared_tz_tolerantly():
     assert report.mismatches == []
 
 
+def test_approval_state_mismatch_reported():
+    # A draft file that landed approved is a real fidelity loss (it is visible on the
+    # target), so the metadata diff compares the content-approval status too.
+    manifest = _manifest("a.txt")
+    source = _Source(manifest.items, checksums={"a.txt": "x"}, metadata={"a.txt": {"moderation_status": "0"}})
+    target = _Target(["a.txt"], checksums={"a.txt": "x"}, metadata={"a.txt": {"moderation_status": "2"}})
+
+    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
+
+    assert report.mismatches == ["approval state mismatch: a.txt"]
+    assert not report.ok
+
+
+def test_approval_state_match_is_ok():
+    manifest = _manifest("a.txt")
+    source = _Source(manifest.items, checksums={"a.txt": "x"}, metadata={"a.txt": {"moderation_status": "1"}})
+    target = _Target(["a.txt"], checksums={"a.txt": "x"}, metadata={"a.txt": {"moderation_status": "1"}})
+
+    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
+
+    assert report.mismatches == []
+    assert report.ok
+
+
+def test_approval_state_unverifiable_when_the_target_reports_none():
+    # A target library without moderation enabled cannot report a status: the
+    # difference is unknown rather than equal.
+    manifest = _manifest("a.txt")
+    modified = {"modified": "2020-01-01T00:00:00Z"}
+    source = _Source(
+        manifest.items, checksums={"a.txt": "x"}, metadata={"a.txt": {**modified, "moderation_status": "0"}}
+    )
+    target = _Target(["a.txt"], checksums={"a.txt": "x"}, metadata={"a.txt": modified})
+
+    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
+
+    assert report.mismatches == []
+    assert not report.complete
+    assert any("approval state" in entry for entry in report.unverifiable)
+
+
 def test_metadata_check_unverifiable_without_target_hook():
     manifest = _manifest("a.txt")
     source = _Source(manifest.items, checksums={"a.txt": "x"})

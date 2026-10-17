@@ -84,6 +84,14 @@ _APPROVAL_FIELDS = {
     "OData__ModerationComments": "_ModerationComments",
 }
 
+#: Approval status of an approved item (0 = draft/pending, 1 = rejected, 2 = approved).
+#: A freshly uploaded document is approved, so only the other states are worth writing.
+_APPROVED_STATUS = "2"
+
+#: Moderation columns of a list item. They only exist on a list whose
+#: ``EnableModeration`` is on, so selecting them unconditionally fails outright.
+_MODERATION_FIELDS = ("OData__ModerationStatus", "OData__ModerationComments")
+
 #: Multi-value typed columns. Their ``<name>Id`` companion is a collection of ids
 #: that a ``*`` projection omits (LookupMulti entirely; UserMulti unreliably), so the
 #: source selects them explicitly and the target writes ``{"results": [...]}``.
@@ -433,6 +441,22 @@ def _report_rejected_fields(result, warnings: list[str], label: str) -> None:
     for value in values:
         if getattr(value, "HasException", False):
             warnings.append(f"{label}: {value.FieldName} rejected ({value.ErrorMessage})")
+
+
+def _moderation_state(properties: dict) -> dict:
+    """The approval fields of a list item, in ``ValidateUpdateListItem`` form.
+
+    Only present ones are returned: an empty ``_ModerationComments`` normalizes to
+    ``None`` server-side, so a blank comment is not carried.
+    """
+    status = properties.get("OData__ModerationStatus")
+    state: dict = {}
+    if status is not None:
+        state["_ModerationStatus"] = str(status)
+    comments = properties.get("OData__ModerationComments")
+    if comments:
+        state["_ModerationComments"] = str(comments)
+    return state
 
 
 def _version_sort_key(label: str) -> tuple[int, ...]:
@@ -2280,6 +2304,10 @@ class SharePointLibrarySource:
         self._default_groups: _DefaultGroups | None = None
         self._item_authors: dict[str, tuple[int | None, int | None]] | None = None
         self._item_unique: dict[str, bool] | None = None
+        # Content-approval state by file URL, read alongside the author ids (only
+        # when the library moderates).
+        self._item_moderation: dict[str, dict] | None = None
+        self._moderation_on: bool | None = None
         self.warnings: list[str] = []
         # Optional hook invoked while a file downloads: (bytes_read, file_size)
         self.on_bytes = on_bytes
@@ -2445,11 +2473,16 @@ class SharePointLibrarySource:
         file = self._files.get(item.dest_path)
         if file is None:
             return None
-        return {
+        metadata = {
             "created": iso_or_none(file.time_created),
             "modified": iso_or_none(file.time_last_modified),
             "size_bytes": file.length or 0,
         }
+        self._file_authors()
+        state = (self._item_moderation or {}).get(item.source_path)
+        if state:
+            metadata["moderation_status"] = state.get("_ModerationStatus")
+        return metadata
 
     def read_authorship(self, item: MigrationItem) -> tuple[str | None, str | None]:
         """The source author/editor login names (for the authorship diff)."""
@@ -2506,13 +2539,14 @@ class SharePointLibrarySource:
             return self._item_authors
         authors: dict[str, tuple[int | None, int | None]] = {}
         unique: dict[str, bool] = {}
+        moderation: dict[str, dict] = {}
+        moderates = self._moderation_enabled()
         if self._sp_list is not None:
             try:
-                items = (
-                    self._sp_list.items.select(["FileRef", "AuthorId", "EditorId", "HasUniqueRoleAssignments"])
-                    .get_all()
-                    .execute_query()
-                )
+                select = ["FileRef", "AuthorId", "EditorId", "HasUniqueRoleAssignments"]
+                if moderates:
+                    select.extend(_MODERATION_FIELDS)
+                items = self._sp_list.items.select(select).get_all().execute_query()
                 for item in items:
                     ref = item.properties.get("FileRef")
                     if ref:
@@ -2521,11 +2555,50 @@ class SharePointLibrarySource:
                             parse_int(item.properties.get("EditorId")),
                         )
                         unique[ref] = bool(item.properties.get("HasUniqueRoleAssignments"))
+                        if moderates:
+                            state = _moderation_state(item.properties)
+                            if state:
+                                moderation[ref] = state
             except Exception as e:  # noqa: BLE001 — authorship is best-effort
                 self.warnings.append(f"author/editor read failed: {e}")
         self._item_authors = authors
         self._item_unique = unique
+        self._item_moderation = moderation
         return authors
+
+    def _moderation_enabled(self) -> bool:
+        """Whether the parent library enables content approval (read once)."""
+        if self._moderation_on is None:
+            self._moderation_on = False
+            if self._sp_list is not None:
+                try:
+                    self._sp_list.ensure_properties(["EnableModeration"]).get().execute_query()
+                    self._moderation_on = bool(self._sp_list.properties.get("EnableModeration"))
+                except Exception as e:  # noqa: BLE001 — approval state is best-effort
+                    self.warnings.append(f"moderation setting read failed: {e}")
+        return self._moderation_on
+
+    @property
+    def supports_item_state(self) -> bool:
+        """Whether approval state can be read (needs the parent library)."""
+        return self._list_source is not None
+
+    def read_item_state(self, item: MigrationItem) -> dict | None:
+        """Approval state that a fresh upload would not reproduce.
+
+        An uploaded document starts out *approved*, so only a draft/pending or
+        rejected source file carries state, together with its approval comments.
+        """
+        if item.item_type == "folder" or self._list_source is None:
+            return None
+        self._file_authors()
+        state = (self._item_moderation or {}).get(item.source_path)
+        if not state:
+            return None
+        status = state.get("_ModerationStatus")
+        if status is None or status == _APPROVED_STATUS:
+            return None
+        return state
 
     def close(self) -> None:
         pass
@@ -2543,6 +2616,11 @@ class SharePointLibraryTarget:
     rewrites the folder's content type id to its target counterpart, exactly as it
     does for an item record.
     """
+
+    #: Files carry content-approval state (``apply_item_state``). Documents refuse a
+    #: moderation change combined with other property writes, so it is a write of its
+    #: own, applied after the timestamps that would otherwise re-approve the file.
+    supports_item_state = True
 
     def __init__(
         self,
@@ -2859,16 +2937,59 @@ class SharePointLibraryTarget:
                     securable.add_role_assignment(principal, role)
         securable.context.execute_query()
 
+    def apply_item_state(self, item: MigrationItem, state: dict) -> None:
+        """Best-effort: restore a migrated file's content-approval state.
+
+        An uploaded file starts out approved, and the timestamp/authorship system
+        updates approve it again, so a source draft or rejected file would
+        otherwise silently become visible. Documents reject a moderation change
+        combined with other properties (``You cannot change moderation status and
+        set other item properties at that same time.``), hence a separate write,
+        applied last. A library without moderation enabled has no such fields: the
+        write fails and is reported, never fatal.
+        """
+        if item.item_type == "folder" or not state:
+            return
+        securable = self._securable(item)
+        if securable is None:
+            return
+        try:
+            result = securable.validate_update_list_item(
+                dict(state),
+                dates_in_utc=True,
+                new_document_update=True,
+            ).execute_query()
+        except Exception as e:  # noqa: BLE001 — approval state is best-effort
+            self.warnings.append(f"approval state for {item.dest_path!r} could not be restored: {e}")
+            return
+        _report_rejected_fields(result, self.warnings, f"approval state {item.dest_path}")
+
     def read_metadata(self, item: MigrationItem) -> dict | None:
         """Comparable attributes of the written item (for the metadata diff)."""
         if item.item_type == "folder":
             return None
         file = self._folder.context.web.get_file_by_server_relative_url(self._url(item)).get().execute_query()
-        return {
+        metadata = {
             "created": iso_or_none(file.time_created),
             "modified": iso_or_none(file.time_last_modified),
             "size_bytes": file.length or 0,
         }
+        status = self._target_moderation_status(item)
+        if status is not None:
+            metadata["moderation_status"] = status
+        return metadata
+
+    def _target_moderation_status(self, item: MigrationItem) -> str | None:
+        """The written file's approval status, or ``None`` when not readable."""
+        securable = self._securable(item)
+        if securable is None:
+            return None
+        try:
+            securable.select(["OData__ModerationStatus"]).get().execute_query()
+        except Exception:  # noqa: BLE001 — a library without moderation has no such column
+            return None
+        status = securable.properties.get("OData__ModerationStatus")
+        return None if status is None else str(status)
 
     def read_permissions(self, item: MigrationItem) -> list[PermissionEntry]:
         """Read the written item's *unique* role assignments (for the permission diff)."""
