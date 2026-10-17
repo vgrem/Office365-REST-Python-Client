@@ -340,7 +340,7 @@ def test_fidelity_matrix_reports_every_dimension_conservatively():
         "sharing_links",
     }
     assert dims["content"] == FidelityStatus.DELIVERED.value
-    assert dims["navigation"] == FidelityStatus.HANDOFF.value
+    assert dims["navigation"] == FidelityStatus.BEST_EFFORT.value
     assert dims["versions"] == FidelityStatus.UNSUPPORTED.value
     # every non-delivered dimension carries a reason
     for name, status in dims.items():

@@ -8,6 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Modern site pages are copied, not just reported.** A *Site Pages* library
+  (`base_template` 119) holds `.aspx` pages, so the item adapters never migrated
+  it and the whole-site resolver only handed it off. Modern pages are reachable
+  over REST, so `resolve_site_task(..., migrate_pages=True)` (the default) now
+  copies them through the rewritten
+  `office365.migration.sharepoint.pages.copy_site_pages`: read the source library
+  once, classify each page (modern by the
+  `0x0101009D1CB255DA76424F860D91F20E6C4118` content-type prefix, classic by
+  `WikiField`-only content), create the page with
+  `Web.add_site_page(name, title=...)` (`POST /_api/sitepages/pages`), MERGE
+  `Title`/`Description`/`CanvasContent1`/`LayoutWebpartsContent`/`BannerImageUrl`/
+  `PromotedState` onto the created item, publish it with
+  `Web.get_site_page_by_id(id).publish()` when the source page was published, and
+  read the canvas back once to confirm it landed. Duplicates follow the SPMT
+  vocabulary via `MigrationSettings.duplicate_page_behavior` — `RENAME` (default,
+  `Home.aspx` → `Home-1.aspx`), `SKIP`, `OVERWRITE` — and copies are **add-only**:
+  no target page is ever deleted. `verify_page_copy(source_web, target_web)`
+  reconciles the copy read-only (same name *or* identical canvas counts as
+  delivered, everything else is `missing`/`drifted`), and `migrate_site.py` gained
+  `--no-pages` / `--duplicate-pages` plus a page line in its plan and a page
+  section in its verification pass. Live-verified on SharePoint Online: a created
+  page stays a draft (`OData__ModerationStatus = 3`) until the page-level publish
+  runs — a MERGE of the moderation status does **not** publish it — and
+  `CanvasContent1` round-trips **byte-identical** through an item MERGE (the source
+  canvas is already entity-encoded), including a 10 394-character page. Also
+  live-verified end to end through `migrate_site.py`: three source pages → two
+  copied (one renamed around an existing page, both published, canvases intact)
+  and one reported as failed because its target name was held by another user's
+  check-out — the failure is recorded per page and never aborts the run. Library
+  surface added: `SitePageCollection.add(name, title, page_layout_type)` (a create
+  that does not name the page is rejected by the server),
+  `Web.add_site_page(...)` and `Web.get_site_page_by_id(id)`. Limits stated
+  plainly: **classic** pages remain a handoff (transformation, not copy), a
+  serialized client-side web part still binds to the source list/library ids, page
+  version history is not restored, and an empty source canvas is left alone (a new
+  page already ships a default one). The page part of the handoff note now names
+  only the pages a copy left behind (`page_handoff_note(..., modern_copied=True)`),
+  and the `navigation` fidelity dimension moved from `handoff` to `best_effort`.
 - **Web-scope structure gaps are named instead of silent.** Structure replay is
   per *list*, because that is as far as REST reaches: `FieldLinks` refuses to
   attach a column that is not reachable from the list (`Column '<name>' does not
@@ -210,9 +248,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (`detect_page_handoff`, `page_handoff_note`) finds each source web's Site Pages,
   wiki and publishing page libraries, lists their pages, and counts the
   client-side web parts a modern page serializes in its canvas; the resolver
-  appends the note to `session.warnings()`. Pages and web parts are still **not**
-  migrated (page transformation belongs to external tools), but the gap is now
-  explicit and reported instead of silent. The canvas parsing is a base-library
+  appends the note to `session.warnings()`. At that point pages and web parts
+  were still **not** migrated (page transformation belongs to external tools);
+  the *Modern site pages are copied* entry above closes the modern-page part of
+  that gap in the same release, leaving classic pages as the handoff. The canvas parsing is a base-library
   helper — `office365.sharepoint.publishing.pages.canvas`
   (`parse_canvas_controls`, `count_web_parts`) and `SitePage.web_part_count` — so
   any inventory that reads `CanvasContent1` can count web parts without a
@@ -226,7 +265,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reconciled), so runs are idempotent and a target's own links are never destroyed,
   and source links are rewritten from the source web's path to the target's.
   Dynamic nodes without a URL (the *Recent* node and its computed children) and
-  audience targeting are out of scope; pages and web parts remain *handoff*.
+  audience targeting are out of scope; pages and web parts were *handoff* at that
+  point — modern page copy landed later in this release.
 - **Web (site) security replication:** `preserve_permissions` now covers the web
   scope, not just per-item ACLs. `resolve_site_task(..., preserve_permissions=True)`
   re-creates each source web's **custom site groups** (flags + membership) and its

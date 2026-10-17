@@ -53,6 +53,8 @@ class MigrationSettings:
     migrate_all_site_fields_and_content_types: bool = False
     migrate_site_settings: str = "PRESERVE_ALL_SETTINGS"
     migrate_navigation: bool = True
+    #: Copy modern site pages (canvas + page metadata) instead of only reporting them.
+    migrate_pages: bool = True
     migrate_term_groups: bool = True
     lookup_reference_policy: int = 0
 

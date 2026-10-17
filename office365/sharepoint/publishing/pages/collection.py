@@ -25,10 +25,27 @@ class SitePageCollection(SitePageMetadataCollection[SitePage]):
             resource_path = ResourcePath("SP.Publishing.SitePageCollection")
         super().__init__(context, SitePage, resource_path)
 
-    def add(self) -> SitePage:
-        """Adds Site Page"""
+    def add(
+        self,
+        name: Optional[str] = None,
+        title: Optional[str] = None,
+        page_layout_type: Optional[str] = None,
+    ) -> SitePage:
+        """Adds (creates a draft) site page.
+
+        Args:
+            name: The page file name, e.g. ``Home.aspx``. The server rejects a
+                create that does not name the page.
+            title: The page title; defaults to ``name``.
+            page_layout_type: The page layout, e.g. ``Article`` (the modern page
+                default) or ``SingleWebPartAppPage``.
+        """
         return_type = SitePage(self.context)
-        return_type.set_property("Title", "", True)
+        if name is not None:
+            return_type.set_property("Name", name)
+        return_type.set_property("Title", title or name or "", True)
+        if page_layout_type is not None:
+            return_type.set_property("PageLayoutType", page_layout_type)
         qry = CreateEntityQuery(self, return_type, return_type)
         self.context.add_query(qry)
         self.add_child(return_type)

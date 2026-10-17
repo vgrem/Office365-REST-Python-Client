@@ -372,12 +372,14 @@ values intact, the source/target verification reporting `OK`. Two limits are
 worth naming: the web-scope **site columns and site content types** themselves are
 not created — they are replayed only *through the lists that use them* (see
 *Provisioning list structure* below) — and the mirrored webs are recreations, so
-their ids, pages, web parts and version history do not match the source's.
+their ids, web-part data bindings and version history do not match the source's
+(pages are copied per web, subwebs included — see *Site pages* below).
 
-**Artifacts a copy cannot carry are named, never dropped silently.** Four of them
-are outside what a client-side copy can produce — pages/web parts, workflow
-associations, InfoPath forms and business-data (BCS) external lists — so the
-resolver appends a handoff note for each one it finds (see
+**Artifacts a copy cannot carry are named, never dropped silently.** Modern site
+pages *are* copied (see *Site pages* below), but three categories are outside what
+a client-side copy can produce — workflow associations, InfoPath forms and
+business-data (BCS) external lists, plus any *classic* page — so the resolver
+appends a handoff note for each one it finds (see
 `detect_handoff(web, lists)` / `handoff_notes(handoff)` in
 `office365.migration.sharepoint.handoff`, also exported from
 `office365.migration.sharepoint`). Detection is cheap and best-effort: two extra
@@ -538,6 +540,63 @@ back as `=IF(Title="",FALSE,TRUE)`), so `verify_list_structure` compares it with
 whitespace and brackets stripped and reports any other difference as a
 `settings_mismatch`.
 
+### Site pages
+
+A *Site Pages* library (`base_template` 119) holds `.aspx` pages rather than
+documents, so the item adapters do not migrate it. **Modern** site pages are still
+reachable over REST, so the whole-site resolver copies them
+(`resolve_site_task(..., migrate_pages=True)`, the default):
+
+1. read the source page library once, projecting `Id, FileLeafRef, Title,
+   Description, ContentTypeId, CanvasContent1, LayoutWebpartsContent,
+   PromotedState, BannerImageUrl, OData__ModerationStatus`;
+2. classify each page — modern when its content type id starts with
+   `0x0101009D1CB255DA76424F860D91F20E6C4118` (or it serializes a canvas),
+   classic when only `WikiField` has content;
+3. create the target page through `POST /_api/sitepages/pages`
+   (`Web.add_site_page(name, title=...)`) and read the new id from the create
+   response (`Id`; the response carries no `Name`);
+4. MERGE the page content onto the created item (`Title`, `Description`,
+   `CanvasContent1`, `LayoutWebpartsContent`, `BannerImageUrl`, `PromotedState`) —
+   only the values the source actually carries, and an *empty* canvas is left
+   alone because a new page already ships a default one;
+5. publish it (`POST /_api/sitepages/pages(<id>)/publish`) when the source page was
+   published, then read the canvas back once to confirm it landed.
+
+Two server facts this relies on are **live-verified** on SharePoint Online: a page
+created that way is a *draft* until the page-level `publish` operation runs (a
+MERGE of `OData__ModerationStatus` does **not** publish it), and a page's
+`CanvasContent1` round-trips byte-identical through an item MERGE (the source
+canvas is stored already entity-encoded, so no normalization is needed).
+
+Copies are **add-only** — an existing target page is never deleted. The duplicate
+behaviour is explicit, using the SPMT vocabulary
+(`MigrationSettings.duplicate_page_behavior`, or `--duplicate-pages` in the
+example): `RENAME` (default: `Home.aspx` → `Home-1.aspx`, never reusing a taken
+name), `SKIP` (leave the target page as it is) or `OVERWRITE` (MERGE onto the
+existing page). `verify_page_copy(source_web, target_web)` reconciles the result
+read-only: a source page counts as delivered when the target has the same name or
+an identical canvas, and anything else is reported as `missing` or `drifted`.
+
+What a copy still cannot do, stated plainly:
+
+- **Classic pages** (wiki/publishing pages) are transformation work, not copy
+  work. They stay a handoff: `detect_page_handoff` inventories them,
+  `page_handoff_note(handoff, modern_copied=True)` names only the ones that were
+  *not* copied.
+- A **client-side web part** serializes the source list/library identifiers it
+  binds to; those are not remapped, so a copied page can render a web part pointed
+  at the source. The note reports the web-part count per page.
+- **Version history** of a page is not restored (REST cannot write it), and a
+  target page that is *checked out* by someone else cannot be created or
+  overwritten — the create fails with SharePoint's own check-out error and the
+  page is listed under `PageCopyReport.failed` rather than aborting the run.
+
+The last two points were exercised live: a run over a source web with three modern
+pages copied two (one of them renamed around an existing target page, both
+published, canvases read back intact) and reported the third as failed because its
+target name was held by another user's check-out.
+
 ## Fidelity
 
 | Flag | Client-side runner | Server-side package |
@@ -635,7 +694,7 @@ the shipped pairs' expected output.
 | Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure` (per list: web-scope site columns and site content types are not registered on the target) | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
 | Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and a file on an **un-published (minor) version** is copied as its draft — both reported as warnings, since the readable version is all REST exposes) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
-| Navigation / pages / web parts | pages/web parts not migrated (the resolver reports each skipped page library as a handoff); quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
+| Navigation / pages / web parts | navigation and pages are web concerns, not adapter concerns: the whole-site resolver copies quick launch/top nav (`migrate_navigation`) and modern site pages — canvas, title, description, layout, banner, promoted state — then publishes the ones the source had published (`migrate_pages`); classic pages are a handoff, and a serialized web part keeps the source list/library ids it binds to | same | same |
 | Workflows / InfoPath forms / BCS external lists | not migrated (the resolver reports every association, InfoPath form and external list as a handoff) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
@@ -663,12 +722,18 @@ the shipped pairs' expected output.
 > Quick Launch and top navigation bar additively (source links rewritten to the
 > target; dynamic nodes such as *Recent* are skipped), and
 > `verify_navigation(source_web, target_web)` reconciles the copyable links.
-> Pages and web parts are **not** migrated — the `navigation` dimension stays
-> `handoff` for that reason. The resolver makes that gap visible:
-> `detect_page_handoff(source_lists)` finds the skipped page libraries (Site
-> Pages, wiki/publishing pages) and `page_handoff_note` appends a warning naming
-> the pages and their client-side web-part count, so a run never silently drops
-> them (`detect_page_handoff` / `page_handoff_note` are also exported for reuse).
+> Site pages follow the same pattern (`migrate_pages`, on by default): the
+> resolver calls `copy_site_pages(source_web, target_web)` and
+> `verify_page_copy(source_web, target_web)` reconciles the canvases. The
+> `navigation` dimension is `best_effort` for that reason: navigation and modern
+> pages are carried, **classic** pages are a handoff, and a modern page's
+> client-side web parts keep the source identifiers they serialize — their data
+> bindings are not remapped. The resolver makes the remaining gap visible:
+> `detect_page_handoff(source_lists)` finds the page libraries and classifies each
+> page, then `page_handoff_note(handoff, modern_copied=...)` appends a warning
+> naming the pages that were *not* copied and the client-side web-part count, so a
+> run never silently drops them (`detect_page_handoff` / `page_handoff_note` are
+> also exported for reuse).
 
 The three other handoff categories are detected the same way, by
 `detect_handoff(web, lists)`:
@@ -919,6 +984,26 @@ are ignored — the owning list id, a lookup's target list, a taxonomy column's
 hidden note list, the column id and its storage column/ordinal — because a faithful
 re-create legitimately changes those. A formula is compared with brackets and
 whitespace stripped, the form its own read-back takes.
+
+### Verifying site pages
+
+Pages are not files with a hash, so the check compares the artifact that carries
+the content — the canvas:
+
+```python
+from office365.migration.sharepoint import verify_page_copy
+
+notes = verify_page_copy(source_web, target_web)  # read-only
+for note in notes:
+    print(note)  # "1 modern page(s) have no target counterpart: CollabHome.aspx"
+```
+
+A source page counts as delivered when the target has a page of the same name
+**or** a page whose canvas is identical — so a deliberately renamed duplicate
+(`Home-1.aspx`) is not reported as drift. Everything else lands in one of two
+findings: pages with no counterpart, and pages whose canvas differs from the
+source's. Classic pages are not compared at all; they are handoff, and
+`page_handoff_note` names them.
 
 ## See also
 

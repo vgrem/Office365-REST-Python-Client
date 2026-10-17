@@ -13,6 +13,7 @@ from office365.migration.sharepoint.adapters import (
     SharePointListSource,
     SharePointListTarget,
 )
+from office365.migration.sharepoint.pages import PageCopyReport
 from office365.migration.sharepoint.resolvers import (
     is_document_library,
     is_migratable_list,
@@ -23,6 +24,8 @@ from office365.migration.sharepoint.structure import normalize_guid
 from office365.migration.tasks import MigrationTask
 
 _DOCUMENT_LIBRARY_TEMPLATE = 101
+_WIKI_PAGE_CONTENT_TYPE = "0x010108"
+_SITE_PAGE_CONTENT_TYPE = "0x0101009D1CB255DA76424F860D91F20E6C4118005E10E40F8E37D94AB983A0181120EFFC"
 
 
 class _Folder:
@@ -95,8 +98,13 @@ class _Lists:
 
 
 class _PageItem:
-    def __init__(self, name, canvas=""):
-        self.properties = {"FileLeafRef": name, "CanvasContent1": canvas}
+    def __init__(self, name, canvas="", wiki="", content_type_id=_SITE_PAGE_CONTENT_TYPE):
+        self.properties = {
+            "FileLeafRef": name,
+            "CanvasContent1": canvas,
+            "WikiField": wiki,
+            "ContentTypeId": content_type_id,
+        }
 
 
 class _PageItems:
@@ -396,7 +404,7 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
 
         self.assertEqual(pairs[0][1].warnings, ["content type 'Project': column 'X' was not linked"])
 
-    def test_page_library_is_reported_as_handoff(self):
+    def test_page_library_is_reported_when_pages_are_not_copied(self):
         pages = _PageList(
             [
                 _PageItem("Home.aspx"),
@@ -407,12 +415,47 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
 
         warnings: list[str] = []
-        pairs = resolve_site_task(task, source, warnings=warnings)
+        pairs = resolve_site_task(task, source, migrate_pages=False, warnings=warnings)
 
         self.assertEqual(len(pairs), 1)  # the page library is not a content pair
-        note = next(message for message in warnings if "pages/web parts are not migrated" in message)
+        note = next(message for message in warnings if "pages are not migrated" in message)
         self.assertIn("Site Pages (2 page(s): Home.aspx, CollabHome.aspx)", note)
         self.assertIn("1 web part(s)", note)
+
+    def test_modern_pages_are_copied_and_classic_pages_reported(self):
+        pages = _PageList(
+            [
+                _PageItem("Home.aspx"),
+                _PageItem("Guide.aspx", wiki="<p>classic</p>", content_type_id=_WIKI_PAGE_CONTENT_TYPE),
+            ]
+        )
+        source = _context([_docs(), pages])
+        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
+        report = PageCopyReport(copied=["Home.aspx"], published=["Home.aspx"], classic=["Guide.aspx"])
+        warnings: list[str] = []
+
+        with mock.patch("office365.migration.sharepoint.resolvers.copy_site_pages", return_value=report) as copy:
+            resolve_site_task(task, source, warnings=warnings)
+
+        self.assertEqual(copy.call_args[0][:2], (source.web, source.web))
+        self.assertIn("page copy: 1 page(s) copied, 1 published", warnings)
+        note = next(message for message in warnings if "classic page(s) are not migrated" in message)
+        self.assertIn("Guide.aspx", note)
+        self.assertNotIn("Home.aspx", note)
+
+    def test_a_failing_page_copy_degrades_to_a_warning(self):
+        pages = _PageList([_PageItem("Home.aspx")])
+        source = _context([_docs(), pages])
+        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
+        warnings: list[str] = []
+
+        with mock.patch("office365.migration.sharepoint.resolvers.copy_site_pages", side_effect=RuntimeError("denied")):
+            pairs = resolve_site_task(task, source, warnings=warnings)
+
+        self.assertEqual(len(pairs), 1)
+        self.assertTrue(any("page copy failed" in message for message in warnings))
+        # The handoff note falls back to "not copied" wording.
+        self.assertTrue(any("pages are not migrated" in message for message in warnings))
 
     def test_workflows_forms_and_external_lists_are_reported_as_handoff(self):
         forms = _FakeList("Requests")

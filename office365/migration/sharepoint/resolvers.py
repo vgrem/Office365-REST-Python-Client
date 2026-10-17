@@ -39,6 +39,7 @@ from office365.migration.sharepoint.adapters import (
 )
 from office365.migration.sharepoint.handoff import EXTERNAL_LIST_TEMPLATE, detect_handoff, handoff_notes
 from office365.migration.sharepoint.navigation import apply_navigation
+from office365.migration.sharepoint.pages import DUPLICATE_RENAME, PageCopyReport, copy_site_pages
 from office365.migration.sharepoint.security import apply_site_security
 from office365.migration.sharepoint.structure import (
     capture_list_structure,
@@ -138,6 +139,8 @@ def resolve_site_task(
     include_subwebs: bool = False,
     preserve_permissions: bool = False,
     migrate_navigation: bool = False,
+    migrate_pages: bool = True,
+    duplicate_page_behavior: str = DUPLICATE_RENAME,
     warnings: list[str] | None = None,
 ) -> list[tuple[Source, Target]]:
     """Resolve a whole-site task into one ``(source, target)`` pair per list.
@@ -172,9 +175,16 @@ def resolve_site_task(
         migrate_navigation: Best-effort copy each web's Quick Launch and top
             navigation (source links rewritten to the target). Additive and
             idempotent; dynamic nodes are skipped.
+        migrate_pages: Copy each web's modern site pages — the page is created
+            through the ``sitepages`` endpoint, its canvas and page metadata are
+            written, and it is published when the source page was. Classic pages
+            and web part data bindings are reported, not carried.
+        duplicate_page_behavior: What to do when a target page of that name
+            already exists — ``RENAME`` (default, as SPMT), ``SKIP`` or
+            ``OVERWRITE``.
         warnings: Optional sink for resolution-level notes (subsites skipped,
-            pages/web parts, workflows, InfoPath forms and BCS external lists
-            detected but not migrated).
+            classic pages, web parts, workflows, InfoPath forms and BCS external
+            lists detected but not migrated).
     """
     if task.kind != SHAREPOINT:
         raise ValueError(f"a site task must be kind {SHAREPOINT!r}, got {task.kind!r}")
@@ -198,16 +208,39 @@ def resolve_site_task(
         include_subwebs,
         preserve_permissions,
         migrate_navigation,
+        migrate_pages,
+        duplicate_page_behavior,
         warnings if warnings is not None else [],
         pairs,
     )
     return pairs
 
 
-def _report_handoff(source_web: Web, source_lists: Iterable[SPList], warnings: list[str]) -> None:
+def _report_pages(
+    source_web: Web, target_web: Web, duplicate_behavior: str, warnings: list[str]
+) -> PageCopyReport | None:
+    """Copy the web's modern site pages, reporting what a copy cannot carry."""
+    try:
+        report = copy_site_pages(source_web, target_web, duplicate_behavior=duplicate_behavior, warnings=warnings)
+    except Exception as e:  # noqa: BLE001 — page copy is best-effort; never abort resolution
+        warnings.append(f"page copy failed for {_web_url(source_web)}: {e}")
+        return None
+    summary = report.summary()
+    if summary:
+        logger.info(summary)
+        warnings.append(summary)
+    return report
+
+
+def _report_handoff(
+    source_web: Web,
+    source_lists: Iterable[SPList],
+    warnings: list[str],
+    page_report: PageCopyReport | None = None,
+) -> None:
     """Append handoff notes for the artifacts the adapters cannot carry (best-effort)."""
     try:
-        notes = handoff_notes(detect_handoff(source_web, source_lists))
+        notes = handoff_notes(detect_handoff(source_web, source_lists), page_report)
     except Exception as e:  # noqa: BLE001 — handoff detection is best-effort; never abort resolution
         warnings.append(f"handoff detection failed for {_web_url(source_web)}: {e}")
         return
@@ -236,6 +269,8 @@ def _resolve_web(
     include_subwebs: bool,
     preserve_permissions: bool,
     migrate_navigation: bool,
+    migrate_pages: bool,
+    duplicate_page_behavior: str,
     warnings: list[str],
     pairs: list[tuple[Source, Target]],
 ) -> None:
@@ -251,9 +286,15 @@ def _resolve_web(
         except Exception as e:  # noqa: BLE001 — navigation is best-effort; never abort list resolution
             warnings.append(f"navigation replication failed for {_web_url(source_context.web)}: {e}")
     source_lists: Iterable[SPList] = source_context.web.lists.get().execute_query()
-    # Pages, workflows, InfoPath forms and BCS external lists are outside what a
-    # client-side copy can carry; report them rather than dropping them silently.
-    _report_handoff(source_context.web, source_lists, warnings)
+    # Modern site pages are copied; classic pages, web part data bindings,
+    # workflows, InfoPath forms and BCS external lists are outside what a
+    # client-side copy can carry — report them rather than dropping them silently.
+    page_report = (
+        _report_pages(source_context.web, target_context.web, duplicate_page_behavior, warnings)
+        if migrate_pages
+        else None
+    )
+    _report_handoff(source_context.web, source_lists, warnings, page_report)
     # Structure provisioning replays each list's columns/content types onto the
     # target *list*; say which web-level definitions that leaves behind.
     _report_web_scope_structure(source_context.web, target_context.web, warnings)
@@ -316,6 +357,8 @@ def _resolve_web(
             include_subwebs,
             preserve_permissions,
             migrate_navigation,
+            migrate_pages,
+            duplicate_page_behavior,
             warnings,
             pairs,
         )

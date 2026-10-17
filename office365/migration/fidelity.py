@@ -203,9 +203,10 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
     set_("views", status.UNSUPPORTED, "views are not carried by the adapters; replay them with provision_list_structure")
     set_(
         "navigation",
-        status.HANDOFF,
-        "pages/web parts are not migrated: the whole-site resolver detects page libraries and reports "
-        "them as handoff, and copies quick-launch/top-nav links (migrate_navigation)",
+        status.BEST_EFFORT,
+        "navigation and site pages are web-scope concerns the adapters do not carry: the whole-site "
+        "resolver copies quick-launch/top-nav links (migrate_navigation) and modern site pages with "
+        "their canvas (migrate_pages); classic pages and web-part data bindings remain handoff",
     )
     set_("sharing_links", status.UNSUPPORTED, "sharing links follow the tenant policy; they are not recreated per item")
     return dims, notes

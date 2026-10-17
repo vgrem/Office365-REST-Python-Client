@@ -154,6 +154,7 @@ if TYPE_CHECKING:
     from office365.sharepoint.marketplace.corporatecuratedgallery.spuninstalladdinresponse import (
         SPUninstallAddinResponse,
     )
+    from office365.sharepoint.publishing.pages.page import SitePage
     from office365.sharepoint.webs.apptile import AppTile
     from office365.sharepoint.webs.sp_focal_point import SPFocalPoint
     from office365.sharepoint.webs.spimageitem import SPImageItem
@@ -823,6 +824,37 @@ class Web(SecurableObject):
         qry = ServiceOperationQuery(self, "CreateSitePage", None, payload, None, return_type)
         self.context.add_query(qry)
         return return_type
+
+    def add_site_page(self, name: str, title: str | None = None, page_layout_type: str = "Article") -> "SitePage":
+        """Adds a modern site page to this web's Site Pages library.
+
+        The page is created as a draft; execute the returned query and then set the
+        page content (``CanvasContent1``) through the item. The ``sitepages``
+        endpoint is hosted per web, so a web reached through a subweb context
+        creates the page in that subweb.
+
+        Args:
+            name: The page file name, e.g. ``Home.aspx``.
+            title: The page title; defaults to the file name.
+            page_layout_type: ``Article`` (default) or ``SingleWebPartAppPage``.
+        """
+        from office365.sharepoint.publishing.pages.collection import SitePageCollection
+
+        collection = SitePageCollection(self.context, ResourcePath("sitepages/pages"))
+        return collection.add(name=name, title=title, page_layout_type=page_layout_type)
+
+    def get_site_page_by_id(self, page_id: int) -> "SitePage":
+        """A modern site page addressed by its list item identifier.
+
+        The returned handle supports page-level operations such as
+        :meth:`~office365.sharepoint.publishing.pages.page.SitePage.publish`.
+
+        Args:
+            page_id: The ``Id`` of the page in the Site Pages library.
+        """
+        from office365.sharepoint.publishing.pages.page import SitePage
+
+        return SitePage(self.context, ResourcePath(f"sitepages/pages({page_id})"))
 
     @staticmethod
     def create_anonymous_link(

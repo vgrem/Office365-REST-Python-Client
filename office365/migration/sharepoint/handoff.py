@@ -1,9 +1,10 @@
 """Detect the SharePoint artifacts a client-side copy cannot carry.
 
 A same-tenant SPO→SPO migration moves content, structure and as much metadata and
-security as REST allows. Some artifacts are simply outside that reach — pages and
-the web parts they serialize (see :mod:`~office365.migration.sharepoint.pages`),
-workflow associations, InfoPath forms, and business-data (BCS) external lists.
+security as REST allows. Some artifacts are simply outside that reach — classic
+pages and the web part data bindings modern pages serialize (see
+:mod:`~office365.migration.sharepoint.pages`), workflow associations, InfoPath
+forms, and business-data (BCS) external lists.
 Copying content and then saying nothing about them is the unethical part: a site
 that looks migrated silently loses its approval flow, its custom forms and its
 external lists. This module keeps the gap honest by *reporting* them, so a run
@@ -36,7 +37,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
-from office365.migration.sharepoint.pages import PageHandoff, detect_page_handoff, page_handoff_note
+from office365.migration.sharepoint.pages import (
+    PageCopyReport,
+    PageHandoff,
+    detect_page_handoff,
+    page_handoff_note,
+)
 
 if TYPE_CHECKING:
     from office365.sharepoint.lists.list import List as SPList
@@ -202,14 +208,16 @@ def _shown(names: List[str]) -> str:
     return shown
 
 
-def handoff_notes(handoff: SiteHandoff) -> List[str]:
+def handoff_notes(handoff: SiteHandoff, page_report: Optional[PageCopyReport] = None) -> List[str]:
     """One warning per handoff category, plus one per failed detector.
 
     Each note names what a *copy* cannot carry and asks for out-of-band
-    remediation, so a migrated site never silently loses a flow or a form.
+    remediation, so a migrated site never silently loses a flow or a form. Pass
+    ``page_report`` when the modern pages were copied: only the classic pages are
+    left over then, and the copy labels its own gaps (web part bindings).
     """
     notes: List[str] = []
-    page_note = page_handoff_note(handoff.pages)
+    page_note = page_handoff_note(handoff.pages, modern_copied=page_report is not None)
     if page_note:
         notes.append(page_note)
     if handoff.workflows:

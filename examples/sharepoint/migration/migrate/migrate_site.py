@@ -39,9 +39,23 @@ The source site's navigation (Quick Launch and top bar) is copied onto the targe
 (additively, source links rewritten to the target) unless the settings disable it;
 a post-run reconciliation reports any link that did not land.
 
-Resolution also reports what a copy cannot carry — pages/web parts, workflow
-associations, InfoPath forms and business-data (BCS) external lists — as one
-warning per category in the run's warning list.
+Modern site pages are copied too (canvas, title, description, layout, banner and
+promoted state, published when the source page was), unless ``--no-pages`` is
+given; a page whose name already exists follows ``--duplicate-pages``
+(``RENAME`` — the default — ``SKIP`` or ``OVERWRITE``), and copies are add-only:
+no target page is deleted. Classic pages (wiki/publishing pages) cannot be copied
+— they need page transformation — so they are reported as a handoff, as are the
+client-side web parts whose data bindings point at the source.
+
+Each web's modern site pages are copied too (``--no-pages`` to only report them):
+the page is created through the ``sitepages`` endpoint, its canvas and page
+metadata are written, and it is published when the source page was. A page whose
+name already exists on the target is renamed around it (``--duplicate-pages`` to
+skip or overwrite instead).
+
+Resolution also reports what a copy cannot carry — classic pages, web part data
+bindings, workflow associations, InfoPath forms and business-data (BCS) external
+lists — as one warning per category in the run's warning list.
 """
 
 from __future__ import annotations
@@ -50,6 +64,7 @@ import argparse
 from pathlib import Path
 
 from office365.migration import MigrationSession, MigrationSettings
+from office365.migration.sharepoint.pages import PAGE_LIBRARY_TEMPLATE, capture_site_pages
 from office365.migration.sharepoint.resolvers import is_document_library, is_migratable_list
 from office365.migration.tasks import MigrationTask
 from office365.sharepoint.client_context import ClientContext
@@ -99,6 +114,17 @@ def main():
         action="store_true",
         help="copy item *unique* role assignments and re-create the site's groups/role assignments",
     )
+    parser.add_argument(
+        "--no-pages",
+        action="store_true",
+        help="only report the source's modern site pages instead of copying them",
+    )
+    parser.add_argument(
+        "--duplicate-pages",
+        choices=["RENAME", "SKIP", "OVERWRITE"],
+        default="RENAME",
+        help="what to do when a target page of that name exists (default: RENAME)",
+    )
     parser.add_argument("--apply", action="store_true", help="perform the migration (default: dry run)")
     parser.add_argument("--no-verify", action="store_true", help="skip the post-run source/target reconciliation")
     args = parser.parse_args()
@@ -113,16 +139,18 @@ def main():
 
     # Plan: read the source site's lists directly (no target writes on a dry run).
     source_ctx = ctx.clone(args.source_site)
-    lists = [entry for entry in source_ctx.web.lists.get().execute_query() if is_migratable_list(entry)]
+    all_lists = source_ctx.web.lists.get().execute_query()
+    lists = [entry for entry in all_lists if is_migratable_list(entry)]
     if include:
         lists = [entry for entry in lists if entry.title in include]
     if exclude:
         lists = [entry for entry in lists if entry.title not in exclude]
+    subwebs = list(source_ctx.web.webs.get().execute_query())
 
     print(f"{args.source_site} -> {args.target_site}")
     for entry in lists:
         print(f"  {'library' if is_document_library(entry) else 'list':7} {entry.title}")
-    subwebs = list(source_ctx.web.webs.get().execute_query())
+    _print_pages(all_lists, copy=not args.no_pages, duplicate=args.duplicate_pages)
     if subwebs:
         action = (
             "will be mirrored (including their nested subsites)"
@@ -152,6 +180,8 @@ def main():
         preserve_timestamps=preserve_timestamps,
         preserve_authorship=preserve_authorship,
         preserve_permissions=preserve_permissions,
+        migrate_pages=not args.no_pages,
+        duplicate_page_behavior=args.duplicate_pages,
     )
     session = MigrationSession().register(context=ctx, settings=fidelity)
     session.add_site_task(
@@ -174,22 +204,42 @@ def main():
     _print_delta(session)
 
     if not args.no_verify:
-        statuses = session.show()
-        print("\nVerifying…", flush=True)
-        for status, report in zip(statuses, session.verify()):
-            print(f"  {status['target']}: {report.summary()}")
-            for path in report.missing[:5]:
-                print(f"      missing: {path}")
-            for path in report.extra[:5]:
-                print(f"      extra:   {path}")
-            for note in report.mismatches[:5]:
-                print(f"      mismatch: {note}")
-            for note in report.unverifiable[:3]:
-                print(f"      unverified: {note}")
-        _verify_web_scope(source_ctx, ctx, preserve_permissions, fidelity.migrate_navigation)
+        _report_verification(session, source_ctx, ctx, preserve_permissions, fidelity)
 
     for warning in session.warnings():
         print(f"  warning: {warning}")
+
+
+def _report_verification(session, source_ctx, ctx, preserve_permissions: bool, settings) -> None:
+    """Reconcile every migrated list, plus the web-level concerns, with the source."""
+    print("\nVerifying…", flush=True)
+    for status, report in zip(session.show(), session.verify()):
+        print(f"  {status['target']}: {report.summary()}")
+        for path in report.missing[:5]:
+            print(f"      missing: {path}")
+        for path in report.extra[:5]:
+            print(f"      extra:   {path}")
+        for note in report.mismatches[:5]:
+            print(f"      mismatch: {note}")
+        for note in report.unverifiable[:3]:
+            print(f"      unverified: {note}")
+    _verify_web_scope(source_ctx, ctx, preserve_permissions, settings.migrate_navigation)
+    if settings.migrate_pages:
+        _verify_pages(source_ctx, ctx)
+
+
+def _print_pages(all_lists, *, copy: bool, duplicate: str) -> None:
+    """Print how many modern site pages the run would copy (dry run reads only)."""
+    if not copy:
+        return
+    pages = [
+        page
+        for entry in all_lists
+        if entry.base_template == PAGE_LIBRARY_TEMPLATE and not entry.hidden
+        for page in capture_site_pages(entry)
+    ]
+    if pages:
+        print(f"  pages:   {len(pages)} modern site page(s) will be copied (duplicates: {duplicate})")
 
 
 def _print_delta(session) -> None:
@@ -213,6 +263,14 @@ def _verify_site_security(source_ctx, ctx) -> None:
 
     for note in verify_site_security(source_ctx.web, ctx.web):
         print(f"  site: {note}")
+
+
+def _verify_pages(source_ctx, ctx) -> None:
+    """Reconcile the migrated web's modern site pages against the source."""
+    from office365.migration.sharepoint.pages import verify_page_copy
+
+    for note in verify_page_copy(source_ctx.web, ctx.web):
+        print(f"  pages: {note}")
 
 
 def _verify_navigation(source_ctx, ctx) -> None:

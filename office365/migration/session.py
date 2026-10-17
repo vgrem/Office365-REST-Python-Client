@@ -176,7 +176,9 @@ class MigrationSession:
         types and views are replayed from the source before content is copied.
 
         Subsites are detected but skipped unless ``include_subwebs`` is set; a note
-        naming them is surfaced through :meth:`warnings` when they are skipped.
+        naming them is surfaced through :meth:`warnings` when they are skipped. Each
+        web's modern site pages are copied unless ``settings.migrate_pages`` is
+        false; classic pages and web part data bindings are reported instead.
         """
         if task is None and descriptor:
             from office365.migration.tasks import MigrationTask
@@ -199,6 +201,8 @@ class MigrationSession:
             include_subwebs=include_subwebs,
             preserve_permissions=bool(effective and effective.preserve_permissions),
             migrate_navigation=bool(self._settings and self._settings.migrate_navigation),
+            migrate_pages=self._settings.migrate_pages if self._settings is not None else True,
+            duplicate_page_behavior=(self._settings.duplicate_page_behavior if self._settings is not None else "RENAME"),
             warnings=self._warnings,
         )
         jobs: list[MigrationJob] = []
