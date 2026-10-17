@@ -17,6 +17,7 @@ from office365.sharepoint.publishing.amplify.history import AmplifyPublishingHis
 from office365.sharepoint.publishing.amplify.requestparams import AmplifyRequestParams
 from office365.sharepoint.publishing.boostfieldsdata import BoostFieldsData
 from office365.sharepoint.publishing.pages.boostproperties import SitePageBoostProperties
+from office365.sharepoint.publishing.pages.canvas import count_web_parts
 from office365.sharepoint.publishing.pages.coauth_state import SitePageCoAuthState
 from office365.sharepoint.publishing.pages.collaborator import SitePageCollaborator
 from office365.sharepoint.publishing.pages.dependency_metadata import SitePageDependencyMetadata
@@ -280,6 +281,11 @@ class SitePage(SitePageMetadata):
     def canvas_json1(self) -> Optional[str]:
         """Gets the CanvasJson1 property"""
         return self.properties.get("CanvasJson1", None)
+
+    @property
+    def web_part_count(self) -> int:
+        """Gets the number of client-side web parts serialized in the page canvas."""
+        return count_web_parts(self.canvas_content1)
 
     @property
     def check_in(self) -> Optional[bool]:
