@@ -189,8 +189,8 @@ def resolve_site_task(
             Branding (master page/theme/logo/CSS) and the site-collection and
             regional settings stay out of scope and are reported.
         warnings: Optional sink for resolution-level notes (subsites skipped,
-            classic pages, web parts, workflows, InfoPath forms and BCS external
-            lists detected but not migrated).
+            web parts, workflows, InfoPath forms, BCS external lists and pages with
+            no copyable body detected but not migrated).
     """
     if task.kind != SHAREPOINT:
         raise ValueError(f"a site task must be kind {SHAREPOINT!r}, got {task.kind!r}")
@@ -310,9 +310,10 @@ def _resolve_web(
             warnings.append(f"navigation replication failed for {_web_url(source_context.web)}: {e}")
     _apply_web_settings(source_context.web, target_context.web, preserve_site_settings, warnings)
     source_lists: Iterable[SPList] = source_context.web.lists.get().execute_query()
-    # Modern site pages are copied; classic pages, web part data bindings,
-    # workflows, InfoPath forms and BCS external lists are outside what a
-    # client-side copy can carry — report them rather than dropping them silently.
+    # Modern and classic wiki pages are copied; web part data bindings, wiki markup
+    # that addresses the source site, workflows, InfoPath forms, BCS external lists
+    # and pages with no copyable body are outside what a client-side copy can carry —
+    # report them rather than dropping them silently.
     page_report = (
         _report_pages(source_context.web, target_context.web, duplicate_page_behavior, warnings)
         if migrate_pages

@@ -25,6 +25,8 @@ from office365.migration.tasks import MigrationTask
 
 _DOCUMENT_LIBRARY_TEMPLATE = 101
 _WIKI_PAGE_CONTENT_TYPE = "0x010108"
+# A publishing page carries neither a canvas nor a wiki body.
+_PUBLISHING_CONTENT_TYPE = "0x010100C568DB52D9D0A14D9B2FDCC96666E9F2007948130EC3DB064584E219954237AF39"
 _SITE_PAGE_CONTENT_TYPE = "0x0101009D1CB255DA76424F860D91F20E6C4118005E10E40F8E37D94AB983A0181120EFFC"
 
 
@@ -440,7 +442,7 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         self.assertIn("Site Pages (2 page(s): Home.aspx, CollabHome.aspx)", note)
         self.assertIn("1 web part(s)", note)
 
-    def test_modern_pages_are_copied_and_classic_pages_reported(self):
+    def test_modern_and_classic_wiki_pages_are_copied(self):
         pages = _PageList(
             [
                 _PageItem("Home.aspx"),
@@ -449,16 +451,35 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         )
         source = _context([_docs(), pages])
         task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
-        report = PageCopyReport(copied=["Home.aspx"], published=["Home.aspx"], classic=["Guide.aspx"])
+        report = PageCopyReport(
+            copied=["Home.aspx", "Guide.aspx"], published=["Home.aspx", "Guide.aspx"], wiki=["Guide.aspx"]
+        )
         warnings: list[str] = []
 
         with mock.patch("office365.migration.sharepoint.resolvers.copy_site_pages", return_value=report) as copy:
             resolve_site_task(task, source, warnings=warnings)
 
         self.assertEqual(copy.call_args[0][:2], (source.web, source.web))
-        self.assertIn("page copy: 1 page(s) copied, 1 published", warnings)
-        note = next(message for message in warnings if "classic page(s) are not migrated" in message)
-        self.assertIn("Guide.aspx", note)
+        self.assertIn("page copy: 2 page(s) copied (1 classic wiki), 2 published", warnings)
+        self.assertFalse(any("are not migrated" in message for message in warnings))
+
+    def test_a_page_with_no_copyable_body_is_still_reported(self):
+        pages = _PageList(
+            [
+                _PageItem("Home.aspx"),
+                _PageItem("Publishing.aspx", content_type_id=_PUBLISHING_CONTENT_TYPE),
+            ]
+        )
+        source = _context([_docs(), pages])
+        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
+        report = PageCopyReport(copied=["Home.aspx"], published=["Home.aspx"])
+        warnings: list[str] = []
+
+        with mock.patch("office365.migration.sharepoint.resolvers.copy_site_pages", return_value=report):
+            resolve_site_task(task, source, warnings=warnings)
+
+        note = next(message for message in warnings if "page(s) are not migrated" in message)
+        self.assertIn("Publishing.aspx", note)
         self.assertNotIn("Home.aspx", note)
 
     def test_a_failing_page_copy_degrades_to_a_warning(self):

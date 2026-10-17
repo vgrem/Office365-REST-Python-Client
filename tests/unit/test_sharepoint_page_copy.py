@@ -1,4 +1,4 @@
-"""Tests for the modern site page copy (create + fill + publish + verify)."""
+"""Tests for the site page copy (create + fill + publish + verify), modern and classic wiki."""
 
 import unittest
 
@@ -20,6 +20,8 @@ from office365.migration.sharepoint.pages import (
 # A modern site page content type (inherited from the Site Page base content type).
 _SITE_PAGE_CONTENT_TYPE = "0x0101009D1CB255DA76424F860D91F20E6C4118005E10E40F8E37D94AB983A0181120EFFC"
 _WIKI_CONTENT_TYPE = "0x010108"
+# A publishing page (``SP.Publishing.PublishingPage``) carries neither a canvas nor a wiki body.
+_PUBLISHING_CONTENT_TYPE = "0x010100C568DB52D9D0A14D9B2FDCC96666E9F2007948130EC3DB064584E219954237AF39"
 
 _WEB_PART_CONTROL = 'data-sp-controldata="{&quot;controlType&quot;:4}"'
 
@@ -40,12 +42,33 @@ class _Context:
         self.executions += 1
 
 
+class _FileHandle:
+    """A list item's file: only ``publish`` is used by the classic page copy."""
+
+    def __init__(self, web, page_id):
+        self.web = web
+        self.page_id = page_id
+
+    def publish(self, comment):
+        self.web.published.append(self.page_id)
+        self.web.store[self.page_id]["OData__ModerationStatus"] = 0
+        return self
+
+    def execute_query(self):
+        return self.web.context.execute_query()
+
+
 class _Item:
-    def __init__(self, store, page_id, fields=None):
+    def __init__(self, store, page_id, fields=None, web=None):
         self.store = store
         self.page_id = page_id
+        self.web = web
         self.properties = {name: value for name, value in store[page_id].items() if fields is None or name in fields}
         self.updates: list[dict] = []
+
+    @property
+    def file(self):
+        return _FileHandle(self.web, self.page_id)
 
     def set_property(self, name, value):
         self.properties[name] = value
@@ -58,8 +81,9 @@ class _Item:
 
 
 class _Items:
-    def __init__(self, store):
+    def __init__(self, store, web=None):
         self.store = store
+        self.web = web
         self.select_calls: list[tuple[str, ...]] = []
         self._fields = None
 
@@ -72,7 +96,38 @@ class _Items:
         return self
 
     def execute_query(self):
-        return [_Item(self.store, page_id, self._fields) for page_id in sorted(self.store)]
+        return [_Item(self.store, page_id, self._fields, self.web) for page_id in sorted(self.store)]
+
+
+class _CreatedItemField:
+    """``File.list_item_all_fields`` on a create response: a projected read of the item."""
+
+    def __init__(self, web, page_id):
+        self.web = web
+        self.page_id = page_id
+        self._fields = None
+
+    def select(self, fields):
+        self._fields = tuple(fields)
+        return self
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        return _Item(self.web.store, self.page_id, self._fields, self.web)
+
+
+class _CreatedWikiPage:
+    """The ``File`` a ``create_wiki_page`` call returns."""
+
+    def __init__(self, web, page_id):
+        self.web = web
+        self.page_id = page_id
+        self.list_item_all_fields = _CreatedItemField(web, page_id)
+
+    def execute_query(self):
+        return self
 
 
 class _PageList:
@@ -81,10 +136,25 @@ class _PageList:
         self.base_template = base_template
         self.hidden = hidden
         self.store = store
+        self.web = None
         self.items = _Items(store)
 
     def get_item_by_id(self, item_id):
-        return _Item(self.store, item_id)
+        return _Item(self.store, item_id, web=self.web)
+
+    def create_wiki_page(self, name, body):
+        if name in self.web.fail_create:
+            raise RuntimeError(f"cannot create {name}")
+        self.web.wiki_created.append((name, body))
+        page_id = max(self.store) + 1 if self.store else 1
+        self.store[page_id] = {
+            "Id": page_id,
+            "FileLeafRef": name,
+            "WikiField": body,
+            "CanvasContent1": None,
+            "OData__ModerationStatus": 3,
+        }
+        return _CreatedWikiPage(self.web, page_id)
 
 
 class _Lists:
@@ -124,7 +194,10 @@ class _Web:
         self.context = _Context()
         self.store = store if store is not None else _PageStore()
         self.published: list[int] = []
+        self.wiki_created: list[tuple[str, str]] = []
         self.fail_create: set[str] = set()
+        for sp_list in self._lists:
+            sp_list.web = self
 
     def add_site_page(self, name, title=None):
         if name in self.fail_create:
@@ -153,6 +226,10 @@ def _target_web(*pages):
     return _Web(_PageList("Site Pages", store), store=store)
 
 
+def _wiki_page_props(name, body, status=0):
+    return _page_props(name, canvas=None, content_type=_WIKI_CONTENT_TYPE, status=status, WikiField=body)
+
+
 def _page_props(name, canvas="<div>hi</div>", content_type=_SITE_PAGE_CONTENT_TYPE, status=0, **extra):
     properties = {
         "Id": 1,
@@ -178,16 +255,20 @@ class TestIsModernPage(unittest.TestCase):
 
 
 class TestCaptureSitePages(unittest.TestCase):
-    def test_reads_modern_pages_and_skips_classic_ones(self):
+    def test_reads_modern_and_classic_pages(self):
         web = _source_web(
             _page_props("Home.aspx", canvas=_WEB_PART_CONTROL),
-            _page_props("Guide.aspx", canvas=None, content_type=_WIKI_CONTENT_TYPE),
+            _wiki_page_props("Guide.aspx", "<p>wiki</p>"),
+            _page_props("Blank.aspx", canvas=None, content_type=_PUBLISHING_CONTENT_TYPE),
         )
 
         payloads = capture_site_pages(web._lists[0])
 
-        self.assertEqual([page.name for page in payloads], ["Home.aspx"])
+        self.assertEqual([page.name for page in payloads], ["Home.aspx", "Guide.aspx"])
         self.assertEqual(payloads[0].web_parts, 1)
+        self.assertTrue(payloads[1].is_classic)
+        self.assertEqual(payloads[1].content, "<p>wiki</p>")
+        self.assertEqual(payloads[1].to_dict()["wiki_length"], len("<p>wiki</p>"))
 
     def test_ignores_non_aspx_items(self):
         web = _source_web(_page_props("data.json"))
@@ -234,19 +315,73 @@ class TestCopySitePages(unittest.TestCase):
         # The verify read finds an identical canvas.
         self.assertEqual(verify_page_copy(source, target), [])
 
-    def test_classic_pages_are_reported_not_copied(self):
-        source = _source_web(_page_props("Guide.aspx", canvas=None, content_type=_WIKI_CONTENT_TYPE))
+    def test_a_classic_wiki_page_is_copied_through_its_wiki_field(self):
+        source = _source_web(_wiki_page_props("Guide.aspx", "<p>classic</p>"))
+        target = _target_web()
+        warnings: list[str] = []
+
+        report = copy_site_pages(source, target, warnings=warnings)
+
+        self.assertEqual(report.copied, ["Guide.aspx"])
+        self.assertEqual(report.wiki, ["Guide.aspx"])
+        self.assertEqual(target.wiki_created, [("Guide.aspx", "<p>classic</p>")])
+        stored = next(iter(target.store.values()))
+        self.assertEqual(stored["WikiField"], "<p>classic</p>")
+        self.assertIsNone(stored["CanvasContent1"])
+        # A created wiki page is a draft, so the copy publishes it as the source was.
+        self.assertEqual(report.published, ["Guide.aspx"])
+        self.assertEqual(len(target.published), 1)
+        self.assertEqual(report.mismatched, [])
+        self.assertEqual(report.summary(), "page copy: 1 page(s) copied (1 classic wiki), 1 published")
+        self.assertTrue(any("copied verbatim" in note for note in warnings))
+        self.assertEqual(verify_page_copy(source, target), [])
+        self.assertIsNone(page_handoff_note(detect_page_handoff(source._lists), modern_copied=True))
+
+    def test_a_classic_wiki_draft_is_copied_without_publishing(self):
+        source = _source_web(_wiki_page_props("Draft.aspx", "<p>draft</p>", status=3))
         target = _target_web()
 
         report = copy_site_pages(source, target)
 
-        self.assertEqual(report.classic, ["Guide.aspx"])
+        self.assertEqual(report.copied, ["Draft.aspx"])
+        self.assertEqual(report.published, [])
+        self.assertEqual(target.published, [])
+
+    def test_a_classic_wiki_page_can_be_overwritten_in_place(self):
+        source = _source_web(_wiki_page_props("Guide.aspx", "<p>source</p>"))
+        target = _target_web()
+        target.store[1] = {"Id": 1, "FileLeafRef": "Guide.aspx", "WikiField": "<p>target</p>"}
+
+        report = copy_site_pages(source, target, duplicate_behavior=DUPLICATE_OVERWRITE)
+
+        self.assertEqual(report.overwritten, ["Guide.aspx"])
+        self.assertEqual(target.wiki_created, [])
+        self.assertEqual(target.store[1]["WikiField"], "<p>source</p>")
+        self.assertEqual(len(target.store), 1)
+
+    def test_a_wiki_body_that_does_not_read_back_is_reported(self):
+        source = _source_web(_wiki_page_props("Guide.aspx", "<p>source</p>"))
+        target = _target_web()
+        target.store.mutate = lambda properties: properties.pop("WikiField", None)
+        warnings: list[str] = []
+
+        report = copy_site_pages(source, target, warnings=warnings)
+
+        self.assertEqual(report.mismatched, ["Guide.aspx"])
+        self.assertTrue(any("did not read back their canvas" in note for note in warnings))
+
+    def test_a_page_without_a_canvas_or_a_wiki_body_is_reported(self):
+        source = _source_web(_page_props("Publishing.aspx", canvas=None, content_type=_PUBLISHING_CONTENT_TYPE))
+        target = _target_web()
+
+        report = copy_site_pages(source, target)
+
+        self.assertEqual(report.classic, ["Publishing.aspx"])
         self.assertTrue(report.is_empty)
-        self.assertIsNone(report.summary())
         self.assertEqual(target.store, {})
         note = page_handoff_note(detect_page_handoff(source._lists), modern_copied=True)
-        self.assertIn("classic page(s) are not migrated", note)
-        self.assertIn("Guide.aspx", note)
+        self.assertIn("page(s) are not migrated", note)
+        self.assertIn("Publishing.aspx", note)
 
     def test_duplicate_page_is_renamed_by_default(self):
         source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"))
@@ -391,7 +526,7 @@ class TestVerifyPageCopy(unittest.TestCase):
 
         notes = verify_page_copy(source, target)
 
-        self.assertEqual(notes, ["1 modern page(s) have no target counterpart: Home.aspx"])
+        self.assertEqual(notes, ["1 page(s) have no target counterpart: Home.aspx"])
 
     def test_matching_page_is_quiet(self):
         source = _source_web(_page_props("Home.aspx", canvas="<div>same</div>"))
@@ -401,6 +536,19 @@ class TestVerifyPageCopy(unittest.TestCase):
 
     def test_source_without_pages_is_quiet(self):
         self.assertEqual(verify_page_copy(_source_web(), _target_web()), [])
+
+    def test_a_missing_classic_page_is_named(self):
+        source = _source_web(_wiki_page_props("Guide.aspx", "<p>wiki</p>"))
+
+        notes = verify_page_copy(source, _target_web())
+
+        self.assertEqual(notes, ["1 page(s) have no target counterpart: Guide.aspx"])
+
+    def test_a_classic_wiki_page_is_compared_through_its_body(self):
+        source = _source_web(_wiki_page_props("Guide.aspx", "<p>wiki</p>"))
+        target = _target_web({"Id": 1, "FileLeafRef": "Guide.aspx", "WikiField": "<p>other</p>"})
+
+        self.assertEqual(verify_page_copy(source, target), ["1 page(s) differ from the source: Guide.aspx"])
 
 
 if __name__ == "__main__":

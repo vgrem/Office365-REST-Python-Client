@@ -1,4 +1,4 @@
-"""Copy modern site pages, and detect the classic ones a client-side copy skips.
+"""Copy modern and classic wiki pages, and detect the pages a client-side copy skips.
 
 A page library (``base_template`` 119 — *Site Pages*, wiki or publishing pages)
 holds ``.aspx`` pages rather than documents, so the item adapters do not migrate
@@ -9,9 +9,13 @@ source page was published. What a copy cannot fix is the *inside* of a web part 
 a serialized client-side web part keeps the source list/library identifiers it
 binds to, and those are not remapped.
 
-Classic pages (wiki pages, publishing pages) and blank/unknown pages are
-transformation work, not copy work: :func:`detect_page_handoff` inventories them
-and :func:`page_handoff_note` names them, so a run never silently drops them.
+**Classic wiki** pages carry their body in ``WikiField`` instead of a canvas, and
+that field is readable and writable over REST, so a wiki page is copied too: the
+page is created in the target page library and the source ``WikiField`` value is
+written back verbatim. **Publishing** pages and pages with neither a canvas nor a
+wiki body stay transformation work, not copy work: :func:`detect_page_handoff`
+inventories them and :func:`page_handoff_note` names them, so a run never
+silently drops them.
 
 Two facts this module relies on, both live-verified on a SharePoint Online tenant:
 
@@ -22,7 +26,14 @@ Two facts this module relies on, both live-verified on a SharePoint Online tenan
 * a page's ``CanvasContent1`` round-trips byte-identical through
   ``item.set_property("CanvasContent1", ...)`` + ``item.update()``; a *newly
   created* page already carries a default empty canvas, which a MERGE of ``""``
-  does not clear, so an empty source canvas is left alone and not verified.
+  does not clear, so an empty source canvas is left alone and not verified;
+* a wiki page is created with ``List.create_wiki_page(name, body)``, which the
+  server normalizes once (it wraps the body in a ``ExternalClass`` div and
+  entity-encodes braces); writing the *already normalized* source ``WikiField``
+  value back round-trips byte-identical, so a copy reuses the source value
+  instead of re-authoring the body;
+* a created wiki page is a draft (``Level`` 2, status 3), and
+  ``item.file.publish(comment)`` — not a moderation-status MERGE — publishes it.
 
 Copies are add-only: an existing target page is never deleted, and the duplicate
 behaviour is explicit (``RENAME`` by default, as SPMT does; ``SKIP`` and
@@ -73,6 +84,7 @@ _PAGE_SELECT = (
     "ContentTypeId",
     "CanvasContent1",
     "LayoutWebpartsContent",
+    "WikiField",
     "PromotedState",
     "BannerImageUrl",
     "OData__ModerationStatus",
@@ -103,12 +115,24 @@ class PagePayload:
     content_type_id: Optional[str] = None
     canvas: Optional[str] = None
     layout: Optional[str] = None
+    #: A classic wiki page's body (``WikiField``) — what it carries instead of a canvas.
+    wiki: Optional[str] = None
     banner_image_url: Optional[dict] = None
     promoted_state: Optional[int] = None
     #: Whether the source page was published (approved), so the copy should publish too.
     published: bool = True
     #: Client-side web parts serialized in the canvas (their bindings are not remapped).
     web_parts: int = 0
+
+    @property
+    def is_classic(self) -> bool:
+        """Whether this is a classic wiki page (a ``WikiField`` body, no canvas)."""
+        return bool(self.wiki) and not is_modern_page(self.content_type_id, self.canvas)
+
+    @property
+    def content(self) -> Optional[str]:
+        """The field value that carries the page body — what a copy writes and verifies."""
+        return self.wiki if self.is_classic else self.canvas
 
     def to_dict(self) -> dict:
         return {
@@ -119,6 +143,7 @@ class PagePayload:
             "published": self.published,
             "web_parts": self.web_parts,
             "canvas_length": len(self.canvas or ""),
+            "wiki_length": len(self.wiki or ""),
         }
 
 
@@ -144,7 +169,13 @@ class PageLibrary:
 
     @property
     def classic_pages(self) -> list[PageInfo]:
-        return [page for page in self.pages if page.kind != "modern"]
+        """Wiki pages: a copy carries their ``WikiField`` body."""
+        return [page for page in self.pages if page.kind == "classic"]
+
+    @property
+    def uncopyable_pages(self) -> list[PageInfo]:
+        """Pages with neither a canvas nor a wiki body (publishing or blank pages)."""
+        return [page for page in self.pages if page.kind == "unknown"]
 
 
 @dataclass
@@ -162,8 +193,8 @@ class PageHandoff:
         return sum(library.web_part_count for library in self.libraries)
 
     @property
-    def classic_page_count(self) -> int:
-        return sum(len(library.classic_pages) for library in self.libraries)
+    def uncopyable_page_count(self) -> int:
+        return sum(len(library.uncopyable_pages) for library in self.libraries)
 
     @property
     def is_empty(self) -> bool:
@@ -190,10 +221,12 @@ class PageCopyReport:
     mismatched: list[str] = field(default_factory=list)
     #: ``(page name, error)`` for pages that could not be copied.
     failed: list[tuple[str, str]] = field(default_factory=list)
-    #: Classic/unknown pages, left for page transformation.
+    #: Pages with neither a canvas nor a wiki body, left for page transformation.
     classic: list[str] = field(default_factory=list)
     #: Pages whose canvas serializes client-side web parts (bindings not remapped).
     web_part_pages: list[str] = field(default_factory=list)
+    #: Classic wiki pages copied through their ``WikiField`` body.
+    wiki: list[str] = field(default_factory=list)
 
     @property
     def page_count(self) -> int:
@@ -210,6 +243,8 @@ class PageCopyReport:
         parts = []
         if self.copied:
             detail = f"{len(self.copied)} page(s) copied"
+            if self.wiki:
+                detail += f" ({len(self.wiki)} classic wiki)"
             if self.renamed:
                 detail += f" ({len(self.renamed)} renamed around an existing page)"
             parts.append(detail)
@@ -246,6 +281,7 @@ def _payload(properties: dict) -> PagePayload:
         content_type_id=properties.get("ContentTypeId"),
         canvas=properties.get("CanvasContent1"),
         layout=properties.get("LayoutWebpartsContent"),
+        wiki=properties.get("WikiField"),
         banner_image_url=properties.get("BannerImageUrl"),
         promoted_state=properties.get("PromotedState"),
         published=status in (None, 0, "0"),
@@ -254,18 +290,19 @@ def _payload(properties: dict) -> PagePayload:
 
 
 def capture_page(item: "ListItem") -> Optional[PagePayload]:
-    """The payload of a modern page item, or ``None`` for a classic/unknown page."""
+    """The payload of a copyable page item (modern or classic wiki), or ``None``."""
     properties = item.properties
     name = properties.get("FileLeafRef") or ""
     if not name.lower().endswith(".aspx"):
         return None
-    if not is_modern_page(properties.get("ContentTypeId"), properties.get("CanvasContent1")):
-        return None
-    return _payload(properties)
+    if is_modern_page(properties.get("ContentTypeId"), properties.get("CanvasContent1")):
+        return _payload(properties)
+    payload = _payload(properties)
+    return payload if payload.is_classic else None
 
 
 def _classify(sp_list: "SPList") -> tuple[list[PagePayload], list[str]]:
-    """Read one page library once: (modern payloads, classic page names)."""
+    """Read one page library once: (copyable payloads, page names with no copyable body)."""
     payloads: list[PagePayload] = []
     classic: list[str] = []
     items = sp_list.items.select(list(_PAGE_SELECT)).get().execute_query()
@@ -274,15 +311,16 @@ def _classify(sp_list: "SPList") -> tuple[list[PagePayload], list[str]]:
         name = str(properties.get("FileLeafRef") or "")
         if not name.lower().endswith(".aspx"):
             continue
-        if is_modern_page(properties.get("ContentTypeId"), properties.get("CanvasContent1")):
-            payloads.append(_payload(properties))
+        payload = _payload(properties)
+        if is_modern_page(properties.get("ContentTypeId"), properties.get("CanvasContent1")) or payload.is_classic:
+            payloads.append(payload)
         else:
             classic.append(name)
     return payloads, classic
 
 
 def capture_site_pages(sp_list: "SPList") -> list[PagePayload]:
-    """The modern pages of a page library (one projected read; read-only)."""
+    """The copyable pages of a page library (one projected read; read-only)."""
     return _classify(sp_list)[0]
 
 
@@ -353,6 +391,38 @@ def _batch(report: "PageCopyReport", behavior: str, name: str, taken: set, exist
     return name, target, None
 
 
+def _copy_wiki_page(
+    target_web: "Web",
+    target_list: "SPList",
+    page: PagePayload,
+    target_name: str,
+    item_id: Optional[int],
+) -> None:
+    """Create or overwrite a classic wiki page, then publish it when the source was.
+
+    The body goes in through ``create_wiki_page`` (an existing page is rewritten with
+    a ``WikiField`` MERGE), and publishing runs through ``item.file.publish``: a
+    moderation-status MERGE does not publish a classic page.
+    """
+    body = page.wiki
+    if not body:
+        raise ValueError(f"classic page {target_name!r} carries no wiki body")
+    if item_id is None:
+        created = target_list.create_wiki_page(target_name, body).execute_query()
+        item_id = created.list_item_all_fields.select(["Id"]).get().execute_query().properties.get("Id")
+        if item_id is None:
+            raise ValueError(f"the target did not return an id for the created page {target_name!r}")
+    item = target_list.get_item_by_id(item_id)
+    values = {"WikiField": body, "Title": page.title, "Description": page.description}
+    for name, value in values.items():
+        if value is not None:
+            item.set_property(name, value)
+    item.update()
+    target_web.context.execute_query()
+    if page.published:
+        item.file.publish("").execute_query()
+
+
 def _copy_page(
     target_web: "Web",
     target_list: "SPList",
@@ -361,6 +431,9 @@ def _copy_page(
     item_id: Optional[int],
 ) -> None:
     """Create or overwrite one page and publish it when the source page was."""
+    if page.is_classic:
+        _copy_wiki_page(target_web, target_list, page, target_name, item_id)
+        return
     if item_id is None:
         created = target_web.add_site_page(target_name, title=page.title)
         target_web.context.execute_query()
@@ -375,17 +448,21 @@ def _copy_page(
 
 
 def _verify(report: "PageCopyReport", target_list: "SPList", written: dict) -> None:
-    """Read the copied pages back once and compare their canvases."""
+    """Read the copied pages back once and compare the field that carries their body."""
     if not written:
         return
-    items = target_list.items.select(["Id", "FileLeafRef", "CanvasContent1"]).get().execute_query()
-    canvases = {
-        str(item.properties.get("FileLeafRef") or "").casefold(): item.properties.get("CanvasContent1") for item in items
+    items = target_list.items.select(["FileLeafRef", "CanvasContent1", "WikiField"]).get().execute_query()
+    written_back = {
+        str(item.properties.get("FileLeafRef") or "").casefold(): (
+            item.properties.get("CanvasContent1"),
+            item.properties.get("WikiField"),
+        )
+        for item in items
     }
-    for name, canvas in written.items():
-        if not canvas:
+    for name, (index, expected) in written.items():
+        if not expected:
             continue
-        if canvases.get(name.casefold()) != canvas:
+        if written_back.get(name.casefold(), (None, None))[index] != expected:
             report.mismatched.append(name)
 
 
@@ -396,13 +473,15 @@ def copy_site_pages(
     duplicate_behavior: str = DUPLICATE_RENAME,
     warnings: Optional[list[str]] = None,
 ) -> PageCopyReport:
-    """Copy the source web's modern site pages to the target web's page library.
+    """Copy the source web's modern and classic wiki pages to the target web's page library.
 
     Read the source page libraries once each, create (or overwrite) the pages on
     the target, write the canvas and page metadata, publish the pages the source
-    had published, and read the canvases back to verify the write. Classic pages
-    are reported in :attr:`PageCopyReport.classic` because copying cannot
-    transform them.
+    had published, and read the bodies back to verify the write. Modern pages are
+    created through the ``sitepages`` endpoint, classic wiki pages through
+    ``create_wiki_page`` (their ``WikiField`` body is carried verbatim); a page with
+    neither a canvas nor a wiki body is reported in :attr:`PageCopyReport.classic`
+    because copying cannot transform it.
 
     Args:
         source_web: The web whose pages are captured (read-only).
@@ -459,8 +538,19 @@ def copy_site_pages(
                 report.published.append(target_name)
             if page.web_parts:
                 report.web_part_pages.append(target_name)
-            written[target_name] = page.canvas
+            if page.is_classic:
+                report.wiki.append(target_name)
+                written[target_name] = (1, page.wiki)
+            else:
+                written[target_name] = (0, page.canvas)
         _verify(report, target_list, written)
+    notes.extend(_gap_notes(report))
+    return report
+
+
+def _gap_notes(report: "PageCopyReport") -> list[str]:
+    """One note per way the copy fell short of a byte-identical page."""
+    notes = []
     if report.failed:
         notes.append(
             f"page copy: {len(report.failed)} page(s) could not be copied: {_shown([name for name, _ in report.failed])}"
@@ -469,19 +559,24 @@ def copy_site_pages(
         notes.append(
             f"page copy: {len(report.mismatched)} page(s) did not read back their canvas: {_shown(report.mismatched)}"
         )
+    if report.wiki:
+        notes.append(
+            f"page copy: {len(report.wiki)} classic wiki page(s) were copied verbatim — wiki markup "
+            f"(internal links, embedded web parts) is not rewritten: {_shown(report.wiki)}"
+        )
     if report.web_part_pages:
         notes.append(
             f"page copy: {len(report.web_part_pages)} page(s) serialize client-side web parts whose data "
             f"bindings (list/library identifiers) are not remapped: {_shown(report.web_part_pages)}"
         )
-    return report
+    return notes
 
 
 def verify_page_copy(source_web: "Web", target_web: "Web") -> list[str]:
-    """Notes for the modern pages a copy did not deliver (read-only).
+    """Notes for the pages a copy did not deliver (read-only).
 
     A source page counts as delivered when the target holds a page of the same
-    name, or a page whose canvas is identical (the copy renames around an existing
+    name, or a page whose body is identical (the copy renames around an existing
     page). Only same-named pages are compared for drift, because a renamed copy is
     a different page by design.
 
@@ -496,29 +591,33 @@ def verify_page_copy(source_web: "Web", target_web: "Web") -> list[str]:
     ]
     if not source_pages:
         return []
-    target_canvases: dict = {}
+    target_bodies: dict = {}
     for sp_list in _page_libraries(target_web.lists.get().execute_query()):
-        items = sp_list.items.select(["FileLeafRef", "CanvasContent1"]).get().execute_query()
+        items = sp_list.items.select(["FileLeafRef", "CanvasContent1", "WikiField"]).get().execute_query()
         for item in items:
             properties = item.properties
-            target_canvases[str(properties.get("FileLeafRef") or "").casefold()] = properties.get("CanvasContent1")
-    delivered = set(target_canvases.values())
+            target_bodies[str(properties.get("FileLeafRef") or "").casefold()] = _body(properties)
+    delivered = set(target_bodies.values())
     missing = [
-        page.name
-        for page in source_pages
-        if page.name.casefold() not in target_canvases and page.canvas not in delivered
+        page.name for page in source_pages if page.name.casefold() not in target_bodies and page.content not in delivered
     ]
     drifted = [
         page.name
         for page in source_pages
-        if page.name.casefold() in target_canvases and target_canvases[page.name.casefold()] != page.canvas
+        if page.name.casefold() in target_bodies and target_bodies[page.name.casefold()] != page.content
     ]
     notes = []
     if missing:
-        notes.append(f"{len(missing)} modern page(s) have no target counterpart: {_shown(missing)}")
+        notes.append(f"{len(missing)} page(s) have no target counterpart: {_shown(missing)}")
     if drifted:
         notes.append(f"{len(drifted)} page(s) differ from the source: {_shown(drifted)}")
     return notes
+
+
+def _body(properties: dict) -> Optional[str]:
+    """The body a target page item carries — its canvas, or a wiki page's ``WikiField``."""
+    canvas = properties.get("CanvasContent1")
+    return canvas or properties.get("WikiField")
 
 
 def _page_info(item: "ListItem") -> Optional[PageInfo]:
@@ -555,12 +654,13 @@ def detect_page_handoff(lists: Iterable["SPList"]) -> PageHandoff:
 def page_handoff_note(handoff: PageHandoff, *, modern_copied: bool = False) -> Optional[str]:
     """A one-line note for the pages a migration does not carry, or ``None``.
 
-    Pass ``modern_copied`` once the modern pages were copied: the note then names
-    only the classic pages, which need page transformation rather than a copy.
+    Pass ``modern_copied`` once the modern and classic wiki pages were copied: the
+    note then names only the pages with no copyable body, which need page
+    transformation rather than a copy.
     """
     details = []
     for library in handoff.libraries:
-        pages = library.classic_pages if modern_copied else library.pages
+        pages = library.uncopyable_pages if modern_copied else library.pages
         if not pages:
             continue
         names = ", ".join(page.name for page in pages[:_MAX_PAGES_IN_NOTE])
@@ -573,7 +673,9 @@ def page_handoff_note(handoff: PageHandoff, *, modern_copied: bool = False) -> O
     if not details:
         return None
     subject = (
-        "classic page(s) are not migrated (they need page transformation)" if modern_copied else "pages are not migrated"
+        "page(s) are not migrated (no modern canvas, no wiki body — they need page transformation)"
+        if modern_copied
+        else "pages are not migrated"
     )
     return f"{subject} — remediate out of band: " + "; ".join(details)
 

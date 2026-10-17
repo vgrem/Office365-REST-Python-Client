@@ -43,22 +43,24 @@ Modern site pages are copied too (canvas, title, description, layout, banner and
 promoted state, published when the source page was), unless ``--no-pages`` is
 given; a page whose name already exists follows ``--duplicate-pages``
 (``RENAME`` — the default — ``SKIP`` or ``OVERWRITE``), and copies are add-only:
-no target page is deleted. Classic pages (wiki/publishing pages) cannot be copied
-— they need page transformation — so they are reported as a handoff, as are the
-client-side web parts whose data bindings point at the source.
+no target page is deleted. A publishing page (or a page with neither a canvas nor
+a wiki body) cannot be copied — it needs page transformation — so it is reported
+as a handoff, as are the client-side web parts whose data bindings point at the
+source site (and the wiki markup that hard-codes it).
 
 Each web's ``Title`` and ``Description`` are copied onto the target web when they
 differ (``--no-site-settings`` to leave the target web's own values). Branding
 (master page, theme, logo, alternate CSS) and the site-collection/regional
 settings are outside a client-side content migration and are reported as such.
 
-Each web's modern site pages are copied too (``--no-pages`` to only report them):
-the page is created through the ``sitepages`` endpoint, its canvas and page
-metadata are written, and it is published when the source page was. A page whose
-name already exists on the target is renamed around it (``--duplicate-pages`` to
-skip or overwrite instead).
+Each web's site pages are copied too (``--no-pages`` to only report them). A
+modern page is created through the ``sitepages`` endpoint and gets its canvas and
+metadata; a classic wiki page is created with its ``WikiField`` body, copied
+verbatim. Both are published when the source page was. A page whose name already
+exists on the target is renamed around it (``--duplicate-pages`` to skip or
+overwrite instead).
 
-Resolution also reports what a copy cannot carry — classic pages, web part data
+Resolution also reports what a copy cannot carry — publishing pages, web part data
 bindings, workflow associations, InfoPath forms and business-data (BCS) external
 lists — as one warning per category in the run's warning list.
 """
@@ -122,7 +124,7 @@ def main():
     parser.add_argument(
         "--no-pages",
         action="store_true",
-        help="only report the source's modern site pages instead of copying them",
+        help="only report the source's site pages instead of copying them",
     )
     parser.add_argument(
         "--no-site-settings",
@@ -238,7 +240,7 @@ def _report_verification(session, source_ctx, ctx, preserve_permissions: bool, s
 
 
 def _print_pages(all_lists, *, copy: bool, duplicate: str) -> None:
-    """Print how many modern site pages the run would copy (dry run reads only)."""
+    """Print how many site pages the run would copy (dry run reads only)."""
     if not copy:
         return
     pages = [
@@ -248,7 +250,11 @@ def _print_pages(all_lists, *, copy: bool, duplicate: str) -> None:
         for page in capture_site_pages(entry)
     ]
     if pages:
-        print(f"  pages:   {len(pages)} modern site page(s) will be copied (duplicates: {duplicate})")
+        classic = sum(1 for page in pages if page.is_classic)
+        detail = f"{len(pages)} site page(s) will be copied"
+        if classic:
+            detail += f" ({classic} classic wiki)"
+        print(f"  pages:   {detail} (duplicates: {duplicate})")
 
 
 def _print_delta(session) -> None:

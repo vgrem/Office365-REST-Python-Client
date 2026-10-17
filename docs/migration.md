@@ -397,9 +397,10 @@ their ids, web-part data bindings and version history do not match the source's
 (pages are copied per web, subwebs included — see *Site pages* below).
 
 **Artifacts a copy cannot carry are named, never dropped silently.** Modern site
-pages *are* copied (see *Site pages* below), but three categories are outside what
-a client-side copy can produce — workflow associations, InfoPath forms and
-business-data (BCS) external lists, plus any *classic* page — so the resolver
+pages and classic wiki pages *are* copied (see *Site pages* below), but three
+categories are outside what a client-side copy can produce — workflow
+associations, InfoPath forms and business-data (BCS) external lists, plus any
+page with no copyable body (a publishing page) — so the resolver
 appends a handoff note for each one it finds (see
 `detect_handoff(web, lists)` / `handoff_notes(handoff)` in
 `office365.migration.sharepoint.handoff`, also exported from
@@ -608,31 +609,39 @@ mirrored subsite also gets the source subsite's title and description.
 ### Site pages
 
 A *Site Pages* library (`base_template` 119) holds `.aspx` pages rather than
-documents, so the item adapters do not migrate it. **Modern** site pages are still
+documents, so the item adapters do not migrate it. Both kinds of page it holds are
 reachable over REST, so the whole-site resolver copies them
 (`resolve_site_task(..., migrate_pages=True)`, the default):
 
 1. read the source page library once, projecting `Id, FileLeafRef, Title,
-   Description, ContentTypeId, CanvasContent1, LayoutWebpartsContent,
+   Description, ContentTypeId, CanvasContent1, LayoutWebpartsContent, WikiField,
    PromotedState, BannerImageUrl, OData__ModerationStatus`;
-2. classify each page — modern when its content type id starts with
+2. classify each page — **modern** when its content type id starts with
    `0x0101009D1CB255DA76424F860D91F20E6C4118` (or it serializes a canvas),
-   classic when only `WikiField` has content;
-3. create the target page through `POST /_api/sitepages/pages`
-   (`Web.add_site_page(name, title=...)`) and read the new id from the create
-   response (`Id`; the response carries no `Name`);
-4. MERGE the page content onto the created item (`Title`, `Description`,
-   `CanvasContent1`, `LayoutWebpartsContent`, `BannerImageUrl`, `PromotedState`) —
-   only the values the source actually carries, and an *empty* canvas is left
-   alone because a new page already ships a default one;
-5. publish it (`POST /_api/sitepages/pages(<id>)/publish`) when the source page was
-   published, then read the canvas back once to confirm it landed.
+   **classic wiki** when only `WikiField` has content, and *uncopyable* when it
+   has neither;
+3. create the target page — a modern page through `POST /_api/sitepages/pages`
+   (`Web.add_site_page(name, title=...)`), a wiki page through
+   `List.create_wiki_page(name, body)` — and read the new id back (`Id`; the
+   modern create response carries no `Name`);
+4. write the page content onto the created item: for a modern page a MERGE of
+   `Title`, `Description`, `CanvasContent1`, `LayoutWebpartsContent`,
+   `BannerImageUrl`, `PromotedState` (only the values the source actually carries,
+   and an *empty* canvas is left alone because a new page already ships a default
+   one); for a wiki page the source `WikiField` body plus `Title`/`Description`;
+5. publish it when the source page was published — for a modern page
+   `POST /_api/sitepages/pages(<id>)/publish`, for a wiki page
+   `item.file.publish(comment)` — then read the body back once to confirm it
+   landed.
 
-Two server facts this relies on are **live-verified** on SharePoint Online: a page
-created that way is a *draft* until the page-level `publish` operation runs (a
-MERGE of `OData__ModerationStatus` does **not** publish it), and a page's
+Three server facts this relies on are **live-verified** on SharePoint Online: a
+page created that way is a *draft* until the publish operation runs (a MERGE of
+`OData__ModerationStatus` does **not** publish either kind of page), a page's
 `CanvasContent1` round-trips byte-identical through an item MERGE (the source
-canvas is stored already entity-encoded, so no normalization is needed).
+canvas is stored already entity-encoded, so no normalization is needed), and a
+`WikiField` body does too — the server normalizes a body once on create (it wraps
+it in an `ExternalClass` div and entity-encodes braces), so a copy reuses the
+*source* value verbatim instead of re-authoring the body.
 
 Copies are **add-only** — an existing target page is never deleted. The duplicate
 behaviour is explicit, using the SPMT vocabulary
@@ -645,22 +654,28 @@ an identical canvas, and anything else is reported as `missing` or `drifted`.
 
 What a copy still cannot do, stated plainly:
 
-- **Classic pages** (wiki/publishing pages) are transformation work, not copy
-  work. They stay a handoff: `detect_page_handoff` inventories them,
+- **Publishing pages**, and pages with neither a canvas nor a wiki body, are
+  transformation work, not copy work. They stay a handoff:
+  `detect_page_handoff` inventories them, and
   `page_handoff_note(handoff, modern_copied=True)` names only the ones that were
-  *not* copied.
+  *not* copied. A copied page is listed in `PageCopyReport.copied`, with the
+  classic ones also in `PageCopyReport.wiki`.
 - A **client-side web part** serializes the source list/library identifiers it
   binds to; those are not remapped, so a copied page can render a web part pointed
-  at the source. The note reports the web-part count per page.
+  at the source. The note reports the web-part count per page. A classic wiki
+  body is copied **verbatim**, so wiki markup that hard-codes the source site —
+  internal links, wiki-embedded web parts — still addresses the source site; the
+  copy warns per page rather than rewriting the markup.
 - **Version history** of a page is not restored (REST cannot write it), and a
   target page that is *checked out* by someone else cannot be created or
   overwritten — the create fails with SharePoint's own check-out error and the
   page is listed under `PageCopyReport.failed` rather than aborting the run.
 
-The last two points were exercised live: a run over a source web with three modern
-pages copied two (one of them renamed around an existing target page, both
-published, canvases read back intact) and reported the third as failed because its
-target name was held by another user's check-out.
+These points were exercised live: a run over a source web with three pages copied
+two — one modern page renamed around an existing target page, and one classic wiki
+page whose `WikiField` body (162 characters, braces and an internal link included)
+read back byte-identical and published to `1.0` — and reported the third as failed
+because its target name was held by another user's check-out.
 
 ## Fidelity
 
@@ -759,7 +774,7 @@ the shipped pairs' expected output.
 | Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure` (per list: web-scope site columns and site content types are not registered on the target) | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
 | Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and a file on an **un-published (minor) version** is copied as its draft — both reported as warnings, since the readable version is all REST exposes) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
-| Navigation / pages / web parts | navigation and pages are web concerns, not adapter concerns: the whole-site resolver copies quick launch/top nav (`migrate_navigation`) and modern site pages — canvas, title, description, layout, banner, promoted state — then publishes the ones the source had published (`migrate_pages`); classic pages are a handoff, and a serialized web part keeps the source list/library ids it binds to | same | same |
+| Navigation / pages / web parts | navigation and pages are web concerns, not adapter concerns: the whole-site resolver copies quick launch/top nav (`migrate_navigation`) and both kinds of page (`migrate_pages`) — a modern site page's canvas, title, description, layout, banner and promoted state, a classic wiki page's `WikiField` body — then publishes the ones the source had published; publishing pages stay a handoff, wiki markup is not rewritten, and a serialized web part keeps the source list/library ids it binds to | same | same |
 | Site settings (web scope) | each web's `Title`/`Description` are copied onto the target web when they differ (`migrate_site_settings`); branding — master page, theme, logo, alternate CSS — and the site-collection/regional settings are not carried over REST | same | same |
 | Workflows / InfoPath forms / BCS external lists | not migrated (the resolver reports every association, InfoPath form and external list as a handoff) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
@@ -790,11 +805,12 @@ the shipped pairs' expected output.
 > `verify_navigation(source_web, target_web)` reconciles the copyable links.
 > Site pages follow the same pattern (`migrate_pages`, on by default): the
 > resolver calls `copy_site_pages(source_web, target_web)` and
-> `verify_page_copy(source_web, target_web)` reconciles the canvases. The
-> `navigation` dimension is `best_effort` for that reason: navigation and modern
-> pages are carried, **classic** pages are a handoff, and a modern page's
-> client-side web parts keep the source identifiers they serialize — their data
-> bindings are not remapped. The resolver makes the remaining gap visible:
+> `verify_page_copy(source_web, target_web)` reconciles the page bodies (canvases
+> and wiki bodies). The `navigation` dimension is `best_effort` for that reason:
+> navigation, modern pages and classic wiki pages are carried, **publishing** pages
+> stay a handoff, wiki markup is not rewritten, and a modern page's client-side web
+> parts keep the source identifiers they serialize — their data bindings are not
+> remapped. The resolver makes the remaining gap visible:
 > `detect_page_handoff(source_lists)` finds the page libraries and classifies each
 > page, then `page_handoff_note(handoff, modern_copied=...)` appends a warning
 > naming the pages that were *not* copied and the client-side web-part count, so a
@@ -1071,14 +1087,14 @@ the `site_settings` fidelity dimension rather than reported as drift.
 ### Verifying site pages
 
 Pages are not files with a hash, so the check compares the artifact that carries
-the content — the canvas:
+the content — the canvas of a modern page, the `WikiField` body of a classic one:
 
 ```python
 from office365.migration.sharepoint import verify_page_copy
 
 notes = verify_page_copy(source_web, target_web)  # read-only
 for note in notes:
-    print(note)  # "1 modern page(s) have no target counterpart: CollabHome.aspx"
+    print(note)  # "1 page(s) have no target counterpart: CollabHome.aspx"
 ```
 
 A source page counts as delivered when the target has a page of the same name

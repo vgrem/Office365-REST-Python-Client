@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Classic wiki pages are copied too, not handed off.** `pages.py` treated every
+  non-modern page as transformation work, yet a wiki page's body lives in
+  `WikiField`, which is readable *and* writable over REST.
+  `copy_site_pages` now classifies a page as modern (a canvas), classic wiki (a
+  `WikiField` body) or uncopyable (a publishing page, or a page with neither), and
+  copies the classic ones through `List.create_wiki_page(name, body)` followed by a
+  `WikiField`/`Title`/`Description` MERGE — the body copied **verbatim** from the
+  source, because the server normalizes a body once on create (it wraps it in an
+  `ExternalClass` div and entity-encodes braces) while the source value already is
+  normalized, so it round-trips byte-identical. Publishing runs through
+  `item.file.publish(comment)`, since a created wiki page is a draft and a
+  moderation-status MERGE does not publish it. `PagePayload` gained `wiki`,
+  `is_classic` and `content`; `PageCopyReport` gained `wiki` (plus `(N classic
+  wiki)` in `summary()`); `PageLibrary`/`PageHandoff` distinguish
+  `classic_pages`/`uncopyable_pages`, so `page_handoff_note(...,
+  modern_copied=True)` now names only the pages with no copyable body;
+  `capture_site_pages` and `verify_page_copy` work per page body instead of
+  assuming a canvas. A copied wiki body is not rewritten, so the copy warns when
+  wiki markup (internal links, wiki-embedded web parts) still addresses the source
+  site. Live-verified on SharePoint Online: a 162-character body with braces and an
+  internal link read back byte-identical and published to `1.0`, and a re-run's
+  `verify_site` reported the same two pre-existing findings and no page drift.
 - **One report answers "did this web migrate?".** A whole-site run touches a web on
   several axes, each with its own verifier, so the example called four of them by
   hand — easy to forget one, impossible to summarize. The new read-only
