@@ -163,7 +163,8 @@ def test_a_failing_list_report_makes_the_web_a_mismatch(contexts, clean, monkeyp
     assert report.summary().startswith("MISMATCH")
     assert "lists: 1 (1 with issues)" in report.summary()
     assert report.issues == [
-        "MISMATCH | target | columns: 1, content types: 0, views: 0, field links: 0, settings: 0, column attributes: 0"
+        "MISMATCH | target | columns: 1, content types: 0, views: 0, field links: 0, settings: 0, "
+        "column attributes: 0, formatting: 0"
     ]
 
 

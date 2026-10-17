@@ -30,6 +30,7 @@ class _Field:
         description=None,
         type_as_string=None,
         sealed=False,
+        custom_formatter=None,
     ):
         self.internal_name = internal_name
         self.title = title
@@ -44,6 +45,7 @@ class _Field:
         self.description = description
         self.type_as_string = type_as_string
         self.sealed = sealed
+        self.properties = {"CustomFormatter": custom_formatter}
 
     def schema_xml_for_copy(self):
         if self._schema is None:
@@ -144,6 +146,7 @@ class _View:
         personal_view=False,
         view_query=None,
         fields=(),
+        custom_formatter=None,
     ):
         self.title = title
         self.view_type = view_type
@@ -152,6 +155,7 @@ class _View:
         self.hidden = hidden
         self.default_view = default_view
         self.personal_view = personal_view
+        self.properties = {"CustomFormatter": custom_formatter}
         self.view_query = view_query
         self.view_fields = _ViewFields(fields)
 
@@ -391,6 +395,36 @@ class TestCaptureListSettings(unittest.TestCase):
 
         for name in ("EnableVersioning", "EnableModeration", "ValidationFormula"):
             self.assertIn(name, lst.ensured)
+
+
+class TestFormattingCapture(unittest.TestCase):
+    def test_column_and_view_formatting_are_captured(self):
+        lst = _List(
+            fields=[_Field("Status", schema='<Field Name="Status"/>', custom_formatter='{"elmType": "div"}')],
+            views=[_View("All Items", custom_formatter='{"additionalRowClass": "x"}')],
+        )
+
+        structure = capture_list_structure(lst)
+
+        self.assertEqual(structure.fields[0].custom_formatter, '{"elmType": "div"}')
+        self.assertEqual(structure.views[0].custom_formatter, '{"additionalRowClass": "x"}')
+
+    def test_an_spfx_field_customizer_is_not_mistaken_for_formatting(self):
+        field = _Field("Tags", schema='<Field Name="Tags"/>')
+        field.properties["ClientSideComponentId"] = "4a4b1f52-7f0e-4a2a-9d1f-2f0e4a2a9d1f"
+
+        structure = capture_list_structure(_List(fields=[field]))
+
+        self.assertEqual(structure.fields[0].client_side_component_id, "4a4b1f52-7f0e-4a2a-9d1f-2f0e4a2a9d1f")
+        self.assertIsNone(structure.fields[0].custom_formatter)
+
+    def test_an_unset_component_id_is_reported_as_absent(self):
+        field = _Field("Tags", schema='<Field Name="Tags"/>')
+        field.properties["ClientSideComponentId"] = "00000000-0000-0000-0000-000000000000"
+
+        structure = capture_list_structure(_List(fields=[field]))
+
+        self.assertIsNone(structure.fields[0].client_side_component_id)
 
 
 class TestListStructureSerialization(unittest.TestCase):

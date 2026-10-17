@@ -23,8 +23,8 @@ different content and deliver different fidelity:
 - **Client-side** (`SharePointLibrarySource/Target`, `SharePointListSource/Target`)
   drives the ordinary SharePoint REST API item by item: files and folders, record
   lists and their attachments, and — via `capture_list_structure` /
-  `provision_list_structure` — columns, content types, views and list container
-  settings. No Azure.
+  `provision_list_structure` — columns, content types, views, list container
+  settings and column/view formatting JSON. No Azure.
 - **Server-side** (`SharePointPackageTarget` + `MigrationServerJob`) builds a
   Migration API package in Azure Storage and submits a bulk ingestion job. It is
   the only path that can carry version history.
@@ -35,7 +35,7 @@ different content and deliver different fidelity:
 | Version history | ✗ | ✓ the runner reads each file's history and the package carries `<Versions>` |
 | Authors / ModifiedBy | not preserved | ✓ applied from `UserGroup.xml` (integer principal id, matched by PUID) |
 | Permissions | best-effort same-tenant ACLs at all three container scopes: **items**, a **list's own ACLs** and **web permission levels, groups and role assignments** (with `--preserve-permissions`) | best-effort same-tenant ACL — **resolved users only** (groups / unresolved principals skipped with a warning) |
-| Columns / content types / views | captured + provisioned over REST | **not emitted** by the builder today |
+| Columns / content types / views / formatting | captured + provisioned over REST (column + view `CustomFormatter` JSON included) | **not emitted** by the builder today |
 | Azure Storage | not needed | required (SharePoint-owned containers; no Azure account) |
 | Throughput | per-item HTTP, throttle-aware, resumable | bulk server-side ingestion; poll a job |
 | Verification | `job.verify()` — counts, md5 (Office files compared canonically), identity marker | job progress/events + `diagnose()` (no content diff) |
@@ -486,6 +486,16 @@ content types are matched and recreated by **name**.
   The whole-site (`resolve_site_task`) and single-list resolvers build and apply
   the map automatically, so a task-based migration needs nothing extra.
 
+- **Formatting is replayed after the columns and views exist, and reported when
+  it does not take.** Column formatting (`Field.CustomFormatter`) and row
+  formatting (`View.CustomFormatter`) are JSON blobs on the entity itself, so they
+  are a `MERGE` each, written only when the target's differs. A *sealed* column
+  accepts the `MERGE` and silently drops the value, so the pass reads both sides
+  back and returns a warning (`column 'X' kept its own formatting`) instead of
+  claiming success — verification compares the two blobs in its own `formatting`
+  column. An **SPFx field customizer** (`ClientSideComponentId`) is a pointer into
+  a deployed solution: it cannot work on a target that does not have that solution,
+  so it is reported, never copied.
 - **A fresh column cannot be attached to a custom content type.** Adding a field
 link for a column that is not already inherited or auto-linked is rejected
 (`Column '<name>' does not exist`). Those columns are skipped and returned in the

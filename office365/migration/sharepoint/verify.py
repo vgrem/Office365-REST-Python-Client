@@ -65,6 +65,7 @@ class StructureReport:
     missing_views: list[str] = field(default_factory=list)
     missing_field_links: list[str] = field(default_factory=list)
     settings_mismatches: list[str] = field(default_factory=list)
+    formatting_mismatches: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
     @property
@@ -77,6 +78,7 @@ class StructureReport:
             or self.missing_views
             or self.missing_field_links
             or self.settings_mismatches
+            or self.formatting_mismatches
         )
 
     def summary(self) -> str:
@@ -85,7 +87,7 @@ class StructureReport:
             f"{status} | {self.list_title or 'list'} | columns: {len(self.missing_columns)}, "
             f"content types: {len(self.missing_content_types)}, views: {len(self.missing_views)}, "
             f"field links: {len(self.missing_field_links)}, settings: {len(self.settings_mismatches)}, "
-            f"column attributes: {len(self.column_mismatches)}"
+            f"column attributes: {len(self.column_mismatches)}, formatting: {len(self.formatting_mismatches)}"
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -98,6 +100,7 @@ class StructureReport:
             "missing_views": list(self.missing_views),
             "missing_field_links": list(self.missing_field_links),
             "settings_mismatches": list(self.settings_mismatches),
+            "formatting_mismatches": list(self.formatting_mismatches),
             "notes": list(self.notes),
             "ok": self.ok,
         }
@@ -162,6 +165,17 @@ def compare_list_structures(
             if internal_name not in existing:
                 report.missing_field_links.append(f"{content_type.name}: {internal_name}")
     report.missing_field_links.sort()
+
+    for column in source.fields:
+        counterpart = target_by_name.get(column.internal_name)
+        if counterpart is not None and column.custom_formatter != counterpart.custom_formatter:
+            report.formatting_mismatches.append(f"column {column.internal_name}: its formatting JSON differs")
+    target_views_by_title = {view.title: view for view in target.views if view.title}
+    for view in source.views:
+        counterpart = target_views_by_title.get(view.title)
+        if counterpart is not None and view.custom_formatter != counterpart.custom_formatter:
+            report.formatting_mismatches.append(f"view {view.title}: its formatting JSON differs")
+    report.formatting_mismatches.sort()
 
     for name, value in source.settings.items():
         target_value = target.settings.get(name)

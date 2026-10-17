@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Column and view formatting JSON is carried with the structure.** A migrated
+  list reproduced its columns, content types, views and container settings but not
+  the *formatting*: a column with a custom renderer arrived as a plain value, and a
+  view with row colouring arrived undecorated. `capture_list_structure` now reads
+  `Field.CustomFormatter` and `View.CustomFormatter` into `FieldDefinition` /
+  `ViewDefinition`, and `provision_list_structure` replays them after the columns
+  and views exist — one `MERGE` each, written only where the target's differs, so
+  a re-run is a no-op. A **sealed** column accepts the `MERGE` and silently drops
+  the value, so the pass reads both sides back and returns
+  `column 'X' kept its own formatting: the target would not accept the formatter`
+  rather than claiming success; `compare_list_structures` gained a `formatting`
+  dimension so `verify_structure.py` reports a divergence too. An **SPFx field
+  customizer** (`ClientSideComponentId`) is a pointer into a deployed solution and
+  is reported, never copied. Live-verified: a list whose text column and default
+  view both carried formatter JSON was migrated and both blobs came back
+  byte-identical, with `verify_list_structure` reporting `formatting: 0`.
 - **A site's custom permission levels are carried, so a grant that names one can be
   restored at all.** `preserve_permissions` replayed role assignments by *name*,
   and a name the target did not have was skipped with a warning — so a site that

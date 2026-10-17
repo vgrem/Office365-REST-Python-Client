@@ -690,3 +690,104 @@ def test_provision_skips_settings_when_the_list_has_no_title():
     provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
 
     assert _merges(transport) == []
+
+
+_COLUMN_FORMATTER = '{"$schema": "column", "elmType": "div"}'
+_VIEW_FORMATTER = '{"additionalRowClass": "sp-field-severity--good"}'
+
+
+def _formatting_structure(*, column_formatter=_COLUMN_FORMATTER, view_formatter=_VIEW_FORMATTER):
+    """A snapshot whose columns/views already exist on the target: only formatting is left."""
+    return ListStructure(
+        title="Tasks",
+        base_template=171,
+        base_type=0,
+        fields=[FieldDefinition(internal_name="Status", custom_formatter=column_formatter)],
+        views=[ViewDefinition(title="All Items", custom_formatter=view_formatter)],
+    )
+
+
+def _formatting_routes(*, field_read_back=None, view_read_back=None):
+    """Routes for the formatting pass: read both sides, MERGE the differing ones, read back."""
+    return [
+        (HttpMethod.Get, "Fields/getByInternalNameOrTitle('Status')", {"d": {"InternalName": "Status"}}),
+        (HttpMethod.Post, "Fields/getByInternalNameOrTitle('Status')", {}),
+        (HttpMethod.Get, "views/GetByTitle('All Items')", {"d": {"Title": "All Items"}}),
+        (HttpMethod.Post, "views/GetByTitle('All Items')", {}),
+        (
+            HttpMethod.Get,
+            "Fields?$select=InternalName,CustomFormatter",
+            {"d": {"results": [{"InternalName": "Status", "CustomFormatter": field_read_back}]}},
+        ),
+        (
+            HttpMethod.Get,
+            "views",
+            {"d": {"results": [{"Title": "All Items", "CustomFormatter": view_read_back}]}},
+        ),
+    ]
+
+
+def test_provision_writes_column_and_view_formatting():
+    ctx, transport = _setup(_formatting_routes(field_read_back=_COLUMN_FORMATTER, view_read_back=_VIEW_FORMATTER))
+
+    warnings = provision_list_structure(
+        ctx.web.lists.get_by_title("Tasks"),
+        _formatting_structure(),
+    )
+
+    merges = [p for p in _posts(transport) if p.headers.get("X-HTTP-Method") == "MERGE"]
+    assert any("Fields/getByInternalNameOrTitle('Status')" in p.url for p in merges)
+    assert any("views/GetByTitle('All Items')" in p.url for p in merges)
+    assert warnings == []
+
+
+def test_provision_leaves_matching_formatting_alone():
+    ctx, transport = _setup(
+        [
+            (
+                HttpMethod.Get,
+                "Fields/getByInternalNameOrTitle('Status')",
+                {"d": {"InternalName": "Status", "CustomFormatter": _COLUMN_FORMATTER}},
+            ),
+            (
+                HttpMethod.Get,
+                "views/GetByTitle('All Items')",
+                {"d": {"Title": "All Items", "CustomFormatter": _VIEW_FORMATTER}},
+            ),
+        ]
+    )
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _formatting_structure())
+
+    assert [p for p in _posts(transport) if p.headers.get("X-HTTP-Method") == "MERGE"] == []
+    assert not any("$select=InternalName" in u for u in _urls(transport))
+
+
+def test_provision_reports_a_formatter_the_target_would_not_take():
+    ctx, _ = _setup(_formatting_routes(field_read_back=None, view_read_back="{}"))
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _formatting_structure())
+
+    assert "column 'Status' kept its own formatting: the target would not accept the formatter" in warnings
+    assert "view 'All Items' kept its own formatting: the target would not accept the formatter" in warnings
+
+
+def test_provision_reports_an_spfx_field_customizer_instead_of_copying_it():
+    ctx, transport = _setup([])
+    component_id = "4a4b1f52-7f0e-4a2a-9d1f-2f0e4a2a9d1f"
+
+    warnings = provision_list_structure(
+        ctx.web.lists.get_by_title("Tasks"),
+        ListStructure(
+            title="Tasks",
+            base_template=171,
+            base_type=0,
+            fields=[FieldDefinition(internal_name="Tags", client_side_component_id=component_id)],
+        ),
+    )
+
+    assert warnings == [
+        f"column 'Tags' carries an SPFx field customizer ({component_id}), which is not carried: "
+        "the solution has to be deployed on the target"
+    ]
+    assert _urls(transport) == []

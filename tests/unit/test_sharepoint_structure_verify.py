@@ -269,3 +269,42 @@ def test_settings_are_reported_in_the_json_form():
 
     assert payload["ok"] is False
     assert payload["settings_mismatches"] == ["EnableModeration: source=True, target=None"]
+
+
+def test_column_and_view_formatting_are_verified():
+    source = ListStructure(
+        title="Projects",
+        fields=[FieldDefinition(internal_name="Status", custom_formatter='{"elmType": "div"}')],
+        views=[ViewDefinition(title="All Items", custom_formatter='{"additionalRowClass": "x"}')],
+    )
+    target = ListStructure(
+        title="Projects",
+        fields=[FieldDefinition(internal_name="Status")],
+        views=[ViewDefinition(title="All Items")],
+    )
+
+    report = compare_list_structures(source, target)
+
+    assert not report.ok
+    assert report.formatting_mismatches == [
+        "column Status: its formatting JSON differs",
+        "view All Items: its formatting JSON differs",
+    ]
+    assert "formatting: 2" in report.summary()
+    assert report.to_dict()["formatting_mismatches"] == report.formatting_mismatches
+
+
+def test_matching_formatting_is_not_a_mismatch():
+    source = ListStructure(
+        title="Projects",
+        fields=[FieldDefinition(internal_name="Status", custom_formatter='{"elmType": "div"}')],
+    )
+    target = ListStructure(
+        title="Projects",
+        fields=[FieldDefinition(internal_name="Status", custom_formatter='{"elmType": "div"}')],
+    )
+
+    report = compare_list_structures(source, target)
+
+    assert report.ok
+    assert report.formatting_mismatches == []

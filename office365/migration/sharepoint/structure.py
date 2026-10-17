@@ -98,6 +98,8 @@ _FIELD_SELECT = [
     "CanBeDeleted",
     "Group",
     "Description",
+    "CustomFormatter",
+    "ClientSideComponentId",
 ]
 
 #: List container settings captured with the structure, in the order they must be
@@ -217,6 +219,8 @@ class FieldDefinition:
     can_be_deleted: Optional[bool] = None
     group: Optional[str] = None
     description: Optional[str] = None
+    custom_formatter: Optional[str] = None
+    client_side_component_id: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -236,6 +240,8 @@ class FieldDefinition:
             can_be_deleted=data.get("can_be_deleted"),
             group=data.get("group"),
             description=data.get("description"),
+            custom_formatter=data.get("custom_formatter"),
+            client_side_component_id=data.get("client_side_component_id"),
         )
 
 
@@ -282,6 +288,7 @@ class ViewDefinition:
     personal_view: Optional[bool] = None
     view_query: Optional[str] = None
     field_internal_names: List[str] = dc_field(default_factory=list)
+    custom_formatter: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -298,6 +305,7 @@ class ViewDefinition:
             personal_view=data.get("personal_view"),
             view_query=data.get("view_query"),
             field_internal_names=list(data.get("field_internal_names") or []),
+            custom_formatter=data.get("custom_formatter"),
         )
 
 
@@ -585,7 +593,21 @@ def _field_definition(field: Field) -> FieldDefinition:
         can_be_deleted=field.can_be_deleted,
         group=field.group,
         description=field.description,
+        custom_formatter=field.properties.get("CustomFormatter"),
+        client_side_component_id=_component_id(field),
     )
+
+
+#: An "unset" ``ClientSideComponentId`` is the all-zero GUID, not an absent property.
+_EMPTY_GUID = "00000000-0000-0000-0000-000000000000"
+
+
+def _component_id(field: Field) -> Optional[str]:
+    """The SPFx field customizer registered on a column, if any."""
+    value = field.properties.get("ClientSideComponentId")
+    if not value or normalize_guid(value) == _EMPTY_GUID:
+        return None
+    return str(value)
 
 
 def _content_type_definition(content_type: ContentType, links: Iterable[FieldLink]) -> ContentTypeDefinition:
@@ -612,6 +634,7 @@ def _view_definition(view: View, field_names: Iterable[str]) -> ViewDefinition:
         personal_view=view.personal_view,
         view_query=view.view_query,
         field_internal_names=[name for name in field_names if name],
+        custom_formatter=view.properties.get("CustomFormatter"),
     )
 
 
@@ -768,7 +791,72 @@ def provision_list_structure(
     _apply_list_settings(sp_list, structure, warnings, validation=True)
 
     sp_list.execute_query()
+    _apply_formatting(sp_list, structure, warnings)
     return warnings
+
+
+def _apply_formatting(sp_list: SPList, structure: ListStructure, warnings: List[str]) -> None:
+    """Replay the column and view formatting JSON the target does not carry.
+
+    Column formatting lives on the column and row formatting on the view, and both
+    are a plain ``MERGE`` on the entity — so both run once the columns and views
+    exist. A column the server keeps sealed swallows the write without an error, so
+    the pass reads both sides back and reports what did not take rather than
+    claiming success.
+
+    An SPFx field customizer is a pointer into a deployed solution: it cannot work
+    on a target that does not have that solution, so it is reported, never copied.
+    """
+    for definition in structure.fields:
+        if definition.client_side_component_id:
+            warnings.append(
+                f"column '{definition.internal_name}' carries an SPFx field customizer "
+                f"({definition.client_side_component_id}), which is not carried: the solution has to be "
+                "deployed on the target"
+            )
+    column_formatters = {
+        definition.internal_name: definition.custom_formatter
+        for definition in structure.fields
+        if definition.custom_formatter and definition.internal_name
+    }
+    view_formatters = {
+        view.title: view.custom_formatter for view in structure.views if view.custom_formatter and view.title
+    }
+    if not column_formatters and not view_formatters:
+        return
+
+    written = False
+    for name, formatter in column_formatters.items():
+        field = sp_list.fields.get_by_internal_name_or_title(name).get().execute_query()
+        if field.properties.get("CustomFormatter") == formatter:
+            continue
+        field.set_property("CustomFormatter", formatter)
+        field.update()
+        written = True
+    for title, formatter in view_formatters.items():
+        view = sp_list.views.get_by_title(title).get().execute_query()
+        if view.properties.get("CustomFormatter") == formatter:
+            continue
+        view.set_property("CustomFormatter", formatter)
+        view.update()
+        written = True
+    if not written:
+        return
+    sp_list.execute_query()
+
+    # A sealed column accepts the MERGE and drops the value: read back, then report.
+    current_fields = {
+        field.internal_name: field.properties.get("CustomFormatter")
+        for field in sp_list.fields.select(["InternalName", "CustomFormatter"]).get().execute_query()
+        if field.internal_name
+    }
+    for name, formatter in column_formatters.items():
+        if name in current_fields and current_fields[name] != formatter:
+            warnings.append(f"column '{name}' kept its own formatting: the target would not accept the formatter")
+    current_views = {view.title: view.properties.get("CustomFormatter") for view in sp_list.views.get().execute_query()}
+    for title, formatter in view_formatters.items():
+        if title in current_views and current_views[title] != formatter:
+            warnings.append(f"view '{title}' kept its own formatting: the target would not accept the formatter")
 
 
 def _apply_list_settings(sp_list: SPList, structure: ListStructure, warnings: List[str], *, validation: bool) -> None:
