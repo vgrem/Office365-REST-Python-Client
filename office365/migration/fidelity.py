@@ -167,12 +167,14 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
         "structure",
         status.UNSUPPORTED,
         "columns, content types, views and list container settings are not carried by the adapters; "
-        "replay them with provision_list_structure (the resolver does)",
+        "replay them with provision_list_structure (the resolver does), which is per list: "
+        "web-scope site columns and site content types are replayed only through the lists that use them",
     )
     set_(
         "content_types",
         status.UNSUPPORTED,
-        "content types are not carried by the adapters; replay them with provision_list_structure (the resolver does)",
+        "content types are not carried by the adapters; replay them with provision_list_structure "
+        "(the resolver does) per list — web-scope registration of a site content type is not reproduced",
     )
     if getattr(source, "supports_typed_values", False) and getattr(target, "supports_typed_values", False):
         set_(

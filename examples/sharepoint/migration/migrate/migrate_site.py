@@ -124,9 +124,13 @@ def main():
         print(f"  {'library' if is_document_library(entry) else 'list':7} {entry.title}")
     subwebs = list(source_ctx.web.webs.get().execute_query())
     if subwebs:
-        action = "will be mirrored" if args.include_subwebs else "will be skipped (pass --include-subwebs)"
-        print(f"  {len(subwebs)} subsite(s) {action}: {', '.join(web.title for web in subwebs)}")
-    if not lists:
+        action = (
+            "will be mirrored (including their nested subsites)"
+            if args.include_subwebs
+            else "will be skipped (pass --include-subwebs)"
+        )
+        print(f"  {len(subwebs)} direct subsite(s) {action}: {', '.join(web.title for web in subwebs)}")
+    if not lists and not (subwebs and args.include_subwebs):
         print("  (nothing to migrate)")
     preserving = [
         name
