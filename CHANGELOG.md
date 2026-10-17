@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Checked-out files are reported, not silently mis-copied:** a checked-out
+  document exposes only its last *checked-in* version over REST, so the migrated
+  copy was faithful to what the source returned while the author's in-progress
+  edits stayed behind — and `verify()` could not notice, because it compares the
+  same read on both sides. Carrying the check-out is not an option (the copy would
+  be left locked by the migrating app), so the library source now detects it and
+  reports it once per run: *N checked-out file(s) were copied from their last
+  checked-in version (in-progress edits are not visible over REST): …* (first five
+  paths, then a count). Detection rides the single item read that already supplies
+  the author ids: `CheckoutUser` only projects when its sub-properties are selected
+  **and** the field is expanded (a bare `$select=CheckoutUser` is rejected with
+  *The query to field 'CheckoutUser' is not valid*), so the projection grows by
+  `CheckoutUser/Id`/`CheckoutUser/Title` plus `$expand=CheckoutUser` and costs no
+  extra request. An un-published minor version — the same class of invisible
+  content — is still not detected.
 - **Document library folder system metadata:** a migrated folder was created with
   the migration's own `Created`/`Modified` (and its author), so every funnel's
   "last updated" date was wrong while `verify()` — which excluded folders from the

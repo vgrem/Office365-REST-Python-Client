@@ -672,9 +672,14 @@ class _ModerationItems:
     def __init__(self, items: list[_ModerationItem]) -> None:
         self._items = items
         self.selects: list[list[str]] = []
+        self.expands: list[list[str]] = []
 
     def select(self, columns) -> "_ModerationItems":
         self.selects.append(list(columns))
+        return self
+
+    def expand(self, names) -> "_ModerationItems":
+        self.expands.append(list(names))
         return self
 
     def get_all(self) -> "_ModerationItems":
@@ -751,6 +756,55 @@ def test_library_source_without_the_library_cannot_read_approval_state():
 
     assert source.supports_item_state is False
     assert source.read_item_state(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt")) is None
+
+
+# ── Checked-out files (in-progress edits REST cannot see) ────────────────────
+
+
+def _checkout_source(urls: list[str], checked_out: set[str]):
+    """A source over the given files, the checked-out ones carrying a ``CheckoutUser``."""
+    folder = _SourceFolder("/sites/x/Docs", _Web(), files=[_SourceFile(url) for url in urls])
+    properties = [
+        {"FileRef": url, **({"CheckoutUser": {"Id": 12, "Title": "vgrem@x"}} if url in checked_out else {})}
+        for url in urls
+    ]
+    lst = _ModerationList([_ModerationItem(entry) for entry in properties], moderation=False)
+    return SharePointLibrarySource(folder, sp_list=lst), lst
+
+
+def test_library_source_warns_about_a_checked_out_file():
+    # A checked-out file exposes its last checked-in content, so the copy is
+    # faithful to what the source returns while the author's pending edits stay
+    # behind — verification compares the same read and cannot see the difference.
+    source, lst = _checkout_source(["/sites/x/Docs/a.txt", "/sites/x/Docs/b.txt"], {"/sites/x/Docs/b.txt"})
+
+    source.list_items()
+
+    assert source.warnings == [
+        "1 checked-out file(s) were copied from their last checked-in version "
+        "(in-progress edits are not visible over REST): b.txt"
+    ]
+    # a user field only projects when its sub-properties are selected *and* it is expanded
+    assert lst.items.expands == [["CheckoutUser"]]
+    assert "CheckoutUser/Id" in lst.items.selects[0]
+
+
+def test_library_source_does_not_warn_when_nothing_is_checked_out():
+    source, _ = _checkout_source(["/sites/x/Docs/a.txt"], set())
+
+    source.list_items()
+
+    assert source.warnings == []
+
+
+def test_library_source_summarizes_a_long_checked_out_list():
+    urls = [f"/sites/x/Docs/f{index}.txt" for index in range(7)]
+    source, _ = _checkout_source(urls, set(urls))
+
+    source.list_items()
+
+    assert len(source.warnings) == 1
+    assert source.warnings[0].endswith(": f0.txt, f1.txt, f2.txt, f3.txt, f4.txt and 2 more")
 
 
 # ── Folder system metadata (a folder is an item too) ─────────────────────────

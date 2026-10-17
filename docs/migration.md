@@ -221,8 +221,18 @@ Two honest limits remain:
     be combined with anything else), so a draft file reports the *migration* time
     there — its `File.TimeLastModified`, the value the metadata diff compares, keeps
     the source timestamp.
-  A failed state write is a warning, never fatal. Check-out and in-progress draft
-  version state are still not carried.
+  A failed state write is a warning, never fatal.
+- A **checked-out file** is copied from its last *checked-in* version, because that
+  is all REST exposes — the author's in-progress edits live in the check-out and
+  never reach a reader. Carrying the check-out itself is not an option either: it
+  would leave the copy locked by the migrating app. The copy is therefore faithful
+  to the source but incomplete, and **verification cannot notice** — it compares the
+  same read on both sides — so the source reports it instead: one warning per run,
+  naming the files (`N checked-out file(s) were copied from their last checked-in
+  version (in-progress edits are not visible over REST): …`). The `CheckoutUser`
+  detection rides the single item read that already supplies the author ids. An
+  **un-published minor version** on a library with minor-versioning enabled is the
+  same class of invisible content and is *not* detected.
 - Per-item **timestamps/permissions/authorship**
   (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
   by the list adapters on a best-effort basis: timestamps and authorship are
@@ -535,7 +545,7 @@ the shipped pairs' expected output.
 | Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
 | Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
-| Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; check-out and in-progress draft state are not; a draft file's `Modified` cannot be restored with it) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
+| Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and reported as a warning, since only that version is readable) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | pages/web parts not migrated (the resolver reports each skipped page library as a handoff); quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
@@ -706,7 +716,7 @@ explicit about what it could not confirm:
 | Check | When | Finding bucket |
 |---|---|---|
 | Presence (expected vs found paths) | always | `missing` / `extra` |
-| Content checksums | always, on a `spot_checks` sample | `mismatches` (or `unverifiable` if a side exposes no comparable hash) |
+| Content checksums | always, on a `spot_checks` sample | `mismatches` (or `unverifiable` if a side exposes no comparable hash); a checked-out source file's pending edits are invisible to both sides and are reported by the source instead |
 | Timestamps (`Created`/`Modified`) | when `preserve_timestamps` was requested | `mismatches` / `unverifiable` (attachments: content-only, reported once; folders: compared on the folder resource, applied last) |
 | Authorship (`Author`/`Editor`) | when `preserve_authorship` was requested | `mismatches` / `unverifiable` |
 | Permissions | when `preserve_permissions` was requested | `mismatches` / `unverifiable` |

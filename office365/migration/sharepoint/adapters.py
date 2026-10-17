@@ -92,6 +92,9 @@ _APPROVED_STATUS = "2"
 #: ``EnableModeration`` is on, so selecting them unconditionally fails outright.
 _MODERATION_FIELDS = ("OData__ModerationStatus", "OData__ModerationComments")
 
+#: How many paths a per-run warning names before it summarizes the rest.
+_WARNING_SAMPLE = 5
+
 #: Multi-value typed columns. Their ``<name>Id`` companion is a collection of ids
 #: that a ``*`` projection omits (LookupMulti entirely; UserMulti unreliably), so the
 #: source selects them explicitly and the target writes ``{"results": [...]}``.
@@ -2310,6 +2313,8 @@ class SharePointLibrarySource:
         # Content-approval state by file URL, read alongside the author ids (only
         # when the library moderates).
         self._item_moderation: dict[str, dict] | None = None
+        # Server-relative URLs of checked-out files, read alongside the author ids.
+        self._item_checkout: set[str] | None = None
         self._moderation_on: bool | None = None
         self.warnings: list[str] = []
         # Optional hook invoked while a file downloads: (bytes_read, file_size)
@@ -2388,7 +2393,28 @@ class SharePointLibrarySource:
                 item.editor = self._principal_for(editor_id)
             result.append(item)
             emit_progress(progress, done=len(result), stage="planning", items=[file])
+        self._report_checkouts(result)
         return result
+
+    def _report_checkouts(self, items: list[MigrationItem]) -> None:
+        """Warn about files whose in-progress edits REST cannot see.
+
+        A checked-out file exposes its last **checked-in** content, so the copy is
+        faithful to what the source returns while the author's pending edits stay
+        behind. Verification cannot catch that — it compares the same read — so the
+        loss is reported here instead of passing silently.
+        """
+        checkout = self._item_checkout or set()
+        checked = sorted(item.dest_path for item in items if item.item_type != "folder" and item.source_path in checkout)
+        if not checked:
+            return
+        shown = ", ".join(checked[:_WARNING_SAMPLE])
+        if len(checked) > _WARNING_SAMPLE:
+            shown = f"{shown} and {len(checked) - _WARNING_SAMPLE} more"
+        self.warnings.append(
+            f"{len(checked)} checked-out file(s) were copied from their last checked-in version "
+            f"(in-progress edits are not visible over REST): {shown}"
+        )
 
     def read(self, item: MigrationItem) -> object:
         if item.item_type == "folder":
@@ -2566,13 +2592,24 @@ class SharePointLibrarySource:
         authors: dict[str, tuple[int | None, int | None]] = {}
         unique: dict[str, bool] = {}
         moderation: dict[str, dict] = {}
+        checkout: set[str] = set()
         moderates = self._moderation_enabled()
         if self._sp_list is not None:
             try:
-                select = ["FileRef", "AuthorId", "EditorId", "HasUniqueRoleAssignments"]
+                # ``CheckoutUser`` is a user field: it only projects when its
+                # sub-properties are selected *and* the field is expanded — a bare
+                # ``$select=CheckoutUser`` is rejected by the server.
+                select = [
+                    "FileRef",
+                    "AuthorId",
+                    "EditorId",
+                    "HasUniqueRoleAssignments",
+                    "CheckoutUser/Id",
+                    "CheckoutUser/Title",
+                ]
                 if moderates:
                     select.extend(_MODERATION_FIELDS)
-                items = self._sp_list.items.select(select).get_all().execute_query()
+                items = self._sp_list.items.select(select).expand(["CheckoutUser"]).get_all().execute_query()
                 for item in items:
                     ref = item.properties.get("FileRef")
                     if ref:
@@ -2581,6 +2618,8 @@ class SharePointLibrarySource:
                             parse_int(item.properties.get("EditorId")),
                         )
                         unique[ref] = bool(item.properties.get("HasUniqueRoleAssignments"))
+                        if item.properties.get("CheckoutUser"):
+                            checkout.add(ref)
                         if moderates:
                             state = _moderation_state(item.properties)
                             if state:
@@ -2590,6 +2629,7 @@ class SharePointLibrarySource:
         self._item_authors = authors
         self._item_unique = unique
         self._item_moderation = moderation
+        self._item_checkout = checkout
         return authors
 
     def _moderation_enabled(self) -> bool:
