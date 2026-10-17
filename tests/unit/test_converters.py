@@ -97,6 +97,24 @@ class TestSerializeValue(unittest.TestCase):
         self.assertEqual(serialize_value(FieldType.Text, V4JsonFormat()), "Text")
         self.assertEqual(serialize_value(FieldType.Text), "Text")
 
+    def test_ordinal_valued_graph_enum_serializes_as_its_name(self):
+        # Generated Graph enums carry the CSDL ordinal as a string; Graph expects
+        # the member name, so "2" must never reach the wire.
+        from office365.todo.tasks.taskstatus import TaskStatus
+
+        self.assertEqual(serialize_value(TaskStatus.completed, V4JsonFormat()), "completed")
+        self.assertEqual(serialize_value(TaskStatus.notStarted), "notStarted")
+        # The int-keyed V3 branch is unaffected: SharePoint keeps its numbers.
+        from office365.sharepoint.fields.type import FieldType
+
+        self.assertEqual(serialize_value(FieldType.Text, JsonLightFormat()), 2)
+
+    def test_named_string_enum_keeps_its_value(self):
+        # A hand-written Graph enum already stores its wire value.
+        from office365.outlook.mail.importance import Importance
+
+        self.assertEqual(serialize_value(Importance.high, V4JsonFormat()), "high")
+
 
 class TestClientValueToJson(unittest.TestCase):
     def test_user_profile(self):

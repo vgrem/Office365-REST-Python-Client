@@ -559,6 +559,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Generated Graph enums sent their CSDL ordinal instead of the member name.**
+  The generator renders a CSDL enum member as `name = "<Value>"`, so a large part
+  of the Graph model carries ordinals rather than wire values — `TaskStatus`
+  is `notStarted = "0" … completed = "2"`. `serialize_value` returned a string
+  value verbatim, so a write payload contained `"2"` where Graph expects
+  `"completed"` (SharePoint's `Edm.Int32` enums were already handled by the
+  int branch). A digit-only string value now falls back to the member name, which
+  is what the OData V4 branch always intended (reads were unaffected: `parse_enum`
+  already falls back to a name lookup). Verified by unit test rather than against
+  the tenant — the lab app is not granted `Tasks.ReadWrite.All`, so the live
+  To Do round-trip was not available.
 - **Two models claimed the wrong OData type name.** `office365.security.security.Security`
   returned `microsoft.graph.security.alert` (a copy-paste from `Alert`), so the
   root security entity serialized with `Alert`'s `@odata.type`;

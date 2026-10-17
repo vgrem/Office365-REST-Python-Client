@@ -41,10 +41,16 @@ def _serialize_enum(value: Enum, json_format: Optional[ODataJsonFormat]) -> Any:
     the member *name* ("teamsForBusiness"). Enums generated with string
     values already match their name; older Graph ones (e.g. auto-numbered
     ``unknown = 0``) must fall back to the name, not the ordinal.
+
+    A generated Graph enum carries the *CSDL ordinal* as a string
+    (``TaskStatus.completed = "2"``), which is not a wire value — Graph
+    rejects it, so a digit-only string falls back to the member name too.
     """
     if isinstance(json_format, JsonLightFormat) and isinstance(value.value, int):
         return value.value
-    return value.value if isinstance(value.value, str) else value.name
+    if isinstance(value.value, str):
+        return value.name if value.value.isdigit() else value.value
+    return value.name
 
 
 def serialize_value(value: Any, json_format: Optional[ODataJsonFormat] = None) -> Any:
