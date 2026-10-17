@@ -8,6 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **A migrated site looks like the source: its branding is carried too.** Content
+  and structure were replayed but the *web* kept the target's own look — its own
+  master page, its own theme, no site logo. `office365.migration.sharepoint.branding`
+  now carries the properties REST accepts: `apply_web_branding(source_web,
+  target_web)` reads `MasterUrl`, `CustomMasterUrl`, `SiteLogoUrl`,
+  `AlternateCssUrl` and `ThemedCssFolderUrl` (one projected GET per side) and
+  MERGEs only the ones that differ, so a re-run writes nothing;
+  `verify_web_branding(source_web, target_web)` is the read-only half and
+  `verify_site(..., branding=True)` reports it as its own dimension next to
+  `settings`; `WebBranding` / `WebBrandingReport` are exported too. Three rules are
+  enforced because a blind copy is wrong: every value is a path **inside the source
+  site**, so it is rebased onto the target's (a master page reads back as
+  `/sites/.../_catalogs/masterpage/seattle.master`, which always differs between two
+  sites); every value names an **asset**, so it is written **only where the target
+  resolves it** — a master page or theme folder lives in a gallery this migration
+  never copies (`_catalogs/masterpage`, `_catalogs/theme` are hidden lists), and a
+  logo may be the site's group image (`_api/GroupService/GetGroupImage?id=...`), a
+  service endpoint with no counterpart to copy — and is otherwise reported as
+  `branding: ... keeps its own MasterUrl — the target has no ...`, because a dangling
+  master page would break every page on the site; and only the logo and the
+  alternate CSS may be **cleared** (an unset source value writes `""`) — a blank
+  master page is never written. It runs after the content, since an alternate-CSS
+  URL can point into a library the run just populated. Live-verified on SharePoint
+  Online: a MERGE of `SiteLogoUrl` + `AlternateCssUrl` on a web is accepted and
+  reads back, writing `null` clears the logo, and a seeded source web's alternate
+  CSS arrived rebased on the target with `site: ... branding: 0`.
 - **Column and view formatting JSON is carried with the structure.** A migrated
   list reproduced its columns, content types, views and container settings but not
   the *formatting*: a column with a custom renderer arrived as a plain value, and a

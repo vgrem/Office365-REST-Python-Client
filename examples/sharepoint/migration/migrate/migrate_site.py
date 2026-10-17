@@ -298,6 +298,7 @@ def _verify_web(source_ctx, ctx, *, preserve_permissions: bool, settings) -> Non
         source_ctx,
         ctx,
         settings=settings.migrate_site_settings != "NONE",
+        branding=settings.migrate_site_settings != "NONE",
         navigation=settings.migrate_navigation,
         pages=settings.migrate_pages,
         security=preserve_permissions,

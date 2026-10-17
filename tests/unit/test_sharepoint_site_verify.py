@@ -38,6 +38,7 @@ def clean(monkeypatch):
 
     for name, func in (
         ("settings", "verify_web_settings"),
+        ("branding", "verify_web_branding"),
         ("navigation", "verify_navigation"),
         ("pages", "verify_page_copy"),
         ("security", "verify_site_security"),
@@ -56,8 +57,10 @@ def test_a_clean_web_is_ok_and_complete(contexts, clean):
     assert report.issues == []
     assert report.url == "https://contoso.sharepoint.com/sites/team_out"
     assert report.findings == {}
-    assert report.checked == ["settings", WEB_SCOPE_STRUCTURE]
-    assert report.summary() == "OK | https://contoso.sharepoint.com/sites/team_out | settings: 0, web-scope structure: 0"
+    assert report.checked == ["settings", "branding", WEB_SCOPE_STRUCTURE]
+    assert report.summary() == (
+        "OK | https://contoso.sharepoint.com/sites/team_out | settings: 0, branding: 0, web-scope structure: 0"
+    )
     assert json.loads(json.dumps(report.to_dict()))["ok"] is True
 
 
@@ -80,7 +83,8 @@ def test_findings_make_the_web_a_mismatch_and_are_counted(contexts, clean, monke
         "pages": ["page: Home.aspx missing", "page: About.aspx drifted"],
     }
     assert report.summary() == (
-        "MISMATCH | https://contoso.sharepoint.com/sites/team_out | settings: 1, web-scope structure: 0, pages: 2"
+        "MISMATCH | https://contoso.sharepoint.com/sites/team_out | settings: 1, branding: 0, "
+        "web-scope structure: 0, pages: 2"
     )
     assert report.issues[0].startswith("site settings:")
     assert len(report.issues) == len(report.findings["settings"]) + len(report.findings["pages"])
@@ -126,14 +130,14 @@ def _raise_access_denied(source_web, target_web):
 
 
 def test_only_the_requested_checks_run(contexts, clean):
-    report = verify_site(*contexts, settings=False, web_scope_structure=False, pages=True)
+    report = verify_site(*contexts, settings=False, branding=False, web_scope_structure=False, pages=True)
 
     assert clean == ["pages"]
     assert report.checked == ["pages"]
 
 
 def test_nothing_requested_reports_nothing_to_check(contexts, clean):
-    report = verify_site(*contexts, settings=False, web_scope_structure=False)
+    report = verify_site(*contexts, settings=False, branding=False, web_scope_structure=False)
 
     assert report.ok
     assert report.summary() == "OK | https://contoso.sharepoint.com/sites/team_out | nothing to check"
@@ -187,6 +191,20 @@ def test_structure_can_be_skipped_even_with_pairs(contexts, clean, monkeypatch):
     assert "lists:" not in report.summary()
 
 
+def test_branding_is_its_own_dimension(contexts, clean, monkeypatch):
+    monkeypatch.setattr(
+        site_verify,
+        "verify_web_branding",
+        lambda s, t: ["branding: https://contoso.sharepoint.com/sites/team_out MasterUrl is None, source has '/x'"],
+    )
+
+    report = verify_site(*contexts)
+
+    assert not report.ok
+    assert list(report.findings) == ["branding"]
+    assert report.summary().endswith("settings: 0, branding: 1, web-scope structure: 0")
+
+
 def test_the_url_falls_back_to_the_context_when_a_projected_read_dropped_it(contexts, clean):
     source, target = contexts
     target.web = type(
@@ -203,7 +221,7 @@ def test_web_scope_structure_findings_are_reported_as_a_note(contexts, monkeypat
     )
     monkeypatch.setattr(site_verify, "compare_web_scope_structure", lambda s, t: object())
 
-    report = verify_site(*contexts)
+    report = verify_site(*contexts, branding=False)
 
     assert report.findings == {WEB_SCOPE_STRUCTURE: ["web-scope structure is not replayed: …"]}
     assert not report.ok

@@ -605,9 +605,8 @@ source's empty one).
 
 What a web-settings copy leaves behind, by design:
 
-- **Branding** — master page, theme, `SiteLogoUrl`, alternate CSS. That is site
-  *design*, not content, and the logo URL points at a source-site asset whose copy
-  is not guaranteed. Hand-off.
+- **Branding** — master page, theme, `SiteLogoUrl`, alternate CSS. Carried by its
+  own module with its own rules: see [Site branding](#site-branding).
 - **Site-collection and regional settings** — time zone, locale, quotas, sharing
   capability, hub association. REST exposes no working write path (setting a
   `TimeZone` id does not change the web's zone), so they are neither copied nor
@@ -615,6 +614,46 @@ What a web-settings copy leaves behind, by design:
 
 Each web is copied through **its own** context, so with `include_subwebs=True` a
 mirrored subsite also gets the source subsite's title and description.
+
+### Site branding
+
+Copying content and replaying structure still left the *web* looking like the
+target: its own master page, its own theme, no site logo — the first thing a user
+sees. `office365.migration.sharepoint.branding` carries the properties REST
+accepts (`MasterUrl`, `CustomMasterUrl`, `SiteLogoUrl`, `AlternateCssUrl`,
+`ThemedCssFolderUrl`) through `apply_web_branding(source_web, target_web)`: one
+projected GET per side, then a single MERGE of only the properties that differ, so
+a re-run is a no-op. `verify_web_branding(source_web, target_web)` is the
+read-only half (one finding per property), and `verify_site(...)` reports it as its
+own `branding` dimension next to `settings`.
+
+Three rules make a blind copy wrong, and each is enforced rather than assumed:
+
+- every value is a path **inside the source site**, so it is rebased onto the
+  target's before it is written — copying it verbatim would leave the migrated web
+  pointing back at the site it came from (`/sites/team_in/…` → `/sites/team_out/…`,
+  including when the value is an absolute URL). Master pages read back as
+  *site-relative* paths on every web, so without the rebase every migrated site
+  would report a master-page mismatch;
+- every one of them names an **asset**, so a value is written only where the
+  target resolves it. A master page or theme folder lives in a gallery this
+  migration never copies (`_catalogs/masterpage` and `_catalogs/theme` are hidden
+  lists); a logo may be the site's group image
+  (`/sites/x/_api/GroupService/GetGroupImage?id=…`), a service endpoint with no
+  counterpart to copy. In both cases the web keeps its own value and the run
+  reports `branding: … keeps its own MasterUrl — the target has no …`: a dangling
+  master page would break every page on the site, so this is a reported gap rather
+  than a hopeful write. An absolute URL is resolved to its path for that check;
+- only the logo and the alternate CSS can be **cleared** — an unset source value
+  writes `""`, which the service accepts and which a second run leaves alone. A
+  blank master page is never written.
+
+Branding is applied **after** the content, because an alternate-CSS URL may point
+into a library this run has just populated. Live-verified on SharePoint Online: a
+MERGE of `SiteLogoUrl` + `AlternateCssUrl` on a web is accepted and reads back,
+writing `null` clears the logo, `MasterUrl` reads back as a site-relative path,
+and a source web's alternate CSS arrived rebased on the target with `verify_site`
+reporting `branding: 0`.
 
 ### Site pages
 
@@ -838,7 +877,7 @@ the shipped pairs' expected output.
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
 | Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and a file on an **un-published (minor) version** is copied as its draft — both reported as warnings, since the readable version is all REST exposes) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | navigation and pages are web concerns, not adapter concerns: the whole-site resolver copies quick launch/top nav (`migrate_navigation`) and both kinds of page (`migrate_pages`) — a modern site page's canvas, title, description, layout, banner and promoted state, a classic wiki page's `WikiField` body — then publishes the ones the source had published; publishing pages stay a handoff, wiki markup is not rewritten, and a serialized web part keeps the source list/library ids it binds to | same | same |
-| Site settings (web scope) | each web's `Title`/`Description` are copied onto the target web when they differ (`migrate_site_settings`); branding — master page, theme, logo, alternate CSS — and the site-collection/regional settings are not carried over REST | same | same |
+| Site settings (web scope) | each web's `Title`/`Description` are copied onto the target web when they differ (`migrate_site_settings`), as is its branding (master page, logo, alternate CSS, theme folder) — rebased onto the target's path and only where the target has the asset; the site-collection/regional settings are not carried over REST | same | same |
 | Workflows / InfoPath forms / BCS external lists | not migrated (the resolver reports every association, InfoPath form and external list as a handoff) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
@@ -1141,10 +1180,16 @@ for note in verify_web_settings(source_web, target_web):
     print(note)  # "site settings: …/sites/team_out Title is 'team_out', source has 'team'"
 ```
 
+Branding is checked the same way — `verify_web_branding(source_web, target_web)` —
+comparing the source's paths *rebased* onto the target site, so a master page that
+moved from `/sites/team_in/…` to `/sites/team_out/…` is not reported as drift while
+a property that genuinely differs still is.
+
 The example's post-run reconciliation calls it for every migrated web, so a run
 whose settings copy silently failed (an app principal without web write access,
 for instance) shows the difference instead of reading as a clean pass. Anything a
-copy cannot carry — branding, site-collection and regional settings — is named by
+copy cannot carry — a master page or theme the target lacks, site-collection and
+regional settings — is named by
 the `site_settings` fidelity dimension rather than reported as drift.
 
 ### Verifying site pages

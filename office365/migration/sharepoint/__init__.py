@@ -11,6 +11,12 @@ from office365.migration.sharepoint.adapters import (
     SharePointListTarget,
 )
 from office365.migration.sharepoint.assessor import MigrationAssessor
+from office365.migration.sharepoint.branding import (
+    WebBranding,
+    WebBrandingReport,
+    apply_web_branding,
+    verify_web_branding,
+)
 from office365.migration.sharepoint.handoff import (
     EXTERNAL_LIST_TEMPLATE,
     FormFinding,
@@ -137,12 +143,15 @@ __all__ = [
     "SiteVerificationReport",
     "StructureReport",
     "ViewDefinition",
+    "WebBranding",
+    "WebBrandingReport",
     "WebNavigation",
     "WebScopeStructure",
     "WebSettings",
     "WebSettingsReport",
     "WorkflowFinding",
     "apply_navigation",
+    "apply_web_branding",
     "apply_site_list_security",
     "apply_site_security",
     "capture_list_security",
@@ -170,6 +179,7 @@ __all__ = [
     "verify_list_structure",
     "verify_navigation",
     "verify_page_copy",
+    "verify_web_branding",
     "verify_web_settings",
     "verify_site",
     "verify_site_security",

@@ -215,8 +215,10 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
         "site_settings",
         status.BEST_EFFORT,
         "each web's Title and Description are copied onto the target web when they differ "
-        "(migrate_site_settings); master page, theme, logo, alternate CSS and the site-collection/"
-        "regional settings are not carried over REST",
+        "(migrate_site_settings), as are the branding properties that REST accepts — master page, "
+        "logo, alternate CSS and theme folder, rebased onto the target's path and only when the "
+        "target has the asset they name; the site-collection/regional settings are not carried "
+        "over REST",
     )
     set_("sharing_links", status.UNSUPPORTED, "sharing links follow the tenant policy; they are not recreated per item")
     return dims, notes

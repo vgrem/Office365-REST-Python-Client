@@ -37,6 +37,7 @@ from office365.migration.sharepoint.adapters import (
     SharePointListSource,
     SharePointListTarget,
 )
+from office365.migration.sharepoint.branding import WebBrandingReport, apply_web_branding
 from office365.migration.sharepoint.handoff import EXTERNAL_LIST_TEMPLATE, detect_handoff, handoff_notes
 from office365.migration.sharepoint.navigation import apply_navigation
 from office365.migration.sharepoint.pages import DUPLICATE_RENAME, PageCopyReport, copy_site_pages
@@ -269,6 +270,21 @@ def _apply_web_settings(
     return report
 
 
+def _apply_web_branding(
+    source_web: Web, target_web: Web, preserve: bool, warnings: list[str]
+) -> WebBrandingReport | None:
+    """Copy the web's branding, reporting the assets the target does not have."""
+    try:
+        report = apply_web_branding(source_web, target_web, preserve=preserve)
+    except Exception as e:  # noqa: BLE001 — branding is best-effort; never abort resolution
+        warnings.append(f"branding copy failed for {_web_url(target_web)}: {e}")
+        return None
+    note = report.summary()
+    if note:
+        warnings.append(note)
+    return report
+
+
 def _report_web_scope_structure(source_web: Web, target_web: Web, warnings: list[str]) -> None:
     """Append a note naming the web-scope structure the target web lacks (best-effort)."""
     try:
@@ -358,6 +374,10 @@ def _resolve_web(
         source, target = _list_adapters(source_list, target_list, content_type_map=content_type_map)
         _attach_warnings(target, structure_warnings)
         pairs.append((source, target))
+
+    # Branding last: an alternate-CSS URL may point into a library this run just
+    # populated, so the asset has to exist before it is copied.
+    _apply_web_branding(source_context.web, target_context.web, preserve_site_settings, warnings)
 
     child_webs = list(source_context.web.webs.get().execute_query())
     if not child_webs:

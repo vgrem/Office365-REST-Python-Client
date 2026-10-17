@@ -18,8 +18,9 @@ What this module deliberately does *not* carry is named instead of being implied
 away (in the docs, and in the ``site_settings`` fidelity dimension's note):
 
 * **branding** — master page, theme, `SiteLogoUrl`, alternate CSS. Those are
-  outside a same-tenant *content* migration (and the logo URL points at a
-  source-site asset whose copy is not guaranteed), so they stay hand-off.
+  carried by :mod:`office365.migration.sharepoint.branding` instead, whose rules
+  are different enough (path rebasing, assets that may not exist on the target) to
+  keep it a separate concern.
 * **site-collection and regional settings** — time zone, locale, quotas,
   sharing capability, hub association. REST exposes no working write path for
   them (setting a `TimeZone` id does not change the web's zone), so they are not

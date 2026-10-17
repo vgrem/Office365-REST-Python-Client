@@ -1,9 +1,10 @@
 """Reconcile a migrated web against its source in one read-only report.
 
 Each web-scope concern the whole-site resolver touches has its own verifier —
-:func:`verify_web_settings`, :func:`compare_web_scope_structure`,
-:func:`verify_navigation`, :func:`verify_page_copy`, :func:`verify_site_security`
-and per list :func:`verify_list_structure`. Calling them one by one is what the
+:func:`verify_web_settings`, :func:`verify_web_branding`,
+:func:`compare_web_scope_structure`, :func:`verify_navigation`,
+:func:`verify_page_copy`, :func:`verify_site_security` and per list
+:func:`verify_list_structure`. Calling them one by one is what the
 example did, which makes it easy to forget one and impossible to answer "did this
 web migrate?" with a single value.
 
@@ -23,6 +24,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Tuple
 
+from office365.migration.sharepoint.branding import verify_web_branding
 from office365.migration.sharepoint.navigation import verify_navigation
 from office365.migration.sharepoint.pages import verify_page_copy
 from office365.migration.sharepoint.security import verify_list_security, verify_site_security
@@ -128,6 +130,7 @@ def verify_site(
     pages: bool = False,
     security: bool = False,
     settings: bool = True,
+    branding: bool = True,
 ) -> SiteVerificationReport:
     """Verify a migrated web against its source (read-only).
 
@@ -147,6 +150,8 @@ def verify_site(
             list's own ACL (a source list that restricts access the target list
             does not is the finding that matters).
         settings: Reconcile the web's ``Title``/``Description``.
+        branding: Reconcile the web's master page, logo, alternate CSS and theme
+            folder (compared source-path-rebased).
 
     Returns:
         A :class:`SiteVerificationReport`; a check that raises is recorded in
@@ -165,6 +170,7 @@ def verify_site(
 
     checks: Dict[str, Tuple[Callable[[], List[str]], bool]] = {
         "settings": (lambda: verify_web_settings(source_web, target_web), settings),
+        "branding": (lambda: verify_web_branding(source_web, target_web), branding),
         WEB_SCOPE_STRUCTURE: (lambda: _web_scope_findings(source_web, target_web), web_scope_structure),
         "navigation": (lambda: verify_navigation(source_web, target_web), navigation),
         "pages": (lambda: verify_page_copy(source_web, target_web), pages),
