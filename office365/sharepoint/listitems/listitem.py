@@ -794,23 +794,45 @@ class ListItem(SecurableObject):
         return self
 
     def _set_taxonomy_field_value(self, name: str, value: TaxonomyFieldValueCollection) -> None:
-        """Sets taxonomy field value
+        """Sets a multi-value taxonomy column.
+
+        A taxonomy column keeps its value in a hidden note companion column, and
+        the collection must be written there as a ``WssId;#Label|TermGuid`` string.
+        The companion's *item* property is its ``EntityPropertyName`` (==
+        ``InternalName``) — not the field's ``StaticName``, which for a
+        library-created column is a random token (writing it fails with "The
+        property ... does not exist on type"). Because ``update()``/``create()``
+        snapshot the item properties when they are called, the companion name is
+        resolved synchronously here; a deferred lookup would set the property after
+        the payload was already built and silently drop the value.
 
         Args:
             name (str): Taxonomy field name
             value (TaxonomyFieldValueCollection): Taxonomy field value
         """
-        tax_field = self.parent_list.fields.get_by_internal_name_or_title(name)
-
-        def _tax_field_loaded():
-            tax_text_field = self.parent_list.fields.get_by_id(tax_field.properties["TextField"])
-
-            def _tax_text_field_loaded(return_type):
-                self.set_property(tax_text_field.properties["StaticName"], str(value))
-
-            tax_text_field.select(["StaticName"]).get().after_execute(_tax_text_field_loaded, execute_first=True)
-
-        tax_field.ensure_property("TextField").after_execute(lambda _: _tax_field_loaded())
+        if self.parent_list is None:
+            return
+        try:
+            tax_field = (
+                self.parent_list.fields.get_by_internal_name_or_title(name).select(["TextField"]).get().execute_query()
+            )
+            text_field_id = tax_field.properties.get("TextField")
+            if not text_field_id:
+                return
+            text_field = (
+                self.parent_list.fields.get_by_id(text_field_id)
+                .select(["EntityPropertyName", "InternalName", "StaticName"])
+                .get()
+                .execute_query()
+            )
+        except Exception:  # noqa: BLE001 — an unresolvable companion leaves the column unset
+            return
+        properties = text_field.properties
+        note_name = (
+            properties.get("EntityPropertyName") or properties.get("InternalName") or properties.get("StaticName")
+        )
+        if note_name:
+            self.set_property(note_name, str(value))
 
     def ensure_type_name(self, target_list) -> Self:
         """Determine the metadata type annotation for this list item.

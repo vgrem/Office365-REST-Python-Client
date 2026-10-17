@@ -61,24 +61,18 @@ class TaxonomyField(FieldLookup):
         )
 
         def _create_taxonomy_field_inner():
-            from office365.sharepoint.lists.list import List
+            # A taxonomy column's ``List`` attribute names the web's hidden
+            # TaxonomyHiddenList -- *not* the list the column is added to. Emitting
+            # the containing list's id here makes SharePoint set the column's
+            # ``LookupList`` to that list, after which every value read fails with
+            # ``SPFieldValidationException`` ("the given guid does not exist in the
+            # term store"). Creating the column without a ``List`` attribute lets
+            # SharePoint bind it to the taxonomy hidden list automatically.
+            def _web_loaded():
+                params.WebId = fields.context.web.id
+                fields.create_field_as_xml(params.schema_xml, return_type)
 
-            if isinstance(fields.parent, List):
-                parent_list = fields.parent
-
-                def _list_loaded():
-                    params.WebId = parent_list.parent_web.id
-                    params.ListId = parent_list.id
-                    fields.create_field_as_xml(params.schema_xml, return_type)
-
-                fields.parent.ensure_properties(["Id", "ParentWeb"]).after_execute(lambda _: _list_loaded())
-            else:
-
-                def _web_loaded():
-                    params.WebId = fields.context.web.id
-                    fields.create_field_as_xml(params.schema_xml, return_type)
-
-                fields.context.web.ensure_property("Id").after_execute(lambda _: _web_loaded())
+            fields.context.web.ensure_property("Id").after_execute(lambda _: _web_loaded())
 
         def _text_field_created(text_field: FieldMultiLineText) -> None:
             params.TextFieldId = text_field.id

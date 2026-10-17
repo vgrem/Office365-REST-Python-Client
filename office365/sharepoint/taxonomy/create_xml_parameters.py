@@ -18,7 +18,6 @@ class TaxonomyFieldCreateXmlParameters(ClientValue):
     AnchorId: str = "00000000-0000-0000-0000-000000000000"
     FieldId: str | None = None
     AllowMultipleValues: bool = False
-    ListId: str | None = None
     WebId: str | None = None
     TextFieldId: str | None = None
 
@@ -28,10 +27,12 @@ class TaxonomyFieldCreateXmlParameters(ClientValue):
 
     @property
     def schema_xml(self):
-        list_attr = f'List="{{{self.ListId}}}"' if self.ListId is not None else ""
-
+        # No ``List`` attribute: for a taxonomy column it names the web's hidden
+        # TaxonomyHiddenList, not the list the column lives on. Emitting the
+        # containing list's id here makes SharePoint bind ``LookupList`` to that
+        # list and every value then fails to resolve (see ``TaxonomyField.create``).
         return """
-            <Field Type="{type_name}" DisplayName="{name}" {list_attr}
+            <Field Type="{type_name}" DisplayName="{name}"
                    WebId="{web_id}" Required="FALSE" EnforceUniqueValues="FALSE"
                    ID="{{{field_id}}}" StaticName="{name}" Name="{name}" Mult="{allow_multiple_values}">
                 <Default/>
@@ -127,7 +128,6 @@ class TaxonomyFieldCreateXmlParameters(ClientValue):
             </Field>
             """.format(
             name=self.Name,
-            list_attr=list_attr,
             web_id=self.WebId,
             field_id=self.FieldId,
             ssp_id=self.SspId,
