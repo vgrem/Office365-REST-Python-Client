@@ -399,3 +399,89 @@ def test_provision_skips_lookup_into_a_list_outside_the_migration():
     assert "Dept" in warnings[0]
     assert _SOURCE_LIST_ID in warnings[0]
     assert not any(p.url.endswith("Fields/CreateFieldAsXml") for p in _posts(transport))
+
+
+# ── Managed Metadata (taxonomy) columns ──────────────────────────────────────
+
+_TAXONOMY_SCHEMA = (
+    '<Field Type="TaxonomyFieldType" DisplayName="Dept" Name="Dept" StaticName="Dept" '
+    'Mult="FALSE" WebId="{11111111-1111-1111-1111-111111111111}">'
+    "<Default></Default>"
+    "<Customization><ArrayOfProperty>"
+    "<Property><Name>SspId</Name>"
+    '<Value xmlns:q1="http://www.w3.org/2001/XMLSchema" p4:type="q1:string" '
+    'xmlns:p4="http://www.w3.org/2001/XMLSchema-instance">f02be691-d551-462f-aaae-e1c89168cd0b</Value></Property>'
+    "<Property><Name>TermSetId</Name>"
+    '<Value xmlns:q1="http://www.w3.org/2001/XMLSchema" p4:type="q1:string" '
+    'xmlns:p4="http://www.w3.org/2001/XMLSchema-instance">a83fe90d-4bdb-4644-a484-7f75ee3f5730</Value></Property>'
+    "</ArrayOfProperty></Customization>"
+    "</Field>"
+)
+
+_NOTE_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+_WEB_ID = "ef40c956-7276-421a-b0a4-d81ccf839bd9"
+
+
+def _taxonomy_structure(mult=""):
+    schema = _TAXONOMY_SCHEMA.replace('Mult="FALSE"', f'Mult="{mult}"') if mult else _TAXONOMY_SCHEMA
+    return _structure(
+        fields=[
+            FieldDefinition(
+                internal_name="Dept",
+                title="Dept",
+                field_type_kind=21,
+                type_as_string="TaxonomyFieldTypeMulti" if mult == "TRUE" else "TaxonomyFieldType",
+                schema_xml=schema,
+            )
+        ],
+        content_types=[],
+        views=[],
+    )
+
+
+def _taxonomy_routes(existing=()):
+    return [
+        (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
+        # TaxonomyField.create first creates a hidden note column, then reads the
+        # web id, then creates the taxonomy column itself.
+        (HttpMethod.Post, "CreateFieldAsXml", {"d": {"Id": _NOTE_ID}}),
+        (HttpMethod.Get, "/Web?", {"d": {"Id": _WEB_ID}}),
+        (HttpMethod.Get, "/Fields", {"d": {"results": list(existing)}}),
+    ]
+
+
+def test_provision_recreates_a_taxonomy_column_against_the_term_set():
+    ctx, transport = _setup(_taxonomy_routes())
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _taxonomy_structure())
+
+    assert warnings == []
+    creates = [p for p in _posts(transport) if p.url.endswith("CreateFieldAsXml")]
+    note_create, taxonomy_create = creates
+    note_schema, taxonomy_schema = str(note_create.data), str(taxonomy_create.data)
+    assert 'Type="Note"' in note_schema
+    assert 'Type="TaxonomyFieldType"' in taxonomy_schema
+    assert "a83fe90d-4bdb-4644-a484-7f75ee3f5730" in taxonomy_schema
+    assert _WEB_ID in taxonomy_schema
+    # The source schema names the source web's TaxonomyHiddenList and note field;
+    # replaying it verbatim would bind the copy to columns that do not exist here.
+    assert "List=" not in taxonomy_schema
+    assert "11111111-1111-1111-1111-111111111111" not in taxonomy_schema
+
+
+def test_provision_skips_an_existing_taxonomy_column():
+    ctx, transport = _setup(_taxonomy_routes(existing=[{"InternalName": "Dept"}]))
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _taxonomy_structure())
+
+    assert [p for p in _posts(transport) if p.url.endswith("CreateFieldAsXml")] == []
+
+
+def test_provision_multi_taxonomy_column_sets_the_mult_flag():
+    ctx, transport = _setup(_taxonomy_routes())
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _taxonomy_structure(mult="TRUE"))
+
+    taxonomy_schema = str([p for p in _posts(transport) if p.url.endswith("CreateFieldAsXml")][-1].data)
+    assert 'Type="TaxonomyFieldTypeMulti"' in taxonomy_schema
+    assert 'Mult="TRUE"' in taxonomy_schema

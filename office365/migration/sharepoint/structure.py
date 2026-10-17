@@ -339,6 +339,69 @@ def rewrite_lookup_schema(
     return rewritten, None
 
 
+#: Managed-metadata column types; recreated through ``TaxonomyField.create`` below.
+_TAXONOMY_TYPES = frozenset({"TaxonomyFieldType", "TaxonomyFieldTypeMulti"})
+
+
+def _is_taxonomy_definition(definition: FieldDefinition) -> bool:
+    """Whether a captured column is a managed-metadata (taxonomy) column."""
+    if (definition.type_as_string or "") in _TAXONOMY_TYPES:
+        return True
+    schema = definition.schema_xml or ""
+    return "TaxonomyFieldType" in schema and "<Name>TermSetId</Name>" in schema
+
+
+def _taxonomy_property(schema_xml: Optional[str], name: str) -> Optional[str]:
+    """Read a value from a taxonomy column's ``<Customization>`` property bag."""
+    if not schema_xml:
+        return None
+    match = re.search(
+        r"<Name>\s*" + re.escape(name) + r"\s*</Name>\s*<Value\b[^>]*>\s*([^<\s]+)\s*</Value>",
+        schema_xml,
+        re.IGNORECASE,
+    )
+    return match.group(1).strip() if match else None
+
+
+def _taxonomy_allow_multiple(schema_xml: str) -> bool:
+    match = re.search(r'\bMult="(TRUE|FALSE)"', schema_xml, re.IGNORECASE)
+    if match:
+        return match.group(1).upper() == "TRUE"
+    return 'Type="TaxonomyFieldTypeMulti"' in schema_xml
+
+
+def _ensure_taxonomy_field(sp_list: Any, definition: FieldDefinition, warnings: List[str]) -> None:
+    """Recreate a managed-metadata column bound to the same term set on the target.
+
+    A taxonomy column cannot be replayed from its ``SchemaXml``: that schema names
+    the *source* web's hidden TaxonomyHiddenList and note field, so the copy ends
+    up pointing at columns that do not exist on the target and every value is
+    dropped. ``TaxonomyField.create`` lets SharePoint provision a fresh hidden
+    note column and bind ``LookupList`` to the target web's TaxonomyHiddenList.
+    """
+    name = definition.internal_name
+    term_set = _taxonomy_property(definition.schema_xml, "TermSetId")
+    if not term_set:
+        warning = f"taxonomy column '{name}' was not recreated: its term set id could not be read"
+        logger.warning(warning)
+        warnings.append(warning)
+        return
+    from office365.sharepoint.taxonomy.field import TaxonomyField
+
+    try:
+        TaxonomyField.create(
+            sp_list.fields,
+            name,
+            term_set,
+            _taxonomy_property(definition.schema_xml, "SspId"),
+            _taxonomy_allow_multiple(definition.schema_xml or ""),
+        )
+    except Exception as exc:  # noqa: BLE001 - best effort, surfaced as a warning
+        warning = f"taxonomy column '{name}' could not be recreated: {exc}"
+        logger.warning(warning)
+        warnings.append(warning)
+
+
 def _is_provisionable_content_type(definition: ContentTypeDefinition) -> bool:
     """Skip base content types — they already exist on any target list."""
     return len(definition.string_id or "") >= _MIN_CUSTOM_CONTENT_TYPE_ID_LENGTH
@@ -456,8 +519,12 @@ def provision_list_structure(
     if structure.content_types_enabled:
         _ensure_content_types_enabled(sp_list)
 
+    taxonomy_definitions: List[FieldDefinition] = []
     for definition in structure.fields:
         if not definition.schema_xml:
+            continue
+        if _is_taxonomy_definition(definition):
+            taxonomy_definitions.append(definition)
             continue
         schema_xml, unresolved = rewrite_lookup_schema(definition.schema_xml, list_id_map)
         if unresolved is not None:
@@ -469,6 +536,21 @@ def provision_list_structure(
             warnings.append(warning)
             continue
         sp_list.fields.ensure_xml(schema_xml, definition.internal_name)
+
+    if taxonomy_definitions:
+        # Executes the queued scalar column creates, then loads the resulting fields
+        # so an already-present taxonomy column is not recreated (which would add a
+        # duplicate hidden note field and a second column with the same name).
+        existing = {
+            field.internal_name
+            for field in sp_list.fields.get().execute_query()
+            if getattr(field, "internal_name", None)
+        }
+        for definition in taxonomy_definitions:
+            if definition.internal_name in existing:
+                continue
+            _ensure_taxonomy_field(sp_list, definition, warnings)
+        sp_list.execute_query()
 
     provisionable = [item for item in structure.content_types if _is_provisionable_content_type(item)]
     for definition in provisionable:

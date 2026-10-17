@@ -145,12 +145,21 @@ Two honest limits remain:
   through each migrated list's `MigrationSourceId` marker, and a **Person** value
   is carried as a login name and resolved to the target's own site-user id with
   `EnsureUser`. **Single- and multi-value** Lookup/Person columns are covered
-  (a multi-value column is written as `{"results": [...]}`); **Managed Metadata**
-  values are still dropped, and a value that cannot be resolved (a lookup into a
-  list outside this migration, an unknown login) is dropped with a warning rather
-  than written wrong. Typed values in **hidden** columns are dropped too: structure
-  provisioning does not replicate hidden columns, so there is no target column to
-  write them to.
+  (a multi-value column is written as `{"results": [...]}`). **Managed Metadata**
+  values are carried by **term id** only — `Label` and the site-local `WssId` are
+  cosmetic and are not compared: a single-value column is written as a typed
+  `SP.Taxonomy.TaxonomyFieldValue`, a multi-value column through its hidden note
+  companion (`-1;#Label|guid;#...`, the only shape the server accepts), and both
+  sides are verified by a sorted term-id list. Structure provisioning recreates a
+  taxonomy column with `TaxonomyField.create(...)` against the same term set, so
+  it binds to the **target** web's `TaxonomyHiddenList` instead of the source's.
+  The term store itself is not migrated: a term absent on the target is rejected
+  by the server, so this is a same-tenant (or pre-provisioned store) capability.
+  A value that cannot be resolved (a lookup into a list outside this migration, a
+  term absent from the target store, an unknown login) is dropped with a warning
+  rather than written wrong. Typed values in **hidden** columns are dropped too:
+  structure provisioning does not replicate hidden columns, so there is no target
+  column to write them to.
 - Per-item **timestamps/permissions/authorship**
   (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
   by the list adapters on a best-effort basis: timestamps and authorship are

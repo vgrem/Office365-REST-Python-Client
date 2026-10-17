@@ -362,10 +362,34 @@ class _TargetItems:
 class _Field:
     """A target column as returned by a ``fields`` projection."""
 
-    def __init__(self, internal_name, type_as_string, lookup_list=None):
+    def __init__(
+        self,
+        internal_name,
+        type_as_string,
+        lookup_list=None,
+        field_id=None,
+        text_field_id=None,
+        schema_xml=None,
+        hidden=None,
+    ):
         self.properties = {"InternalName": internal_name, "TypeAsString": type_as_string}
         if lookup_list is not None:
             self.properties["LookupList"] = lookup_list
+        if field_id is not None:
+            self.properties["Id"] = field_id
+        if text_field_id is not None:
+            self.properties["TextField"] = text_field_id
+        if hidden is not None:
+            self.properties["Hidden"] = hidden
+        self._schema_xml = schema_xml
+
+    @property
+    def id(self):
+        return self.properties.get("Id")
+
+    @property
+    def schema_xml(self):
+        return self._schema_xml
 
     @property
     def internal_name(self):
@@ -374,6 +398,10 @@ class _Field:
     @property
     def type_as_string(self):
         return self.properties.get("TypeAsString")
+
+    @property
+    def hidden(self):
+        return self.properties.get("Hidden")
 
 
 class _TargetFields:
@@ -854,3 +882,145 @@ def test_list_target_reshapes_multi_values_only_when_creating():
     assert inner.created == [{"Title": "A", "MultiDeptId": {"results": [2, 3]}}]
     assert inner.updated == [(7, {"Title": "A", "MultiDeptId": [2, 3]})]
     assert wrapper.key_field == "Key"
+
+
+# ── Typed values: Managed Metadata (taxonomy) columns ────────────────────────
+
+_TERM_A = "25983651-391e-4ac3-8e04-ae070b71cb65"
+_TERM_B = "0e607563-5e38-4cfc-be32-445ad85c9aa2"
+_TAX_ID = "11111111-1111-1111-1111-111111111111"
+_TAX_NOTE_ID = "22222222-2222-2222-2222-222222222222"
+_MULTI_ID = "33333333-3333-3333-3333-333333333333"
+_MULTI_NOTE_ID = "44444444-4444-4444-4444-444444444444"
+
+
+def _taxonomy_fields():
+    return [
+        _Field("Dept", "TaxonomyFieldType", field_id=_TAX_ID, text_field_id=_TAX_NOTE_ID),
+        _Field("Dept_0", "Note", field_id=_TAX_NOTE_ID),
+        _Field("Regions", "TaxonomyFieldTypeMulti", field_id=_MULTI_ID, text_field_id=_MULTI_NOTE_ID),
+        _Field("Regions_0", "Note", field_id=_MULTI_NOTE_ID),
+    ]
+
+
+def test_list_source_projects_taxonomy_as_bare_term_guids():
+    # A taxonomy read returns a label and a site-local WssId next to the term id;
+    # only the term id is portable, so the projection keeps that alone and drops
+    # the hidden note companion (the target recreates the column and re-serializes).
+    items = [
+        _Item(
+            1,
+            {
+                "Id": 1,
+                "Title": "A",
+                "Dept": {"Label": "6", "TermGuid": _TERM_A, "WssId": 6},
+                "Dept_0": f"-1;#|{_TERM_A}",
+                "Regions": {
+                    0: {"Label": "TermA", "TermGuid": _TERM_A, "WssId": 6},
+                    1: {"Label": "TermB", "TermGuid": _TERM_B, "WssId": 7},
+                },
+                "Regions_0": f"-1;#|{_TERM_A};#-1;#|{_TERM_B}",
+            },
+        )
+    ]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=_taxonomy_fields())))
+
+    record = source.read(source.list_items()[0])
+
+    assert record["Dept"] == [{"TermGuid": _TERM_A}]
+    assert record["Regions"] == [{"TermGuid": _TERM_A}, {"TermGuid": _TERM_B}]
+    assert "Dept_0" not in record
+    assert "Regions_0" not in record
+
+
+def test_list_source_drops_an_empty_taxonomy_column():
+    items = [_Item(1, {"Id": 1, "Title": "A", "Dept": None, "Regions": {}})]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=_taxonomy_fields())))
+
+    record = source.read(source.list_items()[0])
+
+    assert "Dept" not in record
+    assert "Regions" not in record
+
+
+def test_list_target_remaps_taxonomy_to_typed_dict_and_note_text():
+    # A single-value column takes a typed TaxonomyFieldValue dict (label blank —
+    # the server resolves by term id); a multi-value one only accepts the hidden
+    # note companion's ``-1;#Label|guid`` text form (a typed collection is rejected).
+    target = SharePointListTarget(cast("SPList", _TargetList(fields=_taxonomy_fields())))
+    record = {
+        "Title": "A",
+        "Dept": [{"TermGuid": _TERM_A}],
+        "Regions": [{"TermGuid": _TERM_A}, {"TermGuid": _TERM_B}],
+    }
+
+    target._remap_taxonomies([record])
+
+    assert record == {
+        "Title": "A",
+        "Dept": {
+            "__metadata": {"type": "SP.Taxonomy.TaxonomyFieldValue"},
+            "Label": "",
+            "TermGuid": _TERM_A,
+            "WssId": -1,
+        },
+        "Regions_0": f"-1;#|{_TERM_A};#-1;#|{_TERM_B}",
+    }
+
+
+def test_list_target_drops_taxonomy_column_absent_on_the_target():
+    target = SharePointListTarget(cast("SPList", _TargetList(fields=[_Field("Other", "Text")])))
+    record = {"Dept": [{"TermGuid": _TERM_A}]}
+
+    target._remap_taxonomies([record])
+
+    assert record == {}
+    assert any("Dept" in warning for warning in target.warnings)
+
+
+def test_list_checksums_ignore_taxonomy_label_and_wss_id():
+    # Verification must treat the term id as the identity: the label and WssId are
+    # cosmetic/site-local and differ between the source and its migrated copy.
+    source = SharePointListSource(
+        cast(
+            "SPList",
+            _SourceList(
+                [
+                    _Item(
+                        1,
+                        {
+                            "Id": 1,
+                            "Title": "A",
+                            "Dept": {"Label": "6", "TermGuid": _TERM_A, "WssId": 6},
+                            "Regions": {
+                                0: {"Label": "TermA", "TermGuid": _TERM_A, "WssId": 6},
+                                1: {"Label": "TermB", "TermGuid": _TERM_B, "WssId": 7},
+                            },
+                        },
+                    )
+                ],
+                fields=_taxonomy_fields(),
+            ),
+        )
+    )
+    source_item = source.list_items()[0]
+    source.read(source_item)
+
+    row = _TargetRow(
+        10,
+        "1",
+        properties={
+            "Title": "A",
+            "Dept": {"Label": "1", "TermGuid": _TERM_A, "WssId": 1},
+            "Regions": {
+                0: {"Label": "TermA", "TermGuid": _TERM_B, "WssId": 2},
+                1: {"Label": "TermB", "TermGuid": _TERM_A, "WssId": 1},
+            },
+            "Regions_0": f"-1;#|{_TERM_B};#-1;#|{_TERM_A}",
+        },
+    )
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row], fields=_taxonomy_fields())))
+
+    checksum = target.checksum(source_item)
+
+    assert checksum == source.checksum(source_item)

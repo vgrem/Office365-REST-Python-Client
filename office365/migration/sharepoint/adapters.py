@@ -139,6 +139,68 @@ def _id_list(value: Any) -> list[Any] | None:
     return None
 
 
+def _taxonomy_terms(value: Any) -> list[dict[str, str]]:
+    """Normalize a taxonomy value to portable ``{"TermGuid": ...}`` terms.
+
+    A live read shapes a single value as a dict (``{"Label", "TermGuid", "WssId"}``)
+    and a multi-value one as a positional mapping (``{0: {...}, 1: {...}}``); a
+    payload this client built holds a bare list. All reduce to a list of terms.
+    Only ``TermGuid`` is carried: a per-site ``WssId`` is meaningless elsewhere and
+    ``Label`` is not authoritative (a read may return the WssId string, and the
+    server resolves a write by term id regardless of the label).
+    """
+    if value is None:
+        return []
+    if isinstance(value, dict):
+        if "TermGuid" in value:
+            items: list[Any] = [value]
+        elif "results" in value and isinstance(value["results"], (list, tuple)):
+            items = list(value["results"])
+        else:
+            try:
+                items = [value[i] for i in range(len(value))]
+            except (KeyError, TypeError):
+                items = list(value.values())
+    elif isinstance(value, (list, tuple)):
+        items = list(value)
+    else:
+        return []
+    terms: list[dict[str, str]] = []
+    for item in items:
+        if isinstance(item, dict):
+            guid = item.get("TermGuid")
+        else:
+            guid = getattr(item, "TermGuid", None)
+        if guid:
+            terms.append({"TermGuid": str(guid)})
+    return terms
+
+
+def _is_taxonomy_value(value: Any) -> bool:
+    """Whether a projected value is a taxonomy term (single dict or multi mapping/list)."""
+    return isinstance(value, (dict, list, tuple)) and bool(_taxonomy_terms(value))
+
+
+def _taxonomy_guids(value: Any) -> list[str]:
+    return [term["TermGuid"] for term in _taxonomy_terms(value)]
+
+
+def _canonicalize_taxonomy_record(record: dict) -> dict:
+    """Replace taxonomy values with a sorted list of term ids for comparison.
+
+    ``Label`` is cosmetic and ``WssId`` is site-local, so neither belongs in the
+    content checksum; the term id is the portable identity. Sorting also keeps the
+    checksum independent of the order a read happens to return the terms in.
+    """
+    if not any(_is_taxonomy_value(value) for value in record.values()):
+        return record
+    canonical = dict(record)
+    for key, value in record.items():
+        if _is_taxonomy_value(value):
+            canonical[key] = sorted(_taxonomy_guids(value))
+    return canonical
+
+
 def _collection_payload(ids: list[int]) -> dict:
     """The JSON shape SharePoint accepts when *creating* a multi-value column.
 
@@ -553,9 +615,12 @@ class SharePointListSource:
         self._attachments: dict[str, Any] = {}
         self._users: dict[int, Principal | None] = {}
         self._default_groups: _DefaultGroups | None = None
+        self._source_fields_cache: list[Any] | None = None
         self._user_columns_cache: set[str] | None = None
         self._multi_columns_cache: dict[str, str] | None = None
         self._skipped_columns_cache: set[str] | None = None
+        self._taxonomy_columns_cache: dict[str, bool] | None = None
+        self._taxonomy_note_columns_cache: set[str] | None = None
         self.warnings: list[str] = []
 
     def label(self) -> str:
@@ -690,10 +755,13 @@ class SharePointListSource:
         dropped: set[str] = set()
         multi = self._multi_columns()
         multi_keys = {f"{name}Id" for name in multi} | {f"{name}StringId" for name in multi}
+        taxonomy = self._taxonomy_columns()
         for record in records:
             for key, value in list(record.items()):
                 if key in multi_keys:
                     continue  # handled by ``_normalize_multi_values``
+                if key in taxonomy:
+                    continue  # handled by ``_project_taxonomy_values``
                 if value is not None and not isinstance(value, (str, int, float, bool)):
                     record.pop(key)
                     if key not in _NAVIGATION_SELECT:
@@ -714,9 +782,70 @@ class SharePointListSource:
             self.warnings.append(
                 f"skipped hidden typed column(s) not replicated by structure provisioning: {', '.join(sorted(skipped))}"
             )
+        self._project_taxonomy_values(records)
         self._normalize_multi_values(records)
         self._annotate_person_logins(records)
         return records
+
+    def _source_fields(self) -> list[Any]:
+        """The source list's field definitions, read once and shared by every scan."""
+        if self._source_fields_cache is None:
+            self._source_fields_cache = list(self._list.fields.get().execute_query())
+        return self._source_fields_cache
+
+    def _taxonomy_columns(self) -> dict[str, bool]:
+        """The source's Managed Metadata columns (internal name -> allows many)."""
+        if self._taxonomy_columns_cache is None:
+            columns: dict[str, bool] = {}
+            notes: set[str] = set()
+            try:
+                fields = self._source_fields()
+                by_id = {
+                    normalize_guid(getattr(field, "id", None)): getattr(field, "internal_name", None) for field in fields
+                }
+                for field in fields:
+                    internal_name = getattr(field, "internal_name", None)
+                    if not internal_name:
+                        continue
+                    field_type = getattr(field, "type_as_string", None)
+                    schema = getattr(field, "schema_xml", None) or ""
+                    if field_type not in _TAXONOMY_FIELD_TYPES and "TermSetId" not in schema:
+                        continue
+                    columns[internal_name] = field_type == "TaxonomyFieldTypeMulti" or 'Mult="TRUE"' in schema
+                    note = by_id.get(normalize_guid(field.properties.get("TextField")))
+                    if note:
+                        notes.add(note)
+            except Exception as e:  # noqa: BLE001 — values stay un-remapped, never fatal
+                self.warnings.append(f"could not read source columns for taxonomy remapping: {e}")
+            self._taxonomy_columns_cache = columns
+            self._taxonomy_note_columns_cache = notes
+        return self._taxonomy_columns_cache
+
+    def _taxonomy_note_columns(self) -> set[str]:
+        """The hidden note companions of the source's taxonomy columns."""
+        self._taxonomy_columns()
+        return self._taxonomy_note_columns_cache or set()
+
+    def _project_taxonomy_values(self, records: list[dict]) -> None:
+        """Project taxonomy columns as bare ``[{"TermGuid": ...}]`` term lists.
+
+        The target recreates the column against the same term set and rebuilds the
+        write payload, so only the portable term id travels. The hidden note
+        companion (if a projection happens to include it) is dropped.
+        """
+        columns = self._taxonomy_columns()
+        if not columns:
+            return
+        notes = self._taxonomy_note_columns()
+        for record in records:
+            for note in notes:
+                record.pop(note, None)
+            for name in columns:
+                terms = _taxonomy_terms(record.get(name))
+                if terms:
+                    record[name] = terms
+                else:
+                    record.pop(name, None)
 
     def _typed_columns(self) -> tuple[set[str], dict[str, str], set[str]]:
         """The source's Person and multi-value columns, read once.
@@ -731,7 +860,7 @@ class SharePointListSource:
             multi: dict[str, str] = {}
             skipped: set[str] = set()
             try:
-                for field in self._list.fields.get().execute_query():
+                for field in self._source_fields():
                     internal_name = getattr(field, "internal_name", None)
                     if not internal_name or internal_name in _PERSON_EXCLUDED:
                         continue
@@ -854,7 +983,7 @@ class SharePointListSource:
     def checksum(self, item: MigrationItem) -> str:
         if item.item_type == "attachment":
             return hashlib.md5(self._attachment_content(item)).hexdigest()
-        return _content_checksum(self._records.get(item.dest_path, {}))
+        return _content_checksum(_canonicalize_taxonomy_record(self._records.get(item.dest_path, {})))
 
     def read_metadata(self, item: MigrationItem) -> dict | None:
         """Comparable attributes of the source item (for the post-run metadata diff)."""
@@ -994,7 +1123,9 @@ class SharePointListTarget:
         # Lookup and Person columns carry an id that is only meaningful on the
         # source (list-local item id / site-user id). The target remaps each to its
         # own value on write and back to the source value on verification.
-        self._columns_cache: tuple[dict[str, str], set[str], dict[str, str], set[str]] | None = None
+        self._columns_cache: (
+            tuple[dict[str, str], set[str], dict[str, str], set[str], dict[str, tuple[bool, str | None]]] | None
+        ) = None
         self._lookup_indexes: dict[str, tuple[dict[int, int], dict[int, int]]] = {}
         self._unresolved_lookups: set[tuple[str, int]] = set()
         self._unresolved_users: set[tuple[str, str]] = set()
@@ -1141,11 +1272,12 @@ class SharePointListTarget:
             self._identity_field = None
             self.warnings.append(f"could not create the {name!r} identity column: {e}")
 
-    def _columns(self) -> tuple[dict[str, str], set[str], dict[str, str], set[str]]:
+    def _columns(self) -> tuple[dict[str, str], set[str], dict[str, str], set[str], dict[str, tuple[bool, str | None]]]:
         """The target's typed columns.
 
         Returns ``(lookup: name -> referenced list id, user names, multi-lookup:
-        name -> referenced list id, multi-user names)``.
+        name -> referenced list id, multi-user names, taxonomy: name -> (allows
+        many, hidden note field internal name))``.
         """
         if self._columns_cache is None:
             self._columns_cache = self._load_columns()
@@ -1163,22 +1295,39 @@ class SharePointListTarget:
     def _multi_user_columns(self) -> set[str]:
         return self._columns()[3]
 
-    def _load_columns(self) -> tuple[dict[str, str], set[str], dict[str, str], set[str]]:
+    def _taxonomy_columns(self) -> dict[str, tuple[bool, str | None]]:
+        return self._columns()[4]
+
+    def _load_columns(
+        self,
+    ) -> tuple[dict[str, str], set[str], dict[str, str], set[str], dict[str, tuple[bool, str | None]]]:
         lookups: dict[str, str] = {}
         users: set[str] = set()
         multi_lookups: dict[str, str] = {}
         multi_users: set[str] = set()
+        taxonomy: dict[str, tuple[bool, str | None]] = {}
         try:
-            fields = self._list.fields.select(["InternalName", "TypeAsString", "LookupList"]).get().execute_query()
+            fields = (
+                self._list.fields.select(["InternalName", "TypeAsString", "LookupList", "Id", "TextField"])
+                .get()
+                .execute_query()
+            )
         except Exception as e:  # noqa: BLE001 — without columns we cannot remap; content still migrates
             self.warnings.append(f"could not read target columns for typed-value remapping: {e}")
-            return lookups, users, multi_lookups, multi_users
+            return lookups, users, multi_lookups, multi_users, taxonomy
+        by_id = {normalize_guid(getattr(field, "id", None)): getattr(field, "internal_name", None) for field in fields}
         for field in fields:
             internal_name = getattr(field, "internal_name", None)
             if not internal_name or internal_name in _PERSON_EXCLUDED:
                 continue
             field_type = getattr(field, "type_as_string", None)
-            if field_type in ("Lookup", "LookupMulti"):
+            if field_type in _TAXONOMY_FIELD_TYPES:
+                # The companion note column that actually carries the write payload
+                # has an unpredictable name; resolve it through the column's
+                # ``TextField`` id.
+                note_name = by_id.get(normalize_guid(field.properties.get("TextField")))
+                taxonomy[internal_name] = (field_type == "TaxonomyFieldTypeMulti", note_name)
+            elif field_type in ("Lookup", "LookupMulti"):
                 list_id = normalize_guid(field.properties.get("LookupList"))
                 if not list_id:
                     continue
@@ -1190,7 +1339,7 @@ class SharePointListTarget:
                 users.add(internal_name)
             elif field_type == "UserMulti":
                 multi_users.add(internal_name)
-        return lookups, users, multi_lookups, multi_users
+        return lookups, users, multi_lookups, multi_users, taxonomy
 
     def _lookup_index(self, target_list_id: str) -> tuple[dict[int, int], dict[int, int]]:
         """``(source id -> target id, target id -> source id)`` for a referenced list."""
@@ -1228,6 +1377,7 @@ class SharePointListTarget:
         self._remap_users(records)
         self._remap_multi_lookups(records)
         self._remap_multi_users(records)
+        self._remap_taxonomies(records)
 
     def _remap_lookups(self, records: list[dict]) -> None:
         columns = self._lookup_columns()
@@ -1311,6 +1461,50 @@ class SharePointListTarget:
                     record[key] = target_ids
                 else:
                     record.pop(key, None)
+
+    def _remap_taxonomies(self, records: list[dict]) -> None:
+        """Write taxonomy terms in the form SharePoint accepts on the target.
+
+        A single-value column takes a typed ``SP.Taxonomy.TaxonomyFieldValue``
+        object; a multi-value column only accepts the hidden note companion's text
+        form ``-1;#Label|guid;#...`` (typed-collection JSON is rejected server-side).
+        The term id is authoritative — the label can be left blank. A column with no
+        target counterpart is dropped and reported rather than sent as an unknown
+        property.
+        """
+        columns = self._taxonomy_columns()
+        unresolved: set[str] = set()
+        for record in records:
+            for internal_name, value in list(record.items()):
+                if not _is_taxonomy_value(value):
+                    continue
+                guids = _taxonomy_guids(value)
+                column = columns.get(internal_name)
+                if column is None:
+                    record.pop(internal_name, None)
+                    unresolved.add(internal_name)
+                    continue
+                allow_many, note_name = column
+                if not guids:
+                    record.pop(internal_name, None)
+                    continue
+                if allow_many and note_name:
+                    record.pop(internal_name, None)
+                    record[note_name] = ";#".join(f"-1;#|{guid}" for guid in guids)
+                elif allow_many:
+                    record.pop(internal_name, None)
+                    unresolved.add(internal_name)
+                else:
+                    record[internal_name] = {
+                        "__metadata": {"type": "SP.Taxonomy.TaxonomyFieldValue"},
+                        "Label": "",
+                        "TermGuid": guids[0],
+                        "WssId": -1,
+                    }
+        if unresolved:
+            self.warnings.append(
+                f"taxonomy column(s) not available on the target, values left empty: {', '.join(sorted(unresolved))}"
+            )
 
     def _report_unresolved_user(self, internal_name: str, login: str) -> None:
         marker = (internal_name, login)
@@ -1489,6 +1683,11 @@ class SharePointListTarget:
     def list_paths(self) -> list[str]:
         if not self._identity_field:
             return [str(i.id) for i in self._list.items.get().execute_query()]
+        # An empty source list never queues a write, so the marker column was not
+        # created during migration; ensure it before verification queries it.
+        self._ensure_identity()
+        if not self._identity_field:
+            return [str(i.id) for i in self._list.items.get().execute_query()]
         if self._identity_index is None or self._identity_index_stale:
             self._refresh_identity_index()
         index = self._identity_index or {}
@@ -1500,10 +1699,13 @@ class SharePointListTarget:
         target_item = self._fresh_target_item(item)
         if target_item is None:
             return ""
-        properties = dict(target_item.properties)
+        properties = _canonicalize_taxonomy_record(dict(target_item.properties))
         self._canonicalize_lookups(properties)
         self._canonicalize_users(properties)
         extra = {self._identity_field} if self._identity_field else set()
+        # The hidden taxonomy note companion is not part of the source's portable
+        # content; it is verified through the term ids on the column itself.
+        extra.update(note for _, note in self._taxonomy_columns().values() if note)
         # The target derives its own ``<name>StringId`` companion; it is not part of
         # the source's canonical content.
         extra.update(f"{name}StringId" for name in self._user_columns())

@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Managed Metadata (taxonomy) value migration:** a `TaxonomyFieldType` /
+  `TaxonomyFieldTypeMulti` column used to be copied verbatim or dropped. The list
+  adapters now carry the portable identity of each term — its `TermGuid` — and
+  rebuild the payload the server accepts: a **single-value** column is written as
+  a typed `SP.Taxonomy.TaxonomyFieldValue` dict, a **multi-value** column through
+  its hidden note companion's `-1;#Label|guid;#...` text (a typed
+  `TaxonomyFieldValueCollection` is rejected server-side). The label and the
+  site-local `WssId` are deliberately not carried: the server resolves a write by
+  term id, and a read may return the `WssId` string as the label. Verification
+  canonicalizes both sides to a **sorted term-id list**, so a copy verifies even
+  though its `WssId` differs. Structure provisioning intercepts taxonomy columns
+  and recreates them with `TaxonomyField.create(...)` against the same term set
+  (`SspId`/`TermSetId` read from the source schema), so the new column binds to the
+  **target** web's `TaxonomyHiddenList` and gets a fresh note companion; it never
+  replays the source `SchemaXml` (whose `List`/`WebId`/`TextField` name the source
+  web). Same-tenant scope only: the term store itself is not migrated.
 - **Page / web-part handoff:** the whole-site resolver no longer skips page
   libraries silently. The new `office365.migration.sharepoint.pages` module
   (`detect_page_handoff`, `page_handoff_note`) finds each source web's Site Pages,
@@ -351,6 +367,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Taxonomy base-library fixes:** `TaxonomyField.create` no longer emits the
+  containing list's id in the column schema. A `List=` attribute made SharePoint
+  bind `LookupList` to the list itself, after which every taxonomy read failed with
+  `SPFieldValidationException` ("the given guid does not exist in the term store");
+  the schema now omits `List` and lets the server bind the web's
+  `TaxonomyHiddenList`. `TaxonomyFieldValueCollection` accepts both the
+  one-argument list form and the legacy `(value, values)` form, and serializes to
+  the note text the server accepts. Setting a multi-value taxonomy value on a list
+  item now resolves the hidden note companion through the column's `TextField` id
+  (instead of guessing `{name}_0`) and writes it synchronously, so the value is
+  saved. **Breaking:** `TaxonomyFieldCreateXmlParameters.ListId` was removed — it
+  was never needed and produced the broken schema.
+- **Verifying an empty migrated list:** `SharePointListTarget.list_paths()` now
+  creates its source-id marker before reading the index. An empty source list never
+  queues a write, so the marker column was not created during migration and
+  verification failed with "The field or property 'MigrationSourceId' does not
+  exist"; it now reports zero paths cleanly.
 - **A list item with an empty multi-value Lookup/Person column reported a
   content mismatch on verification.** The source drops an empty multi-value column
   while the target reads the column back as `None`, and the content checksum
