@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Delta re-runs: the drift a copy cannot reconcile is named.** A manifest is the
+  persisted plan, but a re-run only ever reconciled *content* — an item deleted at
+  the source left an orphan on the target, and a rename/move looked like a new item
+  whose old target copy stayed behind (a duplicate). `MigrationJob.plan()` now
+  loads the plan a previous run persisted at `manifest_path` **before** replacing
+  it and diffs the two (`office365.migration.delta`: `compute_delta`,
+  `DeltaReport`, `MovedItem`, all exported from `office365.migration`), exposing
+  the result as `job.delta` / `session.delta()`: `added`, `missing` (planned
+  before, gone now), `moved` (the same `MigrationItem.source_id` at a different
+  path) and `changed` (same path, different modification time — a `skip` re-run
+  leaves the target copy as it was), with `is_stale` marking a target *known* to
+  differ because of a deletion or a move, and `notes()` giving one sampled,
+  ready-to-print line per kind. A manifest that cannot be read degrades to a
+  `delta unavailable: …` note instead of silently reading as "nothing changed".
+  Detection is read-only — nothing is deleted or moved on the target, since a
+  target may legitimately hold content the copy did not put there — and its
+  identity limits are documented (a file's `UniqueId` is what makes a rename
+  recognizable; a renamed folder has none, and a retitled list item is `changed`,
+  not `moved`). `migrate_site.py` prints the notes after a run, so a re-run against
+  the same `--work` folder surfaces source-side deletions/renames/edits.
 - **Workflows, InfoPath forms and BCS external lists are reported as handoffs:**
   a client-side copy cannot produce any of them — a workflow is server-side state,
   an InfoPath form is an `.xsn` template plus per-list form URLs, and an external

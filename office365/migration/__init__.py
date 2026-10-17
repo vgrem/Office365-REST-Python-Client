@@ -39,6 +39,7 @@ from office365.migration.base import (
     conflict_to_on_conflict,
 )
 from office365.migration.checkpoint import Checkpoint
+from office365.migration.delta import DeltaReport, MovedItem, compute_delta
 from office365.migration.fidelity import FidelityReport, FidelityStatus, describe_fidelity
 from office365.migration.job import MigrationJob
 from office365.migration.manifest import Manifest
@@ -84,6 +85,7 @@ __all__ = [
     "Checkpoint",
     "ConflictResolution",
     "ContentTypeMap",
+    "DeltaReport",
     "ExportFormat",
     "FidelityReport",
     "ItemStatus",
@@ -99,12 +101,14 @@ __all__ = [
     "MigrationSettings",
     "MigrationStats",
     "MigrationTask",
+    "MovedItem",
     "ScanContainer",
     "ScanDefinition",
     "ScanReport",
     "SessionTask",
     "VerificationReport",
     "build_report",
+    "compute_delta",
     "conflict_to_on_conflict",
     "describe_fidelity",
     "FidelityStatus",

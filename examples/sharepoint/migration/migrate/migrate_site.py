@@ -15,6 +15,10 @@ nothing. ``--apply`` performs the copy, persisting per-list state under
 against the source (presence via the ``MigrationSourceId`` marker, plus attachment
 checksums) and prints any adapter warnings; pass ``--no-verify`` to skip it.
 
+A re-run against the same ``--work`` folder diffs its fresh plan against the one
+the previous run persisted, so source-side deletions, renames/moves and edits are
+named as ``delta`` notes instead of leaving stale target copies unnoticed.
+
 Subsites are skipped unless ``--include-subwebs`` is given; the dry run names any
 subsites it would leave behind.
 
@@ -163,6 +167,7 @@ def main():
             f"  [{status['phase']}] {status['source']} -> {status['target']} "
             f"success={stats['success']} skipped={stats['skipped']} errors={stats['errors']}"
         )
+    _print_delta(session)
 
     if not args.no_verify:
         statuses = session.show()
@@ -181,6 +186,13 @@ def main():
 
     for warning in session.warnings():
         print(f"  warning: {warning}")
+
+
+def _print_delta(session) -> None:
+    """Print the drift a re-run found against the plan the previous run persisted."""
+    for report in session.delta():
+        for note in report.notes():
+            print(f"  delta: {note}")
 
 
 def _verify_web_scope(source_ctx, ctx, preserve_permissions: bool, migrate_navigation: bool) -> None:

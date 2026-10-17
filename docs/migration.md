@@ -110,6 +110,39 @@ pipeline uses (see [Data pipeline](data-pipeline.md)).
 > pattern. The client-side runner therefore can't reproduce SPMT's semantics; the
 > server-side path (`MigrationServerJob`) is what does.
 
+### Delta re-runs
+
+A re-run reconciles *content*, not *drift*: an item deleted at the source leaves
+an orphan on the target, and a rename or move looks like a brand-new item — the
+old target copy stays where it was, so the re-run duplicates it. Point a job at
+the manifest a previous run persisted (`manifest_path=`, or `manifest_dir=` for a
+whole-site task) and it diffs that plan against the fresh one before replacing it:
+
+```python
+job = MigrationJob(source, target, manifest_path="state/manifests/docs.json")
+job.plan()  # the delta is computed here, before the plan is replaced
+print(job.delta.summary())  # delta vs 412 planned item(s): 1 new, 2 gone, 3 moved, 0 changed
+print(job.delta.is_stale)  # True — a deletion or a move cannot converge on its own
+for note in job.delta.notes():  # ready-to-print, sampled to five paths per kind
+    print(note)
+```
+
+`job.delta` (a `DeltaReport`) names four kinds of drift: `added` (in the fresh
+plan only), `missing` (planned before, gone from the source now), `moved` (the
+same source identity at a different path) and `changed` (same path, different
+modification time — under the default `skip` policy an existing target copy is
+left as it was). `session.delta()` returns one report per task, and
+`MovedItem`/`compute_delta` are exported for a report of your own.
+
+Detection is **read-only**: nothing is deleted on the target, because a target may
+legitimately hold content the copy did not put there (`extra` in the verification
+report is the same orphan seen from the other side). The limits are stated instead
+of guessed at: a move is only recognizable when the source exposes a stable
+identity (`MigrationItem.source_id` — a SharePoint file's `UniqueId`), so a
+renamed *folder* is reported as one missing path plus the moved paths of its
+children, and a list item is keyed by its source item id — retitling it is a
+`changed` item, never a move.
+
 ## Adapters
 
 | Adapter | Direction | Content |

@@ -13,8 +13,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, cast
 
-from office365.migration.base import MigrationOptions, MigrationPhase, MigrationStats
+from office365.migration.base import MigrationItem, MigrationOptions, MigrationPhase, MigrationStats
 from office365.migration.checkpoint import Checkpoint
+from office365.migration.delta import DeltaReport, compute_delta
 from office365.migration.manifest import Manifest
 from office365.migration.runner import MigrationRunner
 
@@ -38,6 +39,7 @@ class MigrationJob:
         self._target = target
         self._options = options or MigrationOptions()
         self._manifest = Manifest()
+        self._delta = DeltaReport()
         self._checkpoint = Checkpoint.create(run_id)
         self._stats = MigrationStats()
         self._manifest_path = manifest_path
@@ -77,6 +79,16 @@ class MigrationJob:
     @property
     def manifest(self) -> Manifest:
         return self._manifest
+
+    @property
+    def delta(self) -> DeltaReport:
+        """What changed at the source since the persisted plan (a re-run's drift).
+
+        Filled by :meth:`plan` when ``manifest_path`` holds the plan a previous
+        run wrote: deleted, renamed/moved and changed items are named there so a
+        copy that cannot converge on them says so instead of passing silently.
+        """
+        return self._delta
 
     @property
     def checkpoint(self) -> Checkpoint:
@@ -139,9 +151,15 @@ class MigrationJob:
         return None
 
     def plan(self, progress: Callable[["Progress"], None] | None = None) -> Manifest:
-        """Enumerate the source into a persisted manifest."""
+        """Enumerate the source into a persisted manifest.
+
+        When the manifest path already holds a plan, that plan is the baseline of
+        a delta comparison (:attr:`delta`) before it is replaced.
+        """
         self._checkpoint.phase = MigrationPhase.PLANNING
+        previous, note = self._previous_plan()
         self._manifest = Manifest.from_source(self._source, progress)
+        self._delta = compute_delta(previous, self._manifest.items, note=note)
         self._save_state()
         return self._manifest
 
@@ -234,6 +252,18 @@ class MigrationJob:
             self._manifest.save(self._manifest_path)
         if self._checkpoint_path is not None:
             self._checkpoint.save(self._checkpoint_path)
+
+    def _previous_plan(self) -> tuple[list[MigrationItem] | None, str | None]:
+        """The plan a previous run persisted (the delta baseline), if there is one."""
+        if self._manifest_path is None:
+            return None, None
+        path = Path(self._manifest_path)
+        if not path.exists():
+            return None, None
+        try:
+            return Manifest.load(path).items, None
+        except Exception as e:  # noqa: BLE001 — a broken baseline must not block a re-plan
+            return None, f"the previous plan at {path} could not be read ({e})"
 
     def _load_state(self) -> None:
         if self._manifest_path is not None and Path(self._manifest_path).exists():

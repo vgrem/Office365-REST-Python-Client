@@ -29,6 +29,7 @@ from office365.migration.base import MigrationOptions, MigrationPhase
 from office365.migration.job import MigrationJob
 
 if TYPE_CHECKING:
+    from office365.migration.delta import DeltaReport
     from office365.migration.settings import MigrationSettings
     from office365.migration.tasks import MigrationTask
 
@@ -298,6 +299,16 @@ class MigrationSession:
         (see :class:`~office365.migration.fidelity.FidelityReport`).
         """
         return [entry.job.fidelity().to_dict() for entry in self._tasks]
+
+    def delta(self) -> list["DeltaReport"]:
+        """Per-task drift against the plan the previous run persisted.
+
+        One entry per task, in registration order. A task whose plan has no
+        baseline (a first run, or no ``manifest_dir``/``manifest_path``) reports
+        an empty delta; nothing is deleted on the target, so drift is named for
+        an operator to act on.
+        """
+        return [entry.job.delta for entry in self._tasks]
 
     # ── Helpers ──────────────────────────────────────────────────
 
