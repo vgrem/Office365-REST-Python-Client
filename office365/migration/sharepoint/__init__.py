@@ -60,8 +60,12 @@ from office365.migration.sharepoint.scanners import (
     SiteScanSummary,
 )
 from office365.migration.sharepoint.security import (
+    ListSecurityReport,
+    apply_site_list_security,
     apply_site_security,
+    capture_list_security,
     capture_site_groups,
+    verify_list_security,
     verify_site_security,
 )
 from office365.migration.sharepoint.site_settings import (
@@ -73,7 +77,7 @@ from office365.migration.sharepoint.site_settings import (
     parse_site_settings_mode,
     verify_web_settings,
 )
-from office365.migration.sharepoint.site_verify import SiteVerificationReport, verify_site
+from office365.migration.sharepoint.site_verify import LIST_SECURITY, SiteVerificationReport, verify_site
 from office365.migration.sharepoint.structure import (
     ContentTypeDefinition,
     FieldDefinition,
@@ -125,6 +129,8 @@ __all__ = [
     "SiteHandoff",
     "SiteLockedScanner",
     "SiteScanSummary",
+    "LIST_SECURITY",
+    "ListSecurityReport",
     "SiteVerificationReport",
     "StructureReport",
     "ViewDefinition",
@@ -134,7 +140,9 @@ __all__ = [
     "WebSettingsReport",
     "WorkflowFinding",
     "apply_navigation",
+    "apply_site_list_security",
     "apply_site_security",
+    "capture_list_security",
     "apply_web_settings",
     "capture_list_structure",
     "capture_navigation",
@@ -154,6 +162,7 @@ __all__ = [
     "parse_site_settings_mode",
     "provision_list_structure",
     "sharepoint_scan_pairs",
+    "verify_list_security",
     "verify_list_structure",
     "verify_navigation",
     "verify_page_copy",

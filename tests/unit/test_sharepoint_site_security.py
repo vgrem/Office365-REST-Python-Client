@@ -1,18 +1,22 @@
-"""Offline tests for best-effort web-level (site) security replication.
+"""Offline tests for best-effort web- and list-level security replication.
 
-The item adapters restore each item's *unique* ACL; ``security.py`` covers the web
-scope. These tests drive it with fakes — no network — and assert that custom groups
-are created (default groups are mapped onto the target's associated groups),
-membership and web role assignments are reapplied, and unresolvable principals are
-warned about rather than dropped silently.
+The item adapters restore each item's *unique* ACL; ``security.py`` covers the two
+container scopes. These tests drive it with fakes — no network — and assert that
+custom groups are created (default groups are mapped onto the target's associated
+groups), membership and web role assignments are reapplied, a *list's* own ACLs are
+broken and replayed on the target (a restricted library must not arrive readable),
+and unresolvable principals are warned about rather than dropped silently.
 """
 
 from __future__ import annotations
 
 from office365.migration.sharepoint.security import (
     SiteGroup,
+    apply_site_list_security,
     apply_site_security,
+    capture_list_security,
     capture_site_groups,
+    verify_list_security,
     verify_site_security,
 )
 from office365.sharepoint.principal.type import PrincipalType
@@ -156,6 +160,7 @@ class _Web:
         self.assignments_added: list = []
         self.created_groups: list[_Group] = []
         self.executed = 0
+        self.unresolvable: set[str] = set()
         self.context = self
 
     def _next_id(self) -> int:
@@ -163,6 +168,8 @@ class _Web:
 
     def ensure_user(self, login):
         self.ensure_calls.append(login)
+        if login in self.unresolvable:
+            raise RuntimeError(f"user {login} not found")
         return self.ensure_users.setdefault(login, _User(login, next(self._ids)))
 
     def add_role_assignment(self, principal, role) -> None:
@@ -283,3 +290,198 @@ def test_site_group_dataclass_defaults():
     assert group.is_default is False
     assert group.members == []
     assert group.flags == {}
+
+
+class _Ctx:
+    """A client context stand-in: a web plus the queue's ``execute_query``."""
+
+    def __init__(self, web) -> None:
+        self.web = web
+
+    def execute_query(self):
+        self.web.execute_query()
+        return self
+
+
+class _SPList:
+    """A list stand-in: its own ACLs (or none, when it inherits the web's)."""
+
+    def __init__(self, title: str, assignments=None, web=None) -> None:
+        self.title = title
+        self.context = web
+        self._inherits = assignments is None
+        self.role_assignments = _RoleAssignments(list(assignments or []))
+        self.properties: dict[str, object] = {"Title": title, "HasUniqueRoleAssignments": not self._inherits}
+        self.break_calls = 0
+        self.added: list[tuple] = []
+
+    def ensure_properties(self, _names):
+        return self
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        return self
+
+    def break_role_inheritance(self, copy_role_assignments=True, clear_sub_scopes=True):
+        self.break_calls += 1
+        self._inherits = False
+        self.properties["HasUniqueRoleAssignments"] = True
+        self.role_assignments = _RoleAssignments([])
+        return self
+
+    def add_role_assignment(self, principal, role):
+        self.added.append((principal, role))
+        self.role_assignments._items.append(_Assignment(principal, [role]))
+        return self
+
+
+class _Lists:
+    def __init__(self, lists) -> None:
+        self._lists = list(lists)
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        return list(self._lists)
+
+
+def _list_web(*lists, roles=(), groups=None):
+    web = _Web(list(groups or []), {}, roles=roles or [_Role("Read", 1), _Role("Edit", 2)])
+    web.lists = _Lists(lists)
+    for sp_list in lists:
+        sp_list.context = _Ctx(web)
+    return web
+
+
+def _restricted_list(title="Library", principals=("Auditors",), role="Read", web=None):
+    return _SPList(title, [_Assignment(_Member(p), [role]) for p in principals], web=web)
+
+
+def test_a_list_that_inherits_has_no_acl_of_its_own():
+    inheriting = _SPList("Documents")
+    restricted = _restricted_list()
+    _list_web(inheriting, restricted)
+
+    assert capture_list_security(inheriting) is None
+    entries = capture_list_security(restricted)
+
+    assert [(entry.principal_name, entry.roles) for entry in entries] == [("Auditors", ["Read"])]
+
+
+def test_a_restricted_list_is_broken_and_replayed_on_the_target():
+    source_web = _list_web(_restricted_list())
+    target = _SPList("Library")
+    target_web = _list_web(target, groups=[_Group("Auditors", 60)])
+    warnings: list[str] = []
+
+    report = apply_site_list_security(source_web, target_web, warnings=warnings)
+
+    assert report.restricted == ["Library"]
+    assert report.applied == ["Library"]
+    assert target.break_calls == 1
+    assert [principal.title for principal, _role in target.added] == ["Auditors"]
+    assert warnings == []
+
+
+def test_a_list_that_inherits_on_the_source_is_never_touched():
+    target = _SPList("Documents")
+    source_web = _list_web(_SPList("Documents"))
+    target_web = _list_web(target)
+
+    report = apply_site_list_security(source_web, target_web)
+
+    assert report.restricted == []
+    assert report.summary() == "no list carries unique permissions"
+    assert target.break_calls == 0
+    assert target.added == []
+
+
+def test_an_already_restored_target_list_is_not_broken_twice():
+    target = _restricted_list()
+    source_web = _list_web(_restricted_list())
+    target_web = _list_web(target)
+
+    report = apply_site_list_security(source_web, target_web)
+
+    assert report.restricted == ["Library"]
+    assert report.applied == []
+    assert target.break_calls == 0
+    assert target.added == []
+
+
+def test_a_principal_the_target_cannot_resolve_is_a_warning():
+    target = _SPList("Library")
+    source_web = _list_web(_restricted_list(principals=("ghost@contoso.com",)))
+    target_web = _list_web(target)
+    target_web.unresolvable = {"ghost@contoso.com"}
+    warnings: list[str] = []
+
+    report = apply_site_list_security(source_web, target_web, warnings=warnings)
+
+    assert report.restricted == ["Library"]
+    assert target.added == []
+    assert warnings and "ghost@contoso.com" in warnings[0]
+
+
+def test_only_the_named_lists_are_visited():
+    source_web = _list_web(_restricted_list("A"), _restricted_list("B"))
+    target_web = _list_web(_SPList("A"), _SPList("B"))
+
+    report = apply_site_list_security(source_web, target_web, lists=["b"])
+
+    assert report.restricted == ["B"]
+
+
+def test_verify_names_a_list_the_target_leaves_readable():
+    source_web = _list_web(_restricted_list())
+    target_web = _list_web(_SPList("Library"))
+
+    issues = verify_list_security(source_web, target_web)
+
+    assert len(issues) == 1
+    assert issues[0].startswith("list 'Library' inherits the web's permissions on the target")
+    assert "1 assignment(s)" in issues[0]
+
+
+def test_verify_names_an_assignment_the_target_missed():
+    source_web = _list_web(_restricted_list(principals=("Auditors", "S Members")))
+    target_web = _list_web(_restricted_list(principals=("Auditors",)))
+
+    issues = verify_list_security(source_web, target_web)
+
+    assert len(issues) == 1
+    assert "not restored" in issues[0]
+    assert "S Members -> Read" in issues[0]
+
+
+def test_verify_names_a_target_list_restricted_beyond_the_source():
+    source_web = _list_web(_SPList("Library"))
+    target_web = _list_web(_restricted_list())
+
+    issues = verify_list_security(source_web, target_web)
+
+    assert issues == ["list 'Library' is restricted on the target but inherits the web's permissions on the source"]
+
+
+def test_a_list_with_no_readable_assignment_is_left_alone():
+    """A system list can report unique permissions and an empty set — breaking the
+    target for nothing would make it unreadable to everyone."""
+    target = _SPList("Converted Forms")
+    source_web = _list_web(_SPList("Converted Forms", []))
+    target_web = _list_web(target)
+
+    report = apply_site_list_security(source_web, target_web)
+
+    assert report.restricted == []
+    assert target.break_calls == 0
+    assert verify_list_security(source_web, target_web) == []
+
+
+def test_verify_is_clean_when_the_list_acls_match():
+    source_web = _list_web(_restricted_list())
+    target_web = _list_web(_restricted_list())
+
+    assert verify_list_security(source_web, target_web) == []

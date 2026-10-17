@@ -8,6 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **A list's own permissions are replayed, so a restricted library does not arrive
+  readable.** Permissions were restored at two scopes — per item by the adapters,
+  and per web (site groups + web role assignments) by `apply_site_security` — which
+  left a hole in the middle: a library whose permissions are *unique* (the source
+  broke inheritance to restrict it) said nothing about its items, and the web scope
+  is the web. It arrived inheriting the web's permissions, i.e. readable by
+  everyone the site is. `security.py` gains the third scope:
+  `capture_list_security(list)` (read-only; `None` when a list simply inherits),
+  `apply_site_list_security(source_web, target_web, lists=None, warnings=None)` and
+  `verify_list_security(source_web, target_web, lists=None)`, plus
+  `ListSecurityReport` (`N list(s) carry unique permissions, M applied`).
+  Application breaks the target list's inheritance **once** — only when it still
+  inherits — and then adds the source's assignments through the existing principal
+  resolver (default groups normalized, unknown principals warned about, never
+  silently dropped), leaving every other target assignment alone: it is additive
+  and idempotent, so a re-run writes nothing and never prunes. It runs **after**
+  the content, because a freshly broken list is briefly unreadable to everyone but
+  the writer; `migrate_site.py` calls it right after the run when
+  `--preserve-permissions` is set and prints the report. Reading the flag needs
+  `ensure_properties(["HasUniqueRoleAssignments"])` — a plain list read reports
+  `None` even when the list is in fact unique (live-verified, as was the whole
+  path: a list granting only the Visitors group `Read` arrived on the target with
+  exactly that assignment and verified clean). `verify_site(..., security=True)`
+  now reports it as its own `list security` dimension next to `security`, because
+  one can be right while the other is wrong.
 - **A migrated site opens on the copy of its source's home page.** Copying pages
   never moved a web's home page designation, so the migrated site landed on
   whatever page the target web already pointed at — the first thing a user sees.

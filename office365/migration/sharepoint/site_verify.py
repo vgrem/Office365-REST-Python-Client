@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional,
 
 from office365.migration.sharepoint.navigation import verify_navigation
 from office365.migration.sharepoint.pages import verify_page_copy
-from office365.migration.sharepoint.security import verify_site_security
+from office365.migration.sharepoint.security import verify_list_security, verify_site_security
 from office365.migration.sharepoint.site_settings import verify_web_settings
 from office365.migration.sharepoint.structure import (
     compare_web_scope_structure,
@@ -38,9 +38,12 @@ if TYPE_CHECKING:
     from office365.sharepoint.lists.list import List as SPList
     from office365.sharepoint.webs.web import Web
 
-__all__ = ["SiteVerificationReport", "verify_site"]
+__all__ = ["LIST_SECURITY", "SiteVerificationReport", "WEB_SCOPE_STRUCTURE", "verify_site"]
 
 WEB_SCOPE_STRUCTURE = "web-scope structure"
+
+#: Check name for a list's own ACL (as opposed to the web's or an item's).
+LIST_SECURITY = "list security"
 
 
 def _web_url(web: "Web") -> str:
@@ -140,7 +143,9 @@ def verify_site(
             web scope, not a per-list failure).
         navigation: Reconcile quick launch and top navigation.
         pages: Reconcile modern site page copies.
-        security: Reconcile custom site groups and web role assignments.
+        security: Reconcile custom site groups, web role assignments and each
+            list's own ACL (a source list that restricts access the target list
+            does not is the finding that matters).
         settings: Reconcile the web's ``Title``/``Description``.
 
     Returns:
@@ -164,6 +169,8 @@ def verify_site(
         "navigation": (lambda: verify_navigation(source_web, target_web), navigation),
         "pages": (lambda: verify_page_copy(source_web, target_web), pages),
         "security": (lambda: verify_site_security(source_web, target_web), security),
+        # A list's own ACL is a separate scope from the web's (and from an item's).
+        LIST_SECURITY: (lambda: verify_list_security(source_web, target_web), security),
     }
     for name, (run, enabled) in checks.items():
         if not enabled:

@@ -219,11 +219,30 @@ def main():
             f"success={stats['success']} skipped={stats['skipped']} errors={stats['errors']}"
         )
     _print_delta(session)
+    _apply_list_security(source_ctx, ctx, preserve_permissions)
 
     if not args.no_verify:
         _report_verification(session, source_ctx, ctx, preserve_permissions, fidelity)
 
     for warning in session.warnings():
+        print(f"  warning: {warning}")
+
+
+def _apply_list_security(source_ctx, ctx, preserve_permissions: bool) -> None:
+    """Replay each list's own ACLs — after the content, which is the only safe order.
+
+    A list whose source permissions are unique (inheritance broken to restrict it)
+    is the one ACL scope neither the web pass nor the item pass can reach: without
+    this, a restricted library arrives readable at the web's permissions.
+    """
+    if not preserve_permissions:
+        return
+    from office365.migration.sharepoint.security import apply_site_list_security
+
+    warnings: list[str] = []
+    report = apply_site_list_security(source_ctx.web, ctx.web, warnings=warnings)
+    print(f"\nPermissions: {report.summary()}", flush=True)
+    for warning in warnings:
         print(f"  warning: {warning}")
 
 

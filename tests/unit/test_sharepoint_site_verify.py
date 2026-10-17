@@ -4,7 +4,7 @@ import json
 
 import pytest
 from office365.migration.sharepoint import site_verify
-from office365.migration.sharepoint.site_verify import WEB_SCOPE_STRUCTURE, verify_site
+from office365.migration.sharepoint.site_verify import LIST_SECURITY, WEB_SCOPE_STRUCTURE, verify_site
 from office365.migration.sharepoint.verify import StructureReport
 
 
@@ -41,6 +41,7 @@ def clean(monkeypatch):
         ("navigation", "verify_navigation"),
         ("pages", "verify_page_copy"),
         ("security", "verify_site_security"),
+        ("list security", "verify_list_security"),
     ):
         monkeypatch.setattr(site_verify, func, _note(name))
     monkeypatch.setattr(site_verify, "_web_scope_findings", _note("web-scope"))
@@ -83,6 +84,28 @@ def test_findings_make_the_web_a_mismatch_and_are_counted(contexts, clean, monke
     )
     assert report.issues[0].startswith("site settings:")
     assert len(report.issues) == len(report.findings["settings"]) + len(report.findings["pages"])
+
+
+def test_a_list_acl_the_target_did_not_restore_is_its_own_dimension(contexts, clean, monkeypatch):
+    monkeypatch.setattr(
+        site_verify,
+        "verify_list_security",
+        lambda s, t: ["list 'Private' inherits the web's permissions on the target; the source restricts it"],
+    )
+
+    report = verify_site(*contexts, security=True)
+
+    assert not report.ok
+    assert report.findings == {
+        LIST_SECURITY: ["list 'Private' inherits the web's permissions on the target; the source restricts it"]
+    }
+    assert report.summary().endswith(f"{LIST_SECURITY}: 1")
+
+
+def test_the_list_check_only_runs_with_security_enabled(contexts, clean):
+    verify_site(*contexts)
+
+    assert "list security" not in clean
 
 
 def test_a_check_that_cannot_run_is_unverifiable_not_a_mismatch(contexts, clean, monkeypatch):

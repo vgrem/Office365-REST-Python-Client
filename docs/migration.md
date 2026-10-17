@@ -34,7 +34,7 @@ different content and deliver different fidelity:
 | Content | files + folders, **record lists + attachments**, list structure | **document libraries** (files/folders + version history) |
 | Version history | ✗ | ✓ the runner reads each file's history and the package carries `<Versions>` |
 | Authors / ModifiedBy | not preserved | ✓ applied from `UserGroup.xml` (integer principal id, matched by PUID) |
-| Permissions | library: best-effort same-tenant ACL; list: ✗; **web groups/role assignments** with `--preserve-permissions` | best-effort same-tenant ACL — **resolved users only** (groups / unresolved principals skipped with a warning) |
+| Permissions | best-effort same-tenant ACLs at all three container scopes: **items**, a **list's own ACLs** and **web groups/role assignments** (with `--preserve-permissions`) | best-effort same-tenant ACL — **resolved users only** (groups / unresolved principals skipped with a warning) |
 | Columns / content types / views | captured + provisioned over REST | **not emitted** by the builder today |
 | Azure Storage | not needed | required (SharePoint-owned containers; no Azure account) |
 | Throughput | per-item HTTP, throttle-aware, resumable | bulk server-side ingestion; poll a job |
@@ -698,7 +698,7 @@ with a copyable home page moved the target web's `WelcomePage` onto the copy and
 |---|---|---|
 | `preserve_timestamps` | best-effort (`Created`/`Modified` on files, folders and list items) | ✓ carried per manifest object (`TimeCreated`/`TimeLastModified`) |
 | `preserve_authorship` | best-effort (`Author`/`Editor` via `EnsureUser`) | best-effort — resolved PUID users only |
-| `preserve_permissions` | best-effort (same-tenant ACL copy) | best-effort — resolves users by PUID; groups / unresolved principals skipped |
+| `preserve_permissions` | best-effort (same-tenant ACLs: items, a list's own ACLs via `apply_site_list_security`, web groups/role assignments) | best-effort — resolves users by PUID; groups / unresolved principals skipped |
 | `preserve_versions` | ✗ (raises) | ✓ the runner reads history into the package's `<Versions>` |
 
 The server-side package target is the only one that preserves version history: the
@@ -744,6 +744,23 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
   idempotent. Same-tenant, matched by login (`EnsureUser` for users, group name for
   groups); anything unresolvable is reported via `session.warnings()` and by
   `verify_site_security`, never silently dropped.
+- **List security (list scope)** — a library whose permissions are *unique* (the
+  source broke inheritance to restrict it) is a scope neither of the other two
+  reaches: item ACLs say nothing about the container, and the web scope is the
+  web. `apply_site_list_security(source_web, target_web)` replays those ACLs onto
+  the target list: it breaks the target list's inheritance **once** (only if it
+  still inherits), adds the source's assignments, and leaves everything else
+  alone, so it is idempotent and a re-run writes nothing. It is called **after**
+  the content — not by the resolver — because a freshly broken list is briefly
+  unreadable to everyone but the writer, and because a list ACL is only meaningful
+  once the list exists; `migrate_site.py` calls it right after the run whenever
+  `--preserve-permissions` is set and prints `Permissions: N list(s) carry unique
+  permissions, M applied`. `capture_list_security(list)` is the read-only half
+  (`None` when a list simply inherits — which costs one extra GET, so it only runs
+  inside a permissions pass). Verified live: a list that granted only the
+  **Visitors** group `Read`, with inheritance broken, arrived on the target with
+  exactly that assignment — `verify_list_security` clean — and the target's list
+  ACLs were not the web's.
 
 Adapters opt in by implementing optional hooks: `DataSource.read_permissions(item)`,
 `DataTarget.apply_timestamps(item)`, `DataTarget.apply_authorship(item)`, and
@@ -1144,7 +1161,11 @@ The checks are opt-in, matching what a run claimed to do: `settings` and
 `web_scope_structure` are on by default, `navigation`, `pages` and `security` are
 passed when the corresponding run flags were set, and `lists=[(source, target), …]`
 adds per-list structure reconciliation (the same comparison as
-`verify_list_structure`). Everything is read-only.
+`verify_list_structure`). `security=True` covers both container scopes as two
+separate dimensions — `security` (web groups + web role assignments, via
+`verify_site_security`) and `list security` (each list's own ACLs, via
+`verify_list_security`) — because a list can be restricted while the web is fine,
+and the two are fixed by different passes. Everything is read-only.
 
 Two verdicts, deliberately separate: `ok` is False as soon as any check
 contradicts the target, while `complete` is False when a check *could not run*

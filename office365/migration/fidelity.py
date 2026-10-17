@@ -149,7 +149,8 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
         set_(
             "permissions",
             status.BEST_EFFORT,
-            "same-tenant only; groups and principals without a PUID are skipped",
+            "same-tenant only; groups and principals without a PUID are skipped, and a "
+            "list's own ACLs are replayed by apply_site_list_security after the content",
         )
     else:
         set_(
