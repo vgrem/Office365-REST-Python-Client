@@ -167,6 +167,10 @@ Two honest limits remain:
   to the same list before hashing, which makes a lost selection a real `mismatch`;
   only `TypeAsString == "MultiChoice"` counts as multi-value, because a
   `Type="Choice" Mult="TRUE"` column keeps that flag while storing a single value.
+  A **Hyperlink** value travels as the `{"Url", "Description"}` object both sides
+  read and a create accepts as-is. Other value objects — an image/thumbnail, a
+  geolocation point — are still dropped with a warning instead of being sent in a
+  shape the server may reject.
 - Per-item **timestamps/permissions/authorship**
   (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
   by the list adapters on a best-effort basis: timestamps and authorship are

@@ -306,6 +306,34 @@ def test_list_source_drops_an_empty_multi_choice_selection():
     assert "Tags" not in source.read(planned[0])
 
 
+def test_list_source_keeps_a_hyperlink_value_object():
+    # A Hyperlink column reads as ``{"Url", "Description"}`` and a create accepts
+    # that shape as-is, so the projection must carry it instead of dropping it.
+    value = {"Description": "one", "Url": "https://example.com/1"}
+    items = [_Item(1, {"Id": 1, "Title": "A", "Link": value})]
+    fields = [_Field("Link", "URL")]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields)))
+
+    planned = source.list_items()
+
+    assert source.read(planned[0])["Link"] == value
+    assert not any("non-scalar" in w for w in source.warnings)
+
+
+def test_list_source_still_drops_a_value_object_column_of_another_type():
+    # Only the column types known to accept a value object on write are carried; a
+    # nested mapping (e.g. a typed payload carrying ``__metadata``) stays dropped so
+    # it cannot reject the create batch.
+    items = [_Item(1, {"Id": 1, "Title": "A", "Picture": {"Id": "x", "Url": {"Url": "u"}}})]
+    fields = [_Field("Picture", "Thumbnail")]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields)))
+
+    planned = source.list_items()
+
+    assert "Picture" not in source.read(planned[0])
+    assert any("non-scalar" in w and "Picture" in w for w in source.warnings)
+
+
 def test_list_source_captures_attachments_after_records():
     attachment = _Attachment("spec.txt", b"hello")
     items = [
@@ -711,6 +739,40 @@ def test_list_target_content_checksum_detects_lost_multi_choice_values():
     checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
 
     assert checksum != _content_checksum({"Title": "Alpha", "Tags": ["red", "green"]})
+
+
+def test_list_target_content_checksum_compares_hyperlink_values():
+    # The source records the value object it read; the target reads the same shape
+    # back, so both must hash identically.
+    value = {"Description": "one", "Url": "https://example.com/1"}
+    row = _TargetRow(10, "1", properties={"Title": "Alpha", "Link": value})
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
+
+    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
+
+    assert checksum == _content_checksum({"Title": "Alpha", "Link": value})
+
+
+def test_list_target_content_checksum_detects_a_lost_hyperlink_value():
+    value = {"Description": "one", "Url": "https://example.com/1"}
+    row = _TargetRow(10, "1", properties={"Title": "Alpha"})
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
+
+    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
+
+    assert checksum != _content_checksum({"Title": "Alpha", "Link": value})
+
+
+def test_list_target_content_checksum_detects_a_changed_hyperlink_description():
+    row = _TargetRow(
+        10, "1", properties={"Title": "Alpha", "Link": {"Description": "other", "Url": "https://example.com/1"}}
+    )
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
+
+    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
+
+    expected = {"Title": "Alpha", "Link": {"Description": "one", "Url": "https://example.com/1"}}
+    assert checksum != _content_checksum(expected)
 
 
 def test_list_target_content_checksum_detects_a_content_difference():

@@ -111,6 +111,9 @@ _SOURCE_FIELD_SELECT = [
 #: Choice column types; a multi-choice column stores a collection of strings.
 _CHOICE_TYPES = frozenset({"Choice", "MultiChoice"})
 
+#: Column types whose value is a small REST object instead of a scalar.
+_VALUE_OBJECT_TYPES = frozenset({"URL"})
+
 
 def _allows_multiple_values(field: Any) -> bool:
     """Whether a Lookup/Person column holds many values.
@@ -141,6 +144,31 @@ def _is_multi_choice_column(field: Any) -> bool:
     if field_type == "MultiChoice":
         return True
     return field_type in _CHOICE_TYPES and _allows_multiple_values(field)
+
+
+def _is_value_object_column(field: Any) -> bool:
+    """Whether a column holds a REST value object rather than a scalar.
+
+    A Hyperlink column is the common case: a read returns
+    ``{"Url": ..., "Description": ...}``, which a scalar-only record projection
+    dropped (a plain string is accepted on write but then makes every subsequent
+    *read* of the column fail, live-probed).
+    """
+    return getattr(field, "type_as_string", None) in _VALUE_OBJECT_TYPES
+
+
+def _scalar_mapping(value: Any) -> dict | None:
+    """A value object as a plain mapping with scalar members, or ``None``.
+
+    Only a shallow mapping of scalars is accepted, so a navigation property (a
+    ``ClientObject``) or a typed payload carrying a nested ``__metadata`` is never
+    mistaken for a column value.
+    """
+    if not isinstance(value, dict) or not value:
+        return None
+    if any(item is not None and not isinstance(item, (str, int, float, bool)) for item in value.values()):
+        return None
+    return dict(value)
 
 
 #: Record columns excluded from the content checksum: server-assigned identity
@@ -174,20 +202,22 @@ def _content_checksum(record: dict, extra_excluded: "frozenset[str]" = frozenset
     """MD5 of an item's content columns in a stable, order-independent form.
 
     The list source and target both use this so record content can be reconciled:
-    only scalar and multi-value columns are hashed (navigation properties and
-    excluded keys are dropped) and keys are sorted, so the two sides agree
-    regardless of property iteration order. A null column is treated as absent:
-    the source drops an empty multi-value column while the target reads it back as
-    ``None``, and both mean "no value".
+    only scalar, multi-value and value-object columns are hashed (navigation
+    properties and excluded keys are dropped) and keys are sorted, so the two sides
+    agree regardless of property iteration order. A null column is treated as
+    absent: the source drops an empty multi-value column while the target reads it
+    back as ``None``, and both mean "no value".
     """
-    content = {
-        key: value
-        for key, value in record.items()
-        if key not in _CONTENT_EXCLUDED
-        and key not in extra_excluded
-        and value is not None
-        and isinstance(value, (str, int, float, bool, list, tuple))
-    }
+    content = {}
+    for key, value in record.items():
+        if key in _CONTENT_EXCLUDED or key in extra_excluded or value is None:
+            continue
+        if isinstance(value, (str, int, float, bool, list, tuple)):
+            content[key] = value
+            continue
+        mapping = _scalar_mapping(value)
+        if mapping is not None:
+            content[key] = mapping
     payload = json.dumps(content, sort_keys=True, default=str)
     return hashlib.md5(payload.encode("utf-8")).hexdigest()
 
@@ -710,6 +740,7 @@ class SharePointListSource:
         self._taxonomy_columns_cache: dict[str, bool] | None = None
         self._taxonomy_note_columns_cache: set[str] | None = None
         self._multi_choice_columns_cache: set[str] | None = None
+        self._value_object_columns_cache: set[str] | None = None
         self.warnings: list[str] = []
 
     def label(self) -> str:
@@ -846,6 +877,7 @@ class SharePointListSource:
         multi_keys = {f"{name}Id" for name in multi} | {f"{name}StringId" for name in multi}
         choices = self._multi_choice_columns()
         taxonomy = self._taxonomy_columns()
+        value_objects = self._value_object_columns()
         for record in records:
             for key, value in list(record.items()):
                 if key in multi_keys:
@@ -854,6 +886,9 @@ class SharePointListSource:
                     continue  # handled by ``_normalize_multi_choice_values``
                 if key in taxonomy:
                     continue  # handled by ``_project_taxonomy_values``
+                if key in value_objects and _scalar_mapping(value) is not None:
+                    record[key] = _scalar_mapping(value)
+                    continue  # a value object (``{"Url", "Description"}``) is writable as-is
                 if value is not None and not isinstance(value, (str, int, float, bool)):
                     record.pop(key)
                     if key not in _NAVIGATION_SELECT:
@@ -1004,6 +1039,21 @@ class SharePointListSource:
                 self.warnings.append(f"could not read source columns for multi-choice values: {e}")
             self._multi_choice_columns_cache = names
         return self._multi_choice_columns_cache
+
+    def _value_object_columns(self) -> set[str]:
+        """The source's columns that hold a REST value object (e.g. a hyperlink)."""
+        if self._value_object_columns_cache is None:
+            names: set[str] = set()
+            try:
+                names = {
+                    field.internal_name
+                    for field in self._source_fields()
+                    if getattr(field, "internal_name", None) and _is_value_object_column(field)
+                }
+            except Exception as e:  # noqa: BLE001 — values are dropped, never fatal
+                self.warnings.append(f"could not read source columns for value-object values: {e}")
+            self._value_object_columns_cache = names
+        return self._value_object_columns_cache
 
     def _annotate_person_logins(self, records: list[dict]) -> None:
         """Replace each Person column's site-user id with the user's login name.

@@ -403,6 +403,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Hyperlink column values were dropped on migration.** A `URL` column reads as a
+  `{"Url": ..., "Description": ...}` object — not a scalar — so the source
+  projection dropped it with the same "skipped non-scalar column" warning and
+  every migrated item lost its links. The source now carries that object for a
+  column whose type is `URL` (live-probed: a create *and* a `MERGE` update accept
+  the plain object, and it reads back in the same shape, while a bare string is
+  accepted but makes every later read of the column fail), and the checksum hashes
+  scalar-only value objects so a lost or edited link is a real `mismatch`. Value
+  objects of any other type (image/thumbnail, geolocation) are still dropped with
+  the warning rather than sent in a shape the server may reject.
 - **Multi-choice column values were lost on migration.** A `MultiChoice` column
   read back as a positional mapping (`{0: "red", 1: "green"}`) — neither a scalar
   nor a column the adapters knew how to remap — so the source projection dropped
