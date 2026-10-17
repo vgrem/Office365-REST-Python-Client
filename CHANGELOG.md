@@ -403,6 +403,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Multi-choice column values were lost on migration.** A `MultiChoice` column
+  read back as a positional mapping (`{0: "red", 1: "green"}`) — neither a scalar
+  nor a column the adapters knew how to remap — so the source projection dropped
+  it with a "skipped non-scalar column" warning and every migrated item lost its
+  selections. Worse, verification could not see the loss: the checksum only hashes
+  scalars and lists, so a positional mapping was excluded on **both** sides. The
+  source now records a multi-choice cell as a bare list (dropping an empty
+  selection so the column reads back empty rather than as an empty collection) and
+  the target wraps it as `{"results": [...]}` for the create — live-verified to be
+  accepted on create *and* on a `MERGE` update. The read-back mapping is
+  canonicalized to the same bare list before hashing, so a lost or changed
+  selection is a real `mismatch` instead of an invisible drop. A column is treated
+  as multi-value only when it reports `TypeAsString == "MultiChoice"`: a column
+  created from `Type="Choice" Mult="TRUE"` keeps that `Mult` flag in its schema
+  but stores a **single** value in one `nvarchar` slot (live-probed: a scalar write
+  round-trips, an array is rejected), so the schema flag is deliberately ignored.
 - **A multi-value Lookup/Person column spelled `Type="Lookup" Mult="TRUE"` was
   migrated as if it were single-value.** SharePoint keeps the declared spelling and
   reports `TypeAsString` as `Lookup`/`User`, so classifying a column by its type

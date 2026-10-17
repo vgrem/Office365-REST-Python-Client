@@ -160,7 +160,13 @@ Two honest limits remain:
   term absent from the target store, an unknown login) is dropped with a warning
   rather than written wrong. Typed values in **hidden** columns are dropped too:
   structure provisioning does not replicate hidden columns, so there is no target
-  column to write them to.
+  column to write them to. A **multi-choice** column needs no remapping — it holds
+  plain strings — but its shape does: a live read returns the selection as a
+  positional mapping, so the source records it as a bare list and the target wraps
+  it as `{"results": [...]}` for the create. The read-back mapping is canonicalized
+  to the same list before hashing, which makes a lost selection a real `mismatch`;
+  only `TypeAsString == "MultiChoice"` counts as multi-value, because a
+  `Type="Choice" Mult="TRUE"` column keeps that flag while storing a single value.
 - Per-item **timestamps/permissions/authorship**
   (`preserve_timestamps`/`preserve_permissions`/`preserve_authorship`) are applied
   by the list adapters on a best-effort basis: timestamps and authorship are
@@ -471,7 +477,7 @@ the shipped pairs' expected output.
 | Site groups / web role assignments | n/a (whole-site resolver only) | n/a | best-effort (same-tenant; custom groups + membership, associated-group membership excluded) |
 | Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
 | Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure` | same | same |
-| Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD dropped) |
+| Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
 | Check-out / draft / approval state | unsupported | unsupported | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | pages/web parts not migrated (the resolver reports each skipped page library as a handoff); quick launch/top nav copied by the whole-site resolver (`migrate_navigation`) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |

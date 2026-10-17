@@ -17,6 +17,8 @@ from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, cast
 
+from typing_extensions import TypeAlias
+
 from office365.migration.adapters import MigrationProgress
 from office365.migration.base import MigrationItem, PermissionEntry, Principal, conflict_to_on_conflict, is_puid
 from office365.migration.sharepoint.structure import normalize_guid
@@ -37,6 +39,13 @@ if TYPE_CHECKING:
     from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
 
 _TAXONOMY_FIELD_TYPES = {"TaxonomyFieldType", "TaxonomyFieldTypeMulti"}
+
+#: The target's typed columns: ``(lookup: name -> referenced list id, user names,
+#: multi-lookup: name -> referenced list id, multi-user names, taxonomy:
+#: name -> (allows many, hidden note field internal name), multi-choice names)``.
+_TypedColumns: TypeAlias = (
+    "tuple[dict[str, str], set[str], dict[str, str], set[str], dict[str, tuple[bool, str | None]], set[str]]"
+)
 
 # Always-projected system metadata (reliable author/editor identity).
 _METADATA_SELECT = ["AuthorId", "EditorId", "HasUniqueRoleAssignments"]
@@ -99,6 +108,10 @@ _SOURCE_FIELD_SELECT = [
 ]
 
 
+#: Choice column types; a multi-choice column stores a collection of strings.
+_CHOICE_TYPES = frozenset({"Choice", "MultiChoice"})
+
+
 def _allows_multiple_values(field: Any) -> bool:
     """Whether a Lookup/Person column holds many values.
 
@@ -113,6 +126,21 @@ def _allows_multiple_values(field: Any) -> bool:
     if getattr(field, "type_as_string", None) in _MULTI_VALUE_TYPES:
         return True
     return field.properties.get("AllowMultipleValues") is True
+
+
+def _is_multi_choice_column(field: Any) -> bool:
+    """Whether a Choice column stores a collection of values.
+
+    ``TypeAsString == "MultiChoice"`` is the only reliable signal. Live-probed: a
+    column created from a ``Type="Choice" Mult="TRUE"`` schema reads back as
+    ``"Choice"``, stores one value in a single ``nvarchar`` slot (a scalar write
+    round-trips, an array is rejected) and does not project ``AllowMultipleValues``
+    at all — its schema ``Mult`` flag is misleading, so it is deliberately not used.
+    """
+    field_type = getattr(field, "type_as_string", None)
+    if field_type == "MultiChoice":
+        return True
+    return field_type in _CHOICE_TYPES and _allows_multiple_values(field)
 
 
 #: Record columns excluded from the content checksum: server-assigned identity
@@ -184,6 +212,21 @@ def _id_list(value: Any) -> list[Any] | None:
     return None
 
 
+def _multi_values(value: Any) -> list[Any] | None:
+    """A multi-value cell as a plain list of its values, or ``None`` when empty.
+
+    Accepts every shape a live read or a built payload produces: a positional
+    mapping (``{0: "red", 1: "green"}``), a ``{"results": [...]}`` wrapper, a bare
+    list, and — because a collection cell may hold exactly one selection — a bare
+    scalar.
+    """
+    if value is None:
+        return None
+    if isinstance(value, (str, int, float, bool)):
+        return [value]
+    return _id_list(value)
+
+
 def _taxonomy_terms(value: Any) -> list[dict[str, str]]:
     """Normalize a taxonomy value to portable ``{"TermGuid": ...}`` terms.
 
@@ -246,7 +289,7 @@ def _canonicalize_taxonomy_record(record: dict) -> dict:
     return canonical
 
 
-def _collection_payload(ids: list[int]) -> dict:
+def _collection_payload(ids: list) -> dict:
     """The JSON shape SharePoint accepts when *creating* a multi-value column.
 
     Live-probed: a bare array is rejected on create
@@ -666,6 +709,7 @@ class SharePointListSource:
         self._skipped_columns_cache: set[str] | None = None
         self._taxonomy_columns_cache: dict[str, bool] | None = None
         self._taxonomy_note_columns_cache: set[str] | None = None
+        self._multi_choice_columns_cache: set[str] | None = None
         self.warnings: list[str] = []
 
     def label(self) -> str:
@@ -800,11 +844,14 @@ class SharePointListSource:
         dropped: set[str] = set()
         multi = self._multi_columns()
         multi_keys = {f"{name}Id" for name in multi} | {f"{name}StringId" for name in multi}
+        choices = self._multi_choice_columns()
         taxonomy = self._taxonomy_columns()
         for record in records:
             for key, value in list(record.items()):
                 if key in multi_keys:
                     continue  # handled by ``_normalize_multi_values``
+                if key in choices:
+                    continue  # handled by ``_normalize_multi_choice_values``
                 if key in taxonomy:
                     continue  # handled by ``_project_taxonomy_values``
                 if value is not None and not isinstance(value, (str, int, float, bool)):
@@ -829,6 +876,7 @@ class SharePointListSource:
             )
         self._project_taxonomy_values(records)
         self._normalize_multi_values(records)
+        self._normalize_multi_choice_values(records)
         self._annotate_person_logins(records)
         return records
 
@@ -942,6 +990,21 @@ class SharePointListSource:
         """The source's hidden Person/multi-value columns (not replicated on the target)."""
         return self._typed_columns()[2]
 
+    def _multi_choice_columns(self) -> set[str]:
+        """The source's multi-choice columns (internal names)."""
+        if self._multi_choice_columns_cache is None:
+            names: set[str] = set()
+            try:
+                names = {
+                    field.internal_name
+                    for field in self._source_fields()
+                    if getattr(field, "internal_name", None) and _is_multi_choice_column(field)
+                }
+            except Exception as e:  # noqa: BLE001 — values stay un-normalized, never fatal
+                self.warnings.append(f"could not read source columns for multi-choice values: {e}")
+            self._multi_choice_columns_cache = names
+        return self._multi_choice_columns_cache
+
     def _annotate_person_logins(self, records: list[dict]) -> None:
         """Replace each Person column's site-user id with the user's login name.
 
@@ -1016,6 +1079,28 @@ class SharePointListSource:
                         record.pop(key, None)
                 else:
                     record[key] = parsed
+
+    def _normalize_multi_choice_values(self, records: list[dict]) -> None:
+        """Project each multi-choice column as a plain list of its selected values.
+
+        A live read returns the collection as a positional mapping
+        (``{0: "red", 1: "green"}``); the source records it as a bare list, which is
+        what the checksum compares and what the target wraps for a create. An empty
+        selection is dropped so the column reads back empty rather than as an empty
+        collection.
+        """
+        names = self._multi_choice_columns()
+        if not names:
+            return
+        for record in records:
+            for name in names:
+                if name not in record:
+                    continue
+                values = _multi_values(record.get(name))
+                if values:
+                    record[name] = values
+                else:
+                    record.pop(name, None)
 
     def read(self, item: MigrationItem) -> object:
         if item.item_type == "attachment":
@@ -1179,9 +1264,7 @@ class SharePointListTarget:
         # Lookup and Person columns carry an id that is only meaningful on the
         # source (list-local item id / site-user id). The target remaps each to its
         # own value on write and back to the source value on verification.
-        self._columns_cache: (
-            tuple[dict[str, str], set[str], dict[str, str], set[str], dict[str, tuple[bool, str | None]]] | None
-        ) = None
+        self._columns_cache: _TypedColumns | None = None
         self._lookup_indexes: dict[str, tuple[dict[int, int], dict[int, int]]] = {}
         self._unresolved_lookups: set[tuple[str, int]] = set()
         self._unresolved_users: set[tuple[str, str]] = set()
@@ -1310,14 +1393,14 @@ class SharePointListTarget:
         ``{"results": [...]}`` wrapper (live-probed). Lists without multi-value
         columns are passed through untouched.
         """
-        id_keys = self._multi_id_keys()
-        if not id_keys:
+        keys = self._multi_id_keys() | self._multi_choice_columns()
+        if not keys:
             return record
         wrapped = dict(record)
-        for key in id_keys:
-            ids = _id_list(wrapped.get(key))
-            if ids is not None:
-                wrapped[key] = _collection_payload(ids)
+        for key in keys:
+            values = _multi_values(wrapped.get(key))
+            if values is not None:
+                wrapped[key] = _collection_payload(values)
         return wrapped
 
     def _ensure_identity(self) -> None:
@@ -1335,12 +1418,12 @@ class SharePointListTarget:
             self._identity_field = None
             self.warnings.append(f"could not create the {name!r} identity column: {e}")
 
-    def _columns(self) -> tuple[dict[str, str], set[str], dict[str, str], set[str], dict[str, tuple[bool, str | None]]]:
+    def _columns(self) -> _TypedColumns:
         """The target's typed columns.
 
         Returns ``(lookup: name -> referenced list id, user names, multi-lookup:
         name -> referenced list id, multi-user names, taxonomy: name -> (allows
-        many, hidden note field internal name))``.
+        many, hidden note field internal name), multi-choice names)``.
         """
         if self._columns_cache is None:
             self._columns_cache = self._load_columns()
@@ -1361,14 +1444,16 @@ class SharePointListTarget:
     def _taxonomy_columns(self) -> dict[str, tuple[bool, str | None]]:
         return self._columns()[4]
 
-    def _load_columns(
-        self,
-    ) -> tuple[dict[str, str], set[str], dict[str, str], set[str], dict[str, tuple[bool, str | None]]]:
+    def _multi_choice_columns(self) -> set[str]:
+        return self._columns()[5]
+
+    def _load_columns(self) -> _TypedColumns:
         lookups: dict[str, str] = {}
         users: set[str] = set()
         multi_lookups: dict[str, str] = {}
         multi_users: set[str] = set()
         taxonomy: dict[str, tuple[bool, str | None]] = {}
+        multi_choices: set[str] = set()
         try:
             fields = (
                 self._list.fields.select(
@@ -1379,7 +1464,7 @@ class SharePointListTarget:
             )
         except Exception as e:  # noqa: BLE001 — without columns we cannot remap; content still migrates
             self.warnings.append(f"could not read target columns for typed-value remapping: {e}")
-            return lookups, users, multi_lookups, multi_users, taxonomy
+            return lookups, users, multi_lookups, multi_users, taxonomy, multi_choices
         by_id = {normalize_guid(getattr(field, "id", None)): getattr(field, "internal_name", None) for field in fields}
         for field in fields:
             internal_name = getattr(field, "internal_name", None)
@@ -1407,7 +1492,9 @@ class SharePointListTarget:
                         multi_lookups[internal_name] = list_id
                     else:
                         lookups[internal_name] = list_id
-        return lookups, users, multi_lookups, multi_users, taxonomy
+            elif _is_multi_choice_column(field):
+                multi_choices.add(internal_name)
+        return lookups, users, multi_lookups, multi_users, taxonomy, multi_choices
 
     def _lookup_index(self, target_list_id: str) -> tuple[dict[int, int], dict[int, int]]:
         """``(source id -> target id, target id -> source id)`` for a referenced list."""
@@ -1659,6 +1746,22 @@ class SharePointListTarget:
                 mapped_logins.append(logins.get(user_id, value) if user_id is not None else value)
             properties[key] = mapped_logins
 
+    def _canonicalize_multi_choices(self, properties: dict) -> None:
+        """Reduce a read-back multi-choice cell to the bare list the source records.
+
+        A live read returns the selected values as a positional mapping
+        (``{0: "red", 1: "green"}``); the source checksum holds a bare list, so the
+        two are only comparable after the same projection.
+        """
+        for internal_name in self._multi_choice_columns():
+            if internal_name not in properties:
+                continue
+            values = _multi_values(properties.get(internal_name))
+            if values:
+                properties[internal_name] = values
+            else:
+                properties.pop(internal_name, None)
+
     def _write_attachment(self, item: MigrationItem, payload: object) -> None:
         if not self._identity_field:
             raise NotImplementedError("attachments need the identity column, which could not be created")
@@ -1770,6 +1873,7 @@ class SharePointListTarget:
         properties = _canonicalize_taxonomy_record(dict(target_item.properties))
         self._canonicalize_lookups(properties)
         self._canonicalize_users(properties)
+        self._canonicalize_multi_choices(properties)
         extra = {self._identity_field} if self._identity_field else set()
         # The hidden taxonomy note companion is not part of the source's portable
         # content; it is verified through the term ids on the column itself.

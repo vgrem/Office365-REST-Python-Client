@@ -259,6 +259,53 @@ def test_list_source_drops_non_scalar_values_and_warns():
     assert any("non-scalar" in w for w in source.warnings)
 
 
+def test_list_source_projects_multi_choice_values_as_a_list():
+    # A live read returns a multi-choice cell as a positional mapping
+    # (``{0: "red", 1: "green"}``), which the create path cannot write.
+    items = [_Item(1, {"Id": 1, "Title": "A", "Tags": {0: "red", 1: "green"}})]
+    fields = [_Field("Tags", "MultiChoice", allow_multiple_values=True)]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields)))
+
+    planned = source.list_items()
+    record = source.read(planned[0])
+
+    assert record["Tags"] == ["red", "green"]
+    assert not any("non-scalar" in w for w in source.warnings)
+
+
+def test_list_source_treats_a_mult_true_choice_column_as_single_value():
+    # Live-probed: ``Type="Choice" Mult="TRUE"`` stores ONE value in a single
+    # ``nvarchar`` slot (an array write is rejected), so its schema ``Mult`` flag
+    # must not make the projection wrap it in a collection.
+    items = [_Item(1, {"Id": 1, "Title": "A", "Tags": "green"})]
+    fields = [_Field("Tags", "Choice", schema_xml='<Field Type="Choice" Mult="TRUE"/>')]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields)))
+
+    planned = source.list_items()
+
+    assert source.read(planned[0])["Tags"] == "green"
+
+
+def test_list_source_keeps_a_single_value_choice_scalar():
+    items = [_Item(1, {"Id": 1, "Title": "A", "Status": "open"})]
+    fields = [_Field("Status", "Choice", allow_multiple_values=False)]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields)))
+
+    planned = source.list_items()
+
+    assert source.read(planned[0])["Status"] == "open"
+
+
+def test_list_source_drops_an_empty_multi_choice_selection():
+    items = [_Item(1, {"Id": 1, "Title": "A", "Tags": {}})]
+    fields = [_Field("Tags", "MultiChoice", allow_multiple_values=True)]
+    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields)))
+
+    planned = source.list_items()
+
+    assert "Tags" not in source.read(planned[0])
+
+
 def test_list_source_captures_attachments_after_records():
     attachment = _Attachment("spec.txt", b"hello")
     items = [
@@ -626,6 +673,44 @@ def test_list_target_content_checksum_matches_source_for_equal_content():
 
     assert checksum == _content_checksum({"Title": "Alpha", "Quantity": 3})
     assert row.get_calls == 1
+
+
+def test_list_target_wraps_multi_choice_values_for_a_create():
+    # A create wants the ``{"results": [...]}`` wrapper; the bare list the source
+    # records is what a MERGE update accepts.
+    fields = [_Field("Tags", "MultiChoice", allow_multiple_values=True)]
+    target_list = _TargetList(fields=fields)
+    target = SharePointListTarget(cast("SPList", target_list))
+
+    target.write(MigrationItem("Docs/1", "1", item_type="record"), {"Title": "A", "Tags": ["red", "green"]})
+
+    assert target_list.queued == [
+        {"Title": "A", "Tags": {"results": ["red", "green"]}, DEFAULT_LIST_IDENTITY_FIELD: "1"}
+    ]
+
+
+def test_list_target_content_checksum_compares_multi_choice_values():
+    # The source records a bare list while the target reads a positional mapping;
+    # both must project to the same content or every run reports a false mismatch.
+    row = _TargetRow(10, "1", properties={"Title": "Alpha", "Tags": {0: "red", 1: "green"}})
+    fields = [_Field("Tags", "MultiChoice", allow_multiple_values=True)]
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row], fields=fields)))
+
+    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
+
+    assert checksum == _content_checksum({"Title": "Alpha", "Tags": ["red", "green"]})
+
+
+def test_list_target_content_checksum_detects_lost_multi_choice_values():
+    # The defect this guards: a dropped multi-choice value was invisible to
+    # verification because a positional mapping is not a checksummed scalar.
+    row = _TargetRow(10, "1", properties={"Title": "Alpha"})
+    fields = [_Field("Tags", "MultiChoice", allow_multiple_values=True)]
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row], fields=fields)))
+
+    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
+
+    assert checksum != _content_checksum({"Title": "Alpha", "Tags": ["red", "green"]})
 
 
 def test_list_target_content_checksum_detects_a_content_difference():
