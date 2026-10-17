@@ -2,6 +2,7 @@
 
 import hashlib
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 
 from office365.migration.session import MigrationSession
@@ -43,6 +44,10 @@ class _FakeList:
         self.allow_deletion = allow_deletion
         self.root_folder = _Folder()
         self.properties = {"Id": list_id if list_id is not None else _guid_for(title)}
+
+    @property
+    def id(self):
+        return self.properties["Id"]
 
     def get(self):
         return self
@@ -108,6 +113,10 @@ class _PageList:
         self.allow_deletion = True
         self.items = _PageItems(pages)
         self.properties = {"Id": _guid_for(title)}
+
+    @property
+    def id(self):
+        return self.properties["Id"]
 
 
 class _Web:
@@ -514,7 +523,10 @@ class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
             target_list="Documents",
         )
 
-        with mock.patch("office365.migration.sharepoint.resolvers._package_target", return_value=object()):
+        with mock.patch(
+            "office365.migration.sharepoint.resolvers._package_target",
+            return_value=SimpleNamespace(warnings=[]),
+        ):
             resolve_task(task, source, MigrationSettings(use_migration_api=True))
 
         # The package builder emits no columns/content types/views, so structure is

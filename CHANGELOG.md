@@ -31,7 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   client-side web parts a modern page serializes in its canvas; the resolver
   appends the note to `session.warnings()`. Pages and web parts are still **not**
   migrated (page transformation belongs to external tools), but the gap is now
-  explicit and reported instead of silent.
+  explicit and reported instead of silent. The canvas parsing is a base-library
+  helper — `office365.sharepoint.publishing.pages.canvas`
+  (`parse_canvas_controls`, `count_web_parts`) and `SitePage.web_part_count` — so
+  any inventory that reads `CanvasContent1` can count web parts without a
+  migration run.
 - **Web navigation replication:** the whole-site resolver now copies each web's
   **Quick Launch** and **top navigation bar** onto the target when
   `MigrationSettings.migrate_navigation` is on (the default). The new
@@ -325,6 +329,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   display name (falling back to `hint`, then `"(unnamed)"`).
 
 ### Changed
+- **`ViewCollection.create` / `ensure_view` annotate `view_type` as `int | str`.**
+  The parameter always accepted either an integer `ViewTypeKind` or its name (the
+  docstring said so, and the collection normalizes both), but the annotation said
+  `int` only. Passing a view's own `view_type` (a read returns the name) is now
+  type-correct; no runtime behaviour changed.
 - **`verify()` reports are more precise:** unexpected target items no longer
   masquerade as content `mismatches` — they are reported in the new
   `VerificationReport.extra` bucket, which (like `missing`) makes `ok` False.
@@ -367,6 +376,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Structure provisioning skipped a nameless content type instead of sending a
+  null name.** `provision_list_structure` handed the captured name straight to
+  `ContentTypeCollection.ensure`, so a capture without one would have posted a
+  null `Name` and been rejected by the server. Nameless content types are now left
+  out (like the base content types it already filters), and only named ones are
+  provisioned and reconciled.
 - **Taxonomy base-library fixes:** `TaxonomyField.create` no longer emits the
   containing list's id in the column schema. A `List=` attribute made SharePoint
   bind `LookupList` to the list itself, after which every taxonomy read failed with

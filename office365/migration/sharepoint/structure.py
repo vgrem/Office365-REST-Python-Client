@@ -38,11 +38,18 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from dataclasses import field as dc_field
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from office365.migration.map import ContentTypeMap
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.sharepoint.fields.builtin_field_name import SYSTEM_FIELD_NAMES
+
+if TYPE_CHECKING:
+    from office365.sharepoint.contenttypes.content_type import ContentType
+    from office365.sharepoint.contenttypes.fieldlinks.field_link import FieldLink
+    from office365.sharepoint.fields.field import Field
+    from office365.sharepoint.lists.list import List as SPList
+    from office365.sharepoint.views.view import View
 
 logger = logging.getLogger(__name__)
 
@@ -213,7 +220,7 @@ class ListStructure:
         )
 
 
-def capture_list_structure(sp_list: Any) -> ListStructure:
+def capture_list_structure(sp_list: SPList) -> ListStructure:
     """Read a SharePoint list's structure into a :class:`ListStructure` snapshot.
 
     Issues only GET requests. Loads the list's scalar properties, its columns,
@@ -231,11 +238,11 @@ def capture_list_structure(sp_list: Any) -> ListStructure:
     ).execute_query()
 
     structure = ListStructure(
-        title=getattr(sp_list, "title", None),
-        base_template=getattr(sp_list, "base_template", None),
-        base_type=getattr(sp_list, "base_type", None),
-        description=getattr(sp_list, "description", None),
-        content_types_enabled=getattr(sp_list, "content_types_enabled", None),
+        title=sp_list.title,
+        base_template=sp_list.base_template,
+        base_type=sp_list.base_type,
+        description=sp_list.description,
+        content_types_enabled=sp_list.content_types_enabled,
     )
 
     loaded_fields = sp_list.fields.select(list(_FIELD_SELECT)).get().execute_query()
@@ -256,7 +263,7 @@ def capture_list_structure(sp_list: Any) -> ListStructure:
     return structure
 
 
-def _is_capturable_field(field: Any) -> bool:
+def _is_capturable_field(field: Field) -> bool:
     """Only recreatable user columns — not built-in, framework, or hidden fields.
 
     Built-in/system fields are already present on any target list, and framework
@@ -264,19 +271,19 @@ def _is_capturable_field(field: Any) -> bool:
     labels, ...) cannot be recreated meaningfully. A list-scoped, deletable,
     visible column is what a user actually added.
     """
-    name = getattr(field, "internal_name", None)
+    name = field.internal_name
     if not name or name in SYSTEM_FIELD_NAMES:
         return False
-    if getattr(field, "from_base_type", None) is True:
+    if field.from_base_type is True:
         return False
-    if getattr(field, "can_be_deleted", None) is False:
+    if field.can_be_deleted is False:
         return False
-    return getattr(field, "hidden", None) is not True
+    return field.hidden is not True
 
 
-def _is_capturable_content_type(content_type: Any) -> bool:
+def _is_capturable_content_type(content_type: ContentType) -> bool:
     """Content types that carry useful, recreatable structure (non-hidden, identified)."""
-    return bool(getattr(content_type, "string_id", None)) and not getattr(content_type, "hidden", False)
+    return bool(content_type.string_id) and not content_type.hidden
 
 
 #: Content types in this length range are base types (Item ``0x01``, Document
@@ -370,7 +377,7 @@ def _taxonomy_allow_multiple(schema_xml: str) -> bool:
     return 'Type="TaxonomyFieldTypeMulti"' in schema_xml
 
 
-def _ensure_taxonomy_field(sp_list: Any, definition: FieldDefinition, warnings: List[str]) -> None:
+def _ensure_taxonomy_field(sp_list: SPList, definition: FieldDefinition, warnings: List[str]) -> None:
     """Recreate a managed-metadata column bound to the same term set on the target.
 
     A taxonomy column cannot be replayed from its ``SchemaXml``: that schema names
@@ -407,66 +414,67 @@ def _is_provisionable_content_type(definition: ContentTypeDefinition) -> bool:
     return len(definition.string_id or "") >= _MIN_CUSTOM_CONTENT_TYPE_ID_LENGTH
 
 
-def _schema_for_copy(field: Any) -> Optional[str]:
-    """``SchemaXml`` stripped of origin attributes, when the field offers it."""
-    copier = getattr(field, "schema_xml_for_copy", None)
-    value: Any = copier() if callable(copier) else getattr(field, "schema_xml", None)
-    return value
+def _schema_for_copy(field: Field) -> Optional[str]:
+    """``SchemaXml`` stripped of origin attributes (``SourceID``/``Version``)."""
+    return field.schema_xml_for_copy()
 
 
-def _field_kind_int(field: Any) -> Optional[int]:
-    kind = getattr(field, "field_type_kind", None)
+def _field_kind_int(field: Field) -> Optional[int]:
+    # ``Field.field_type_kind`` is typed ``FieldType`` but a raw read leaves the
+    # JSON integer in the property bag, so accept either shape.
+    kind = field.field_type_kind
     if kind is None:
         return None
-    return int(getattr(kind, "value", kind))
+    value = getattr(kind, "value", kind)
+    return value if isinstance(value, int) else None
 
 
-def _field_definition(field: Any) -> FieldDefinition:
+def _field_definition(field: Field) -> FieldDefinition:
     return FieldDefinition(
         internal_name=field.internal_name or "",
-        title=getattr(field, "title", None),
+        title=field.title,
         field_type_kind=_field_kind_int(field),
-        type_as_string=getattr(field, "type_as_string", None),
+        type_as_string=field.type_as_string,
         schema_xml=_schema_for_copy(field),
-        required=getattr(field, "required", None),
-        hidden=getattr(field, "hidden", None),
-        read_only=getattr(field, "read_only_field", None),
-        from_base_type=getattr(field, "from_base_type", None),
-        can_be_deleted=getattr(field, "can_be_deleted", None),
-        group=getattr(field, "group", None),
-        description=getattr(field, "description", None),
+        required=field.required,
+        hidden=field.hidden,
+        read_only=field.read_only_field,
+        from_base_type=field.from_base_type,
+        can_be_deleted=field.can_be_deleted,
+        group=field.group,
+        description=field.description,
     )
 
 
-def _content_type_definition(content_type: Any, links: Any) -> ContentTypeDefinition:
+def _content_type_definition(content_type: ContentType, links: Iterable[FieldLink]) -> ContentTypeDefinition:
     return ContentTypeDefinition(
         string_id=content_type.string_id or "",
-        name=getattr(content_type, "name", None),
-        group=getattr(content_type, "group", None),
-        description=getattr(content_type, "description", None),
-        hidden=getattr(content_type, "hidden", None),
-        sealed=getattr(content_type, "sealed", None),
-        read_only=getattr(content_type, "read_only", None),
-        field_internal_names=[name for name in (getattr(link, "field_internal_name", None) for link in links) if name],
+        name=content_type.name,
+        group=content_type.group,
+        description=content_type.description,
+        hidden=content_type.hidden,
+        sealed=content_type.sealed,
+        read_only=content_type.read_only,
+        field_internal_names=[name for name in (link.field_internal_name for link in links) if name],
     )
 
 
-def _view_definition(view: Any, field_names: List[Any]) -> ViewDefinition:
+def _view_definition(view: View, field_names: Iterable[str]) -> ViewDefinition:
     return ViewDefinition(
         title=view.title or "",
-        view_type=getattr(view, "view_type", None),
-        row_limit=getattr(view, "row_limit", None),
-        paged=getattr(view, "paged", None),
-        hidden=getattr(view, "hidden", None),
-        default_view=getattr(view, "default_view", None),
-        personal_view=getattr(view, "personal_view", None),
-        view_query=getattr(view, "view_query", None),
+        view_type=view.view_type,
+        row_limit=view.row_limit,
+        paged=view.paged,
+        hidden=view.hidden,
+        default_view=view.default_view,
+        personal_view=view.personal_view,
+        view_query=view.view_query,
         field_internal_names=[name for name in field_names if name],
     )
 
 
 def provision_list_structure(
-    sp_list: Any,
+    sp_list: SPList,
     structure: ListStructure,
     *,
     on_conflict: str = "skip",
@@ -535,27 +543,26 @@ def provision_list_structure(
             logger.warning(warning)
             warnings.append(warning)
             continue
+        assert schema_xml is not None  # a skipped lookup always names its unresolved list id
         sp_list.fields.ensure_xml(schema_xml, definition.internal_name)
 
     if taxonomy_definitions:
         # Executes the queued scalar column creates, then loads the resulting fields
         # so an already-present taxonomy column is not recreated (which would add a
         # duplicate hidden note field and a second column with the same name).
-        existing = {
-            field.internal_name
-            for field in sp_list.fields.get().execute_query()
-            if getattr(field, "internal_name", None)
-        }
+        existing = {field.internal_name for field in sp_list.fields.get().execute_query() if field.internal_name}
         for definition in taxonomy_definitions:
             if definition.internal_name in existing:
                 continue
             _ensure_taxonomy_field(sp_list, definition, warnings)
         sp_list.execute_query()
 
-    provisionable = [item for item in structure.content_types if _is_provisionable_content_type(item)]
-    for definition in provisionable:
+    provisionable = [
+        (item.name, item) for item in structure.content_types if item.name and _is_provisionable_content_type(item)
+    ]
+    for name, definition in provisionable:
         sp_list.content_types.ensure(
-            definition.name,
+            name,
             definition.description,
             definition.group,
             content_type_id=definition.string_id,
@@ -574,8 +581,8 @@ def provision_list_structure(
         # created) content types so their field links can be reconciled and item
         # content-type ids can be rewritten.
         loaded = {ct.name: ct for ct in sp_list.content_types.get().execute_query() if ct.name}
-        for definition in provisionable:
-            target = loaded.get(definition.name)
+        for name, definition in provisionable:
+            target = loaded.get(name)
             if target is not None and definition.field_internal_names:
                 warnings.extend(_reconcile_field_links(target, definition.field_internal_names, available))
         if content_type_map is not None:
@@ -596,18 +603,18 @@ def provision_list_structure(
     return warnings
 
 
-def _ensure_content_types_enabled(sp_list: Any) -> None:
+def _ensure_content_types_enabled(sp_list: SPList) -> None:
     """Turn on content types on the list, only when it is currently off."""
 
     def _enable(_: Any) -> None:
-        if getattr(sp_list, "content_types_enabled", None) is not True:
+        if sp_list.content_types_enabled is not True:
             sp_list.set_property("ContentTypesEnabled", True)
             sp_list.update()
 
     sp_list.ensure_property("ContentTypesEnabled").after_execute(_enable)
 
 
-def _reconcile_field_links(content_type: Any, internal_names: List[str], available: set[str]) -> List[str]:
+def _reconcile_field_links(content_type: ContentType, internal_names: List[str], available: set[str]) -> List[str]:
     """Add any missing field links to a content type and restore their order.
 
     Only columns in ``available`` (the captured user columns) or already linked

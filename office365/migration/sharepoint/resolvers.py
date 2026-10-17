@@ -22,7 +22,7 @@ sub-collections resolve against the context root otherwise).
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Iterable, Sequence
+from typing import TYPE_CHECKING, Iterable, Sequence, Union
 
 from office365.migration.adapters.filesystem import FileSystemSource
 from office365.migration.map import ContentTypeMap
@@ -41,10 +41,22 @@ from office365.migration.sharepoint.structure import (
     provision_list_structure,
 )
 from office365.migration.tasks import FILE_SHARE, SHAREPOINT, MigrationTask
+from office365.sharepoint.lists.base_type import BaseType
+from office365.sharepoint.lists.templates.type import ListTemplateType
 from office365.sharepoint.webs.creation_information import WebCreationInformation
 
 if TYPE_CHECKING:
     from office365.migration.settings import MigrationSettings
+    from office365.migration.sharepoint.package_target import SharePointPackageTarget
+    from office365.sharepoint.client_context import ClientContext
+    from office365.sharepoint.folders.folder import Folder
+    from office365.sharepoint.lists.list import List as SPList
+    from office365.sharepoint.webs.web import Web
+
+    #: The adapter pairs a resolver builds. A file-share source still targets a
+    #: SharePoint list/library; only the server-side package path differs.
+    Source = Union[FileSystemSource, SharePointLibrarySource, SharePointListSource]
+    Target = Union[SharePointLibraryTarget, SharePointListTarget, SharePointPackageTarget]
 
 logger = logging.getLogger(__name__)
 
@@ -57,34 +69,34 @@ _SYSTEM_BASE_TEMPLATES = frozenset({112, 113, 114, 115, 116, 117, 118, 119, 121,
 
 #: ``SPBaseType.DocumentLibrary`` — libraries hold files; everything else is a
 #: record list.
-_DOCUMENT_LIBRARY = 1
+_DOCUMENT_LIBRARY = BaseType.DocumentLibrary.value
 
 
-def is_document_library(sp_list: Any) -> bool:
+def is_document_library(sp_list: SPList) -> bool:
     """Whether a SharePoint list is a document library (holds files, not records)."""
     return sp_list.base_type == _DOCUMENT_LIBRARY
 
 
-def is_migratable_list(sp_list: Any) -> bool:
+def is_migratable_list(sp_list: SPList) -> bool:
     """Whether a list/library takes part in a whole-site migration.
 
     Skips hidden lists, SharePoint infrastructure templates, and system lists
     that cannot be deleted (e.g. ``User Information``).
     """
-    if getattr(sp_list, "hidden", False):
+    if sp_list.hidden:
         return False
-    if getattr(sp_list, "allow_deletion", None) is False:
+    if sp_list.allow_deletion is False:
         return False
-    return getattr(sp_list, "base_template", None) not in _SYSTEM_BASE_TEMPLATES
+    return sp_list.base_template not in _SYSTEM_BASE_TEMPLATES
 
 
 def resolve_task(
     task: MigrationTask,
-    context: Any,
+    context: ClientContext,
     settings: "MigrationSettings | None" = None,
     *,
     provision_structure: bool = True,
-) -> tuple[Any, Any]:
+) -> tuple[Source, Target]:
     """Return a single ``(source, target)`` adapter pair for a task descriptor.
 
     Use :func:`resolve_site_task` for ``migrate_all`` / whole-site tasks. For a
@@ -105,7 +117,7 @@ def resolve_task(
 
 def resolve_site_task(
     task: MigrationTask,
-    context: Any,
+    context: ClientContext,
     settings: "MigrationSettings | None" = None,
     *,
     include: Sequence[str] | None = None,
@@ -115,7 +127,7 @@ def resolve_site_task(
     preserve_permissions: bool = False,
     migrate_navigation: bool = False,
     warnings: list[str] | None = None,
-) -> list[tuple[Any, Any]]:
+) -> list[tuple[Source, Target]]:
     """Resolve a whole-site task into one ``(source, target)`` pair per list.
 
     Walks every migratable list and document library on the source site, pairs it
@@ -163,7 +175,7 @@ def resolve_site_task(
     include_titles = set(include) if include else None
     exclude_titles = set(exclude) if exclude else set()
 
-    pairs: list[tuple[Any, Any]] = []
+    pairs: list[tuple[Source, Target]] = []
     _resolve_web(
         source_context,
         target_context,
@@ -179,7 +191,7 @@ def resolve_site_task(
     return pairs
 
 
-def _report_page_handoff(source_lists: Iterable[Any], source_web: Any, warnings: list[str]) -> None:
+def _report_page_handoff(source_lists: Iterable[SPList], source_web: Web, warnings: list[str]) -> None:
     """Append a handoff note for the page libraries the adapters skip (best-effort)."""
     try:
         note = page_handoff_note(detect_page_handoff(source_lists))
@@ -191,8 +203,8 @@ def _report_page_handoff(source_lists: Iterable[Any], source_web: Any, warnings:
 
 
 def _resolve_web(
-    source_context: Any,
-    target_context: Any,
+    source_context: ClientContext,
+    target_context: ClientContext,
     include_titles: set[str] | None,
     exclude_titles: set[str],
     provision_structure: bool,
@@ -200,7 +212,7 @@ def _resolve_web(
     preserve_permissions: bool,
     migrate_navigation: bool,
     warnings: list[str],
-    pairs: list[tuple[Any, Any]],
+    pairs: list[tuple[Source, Target]],
 ) -> None:
     """Resolve one web's lists, then recurse into its subsites when requested."""
     if preserve_permissions:
@@ -213,13 +225,13 @@ def _resolve_web(
             apply_navigation(source_context.web, target_context.web, warnings)
         except Exception as e:  # noqa: BLE001 — navigation is best-effort; never abort list resolution
             warnings.append(f"navigation replication failed for {_web_url(source_context.web)}: {e}")
-    source_lists: Iterable[Any] = source_context.web.lists.get().execute_query()
+    source_lists: Iterable[SPList] = source_context.web.lists.get().execute_query()
     # A page library (Site Pages, wiki/publishing pages) holds .aspx pages, not
     # documents; the adapters skip it, so report it as an explicit handoff.
     _report_page_handoff(source_lists, source_context.web, warnings)
-    selected: list[Any] = []
+    selected: list[SPList] = []
     for source_list in source_lists:
-        title = getattr(source_list, "title", None)
+        title = source_list.title
         if not title or title in exclude_titles:
             continue
         if include_titles is not None and title not in include_titles:
@@ -238,8 +250,8 @@ def _resolve_web(
     # still be remapped instead of being dropped.
     targets_by_title = _target_list_ids_by_title(target_context.web)
     for source_list in source_lists:
-        source_id = normalize_guid(_property(source_list, "Id"))
-        title = getattr(source_list, "title", None)
+        source_id = normalize_guid(source_list.id)
+        title = source_list.title
         target_id = targets_by_title.get(title) if title else None
         if source_id and target_id and source_id not in list_id_map:
             list_id_map[source_id] = target_id
@@ -257,7 +269,7 @@ def _resolve_web(
     if not child_webs:
         return
     if not include_subwebs:
-        names = [getattr(web, "title", None) or _web_identity(web)[0] for web in child_webs]
+        names = [web.title or _web_identity(web)[0] for web in child_webs]
         note = (
             f"{len(child_webs)} subsite(s) were not migrated (pass include_subwebs=True to "
             f"include them): {', '.join(names)}"
@@ -282,7 +294,7 @@ def _resolve_web(
 
 
 def _provision_structure(
-    source_list: Any, target_list: Any, list_id_map: dict[str, str] | None = None
+    source_list: SPList, target_list: SPList, list_id_map: dict[str, str] | None = None
 ) -> tuple[ContentTypeMap, list[str]]:
     """Capture the source list structure and replay it onto the target list.
 
@@ -307,23 +319,23 @@ def _provision_structure(
     entries: dict[str, str] = {}
     warnings: list[str] = []
     for warning in provision_list_structure(target_list, structure, content_type_map=entries, list_id_map=list_id_map):
-        logger.warning("list %r: %s", getattr(source_list, "title", None), warning)
+        logger.warning("list %r: %s", source_list.title, warning)
         warnings.append(warning)
     return ContentTypeMap(entries), warnings
 
 
-def _list_id_map_from_pairs(resolved: Sequence[tuple[Any, Any]]) -> dict[str, str]:
+def _list_id_map_from_pairs(resolved: Sequence[tuple[SPList, SPList]]) -> dict[str, str]:
     """Normalized source->target list ids for the lists resolved for one web."""
     result: dict[str, str] = {}
     for source_list, target_list in resolved:
-        source_id = normalize_guid(_property(source_list, "Id"))
-        target_id = normalize_guid(_property(target_list, "Id"))
+        source_id = normalize_guid(source_list.id)
+        target_id = normalize_guid(target_list.id)
         if source_id and target_id:
             result[source_id] = target_id
     return result
 
 
-def _list_id_map(source_web: Any, target_web: Any) -> dict[str, str]:
+def _list_id_map(source_web: Web, target_web: Web) -> dict[str, str]:
     """Match lists across two webs by title, keyed by normalized source list id.
 
     Used by the single-list resolver, which only ever provisions one list and so
@@ -334,44 +346,33 @@ def _list_id_map(source_web: Any, target_web: Any) -> dict[str, str]:
     targets_by_title = _target_list_ids_by_title(target_web)
     result: dict[str, str] = {}
     for source_list in source_web.lists.get().execute_query():
-        source_id = normalize_guid(_property(source_list, "Id"))
-        title = getattr(source_list, "title", None)
+        source_id = normalize_guid(source_list.id)
+        title = source_list.title
         target_id = targets_by_title.get(title) if title else None
         if source_id and target_id:
             result[source_id] = target_id
     return result
 
 
-def _target_list_ids_by_title(target_web: Any) -> dict[str, str]:
+def _target_list_ids_by_title(target_web: Web) -> dict[str, str]:
     """Normalized target list ids keyed by list title for one target web."""
     result: dict[str, str] = {}
     for target_list in target_web.lists.get().execute_query():
-        title = getattr(target_list, "title", None)
-        target_id = normalize_guid(_property(target_list, "Id"))
+        title = target_list.title
+        target_id = normalize_guid(target_list.id)
         if title and target_id:
             result[title] = target_id
     return result
 
 
-def _property(obj: Any, name: str) -> Any:
-    properties = getattr(obj, "properties", None)
-    return properties.get(name) if properties is not None else None
-
-
-def _attach_warnings(target: Any, warnings: list[str]) -> None:
+def _attach_warnings(target: Target, warnings: list[str]) -> None:
     """Record structure-provisioning warnings on the target adapter for the session."""
-    if not warnings:
-        return
-    bucket = getattr(target, "warnings", None)
-    if bucket is None:
-        target.warnings = list(warnings)
-    else:
-        bucket.extend(warnings)
+    target.warnings.extend(warnings)
 
 
 def _list_adapters(
-    source_list: Any, target_list: Any, *, content_type_map: ContentTypeMap | None = None
-) -> tuple[Any, Any]:
+    source_list: SPList, target_list: SPList, *, content_type_map: ContentTypeMap | None = None
+) -> tuple[Source, Target]:
     """Build the source/target adapter pair for one resolved list/library."""
     if is_document_library(source_list):
         source = SharePointLibrarySource(source_list.root_folder, sp_list=source_list)
@@ -383,14 +384,17 @@ def _list_adapters(
     return source, target
 
 
-def _ensure_target_list(context: Any, source_list: Any) -> Any:
+def _ensure_target_list(context: ClientContext, source_list: SPList) -> SPList:
     """The target list matching ``source_list``'s title, created (type only) if absent."""
-    target = context.web.lists.ensure_list(source_list.title, template_type=_template_type(source_list))
+    title = source_list.title
+    if not title:
+        raise ValueError("cannot resolve a target list for a source list without a title")
+    target = context.web.lists.ensure_list(title, template_type=_template_type(source_list))
     target.execute_query()
     return target
 
 
-def _ensure_target_web(parent_context: Any, source_web: Any) -> tuple[Any, Any]:
+def _ensure_target_web(parent_context: ClientContext, source_web: Web) -> tuple[Web, ClientContext]:
     """The target subsite mirroring ``source_web`` (created if absent), plus its context.
 
     Returns a ``(target_web, target_context)`` pair; ``target_context`` is rooted at
@@ -407,34 +411,31 @@ def _ensure_target_web(parent_context: Any, source_web: Any) -> tuple[Any, Any]:
     return created, _context_for(parent_context, created_url)
 
 
-def _web_identity(web: Any) -> tuple[str, str, str]:
+def _web_identity(web: Web) -> tuple[str, str, str]:
     """A web's URL leaf, display title and template (REST-creation inputs)."""
     raw = _web_url(web)
     leaf = raw.rstrip("/").rsplit("/", 1)[-1]
-    title = getattr(web, "title", None) or leaf
-    template = getattr(web, "web_template", None) or "STS#3"
+    title = web.title or leaf
+    template = web.web_template or "STS#3"
     return leaf, title, template
 
 
-def _web_url(web: Any) -> str:
+def _web_url(web: Web) -> str:
     """A web's absolute URL, or its server-relative URL when only that is loaded."""
     for name in ("Url", "ServerRelativeUrl"):
-        value = web.get_property(name) if hasattr(web, "get_property") else None
+        value = web.get_property(name)
         if value:
-            return value
-    value = getattr(web, "server_relative_url", None) or getattr(web, "url", None)
-    return value or ""
+            return str(value)
+    return web.server_relative_url or web.url or ""
 
 
-def _web_leaf(web: Any) -> str:
+def _web_leaf(web: Web) -> str:
     """A web's URL leaf, case-folded, for identity matching across tenants."""
     return _web_identity(web)[0].casefold()
 
 
-def _template_type(source_list: Any) -> Any:
-    from office365.sharepoint.lists.templates.type import ListTemplateType
-
-    value = getattr(source_list, "base_template", None)
+def _template_type(source_list: SPList) -> ListTemplateType:
+    value = source_list.base_template
     if value is not None:
         try:
             return ListTemplateType(value)
@@ -443,7 +444,9 @@ def _template_type(source_list: Any) -> Any:
     return ListTemplateType.DocumentLibrary if is_document_library(source_list) else ListTemplateType.GenericList
 
 
-def _file_share(task: MigrationTask, context: Any, settings: "MigrationSettings | None") -> tuple[Any, Any]:
+def _file_share(
+    task: MigrationTask, context: ClientContext, settings: "MigrationSettings | None"
+) -> tuple[Source, Target]:
     if not task.file_share_source:
         raise ValueError("a file-share task requires file_share_source")
     source = FileSystemSource(task.file_share_source)
@@ -454,11 +457,11 @@ def _file_share(task: MigrationTask, context: Any, settings: "MigrationSettings 
 
 def _sharepoint(
     task: MigrationTask,
-    context: Any,
+    context: ClientContext,
     settings: "MigrationSettings | None",
     *,
     provision_structure: bool = True,
-) -> tuple[Any, Any]:
+) -> tuple[Source, Target]:
     source_context = _context_for(context, task.sharepoint_source_site_url)
     target_context = _context_for(context, task.target_site_url)
     source_list = source_context.web.get_list_by_title(task.source_list).get().execute_query()
@@ -478,13 +481,13 @@ def _sharepoint(
     return source, target
 
 
-def _list_source(source_list: Any) -> Any:
+def _list_source(source_list: SPList) -> Source:
     if is_document_library(source_list):
         return SharePointLibrarySource(source_list.root_folder, sp_list=source_list)
     return SharePointListSource(source_list)
 
 
-def _context_for(context: Any, url: str | None) -> Any:
+def _context_for(context: ClientContext, url: str | None) -> ClientContext:
     """The registered context, or an authenticated clone for another site URL.
 
     Source and target may live in different site collections of the same tenant;
@@ -499,7 +502,7 @@ def _same_site(a: str | None, b: str | None) -> bool:
     return (a or "").rstrip("/").casefold() == (b or "").rstrip("/").casefold()
 
 
-def _target_folder(context: Any, task: MigrationTask) -> tuple[Any, Any]:
+def _target_folder(context: ClientContext, task: MigrationTask) -> tuple[SPList, Folder]:
     """The target list and (when set) the relative target subfolder."""
     target_list = context.web.get_list_by_title(task.target_list).get().execute_query()
     folder = target_list.root_folder.get().execute_query()
@@ -511,13 +514,13 @@ def _target_folder(context: Any, task: MigrationTask) -> tuple[Any, Any]:
 
 def _build_target(
     task: MigrationTask,
-    context: Any,
+    context: ClientContext,
     settings,
-    target_list: Any,
-    folder: Any,
+    target_list: SPList,
+    folder: Folder,
     *,
     content_type_map: ContentTypeMap | None = None,
-) -> Any:
+) -> Target:
     if settings is not None and settings.use_migration_api:
         return _package_target(task, context, target_list)
     if is_document_library(target_list):
@@ -525,7 +528,7 @@ def _build_target(
     return SharePointListTarget(target_list, content_type_map=content_type_map)
 
 
-def _package_target(task: MigrationTask, context: Any, library: Any) -> Any:
+def _package_target(task: MigrationTask, context: ClientContext, library: SPList) -> SharePointPackageTarget:
     """The server-side Migration API target (provisions containers)."""
     from urllib.parse import urlparse
 
@@ -544,7 +547,7 @@ def _package_target(task: MigrationTask, context: Any, library: Any) -> Any:
         manifest_uri=containers.MetadataContainerUri,
         encryption_key=containers.EncryptionKey,
         site_url=context.base_url,
-        list_title=library.title,
+        list_title=library.title or "",
         list_url=root.server_relative_url,
         web_url=urlparse(context.base_url).path or "/",
         root_folder_id=root.unique_id,

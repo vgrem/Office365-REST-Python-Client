@@ -13,17 +13,19 @@ expected to carry additional built-in columns, content types and views, so
 (the REST API cannot attach a fresh column as a field link; see
 :func:`provision_list_structure`).
 
-The comparison is offline-testable: pass any object exposing the list
-``fields``/``content_types``/``views`` collections ``capture_list_structure``
-already reads.
+The comparison is offline-testable: :func:`capture_list_structure` performs the
+reads, so this module never talks to the server itself.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from office365.migration.sharepoint.structure import ListStructure, capture_list_structure
+
+if TYPE_CHECKING:
+    from office365.sharepoint.lists.list import List as SPList
 
 __all__ = ["StructureReport", "compare_list_structures", "verify_list_structure"]
 
@@ -65,7 +67,7 @@ class StructureReport:
         }
 
 
-def verify_list_structure(source_list: Any, target_list: Any) -> StructureReport:
+def verify_list_structure(source_list: SPList, target_list: SPList) -> StructureReport:
     """Capture both lists and report source structure missing on the target.
 
     Args:
