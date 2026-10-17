@@ -206,9 +206,27 @@ class _Web:
         self.fields = _WebCollectionView(fields or [])
         self.content_types = _WebCollectionView(content_types or [])
         self._props = {"Url": url} if url else {}
+        self._props.update({"Title": title, "Description": None})
+        self.written = {}
 
     def get_property(self, name):
         return self._props.get(name)
+
+    @property
+    def properties(self):
+        return self._props
+
+    def select(self, names):
+        self._selected = names
+        return self
+
+    def set_property(self, name, value):
+        self.written[name] = value
+        self._props[name] = value
+        return self
+
+    def update(self):
+        return self
 
     @property
     def url(self):

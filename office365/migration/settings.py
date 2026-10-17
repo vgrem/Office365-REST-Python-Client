@@ -2,9 +2,13 @@
 
 Mirrors the parameters of ``Microsoft.SharePoint.MigrationTool.PowerShell``'s
 ``Register-SPMTMigration`` cmdlet (snake-cased) and maps the subset the core
-enforces onto :class:`~office365.migration.base.MigrationOptions`. Settings that
-only apply to the SPMT Windows tool (``working_folder``, ``enable_multi_round``,
-...) are kept for parity/documentation and ignored by the core.
+enforces onto :class:`~office365.migration.base.MigrationOptions`.
+
+The surface is wider than what the library implements, and a knob that silently
+does nothing is a trap — a caller who sets ``skip_lists_with_name`` expects that
+list to be skipped. So every setting the engine does *not* honor is reported by
+:meth:`MigrationSettings.unhonored` (a session appends those notes to its
+warnings), which keeps the honest/unhonest distinction in one place.
 """
 
 from __future__ import annotations
@@ -14,6 +18,36 @@ from dataclasses import dataclass, field
 from office365.migration.base import MigrationOptions
 
 __all__ = ["MigrationSettings"]
+
+#: ``(field, the value the engine can honor, why anything else is not honored)``.
+#: A ``None`` "honored value" means *any* truthy value is unhonorable.
+_UNHONORED: tuple[tuple[str, object, str], ...] = (
+    ("migration_type", "Content", "workflows are never migrated — they are reported as a handoff"),
+    ("preserve_inheritance", True, "only items with a unique ACL are copied; inherited permissions stay inherited"),
+    ("include_hidden_files", True, "hidden files are copied like any other file"),
+    ("skip_sites_with_name", None, "subsites are filtered by include_subwebs only"),
+    ("skip_lists_with_name", None, "lists are filtered by the include/exclude arguments"),
+    ("skip_content_types_with_name", None, "content types are replayed wholesale per list"),
+    ("replacement_of_invalid_char", None, "invalid characters are not rewritten"),
+    (
+        "migrate_all_site_fields_and_content_types",
+        False,
+        "structure is replayed per list; site columns and site content types are not registered at web scope",
+    ),
+    ("migrate_term_groups", False, "a session does not migrate the term store (use export_tree/import_tree)"),
+    ("keep_all_versions", True, "every readable version is carried, with no cap"),
+    ("number_of_versions", 10, "the package carries every readable version, so a cap is not applied"),
+    ("automatic_user_mapping", True, "cross-tenant identity mapping is not implemented"),
+    ("user_mapping_file", None, "cross-tenant identity mapping is not implemented"),
+    ("lookup_reference_policy", 0, "lookups are remapped onto the migrated target list"),
+    ("working_folder", None, "the client-side path keeps no working folder"),
+    ("enable_multi_round", False, "multi-round runs are not implemented"),
+    ("scan_only", False, "use the assessment scanners for a read-only inventory"),
+    ("use_custom_azure_storage", False, "custom Azure storage is not wired into the package target"),
+    ("custom_azure_storage_account", None, "custom Azure storage is not wired into the package target"),
+    ("custom_azure_access_key", None, "custom Azure storage is not wired into the package target"),
+    ("delete_temp_files_when_migration_done", False, "no temporary files are kept"),
+)
 
 
 @dataclass
@@ -57,6 +91,30 @@ class MigrationSettings:
     migrate_pages: bool = True
     migrate_term_groups: bool = True
     lookup_reference_policy: int = 0
+
+    def unhonored(self) -> list[str]:
+        """The settings that ask for behavior this library does not implement.
+
+        One ready-to-print note per setting, so a run never reads as honoring a
+        knob it ignores (a session appends them to ``session.warnings()``). A
+        setting whose *default* is what the engine actually does is silent unless
+        it is changed; the modes the engine does honor (``migrate_site_settings``,
+        ``migrate_navigation``, ``migrate_pages``, ``duplicate_page_behavior``,
+        ``preserve_*``, ``skip_files_with_extension``, ``migrate_files_*_after``,
+        ``use_migration_api``) are not listed.
+        """
+        notes: list[str] = []
+        for name, honored, reason in _UNHONORED:
+            value = getattr(self, name)
+            if honored is None:
+                differs = bool(value)
+            elif isinstance(honored, str):
+                differs = str(value).strip().lower() != honored.lower()
+            else:
+                differs = value != honored
+            if differs:
+                notes.append(f"{name}={value!r} is not honored: {reason}")
+        return notes
 
     def to_options(self, **overrides) -> MigrationOptions:
         """Build :class:`MigrationOptions` from the settings (``overrides`` win)."""

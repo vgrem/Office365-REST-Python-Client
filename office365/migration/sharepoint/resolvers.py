@@ -41,6 +41,7 @@ from office365.migration.sharepoint.handoff import EXTERNAL_LIST_TEMPLATE, detec
 from office365.migration.sharepoint.navigation import apply_navigation
 from office365.migration.sharepoint.pages import DUPLICATE_RENAME, PageCopyReport, copy_site_pages
 from office365.migration.sharepoint.security import apply_site_security
+from office365.migration.sharepoint.site_settings import WebSettingsReport, apply_web_settings
 from office365.migration.sharepoint.structure import (
     capture_list_structure,
     compare_web_scope_structure,
@@ -141,6 +142,7 @@ def resolve_site_task(
     migrate_navigation: bool = False,
     migrate_pages: bool = True,
     duplicate_page_behavior: str = DUPLICATE_RENAME,
+    migrate_site_settings: bool = True,
     warnings: list[str] | None = None,
 ) -> list[tuple[Source, Target]]:
     """Resolve a whole-site task into one ``(source, target)`` pair per list.
@@ -182,6 +184,10 @@ def resolve_site_task(
         duplicate_page_behavior: What to do when a target page of that name
             already exists — ``RENAME`` (default, as SPMT), ``SKIP`` or
             ``OVERWRITE``.
+        migrate_site_settings: Copy each web's ``Title`` and ``Description`` onto
+            the target web when they differ (the ``PRESERVE_ALL_SETTINGS`` mode).
+            Branding (master page/theme/logo/CSS) and the site-collection and
+            regional settings stay out of scope and are reported.
         warnings: Optional sink for resolution-level notes (subsites skipped,
             classic pages, web parts, workflows, InfoPath forms and BCS external
             lists detected but not migrated).
@@ -210,6 +216,7 @@ def resolve_site_task(
         migrate_navigation,
         migrate_pages,
         duplicate_page_behavior,
+        migrate_site_settings,
         warnings if warnings is not None else [],
         pairs,
     )
@@ -247,6 +254,21 @@ def _report_handoff(
     warnings.extend(notes)
 
 
+def _apply_web_settings(
+    source_web: Web, target_web: Web, preserve: bool, warnings: list[str]
+) -> WebSettingsReport | None:
+    """Copy the web's Title/Description, reporting what a copy cannot carry."""
+    try:
+        report = apply_web_settings(source_web, target_web, preserve=preserve)
+    except Exception as e:  # noqa: BLE001 — site settings are best-effort; never abort resolution
+        warnings.append(f"site settings copy failed for {_web_url(target_web)}: {e}")
+        return None
+    note = report.summary()
+    if note:
+        warnings.append(note)
+    return report
+
+
 def _report_web_scope_structure(source_web: Web, target_web: Web, warnings: list[str]) -> None:
     """Append a note naming the web-scope structure the target web lacks (best-effort)."""
     try:
@@ -271,6 +293,7 @@ def _resolve_web(
     migrate_navigation: bool,
     migrate_pages: bool,
     duplicate_page_behavior: str,
+    preserve_site_settings: bool,
     warnings: list[str],
     pairs: list[tuple[Source, Target]],
 ) -> None:
@@ -285,6 +308,7 @@ def _resolve_web(
             apply_navigation(source_context.web, target_context.web, warnings)
         except Exception as e:  # noqa: BLE001 — navigation is best-effort; never abort list resolution
             warnings.append(f"navigation replication failed for {_web_url(source_context.web)}: {e}")
+    _apply_web_settings(source_context.web, target_context.web, preserve_site_settings, warnings)
     source_lists: Iterable[SPList] = source_context.web.lists.get().execute_query()
     # Modern site pages are copied; classic pages, web part data bindings,
     # workflows, InfoPath forms and BCS external lists are outside what a
@@ -359,6 +383,7 @@ def _resolve_web(
             migrate_navigation,
             migrate_pages,
             duplicate_page_behavior,
+            preserve_site_settings,
             warnings,
             pairs,
         )

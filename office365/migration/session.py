@@ -97,6 +97,7 @@ class MigrationSession:
         self._tasks: list[SessionTask] = []
         self._ids = itertools.count(1)
         self._warnings: list[str] = []
+        self._settings_noted = False
 
     # ── Cmdlets ──────────────────────────────────────────────────
 
@@ -135,6 +136,7 @@ class MigrationSession:
             from office365.migration.tasks import MigrationTask
 
             task = MigrationTask(**descriptor)
+        self._note_unhonored_settings()
         if task is not None:
             if task.migrate_all:
                 raise ValueError("use add_site_task() for a whole-site (migrate_all) task")
@@ -178,7 +180,11 @@ class MigrationSession:
         Subsites are detected but skipped unless ``include_subwebs`` is set; a note
         naming them is surfaced through :meth:`warnings` when they are skipped. Each
         web's modern site pages are copied unless ``settings.migrate_pages`` is
-        false; classic pages and web part data bindings are reported instead.
+        false; classic pages and web part data bindings are reported instead. Each
+        web's ``Title``/``Description`` are copied onto the target when they differ
+        (``settings.migrate_site_settings``, ``NONE`` to leave the target web alone);
+        branding and the site-collection/regional settings are reported, not
+        carried.
         """
         if task is None and descriptor:
             from office365.migration.tasks import MigrationTask
@@ -189,7 +195,9 @@ class MigrationSession:
         if self._context is None:
             raise ValueError("register a ClientContext first (session.register(context=ctx))")
         from office365.migration.sharepoint.resolvers import resolve_site_task
+        from office365.migration.sharepoint.site_settings import parse_site_settings_mode
 
+        self._note_unhonored_settings()
         effective = self._effective_options(options)
         pairs = resolve_site_task(
             task,
@@ -203,6 +211,9 @@ class MigrationSession:
             migrate_navigation=bool(self._settings and self._settings.migrate_navigation),
             migrate_pages=self._settings.migrate_pages if self._settings is not None else True,
             duplicate_page_behavior=(self._settings.duplicate_page_behavior if self._settings is not None else "RENAME"),
+            migrate_site_settings=parse_site_settings_mode(
+                self._settings.migrate_site_settings if self._settings is not None else None
+            ),
             warnings=self._warnings,
         )
         jobs: list[MigrationJob] = []
@@ -315,6 +326,19 @@ class MigrationSession:
         return [entry.job.delta for entry in self._tasks]
 
     # ── Helpers ──────────────────────────────────────────────────
+
+    def _note_unhonored_settings(self) -> None:
+        """Surface the settings that ask for behavior the engine does not implement.
+
+        ``MigrationSettings`` mirrors the SPMT cmdlet surface, which is wider than
+        what a client-side run can do (``skip_lists_with_name``, term groups,
+        multi-round, custom Azure storage …). Reporting them once per session keeps
+        a run from reading as honoring a knob it ignores.
+        """
+        if self._settings_noted or self._settings is None:
+            return
+        self._settings_noted = True
+        self._warnings.extend(self._settings.unhonored())
 
     def _effective_options(self, options: MigrationOptions | None) -> MigrationOptions | None:
         """Resolve the options for a new job: explicit > session > settings.

@@ -331,6 +331,27 @@ content through a server-side package, because the package builder does not emit
 columns, content types, or views today — the target's structure is still captured
 and replayed over REST first.
 
+**The settings surface is wider than the engine, and that is reported, not
+implied.** `MigrationSettings` mirrors the cmdlet, but a client-side run cannot do
+everything SPMT does — it does not migrate the term store, it cannot skip lists by
+name, it carries no cross-tenant user map and it has no multi-round or Azure
+storage plumbing. A knob that silently does nothing is a trap, so
+`MigrationSettings.unhonored()` returns one ready-to-print note per setting whose
+current value asks for behavior the engine does not implement (a setting whose
+default *is* what the engine does stays silent), and a session appends them to
+`session.warnings()` once:
+
+```python
+from office365.migration import MigrationSettings
+
+MigrationSettings(skip_lists_with_name="Archive").unhonored()
+# ['skip_lists_with_name=...'] plus the term-group default, which is never honored
+```
+
+Filter lists with the `include`/`exclude` arguments of `add_task`/`add_site_task`
+instead, and migrate a term store with `StoreManager.export_tree()` /
+`import_tree()`.
+
 ### Whole-site migration
 
 A `MigrationTask(migrate_all=True)` covers **every list and document library** on
@@ -540,6 +561,50 @@ back as `=IF(Title="",FALSE,TRUE)`), so `verify_list_structure` compares it with
 whitespace and brackets stripped and reports any other difference as a
 `settings_mismatch`.
 
+### Site settings
+
+Replaying a list's structure reproduces its columns, content types, views and
+container settings — never the web that hosts them, so without this a migrated
+site would keep the *target* web's identity where people actually read it (site
+header, site card, search results). The web-scope settings that are plain writable
+strings over REST are copied (one projected GET per side, then a single MERGE):
+
+- `Title`
+- `Description`
+
+Only **differing** values are written, so the copy is idempotent and a re-run does
+not bump the target web's metadata; an unset source value clears the target's
+(these properties reject `null`). Copy is on by default
+(`MigrationSettings.migrate_site_settings="PRESERVE_ALL_SETTINGS"`, or
+`--no-site-settings` in the example); `"NONE"` leaves the target web alone, and any
+other value raises rather than silently doing nothing.
+
+```python
+from office365.migration.sharepoint import apply_web_settings, verify_web_settings
+
+apply_web_settings(source_web, target_web)  # -> WebSettingsReport(applied={"Title": "team"})
+verify_web_settings(source_web, target_web)  # -> [] once the copy landed
+```
+
+The site-settings surface is **live-verified** on SharePoint Online: the copy wrote
+only the property that differed, a second run wrote nothing, `verify_web_settings`
+was clean afterwards and reported the drift again once the target was restored, and
+a subsite was copied the same way (including clearing a `Description` back to the
+source's empty one).
+
+What a web-settings copy leaves behind, by design:
+
+- **Branding** — master page, theme, `SiteLogoUrl`, alternate CSS. That is site
+  *design*, not content, and the logo URL points at a source-site asset whose copy
+  is not guaranteed. Hand-off.
+- **Site-collection and regional settings** — time zone, locale, quotas, sharing
+  capability, hub association. REST exposes no working write path (setting a
+  `TimeZone` id does not change the web's zone), so they are neither copied nor
+  attempted; the `site_settings` fidelity dimension carries that note.
+
+Each web is copied through **its own** context, so with `include_subwebs=True` a
+mirrored subsite also gets the source subsite's title and description.
+
 ### Site pages
 
 A *Site Pages* library (`base_template` 119) holds `.aspx` pages rather than
@@ -695,6 +760,7 @@ the shipped pairs' expected output.
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
 | Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and a file on an **un-published (minor) version** is copied as its draft — both reported as warnings, since the readable version is all REST exposes) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | navigation and pages are web concerns, not adapter concerns: the whole-site resolver copies quick launch/top nav (`migrate_navigation`) and modern site pages — canvas, title, description, layout, banner, promoted state — then publishes the ones the source had published (`migrate_pages`); classic pages are a handoff, and a serialized web part keeps the source list/library ids it binds to | same | same |
+| Site settings (web scope) | each web's `Title`/`Description` are copied onto the target web when they differ (`migrate_site_settings`); branding — master page, theme, logo, alternate CSS — and the site-collection/regional settings are not carried over REST | same | same |
 | Workflows / InfoPath forms / BCS external lists | not migrated (the resolver reports every association, InfoPath form and external list as a handoff) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
@@ -984,6 +1050,23 @@ are ignored — the owning list id, a lookup's target list, a taxonomy column's
 hidden note list, the column id and its storage column/ordinal — because a faithful
 re-create legitimately changes those. A formula is compared with brackets and
 whitespace stripped, the form its own read-back takes.
+
+### Verifying site settings
+
+A copied web title is a one-line check (read-only, two projected GETs):
+
+```python
+from office365.migration.sharepoint import verify_web_settings
+
+for note in verify_web_settings(source_web, target_web):
+    print(note)  # "site settings: …/sites/team_out Title is 'team_out', source has 'team'"
+```
+
+The example's post-run reconciliation calls it for every migrated web, so a run
+whose settings copy silently failed (an app principal without web write access,
+for instance) shows the difference instead of reading as a clean pass. Anything a
+copy cannot carry — branding, site-collection and regional settings — is named by
+the `site_settings` fidelity dimension rather than reported as drift.
 
 ### Verifying site pages
 

@@ -8,6 +8,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Each web's `Title` and `Description` are copied, and the settings a run
+  cannot honor are no longer silent.** Replaying a list's structure never touched
+  the *web* that hosts it, so a migrated site kept the target web's identity where
+  people read it (site header, site card, search results).
+  `office365.migration.sharepoint.site_settings` adds `apply_web_settings(source_web,
+  target_web)` — one projected GET per side, then a single MERGE of only the
+  properties that **differ** (so a re-run is a no-op and an unset source value
+  clears the target's, since these reject `null`) — plus the read-only
+  `verify_web_settings(source_web, target_web)` (one finding per property) and
+  `WebSettings` / `WebSettingsReport` / `parse_site_settings_mode`, all also
+  exported from `office365.migration.sharepoint`. The whole-site resolver copies
+  them per web (`resolve_site_task(..., migrate_site_settings=True)`, i.e.
+  `MigrationSettings.migrate_site_settings="PRESERVE_ALL_SETTINGS"`; `"NONE"` or
+  `migrate_site.py --no-site-settings` leaves the target web alone, and an unknown
+  mode raises instead of quietly doing nothing), through each web's own context so
+  a mirrored subsite gets the source subsite's values too, and a new
+  `site_settings` fidelity dimension reports `best_effort` with the reasons.
+  Branding (master page, theme, `SiteLogoUrl`, alternate CSS) and the
+  site-collection/regional settings stay out of scope and are named as such. The
+  other half of the same problem was the **knob facade**:
+  `MigrationSettings.unhonored()` now returns one ready-to-print note per setting
+  whose current value asks for behavior the engine does not implement (skip-by-name
+  filters, term groups, cross-tenant user mapping, multi-round, custom Azure
+  storage, an unset `migration_type`, …), and a session appends them to
+  `session.warnings()` once, so `skip_lists_with_name="Archive"` can no longer read
+  as honored. Live-verified on SharePoint Online: the copy wrote only the differing
+  property, a second run wrote nothing, `verify_web_settings` was clean afterwards
+  and named the drift again once the target was restored, and a subsite round-trip
+  cleared a stale `Description` back to the source's empty one.
 - **Modern site pages are copied, not just reported.** A *Site Pages* library
   (`base_template` 119) holds `.aspx` pages, so the item adapters never migrated
   it and the whole-site resolver only handed it off. Modern pages are reachable

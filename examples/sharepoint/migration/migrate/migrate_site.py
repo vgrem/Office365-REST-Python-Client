@@ -47,6 +47,11 @@ no target page is deleted. Classic pages (wiki/publishing pages) cannot be copie
 — they need page transformation — so they are reported as a handoff, as are the
 client-side web parts whose data bindings point at the source.
 
+Each web's ``Title`` and ``Description`` are copied onto the target web when they
+differ (``--no-site-settings`` to leave the target web's own values). Branding
+(master page, theme, logo, alternate CSS) and the site-collection/regional
+settings are outside a client-side content migration and are reported as such.
+
 Each web's modern site pages are copied too (``--no-pages`` to only report them):
 the page is created through the ``sitepages`` endpoint, its canvas and page
 metadata are written, and it is published when the source page was. A page whose
@@ -120,6 +125,11 @@ def main():
         help="only report the source's modern site pages instead of copying them",
     )
     parser.add_argument(
+        "--no-site-settings",
+        action="store_true",
+        help="leave the target web's own Title/Description instead of copying the source's",
+    )
+    parser.add_argument(
         "--duplicate-pages",
         choices=["RENAME", "SKIP", "OVERWRITE"],
         default="RENAME",
@@ -181,6 +191,7 @@ def main():
         preserve_authorship=preserve_authorship,
         preserve_permissions=preserve_permissions,
         migrate_pages=not args.no_pages,
+        migrate_site_settings="NONE" if args.no_site_settings else "PRESERVE_ALL_SETTINGS",
         duplicate_page_behavior=args.duplicate_pages,
     )
     session = MigrationSession().register(context=ctx, settings=fidelity)
@@ -224,6 +235,8 @@ def _report_verification(session, source_ctx, ctx, preserve_permissions: bool, s
         for note in report.unverifiable[:3]:
             print(f"      unverified: {note}")
     _verify_web_scope(source_ctx, ctx, preserve_permissions, settings.migrate_navigation)
+    if settings.migrate_site_settings != "NONE":
+        _verify_site_settings(source_ctx, ctx)
     if settings.migrate_pages:
         _verify_pages(source_ctx, ctx)
 
@@ -263,6 +276,14 @@ def _verify_site_security(source_ctx, ctx) -> None:
 
     for note in verify_site_security(source_ctx.web, ctx.web):
         print(f"  site: {note}")
+
+
+def _verify_site_settings(source_ctx, ctx) -> None:
+    """Reconcile the target web's Title/Description against the source."""
+    from office365.migration.sharepoint.site_settings import verify_web_settings
+
+    for note in verify_web_settings(source_ctx.web, ctx.web):
+        print(f"  {note}")
 
 
 def _verify_pages(source_ctx, ctx) -> None:
