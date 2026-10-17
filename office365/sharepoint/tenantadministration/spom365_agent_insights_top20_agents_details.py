@@ -19,3 +19,7 @@ class SPOM365AgentInsightsTop20AgentsDetails(ClientValue):
     IncludeOperations: bool | None = None
 
     Operations: str | None = None
+
+    AgentPlatform: str | None = None
+
+    IncludeAgentPlatform: bool | None = None

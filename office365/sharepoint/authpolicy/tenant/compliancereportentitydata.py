@@ -19,3 +19,8 @@ class SPTenantIBPolicyComplianceReportEntityData(Entity):
     def update_onedrive_segments(self) -> Optional[bool]:
         """Gets the UpdateOneDriveSegments property"""
         return self.properties.get("UpdateOneDriveSegments", None)
+
+    @property
+    def update_user_owned_container_segments(self) -> Optional[bool]:
+        """Gets the UpdateUserOwnedContainerSegments property"""
+        return self.properties.get("UpdateUserOwnedContainerSegments", None)

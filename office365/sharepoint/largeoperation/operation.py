@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import Optional
 
+from office365.runtime.pollable import PollableOperation
 from office365.sharepoint.entity import Entity
 
 
-class SPLargeOperation(Entity):
+class SPLargeOperation(PollableOperation, Entity):
     @property
     def entity_type_name(self):
         return "Microsoft.SharePoint.LargeOperation.SPLargeOperation"

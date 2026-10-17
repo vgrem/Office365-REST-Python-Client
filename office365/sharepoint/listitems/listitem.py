@@ -1260,3 +1260,50 @@ class ListItem(SecurableObject):
         )
         self.context.add_query(qry)
         return return_type
+
+    def set_compliance_tag_v2(
+        self,
+        compliance_tag: str,
+        is_tag_policy_hold: bool,
+        is_tag_policy_record: bool,
+        is_event_based_tag: bool,
+        is_tag_super_lock: bool,
+        is_unlocked_as_default: bool,
+        do_not_enforce_tag_policy_hold_for_versions: bool,
+    ) -> Self:
+        """SetComplianceTagV2 operation.
+
+        Args:
+            compliance_tag (str):
+                complianceTag parameter
+            is_tag_policy_hold (bool):
+                isTagPolicyHold parameter
+            is_tag_policy_record (bool):
+                isTagPolicyRecord parameter
+            is_event_based_tag (bool):
+                isEventBasedTag parameter
+            is_tag_super_lock (bool):
+                isTagSuperLock parameter
+            is_unlocked_as_default (bool):
+                isUnlockedAsDefault parameter
+            do_not_enforce_tag_policy_hold_for_versions (bool):
+                doNotEnforceTagPolicyHoldForVersions parameter
+        """
+        qry = ServiceOperationQuery(
+            self,
+            "SetComplianceTagV2",
+            None,
+            {
+                "complianceTag": compliance_tag,
+                "isTagPolicyHold": is_tag_policy_hold,
+                "isTagPolicyRecord": is_tag_policy_record,
+                "isEventBasedTag": is_event_based_tag,
+                "isTagSuperLock": is_tag_super_lock,
+                "isUnlockedAsDefault": is_unlocked_as_default,
+                "doNotEnforceTagPolicyHoldForVersions": do_not_enforce_tag_policy_hold_for_versions,
+            },
+            None,
+            None,
+        )
+        self.context.add_query(qry)
+        return self

@@ -46,3 +46,18 @@ class AuthFileDetonationRequestResponse(Entity):
     def spo_region(self) -> Optional[str]:
         """Gets the spoRegion property"""
         return self.properties.get("spoRegion", None)
+
+    @property
+    def auth_z_failure_reason(self) -> Optional[str]:
+        """Gets the authZFailureReason property"""
+        return self.properties.get("authZFailureReason", None)
+
+    @property
+    def auth_z_result(self) -> Optional[str]:
+        """Gets the authZResult property"""
+        return self.properties.get("authZResult", None)
+
+    @property
+    def storage_signal(self) -> Optional[str]:
+        """Gets the storageSignal property"""
+        return self.properties.get("storageSignal", None)

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import field
+from dataclasses import dataclass, field
 from datetime import datetime
 
 from office365.runtime.client_value import ClientValue
 from office365.runtime.types.collections import StringCollection
 
 
+@dataclass
 class StorageUsageMetricsSnapshot(ClientValue):
     ActiveSitesCount: int | None = None
     ActiveUsedStorageMB: int | None = None
@@ -24,3 +25,9 @@ class StorageUsageMetricsSnapshot(ClientValue):
     @property
     def entity_type_name(self) -> str:
         return "Microsoft.SharePoint.Administration.TenantAdmin.StorageUsage.StorageUsageMetricsSnapshot"
+
+    IsArchiveStorageReclassifiedAsActive: bool | None = None
+
+    PaygoActiveStorageMB: int | None = None
+
+    PaygoArchiveStorageMB: int | None = None

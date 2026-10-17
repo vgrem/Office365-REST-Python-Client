@@ -40,3 +40,5 @@ class SharePointHomePageContext(ClientValue):
         return "Microsoft.SharePoint.Portal.Home.SharePointHomePageContext"
 
     CustomFormURL: str | None = None
+
+    IsSmartWikiEntryEnabled: bool | None = None

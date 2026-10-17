@@ -6910,3 +6910,96 @@ class Tenant(Entity):
     def onedrives_summary_metrics_data(self) -> Optional[OneDrivesSummaryMetrics]:
         """Gets the OneDrivesSummaryMetricsData property"""
         return self.properties.get("OneDrivesSummaryMetricsData", None)
+
+    @property
+    def smart_wiki_entry_scope(self) -> Optional[int]:
+        """Gets the SmartWikiEntryScope property"""
+        return self.properties.get("SmartWikiEntryScope", None)
+
+    @property
+    def smart_wiki_entry_site_info_list(self) -> ClientValueCollection[SiteInfoForSitePicker]:
+        """Gets the SmartWikiEntrySiteInfoList property"""
+        from office365.sharepoint.tenant.administration.siteinfo_for_site_picker import (
+            SiteInfoForSitePicker,
+        )
+
+        return self.properties.get(
+            "SmartWikiEntrySiteInfoList", ClientValueCollection[SiteInfoForSitePicker](SiteInfoForSitePicker)
+        )
+
+    @property
+    def smart_wiki_entry_site_list(self) -> GuidCollection:
+        """Gets the SmartWikiEntrySiteList property"""
+        return self.properties.get("SmartWikiEntrySiteList", GuidCollection())
+
+    def get_onedrives_summary_metrics_data(self) -> ClientResult[OneDrivesSummaryMetrics]:
+        """GetOneDrivesSummaryMetricsData operation."""
+        from office365.sharepoint.tenant.administration.onedrives_summary_metrics import (
+            OneDrivesSummaryMetrics,
+        )
+
+        return_type = ClientResult(self.context, OneDrivesSummaryMetrics())
+        qry = ServiceOperationQuery(self, "GetOneDrivesSummaryMetricsData", None, {}, None, return_type)
+        self.context.add_query(qry)
+        return return_type
+
+    def get_spo_container_type_file_version_policy_job_impact(
+        self, container_type_id: UUID, version_policy: SPOFileVersionPolicySettings
+    ) -> ClientResult[SPOTenantVersionPolicyImpact]:
+        """GetSPOContainerTypeFileVersionPolicyJobImpact operation.
+
+        Args:
+            container_type_id (UUID):
+                containerTypeId parameter
+            version_policy (SPOFileVersionPolicySettings):
+                versionPolicy parameter
+        """
+        from office365.sharepoint.tenant.administration.spo_tenant_version_policy_impact import (
+            SPOTenantVersionPolicyImpact,
+        )
+
+        return_type = ClientResult(self.context, SPOTenantVersionPolicyImpact())
+        qry = ServiceOperationQuery(
+            self,
+            "GetSPOContainerTypeFileVersionPolicyJobImpact",
+            None,
+            {"containerTypeId": container_type_id, "versionPolicy": version_policy},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def get_spo_container_type_file_version_policy_job_progress(self, container_type_id: UUID) -> ClientResult[str]:
+        """GetSPOContainerTypeFileVersionPolicyJobProgress operation.
+
+        Args:
+            container_type_id (UUID):
+                containerTypeId parameter
+        """
+        return_type = ClientResult(self.context, str())
+        qry = ServiceOperationQuery(
+            self,
+            "GetSPOContainerTypeFileVersionPolicyJobProgress",
+            None,
+            {"containerTypeId": container_type_id},
+            None,
+            return_type,
+        )
+        self.context.add_query(qry)
+        return return_type
+
+    def set_smart_wiki_entry_settings(self, scope: int, site_ids: list[UUID]) -> Self:
+        """SetSmartWikiEntrySettings operation.
+
+        Args:
+            scope (int):
+                scope parameter
+            site_ids (list[UUID]):
+                siteIds parameter
+        """
+        qry = ServiceOperationQuery(
+            self, "SetSmartWikiEntrySettings", None, {"scope": scope, "siteIds": GuidCollection(site_ids)}, None, None
+        )
+        self.context.add_query(qry)
+        return self

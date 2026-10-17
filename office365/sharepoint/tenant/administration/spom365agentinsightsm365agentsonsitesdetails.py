@@ -31,3 +31,5 @@ class SPOM365AgentInsightsM365AgentsOnSitesDetails(ClientValue):
         return "Microsoft.Online.SharePoint.TenantAdministration.SPOM365AgentInsightsM365AgentsOnSitesDetails"
 
     Operations: str | None = None
+
+    AgentPlatform: str | None = None
