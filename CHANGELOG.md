@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-**Migration (mail export)**
+**Migration (mail)**
 
 - `MailFolderSource` + `MailExportTarget` (`office365.migration.outlook`) export a
   mail folder and its subtree as a portable EML tree through the existing
@@ -20,6 +20,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   what is already on disk and `verify()` compares each file's MD5 against the
   source MIME. `MailExportOptions` controls subfolders, drafts and extra
   projection properties.
+- `EmlTreeSource` + `MailboxTarget` import that tree back into a mailbox folder
+  through Graph's MIME import, recreating the folder chain with the exported
+  names, skipping messages the folder already has (matched by
+  `internetMessageId`) and replaying read state, categories and importance with
+  one `PATCH` per message (`MailImportOptions` turns that off). Verification uses
+  the new `mime_digest` — semantic headers plus a hash per decoded part — because
+  Exchange re-serializes every message and an imported message is never
+  byte-identical. Exchange limits, all reported rather than hidden: an imported
+  message is a draft (`isDraft` cannot be cleared by `PATCH`), `receivedDateTime`
+  is the import time (the original survives as `sentDateTime`), timestamps are not
+  restorable (so `preserve_timestamps` is refused up front), and messages over
+  4 MB are refused instead of truncated.
 - `MigrationItem.metadata` carries adapter-defined envelope attributes into the
   manifest, so an export writes its own index from the plan instead of re-reading
   the source.

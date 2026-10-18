@@ -337,6 +337,47 @@ migration service ingests this EML tree — the toolkit produces the artefact, i
 does not wrap the service. The [example](https://github.com/vgrem/office365-rest-python-client/tree/master/examples/outlook/migration/export/README.md)
 shows the flags (`--flat`, `--no-drafts`, `--preserve-timestamps`).
 
+### Importing an EML tree
+
+The inverse is the same job with the adapters swapped: `EmlTreeSource` reads the
+`.eml` files (the sidecar becomes the item's envelope) and `MailboxTarget` writes
+each message through Graph's MIME import, recreating the folder chain.
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import EmlTreeSource, MailImportOptions, MailboxTarget
+
+inbox = client.me.mail_folders["inbox"].get().execute_query()
+job = MigrationJob(EmlTreeSource("./mailbox-export"), MailboxTarget(inbox, MailImportOptions()))
+job.plan()
+job.run()
+print(job.verify().summary())  # semantic digest, not bytes: Exchange re-serializes MIME
+```
+
+- **The export's top directory is the target folder.** Directories below it are
+  created under the target using the sidecar's `folder_display_path`, so a folder
+  called `All Mail` does not come back as `All-Mail`. `MailImportOptions(root_name=...)`
+  nests the whole tree one level deeper.
+- **Idempotent.** `exists()` matches on `internetMessageId` inside the target folder,
+  so a resumed or re-run job skips what it already delivered instead of duplicating
+  it — Exchange itself accepts duplicate `Message-ID`s with distinct ids.
+- **Flags MIME cannot carry are replayed** (one `PATCH` per message, only when the
+  value differs): read state, Outlook categories, importance.
+  `restore_read_state=False` / `restore_categories=False` turn that off.
+
+Four honest limits, all Exchange's rather than the adapter's:
+
+- **An imported message is a draft.** Graph creates it with `isDraft: true` and
+  ignores a PATCH that tries to clear it; only a real delivery (the Exchange
+  migration service, IMAP `APPEND`) produces a non-draft.
+- **`receivedDateTime` is the import time.** The original date survives in the `Date`
+  header, which Graph exposes as `sentDateTime`, and that is restored for free.
+- **Timestamps are not restorable**, so `preserve_timestamps` is refused up front by
+  the runner rather than silently dropped.
+- **4 MB per message.** Graph's MIME import caps the request body; a larger message
+  needs an upload session, which this target does not use, so it raises rather than
+  truncating.
+
 ## SPMT-style sessions
 
 `MigrationSession` mirrors the

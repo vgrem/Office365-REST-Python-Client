@@ -76,17 +76,18 @@ class MailFolderSource(DataSource):
 
     def list_items(self, progress: MigrationProgress = None) -> list[MigrationItem]:
         root = self._options.root_name or mail_slug(getattr(self._folder, "display_name", None)) or "mailbox"
+        display = getattr(self._folder, "display_name", None) or root
         items: list[MigrationItem] = []
-        self._collect(self._folder, root, items, progress)
+        self._collect(self._folder, root, display, items, progress)
         self._enumerated = True
         return items
 
-    def _collect(self, folder, path: str, items: list[MigrationItem], progress) -> None:
+    def _collect(self, folder, path: str, display: str, items: list[MigrationItem], progress) -> None:
         for message in folder.messages.select(MAIL_COLUMNS).get_all().execute_query():
             is_draft = bool(message.is_draft)
             if is_draft and not self._options.include_drafts:
                 continue
-            item = self._item(message, path)
+            item = self._item(message, path, display)
             self._messages[item.dest_path] = message
             items.append(item)
             emit_progress(progress, done=len(items), stage="planning", items=[item])
@@ -94,21 +95,24 @@ class MailFolderSource(DataSource):
             return
         for child in folder.child_folders.get().execute_query():
             name = mail_slug(getattr(child, "display_name", None)) or str(child.id)
-            self._collect(child, f"{path}/{name}", items, progress)
+            child_display = getattr(child, "display_name", None) or name
+            self._collect(child, f"{path}/{name}", f"{display}/{child_display}", items, progress)
 
-    def _item(self, message, path: str) -> MigrationItem:
+    def _item(self, message, path: str, display: str) -> MigrationItem:
         received = message.received_date_time
         modified = message.get_property("lastModifiedDateTime") or received
         dest = mail_dest_path(message, path)
         return MigrationItem(
             source_path=dest,
             dest_path=dest,
-            size_bytes=int(message.get_property("size") or 0),
+            # The projection cannot ask for ``size`` (the backend rejects the column), so
+            # the count is filled in by ``read()`` once the bytes are in hand.
+            size_bytes=0,
             item_type="file",
             modified=iso_or_none(modified) if isinstance(modified, datetime) else None,
             created=iso_or_none(received),
             source_id=message.internet_message_id or message.id,
-            metadata=mail_envelope(message, path, self._options.extra_properties),
+            metadata=mail_envelope(message, path, self._options.extra_properties, display),
         )
 
     def _handle(self, item: MigrationItem):
@@ -123,7 +127,9 @@ class MailFolderSource(DataSource):
 
     def read(self, item: MigrationItem) -> bytes:
         """The message's RFC 822 bytes (``GET /messages/{id}/$value``)."""
-        return self._handle(item).get_content().execute_query().value
+        data = self._handle(item).get_content().execute_query().value
+        item.size_bytes = len(data)
+        return data
 
     def checksum(self, item: MigrationItem) -> str:
         return _md5(self.read(item))

@@ -64,10 +64,13 @@ if TYPE_CHECKING:
     # type checkers and ``__all__`` see them without importing the products).
     from office365.migration.outlook import (
         OUTLOOK_SCANS,
+        EmlTreeSource,
         MailboxAssessor,
+        MailboxTarget,
         MailExportOptions,
         MailExportTarget,
         MailFolderSource,
+        MailImportOptions,
         OutlookOptions,
     )
     from office365.migration.sharepoint import (
@@ -91,6 +94,9 @@ _LAZY_EXPORTS = {
     "MailExportOptions": "office365.migration.outlook",
     "MailExportTarget": "office365.migration.outlook",
     "MailFolderSource": "office365.migration.outlook",
+    "MailImportOptions": "office365.migration.outlook",
+    "EmlTreeSource": "office365.migration.outlook",
+    "MailboxTarget": "office365.migration.outlook",
     "TeamsArchiveSource": "office365.migration.teams",
     "TeamsArchiveTarget": "office365.migration.teams",
     "TeamsExportOptions": "office365.migration.teams",
@@ -144,6 +150,9 @@ __all__ = [
     "MailExportOptions",
     "MailExportTarget",
     "MailFolderSource",
+    "MailImportOptions",
+    "EmlTreeSource",
+    "MailboxTarget",
     "OutlookOptions",
     "OUTLOOK_SCANS",
     "TeamsArchiveSource",

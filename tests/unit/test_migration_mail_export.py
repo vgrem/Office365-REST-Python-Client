@@ -38,7 +38,6 @@ _INBOX = [
         "hasAttachments": True,
         "conversationId": "c1",
         "parentFolderId": "inbox",
-        "size": 2048,
         "from": {"emailAddress": {"name": "Alice", "address": "alice@contoso.com"}},
         "toRecipients": [{"emailAddress": {"name": "Bob", "address": "bob@contoso.com"}}],
         "ccRecipients": [],
@@ -53,7 +52,6 @@ _INBOX = [
         "categories": [],
         "hasAttachments": False,
         "parentFolderId": "inbox",
-        "size": 512,
         "from": {"emailAddress": {"address": "carol@contoso.com"}},
         "toRecipients": [],
         "ccRecipients": [],
@@ -67,7 +65,6 @@ _INBOX = [
         "categories": [],
         "hasAttachments": False,
         "parentFolderId": "inbox",
-        "size": 128,
         "from": {"emailAddress": {"address": "alice@contoso.com"}},
         "toRecipients": [],
         "ccRecipients": [],
@@ -85,7 +82,6 @@ _ARCHIVE = [
         "categories": [],
         "hasAttachments": False,
         "parentFolderId": "archive",
-        "size": 256,
         "from": {"emailAddress": {"address": "dave@contoso.com"}},
         "toRecipients": [],
         "ccRecipients": [],
@@ -99,7 +95,7 @@ _MIME = {
     "m3": b"From: Dave <dave@contoso.com>\r\nSubject: Old thread\r\n\r\nbody-3\r\n",
 }
 
-_M1_SIZE = 2048  # the message payload's "size" property
+_M1_SIZE = len(_MIME["m1"])  # the transported byte count: Exchange does not expose `size`
 _INBOX_FOLDER = {"id": "inbox", "displayName": "Inbox", "totalItemCount": 3, "childFolderCount": 1}
 _ARCHIVE_FOLDER = {"id": "archive", "displayName": "Archive", "totalItemCount": 1, "childFolderCount": 0}
 
@@ -172,6 +168,10 @@ def test_source_records_the_envelope_that_mime_cannot_carry():
     assert first.metadata["conversation_id"] == "c1"
     assert first.metadata["eml_path"] == first.dest_path
     assert first.created == "2024-03-01T09:15:00+00:00"
+    # Exchange will not project `size`, so the plan carries no byte count...
+    assert first.size_bytes == 0
+    # ...and the size is filled in from the MIME that is actually transferred.
+    assert len(source.read(first)) == _M1_SIZE
     assert first.size_bytes == _M1_SIZE
 
 
@@ -183,8 +183,24 @@ def test_source_projects_every_property_it_reads():
     MailFolderSource(_folder(client)).list_items()
 
     url = next(request.url for request in transport.requests if "/messages?" in request.url)
-    for column in ("internetMessageId", "receivedDateTime", "lastModifiedDateTime", "size", "categories"):
+    for column in ("internetMessageId", "receivedDateTime", "lastModifiedDateTime", "categories"):
         assert column in url, column
+
+
+def test_source_does_not_project_a_column_the_backend_rejects():
+    """`message.size` is documented but not selectable on the Exchange backend.
+
+    ``$select=size`` answers ``RequestBroker--ParseUri: Could not find a property named
+    'size' on type 'Microsoft.OutlookServices.Message'``, so an export that asked for it
+    failed on the first folder. The transported byte count is filled in by ``read()``.
+    """
+    transport = _transport()
+    client = _client(transport)
+
+    MailFolderSource(_folder(client)).list_items()
+
+    url = next(request.url for request in transport.requests if "/messages?" in request.url)
+    assert "size" not in url
 
 
 def test_source_reads_rfc822_bytes_and_checksums_them():

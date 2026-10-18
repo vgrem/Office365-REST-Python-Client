@@ -206,6 +206,11 @@ def build_batch_response(request, responses: list) -> Response:
     return resp
 
 
+def _method_name(method: Any) -> str:
+    """The HTTP verb as a plain string (``HttpMethod.Post`` -> ``"POST"``)."""
+    return str(getattr(method, "value", method)).upper()
+
+
 class MethodRoutingTransport(BaseTransport):
     """Routes by ``(HTTP method, URL substring)``, and expands ``$batch`` payloads.
 
@@ -234,7 +239,10 @@ class MethodRoutingTransport(BaseTransport):
         """
         self.requests.append(request)
         for method, key, payload in self._routes:
-            if method is not None and request.method != method:
+            # ``RequestOptions.method`` is an :class:`HttpMethod` enum, which is not a
+            # ``str``: normalise both sides so both ``("POST", ...)`` and
+            # ``(HttpMethod.Post, ...)`` routes match.
+            if method is not None and _method_name(request.method) != _method_name(method):
                 continue
             if key in request.url:
                 return build_response(request, payload(request) if callable(payload) else payload)
