@@ -5,11 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [3.3.0] - 2026-10-18
 
 Two stories: the SharePoint migration layer grew from "copy items" to a resumable,
 verifiable site copy, and the runtime grew async/await, long-running operations and
 a set of write/lookup primitives that the generated surface lacked.
+
+### Breaking in 3.3.0
+
+The public surface is additive; three modules moved, and the old import paths are
+gone. Nothing else in this release changes or removes an existing API.
+
+- `Report` calls return the new `ReportResult` (a `ClientResult` subclass, so
+  `.value`, `bytes()` and `.execute_query()` behave as before) instead of
+  `ClientResult[bytes]`.
+- The Security API lives at `office365.security` (was
+  `office365.discovery.security`).
+- `TaskStatus` lives at `office365.todo.tasks.taskstatus` (was
+  `office365.todo.taskstatus`).
 
 ### Added
 
@@ -120,11 +133,9 @@ a set of write/lookup primitives that the generated surface lacked.
 - Planner writes derive from `PlannerEntity`: `If-Match` from the latest etag plus
   `Prefer: return=representation`, so consecutive updates no longer fail with a
   stale-token `409`.
-- Report calls return `ReportResult` (was `ClientResult[bytes]`), the Security API
-  lives at `office365.security`, `TaskStatus` moved to
-  `office365.todo.tasks.taskstatus`, twelve duplicate model modules re-export the
-  canonical class, and `ViewCollection.create`/`ensure_view` annotate `view_type`
-  as `int | str`.
+- Twelve duplicate model modules re-export the canonical class, and
+  `ViewCollection.create`/`ensure_view` annotate `view_type` as `int | str`. (The
+  three moved modules are listed under *Breaking in 3.3.0*.)
 
 ### Fixed
 
