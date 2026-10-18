@@ -55,11 +55,13 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from dataclasses import field as dc_field
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
 from xml.etree import ElementTree
 
 from office365.migration.map import ContentTypeMap
 from office365.runtime.client_request_exception import ClientRequestException
+from office365.runtime.paths.resource_path import ResourcePath
+from office365.sharepoint.contenttypes.fieldlinks.collection import FieldLinkCollection
 from office365.sharepoint.fields.builtin_field_name import SYSTEM_FIELD_NAMES
 
 if TYPE_CHECKING:
@@ -802,10 +804,12 @@ def provision_list_structure(
         # created) content types so their field links can be reconciled and item
         # content-type ids can be rewritten.
         loaded = {ct.name: ct for ct in sp_list.content_types.get().execute_query() if ct.name}
-        for name, definition in provisionable:
-            target = loaded.get(name)
-            if target is not None and definition.field_internal_names:
-                warnings.extend(_reconcile_field_links(target, definition.field_internal_names, available))
+        reconcile = [
+            (loaded[name], definition.field_internal_names)
+            for name, definition in provisionable
+            if name in loaded and definition.field_internal_names
+        ]
+        warnings.extend(_reconcile_field_links(reconcile, available))
         if content_type_map is not None:
             content_type_map.update(ContentTypeMap.build(structure.content_types, loaded.values()).entries)
 
@@ -963,55 +967,121 @@ def _ensure_content_types_enabled(sp_list: SPList) -> None:
     sp_list.ensure_property("ContentTypesEnabled").after_execute(_enable)
 
 
-def _reconcile_field_links(content_type: ContentType, internal_names: List[str], available: set[str]) -> List[str]:
-    """Add any missing field links to a content type and restore their order.
+def _content_type_label(content_type: ContentType) -> str:
+    """How a content type is named in warnings."""
+    return content_type.name or content_type.string_id or "<content type>"
+
+
+def _read_field_links(context: Any, content_types: "List[ContentType]") -> "Dict[int, Optional[List[str]]]":
+    """Read the links of several content types in one round-trip.
+
+    Returns ``{id(content type): [linked column, ...]}``, or ``None`` for a content
+    type whose links could not be read. Fresh collections are used so a re-read
+    cannot append to an already loaded one.
+    """
+    collections = {
+        id(content_type): FieldLinkCollection(context, ResourcePath("FieldLinks", content_type.resource_path))
+        for content_type in content_types
+    }
+    with context.collect_batch_failures() as failures:
+        for links in collections.values():
+            links.get()
+        context.execute_batch()
+    unreadable = {id(query.return_type) for query, _ in failures if query.return_type is not None}
+    result: Dict[int, Optional[List[str]]] = {}
+    for key, links in collections.items():
+        linked = [link.field_internal_name for link in links]
+        result[key] = None if key in unreadable else [name for name in linked if name is not None]
+    return result
+
+
+def _reconcile_field_links(targets: "List[Tuple[ContentType, List[str]]]", available: set[str]) -> List[str]:
+    """Link the captured columns to each content type in as few round-trips as possible.
 
     Only columns in ``available`` (the captured user columns) or already linked
     are attempted; every other captured link names a built-in/SharePoint-owned
     column the target list provides itself, so it is skipped rather than sent to
     the server as a guaranteed failure.
 
-    Returns a list of warnings for columns the server would not link. Adding a
-    link for a ready column is a no-op; adding one for a column SharePoint does
-    not consider part of the content type fails (``Column '<name>' does not
-    exist``), which is a REST limitation rather than a client error, so it is
-    reported instead of raised.
+    The content types are reconciled together: their links are read in one
+    ``$batch`` and the missing ones are added in a second, so a content type with
+    seven links costs a share of two requests instead of seven round-trips.
+
+    The links are then read back, and that re-read is what the warnings report.
+    It is not redundant: the adds travel in a change set, which the server applies
+    atomically, so one refused column rolls back its siblings while their
+    sub-responses still say ``200``. The order is restored per content type only
+    when the server did not keep the captured one — a ``Reorder`` rejection is
+    therefore attributable to the content type that caused it.
+
+    Returns a list of warnings for content types whose links could not be read and
+    for columns that are not linked afterwards. Adding a link for a ready column
+    is a no-op; adding one for a column SharePoint does not consider part of the
+    content type fails (``Column '<name>' does not exist``), which is a REST
+    limitation rather than a client error, so it is reported instead of raised.
     """
     warnings: List[str] = []
-    name = content_type.name or content_type.string_id or "<content type>"
-    try:
-        links = content_type.field_links.get().execute_query()
-    except ClientRequestException as exc:
-        return [f"content type '{name}': field links could not be read: {_message(exc)}"]
+    if not targets:
+        return warnings
+    context = targets[0][0].context
+    content_types = [content_type for content_type, _ in targets]
 
-    existing = {link.field_internal_name for link in links}
-    skipped = [name_ for name_ in internal_names if name_ not in existing and name_ not in available]
-    if skipped:
-        logger.debug(
-            "content type %r: left %d built-in column(s) to the target list: %s",
-            name,
-            len(skipped),
-            ", ".join(sorted(skipped)),
-        )
-
-    linkable = [name_ for name_ in internal_names if name_ in existing or name_ in available]
-    added = False
-    for internal_name in linkable:
-        if internal_name in existing:
+    before = _read_field_links(context, content_types)
+    plan: "List[Tuple[ContentType, str, List[str], List[str]]]" = []  # linked, to link
+    for content_type, internal_names in targets:
+        label = _content_type_label(content_type)
+        existing = before.get(id(content_type))
+        if existing is None:
+            warnings.append(f"content type '{label}': field links could not be read")
             continue
-        try:
-            content_type.field_links.add(internal_name).execute_query()
-        except ClientRequestException as exc:
-            warning = f"content type '{name}': column '{internal_name}' was not linked: {_message(exc)}"
+        skipped = [name for name in internal_names if name not in existing and name not in available]
+        if skipped:
+            logger.debug(
+                "content type %r: left %d built-in column(s) to the target list: %s",
+                label,
+                len(skipped),
+                ", ".join(sorted(skipped)),
+            )
+        linkable = [name for name in internal_names if name in existing or name in available]
+        plan.append((content_type, label, existing, linkable))
+
+    if not plan:
+        return warnings
+
+    # One round-trip for every missing link. A rejected sub-request is recorded
+    # rather than raised (see ``collect_batch_failures``), and the re-read below
+    # decides the outcome; the recorded failures are kept for the log.
+    queued: Dict[int, "Tuple[str, str]"] = {}
+    with context.collect_batch_failures() as add_failures:
+        for content_type, label, existing, linkable in plan:
+            for internal_name in linkable:
+                if internal_name not in existing:
+                    queued[id(content_type.field_links.add(internal_name))] = (label, internal_name)
+        context.execute_batch()
+    # The server's reason is the useful half of the warning; keep it against the
+    # column it belongs to, and let the re-read decide whether it still applies.
+    refused = {queued[id(query.return_type)]: exc for query, exc in add_failures if id(query.return_type) in queued}
+
+    # Nothing was queued ⇒ nothing can have changed; skip the read-back.
+    after = _read_field_links(context, [content_type for content_type, *_ in plan]) if queued else before
+    for content_type, label, _existing, linkable in plan:
+        linked = after.get(id(content_type))
+        if linked is None:
+            warnings.append(f"content type '{label}': field links could not be read back")
+            continue
+        missing = [name for name in linkable if name not in linked]
+        for internal_name in missing:
+            reason = refused.get((label, internal_name))
+            suffix = f": {_message(reason)}" if reason is not None else ""
+            warning = f"content type '{label}': column '{internal_name}' was not linked{suffix}"
             logger.debug(warning)
             warnings.append(warning)
-            continue
-        added = True
-    if added:
+        if missing or [name for name in linked if name in linkable] == linkable:
+            continue  # cannot order a column the server refused, or already in order
         try:
             content_type.field_links.reorder(linkable).execute_query()
         except ClientRequestException as exc:
-            warning = f"content type '{name}': field link order was not applied: {_message(exc)}"
+            warning = f"content type '{label}': field link order was not applied: {_message(exc)}"
             logger.debug(warning)
             warnings.append(warning)
     return warnings

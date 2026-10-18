@@ -159,6 +159,15 @@ a set of write/lookup primitives that the generated surface lacked.
   works, `reorder_fields` sends a plain JSON array, `FieldLink.field_internal_name`
   falls back to `Name`, `ContentTypeId` declares the right OData type, V3 enums
   serialize as `Edm.Int32`, and the taxonomy `TextField` round-trips.
+- Structure replay: a list's content-type field links are read, added and read
+  back in `$batch` rounds under `collect_batch_failures()`, so one round of three
+  requests replaces the one-per-link exchange that dominated a replay (~35 requests
+  for a ten-column, five-view list, ~60 % of them links). A refused column is still
+  reported per column with the server's reason, and the read-back — not the
+  sub-responses — decides what is linked, because a change set is atomic and one
+  refusal rolls its siblings back while they answer `200`. Link order is restored
+  per content type only when the target's order differs, so a re-run writes
+  nothing.
 - Site: a re-run no longer mints `Home-2.aspx`/`Home-3.aspx`, `ClientContext.clone(url)`
   no longer sends requests to the original site, a `select` projection no longer
   drops every item value and attachment, manifest/checkpoint saves create their

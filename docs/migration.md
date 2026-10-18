@@ -589,11 +589,23 @@ guaranteed link failures.
   list means "the target web is not a schema clone of the source web", not
   "recreate N columns".
 
+- **Field links are replayed in batches, and read back to decide the warnings.**
+  All content types of a list are reconciled together: their links are read in one
+  `$batch`, the missing ones are added in a second, and the links are read again
+  after the write. That round of three requests replaces the one-per-link
+  exchange, which was the bulk of a structure replay (~35 requests for a
+  ten-column, five-view list; ~60 % of them field links). The read-back is not
+  redundant: the adds travel in a change set, which SharePoint applies atomically,
+  so one refused column rolls back its siblings while their sub-responses still
+  answer `200` — the re-read is what lets `warnings` name every column that is
+  *not* linked, with the server's reason attached to the column that caused it.
+  Link **order** is restored per content type, only when the read-back shows the
+  server kept a different order, so a column the server refused is never sent in a
+  `Reorder` array and a re-run over an already-correct list writes nothing.
+
 A structure-provisioning warning is also recorded on the resolved target adapter,
 so a whole-site session reports it through `session.warnings()` instead of only in
 the log.
-
-Field-link **order** is restored only when at least one link was actually added.
 
 ### List container settings
 

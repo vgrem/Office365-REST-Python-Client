@@ -1,8 +1,9 @@
 """Offline tests for replaying a captured list structure onto a target list.
 
 ``provision_list_structure`` is imperative (it issues and executes requests), so
-these tests script the request/response exchange with a small method-aware
-routing transport. They assert both that the right endpoints are hit and that the
+these tests script the request/response exchange with the shared method-aware
+routing transport, which also expands ``$batch`` payloads into their
+sub-requests. They assert both that the right endpoints are hit and that the
 content-type field-link URLs are correctly pathed from the reloaded content type.
 """
 
@@ -18,12 +19,15 @@ from office365.migration.sharepoint.structure import (
     rewrite_lookup_schema,
 )
 from office365.runtime.http.http_method import HttpMethod
-from office365.runtime.transport.base import BaseTransport
 from office365.sharepoint.client_context import ClientContext
 from tests import test_site_url
-from tests._scripted_transport import build_response
+from tests._scripted_transport import MethodRoutingTransport, build_response
 
 _CT_ID = "0x0100abcdefabcdefabcdefabcdefab"
+# a field-link round is read, written and read back
+_LINK_READS = 2
+# the atomic-rollback case links two columns, and loses both
+_LINKED_COLUMNS = 2
 
 _NOT_FOUND = {
     "http_status": 404,
@@ -31,21 +35,7 @@ _NOT_FOUND = {
 }
 
 
-class _MethodRoutingTransport(BaseTransport):
-    """Routes by (HTTP method, URL substring), recording every request."""
-
-    def __init__(self, routes):
-        self._routes = routes
-        self.requests = []
-
-    def execute(self, request):
-        self.requests.append(request)
-        for method, key, payload in self._routes:
-            if method is not None and request.method != method:
-                continue
-            if key in request.url:
-                return build_response(request, payload)
-        raise AssertionError(f"no route for {request.method} {request.url}")
+_MethodRoutingTransport = MethodRoutingTransport
 
 
 def _structure(**overrides):
@@ -108,11 +98,27 @@ def _routes():
     ]
 
 
+class _OfflineAuth:
+    """Stand-in authentication context: nothing is signed, offline."""
+
+    url = test_site_url
+    is_configured = False
+    is_async_token_callback = False
+
+    def authenticate_request(self, request):
+        return None
+
+
 def _setup(routes):
     ctx = ClientContext(test_site_url)
-    ctx.pending_request().beforeExecute.clear()
+    request = ctx.pending_request()
+    request.beforeExecute.clear()
+    # ``execute_batch`` re-registers auth and the form digest on the batch request
+    # itself, so an offline run needs a digest and an auth context that signs nothing.
+    request._auth_context = _OfflineAuth()  # noqa: SLF001 - offline, no credentials
+    request.context_info.FormDigestValue = "offline-digest"
     transport = _MethodRoutingTransport(routes)
-    ctx.pending_request().transport = transport
+    request.transport = transport
     return ctx, transport
 
 
@@ -137,7 +143,10 @@ def test_provision_creates_columns_content_type_links_and_view():
     # field links are pathed through the reloaded content type id, not the collection
     assert any(u.endswith("/ContentTypes('" + _CT_ID + "')/FieldLinks") for u in urls)
     assert sum(1 for p in _posts(transport) if p.url.endswith("/FieldLinks")) == 1  # only the captured column
-    assert any(u.endswith("/FieldLinks/Reorder") for u in urls)
+    # the links are read back afterwards: a change set is atomic, so a refused
+    # column rolls its siblings back while their sub-responses still say 200
+    reads = [r for r in transport.requests if r.method == HttpMethod.Get and r.url.endswith("/FieldLinks")]
+    assert len(reads) == _LINK_READS
     assert any(u.endswith("views/GetByTitle('All Items')") for u in urls)
     assert any(u.endswith("views/Add") for u in urls)
 
@@ -250,15 +259,49 @@ _LINK_REJECTED = {
 }
 
 
-def _link_routes(link_payload):
+class _FieldLinks:
+    """In-memory field links, so a read after a write sees what the write did.
+
+    ``refuse`` names the column the server rejects; with ``atomic`` the rejection
+    rolls the whole change set back, so nothing the batch wrote survives even
+    though the sibling sub-responses still answer ``200``.
+    """
+
+    def __init__(self, seed=None, refuse=None, atomic=False):
+        self._links = dict(seed or {})
+        self._refuse = refuse
+        self._atomic = atomic
+        self._rolled_back = False
+
+    def read(self, request):
+        linked = [] if self._rolled_back else self._links.get(_ct_key(request.url), [])
+        results = [{"Name": name, "FieldInternalName": name} for name in linked]
+        return {"d": {"results": results}}
+
+    def add(self, request):
+        name = request.data["FieldInternalName"]
+        if name == self._refuse:
+            self._rolled_back = self._atomic
+            return _LINK_REJECTED
+        if not self._rolled_back:
+            self._links.setdefault(_ct_key(request.url), []).append(name)
+        return {"d": {"Name": name}}
+
+
+def _ct_key(url):
+    return url.split("/ContentTypes(")[-1].split(")")[0].strip("'")
+
+
+def _link_routes(links=None):
+    links = links if links is not None else _FieldLinks()
     return [
         (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
         (HttpMethod.Get, "getByInternalNameOrTitle", _NOT_FOUND),
         (HttpMethod.Post, "CreateFieldAsXml", {"d": {"InternalName": "ProjectType", "FieldTypeKind": 6}}),
         # field links must be matched before the bare /ContentTypes routes
-        (HttpMethod.Get, "/FieldLinks", {"d": {"results": []}}),
+        (HttpMethod.Get, "/FieldLinks", links.read),
         (HttpMethod.Post, "/FieldLinks/Reorder", {}),
-        (HttpMethod.Post, "/FieldLinks", link_payload),
+        (HttpMethod.Post, "/FieldLinks", links.add),
         (HttpMethod.Get, "ContentTypes?$filter=", {"d": {"results": []}}),
         (HttpMethod.Post, "/ContentTypes", {"d": {"Name": "Project", "StringId": _CT_ID}}),
         (HttpMethod.Get, "/ContentTypes", {"d": {"results": [{"Name": "Project", "StringId": _CT_ID}]}}),
@@ -266,7 +309,7 @@ def _link_routes(link_payload):
 
 
 def test_provision_reports_columns_the_server_refuses_to_link():
-    ctx, transport = _setup(_link_routes(_LINK_REJECTED))
+    ctx, transport = _setup(_link_routes(_FieldLinks(refuse="ProjectType")))
 
     warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(views=[]))
 
@@ -278,10 +321,42 @@ def test_provision_reports_columns_the_server_refuses_to_link():
     assert not any(u.endswith("/FieldLinks/Reorder") for u in _urls(transport))
 
 
+def test_provision_reports_links_a_rejected_sibling_rolled_back():
+    # The adds travel in one change set, which the server applies atomically: a
+    # refused column takes its siblings with it while their sub-responses still
+    # answer 200. The read-back is what turns that into warnings, so a silently
+    # rolled-back link cannot be reported as linked.
+    links = _FieldLinks(refuse="MediaServiceImageTags", atomic=True)
+    ctx, transport = _setup(_link_routes(links))
+    structure = _structure(
+        views=[],
+        fields=[
+            FieldDefinition(internal_name="ProjectType", title="Project Type", field_type_kind=6, schema_xml="<Field/>"),
+            FieldDefinition(
+                internal_name="MediaServiceImageTags", title="Tags", field_type_kind=6, schema_xml="<Field/>"
+            ),
+        ],
+        content_types=[
+            ContentTypeDefinition(
+                string_id=_CT_ID, name="Project", field_internal_names=["ProjectType", "MediaServiceImageTags"]
+            )
+        ],
+    )
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert len(warnings) == _LINKED_COLUMNS
+    assert "column 'ProjectType' was not linked" in warnings[0]
+    # the refused column carries the server's reason, the rolled-back sibling cannot
+    assert "column 'MediaServiceImageTags' was not linked: Column 'ProjectType' does not exist." in warnings[1]
+    # a column the server does not hold cannot be ordered
+    assert not any(u.endswith("/FieldLinks/Reorder") for u in _urls(transport))
+
+
 def test_provision_skips_links_for_columns_it_did_not_capture():
     # A content type may link built-in columns (``Title``) that capture deliberately
     # skips; sending them to the server is a guaranteed ``does not exist`` failure.
-    routes = _link_routes({})
+    routes = _link_routes()
     ctx, transport = _setup(routes)
     structure = _structure(
         views=[],
@@ -302,14 +377,25 @@ def test_provision_skips_links_for_columns_it_did_not_capture():
 
 
 def test_provision_reorders_links_with_a_plain_array():
-    ctx, transport = _setup(_link_routes({}))
+    # the server already links both columns, but in the wrong order
+    links = _FieldLinks(seed={_CT_ID: ["ProjectType", "Category"]})
+    ctx, transport = _setup(_link_routes(links))
+    structure = _structure(
+        views=[],
+        fields=[
+            FieldDefinition(internal_name="ProjectType", title="Project Type", field_type_kind=6, schema_xml="<Field/>"),
+            FieldDefinition(internal_name="Category", title="Category", field_type_kind=6, schema_xml="<Field/>"),
+        ],
+        content_types=[
+            ContentTypeDefinition(string_id=_CT_ID, name="Project", field_internal_names=["Category", "ProjectType"])
+        ],
+    )
 
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(views=[]))
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
 
     reorder = next(r for r in _posts(transport) if r.url.endswith("/FieldLinks/Reorder"))
     assert isinstance(reorder.data["internalNames"], list)
-    # ``Title`` is not part of the captured structure, so only the captured column is reordered
-    assert reorder.data["internalNames"] == ["ProjectType"]
+    assert reorder.data["internalNames"] == ["Category", "ProjectType"]
 
 
 # --- lookup columns: repoint the schema at the target list --------------------
@@ -526,7 +612,7 @@ class _RejectingSettingTransport(_MethodRoutingTransport):
         super().__init__(routes)
         self._rejected = rejected
 
-    def execute(self, request):
+    def dispatch(self, request):
         if isinstance(request.data, dict) and self._rejected in request.data:
             self.requests.append(request)
             return build_response(
@@ -541,7 +627,7 @@ class _RejectingSettingTransport(_MethodRoutingTransport):
                     },
                 },
             )
-        return super().execute(request)
+        return super().dispatch(request)
 
 
 def _empty_structure(**overrides):
