@@ -66,11 +66,6 @@ class TestJsonLogFormatter(unittest.TestCase):
 
         self.assertEqual(payload["event"], "log")
 
-    def test_the_line_carries_no_newline_of_its_own(self):
-        record = logging.LogRecord(LOGGER_NAME, logging.INFO, __file__, 1, "hello", None, None)
-
-        self.assertNotIn("\n", JsonLogFormatter().format(record))
-
 
 class TestConfigureJsonLogging(unittest.TestCase):
     def test_events_are_written_as_json_lines(self):

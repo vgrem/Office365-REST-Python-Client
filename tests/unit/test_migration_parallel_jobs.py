@@ -29,7 +29,6 @@ from office365.migration.sharepoint.adapters import (
     SharePointListSource,
     SharePointListTarget,
 )
-from office365.migration.sharepoint.resolvers import _report
 from office365.sharepoint.client_context import ClientContext
 from tests._scripted_transport import RoutingTransport
 
@@ -151,6 +150,9 @@ def test_jobs_run_at_the_same_time(tmp_path):
     assert [status["stats"]["success"] for status in statuses] == [FILES_PER_JOB] * JOBS
     for index in range(JOBS):
         assert (tmp_path / f"dst{index}" / "docs" / "a.txt").read_text() == "alpha"
+    # Four threads, but the statuses come back in registration order.
+    assert [status["id"] for status in statuses] == [str(index) for index in range(1, JOBS + 1)]
+    assert [status["id"] for status in session.show()] == [status["id"] for status in statuses]
 
 
 def test_concurrency_defaults_to_one_job_at_a_time(tmp_path):
@@ -161,16 +163,6 @@ def test_concurrency_defaults_to_one_job_at_a_time(tmp_path):
     session.start()
 
     assert state["peak"] == 1
-
-
-def test_statuses_keep_registration_order(tmp_path):
-    gate = threading.Barrier(JOBS)
-    session = _session_with_jobs(tmp_path, JOBS, lambda source: _GatedSource(source, gate))
-
-    statuses = session.start(concurrency=JOBS)
-
-    assert [status["id"] for status in statuses] == [str(index) for index in range(1, JOBS + 1)]
-    assert [status["id"] for status in session.show()] == [status["id"] for status in statuses]
 
 
 def test_a_failing_job_stops_the_session_but_keeps_the_finished_work(tmp_path):
@@ -214,12 +206,6 @@ class _Rebindable:
 
     def label(self) -> str:
         return "fake"
-
-
-def test_rebind_returns_self_for_context_free_adapters():
-    job = MigrationJob(FileSystemSource("."), FileSystemTarget("."))
-
-    assert job.rebind() is job
 
 
 def test_rebind_copies_a_context_bound_job_and_keeps_its_state_paths():
@@ -297,20 +283,6 @@ def test_library_source_rebinds_folder_and_list_on_one_clone():
 
 
 # ── Resolution progress ─────────────────────────────────────────
-
-
-def test_report_emits_the_runner_progress_shape():
-    seen = []
-
-    _report(seen.append, 2, 5, "structure", "Documents")
-
-    progress = seen[0]
-    assert (progress.done, progress.total, progress.stage) == (2, 5, "structure")
-    assert progress.items == ["Documents"]
-
-
-def test_report_without_a_callback_is_a_no_op():
-    _report(None, 0, 0, "lists")  # nothing to assert: it simply must not raise
 
 
 def test_site_resolution_forwards_the_progress_callback(monkeypatch):

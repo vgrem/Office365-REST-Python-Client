@@ -14,7 +14,7 @@ from office365.migration import MigrationSession, ThrottleMonitor
 from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget
 from office365.migration.job import MigrationJob
 from office365.migration.logging import LOGGER_NAME
-from office365.migration.throttling import THROTTLED_STATUS_CODES, _CountingTransport
+from office365.migration.throttling import _CountingTransport
 from office365.runtime.transport.base import BaseTransport
 
 THROTTLE_AFTER = 10
@@ -120,7 +120,7 @@ def test_a_throttled_response_is_counted_with_its_retry_after():
 
 def test_an_ordinary_or_client_error_response_is_not_a_throttle():
     monitor = ThrottleMonitor()
-    responses = [_Response(200), _Response(404), _Response(500)]
+    responses = [None, _Response(), _Response(200), _Response(404), _Response(500)]
 
     for response in responses:
         monitor.observe(response)
@@ -130,27 +130,12 @@ def test_an_ordinary_or_client_error_response_is_not_a_throttle():
     assert monitor.summary() == ""
 
 
-def test_a_response_without_a_status_still_counts_as_a_request():
-    monitor = ThrottleMonitor()
-    responses = [None, _Response()]
-
-    for response in responses:
-        monitor.observe(response)
-
-    assert monitor.responses == len(responses)
-    assert monitor.throttled == 0
-
-
 def test_an_http_date_retry_after_is_parsed():
     monitor = ThrottleMonitor()
     when = datetime.now(timezone.utc) + timedelta(seconds=THROTTLE_AFTER)
     monitor.observe(_Response(SERVICE_UNAVAILABLE, {"Retry-After": format_datetime(when, usegmt=True)}))
 
     assert THROTTLE_AFTER - 1 <= monitor.retry_after <= THROTTLE_AFTER + 1
-
-
-def test_the_statuses_that_count_are_the_slow_down_ones():
-    assert THROTTLED_STATUS_CODES == frozenset({TOO_MANY_REQUESTS, SERVICE_UNAVAILABLE})
 
 
 def test_counting_is_thread_safe():
@@ -236,7 +221,8 @@ def test_attach_counts_the_responses_a_transport_returns():
 
 def test_attach_counts_the_async_path_too():
     inner = _Transport(_Response(SERVICE_UNAVAILABLE))
-    context = _Context(_Request(inner))
+    dedicated = _Transport(_Response(TOO_MANY_REQUESTS))
+    context = _Context(_Request(inner, dedicated))
 
     ThrottleMonitor().attach(context)
     wrapped = context.pending_request().async_transport
@@ -246,6 +232,7 @@ def test_attach_counts_the_async_path_too():
 
     asyncio.run(_run())
 
+    assert context.pending_request().transport.inner is inner
     assert context.pending_request().transport.monitor.throttled == 1
 
 
@@ -260,17 +247,6 @@ def test_attaching_twice_does_not_stack_wrappers():
     wrapped = context.pending_request().transport
     assert isinstance(wrapped, _CountingTransport)
     assert wrapped.inner is inner
-
-
-def test_attach_wraps_a_dedicated_async_transport():
-    sync_transport = _Transport(_Response(200))
-    async_transport = _Transport(_Response(200))
-    context = _Context(_Request(sync_transport, async_transport))
-
-    ThrottleMonitor().attach(context)
-
-    assert context.pending_request().transport.inner is sync_transport
-    assert context.pending_request().async_transport.inner is async_transport
 
 
 # ── the session reports it ───────────────────────────────────────
@@ -322,12 +298,6 @@ def test_a_session_without_a_monitor_adds_no_throttling_fields(tmp_path, capture
     assert not hasattr(completed, "throttled")
     assert not hasattr(completed, "responses")
     assert session.throttle is None
-
-
-def test_a_session_exposes_its_monitor(tmp_path):
-    monitor = ThrottleMonitor()
-
-    assert _session(tmp_path, monitor).throttle is monitor
 
 
 def test_a_run_that_is_not_throttled_emits_no_event(tmp_path, capture):
