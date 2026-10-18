@@ -504,6 +504,7 @@ gone. Nothing else in this release changes or removes an existing API.
 ## [3.0.0]
 
 ### Breaking
+- **Model properties are PEP 8 names** — 628 properties across SharePoint, Graph, and security moved from camelCase to snake_case (`file.serverRelativeUrl` → `file.server_relative_url`). The OData wire keys are unchanged, so `properties["ServerRelativeUrl"]`, `get_property()`, `ensure_property()`, and `$select`/`$expand` keep working. No aliases shipped: the old names raise `AttributeError`. Migration guide: [Upgrading from 2.x](docs/upgrading.md)
 - **Python 2 dropped** — minimum Python version is now 3.8
 - **ACS/SAML retirement** — `with_user_credentials` now raises `RuntimeError` for SharePoint Online. Use `with_username_and_password` (MSAL ROPC) instead. ACS App-Only (`with_client_credentials`) marked as deprecated.
 - **USGovernment GCC endpoints corrected** — were using wrong URLs

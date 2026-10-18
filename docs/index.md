@@ -37,6 +37,7 @@ To-Do, Bookings, Entra ID, OneDrive, and SharePoint.
 | Page | What it's for |
 |---|---|
 | [Installation](installation.md) | `pip install` and requirements |
+| [Upgrading from 2.x](upgrading.md) | the 3.0 property rename, and what else breaks |
 | [Getting Started](getting-started.md) | pick your client, authenticate, first query |
 | [Async / await](async.md) | run the same fluent API from `async` code |
 | [Authentication](auth/index.md) | every auth flow, side by side |

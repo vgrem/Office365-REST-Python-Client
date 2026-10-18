@@ -2,6 +2,7 @@
 nav:
   - index.md
   - installation.md
+  - upgrading.md
   - getting-started.md
   - async.md
   - long-running-operations.md
