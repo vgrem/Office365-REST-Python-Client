@@ -466,9 +466,14 @@ class _TargetRow:
             self.properties.update(properties)
         self.attachment_files = _TargetAttachments(entries=entries)
         self.get_calls = 0
+        self.update_writes = []
 
     def get(self):
         self.get_calls += 1
+        return _Executable()
+
+    def validate_update_list_item(self, form_values, **_kwargs):
+        self.update_writes.append(dict(form_values))
         return _Executable()
 
 
@@ -687,6 +692,40 @@ def test_list_target_writes_attachment_via_identity():
     assert target.checksum(item) == hashlib.md5(b"hello").hexdigest()
     assert target.exists(item) is True
     assert target.exists(MigrationItem("Docs/1/x.txt", "1/x.txt", item_type="attachment")) is False
+
+
+def test_list_target_reads_a_verified_item_once():
+    row = _TargetRow(
+        10,
+        "1",
+        properties={"Created": "2024-01-01T00:00:00Z", "Modified": "2024-01-02T00:00:00Z"},
+    )
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
+    item = MigrationItem("Docs/1", "1", item_type="record")
+
+    target.checksum(item)
+    target.read_metadata(item)
+    target.read_authorship(item)
+
+    # One verification round asks several questions about the same unchanged item;
+    # the fresh read is memoized, so it costs one request rather than one per hook.
+    assert row.get_calls == 1
+
+
+def test_list_target_rereads_a_verified_item_after_a_fidelity_write():
+    row = _TargetRow(10, "1")
+    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
+    item = MigrationItem(
+        "Docs/1", "1", item_type="record", created="2024-01-01T00:00:00Z", modified="2024-01-02T00:00:00Z"
+    )
+
+    target.checksum(item)
+    target.apply_timestamps(item)
+    target.checksum(item)
+
+    # The system update changes what a read returns, so the memo is dropped.
+    assert row.update_writes == [{"Created": "2024-01-01T00:00:00Z", "Modified": "2024-01-02T00:00:00Z"}]
+    assert row.get_calls == 2  # noqa: PLR2004 - one read per verification pass
 
 
 def test_list_target_exists_recognizes_records_by_identity():

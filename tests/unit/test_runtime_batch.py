@@ -667,6 +667,7 @@ class _ScriptedBatchTransport(BaseTransport):
         self.rounds: list[list[str]] = []
         self.payloads: list[str] = []
         self.singles: list[str] = []
+        self.single_payloads: list[str] = []
 
     def execute(self, request):
         if "$batch" in request.url:
@@ -684,6 +685,8 @@ class _ScriptedBatchTransport(BaseTransport):
             return _v3_response_with_bodies(self._bodies[index])
 
         self.singles.append(f"{request.method} {request.url} HTTP/1.1")
+        data = request.data
+        self.single_payloads.append(data.decode("utf-8", "replace") if isinstance(data, bytes) else (data or ""))
         index = min(len(self.singles) - 1, len(self._single_bodies) - 1)
         body = self._single_bodies[index] if self._single_bodies else {"d": {}}
         resp = Response()
@@ -812,6 +815,44 @@ _LIST_TYPE_BODY = {
         "ListItemEntityTypeFullName": "SP.Data.MyListListItem",
     }
 }
+
+
+def test_batched_update_body_matches_the_standalone_body():
+    """#943: an item update serializes identically inside and outside a change set.
+
+    A hyperlink column written as a plain ``{"Url": ..., "Description": ...}`` dict
+    carries no type of its own, so the sub-request must still annotate the item
+    (``SP.Data.<List>ListItem``) exactly as the standalone request does. Without it
+    the server answered ``A value without a type name was found`` and rejected the
+    whole change set — after the first item had already been written.
+    """
+    list_body = {"d": {"Id": 10, "ListItemEntityTypeFullName": "SP.Data.MyListListItem"}}
+
+    def _update_item(ctx: ClientContext) -> None:
+        lst = ctx.web.lists.get_by_title("MyList")
+        lst.set_property("Id", "11111111-2222-3333-4444-555555555555")
+        item = lst.items.get_by_id(10)
+        item.set_property("Link", {"Url": "https://contoso.com/x", "Description": "X"}).update()
+
+    def _body(payload) -> str:
+        return jsonlib.dumps(payload) if isinstance(payload, dict) else payload
+
+    single = _ScriptedBatchTransport([[list_body]], single_bodies=[list_body])
+    single_ctx = _sharepoint_ctx(single)
+    _update_item(single_ctx)
+    single_ctx.execute_query()
+    standalone_body = next(_body(payload) for payload in single.single_payloads if '"Link"' in _body(payload))
+
+    batched = _ScriptedBatchTransport([[list_body]], single_bodies=[list_body])
+    ctx = _sharepoint_ctx(batched)
+    _update_item(ctx)
+    ctx.execute_batch()
+
+    assert '"SP.Data.MyListListItem"' in standalone_body
+    # The type read is its own round, and the MERGE carries the same body the
+    # standalone request sent — the annotation is adopted before serialization.
+    assert [[line.split()[0] for line in rnd] for rnd in batched.rounds] == [["GET"], ["MERGE"]]
+    assert standalone_body in batched.payloads[-1]
 
 
 def test_add_item_resolves_entity_type_before_create_round():

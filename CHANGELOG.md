@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+**Migration (client-side)**
+
+- Verification reads each verified record once: the fresh target read behind
+  `SharePointListTarget.checksum`, `read_metadata`, `read_authorship` and
+  `read_permissions` is memoized for the run, so a verification pass costs one
+  request per sampled item instead of up to four (a 25-item fidelity verification
+  on a live list: 52 requests instead of 130, identical findings). Anything that
+  writes to the target (a fidelity write, a flushed chunk, or `configure()`
+  starting a new run) drops the memo.
+
 ## [3.3.0] - 2026-10-18
 
 Two stories: the SharePoint migration layer grew from "copy items" to a resumable,
@@ -215,7 +229,9 @@ gone. Nothing else in this release changes or removes an existing API.
 - Transports and batching: a thread-safe default `RequestsTransport`,
   transport-level TLS verification and proxies, `httpx` per-request `NO_TIMEOUT`,
   batch GETs placed outside the change set, multi-phase SharePoint batch writes,
-  and list-item creates deferred until the entity type is known.
+  and list-item creates *and updates* deferred until the list's entity type is
+  known (a batched hyperlink or multi-value update used to be sent unannotated and
+  rejected with `A value without a type name was found`).
 - Small ones: `ReportResult` raw content, `Group.created_datetime` returning `None`,
   nested OneDrive folder addressing, `ensure_folder`/`ensure_file` on a folder
   addressed by id, sharing-link expiration dates, webhook expiration format,

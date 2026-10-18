@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from office365.migration.map import ContentTypeMap
     from office365.sharepoint.files.file import File
     from office365.sharepoint.folders.folder import Folder
+    from office365.sharepoint.listitems.listitem import ListItem
     from office365.sharepoint.lists.list import List as SPList
     from office365.sharepoint.permissions.roles.definitions.definition import RoleDefinition
 
@@ -1578,6 +1579,10 @@ class SharePointListTarget:
         self._unresolved_lookups: set[tuple[str, int]] = set()
         self._unresolved_users: set[tuple[str, str]] = set()
         self._user_logins: dict[int, str] | None = None
+        # Verification reads the same written item through four hooks (checksum,
+        # metadata, authorship, permissions). Memoizing the fresh read keeps that
+        # to one request per item; anything that writes to the target clears it.
+        self._fresh_reads: dict[str, "ListItem | None"] = {}
 
     @property
     def on_conflict(self) -> str:
@@ -1593,6 +1598,8 @@ class SharePointListTarget:
         """
         if self._on_conflict_override is None:
             self._on_conflict = conflict_to_on_conflict(options.conflict_resolution)
+        # A run boundary: verification reads memoized by the previous run are stale.
+        self._fresh_reads.clear()
 
     def label(self) -> str:
         return f"list:{self._list.title}"
@@ -2242,6 +2249,7 @@ class SharePointListTarget:
         if not self._list.context.has_pending_request:
             return
         self._list.context.execute_batch(items_per_batch=batch_size, concurrency=concurrency)
+        self._fresh_reads.clear()
         self._list.items.clear()
         # Records were just created/updated, so the cached source-id index needs an
         # incremental refresh (new items only) before the next lookup.
@@ -2284,6 +2292,7 @@ class SharePointListTarget:
         form_values.update(self._pending_authorship.pop(item.dest_path, {}))
         form_values.update(self._pending_approval.pop(item.dest_path, {}))
         if form_values:
+            self._fresh_reads.pop(str(item.dest_path), None)
             result = target_item.validate_update_list_item(
                 form_values, dates_in_utc=True, new_document_update=True
             ).execute_query()
@@ -2352,6 +2361,7 @@ class SharePointListTarget:
         target_item = self._target_item(item)
         if target_item is None:
             return
+        self._fresh_reads.pop(str(item.dest_path), None)
         _replay_role_assignments(target_item, self._principals(), permissions, self.warnings, item.dest_path)
         self._list.context.execute_query()
 
@@ -2360,10 +2370,18 @@ class SharePointListTarget:
 
         The cached identity-index object predates the fidelity writes
         (``apply_timestamps``/``apply_authorship``), so re-read it before diffing.
+        The read is memoized per destination path: verification asks for the same
+        item through :meth:`checksum`, :meth:`read_metadata`,
+        :meth:`read_authorship` and :meth:`read_permissions`, and four reads of an
+        unchanged item are three requests too many. Every write clears the memo.
         """
+        key = str(item.dest_path)
+        if key in self._fresh_reads:
+            return self._fresh_reads[key]
         target_item = self._target_item(item)
         if target_item is not None:
             target_item.get().execute_query()
+        self._fresh_reads[key] = target_item
         return target_item
 
     def read_metadata(self, item: MigrationItem) -> dict | None:
