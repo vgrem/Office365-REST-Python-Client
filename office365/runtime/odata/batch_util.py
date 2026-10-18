@@ -4,14 +4,23 @@ Proactive chunking: batches are split by sub-request **count** and by estimated
 **payload bytes** so a batch never exceeds a service request-size limit.
 Reactive fallback: a whole-batch transport rejection (nothing was applied) is
 signalled with :class:`WholeBatchRejected`, which callers halve and retry.
+
+Error model: by default a permanently failed sub-response aborts the batch. A
+caller that wants best-effort semantics opens
+:meth:`ClientRuntimeContext.collect_batch_failures` instead, and each failed
+sub-request is recorded against its own query rather than raised.
 """
 
 from __future__ import annotations
 
 import json
-from typing import Optional, Sequence
+from typing import TYPE_CHECKING, Optional, Sequence
 
 from office365.runtime.client_request_exception import ClientRequestException
+
+if TYPE_CHECKING:
+    from office365.runtime.client_runtime_context import ClientRuntimeContext
+    from office365.runtime.queries.client_query import ClientQuery
 
 # Batch-level HTTP statuses that indicate the whole request was rejected before
 # any sub-request ran (e.g. the body exceeds a request-size limit).
@@ -76,6 +85,29 @@ def partition_by_limits(
     if current:
         batches.append(current)
     return batches
+
+
+def record_batch_failure(context: ClientRuntimeContext, query: ClientQuery, exc: ClientRequestException) -> bool:
+    """Record one failed sub-request when a tolerant batch scope is active.
+
+    The sink lives on the context (see ``collect_batch_failures``), not on the
+    batch query: batches are partitioned, retried and split into new
+    ``BatchQuery`` objects, so a per-query sink would lose failures along the way.
+
+    Args:
+        context: The runtime context that owns the batch.
+        query: The sub-query that failed (the caller's handle on the item).
+        exc: The error to record.
+
+    Returns:
+        ``True`` when the failure was recorded; ``False`` when no tolerant scope
+        is active, so the caller must re-raise (the default behaviour).
+    """
+    sink = getattr(context, "_batch_failures", None)
+    if sink is None:
+        return False
+    sink.append((query, exc))
+    return True
 
 
 class WholeBatchRejected(ClientRequestException):

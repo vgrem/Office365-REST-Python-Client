@@ -4,12 +4,13 @@ import json
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 from requests import Response
+from requests.exceptions import HTTPError
 from requests.structures import CaseInsensitiveDict
 
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.batch_util import WHOLE_BATCH_REJECT_CODES, WholeBatchRejected
+from office365.runtime.odata.batch_util import WHOLE_BATCH_REJECT_CODES, WholeBatchRejected, record_batch_failure
 from office365.runtime.odata.request import ODataRequest
 from office365.runtime.queries.batch import BatchQuery
 from office365.runtime.queries.client_query import ClientQuery
@@ -52,7 +53,14 @@ class ODataV4BatchRequest(ODataRequest):
         """
         for sub_qry, sub_resp in self._extract_response(response, query):
             self._observe_throttle(sub_resp)
-            sub_resp.raise_for_status()
+            try:
+                sub_resp.raise_for_status()
+            except HTTPError:
+                # Same tolerant-scope rule as the retry path; the non-tolerant
+                # path still raises the original ``HTTPError``.
+                if record_batch_failure(query.context, sub_qry, ClientRequestException.from_response(sub_resp)):
+                    continue
+                raise
             super().process_response(sub_resp, sub_qry)
 
     def execute_query_with_retry(
@@ -114,6 +122,11 @@ class ODataV4BatchRequest(ODataRequest):
             )
         except WholeBatchRejected as reject:
             self._split_and_retry(query, reject, max_retry, base_delay, jitter)
+        except ClientRequestException as exc:
+            # Sub-requests still failing after every retry: a tolerant scope
+            # records them, otherwise the first one propagates as before.
+            if not self._record_failures(query, state["pending"].queries, exc):
+                raise
 
     async def execute_query_with_retry_async(
         self,
@@ -165,6 +178,9 @@ class ODataV4BatchRequest(ODataRequest):
             )
         except WholeBatchRejected as reject:
             await self._split_and_retry_async(query, reject, max_retry, base_delay, jitter)
+        except ClientRequestException as exc:
+            if not self._record_failures(query, state["pending"].queries, exc):
+                raise
 
     def _collect_failures(
         self, response: Response, query: BatchQuery
@@ -185,9 +201,25 @@ class ODataV4BatchRequest(ODataRequest):
                 failures.append((sub_qry, sub_resp))
                 retry_after = max(retry_after or 0, response_retry_after(sub_resp) or 0)
             else:
-                self._raise_for_status(sub_resp)
+                try:
+                    self._raise_for_status(sub_resp)
+                except ClientRequestException as exc:
+                    # Tolerant scope: this sub-request is one item's failure, not
+                    # the batch's — record it and keep applying the rest.
+                    if record_batch_failure(query.context, sub_qry, exc):
+                        continue
+                    raise
                 super(ODataV4BatchRequest, self).process_response(sub_resp, sub_qry)
         return failures, retry_after
+
+    @staticmethod
+    def _record_failures(query: BatchQuery, queries: List[ClientQuery], exc: ClientRequestException) -> bool:
+        """Record one failure per still-failing sub-request when a tolerant scope is active.
+
+        Returns ``False`` when it is not, so the caller re-raises the original error.
+        """
+        recorded = [record_batch_failure(query.context, sub_qry, exc) for sub_qry in queries]
+        return bool(recorded) and all(recorded)
 
     def _retry_pending(self, query: BatchQuery, failures: List[Tuple[ClientQuery, Response]]) -> BatchQuery:
         """Rebuild the pending batch from the transiently-failed sub-requests."""
@@ -207,6 +239,8 @@ class ODataV4BatchRequest(ODataRequest):
             first = queries[0]
             req = first.build_request()
             message = f"{reject}; a batch of 1 was still rejected — request {req.method} {req.url}"
+            if record_batch_failure(query.context, first, ClientRequestException(message, response=reject.response)):
+                return
             raise ClientRequestException(message, response=reject.response) from reject
         mid = len(queries) // 2  # noqa: PLR2004
         for half in (queries[:mid], queries[mid:]):
@@ -228,6 +262,8 @@ class ODataV4BatchRequest(ODataRequest):
             first = queries[0]
             req = first.build_request()
             message = f"{reject}; a batch of 1 was still rejected — request {req.method} {req.url}"
+            if record_batch_failure(query.context, first, ClientRequestException(message, response=reject.response)):
+                return
             raise ClientRequestException(message, response=reject.response) from reject
         mid = len(queries) // 2  # noqa: PLR2004
         for half in (queries[:mid], queries[mid:]):

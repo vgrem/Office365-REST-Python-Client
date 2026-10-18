@@ -54,6 +54,54 @@ class ClientRuntimeContext(ABC):
         # The client-level retry policy itself lives on the pending
         # ``ClientRequest`` (a transport/resilience setting).
         self._in_retry = False
+        # Failure sink for :meth:`collect_batch_failures`; ``None`` outside a
+        # tolerant scope, which is what keeps the default batch semantics
+        # (a failed sub-request raises) untouched.
+        self._batch_failures: list[tuple[ClientQuery, ClientRequestException]] | None = None
+
+    @contextmanager
+    def collect_batch_failures(self) -> Iterator[list[tuple[ClientQuery, ClientRequestException]]]:
+        """Run batched writes tolerantly: a rejected sub-request is recorded, not raised.
+
+        Inside the scope, a sub-request the service rejects (a denied write, a
+        validation error) no longer aborts the batch: it is appended to the
+        yielded list as ``(query, exception)`` and the remaining sub-requests
+        still run. Throttled sub-requests (HTTP 429/503) are retried exactly as
+        outside the scope; if a retry is exhausted the failure is recorded too.
+
+        Failure attribution is per *query*: the sink is keyed on the context, so
+        it survives batch partitioning, splitting and per-sub-request retries.
+        Pair each queued query with the item it writes, then match it against the
+        recorded failures to report per item instead of failing the whole run.
+
+        Example:
+            >>> with ctx.collect_batch_failures() as failures:
+            ...     for name in link_names:
+            ...         content_type.field_links.add(name)
+            ...     ctx.execute_batch()
+            >>> for query, error in failures:
+            ...     print(query, error)
+
+        Yields:
+            The list the failures are appended to, as ``(query, exception)`` pairs
+            in completion order (unordered when ``concurrency`` > 1).
+
+        Raises:
+            RuntimeError: If a tolerant scope is already active on this context.
+        """
+        if self._batch_failures is not None:
+            raise RuntimeError("a tolerant batch scope is already active on this context")
+        failures: list[tuple[ClientQuery, ClientRequestException]] = []
+        self._batch_failures = failures
+        try:
+            yield failures
+        finally:
+            self._batch_failures = None
+
+    @property
+    def collecting_batch_failures(self) -> bool:
+        """Whether a :meth:`collect_batch_failures` scope is active on this context."""
+        return self._batch_failures is not None
 
     @classmethod
     def declared_limits(cls) -> Tuple[Limit, ...]:

@@ -84,6 +84,12 @@ a set of write/lookup primitives that the generated surface lacked.
   `Entity.delete_object(ignore_missing=True)`, `List.ensure_field`/`ensure_fields`,
   `Field.schema_xml_for_copy()`, batch `$batch` writes, and token-aware
   `Web.get_securable_object`.
+- **Best-effort batches:** `ClientRuntimeContext.collect_batch_failures()` runs a
+  batch tolerantly — a rejected sub-request (denied write, validation error,
+  retries exhausted) is recorded against its own query as `(query, exception)` and
+  the remaining sub-requests still execute, instead of the first failure aborting
+  the whole batch. Throttled sub-requests are still retried, and the default
+  outside the scope is unchanged (first failure raises).
 - **Lookups:** one rule for `get_by_*` (resolve one) versus `find_by_*` (return
   `None`), tolerant Graph resolvers, `ClientObject.get_or_none()`, and a bounded
   `single()`.

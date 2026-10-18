@@ -125,6 +125,30 @@ so `sequential` doesn't enable create-then-use-id flows — those need two
 round-trips. `sequential=True` implies `concurrency=1` (Graph sequences within a
 single `$batch`).
 
+A rejected sub-request normally fails the whole batch. When the writes are
+independent and you would rather report them per item than abort the run, open a
+tolerant scope — the rejected sub-request is recorded against its own query and
+the rest still execute:
+
+```python
+target_list = ctx.web.lists.get_by_title("Documents")
+queued = {}
+with ctx.collect_batch_failures() as failures:
+    for row in rows:
+        queued[id(target_list.add_item(row))] = row["Title"]
+    ctx.execute_batch()
+
+for query, error in failures:
+    print(f"{queued.get(id(query.return_type), '?')}: {error}")
+```
+
+Each recorded failure is `(query, exception)`, and `query.return_type` is the
+object your queued call returned — so pair items with queries by identity, as
+above. Throttled sub-requests (429/503) are still retried inside the scope; only a
+failure that is still standing (denied, invalid, retries exhausted) is recorded.
+Outside the scope the default is unchanged: the first failure raises
+`ClientRequestException`.
+
 ### Throttling & retries
 
 Microsoft 365 throttles with **HTTP 429** + a `Retry-After` header; Graph also
