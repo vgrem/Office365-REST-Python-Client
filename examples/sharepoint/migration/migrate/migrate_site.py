@@ -75,6 +75,10 @@ event, with the run/job/plan boundaries and every failure — for whatever colle
 logs on the machine (an OpenTelemetry Collector, Promtail, ``kubectl logs``). The
 checkpoint and manifest files stay the authoritative record; the log is for
 watching a run, not for resuming one.
+
+``--concurrency N`` (default 1) and ``--batch-size N`` (default 100) tune the copy,
+and each list's closing line reports the rate it actually achieved (``in 1m42s,
+13.7 items/s, 6.1 MB/s``), so a change can be judged on a number instead of a hunch.
 """
 
 from __future__ import annotations
@@ -83,7 +87,8 @@ import argparse
 import logging
 from pathlib import Path
 
-from office365.migration import MigrationSession, MigrationSettings
+from office365.migration import MigrationOptions, MigrationSession, MigrationSettings
+from office365.migration.base import DEFAULT_BATCH_SIZE
 from office365.migration.logging import ProgressReporter, configure_json_logging
 from office365.migration.sharepoint.pages import (
     PAGE_LIBRARY_TEMPLATE,
@@ -155,6 +160,20 @@ def _parser() -> argparse.ArgumentParser:
         choices=["RENAME", "SKIP", "OVERWRITE"],
         default="RENAME",
         help="what to do when a target page of that name exists (default: RENAME)",
+    )
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=1,
+        metavar="N",
+        help="parallel workers per list (default: 1; raise it for many small files)",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=100,
+        metavar="N",
+        help="items per $batch / progress/checkpoint flush (default: 100)",
     )
     parser.add_argument(
         "--stats",
@@ -232,6 +251,8 @@ def main():
     ]
     if preserving:
         print(f"  preserving (best-effort): {', '.join(preserving)}")
+    if args.concurrency != 1 or args.batch_size != DEFAULT_BATCH_SIZE:
+        print(f"  tuning: concurrency {args.concurrency}, batch size {args.batch_size}")
     if not args.apply:
         print(f"\nDry run — {len(lists)} list(s). Re-run with --apply to migrate (--include/--exclude to narrow).")
         return
@@ -245,7 +266,8 @@ def main():
         migrate_site_settings="NONE" if args.no_site_settings else "PRESERVE_ALL_SETTINGS",
         duplicate_page_behavior=args.duplicate_pages,
     )
-    session = MigrationSession().register(context=ctx, settings=fidelity)
+    options = MigrationOptions(concurrency=max(1, args.concurrency), batch_size=max(1, args.batch_size))
+    session = MigrationSession(options).register(context=ctx, settings=fidelity)
     session.add_site_task(
         task=MigrationTask.sharepoint(args.source_site, args.target_site, migrate_all=True),
         include=include,
@@ -263,6 +285,7 @@ def main():
         print(
             f"  [{status['phase']}] {status['source']} -> {status['target']} "
             f"success={stats['success']} skipped={stats['skipped']} errors={stats['errors']}"
+            f"{_throughput(status)}"
         )
     _print_delta(session)
     _apply_list_security(source_ctx, ctx, preserve_permissions)
@@ -272,6 +295,29 @@ def main():
 
     for warning in session.warnings():
         print(f"  warning: {warning}")
+
+
+def _throughput(status: dict) -> str:
+    """``in 1m42s (1.7 items/s, 0.4 MB/s)`` — how fast this container actually went."""
+    duration_ms = status.get("duration_ms")
+    if not duration_ms:
+        return ""
+    seconds = duration_ms / 1000
+    stats = status["stats"]
+    handled = stats["success"] + stats["skipped"]
+    parts = [f"in {_elapsed(seconds)}"]
+    if handled:
+        parts.append(f"{handled / seconds:.1f} items/s")
+    if stats["bytes_transferred"]:
+        parts.append(f"{stats['bytes_transferred'] / seconds / 1024 / 1024:.1f} MB/s")
+    return f" ({', '.join(parts)})"
+
+
+def _elapsed(seconds: float) -> str:
+    """``102`` -> ``"1m42s"`` — a duration readable at a glance."""
+    seconds = int(round(seconds))
+    minutes, rest = divmod(seconds, 60)
+    return f"{minutes}m{rest:02d}s" if minutes else f"{rest}s"
 
 
 def _heartbeat(progress: dict) -> None:

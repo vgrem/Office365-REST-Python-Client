@@ -807,6 +807,18 @@ The example wires this up for you: `--stats 30` prints a heartbeat per active li
 `--log-json` (or `--log-json run.jsonl`) writes the events, `--log-level` filters
 them.
 
+**Throughput.** `MigrationOptions.concurrency` (default `1`) makes the runner drive
+a list's writes through parallel workers, and `batch_size` (default `100`) sets how
+many items a `$batch` carries and how often progress/checkpoints flush. The example
+exposes both (`--concurrency 4 --batch-size 50`) and prints the measured rate per
+list — `success=168 skipped=2 errors=0 (in 1m42s, 13.7 items/s, 6.1 MB/s)` from the
+`duration_ms` the session status now carries — so a tuning change can be judged on a
+number instead of a feeling. Concurrency buys the most on many small files and buys
+nothing on a few large ones, where the upload session is already the bottleneck; it
+also multiplies in-flight requests, so raise it against a throttling tenant with
+care (the runtime retries a 429/503 with `Retry-After`, but the retries are time you
+do not get back).
+
 Resume from the **checkpoint and manifest files**, never from a log: those are the
 authoritative record of what has been copied, and a log is best-effort.
 

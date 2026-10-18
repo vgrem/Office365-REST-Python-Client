@@ -62,6 +62,7 @@ def _job_status(job: MigrationJob) -> dict:
         "source": job.source_label,
         "target": job.target_label,
         "phase": job.phase.value,
+        "duration_ms": job.duration_ms,
         "fidelity": job.fidelity().summary(),
         "stats": {
             "total": job.stats.total,

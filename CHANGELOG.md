@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **A migration run reports how fast it went, and can be tuned.** `MigrationOptions`
+  already carried `concurrency` and `batch_size`, but nothing measured their effect
+  — a run's only speed signal was a wall-clock you took yourself. `SessionTask.status()`
+  now includes `duration_ms`, so the per-list summary can state the rate it achieved
+  (`success=168 skipped=2 errors=0 (in 1m42s, 13.7 items/s, 6.1 MB/s)`), and the
+  whole-site example exposes both knobs (`--concurrency N`, `--batch-size N`) plus a
+  `tuning:` line in its plan so a run is self-describing. Concurrency defaults to `1`
+  and stays opt-in: it helps across many small files, does nothing for a handful of
+  large ones, and multiplies in-flight requests against a throttling tenant.
 - **A migration run can now be watched, and its log shipped.** A session printed
   nothing between "Migrating…" and the summary, which made a long copy impossible to
   monitor and its throughput impossible to measure. `office365.migration.logging`

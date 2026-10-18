@@ -93,10 +93,20 @@ def test_session_cmdlets_with_direct_adapters(tmp_path):
     assert status["id"] == "1"
     assert status["phase"] == "completed"
     assert status["stats"]["success"] == 1
+    # the status carries the wall clock, so a caller (or a log consumer) can
+    # derive a throughput without re-timing the run
+    assert isinstance(status["duration_ms"], int)
 
     session.remove_task("1")
     assert session.tasks == []
     session.unregister()
+
+
+def test_a_task_that_never_ran_reports_no_duration(tmp_path):
+    session = MigrationSession().register()
+    session.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path / "out"))
+
+    assert session.show()[0]["duration_ms"] is None
 
 
 def test_remove_task_accepts_the_job(tmp_path):
