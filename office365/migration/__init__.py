@@ -62,7 +62,14 @@ from office365.migration.validators import VerificationReport, verify
 if TYPE_CHECKING:
     # Product conveniences resolved lazily by ``__getattr__`` (declared here so
     # type checkers and ``__all__`` see them without importing the products).
-    from office365.migration.outlook import OUTLOOK_SCANS, MailboxAssessor, OutlookOptions
+    from office365.migration.outlook import (
+        OUTLOOK_SCANS,
+        MailboxAssessor,
+        MailExportOptions,
+        MailExportTarget,
+        MailFolderSource,
+        OutlookOptions,
+    )
     from office365.migration.sharepoint import (
         SHAREPOINT_SCANS,
         MigrationAssessor,
@@ -81,6 +88,9 @@ _LAZY_EXPORTS = {
     "MailboxAssessor": "office365.migration.outlook",
     "OutlookOptions": "office365.migration.outlook",
     "OUTLOOK_SCANS": "office365.migration.outlook",
+    "MailExportOptions": "office365.migration.outlook",
+    "MailExportTarget": "office365.migration.outlook",
+    "MailFolderSource": "office365.migration.outlook",
     "TeamsArchiveSource": "office365.migration.teams",
     "TeamsArchiveTarget": "office365.migration.teams",
     "TeamsExportOptions": "office365.migration.teams",
@@ -131,6 +141,9 @@ __all__ = [
     "MigrationTenantAssessor",
     "SHAREPOINT_SCANS",
     "MailboxAssessor",
+    "MailExportOptions",
+    "MailExportTarget",
+    "MailFolderSource",
     "OutlookOptions",
     "OUTLOOK_SCANS",
     "TeamsArchiveSource",

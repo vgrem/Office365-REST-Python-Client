@@ -151,6 +151,7 @@ children, and a list item is keyed by its source item id — retitling it is a
 | `JsonFileSource` / `JsonFileTarget` | both | record payloads (one JSON file per item) |
 | `SharePointLibrarySource` / `SharePointLibraryTarget` | both | files + folders (recursive) + folder column values and system metadata |
 | `SharePointListSource` / `SharePointListTarget` | both | list items as records |
+| `MailFolderSource` / `MailExportTarget` | export | mail as a portable EML tree (`office365.migration.outlook`) |
 | `TeamsArchiveSource` / `TeamsArchiveTarget` | both | Teams archives |
 
 ### Migrating list items
@@ -284,6 +285,57 @@ Two honest limits remain:
   are copied. Unresolved principals and unhonorable facets surface as
   `mismatches`/`unverifiable` in the post-run verification, never as a silent
   drop.
+
+## Migrating mail
+
+A mailbox export is the same job as a file migration: `MailFolderSource`
+enumerates messages as items (one per message, its envelope carried in
+`item.metadata`), and `MailExportTarget` writes a portable EML tree.
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import MailExportOptions, MailExportTarget, MailFolderSource
+
+folder = client.me.mail_folders["inbox"].get().execute_query()
+job = MigrationJob(
+    MailFolderSource(folder, MailExportOptions(include_subfolders=True)),
+    MailExportTarget("./mailbox-export"),
+)
+job.plan()
+job.run()
+print(job.verify().summary())  # each .eml's MD5 vs the source message's MIME
+```
+
+The target layout:
+
+```text
+<root>/Inbox/2024-03-01_Quarterly-report-Q1_cb65ad88.eml   # RFC 822 bytes
+<root>/Inbox/2024-03-01_Quarterly-report-Q1_cb65ad88.json  # sidecar record
+<root>/Inbox/Archive/2023-12-24_Old-thread_1f9c07aa.eml
+<root>/manifest.jsonl                                      # one sidecar per line
+```
+
+Names are derived from the message (`date_subject_id-digest.eml`), not from the
+enumeration order, so a re-run lands on the same paths and skips what is already
+there. The sidecar carries what MIME cannot — Graph ids, read state, Outlook
+categories, conversation id, folder path — and `manifest.jsonl` is what a later
+import reads to restore them.
+
+Three honest limits:
+
+- **Attachments are inside the MIME.** They are part of the message, so they are
+  not separate manifest items and not separately verified.
+- **The MIME body is fetched per message.** `Message.get_content()` is batchable
+  since 3.3.0, so batching those reads is a tuning step, not a redesign.
+- **Drafts may have no `internetMessageId`.** Those are keyed by Graph id, which
+  changes if the draft moves — a re-run then reports a second copy rather than
+  overwriting the first.
+
+For a pre-migration inventory (folder counts, large-folder flags) use
+`MailboxAssessor`; for the mailbox-wide move into Exchange, the Exchange
+migration service ingests this EML tree — the toolkit produces the artefact, it
+does not wrap the service. The [example](https://github.com/vgrem/office365-rest-python-client/tree/master/examples/outlook/migration/export/README.md)
+shows the flags (`--flat`, `--no-drafts`, `--preserve-timestamps`).
 
 ## SPMT-style sessions
 

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+**Migration (mail export)**
+
+- `MailFolderSource` + `MailExportTarget` (`office365.migration.outlook`) export a
+  mail folder and its subtree as a portable EML tree through the existing
+  `MigrationJob`: one `.eml` (RFC 822 bytes) plus one JSON sidecar per message —
+  the sidecar keeps what MIME cannot (Graph ids, read state, Outlook categories,
+  conversation id, folder path) — and a `manifest.jsonl` index. Destinations are
+  derived from the message (`date_subject_id-digest.eml`), so a resumed run skips
+  what is already on disk and `verify()` compares each file's MD5 against the
+  source MIME. `MailExportOptions` controls subfolders, drafts and extra
+  projection properties.
+- `MigrationItem.metadata` carries adapter-defined envelope attributes into the
+  manifest, so an export writes its own index from the plan instead of re-reading
+  the source.
+
 ### Fixed
 
 **Migration (client-side)**

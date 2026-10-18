@@ -7,6 +7,7 @@ from __future__ import annotations
 import re
 from dataclasses import asdict, dataclass, field, fields
 from enum import Enum
+from typing import Any
 
 from office365.runtime.limits import DEFAULT_BATCH_SIZE
 from office365.runtime.operations import OperationStats
@@ -90,6 +91,10 @@ class MigrationItem:
     # the manifest (they are small, JSON-safe dicts), never checkpointed.
     author: "Principal | None" = None
     editor: "Principal | None" = None
+    # Adapter-defined envelope attributes carried with the item (e.g. a mail
+    # message's subject/recipients/categories). Persisted in the manifest so a
+    # portable export writes its own index; the runner never interprets it.
+    metadata: dict[str, Any] | None = None
 
 
 # SharePoint Online renders ``UserInfo.UserId.NameId`` as a 16-character hex PUID
