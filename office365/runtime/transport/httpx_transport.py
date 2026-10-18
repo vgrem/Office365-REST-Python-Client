@@ -23,10 +23,15 @@ Notes:
       downloads (``response.iter_content``) work but are buffered in memory.
     * TLS verification, proxies and redirect policy are client-level
       (constructor) settings; per-request ``verify``/``proxies`` are not honored.
+    * The transport may outlive an event loop: it rebuilds its own
+      ``httpx.AsyncClient`` when it is used from a new loop, because a
+      connection pool cannot follow a loop that has already finished. An
+      ``async_client`` you inject is never replaced — its lifetime is yours.
 """
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any, AsyncIterator, Iterator, Optional
 
 from requests import Response
@@ -87,13 +92,15 @@ class HttpxTransport(BaseTransport):
                 verify=verify, timeout=resolved_timeout, follow_redirects=follow_redirects, **client_kwargs
             )
         )
-        self._async_client = (
-            async_client
-            if async_client is not None
-            else httpx.AsyncClient(
-                verify=verify, timeout=resolved_timeout, follow_redirects=follow_redirects, **client_kwargs
-            )
+        # Kept as a factory, not only as an instance: a pooled ``AsyncClient``
+        # cannot be reused from a second event loop, so a stale one is replaced
+        # with an identically configured one (see _async_client_for_running_loop).
+        self._async_client_factory = lambda: httpx.AsyncClient(
+            verify=verify, timeout=resolved_timeout, follow_redirects=follow_redirects, **client_kwargs
         )
+        self._async_client_owned = async_client is None
+        self._async_client = self._async_client_factory() if async_client is None else async_client
+        self._async_loop: Any | None = None
 
     @staticmethod
     def _resolve_timeout(httpx: Any, timeout: Any | None) -> Any:
@@ -119,10 +126,29 @@ class HttpxTransport(BaseTransport):
             raise RequestsConnectionError(str(exc)) from exc
         return self._to_requests_response(httpx_response)
 
+    def _async_client_for_running_loop(self) -> Any:
+        """Return the async client bound to the loop that is running now.
+
+        An ``httpx.AsyncClient`` holds its connection pool on the loop that
+        created the connections, so reusing one instance across two
+        ``asyncio.run()`` calls fails on the second with ``Event loop is
+        closed``. A transport that outlives a loop — a script run twice, a
+        notebook cell, a worker that builds a loop per request — therefore gets
+        a fresh client for the new loop with the constructor settings intact.
+        Closing the abandoned pool needs its (finished) loop, so it is released
+        with the client. An injected client is never replaced.
+        """
+        loop = asyncio.get_running_loop()
+        if self._async_loop is not loop:
+            if self._async_loop is not None and self._async_client_owned:
+                self._async_client = self._async_client_factory()
+            self._async_loop = loop
+        return self._async_client
+
     async def execute_async(self, request: RequestOptions) -> Response:
         """Send a request asynchronously through an ``httpx.AsyncClient``."""
         try:
-            httpx_response = await self._async_client.request(
+            httpx_response = await self._async_client_for_running_loop().request(
                 request.method.value, request.url, **self._build_kwargs(request)
             )
         except self._httpx.TimeoutException as exc:
@@ -158,7 +184,7 @@ class HttpxTransport(BaseTransport):
     ) -> AsyncIterator[bytes]:
         """Stream a response body natively on the event loop via ``httpx``."""
         try:
-            async with self._async_client.stream(
+            async with self._async_client_for_running_loop().stream(
                 request.method.value, request.url, **self._build_kwargs(request)
             ) as response:
                 if response.status_code >= 400:  # noqa: PLR2004
@@ -178,7 +204,7 @@ class HttpxTransport(BaseTransport):
 
     async def aclose(self) -> None:
         """Close both clients (the async one is awaited)."""
-        await self._async_client.aclose()
+        await self._async_client_for_running_loop().aclose()
         self._client.close()
 
     def _build_kwargs(self, request: RequestOptions) -> dict[str, Any]:

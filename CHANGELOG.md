@@ -97,7 +97,10 @@ a set of write/lookup primitives that the generated surface lacked.
   property-level `Prefer` injection, and a
   `Prefer: include-unknown-enum-members` helper.
 - **Auth and identity:** `ClientRuntimeContext.with_auto_retry(...)` (inherited by
-  clones), a typed `AccessDeniedException` for 401/403, `@require_permission`
+  clones), async token locks and `HttpxTransport` clients that follow the running
+  event loop (a transport reused from a second `asyncio.run()` rebuilt its
+  `AsyncClient`; a lock bound to a finished loop is replaced), a typed
+  `AccessDeniedException` for 401/403, `@require_permission`
   hints on denied requests, `Credential.is_expired`/`days_until_expiry`/
   `expiry_status`, idempotent `Application.ensure_certificate`,
   `with_certificate(public_certificate=...)` without a thumbprint, idempotent app +

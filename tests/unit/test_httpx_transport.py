@@ -250,3 +250,47 @@ def test_per_request_tuple_timeout_is_forwarded() -> None:
     request.timeout = (5, 30)
 
     assert transport._build_kwargs(request)["timeout"] == (5, 30)
+
+
+class _LoopBoundTransport(httpx.AsyncBaseTransport):
+    """A connection pool stand-in: usable from the single loop that created it."""
+
+    def __init__(self, payload: dict) -> None:
+        self._payload = payload
+        self._loop: asyncio.AbstractEventLoop | None = None
+
+    async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+        loop = asyncio.get_running_loop()
+        if self._loop is not None and self._loop is not loop:
+            raise RuntimeError("Event loop is closed")
+        self._loop = loop
+        return httpx.Response(200, json=self._payload)
+
+
+def test_transport_rebuilds_its_client_for_a_new_event_loop(monkeypatch) -> None:
+    # An owned client cannot follow a loop that has finished, so a transport used
+    # from a second ``asyncio.run()`` must build a client for that loop.
+    payload = {"d": {"Title": "Contoso"}}
+    async_client = httpx.AsyncClient
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **_: async_client(transport=_LoopBoundTransport(payload)))
+    transport = HttpxTransport()
+
+    first = asyncio.run(transport.execute_async(RequestOptions(url=_URL)))
+    second = asyncio.run(transport.execute_async(RequestOptions(url=_URL)))
+
+    assert first.json() == second.json() == payload
+
+
+def test_injected_async_client_is_not_replaced() -> None:
+    # An injected client belongs to the caller: the transport reuses it as-is,
+    # even across loops (the caller decides where it may live).
+    client = httpx.AsyncClient(transport=httpx.MockTransport(_json_handler({"d": {"Title": "Contoso"}})))
+    transport = HttpxTransport(
+        client=httpx.Client(transport=httpx.MockTransport(_json_handler({}))), async_client=client
+    )
+
+    first = asyncio.run(transport.execute_async(RequestOptions(url=_URL)))
+    second = asyncio.run(transport.execute_async(RequestOptions(url=_URL)))
+
+    assert transport._async_client is client  # noqa: SLF001 - ownership is the contract
+    assert first.status_code == second.status_code == 200  # noqa: PLR2004

@@ -233,3 +233,27 @@ def test_sharepoint_sync_query_with_async_callback_raises() -> None:
 
     with pytest.raises(RuntimeError, match="async token callback"):
         ctx.execute_query()
+
+
+def test_sharepoint_async_query_survives_a_second_event_loop() -> None:
+    # A lock kept across two ``asyncio.run()`` calls binds to the first loop and
+    # fails once it is contended, so the context hands out a lock per loop.
+    async def token_cb():
+        return {"access_token": "sp-tok", "token_type": "Bearer", "expiresIn": 3600}
+
+    ctx = ClientContext(_SITE_URL)
+    ctx.with_access_token(token_cb)
+    transport = RoutingTransport([("contextInfo", _digest_payload()), ("/_api/Web", {"d": {"Title": "Contoso"}})])
+    ctx.pending_request().transport = transport
+    ctx.load(ctx.web)
+
+    locks = []
+
+    async def capture():
+        locks.append(ctx.authentication_context._get_async_lock())  # noqa: SLF001 - the mechanism under test
+        await ctx.execute_query_async()
+
+    asyncio.run(capture())
+    asyncio.run(capture())
+
+    assert locks[0] is not locks[1]

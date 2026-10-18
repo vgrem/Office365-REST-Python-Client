@@ -53,6 +53,7 @@ class AuthenticationContext:
         self._lock = threading.Lock()
         self._token_callback_is_async = False
         self._async_lock: Optional[asyncio.Lock] = None
+        self._async_lock_loop: Any = None
         self._cached_token: Optional[TokenResponse] = None
         self._token_expires = datetime.now(timezone.utc)
 
@@ -119,8 +120,17 @@ class AuthenticationContext:
         self._token_expires = datetime.now(timezone.utc) + timedelta(seconds=ttl)
 
     def _get_async_lock(self) -> asyncio.Lock:
-        if self._async_lock is None:
+        """Return a lock for the running loop, recreating it when the loop changes.
+
+        A lock binds to the loop that first waits on it, so a lock kept across
+        two ``asyncio.run()`` calls can fail with ``Event loop is closed`` (or
+        hang) once it is contended. The lock exists only to collapse concurrent
+        acquisitions, so replacing it for a new loop costs nothing.
+        """
+        loop = asyncio.get_running_loop()
+        if self._async_lock is None or self._async_lock_loop is not loop:
             self._async_lock = asyncio.Lock()
+            self._async_lock_loop = loop
         return self._async_lock
 
     @property

@@ -507,6 +507,17 @@ finally:
     verification, proxies and redirect policy are client-level constructor
     settings; per-request `verify` and `proxies` are not honored.
 
+!!! note "One transport, several event loops"
+    A transport instance may outlive a loop — a script that calls
+    `asyncio.run()` twice, a notebook cell, a worker that builds a loop per
+    request. `HttpxTransport` keeps that working by rebuilding the
+    `httpx.AsyncClient` it owns when it is first used from a new loop (a
+    connection pool cannot follow a loop that has finished); the constructor
+    settings are re-applied. A client passed as `async_client=...` is **never**
+    replaced — its lifetime is yours, so give each loop its own. The default
+    transport needs no such care: `requests` sessions and the offload pool are
+    loop-free.
+
 ## Offload executor
 
 With the default `requests` transport, the blocking work behind every `await`
