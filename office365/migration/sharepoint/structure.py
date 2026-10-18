@@ -905,11 +905,13 @@ def _apply_list_settings(sp_list: SPList, structure: ListStructure, warnings: Li
     version limit with versioning off, a system library that grants no write) even
     though the target is already correct.
 
-    Each remaining setting is written by its own throw-away list handle (addressed
-    by title), so a server rejection of one setting cannot leak into the next
-    ``MERGE`` and the caller's own list object keeps no half-applied state. Failure
-    reasons are collected as warnings: a policy the target list type cannot express
-    (minor versions on a plain list, for instance) is a fidelity note, not an error.
+    The remaining settings are then written together, in one ``$batch``, instead of
+    one round-trip each. A change set is atomic, so a rejection does not produce a
+    half-applied list with a misleading ``200`` per survivor: the batch either
+    applies in full or does not apply at all, and the caller falls back to writing
+    each setting on its own — the same per-setting isolation as before, with the
+    same warning text — so a policy the target list type cannot express (minor
+    versions on a plain list, for instance) stays a fidelity note, not an error.
     """
     title = structure.title or sp_list.title
     if not title:
@@ -924,17 +926,49 @@ def _apply_list_settings(sp_list: SPList, structure: ListStructure, warnings: Li
     if not wanted:
         return
     current = _current_settings(sp_list, list(wanted))
-    for name, value in wanted.items():
-        if name in current and comparable_setting(name, current[name]) == comparable_setting(name, value):
-            continue
-        handle = sp_list.context.web.lists.get_by_title(title)
-        handle.set_property(name, value)
+    differing = {
+        name: value
+        for name, value in wanted.items()
+        if name not in current or comparable_setting(name, current[name]) != comparable_setting(name, value)
+    }
+    if not differing:
+        return
+    if len(differing) > 1 and _write_settings_together(sp_list, title, differing):
+        return
+    for name, value in differing.items():
+        _write_setting(sp_list, title, name, value, warnings)
+
+
+def _write_settings_together(sp_list: SPList, title: str, settings: Dict[str, Any]) -> bool:
+    """Try to apply every setting in one ``$batch``; report whether it took.
+
+    Returns ``False`` when the server refused something, in which case nothing was
+    applied: a change set is atomic, so its sub-responses saying ``200`` is not
+    evidence that the write survived.
+    """
+    with sp_list.context.collect_batch_failures() as failures:
+        for name, value in settings.items():
+            handle = sp_list.context.web.lists.get_by_title(title)
+            handle.set_property(name, value)
+            handle.update()
         try:
-            handle.update().execute_query()
-        except Exception as exc:  # noqa: BLE001 - any rejection is a fidelity note
-            warning = f"list setting '{name}' was not applied: {_rejection_reason(exc)}"
-            logger.debug(warning)
-            warnings.append(warning)
+            sp_list.context.execute_batch()
+        except Exception as exc:  # noqa: BLE001 - the whole batch failed, nothing landed
+            logger.debug("list settings were not applied in one batch: %s", _rejection_reason(exc))
+            return False
+    return not failures
+
+
+def _write_setting(sp_list: SPList, title: str, name: str, value: Any, warnings: List[str]) -> None:
+    """Write one setting through its own list handle, so a rejection stays its own."""
+    handle = sp_list.context.web.lists.get_by_title(title)
+    handle.set_property(name, value)
+    try:
+        handle.update().execute_query()
+    except Exception as exc:  # noqa: BLE001 - any rejection is a fidelity note
+        warning = f"list setting '{name}' was not applied: {_rejection_reason(exc)}"
+        logger.debug(warning)
+        warnings.append(warning)
 
 
 def _setting_is_expressible(name: str, settings: Dict[str, Any]) -> bool:

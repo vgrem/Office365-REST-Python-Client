@@ -168,8 +168,15 @@ def parse_batch_requests(request) -> list:
         head, _, body = payload.replace(b"\r\n", b"\n").partition(b"\n\n")
         lines = [line for line in head.decode("utf-8", "replace").split("\n") if line]
         method, url, _ = lines[0].split(" ", 2)
+        headers = [line for line in lines[1:] if ":" in line]
         req = RequestOptions(url)
-        req.method = HttpMethod(method)
+        # ``MERGE`` is a SharePoint verb with no ``HttpMethod`` member: the SDK
+        # sends a POST and overrides it with ``X-HTTP-Method``, so the sub-request
+        # carries the override header and routes as the POST it really is.
+        req.method = HttpMethod.Post if method == "MERGE" else HttpMethod(method)
+        for line in headers:
+            key, value = line.split(":", 1)
+            req.ensure_header(key.strip(), value.strip())
         req.data = _json.loads(body) if body.strip() else None
         return req
 

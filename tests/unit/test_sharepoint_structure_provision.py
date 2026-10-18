@@ -109,7 +109,7 @@ class _OfflineAuth:
         return None
 
 
-def _setup(routes):
+def _setup(routes, transport=None):
     ctx = ClientContext(test_site_url)
     request = ctx.pending_request()
     request.beforeExecute.clear()
@@ -117,7 +117,7 @@ def _setup(routes):
     # itself, so an offline run needs a digest and an auth context that signs nothing.
     request._auth_context = _OfflineAuth()  # noqa: SLF001 - offline, no credentials
     request.context_info.FormDigestValue = "offline-digest"
-    transport = _MethodRoutingTransport(routes)
+    transport = transport if transport is not None else _MethodRoutingTransport(routes)
     request.transport = transport
     return ctx, transport
 
@@ -671,6 +671,19 @@ def test_provision_applies_each_container_setting_by_title():
     assert all(m.url.endswith("lists/GetByTitle('Tasks')") for m in _merges(transport))
 
 
+def test_provision_writes_the_differing_settings_in_one_batch():
+    # One request carries every differing setting; a change set is atomic, so the
+    # target cannot end up half-configured with a 200 per survivor.
+    ctx, transport = _setup(_setting_routes())
+    structure = _empty_structure(settings={"EnableVersioning": True, "MajorVersionLimit": 12})
+
+    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
+
+    assert len(transport.batches) == 1
+    assert len(transport.batches[0]) == _LINKED_COLUMNS
+    assert _settings_written(transport) == [{"EnableVersioning": True}, {"MajorVersionLimit": 12}]
+
+
 def test_provision_applies_settings_even_with_skip_conflict_mode():
     ctx, transport = _setup(_setting_routes())
     structure = _empty_structure(settings={"EnableModeration": True})
@@ -746,10 +759,8 @@ def test_provision_applies_list_validation_after_the_columns_exist():
 
 
 def test_provision_reports_a_rejected_setting_as_a_warning():
-    transport = _RejectingSettingTransport(_setting_routes(), "EnableMinorVersions")
-    ctx = ClientContext(test_site_url)
-    ctx.pending_request().beforeExecute.clear()
-    ctx.pending_request().transport = transport
+    routes = _setting_routes()
+    ctx, transport = _setup(routes, _RejectingSettingTransport(routes, "EnableMinorVersions"))
     structure = _empty_structure(base_type=1, settings={"EnableMinorVersions": True, "ForceCheckout": True})
 
     warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)

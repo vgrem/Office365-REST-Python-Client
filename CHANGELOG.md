@@ -154,6 +154,11 @@ a set of write/lookup primitives that the generated surface lacked.
   the list name prefixed) *and* handed it to `session.warnings()`, so every note
   printed twice — once by logging's last-resort handler, once by the caller. They are
   `DEBUG` provenance now; the caller decides how to show them.
+- List settings: the differing container settings (versioning, moderation,
+  version limits, check-out, item-level read/write policy) are applied in one
+  `$batch` instead of one request each. A change set is atomic, so a refusal falls
+  back to writing them one by one — a setting the list type cannot accept is still
+  its own warning and does not abort the others.
 - Structure: content-type field links skip built-in and SharePoint-owned columns,
   a nameless content type no longer sends a null name, `ContentType.set_default`
   works, `reorder_fields` sends a plain JSON array, `FieldLink.field_internal_name`

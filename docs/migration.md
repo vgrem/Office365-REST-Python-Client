@@ -614,8 +614,8 @@ The snapshot also carries the list's own policy — `EnableVersioning`,
 `EnableAttachments`, `ReadSecurity`, `WriteSecurity`, `ValidationFormula` /
 `ValidationMessage`, plus `EnableMinorVersions`,
 `MajorWithMinorVersionsLimit` and `ForceCheckout` on a document library — and
-provisioning replays it as per-property `MERGE` requests. Four details are
-worth knowing, all live-verified:
+provisioning replays it as per-property `MERGE` requests — the differing ones
+together in one `$batch`. Four details are worth knowing, all live-verified:
 
 - **Only differing settings are written.** The target's current values are read
   first (one `GET`), so a list created from the same template — which already
@@ -636,8 +636,11 @@ worth knowing, all live-verified:
 - **A setting the list cannot accept is a warning, not a failure.** A plain list
   rejects minor versions, their limit and required check-out (`The list does not
   support minor versioning.`), which is why those three are captured and applied
-  only for a document library. Each setting is sent through its own handle so one
-  rejection cannot leak into the next.
+  only for a document library. The differing settings go out in **one** `$batch`
+  rather than one request each; because a change set is atomic, a refusal makes
+  the whole write fall back to sending them one by one through their own handles,
+  so one rejection still cannot leak into the next and cannot leave a
+  half-configured list behind a `200` per survivor.
 
 The server canonicalizes a validation formula (`=IF([Title]="",FALSE,TRUE)` reads
 back as `=IF(Title="",FALSE,TRUE)`), so `verify_list_structure` compares it with
