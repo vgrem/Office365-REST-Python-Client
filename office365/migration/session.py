@@ -23,10 +23,12 @@ from __future__ import annotations
 import itertools
 import re
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from office365.migration.base import MigrationOptions, MigrationPhase
 from office365.migration.job import MigrationJob
+from office365.migration.logging import log_event
 
 if TYPE_CHECKING:
     from office365.migration.delta import DeltaReport
@@ -243,20 +245,41 @@ class MigrationSession:
         return [entry.status() for entry in self._tasks]
 
     def start(self, progress=None) -> list[dict]:
-        """Start the migration: plan + run every registered task."""
+        """Start the migration: plan + run every registered task.
+
+        ``progress`` is the ``ProgressCallback`` handed to each job (and on to the
+        runner), so one :class:`~office365.migration.logging.ProgressReporter` can
+        heartbeat the whole session.
+        """
         statuses: list[dict] = []
-        for entry in self._tasks:
-            job = entry.job
-            if job.phase in (
-                MigrationPhase.COMPLETED,
-                MigrationPhase.COMPLETED_WITH_ERRORS,
-                MigrationPhase.CANCELLED,
-            ):
+        started = datetime.now(timezone.utc)
+        log_event("run.started", tasks=len(self._tasks))
+        try:
+            for entry in self._tasks:
+                job = entry.job
+                if job.phase in (
+                    MigrationPhase.COMPLETED,
+                    MigrationPhase.COMPLETED_WITH_ERRORS,
+                    MigrationPhase.CANCELLED,
+                ):
+                    statuses.append(entry.status())
+                    continue
+                job.plan(progress)
+                job.run(progress)
                 statuses.append(entry.status())
-                continue
-            job.plan(progress)
-            job.run(progress)
-            statuses.append(entry.status())
+        finally:
+            totals = {"success": 0, "skipped": 0, "errors": 0}
+            for status in statuses:
+                for key in totals:
+                    totals[key] += status.get("stats", {}).get(key) or 0
+            log_event(
+                "run.completed",
+                f"{len(statuses)} task(s): {totals['success']} copied, "
+                f"{totals['skipped']} skipped, {totals['errors']} failed",
+                duration_ms=int((datetime.now(timezone.utc) - started).total_seconds() * 1000),
+                tasks=len(statuses),
+                **totals,
+            )
         return statuses
 
     def stop(self) -> None:

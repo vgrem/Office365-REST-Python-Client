@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **A migration run can now be watched, and its log shipped.** A session printed
+  nothing between "Migrating…" and the summary, which made a long copy impossible to
+  monitor and its throughput impossible to measure. `office365.migration.logging`
+  adds two pieces and no backend: `log_event(...)` + `JsonLogFormatter` emit one JSON
+  object per event on the `office365.migration` logger (`run.started`/`run.completed`,
+  `plan.started`/`plan.completed`, `job.started`/`job.completed`/`job.failed`,
+  `progress`), and `ProgressReporter` is a plain `ProgressCallback` that reduces the
+  runner's per-item snapshots into a throttled heartbeat with a rate and an ETA — so
+  it drops into `session.start(progress=...)`, `job.run(...)` or any long-running
+  runtime operation. `configure_json_logging()` routes the events as JSON lines to
+  any stream. Per-item events are deliberately absent (items are counted, failures
+  get a line of their own), and no collector, exporter or vendor SDK is imported: a
+  library must not choose a monitoring product for its caller, so the JSON stream is
+  handed to whatever the machine already runs (an OpenTelemetry Collector into Loki
+  or Azure Monitor, Promtail, a sidecar). The checkpoint and manifest files stay the
+  authoritative record — a log is for watching a run, never for resuming one. The
+  example gains `--stats SECONDS` (heartbeat per active list), `--log-json [PATH]`
+  and `--log-level`.
 - **A migrated site looks like the source: its branding is carried too.** Content
   and structure were replayed but the *web* kept the target's own look — its own
   master page, its own theme, no site logo. `office365.migration.sharepoint.branding`

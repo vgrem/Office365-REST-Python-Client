@@ -42,6 +42,12 @@ from office365.migration.checkpoint import Checkpoint
 from office365.migration.delta import DeltaReport, MovedItem, compute_delta
 from office365.migration.fidelity import FidelityReport, FidelityStatus, describe_fidelity
 from office365.migration.job import MigrationJob
+from office365.migration.logging import (
+    JsonLogFormatter,
+    ProgressReporter,
+    configure_json_logging,
+    log_event,
+)
 from office365.migration.manifest import Manifest
 from office365.migration.map import ContentTypeMap
 from office365.migration.report import MigrationReport, build_report, export_reports
@@ -89,6 +95,7 @@ __all__ = [
     "ExportFormat",
     "FidelityReport",
     "ItemStatus",
+    "JsonLogFormatter",
     "Manifest",
     "MigrationItem",
     "MigrationJob",
@@ -101,6 +108,7 @@ __all__ = [
     "MigrationSettings",
     "MigrationStats",
     "MigrationTask",
+    "ProgressReporter",
     "MovedItem",
     "ScanContainer",
     "ScanDefinition",
@@ -109,8 +117,10 @@ __all__ = [
     "VerificationReport",
     "build_report",
     "compute_delta",
+    "configure_json_logging",
     "conflict_to_on_conflict",
     "describe_fidelity",
+    "log_event",
     "FidelityStatus",
     "export_reports",
     "scan_pairs",

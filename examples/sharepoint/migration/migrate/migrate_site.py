@@ -67,14 +67,24 @@ overwrite instead).
 Resolution also reports what a copy cannot carry — publishing pages, web part data
 bindings, workflow associations, InfoPath forms and business-data (BCS) external
 lists — as one warning per category in the run's warning list.
+
+While it runs, ``--stats`` prints a heartbeat per active list (items done, rate,
+ETA) instead of going quiet between "Migrating…" and the summary, and
+``--log-json`` turns the same events into JSON lines on stderr — one object per
+event, with the run/job/plan boundaries and every failure — for whatever collects
+logs on the machine (an OpenTelemetry Collector, Promtail, ``kubectl logs``). The
+checkpoint and manifest files stay the authoritative record; the log is for
+watching a run, not for resuming one.
 """
 
 from __future__ import annotations
 
 import argparse
+import logging
 from pathlib import Path
 
 from office365.migration import MigrationSession, MigrationSettings
+from office365.migration.logging import ProgressReporter, configure_json_logging
 from office365.migration.sharepoint.pages import (
     PAGE_LIBRARY_TEMPLATE,
     capture_home_page,
@@ -92,7 +102,8 @@ def _csv(value: str | None) -> list[str] | None:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def main():
+def _parser() -> argparse.ArgumentParser:
+    """The command line: what to migrate, what to preserve and how to report it."""
     parser = argparse.ArgumentParser(description="Whole-site (same-tenant) SharePoint migration")
     parser.add_argument("--source-site", default=team_site_url, help="source site collection URL")
     parser.add_argument("--target-site", default=site_url, help="target site collection URL")
@@ -145,15 +156,45 @@ def main():
         default="RENAME",
         help="what to do when a target page of that name exists (default: RENAME)",
     )
+    parser.add_argument(
+        "--stats",
+        type=float,
+        default=15.0,
+        metavar="SECONDS",
+        help="progress heartbeat interval per list (default: 15; 0 disables)",
+    )
+    parser.add_argument(
+        "--log-json",
+        nargs="?",
+        const="-",
+        metavar="PATH",
+        help="write structured migration events as JSON lines (default: stderr)",
+    )
+    parser.add_argument(
+        "--log-level",
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        help="minimum level for the structured events (default: INFO)",
+    )
     parser.add_argument("--apply", action="store_true", help="perform the migration (default: dry run)")
     parser.add_argument("--no-verify", action="store_true", help="skip the post-run source/target reconciliation")
-    args = parser.parse_args()
+    return parser
+
+
+def main():
+    args = _parser().parse_args()
 
     include = _csv(args.include)
     exclude = _csv(args.exclude)
     preserve_timestamps = args.preserve or args.preserve_timestamps
     preserve_authorship = args.preserve or args.preserve_authorship
     preserve_permissions = args.preserve or args.preserve_permissions
+
+    if args.log_json:
+        stream = None
+        if args.log_json != "-":
+            stream = open(args.log_json, "a", encoding="utf-8")  # noqa: SIM115 — closed at process exit
+        configure_json_logging(stream, level=getattr(logging, args.log_level))
 
     ctx = ClientContext(args.target_site).with_client_certificate(tenant, client_id, cert_thumbprint, cert_path)
 
@@ -215,8 +256,9 @@ def main():
         checkpoint_dir=work / "checkpoints",
     )
 
+    reporter = ProgressReporter(interval=args.stats, emit=_heartbeat) if args.stats else None
     print("\nMigrating…", flush=True)
-    for status in session.start():
+    for status in session.start(progress=reporter):
         stats = status["stats"]
         print(
             f"  [{status['phase']}] {status['source']} -> {status['target']} "
@@ -230,6 +272,20 @@ def main():
 
     for warning in session.warnings():
         print(f"  warning: {warning}")
+
+
+def _heartbeat(progress: dict) -> None:
+    """One compact progress line: stage, counts, percentage, rate and ETA."""
+    done = f"{progress['done']:,}"
+    if progress["total"]:
+        done += f"/{progress['total']:,} ({progress['percent']}%)"
+    parts = [progress["stage"], done] if progress["stage"] else [done]
+    if progress["rate"]:
+        parts.append(f"{progress['rate']:g} it/s")
+    eta = progress["eta_seconds"]
+    if eta is not None:
+        parts.append("ETA <1s" if eta < 1 else f"ETA {int(eta)}s")
+    print(f"  … {' '.join(parts)}", flush=True)
 
 
 def _apply_list_security(source_ctx, ctx, preserve_permissions: bool) -> None:

@@ -751,6 +751,65 @@ the target's own home page alone and said so, because the source's home page
 with a copyable home page moved the target web's `WelcomePage` onto the copy and
 `verify_site` confirmed it.
 
+## Monitoring a run
+
+A session is long and headless: without a progress hook it prints nothing between
+"Migrating…" and the summary. `office365.migration.logging` supplies the two pieces
+an operator needs, and nothing that ties this library to a monitoring product.
+
+**Events.** Every boundary emits one structured event on the
+`office365.migration` logger — `run.started`/`run.completed`,
+`plan.started`/`plan.completed`, `job.started`/`job.completed`/`job.failed`,
+`progress` — through `log_event(...)`. `JsonLogFormatter` renders each as one JSON
+object per line with a stable shape, so a filter never has to parse prose:
+
+```json
+{"ts":"2026-02-11T09:12:03.114Z","level":"info","logger":"office365.migration",
+ "event":"job.completed","message":"library:/sites/t/Documents: 168 copied, 2 skipped, 0 failed",
+ "source":"library:/sites/s/Documents","target":"library:/sites/t/Documents",
+ "phase":"completed","success":168,"skipped":2,"errors":0,"bytes_transferred":734003200,
+ "duration_ms":184233}
+```
+
+There is deliberately **no per-item event**: a five-hundred-thousand item library
+must not produce five-hundred-thousand lines, so items are counted and only
+failures get a line of their own (`job.failed` carries the error text). The
+migration package's own plain-logger messages — everything a resolution step
+collects, such as a list that lost its field links — share the stream tagged
+`"event": "log"`, so one handler sees the whole run.
+
+**Progress.** `ProgressReporter` is a plain `ProgressCallback` that reduces the
+runner's per-item snapshots into a throttled heartbeat with a rate and an ETA —
+it drops into `session.start(progress=...)`, `job.run(...)` or any long-running
+runtime operation:
+
+```python
+from office365.migration.logging import ProgressReporter, configure_json_logging
+
+configure_json_logging()  # JSON lines on stderr
+reporter = ProgressReporter(interval=15)  # one heartbeat per 15s
+session.start(progress=reporter)
+print(reporter.summary())  # "1,234/5,000 (24.7%) 41.2/s ETA 1m31s"
+```
+
+The window restarts when a new container (a different total) begins, the rate stays
+`None` until there is at least half a second to measure, and `close()` emits a last
+heartbeat only when the interval swallowed the final count.
+
+**Shipping the log.** Emit JSON lines and let the machine's own collector ship them:
+an OpenTelemetry Collector's `filelog`/`stdout` receiver into Loki or Azure Monitor,
+Promtail, a sidecar, `kubectl logs -f`. No exporter, SDK or vendor client is imported
+here — a library must not choose a monitoring product for its caller. Alert on the
+gaps rather than the totals: a heartbeat that stops (a stalled run), `job.failed`,
+a rising error count, or a `run.completed` whose phase is not `completed`.
+
+The example wires this up for you: `--stats 30` prints a heartbeat per active list,
+`--log-json` (or `--log-json run.jsonl`) writes the events, `--log-level` filters
+them.
+
+Resume from the **checkpoint and manifest files**, never from a log: those are the
+authoritative record of what has been copied, and a log is best-effort.
+
 ## Fidelity
 
 | Flag | Client-side runner | Server-side package |

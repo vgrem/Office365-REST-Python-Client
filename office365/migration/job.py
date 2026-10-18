@@ -8,6 +8,7 @@ see :class:`MigrationServerJob` instead.)
 
 from __future__ import annotations
 
+import logging
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
@@ -16,11 +17,18 @@ from typing import TYPE_CHECKING, Any, Callable, cast
 from office365.migration.base import MigrationItem, MigrationOptions, MigrationPhase, MigrationStats
 from office365.migration.checkpoint import Checkpoint
 from office365.migration.delta import DeltaReport, compute_delta
+from office365.migration.logging import log_event
 from office365.migration.manifest import Manifest
 from office365.migration.runner import MigrationRunner
 
 if TYPE_CHECKING:
     from office365.runtime.operations import Progress
+
+
+def _elapsed_ms(started: datetime, finished: datetime | None = None) -> int:
+    """Whole milliseconds between two UTC timestamps (for the event payload)."""
+    end = finished or datetime.now(timezone.utc)
+    return int((end - started).total_seconds() * 1000)
 
 
 class MigrationJob:
@@ -130,6 +138,12 @@ class MigrationJob:
             return None
         return (self._finished_at - self._started_at).total_seconds()
 
+    @property
+    def duration_ms(self) -> int | None:
+        """Wall-clock duration of the last run, in milliseconds (log payloads)."""
+        duration = self.duration
+        return None if duration is None else int(duration * 1000)
+
     # ── Lifecycle ────────────────────────────────────────────────
 
     def assess(self, progress: Callable[["Progress"], None] | None = None) -> object | None:
@@ -157,27 +171,72 @@ class MigrationJob:
         a delta comparison (:attr:`delta`) before it is replaced.
         """
         self._checkpoint.phase = MigrationPhase.PLANNING
+        started = datetime.now(timezone.utc)
+        # No labels here: a SharePoint source has not read its list yet, so its
+        # server-relative URL is still unknown — ``plan.completed`` carries both.
+        log_event("plan.started")
         previous, note = self._previous_plan()
         self._manifest = Manifest.from_source(self._source, progress)
         self._delta = compute_delta(previous, self._manifest.items, note=note)
         self._save_state()
+        log_event(
+            "plan.completed",
+            f"{self.source_label}: {len(self._manifest.items)} item(s) planned",
+            source=self.source_label,
+            target=self.target_label,
+            items=len(self._manifest.items),
+            duration_ms=_elapsed_ms(started),
+        )
         return self._manifest
 
     def run(self, progress: Callable[["Progress"], None] | None = None) -> MigrationStats:
         """Execute the migration (resumable; re-drives pending/failed items)."""
         self._checkpoint.phase = MigrationPhase.RUNNING
         self._started_at = datetime.now(timezone.utc)
-        self._stats = self._runner.run(
-            self._source,
-            self._target,
-            self._manifest.items,
-            self._options,
-            self._checkpoint,
-            self._checkpoint_path,
-            progress,
-            stop_event=self._stop_event.is_set,
+        log_event(
+            "job.started",
+            f"{self.source_label} -> {self.target_label}",
+            source=self.source_label,
+            target=self.target_label,
+            items=len(self._manifest.items),
         )
+        try:
+            self._stats = self._runner.run(
+                self._source,
+                self._target,
+                self._manifest.items,
+                self._options,
+                self._checkpoint,
+                self._checkpoint_path,
+                progress,
+                stop_event=self._stop_event.is_set,
+            )
+        except Exception as e:
+            self._finished_at = datetime.now(timezone.utc)
+            log_event(
+                "job.failed",
+                f"{self.source_label} -> {self.target_label} failed: {e}",
+                level=logging.ERROR,
+                source=self.source_label,
+                target=self.target_label,
+                error=str(e),
+                duration_ms=self.duration_ms,
+            )
+            raise
         self._finished_at = datetime.now(timezone.utc)
+        log_event(
+            "job.completed",
+            f"{self.target_label}: {self._stats.success} copied, {self._stats.skipped} skipped"
+            f", {self._stats.errors} failed",
+            source=self.source_label,
+            target=self.target_label,
+            phase=self._checkpoint.phase.value,
+            success=self._stats.success,
+            skipped=self._stats.skipped,
+            errors=self._stats.errors,
+            bytes_transferred=self._stats.bytes_transferred,
+            duration_ms=self.duration_ms,
+        )
         if self._checkpoint.phase == MigrationPhase.PAUSED and self._cancel_requested:
             self._checkpoint.phase = MigrationPhase.CANCELLED
             self._save_state()
