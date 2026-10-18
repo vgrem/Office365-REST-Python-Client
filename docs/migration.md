@@ -417,6 +417,52 @@ are replayed** from the source before content is copied (`provision_structure=Tr
 create the containers. The server-side Migration API path is per-library and not
 supported for a whole-site task.
 
+### Many lists at once
+
+A whole-site task is a **queue of one job per list**, and `session.start()` walks
+that queue serially by default. For a site of many small lists that is the
+dominant cost, because each job pays its own fixed overhead — resolve the list,
+ensure its container, replay its structure, read its items — and none of it
+overlaps. Pass `concurrency` to run several jobs at once:
+
+```python
+from office365.migration.logging import ProgressReporter
+
+reporter = ProgressReporter(interval=15, emit=print)
+session.add_site_task(task=..., manifest_dir="state/manifests", progress=reporter)
+session.start(progress=reporter, concurrency=4)
+```
+
+What is shared and what is not is deliberate:
+
+| Per job | Shared by every job |
+| --- | --- |
+| pending-query queue, form digest, phase/stats | authentication context (single-flight token cache) |
+| manifest + checkpoint (`<index>-<list>.…`) | HTTP transport: one connection pool |
+| `ProgressReporter` counters (`derive`) | retry policy and `RateLimiter` (pacing) |
+
+A `ClientContext` owns a single pending-query queue, so two jobs cannot use one
+context concurrently. Each worker therefore gets a clone (`ClientContext.clone`,
+which shares the auth context and transport *by reference*) and the adapters are
+re-addressed on it (`MigrationJob.rebind()` → `adapter.rebind()`): a list is
+looked up by id, a folder by server-relative path, which costs one read per
+container and buys a run that is safe on threads. Context-free adapters
+(`filesystem`, `json`) are shared unchanged, so a mixed session keeps working.
+
+This changes *when* work happens, not *what* lands on the target: manifests,
+checkpoints, conflict handling, verification, throttling accounting and warning
+collection are the same, statuses are returned in registration order, and a job
+that already completed is still skipped on a re-run. A task failure stops the
+session as it does serially — after the in-flight jobs finish, so nothing is left
+half-written. Keep `concurrency` and `--pace` together: the limiter is shared, so
+pacing still bounds the whole run no matter how many workers are in flight.
+
+**Resolution reports progress too.** `add_site_task(progress=...)` fires the same
+`Progress` heartbeat the runner uses while the plan is resolved — `lists`, then
+`containers` (per target container ensured), `structure` (per list replayed), and
+the indeterminate `pages`, `navigation` and `branding` stages — so the run is not
+silent between the inventory and the first copy.
+
 ### Capturing list structure
 
 `capture_list_structure(sp_list)` reads a list's **columns** (with `SchemaXml`
@@ -832,6 +878,45 @@ nothing on a few large ones, where the upload session is already the bottleneck;
 also multiplies in-flight requests, so raise it against a throttling tenant with
 care (the runtime retries a 429/503 with `Retry-After`, but the retries are time you
 do not get back).
+
+### Throttling as a measured number
+
+Retrying a `429`/`503` is transparent by design, which is exactly what makes it
+misleading: a run throttled on every batch reports the *throttled* rate, so
+"is concurrency 8 faster than 4?" has no honest answer. `ThrottleMonitor` supplies
+the denominator — it wraps a context's transport (sync and async) and counts
+responses, `429`/`503`s and the `Retry-After` seconds the service asked for, without
+changing retry, backoff or pacing:
+
+```python
+from office365.migration import MigrationSession, ThrottleMonitor
+
+throttle = ThrottleMonitor().attach(target_ctx).attach(source_ctx)
+session = MigrationSession(throttle=throttle).register(context=target_ctx)
+statuses = session.start()
+
+print(throttle.summary())  # "throttled 3/171 response(s) (429: 2, 503: 1), 42s of Retry-After"
+print(throttle.snapshot())  # {'responses': 171, 'throttled': 3, 'retry_after_s': 42.0, 'by_status': {...}}
+```
+
+The session logs a `throttled` event (level `warning`) whenever the counter grows,
+carrying the cumulative `responses`/`throttled`/`retry_after_s`/`by_status`, and adds
+the same counters to `run.completed` — so a collector can chart throttling over time,
+and `retry_after_s` is the additive cost throttling put on the run. Attaching is
+cheap and inert: contexts cloned from a monitored one share the wrapper (the
+whole-site resolver's every web included), and re-attaching replaces rather than
+stacks. A monitor is the thing to add *before* changing `--concurrency`, or the
+before/after numbers mean nothing.
+
+The proactive lever is pacing rather than retrying: `RateLimiter(min_interval=...)`
+puts a floor between requests across all workers of a run, so the tenant's limit is
+approached instead of discovered:
+
+```python
+from office365.runtime.http.throttling import RateLimiter
+
+RateLimiter(min_interval=0.25).bind(target_ctx)  # at most 4 requests/second, fleet-wide
+```
 
 Resume from the **checkpoint and manifest files**, never from a log: those are the
 authoritative record of what has been copied, and a log is best-effort.

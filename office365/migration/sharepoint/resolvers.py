@@ -27,7 +27,7 @@ reported through the same sink (see
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Iterable, Sequence, Union
+from typing import TYPE_CHECKING, Callable, Iterable, Sequence, Union
 
 from office365.migration.adapters.filesystem import FileSystemSource
 from office365.migration.map import ContentTypeMap
@@ -52,6 +52,7 @@ from office365.migration.sharepoint.structure import (
     web_scope_note,
 )
 from office365.migration.tasks import FILE_SHARE, SHAREPOINT, MigrationTask
+from office365.runtime.operations import Progress
 from office365.sharepoint.lists.base_type import BaseType
 from office365.sharepoint.lists.templates.type import ListTemplateType
 from office365.sharepoint.webs.creation_information import WebCreationInformation
@@ -131,6 +132,27 @@ def resolve_task(
     raise ValueError(f"unsupported task kind {task.kind!r}")
 
 
+def _report(
+    progress: "Callable[[Progress], None] | None",
+    done: int,
+    total: int | None,
+    stage: str,
+    title: str | None = None,
+) -> None:
+    """Emit one resolution step, if a callback was supplied.
+
+    Resolution used to be the session's silent phase: it provisions target
+    containers and replays every list's structure before anything is copied, so a
+    run printed its plan and then sat quiet. These steps give the same
+    ``Progress`` heartbeat the runner emits, using its vocabulary: ``lists`` (what
+    is in scope), ``containers`` (target lists created/found), ``structure`` (per
+    list columns/content types/views), and the indeterminate ``pages`` /
+    ``navigation`` / ``branding`` stages.
+    """
+    if progress is not None:
+        progress(Progress(done=done, total=total, stage=stage, items=[title] if title else None))
+
+
 def resolve_site_task(
     task: MigrationTask,
     context: ClientContext,
@@ -146,6 +168,7 @@ def resolve_site_task(
     duplicate_page_behavior: str = DUPLICATE_RENAME,
     migrate_site_settings: bool = True,
     warnings: list[str] | None = None,
+    progress: "Callable[[Progress], None] | None" = None,
 ) -> list[tuple[Source, Target]]:
     """Resolve a whole-site task into one ``(source, target)`` pair per list.
 
@@ -195,6 +218,11 @@ def resolve_site_task(
         warnings: Optional sink for resolution-level notes (subsites skipped,
             web parts, workflows, InfoPath forms, BCS external lists and pages with
             no copyable body detected but not migrated).
+        progress: Optional ``ProgressCallback`` fired as containers are created and
+            each list's structure is replayed, so the provisioning phase reports
+            instead of running silent (``lists`` / ``containers`` / ``structure``
+            stages, then indeterminate ``pages`` / ``navigation`` / ``branding``
+            ones).
     """
     if task.kind != SHAREPOINT:
         raise ValueError(f"a site task must be kind {SHAREPOINT!r}, got {task.kind!r}")
@@ -223,14 +251,20 @@ def resolve_site_task(
         migrate_site_settings,
         warnings if warnings is not None else [],
         pairs,
+        progress=progress,
     )
     return pairs
 
 
 def _report_pages(
-    source_web: Web, target_web: Web, duplicate_behavior: str, warnings: list[str]
+    source_web: Web,
+    target_web: Web,
+    duplicate_behavior: str,
+    warnings: list[str],
+    progress: "Callable[[Progress], None] | None" = None,
 ) -> PageCopyReport | None:
     """Copy the web's modern site pages, reporting what a copy cannot carry."""
+    _report(progress, 0, None, "pages")
     try:
         report = copy_site_pages(source_web, target_web, duplicate_behavior=duplicate_behavior, warnings=warnings)
     except Exception as e:  # noqa: BLE001 — page copy is best-effort; never abort resolution
@@ -337,6 +371,8 @@ def _resolve_web(
     preserve_site_settings: bool,
     warnings: list[str],
     pairs: list[tuple[Source, Target]],
+    *,
+    progress: "Callable[[Progress], None] | None" = None,
 ) -> None:
     """Resolve one web's lists, then recurse into its subsites when requested."""
     if preserve_permissions:
@@ -345,37 +381,34 @@ def _resolve_web(
         except Exception as e:  # noqa: BLE001 — site security is best-effort; never abort list resolution
             warnings.append(f"site security replication failed for {_web_url(source_context.web)}: {e}")
     if migrate_navigation:
+        _report(progress, 0, None, "navigation")
         try:
             apply_navigation(source_context.web, target_context.web, warnings)
         except Exception as e:  # noqa: BLE001 — navigation is best-effort; never abort list resolution
             warnings.append(f"navigation replication failed for {_web_url(source_context.web)}: {e}")
     _apply_web_settings(source_context.web, target_context.web, preserve_site_settings, warnings)
+    _report(progress, 0, None, "lists")
     source_lists: Iterable[SPList] = source_context.web.lists.get().execute_query()
     # Modern and classic wiki pages are copied; web part data bindings, wiki markup
     # that addresses the source site, workflows, InfoPath forms, BCS external lists
     # and pages with no copyable body are outside what a client-side copy can carry —
     # report them rather than dropping them silently.
     page_report = (
-        _report_pages(source_context.web, target_context.web, duplicate_page_behavior, warnings)
+        _report_pages(source_context.web, target_context.web, duplicate_page_behavior, warnings, progress)
         if migrate_pages
         else None
     )
     _report_handoff(source_context.web, source_lists, warnings, page_report)
-    selected: list[SPList] = []
-    for source_list in source_lists:
-        title = source_list.title
-        if not title or title in exclude_titles:
-            continue
-        if include_titles is not None and title not in include_titles:
-            continue
-        if not is_migratable_list(source_list):
-            continue
-        selected.append(source_list)
+    selected = _select_lists(source_lists, include_titles, exclude_titles)
+    _report(progress, 0, len(selected), "containers")
 
     # Create/resolve every target container *before* replaying any structure: a
     # lookup column names the list it points at, so that list must already exist
     # (and have a known target id) when the referencing list's fields are replayed.
-    resolved = [(source_list, _ensure_target_list(target_context, source_list)) for source_list in selected]
+    resolved = []
+    for position, source_list in enumerate(selected, start=1):
+        resolved.append((source_list, _ensure_target_list(target_context, source_list)))
+        _report(progress, position, len(selected), "containers", source_list.title)
     list_id_map = _list_id_map_from_pairs(resolved)
     # A lookup may reference a list that is *not* in the include/exclude scope but
     # is already present on the target; match those by title so their values can
@@ -395,7 +428,7 @@ def _resolve_web(
     _provision_web_scope_structure(source_context.web, target_context.web, provision_structure, list_id_map, warnings)
     _report_web_scope_structure(source_context.web, target_context.web, warnings)
 
-    for source_list, target_list in resolved:
+    for position, (source_list, target_list) in enumerate(resolved, start=1):
         if provision_structure:
             content_type_map, structure_warnings = _provision_structure(source_list, target_list, list_id_map)
         else:
@@ -403,9 +436,11 @@ def _resolve_web(
         source, target = _list_adapters(source_list, target_list, content_type_map=content_type_map)
         _attach_warnings(target, structure_warnings)
         pairs.append((source, target))
+        _report(progress, position, len(resolved), "structure", source_list.title)
 
     # Branding last: an alternate-CSS URL may point into a library this run just
     # populated, so the asset has to exist before it is copied.
+    _report(progress, 0, None, "branding")
     _apply_web_branding(source_context.web, target_context.web, preserve_site_settings, warnings)
 
     child_webs = list(source_context.web.webs.get().execute_query())
@@ -436,7 +471,27 @@ def _resolve_web(
             preserve_site_settings,
             warnings,
             pairs,
+            progress=progress,
         )
+
+
+def _select_lists(
+    source_lists: Iterable[SPList],
+    include_titles: set[str] | None,
+    exclude_titles: set[str],
+) -> list[SPList]:
+    """The lists a run migrates: migratable, and inside the include/exclude scope."""
+    selected: list[SPList] = []
+    for source_list in source_lists:
+        title = source_list.title
+        if not title or title in exclude_titles:
+            continue
+        if include_titles is not None and title not in include_titles:
+            continue
+        if not is_migratable_list(source_list):
+            continue
+        selected.append(source_list)
+    return selected
 
 
 def _provision_structure(

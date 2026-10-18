@@ -48,13 +48,22 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 import time
 from datetime import datetime, timezone
 from typing import Any, Callable, Optional
 
 from office365.runtime.operations import Progress
 
-__all__ = ["LOGGER_NAME", "JsonLogFormatter", "ProgressReporter", "configure_json_logging", "log_event"]
+__all__ = [
+    "LOGGER_NAME",
+    "JsonLogFormatter",
+    "TextLogFormatter",
+    "ProgressReporter",
+    "configure_json_logging",
+    "configure_text_logging",
+    "log_event",
+]
 
 #: Every event this module emits goes through this logger, so a caller can route
 #: migration events without touching the rest of the library's logging.
@@ -74,6 +83,23 @@ _MIN_RATE_SECONDS = 0.5
 def _utc_now() -> str:
     """A stable, sortable UTC timestamp (millisecond precision, ``Z`` suffix)."""
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
+class TextLogFormatter(logging.Formatter):
+    """Render a log record as one readable line, with its event name when it has one.
+
+    ``"warning  job.failed  library:/sites/t: denied"`` — the event name is what a
+    filter or a grep needs, and a record from elsewhere in the library (no ``event``
+    field) simply renders without it.
+    """
+
+    def __init__(self) -> None:
+        super().__init__("%(levelname)-7s %(message)s")
+
+    def format(self, record: logging.LogRecord) -> str:
+        line = super().format(record)
+        event = getattr(record, "event", None)
+        return f"{line}  [{event}]" if event else line
 
 
 class JsonLogFormatter(logging.Formatter):
@@ -120,6 +146,35 @@ def configure_json_logging(stream: Any = None, level: int = logging.INFO) -> log
     handler = logging.StreamHandler(stream)
     handler.setFormatter(JsonLogFormatter())
     handler._office365_json = True  # type: ignore[attr-defined]
+    logger.addHandler(handler)
+    if logger.level == logging.NOTSET or logger.level > level:
+        logger.setLevel(level)
+    return handler
+
+
+def configure_text_logging(stream: Any = None, level: int = logging.INFO) -> logging.Handler:
+    """Route migration events to ``stream`` (default ``stderr``) as plain lines.
+
+    The human-readable counterpart of :func:`configure_json_logging` — same events,
+    same level filtering, one line each (``warning  job.failed  library:/sites/t:
+    denied``), for a run whose progress is being watched rather than collected. Also
+    replaces a handler installed by an earlier call, and touches only
+    :data:`LOGGER_NAME`.
+
+    Args:
+        stream: A writable text stream; defaults to ``sys.stderr``.
+        level: Minimum level for migration events (``logging.INFO`` by default).
+
+    Returns:
+        The installed handler, in case the caller wants to remove or re-route it.
+    """
+    for handler in list(logger.handlers):
+        if getattr(handler, "_office365_text", False):
+            logger.removeHandler(handler)
+    handler = logging.StreamHandler(stream)
+    handler.setFormatter(TextLogFormatter())
+    handler.setLevel(level)
+    handler._office365_text = True  # type: ignore[attr-defined]
     logger.addHandler(handler)
     if logger.level == logging.NOTSET or logger.level > level:
         logger.setLevel(level)
@@ -187,10 +242,18 @@ class ProgressReporter:
         self._stage = ""
         self._beat = 0
         self._emitted_done = -1
+        # A shared reporter is handed to every concurrently-running job, so the
+        # counters and the emit call are taken under one lock (re-entrant: an emit
+        # hook may report back into the same reporter).
+        self._lock = threading.RLock()
 
     # ── ProgressCallback ─────────────────────────────────────────
 
     def __call__(self, progress: Progress) -> None:
+        with self._lock:
+            self._observe(progress)
+
+    def _observe(self, progress: Progress) -> None:
         total = progress.total
         if total is not None and self._total is not None and total != self._total:
             # A second container restarts the window: a rate carried over from the
@@ -201,16 +264,34 @@ class ProgressReporter:
             self._last_emit = self._started
         if total is not None:
             self._total = total
+        elif progress.stage and progress.stage != self._stage:
+            # A stage that reports no total ("pages", "navigation") is
+            # indeterminate: keeping the previous stage's total would print a
+            # percentage that is no longer about anything.
+            self._total = None
         self._done = progress.done
         self._stage = progress.stage or self._stage
         now = self._clock()
         if self.interval == 0 or now - self._last_emit >= self.interval:
             self.flush(now=now)
 
+    def derive(self, label: str = "") -> "ProgressReporter":
+        """A sibling reporter with its own counters, sharing this one's settings.
+
+        Concurrency gives every job its own container window (and label) while the
+        interval, clock and ``emit`` sink stay the session's — so the heartbeats of
+        two lists running at once do not fight over one set of counters.
+        """
+        return ProgressReporter(self.interval, emit=self._emit, clock=self._clock, label=label or self.label)
+
     # ── Reporting ────────────────────────────────────────────────
 
     def flush(self, *, now: Optional[float] = None) -> dict:
         """Emit a heartbeat now (if there is anything to report) and return it."""
+        with self._lock:
+            return self._flush(now=now)
+
+    def _flush(self, *, now: Optional[float] = None) -> dict:
         now = self._clock() if now is None else now
         payload = self.snapshot(now=now)
         self._last_emit = now

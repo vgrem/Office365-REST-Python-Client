@@ -46,6 +46,31 @@ if TYPE_CHECKING:
 
 _TAXONOMY_FIELD_TYPES = {"TaxonomyFieldType", "TaxonomyFieldTypeMulti"}
 
+
+def _cloned_context(obj):
+    """A fresh ``ClientContext`` clone for ``obj`` (same auth + transport, own queue)."""
+    ctx = obj.context
+    return ctx.clone(ctx.base_url)
+
+
+def _cloned_list(sp_list: "SPList", context=None) -> "SPList":
+    """The same list, addressed by id and loaded on ``context`` (or a clone of it)."""
+    list_id = sp_list.id
+    if not list_id:
+        raise ValueError("cannot rebind a list that was never loaded")
+    ctx = context if context is not None else _cloned_context(sp_list)
+    return ctx.web.lists.get_by_id(list_id).get().execute_query()
+
+
+def _cloned_folder(folder: "Folder", context=None) -> "Folder":
+    """The same folder, addressed by server-relative path and loaded on ``context``."""
+    server_relative_url = folder.server_relative_url
+    if not server_relative_url:
+        raise ValueError("cannot rebind a folder that was never loaded")
+    ctx = context if context is not None else _cloned_context(folder)
+    return ctx.web.get_folder_by_server_relative_path(server_relative_url).get().execute_query()
+
+
 #: The target's typed columns: ``(lookup: name -> referenced list id, user names,
 #: multi-lookup: name -> referenced list id, multi-user names, taxonomy:
 #: name -> (allows many, hidden note field internal name), multi-choice names)``.
@@ -871,6 +896,17 @@ class SharePointListSource:
     # target can resolve them (see ``_annotate_person_logins``).
     supports_typed_values = True
 
+    def rebind(self) -> "SharePointListSource":
+        """This source on its own cloned context, so another thread can drive it.
+
+        A context owns one pending-query queue: two adapters sharing it interleave
+        their deferred queries. Re-addressing the same list (by id) on a ``clone``
+        — which shares the authenticated transport — lets a session run several
+        list jobs in parallel over one connection pool. Read caches are per-run and
+        deliberately not carried over.
+        """
+        return SharePointListSource(_cloned_list(self._list), self._select)
+
     def __init__(self, source_list: "SPList", select: list[str] | None = None) -> None:
         self._list = source_list
         self._select = select
@@ -1489,6 +1525,17 @@ class SharePointListTarget:
     #: chunked path even at ``concurrency == 1``, so checkpoints never record
     #: ``DONE`` ahead of the actual write.
     deferred_writes = True
+
+    def rebind(self) -> "SharePointListTarget":
+        """This target on its own cloned context (see :meth:`SharePointListSource.rebind`)."""
+        return SharePointListTarget(
+            _cloned_list(self._list),
+            key=list(self._key_columns) or None,
+            key_field=self._key_field,
+            on_conflict=self._on_conflict_override,
+            identity_field=self._identity_field,
+            content_type_map=self._content_type_map,
+        )
 
     def __init__(
         self,
@@ -2341,6 +2388,12 @@ class SharePointLibrarySource:
     folder's department) as their payload when the parent list is known.
     """
 
+    def rebind(self) -> "SharePointLibrarySource":
+        """This source on its own cloned context (see :meth:`SharePointListSource.rebind`)."""
+        context = _cloned_context(self._folder)
+        sp_list = _cloned_list(self._sp_list, context) if self._sp_list is not None else None
+        return SharePointLibrarySource(_cloned_folder(self._folder, context), self.on_bytes, sp_list=sp_list)
+
     def __init__(
         self,
         library_folder: "Folder",
@@ -2773,6 +2826,17 @@ class SharePointLibraryTarget:
     #: own, applied after the timestamps that would otherwise re-approve the file.
     supports_item_state = True
 
+    def rebind(self) -> "SharePointLibraryTarget":
+        """This target on its own cloned context (see :meth:`SharePointListSource.rebind`)."""
+        context = _cloned_context(self._folder)
+        sp_list = _cloned_list(self._sp_list, context) if self._sp_list is not None else None
+        return SharePointLibraryTarget(
+            _cloned_folder(self._folder, context),
+            concurrency=self._concurrency,
+            sp_list=sp_list,
+            content_type_map=self._content_type_map,
+        )
+
     def __init__(
         self,
         library_folder: "Folder",
@@ -2788,6 +2852,7 @@ class SharePointLibraryTarget:
         self._list_target = (
             SharePointListTarget(sp_list, content_type_map=content_type_map) if sp_list is not None else None
         )
+        self._content_type_map = content_type_map
         self.warnings: list[str] = []
         self._login_cache: dict[int, str | None] = {}
         self._principals_cache: _TargetPrincipals | None = None

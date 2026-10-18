@@ -31,6 +31,16 @@ def _elapsed_ms(started: datetime, finished: datetime | None = None) -> int:
     return int((end - started).total_seconds() * 1000)
 
 
+def _rebind_adapter(adapter):
+    """The adapter re-addressed on its own context, or the adapter itself.
+
+    Adapters opt in by exposing ``rebind()`` (the SharePoint ones do); the ones that
+    hold no runtime context (filesystem, in-memory) are shared as they are.
+    """
+    rebind = getattr(adapter, "rebind", None)
+    return rebind() if callable(rebind) else adapter
+
+
 class MigrationJob:
     """A resumable migration between a source and a target adapter."""
 
@@ -68,6 +78,33 @@ class MigrationJob:
         """
         self._assess_hook = hook
         return self
+
+    def rebind(self) -> "MigrationJob":
+        """This job with context-isolated adapters — a copy safe to run on a thread.
+
+        A job's adapters may hold a ``ClientRuntimeContext`` (the SharePoint adapters
+        do), and a context owns a single pending-query queue: two jobs sharing one
+        cannot run at the same time. Adapters that expose ``rebind()`` are
+        re-addressed on a ``clone`` (which shares the authenticated transport, so the
+        whole fleet still uses one connection pool); the rest are context-free and
+        shared. Returns ``self`` when nothing had to change, so a sequential run is
+        untouched.
+
+        The copy starts from a fresh phase and stats — it is meant to be created
+        *before* the job runs, which is what a session does before handing it to a
+        worker thread.
+        """
+        source = _rebind_adapter(self._source)
+        target = _rebind_adapter(self._target)
+        if source is self._source and target is self._target:
+            return self
+        return MigrationJob(
+            source,
+            target,
+            self._options,
+            manifest_path=self._manifest_path,
+            checkpoint_path=self._checkpoint_path,
+        )
 
     # ── State ────────────────────────────────────────────────────
 

@@ -56,6 +56,7 @@ from office365.migration.server_job import MigrationServerJob
 from office365.migration.session import MigrationSession, SessionTask
 from office365.migration.settings import MigrationSettings
 from office365.migration.tasks import MigrationTask
+from office365.migration.throttling import ThrottleMonitor
 from office365.migration.validators import VerificationReport, verify
 
 if TYPE_CHECKING:
@@ -114,6 +115,7 @@ __all__ = [
     "ScanDefinition",
     "ScanReport",
     "SessionTask",
+    "ThrottleMonitor",
     "VerificationReport",
     "build_report",
     "compute_delta",

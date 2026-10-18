@@ -21,7 +21,9 @@ the registered ``ClientContext``).
 from __future__ import annotations
 
 import itertools
+import logging
 import re
+import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
@@ -34,8 +36,18 @@ if TYPE_CHECKING:
     from office365.migration.delta import DeltaReport
     from office365.migration.settings import MigrationSettings
     from office365.migration.tasks import MigrationTask
+    from office365.migration.throttling import ThrottleMonitor
 
 __all__ = ["MigrationSession", "SessionTask"]
+
+#: Job phases a session does not run again (a resume re-plans only unfinished work).
+_TERMINAL_PHASES = frozenset(
+    {
+        MigrationPhase.COMPLETED,
+        MigrationPhase.COMPLETED_WITH_ERRORS,
+        MigrationPhase.CANCELLED,
+    }
+)
 
 
 def _site_list_slug(target) -> str:
@@ -54,6 +66,11 @@ def _child_path(directory, label: str, name: str):
     from pathlib import Path
 
     return Path(directory) / f"{label}.{name}"
+
+
+def _throttle_fields(monitor: "ThrottleMonitor | None") -> dict:
+    """The throttling counters to add to a run event — nothing without a monitor."""
+    return monitor.snapshot() if monitor is not None else {}
 
 
 def _job_status(job: MigrationJob) -> dict:
@@ -93,14 +110,26 @@ class SessionTask:
 class MigrationSession:
     """A batch of migration tasks, driven like the SPMT PowerShell cmdlets."""
 
-    def __init__(self, options: MigrationOptions | None = None, context=None, settings=None) -> None:
+    def __init__(
+        self,
+        options: MigrationOptions | None = None,
+        context=None,
+        settings=None,
+        throttle: "ThrottleMonitor | None" = None,
+    ) -> None:
         self._options = options
         self._context = context
         self._settings = settings
+        self._throttle = throttle
         self._tasks: list[SessionTask] = []
         self._ids = itertools.count(1)
         self._warnings: list[str] = []
         self._settings_noted = False
+
+    @property
+    def throttle(self) -> "ThrottleMonitor | None":
+        """The throttling monitor this session reports, if one was supplied."""
+        return self._throttle
 
     # ── Cmdlets ──────────────────────────────────────────────────
 
@@ -169,6 +198,7 @@ class MigrationSession:
         include_subwebs: bool = False,
         manifest_dir=None,
         checkpoint_dir=None,
+        progress=None,
         **descriptor,
     ) -> list[MigrationJob]:
         """Add a whole-site (``migrate_all``) task — one job per source list/library.
@@ -188,6 +218,10 @@ class MigrationSession:
         (``settings.migrate_site_settings``, ``NONE`` to leave the target web alone);
         branding and the site-collection/regional settings are reported, not
         carried.
+
+        ``progress`` is a ``ProgressCallback`` fired while the plan is resolved —
+        target containers created, each list's structure replayed — which is
+        otherwise the quiet phase between the inventory and the first copy.
         """
         if task is None and descriptor:
             from office365.migration.tasks import MigrationTask
@@ -218,6 +252,7 @@ class MigrationSession:
                 self._settings.migrate_site_settings if self._settings is not None else None
             ),
             warnings=self._warnings,
+            progress=progress,
         )
         jobs: list[MigrationJob] = []
         for index, (source, target) in enumerate(pairs, start=1):
@@ -245,43 +280,102 @@ class MigrationSession:
         """The per-task status (``Show-SPMTMigration``)."""
         return [entry.status() for entry in self._tasks]
 
-    def start(self, progress=None) -> list[dict]:
+    def start(self, progress=None, concurrency: int = 1) -> list[dict]:
         """Start the migration: plan + run every registered task.
 
         ``progress`` is the ``ProgressCallback`` handed to each job (and on to the
         runner), so one :class:`~office365.migration.logging.ProgressReporter` can
         heartbeat the whole session.
+
+        ``concurrency`` is how many tasks run **at once** (default ``1``: one after
+        another). Because a whole-site task resolves to one job per list, this is
+        the site-level knob: a site of many small lists is waiting on round trips,
+        not on bandwidth, and copies them in parallel. Each job gets its own
+        context clone (:meth:`~office365.migration.job.MigrationJob.rebind`), so
+        threads never share a pending-query queue while still sharing the
+        authenticated transport — and therefore the same connection pool, retry
+        policy and rate limiter. A shared
+        :class:`~office365.migration.logging.ProgressReporter` is derived per job so
+        heartbeats keep their own counters and label.
         """
-        statuses: list[dict] = []
+        statuses: list[dict | None] = [None] * len(self._tasks)
         started = datetime.now(timezone.utc)
         log_event("run.started", tasks=len(self._tasks))
+        throttled = self._throttle.throttled if self._throttle is not None else 0
         try:
-            for entry in self._tasks:
-                job = entry.job
-                if job.phase in (
-                    MigrationPhase.COMPLETED,
-                    MigrationPhase.COMPLETED_WITH_ERRORS,
-                    MigrationPhase.CANCELLED,
-                ):
-                    statuses.append(entry.status())
-                    continue
-                job.plan(progress)
-                job.run(progress)
-                statuses.append(entry.status())
+            if concurrency > 1:
+                self._run_parallel(progress, concurrency, statuses)
+            else:
+                for index, entry in enumerate(self._tasks):
+                    statuses[index] = self._run_entry(entry, progress, isolated=False)
+                    throttled = self._note_throttling(throttled)
         finally:
+            done = [status for status in statuses if status is not None]
             totals = {"success": 0, "skipped": 0, "errors": 0}
-            for status in statuses:
+            for status in done:
                 for key in totals:
                     totals[key] += status.get("stats", {}).get(key) or 0
             log_event(
                 "run.completed",
-                f"{len(statuses)} task(s): {totals['success']} copied, "
+                f"{len(done)} task(s): {totals['success']} copied, "
                 f"{totals['skipped']} skipped, {totals['errors']} failed",
                 duration_ms=int((datetime.now(timezone.utc) - started).total_seconds() * 1000),
-                tasks=len(statuses),
+                tasks=len(done),
                 **totals,
+                **_throttle_fields(self._throttle),
             )
-        return statuses
+        return [status for status in statuses if status is not None]
+
+    def _run_entry(self, entry: "SessionTask", progress, *, isolated: bool) -> dict:
+        """Plan and run one task, optionally on context-isolated adapters."""
+        job = entry.job
+        if job.phase in _TERMINAL_PHASES:
+            return entry.status()
+        if isolated:
+            # Adopt the copy *before* running: if the run fails part-way, the
+            # session still reports what it copied instead of a job that never moved.
+            job = job.rebind()
+            entry.job = job
+        job.plan(progress)
+        job.run(progress)
+        return entry.status()
+
+    def _run_parallel(self, progress, concurrency: int, statuses: list[dict | None]) -> None:
+        """Run the registered jobs on a thread pool (one cloned context per job)."""
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        workers = max(1, min(concurrency, len(self._tasks)))
+        log_event("run.parallel", tasks=len(self._tasks), concurrency=workers)
+        lock = threading.Lock()
+        throttled = self._throttle.throttled if self._throttle is not None else 0
+
+        def _work(index: int, entry: "SessionTask") -> None:
+            # A derived reporter keeps each job's counters its own; the session's
+            # interval, clock and emit sink are still the ones in use.
+            reporter = progress.derive(entry.job.target_label) if hasattr(progress, "derive") else progress
+            status = self._run_entry(entry, reporter, isolated=True)
+            with lock:
+                statuses[index] = status
+
+        with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="migration") as pool:
+            futures = [pool.submit(_work, index, entry) for index, entry in enumerate(self._tasks)]
+            for future in as_completed(futures):
+                future.result()  # a task failure stops the session, as it does sequentially
+                throttled = self._note_throttling(throttled)
+
+    def _note_throttling(self, seen: int) -> int:
+        """Emit a ``throttled`` event when the monitor counted more since ``seen``.
+
+        The event carries the cumulative counters (``responses``, ``throttled``,
+        ``retry_after_s``, ``by_status``) so a collector can chart a run's
+        throttling over time rather than only its total.
+        """
+        if self._throttle is None:
+            return seen
+        snapshot = self._throttle.snapshot()
+        if snapshot["throttled"] > seen:
+            log_event("throttled", self._throttle.summary(), level=logging.WARNING, **snapshot)
+        return snapshot["throttled"]
 
     def stop(self) -> None:
         """Cancel the session (``Stop-SPMTMigration``); tasks stay resumable."""

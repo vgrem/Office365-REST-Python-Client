@@ -1,6 +1,7 @@
 import json
 import logging
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from office365.migration.logging import (
     JsonLogFormatter,
     ProgressReporter,
     configure_json_logging,
+    configure_text_logging,
     log_event,
 )
 from office365.migration.session import MigrationSession
@@ -208,6 +210,52 @@ class TestProgressReporter(unittest.TestCase):
         self.assertIsNone(beat["eta_seconds"])
         self.assertEqual(self.reporter.summary(), "Documents: 30 3/s")
 
+    def test_an_indeterminate_stage_clears_the_previous_total(self):
+        # Structure replay is counted; pages and navigation are not. A stale total
+        # would otherwise make the heartbeat claim a percentage it cannot know.
+        self.reporter(Progress(done=4, total=4, stage="structure"))
+        self.now = 10.0
+        self.reporter(Progress(done=0, stage="pages"))
+
+        beat = self.reporter.flush()
+
+        self.assertEqual(beat["stage"], "pages")
+        self.assertIsNone(beat["total"])
+        self.assertEqual(beat["done"], 0)
+
+    def test_a_derived_reporter_shares_the_sink_and_keeps_its_own_counters(self):
+        other = self.reporter.derive("Documents/Sub")
+        self.now = 10.0
+
+        self.reporter(Progress(done=5, total=10, stage="structure"))
+        other(Progress(done=1, total=2, stage="structure"))
+
+        self.assertEqual([beat["label"] for beat in self.beats], ["Documents", "Documents/Sub"])
+        self.assertEqual([beat["done"] for beat in self.beats], [5, 1])
+        self.assertEqual(self.reporter.summary(), "Documents: 5/10 (50.0%) 0.5/s ETA 10s")
+        self.assertEqual(other.summary(), "Documents/Sub: 1/2 (50.0%) 0.1/s ETA 10s")
+
+    def test_snapshots_from_several_threads_are_counted_once(self):
+        errors: list = []
+
+        def _beat() -> None:
+            try:
+                for done in range(1, 51):
+                    self.reporter(Progress(done=done, total=50, stage="migrating"))
+            except Exception as ex:  # a lock-free reporter would corrupt here, not raise
+                errors.append(ex)
+
+        threads = [threading.Thread(target=_beat) for _ in range(4)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        beat = self.reporter.flush()
+        self.assertEqual(errors, [])
+        self.assertGreaterEqual(beat["done"], 1)
+        self.assertEqual(len(self.beats), beat["beat"])
+
 
 class TestMigrationEvents(_LogTestCase):
     def test_a_job_reports_its_plan_and_its_run(self):
@@ -264,6 +312,49 @@ class TestMigrationEvents(_LogTestCase):
         completed = self.events(handler, "run.completed")[0]
         self.assertEqual(completed.tasks, 0)  # type: ignore[attr-defined]
         self.assertEqual(completed.errors, 0)  # type: ignore[attr-defined]
+
+
+class TestConfigureTextLogging(unittest.TestCase):
+    def test_events_are_written_as_plain_lines(self):
+        import io
+
+        stream = io.StringIO()
+        handler = configure_text_logging(stream)
+        self.addCleanup(logging.getLogger(LOGGER_NAME).removeHandler, handler)
+
+        log_event("job.failed", "library:/sites/t: denied", level=logging.WARNING, source="library:/sites/s")
+
+        lines = [line for line in stream.getvalue().splitlines() if line.strip()]
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].startswith("WARNING"))
+        self.assertIn("library:/sites/t: denied", lines[0])
+        self.assertTrue(lines[0].endswith("[job.failed]"))
+
+    def test_the_level_filters_what_is_shown(self):
+        import io
+
+        stream = io.StringIO()
+        handler = configure_text_logging(stream, level=logging.WARNING)
+        self.addCleanup(logging.getLogger(LOGGER_NAME).removeHandler, handler)
+
+        log_event("job.started", "Documents")
+        log_event("job.failed", "denied", level=logging.WARNING)
+
+        self.assertNotIn("Documents", stream.getvalue())
+        self.assertEqual(len([line for line in stream.getvalue().splitlines() if line.strip()]), 1)
+
+    def test_configuring_twice_does_not_duplicate_every_line(self):
+        import io
+
+        stream = io.StringIO()
+        first = configure_text_logging(stream)
+        second = configure_text_logging(stream)
+        logger = logging.getLogger(LOGGER_NAME)
+        self.addCleanup(logger.removeHandler, second)
+
+        self.assertNotIn(first, logger.handlers)
+        log_event("run.started", tasks=0)
+        self.assertEqual(len([line for line in stream.getvalue().splitlines() if line.strip()]), 1)
 
 
 if __name__ == "__main__":

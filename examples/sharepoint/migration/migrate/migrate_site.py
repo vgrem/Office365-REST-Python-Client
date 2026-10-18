@@ -72,13 +72,27 @@ While it runs, ``--stats`` prints a heartbeat per active list (items done, rate,
 ETA) instead of going quiet between "Migrating…" and the summary, and
 ``--log-json`` turns the same events into JSON lines on stderr — one object per
 event, with the run/job/plan boundaries and every failure — for whatever collects
-logs on the machine (an OpenTelemetry Collector, Promtail, ``kubectl logs``). The
-checkpoint and manifest files stay the authoritative record; the log is for
-watching a run, not for resuming one.
+logs on the machine (an OpenTelemetry Collector, Promtail, ``kubectl logs``);
+``--log-level DEBUG`` without it prints those events as plain lines instead, so a
+watched run needs no collector to be verbose. The checkpoint and manifest files stay
+the authoritative record; the log is for watching a run, not for resuming one.
 
 ``--concurrency N`` (default 1) and ``--batch-size N`` (default 100) tune the copy,
 and each list's closing line reports the rate it actually achieved (``in 1m42s,
 13.7 items/s, 6.1 MB/s``), so a change can be judged on a number instead of a hunch.
+``--lists-in-flight N`` (default 1) is the site-level knob: a site of many small
+lists spends its time on round trips — resolving each list's structure, then
+copying a few hundred items — so migrating several lists at once is what shortens
+the run. Each list keeps its own manifest and checkpoint, and every worker gets its
+own context clone (same transport, same rate limiter), so parallelism does not
+change what the target receives.
+
+Two throttling knobs make that number honest: the run counts the responses the
+service answered with ``429``/``503`` and the ``Retry-After`` seconds it asked for
+(``ThrottleMonitor``), reporting them in the summary and as ``throttled`` events, so
+a rate the service limited is not mistaken for the rate the target allows; and
+``--pace SECONDS`` puts a floor between requests across all workers, which is the
+proactive lever for a tenant that throttles a parallel run.
 """
 
 from __future__ import annotations
@@ -87,9 +101,9 @@ import argparse
 import logging
 from pathlib import Path
 
-from office365.migration import MigrationOptions, MigrationSession, MigrationSettings
+from office365.migration import MigrationOptions, MigrationSession, MigrationSettings, ThrottleMonitor
 from office365.migration.base import DEFAULT_BATCH_SIZE
-from office365.migration.logging import ProgressReporter, configure_json_logging
+from office365.migration.logging import ProgressReporter, configure_json_logging, configure_text_logging
 from office365.migration.sharepoint.pages import (
     PAGE_LIBRARY_TEMPLATE,
     capture_home_page,
@@ -97,6 +111,7 @@ from office365.migration.sharepoint.pages import (
 )
 from office365.migration.sharepoint.resolvers import is_document_library, is_migratable_list
 from office365.migration.tasks import MigrationTask
+from office365.runtime.http.throttling import RateLimiter
 from office365.sharepoint.client_context import ClientContext
 from tests.settings import cert_path, cert_thumbprint, client_id, site_url, team_site_url, tenant
 
@@ -162,6 +177,13 @@ def _parser() -> argparse.ArgumentParser:
         help="what to do when a target page of that name exists (default: RENAME)",
     )
     parser.add_argument(
+        "--lists-in-flight",
+        type=int,
+        default=1,
+        metavar="N",
+        help="lists migrated at the same time (default: 1; raise it to stop paying resolution and round trips serially)",
+    )
+    parser.add_argument(
         "--concurrency",
         type=int,
         default=1,
@@ -174,6 +196,13 @@ def _parser() -> argparse.ArgumentParser:
         default=100,
         metavar="N",
         help="items per $batch / progress/checkpoint flush (default: 100)",
+    )
+    parser.add_argument(
+        "--pace",
+        type=float,
+        default=0.0,
+        metavar="SECONDS",
+        help="minimum interval between requests across all workers (default: 0, no pacing)",
     )
     parser.add_argument(
         "--stats",
@@ -193,7 +222,7 @@ def _parser() -> argparse.ArgumentParser:
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-        help="minimum level for the structured events (default: INFO)",
+        help="minimum level for the run's events; DEBUG without --log-json prints them as plain lines (default: INFO)",
     )
     parser.add_argument("--apply", action="store_true", help="perform the migration (default: dry run)")
     parser.add_argument("--no-verify", action="store_true", help="skip the post-run source/target reconciliation")
@@ -209,11 +238,15 @@ def main():
     preserve_authorship = args.preserve or args.preserve_authorship
     preserve_permissions = args.preserve or args.preserve_permissions
 
+    level = getattr(logging, args.log_level)
     if args.log_json:
         stream = None
         if args.log_json != "-":
             stream = open(args.log_json, "a", encoding="utf-8")  # noqa: SIM115 — closed at process exit
-        configure_json_logging(stream, level=getattr(logging, args.log_level))
+        configure_json_logging(stream, level=level)
+    elif args.log_level == "DEBUG":
+        # --log-level is not a silent no-op: verbose events as plain lines on stderr.
+        configure_text_logging(level=level)
 
     ctx = ClientContext(args.target_site).with_client_certificate(tenant, client_id, cert_thumbprint, cert_path)
 
@@ -251,8 +284,11 @@ def main():
     ]
     if preserving:
         print(f"  preserving (best-effort): {', '.join(preserving)}")
-    if args.concurrency != 1 or args.batch_size != DEFAULT_BATCH_SIZE:
-        print(f"  tuning: concurrency {args.concurrency}, batch size {args.batch_size}")
+    if args.concurrency != 1 or args.batch_size != DEFAULT_BATCH_SIZE or args.lists_in_flight != 1:
+        print(
+            f"  tuning: lists in flight {args.lists_in_flight}, concurrency {args.concurrency}, "
+            f"batch size {args.batch_size}"
+        )
     if not args.apply:
         print(f"\nDry run — {len(lists)} list(s). Re-run with --apply to migrate (--include/--exclude to narrow).")
         return
@@ -267,7 +303,16 @@ def main():
         duplicate_page_behavior=args.duplicate_pages,
     )
     options = MigrationOptions(concurrency=max(1, args.concurrency), batch_size=max(1, args.batch_size))
-    session = MigrationSession(options).register(context=ctx, settings=fidelity)
+    # Clone-aware: every web the resolver resolves shares this transport.
+    throttle = ThrottleMonitor().attach(ctx)
+    if args.pace > 0:
+        limiter = RateLimiter(min_interval=args.pace)
+        limiter.bind(ctx)
+        print(f"  pacing: at most one request per {args.pace:g}s across all workers")
+    session = MigrationSession(options, throttle=throttle).register(context=ctx, settings=fidelity)
+    # The reporter covers the plan as well as the copy: resolution provisions every
+    # target container and replays its structure, which used to be the quiet phase.
+    reporter = ProgressReporter(interval=args.stats, emit=_heartbeat) if args.stats else None
     session.add_site_task(
         task=MigrationTask.sharepoint(args.source_site, args.target_site, migrate_all=True),
         include=include,
@@ -276,11 +321,11 @@ def main():
         include_subwebs=args.include_subwebs,
         manifest_dir=work / "manifests",
         checkpoint_dir=work / "checkpoints",
+        progress=reporter,
     )
 
-    reporter = ProgressReporter(interval=args.stats, emit=_heartbeat) if args.stats else None
     print("\nMigrating…", flush=True)
-    for status in session.start(progress=reporter):
+    for status in session.start(progress=reporter, concurrency=max(1, args.lists_in_flight)):
         stats = status["stats"]
         print(
             f"  [{status['phase']}] {status['source']} -> {status['target']} "
@@ -293,8 +338,16 @@ def main():
     if not args.no_verify:
         _report_verification(session, source_ctx, ctx, preserve_permissions, fidelity)
 
+    print(f"  {_throttling(throttle)}")
     for warning in session.warnings():
         print(f"  warning: {warning}")
+
+
+def _throttling(monitor: ThrottleMonitor) -> str:
+    """``throttling: none (171 requests)`` or the monitor's counted summary."""
+    if not monitor.throttled:
+        return f"throttling: none ({monitor.responses} request(s))"
+    return f"throttling: {monitor.summary()}"
 
 
 def _throughput(status: dict) -> str:
@@ -321,11 +374,11 @@ def _elapsed(seconds: float) -> str:
 
 
 def _heartbeat(progress: dict) -> None:
-    """One compact progress line: stage, counts, percentage, rate and ETA."""
+    """One compact progress line: list, stage, counts, percentage, rate and ETA."""
     done = f"{progress['done']:,}"
     if progress["total"]:
         done += f"/{progress['total']:,} ({progress['percent']}%)"
-    parts = [progress["stage"], done] if progress["stage"] else [done]
+    parts = [part for part in (progress["label"], progress["stage"], done) if part]
     if progress["rate"]:
         parts.append(f"{progress['rate']:g} it/s")
     eta = progress["eta_seconds"]

@@ -28,6 +28,7 @@ generator/documentation/graphopenapi.cache.json
 
 # Example run checkpoints (data-pipeline resume state)
 *.checkpoint.json
+.migration/
 
 # local virtualenvs
 .repro-venv/

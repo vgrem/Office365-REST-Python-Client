@@ -8,6 +8,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **A whole-site migration can now run several lists at once.** A `migrate_all` task
+  resolves to one job per list, and `MigrationSession.start()` walked that queue
+  serially — so a site of 24 small lists paid 24 × (resolve + provision + read + copy)
+  with no overlap, which is the dominant cost of a pilot-site run, not the per-item
+  copy. `start(concurrency=N)` runs `N` jobs at once. Each job gets its own context
+  clone (`MigrationJob.rebind()` → `SharePointList*` / `SharePointLibrary*`
+  `rebind()`: a list re-addressed by id, a folder by server-relative path) because a
+  `ClientContext` owns a single pending-query queue; the clone shares the
+  authentication context (single-flight token cache), the transport (one connection
+  pool), the retry policy and the `RateLimiter`, so `--pace` still bounds the whole
+  run. Context-free adapters (filesystem, json) are shared unchanged, manifests and
+  checkpoints stay per list, statuses keep registration order, completed jobs are
+  still skipped, and a failure stops the session after in-flight jobs finish.
+  `migrate_site.py` gains `--lists-in-flight N` (default `1`, unchanged behaviour).
+  Docs: [Many lists at once](docs/migration.md#many-lists-at-once).
+- **Resolving a site task reports progress instead of going quiet.**
+  `add_site_task(progress=...)` now fires the runner's `Progress` heartbeat while the
+  plan is resolved — target containers created and each list's columns, content
+  types and views replayed — which was previously the silent stretch between the
+  inventory and the first `Migrating…` line. Stages: `lists`, `containers`,
+  `structure` (determinate) and `pages`, `navigation`, `branding` (indeterminate, no
+  stale percentage). `ProgressReporter` is thread-safe and `derive(label)` gives each
+  parallel job its own counters over the shared sink and interval.
+- **Throttling is now a measured number, not an invisible retry.** A `429`/`503` is
+  retried transparently by the runtime, which is right — and exactly what hides the
+  cost: a run throttled on every batch reports the *throttled* rate, so "is
+  concurrency 8 faster than 4?" cannot be answered and a pacing knob cannot be tuned.
+  `ThrottleMonitor` (`office365.migration`) closes that gap
+  with one counter and no policy: `attach(context)` wraps the context's transport —
+  sync and async, and through `ClientContext.clone` every web the resolver touches —
+  and counts responses, `429`/`503`s and the `Retry-After` seconds the service asked
+  for, leaving retry, backoff and pacing untouched (`summary()`,
+  `snapshot()`/`to_dict()`, `reset()`). `MigrationSession(throttle=monitor)` logs a
+  `throttled` event whenever the counter grows and adds the cumulative
+  `responses`/`throttled`/`retry_after_s`/`by_status` to `run.completed`, so a
+  collector can chart throttling over time and `retry_after_s` states the time
+  throttling added to the run. `migrate_site.py` gains `--pace SECONDS`
+  (`RateLimiter`, a fleet-wide floor between requests — the proactive lever) and
+  prints the counted cost in its summary (`throttling: none (171 request(s))`).
+  Docs: [Throttling as a measured number](docs/migration.md#throttling-as-a-measured-number).
+- **`--log-level` is no longer a silent no-op in the migration example.**
+  `migrate_site.py --log-level DEBUG` (without `--log-json`) now prints the run's
+  events as plain lines — `WARNING job.failed denied  [job.failed]` — through the new
+  `configure_text_logging()`, the human-readable counterpart of
+  `configure_json_logging()` (same events, same level filtering, one line each, and
+  it also replaces rather than duplicates a handler it installed earlier). Before,
+  the level only applied inside `--log-json`, so asking for a verbose run printed
+  nothing at all. Note that **progress** is still `--stats SECONDS` (a per-list
+  heartbeat); the event stream carries the boundaries and failures, not the counters.
 - **Web-scope site columns are provisioned on the target web, not only replayed
   through the lists that use them.** Structure replay was per list, so a column a web
   defines at *site* scope was recreated as a list column on every migrated list that
