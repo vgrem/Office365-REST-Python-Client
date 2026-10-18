@@ -159,41 +159,19 @@ uv run python examples/auth/with_client_secret.py
 
 ## Publish a release
 
-Publishing is a tag push; everything else is automated by
-`.github/workflows/release.yml`:
+Publishing is a tag push; `.github/workflows/release.yml` builds and uploads the
+wheels. The tag must match `project.version` in `pyproject.toml` — the workflow
+refuses a mismatch:
 
 ```bash
-git tag -a v3.3.0 -m "3.3.0"   # must match `project.version` in pyproject.toml
+git tag -a v3.3.0 -m "3.3.0"
 git push origin v3.3.0
 ```
 
-The workflow refuses a tag that does not match `pyproject.toml`, uploads the
-built wheels to PyPI, then opens a **draft** GitHub release for the tag with those
-same artifacts attached and a body seeded from a template in the workflow: the
-release headings, the changelog link and the install line.
-
-The draft is the human gate. Nothing is generated from the commit history —
-`CHANGELOG.md` is the source of truth, because it is already curated to what a
-user sees (`--generate-notes` would dump the whole `git log` since the last tag:
-382 commits for 3.3.0, against the ~20 bullets a release page carries). Paste the
-`### Breaking in x.y.z` subsection, paste the fixes worth calling out, write the
-summary and highlights, then publish; publishing also makes it the latest
-release. A re-run of the workflow refreshes the attached assets but never
-overwrites an edited body.
-
-The release is created by the `office365-maintainer` GitHub App, so it is
-bot-authored. Two escapes, both starting from a local `dist/` (`uv build`):
-
-**The workflow's release job failed** (PyPI already has the version) — act as the
-app from the CLI, which `scripts/github_app_token.py` makes a one-liner:
-
-```bash
-export GH_TOKEN="$(uv run python scripts/github_app_token.py \
-    --app-id 5098142 --private-key ~/.config/office365-maintainer/app.pem \
-    --repo vgrem/office365-rest-python-client)"
-gh release create v3.3.0 dist/* --verify-tag --title v3.3.0 --notes-file /tmp/notes.md
-```
-
-**A major release you want to write and sign yourself** — delete the draft and
-run the same `gh release create` line under your own `gh` login (no `GH_TOKEN`
-override), which makes the release human-authored.
+The GitHub release is then created by hand on the
+[Releases page](https://github.com/vgrem/office365-rest-python-client/releases/new):
+pick the `v3.3.0` tag, title it `v3.3.0`, and write the body from the matching
+`CHANGELOG.md` section — a short summary, the `### ✨ Highlights`, the
+`### ⚠️ Breaking changes` block, the fixes worth calling out, and the changelog +
+install footer. `CHANGELOG.md` stays the exhaustive record; the release page is
+the curated read.

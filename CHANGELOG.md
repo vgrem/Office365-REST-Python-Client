@@ -5,14 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
-
-### Fixed
-
-- `SearchService.post_query` accepts `sort_list` (a list of `Sort`), the same
-  argument the GET form `query` takes; it is sent in the request body as
-  `SortList`. A POST that asks for no sorting sends the same body as before.
-
 ## [3.3.0] - 2026-10-18
 
 Two stories: the SharePoint migration layer grew from "copy items" to a resumable,
@@ -232,6 +224,9 @@ gone. Nothing else in this release changes or removes an existing API.
   naive credential timestamps, `has_application_permissions` false negatives,
   agreement-file inheritance, the device-flow prompt, chat members right after
   creation, and `examples/onedrive/termstore/export_tree.py`.
+- `SearchService.post_query` accepts `sort_list` (a list of `Sort`), the same
+  argument the GET form `query` takes; it is sent in the request body as
+  `SortList`. A POST that asks for no sorting sends the same body as before.
 
 ### Deprecated
 

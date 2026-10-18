@@ -1,12 +1,9 @@
 name: Release to PyPI
 
-# A tag push publishes the wheels and then opens a **draft** GitHub release for
-# the tag, with the built artifacts attached and a body seeded from the template
-# below. The draft is the human gate: the summary, highlights and the pasted
-# changelog blocks are written by hand on the release page, so nothing reaches
-# the feed with a TODO in it.
+# A `v*` tag publishes the wheels to PyPI. The GitHub release is created by hand
+# on the Releases page afterwards — a tag push never touches it.
 #
-# `workflow_dispatch` is the PyPI-only escape hatch (no tag, so no release).
+# `workflow_dispatch` is the escape hatch for publishing without a tag.
 
 on:
   push:
@@ -42,76 +39,8 @@ jobs:
           version: "0.9.22"
       - name: Build
         run: uv build
-      # Upload before publishing so the wheels attached to the release are the
-      # exact bytes that went to PyPI.
-      - uses: actions/upload-artifact@v7
-        with:
-          name: dist
-          path: dist/*
-          if-no-files-found: error
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-
-  release:
-    needs: publish
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read # the *app* token carries the write, not GITHUB_TOKEN
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
-        with:
-          name: dist
-          path: dist
-      - id: app
-        uses: actions/create-github-app-token@v3
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: ${{ github.event.repository.name }}
-          permission-contents: write
-      - name: Seed the draft body
-        run: |
-          cat > release-notes.md <<'EOF'
-          <!-- One or two paragraphs on what this release is about, then a
-               "Highlights" list of the 4-8 things a user should care about.
-               CHANGELOG.md stays the exhaustive record; this page is curated. -->
-
-          ### ✨ Highlights
-
-          <!-- 4-8 bullets, the features a user should care about -->
-
-          ### ⚠️ Breaking changes
-
-          <!-- paste `### Breaking in x.y.z` from CHANGELOG.md, or "- None." -->
-
-          ### 🐛 Notable fixes
-
-          <!-- paste the `### Fixed` bullets worth calling out: one line each -->
-
-          ---
-
-          📄 Full changelog: **[CHANGELOG.md](https://github.com/vgrem/office365-rest-python-client/blob/master/CHANGELOG.md)**&nbsp;&nbsp;·&nbsp;&nbsp;📦 `pip install --upgrade office365-rest-python-client`
-          EOF
-      - name: Create the draft release
-        env:
-          GH_TOKEN: ${{ steps.app.outputs.token }}
-        run: |
-          set -euo pipefail
-          tag="${GITHUB_REF_NAME}"
-          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            # A re-run must not overwrite a body that was already edited by hand.
-            gh release upload "$tag" dist/* --clobber --repo "$GITHUB_REPOSITORY"
-          else
-            gh release create "$tag" dist/* \
-              --draft \
-              --verify-tag \
-              --title "$tag" \
-              --notes-file release-notes.md \
-              --repo "$GITHUB_REPOSITORY"
-          fi
