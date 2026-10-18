@@ -353,7 +353,7 @@ def _report_web_scope_structure(source_web: Web, target_web: Web, warnings: list
         return
     note = web_scope_note(missing, _web_url(source_web))
     if note:
-        logger.warning(note)
+        logger.debug(note)
         warnings.append(note)
 
 
@@ -452,7 +452,7 @@ def _resolve_web(
             f"{len(child_webs)} subsite(s) were not migrated (pass include_subwebs=True to "
             f"include them): {', '.join(names)}"
         )
-        logger.warning(note)
+        logger.debug(note)
         warnings.append(note)
         return
     for source_child in child_webs:
@@ -520,7 +520,11 @@ def _provision_structure(
     entries: dict[str, str] = {}
     warnings: list[str] = []
     for warning in provision_list_structure(target_list, structure, content_type_map=entries, list_id_map=list_id_map):
-        logger.warning("list %r: %s", source_list.title, warning)
+        # The list's name is the log line's context; the bare warning goes to the
+        # caller's sink, which is where an operator already reads it. Logging it at
+        # ``warning`` too printed every note twice (once with the prefix, once
+        # without) through logging's last-resort handler.
+        logger.debug("list %r: %s", source_list.title, warning)
         warnings.append(warning)
     return ContentTypeMap(entries), warnings
 

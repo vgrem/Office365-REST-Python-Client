@@ -833,10 +833,13 @@ object per line with a stable shape, so a filter never has to parse prose:
 
 There is deliberately **no per-item event**: a five-hundred-thousand item library
 must not produce five-hundred-thousand lines, so items are counted and only
-failures get a line of their own (`job.failed` carries the error text). The
-migration package's own plain-logger messages — everything a resolution step
-collects, such as a list that lost its field links — share the stream tagged
-`"event": "log"`, so one handler sees the whole run.
+failures get a line of their own (`job.failed` carries the error text). Notes a
+resolution step collects — a list that lost its field links, a list setting the
+target refused — go to the caller's warning sink (`session.warnings()`), which is
+what a console and a report read; they are also logged at `DEBUG` for provenance,
+so a message is never printed twice (once by the logger, once by the caller). A
+caller that ships logs rather than prints them can emit each of them as a
+`run.warning` event (`count` included) — the example does, under `--log-json`.
 
 **Progress.** `ProgressReporter` is a plain `ProgressCallback` that reduces the
 runner's per-item snapshots into a throttled heartbeat with a rate and an ETA —
@@ -852,9 +855,12 @@ session.start(progress=reporter)
 print(reporter.summary())  # "1,234/5,000 (24.7%) 41.2/s ETA 1m31s"
 ```
 
-The window restarts when a new container (a different total) begins, the rate stays
-`None` until there is at least half a second to measure, and `close()` emits a last
-heartbeat only when the interval swallowed the final count.
+The window restarts when a new container (a different total) begins and when the
+stage changes — a rate measured while planning says nothing about the copy that
+follows it, which is what used to print an ETA of several hours on a run that was
+seconds into copying. The rate stays `None` until there is at least half a second to
+measure, and `close()` emits a last heartbeat only when the interval swallowed the
+final count.
 
 **Shipping the log.** Emit JSON lines and let the machine's own collector ship them:
 an OpenTelemetry Collector's `filelog`/`stdout` receiver into Loki or Azure Monitor,
@@ -871,8 +877,8 @@ them.
 a list's writes through parallel workers, and `batch_size` (default `100`) sets how
 many items a `$batch` carries and how often progress/checkpoints flush. The example
 exposes both (`--concurrency 4 --batch-size 50`) and prints the measured rate per
-list — `success=168 skipped=2 errors=0 (in 1m42s, 13.7 items/s, 6.1 MB/s)` from the
-`duration_ms` the session status now carries — so a tuning change can be judged on a
+list — `✓ [ 5/24] Documents  168 copied  1m42s  1.7 items/s  6.1 MB/s`, from the
+`duration_ms` the session status carries — so a tuning change can be judged on a
 number instead of a feeling. Concurrency buys the most on many small files and buys
 nothing on a few large ones, where the upload session is already the bottleneck; it
 also multiplies in-flight requests, so raise it against a throttling tenant with

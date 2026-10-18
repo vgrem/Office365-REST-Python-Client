@@ -20,6 +20,13 @@ a set of write/lookup primitives that the generated surface lacked.
   and checkpoint — creating missing target containers and replaying each list's
   structure (columns, content types, views, container settings) before content is
   copied. `include_subwebs=True` mirrors the source subsite tree.
+- **A run that names what it is copying.** The `migrate_site.py` console prints a
+  heartbeat per list (`[ 4/24] Documents  migrating  412/1,010 (40.8%)  9.7 it/s  ETA
+  1m02s`) and a closing line the moment a list finishes (`✓ [ 4/24] Documents  1,010
+  copied  1m42s  9.9 it/s  2.4 MB/s`, `!` when it left failures); progress counters
+  are derived per job in both serial and parallel mode (a carried-over rate and total
+  no longer produce an ETA of hours), the window restarts when the stage changes, a
+  heartbeat carries its `subject`, and repeated warnings print once with a count.
 - **Several lists at once, and both phases reported.**
   `MigrationSession.start(concurrency=N)` runs `N` list jobs in parallel, each on a
   `ClientContext` clone that shares the auth context, transport and `RateLimiter`
@@ -132,6 +139,10 @@ a set of write/lookup primitives that the generated surface lacked.
   items, folder system metadata and column values are written, approval state is
   carried, and Office Open XML documents are no longer flagged as content
   mismatches (SharePoint re-serializes them, so byte equality is unattainable).
+- Warnings: structure provisioning logged each note at `warning` (one of them with
+  the list name prefixed) *and* handed it to `session.warnings()`, so every note
+  printed twice — once by logging's last-resort handler, once by the caller. They are
+  `DEBUG` provenance now; the caller decides how to show them.
 - Structure: content-type field links skip built-in and SharePoint-owned columns,
   a nameless content type no longer sends a null name, `ContentType.set_default`
   works, `reorder_fields` sends a plain JSON array, `FieldLink.field_internal_name`

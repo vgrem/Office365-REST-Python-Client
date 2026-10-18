@@ -21,6 +21,7 @@ from office365.migration import MigrationTask
 from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget
 from office365.migration.base import MigrationPhase
 from office365.migration.job import MigrationJob
+from office365.migration.logging import ProgressReporter
 from office365.migration.session import MigrationSession
 from office365.migration.sharepoint import resolvers
 from office365.migration.sharepoint.adapters import (
@@ -68,6 +69,13 @@ class _GatedSource(FileSystemSource):
     def list_items(self, progress=None):
         self._gate.wait(timeout=BARRIER_TIMEOUT)
         return super().list_items(progress)
+
+
+class _LabelledTarget(FileSystemTarget):
+    """A target labelled the way a SharePoint adapter labels one."""
+
+    def label(self) -> str:
+        return "library:/sites/target/Documents"
 
 
 class _CountingSource(FileSystemSource):
@@ -153,6 +161,20 @@ def test_jobs_run_at_the_same_time(tmp_path):
     # Four threads, but the statuses come back in registration order.
     assert [status["id"] for status in statuses] == [str(index) for index in range(1, JOBS + 1)]
     assert [status["id"] for status in session.show()] == [status["id"] for status in statuses]
+
+
+def test_a_serial_run_names_each_list_in_its_progress(tmp_path):
+    # A shared reporter would carry one list's rate and total into the next; every
+    # job gets its own counters, labelled with the list's name rather than its URL.
+    session = MigrationSession()
+    _seed(tmp_path / "src")
+    session.add_task(FileSystemSource(tmp_path / "src"), _LabelledTarget(tmp_path / "dst"))
+    beats: list = []
+
+    session.start(progress=ProgressReporter(interval=0, emit=beats.append))
+
+    assert {beat["label"] for beat in beats} == {"Documents"}
+    assert beats[-1]["done"] == beats[-1]["total"]
 
 
 def test_concurrency_defaults_to_one_job_at_a_time(tmp_path):

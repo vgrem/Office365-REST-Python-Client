@@ -550,7 +550,7 @@ def _ensure_taxonomy_field(container: SPList | Web, definition: FieldDefinition,
     term_set = _taxonomy_property(definition.schema_xml, "TermSetId")
     if not term_set:
         warning = f"taxonomy column '{name}' was not recreated: its term set id could not be read"
-        logger.warning(warning)
+        logger.debug(warning)
         warnings.append(warning)
         return None
     from office365.sharepoint.taxonomy.field import TaxonomyField
@@ -565,7 +565,7 @@ def _ensure_taxonomy_field(container: SPList | Web, definition: FieldDefinition,
         )
     except Exception as exc:  # noqa: BLE001 - best effort, surfaced as a warning
         warning = f"taxonomy column '{name}' could not be recreated: {exc}"
-        logger.warning(warning)
+        logger.debug(warning)
         warnings.append(warning)
         return None
 
@@ -752,7 +752,7 @@ def provision_list_structure(
                 f"column '{definition.internal_name}' was not recreated: it is bound to an "
                 "external (BCS) content type, which a client-side migration cannot provision"
             )
-            logger.warning(warning)
+            logger.debug(warning)
             warnings.append(warning)
             continue
         schema_xml, unresolved = rewrite_lookup_schema(definition.schema_xml, list_id_map)
@@ -761,7 +761,7 @@ def provision_list_structure(
                 f"column '{definition.internal_name}' was not recreated: it is a lookup into "
                 f"list {{{unresolved}}}, which is not part of this migration"
             )
-            logger.warning(warning)
+            logger.debug(warning)
             warnings.append(warning)
             continue
         assert schema_xml is not None  # a skipped lookup always names its unresolved list id
@@ -929,7 +929,7 @@ def _apply_list_settings(sp_list: SPList, structure: ListStructure, warnings: Li
             handle.update().execute_query()
         except Exception as exc:  # noqa: BLE001 - any rejection is a fidelity note
             warning = f"list setting '{name}' was not applied: {_rejection_reason(exc)}"
-            logger.warning(warning)
+            logger.debug(warning)
             warnings.append(warning)
 
 
@@ -1003,7 +1003,7 @@ def _reconcile_field_links(content_type: ContentType, internal_names: List[str],
             content_type.field_links.add(internal_name).execute_query()
         except ClientRequestException as exc:
             warning = f"content type '{name}': column '{internal_name}' was not linked: {_message(exc)}"
-            logger.warning(warning)
+            logger.debug(warning)
             warnings.append(warning)
             continue
         added = True
@@ -1012,7 +1012,7 @@ def _reconcile_field_links(content_type: ContentType, internal_names: List[str],
             content_type.field_links.reorder(linkable).execute_query()
         except ClientRequestException as exc:
             warning = f"content type '{name}': field link order was not applied: {_message(exc)}"
-            logger.warning(warning)
+            logger.debug(warning)
             warnings.append(warning)
     return warnings
 

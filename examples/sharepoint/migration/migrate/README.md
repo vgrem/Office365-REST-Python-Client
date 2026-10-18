@@ -32,7 +32,7 @@ python migrate_site.py --source-site https://contoso.sharepoint.com/sites/a \
 | `--concurrency N` | parallel workers per list — most help on many small files, none on a few large ones (the upload session is already the bottleneck) |
 | `--batch-size N` | items per `$batch` and how often progress/checkpoints flush |
 | `--pace SECONDS` | a fleet-wide floor between requests (`RateLimiter`), the proactive answer to a tenant that throttles |
-| `--stats N` | heartbeat per active list instead of silence between `Migrating…` and the summary |
+| `--stats N` | a heartbeat per active list (named, with its position in the run) instead of silence between `Migrating…` and the summary |
 
 `--lists-in-flight` is usually the bigger of the two parallelism knobs, and the
 cheapest to justify: each list keeps its own manifest and checkpoint, every worker
@@ -48,3 +48,34 @@ new number is the tenant's ceiling rather than the copy's speed — back off wit
 in `run.completed`, so the curve can be charted from a collector.
 
 See [Throttling as a measured number](https://github.com/vgrem/office365-rest-python-client/blob/main/docs/migration.md#throttling-as-a-measured-number).
+
+## What a run prints
+
+A heartbeat names the list it belongs to and where that list sits in the run, and
+finishing a list prints its own line — so a watched run reads like a progress
+report instead of a stream of percentages:
+
+```
+Lists (24)
+  library  Documents
+  list     Tasks
+
+Migrating into https://contoso.sharepoint.com/sites/b…
+  Documents                   containers   4/24 (16.7%)   6.1 it/s   ETA 3s
+  [  4/24] Documents          migrating   412/1,010 (40.8%)   9.7 it/s   ETA 1m02s
+  ✓ [  4/24] Documents        1,010 copied   1m42s   9.9 it/s   2.4 MB/s
+  ✓ [  5/24] Tasks            168 copied   12s   14.0 it/s
+  ! [  6/24] Archive          212 copied   3 failed   2m04s   1.7 it/s
+
+Warnings (3)
+  ×2  content type 'Document': column 'Tags' was not linked: Access is denied
+     list setting 'EnableMinorVersions' was not applied: Access is denied
+
+Done in 12m31s — 2,104 copied, 12 skipped, 3 failed across 24 list(s)
+  throttling: none (1,204 request(s))
+```
+
+`✓` is a list that copied what it planned, `!` one that left failures behind —
+re-run and the checkpoint retries only those. A warning that repeats is printed
+once with a count, because structure replay reports the same rejection once per
+list that hits it and a policy to read is not a line per list.

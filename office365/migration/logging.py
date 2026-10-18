@@ -30,13 +30,17 @@ Event vocabulary (payload fields in parentheses):
 ``errors``, ``bytes_transferred``) / ``job.failed`` (…, ``error``)
     One container (a list, a library, a site's root) for one job.
 ``progress`` (``done``, ``total``, ``percent``, ``rate``, ``eta_seconds``,
-``elapsed_seconds``, ``stage``)
-    A throttled heartbeat from :class:`ProgressReporter`.
+``elapsed_seconds``, ``stage``, ``subject``)
+    A throttled heartbeat from :class:`ProgressReporter`; ``subject`` names the item
+    it is about (a list title, a file) when the caller reported one.
+``run.warning`` (``count``)
+    A note a resolution step collected, emitted by a caller that ships logs
+    (``session.warnings()`` is the same text). Notes are collected, not logged at
+    ``warning``: a library that both logs a note and hands it to the caller prints
+    every one of them twice.
 
 Every record also carries ``ts`` (UTC ISO-8601 with milliseconds), ``level`` and
-``logger``. The migration package's own plain-logger messages — the warnings a
-resolution step collects — share the stream and are tagged ``event: "log"``, so one
-handler captures the whole run. Per-item events are deliberately absent: a five-hundred-thousand item
+``logger``. Per-item events are deliberately absent: a five-hundred-thousand item
 library must not produce five hundred thousand log lines, so items are counted and
 only failures are worth a line of their own.
 
@@ -240,6 +244,9 @@ class ProgressReporter:
         self._done = 0
         self._total: Optional[int] = None
         self._stage = ""
+        #: The item the current snapshot is about (a list title, a file name), when
+        #: the caller names one; it is what a heartbeat line leads with.
+        self._subject: Optional[str] = None
         self._beat = 0
         self._emitted_done = -1
         # A shared reporter is handed to every concurrently-running job, so the
@@ -255,22 +262,30 @@ class ProgressReporter:
 
     def _observe(self, progress: Progress) -> None:
         total = progress.total
-        if total is not None and self._total is not None and total != self._total:
-            # A second container restarts the window: a rate carried over from the
-            # previous list would be meaningless. The *first* total does not, so the
-            # clock keeps running from the moment the reporter was created.
+        stage = progress.stage or self._stage
+        # Two things restart the measurement window: a different container (its
+        # total) and a different stage (planning -> copying). A rate carried over
+        # from one into the other is not about the work being reported, and it
+        # produced the classic "planning, ETA 81h" line. The *first* total does not
+        # restart anything, so a single-container run is measured from its start.
+        new_total = total is not None and self._total is not None and total != self._total
+        new_stage = bool(self._stage) and stage != self._stage
+        if new_total or new_stage:
             self._done = 0
             self._started = self._clock()
             self._last_emit = self._started
         if total is not None:
             self._total = total
-        elif progress.stage and progress.stage != self._stage:
+        elif new_stage:
             # A stage that reports no total ("pages", "navigation") is
             # indeterminate: keeping the previous stage's total would print a
             # percentage that is no longer about anything.
             self._total = None
+        items = getattr(progress, "items", None)
+        if items:
+            self._subject = str(items[0])
         self._done = progress.done
-        self._stage = progress.stage or self._stage
+        self._stage = stage
         now = self._clock()
         if self.interval == 0 or now - self._last_emit >= self.interval:
             self.flush(now=now)
@@ -314,6 +329,7 @@ class ProgressReporter:
             percent = round(min(100.0, self._done / self._total * 100), 1)
         return {
             "label": self.label,
+            "subject": self._subject,
             "stage": self._stage,
             "done": self._done,
             "total": self._total,

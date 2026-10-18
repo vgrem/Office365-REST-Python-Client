@@ -50,6 +50,22 @@ _TERMINAL_PHASES = frozenset(
 )
 
 
+def _display_label(target) -> str:
+    """A short, human label for a target adapter (``list:Documents`` -> ``Documents``).
+
+    Progress lines name the object being copied, and a server-relative URL or an
+    adapter prefix is noise there; the last path segment is what an operator calls
+    the library.
+    """
+    label = getattr(target, "label", None)
+    text = str(label()) if callable(label) else type(target).__name__
+    kind, _, value = text.partition(":")
+    if not value:
+        return kind
+    leaf = value.rstrip("/").rsplit("/", 1)[-1]
+    return leaf or kind or text
+
+
 def _site_list_slug(target) -> str:
     """A filesystem-safe slug for a resolved target adapter (``library:<url>``)."""
     label = getattr(target, "label", None)
@@ -307,7 +323,8 @@ class MigrationSession:
                 self._run_parallel(progress, concurrency, statuses)
             else:
                 for index, entry in enumerate(self._tasks):
-                    statuses[index] = self._run_entry(entry, progress, isolated=False)
+                    reporter = self._reporter(progress, entry)
+                    statuses[index] = self._run_entry(entry, reporter, isolated=False)
                     throttled = self._note_throttling(throttled)
         finally:
             done = [status for status in statuses if status is not None]
@@ -336,8 +353,15 @@ class MigrationSession:
             # session still reports what it copied instead of a job that never moved.
             job = job.rebind()
             entry.job = job
-        job.plan(progress)
-        job.run(progress)
+        try:
+            job.plan(progress)
+            job.run(progress)
+        finally:
+            # Emit the last heartbeat so the final count is never lost (and a
+            # caller watching the stream sees this list finish).
+            close = getattr(progress, "close", None)
+            if callable(close):
+                close()
         return entry.status()
 
     def _run_parallel(self, progress, concurrency: int, statuses: list[dict | None]) -> None:
@@ -350,10 +374,7 @@ class MigrationSession:
         throttled = self._throttle.throttled if self._throttle is not None else 0
 
         def _work(index: int, entry: "SessionTask") -> None:
-            # A derived reporter keeps each job's counters its own; the session's
-            # interval, clock and emit sink are still the ones in use.
-            reporter = progress.derive(entry.job.target_label) if hasattr(progress, "derive") else progress
-            status = self._run_entry(entry, reporter, isolated=True)
+            status = self._run_entry(entry, self._reporter(progress, entry), isolated=True)
             with lock:
                 statuses[index] = status
 
@@ -362,6 +383,16 @@ class MigrationSession:
             for future in as_completed(futures):
                 future.result()  # a task failure stops the session, as it does sequentially
                 throttled = self._note_throttling(throttled)
+
+    def _reporter(self, progress, entry: "SessionTask"):
+        """A per-job view of ``progress``: own counters, the list's name for a label.
+
+        Derived in both modes: a single reporter sharing one set of counters would
+        carry a rate and a container total from the previous list into the next one.
+        """
+        if hasattr(progress, "derive"):
+            return progress.derive(_display_label(entry.job.target))
+        return progress
 
     def _note_throttling(self, seen: int) -> int:
         """Emit a ``throttled`` event when the monitor counted more since ``seen``.

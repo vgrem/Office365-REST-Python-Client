@@ -164,6 +164,24 @@ class TestProgressReporter(unittest.TestCase):
         self.assertEqual(beat["rate"], 2.5)  # 10 done in the 4s since the restart
         self.assertEqual(beat["elapsed_seconds"], 4.0)
 
+    def test_a_new_stage_restarts_the_window(self):
+        # Planning and copying report the same total; a rate measured while
+        # planning must not describe the copy (it printed an ETA of hours).
+        self.now = 10.0
+        self.reporter(Progress(done=1, total=100, stage="planning"))
+        self.now = 12.0
+        self.reporter(Progress(done=20, total=100, stage="copying"))
+        self.now = 14.0
+
+        beat = self.reporter.flush()
+        self.assertEqual(beat["elapsed_seconds"], 2.0)
+        self.assertEqual(beat["rate"], 10.0)
+
+    def test_a_snapshot_names_the_item_it_is_about(self):
+        self.reporter(Progress(done=1, total=2, stage="structure", items=["Documents"]))
+
+        self.assertEqual(self.reporter.flush()["subject"], "Documents")
+
     def test_closing_reports_a_count_the_interval_swallowed(self):
         self.reporter(Progress(done=7, total=10))
 
