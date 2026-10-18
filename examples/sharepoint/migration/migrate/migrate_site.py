@@ -49,9 +49,13 @@ as a handoff, as are the client-side web parts whose data bindings point at the
 source site (and the wiki markup that hard-codes it).
 
 Each web's ``Title`` and ``Description`` are copied onto the target web when they
-differ (``--no-site-settings`` to leave the target web's own values). Branding
-(master page, theme, logo, alternate CSS) and the site-collection/regional
-settings are outside a client-side content migration and are reported as such.
+differ (``--no-site-settings`` to leave the target web's own values), and so is its
+branding — master page, logo, alternate CSS and theme folder — rebased onto the
+target's path and written only where the target actually resolves the asset it
+names; one it does not is reported instead (``SiteLogoUrl`` is often the site's
+group image, a service endpoint with no counterpart to copy). Site-collection and
+regional settings stay outside a client-side content migration and are reported as
+such.
 
 Each web's site pages are copied too (``--no-pages`` to only report them). A
 modern page is created through the ``sitepages`` endpoint and gets its canvas and

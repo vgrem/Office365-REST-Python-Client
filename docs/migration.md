@@ -712,6 +712,16 @@ read-only: a source page counts as delivered when the target has the same name o
 an identical canvas, anything else is reported as `missing` or `drifted`, and a
 target whose home page is not the copy of the source's is named as such.
 
+The copy is **idempotent**: a page's body is its identity (a copy writes the
+source body verbatim and publishes it), so a second run over the same source and
+target finds its own earlier copy — including the one it renamed around an
+existing page — and leaves it alone instead of minting `Home-2.aspx`,
+`Home-3.aspx`, … on every run. Such pages are listed in
+`PageCopyReport.unchanged`, and the home page designation follows them, so a
+re-run keeps the site opening on the copy. `OVERWRITE` and `SKIP` are unaffected;
+each target page accounts for at most one source page, so two source pages with
+an identical body stay two copies.
+
 What a copy still cannot do, stated plainly:
 
 - **Publishing pages**, and pages with neither a canvas nor a wiki body, are

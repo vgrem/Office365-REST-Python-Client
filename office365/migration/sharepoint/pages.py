@@ -219,6 +219,8 @@ class PageCopyReport:
     renamed: list[tuple[str, str]] = field(default_factory=list)
     #: Pages left untouched because a page of that name already exists (``SKIP``).
     skipped: list[str] = field(default_factory=list)
+    #: Pages already present on the target with the source's own body (a re-run).
+    unchanged: list[str] = field(default_factory=list)
     #: Pages published after their content was written.
     published: list[str] = field(default_factory=list)
     #: Pages whose canvas did not read back identical after the write.
@@ -244,7 +246,7 @@ class PageCopyReport:
 
     def summary(self) -> Optional[str]:
         """One line describing what the copy did, or ``None`` when nothing happened."""
-        if not self.copied and not self.overwritten and not self.skipped:
+        if not self.copied and not self.overwritten and not self.skipped and not self.unchanged:
             return None
         parts = []
         if self.copied:
@@ -258,6 +260,8 @@ class PageCopyReport:
             parts.append(f"{len(self.overwritten)} overwritten")
         if self.skipped:
             parts.append(f"{len(self.skipped)} left as they were")
+        if self.unchanged:
+            parts.append(f"{len(self.unchanged)} already copied")
         if self.published:
             parts.append(f"{len(self.published)} published")
         if self.home_page:
@@ -382,6 +386,31 @@ def _renamed(name: str, taken: set) -> str:
         index += 1
 
 
+def _already_copied(page: "PagePayload", bodies: dict, consumed: set) -> Optional[str]:
+    """The target page that already carries this page's body, if any.
+
+    A copy writes the source body verbatim, so the body is the copy's identity. A
+    second run over the same source and target therefore finds its own earlier copy
+    — possibly renamed around an existing page — instead of minting ``Home-2.aspx``,
+    ``Home-3.aspx``, ... on every run. The page of the same name is tried first (a
+    page that kept its name costs one dict lookup); a body match elsewhere picks up
+    the renamed copy. ``consumed`` makes each target page account for at most one
+    source page, so two source pages with an identical body stay two copies.
+
+    An empty body counts as a body: the server gives a created page an empty canvas
+    of its own (``<div></div>``), which a copy never writes over, so a page with no
+    canvas would otherwise be copied again on every run.
+    """
+    content = page.content or ""
+    name = page.name.casefold()
+    if name not in consumed and bodies.get(name) == content:
+        return name
+    return next(
+        (candidate for candidate, body in bodies.items() if candidate not in consumed and body == content),
+        None,
+    )
+
+
 def _batch(report: "PageCopyReport", behavior: str, name: str, taken: set, existing: dict) -> Optional[tuple]:
     """Decide the target page name and item id for one source page.
 
@@ -474,6 +503,60 @@ def _verify(report: "PageCopyReport", target_list: "SPList", written: dict) -> N
             report.mismatched.append(name)
 
 
+def _copy_library(
+    target_web: "Web", target_list: "SPList", payloads: list, behavior: str, report: "PageCopyReport"
+) -> None:
+    """Copy one page library's payloads onto the target, then read the bodies back."""
+    existing: dict = {}
+    bodies: dict = {}
+    names: dict = {}
+    for item in target_list.items.select(["Id", "FileLeafRef", "CanvasContent1", "WikiField"]).get().execute_query():
+        name = str(item.properties.get("FileLeafRef") or "").casefold()
+        existing[name] = item.properties.get("Id")
+        names[name] = str(item.properties.get("FileLeafRef") or "")
+        bodies[name] = _body(item.properties) or ""
+    taken = set(existing)
+    consumed: set = set()
+    written: dict = {}
+    for page in payloads:
+        if behavior == DUPLICATE_RENAME:
+            matched = _already_copied(page, bodies, consumed)
+            if matched is not None:
+                consumed.add(matched)
+                report.unchanged.append(page.name)
+                if matched != page.name.casefold():
+                    report.renamed.append((page.name, names.get(matched, matched)))
+                continue
+        decision = _batch(report, behavior, page.name, taken, existing)
+        if decision is None:
+            continue
+        source_name, target_name, item_id = decision
+        try:
+            _copy_page(target_web, target_list, page, target_name, item_id)
+        except Exception as e:  # noqa: BLE001 — one page never aborts the others
+            report.failed.append((source_name, str(e)))
+            continue
+        taken.add(target_name.casefold())
+        consumed.add(target_name.casefold())
+        bodies[target_name.casefold()] = page.content or ""
+        if item_id is not None:
+            report.overwritten.append(target_name)
+        else:
+            report.copied.append(target_name)
+        if target_name != source_name:
+            report.renamed.append((source_name, target_name))
+        if page.published:
+            report.published.append(target_name)
+        if page.web_parts:
+            report.web_part_pages.append(target_name)
+        if page.is_classic:
+            report.wiki.append(target_name)
+            written[target_name] = (1, page.wiki)
+        else:
+            written[target_name] = (0, page.canvas)
+    _verify(report, target_list, written)
+
+
 def copy_site_pages(
     source_web: "Web",
     target_web: "Web",
@@ -519,39 +602,7 @@ def copy_site_pages(
         if target_list is None:
             notes.append(f"page copy: no target page library matches '{title}' — {len(payloads)} page(s) not copied")
             continue
-        existing = {
-            str(item.properties.get("FileLeafRef") or "").casefold(): item.properties.get("Id")
-            for item in target_list.items.select(["Id", "FileLeafRef"]).get().execute_query()
-        }
-        taken = set(existing)
-        written: dict = {}
-        for page in payloads:
-            decision = _batch(report, behavior, page.name, taken, existing)
-            if decision is None:
-                continue
-            source_name, target_name, item_id = decision
-            try:
-                _copy_page(target_web, target_list, page, target_name, item_id)
-            except Exception as e:  # noqa: BLE001 — one page never aborts the others
-                report.failed.append((source_name, str(e)))
-                continue
-            taken.add(target_name.casefold())
-            if item_id is not None:
-                report.overwritten.append(target_name)
-            else:
-                report.copied.append(target_name)
-            if target_name != source_name:
-                report.renamed.append((source_name, target_name))
-            if page.published:
-                report.published.append(target_name)
-            if page.web_parts:
-                report.web_part_pages.append(target_name)
-            if page.is_classic:
-                report.wiki.append(target_name)
-                written[target_name] = (1, page.wiki)
-            else:
-                written[target_name] = (0, page.canvas)
-        _verify(report, target_list, written)
+        _copy_library(target_web, target_list, payloads, behavior, report)
     notes.extend(_gap_notes(report))
     report.home_page = apply_home_page(source_web, target_web, renamed=dict(report.renamed), warnings=notes)
     return report
@@ -656,7 +707,7 @@ def _home_page_notes(source_web: "Web", target_web: "Web", source_pages: list, t
     if source_page is None:
         return []
     target_path = capture_home_page(target_web)
-    if target_bodies.get(_page_name(target_path)) == source_page.content:
+    if target_bodies.get(_page_name(target_path)) == (source_page.content or ""):
         return []
     return [
         f"the target's home page is '{target_path or ''}', not the copy of '{source_path}' — "
@@ -669,8 +720,9 @@ def verify_page_copy(source_web: "Web", target_web: "Web") -> list[str]:
 
     A source page counts as delivered when the target holds a page of the same
     name, or a page whose body is identical (the copy renames around an existing
-    page). Only same-named pages are compared for drift, because a renamed copy is
-    a different page by design.
+    page). A same-named target page is only compared for drift when the source body
+    is nowhere on the target — otherwise the copy landed under a renamed name and the
+    same-named page is simply the target's own page.
 
     Args:
         source_web: The web the pages were captured from.
@@ -688,15 +740,19 @@ def verify_page_copy(source_web: "Web", target_web: "Web") -> list[str]:
         items = sp_list.items.select(["FileLeafRef", "CanvasContent1", "WikiField"]).get().execute_query()
         for item in items:
             properties = item.properties
-            target_bodies[str(properties.get("FileLeafRef") or "").casefold()] = _body(properties)
+            target_bodies[str(properties.get("FileLeafRef") or "").casefold()] = _body(properties) or ""
     delivered = set(target_bodies.values())
     missing = [
-        page.name for page in source_pages if page.name.casefold() not in target_bodies and page.content not in delivered
+        page.name
+        for page in source_pages
+        if page.name.casefold() not in target_bodies and (page.content or "") not in delivered
     ]
     drifted = [
         page.name
         for page in source_pages
-        if page.name.casefold() in target_bodies and target_bodies[page.name.casefold()] != page.content
+        if page.name.casefold() in target_bodies
+        and target_bodies[page.name.casefold()] != (page.content or "")
+        and (page.content or "") not in delivered
     ]
     notes = []
     if missing:

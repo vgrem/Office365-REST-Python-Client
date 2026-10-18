@@ -791,6 +791,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Update imports accordingly.
 
 ### Fixed
+- **Re-running a site migration no longer mints `Home-2.aspx`, `Home-3.aspx`, …**
+  Page copies used the duplicate policy (`RENAME`, the default) on *every* run: the
+  target already held a page of that name — the copy the previous run made — so each
+  re-run added another numbered page beside it, and the home page designation could
+  not settle on one. A page's body is the copy's identity (the source body is
+  written verbatim and published), so `copy_site_pages` now looks for its own
+  earlier copy — by name first, then by body, which also finds the one it renamed
+  around an existing page — and leaves it alone, reporting it in the new
+  `PageCopyReport.unchanged` ("… already copied") instead of copying it again. Each
+  target page accounts for at most one source page, so two source pages with an
+  identical body stay two copies; `SKIP` and `OVERWRITE` are unchanged. The renamed
+  pair stays in `PageCopyReport.renamed`, so `apply_home_page` keeps pointing the
+  target web at the copy on a re-run. `verify_page_copy` was inconsistent with its
+  own rule — a source page counted as delivered when the target held a page with
+  the identical body, yet the same-named page it renamed around was *also* reported
+  as `drifted`; that page is now reported as drift only when the source body is
+  nowhere on the target. Live-verified on SharePoint Online: a full site run twice
+  over the same source and target copied nothing the second time, with the target
+  page list unchanged.
 - **A provisioned library no longer reports field links it could never have.** A
   content type's `FieldLinks` also name built-in and SharePoint-owned columns
   (`Title`, `FileLeafRef`, and the framework columns SharePoint provisions for

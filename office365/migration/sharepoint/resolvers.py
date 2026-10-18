@@ -186,9 +186,11 @@ def resolve_site_task(
             already exists — ``RENAME`` (default, as SPMT), ``SKIP`` or
             ``OVERWRITE``.
         migrate_site_settings: Copy each web's ``Title`` and ``Description`` onto
-            the target web when they differ (the ``PRESERVE_ALL_SETTINGS`` mode).
-            Branding (master page/theme/logo/CSS) and the site-collection and
-            regional settings stay out of scope and are reported.
+            the target web when they differ (the ``PRESERVE_ALL_SETTINGS`` mode),
+            and carry its branding (master page, custom master, logo, alternate CSS
+            and theme folder) rebased onto the target's path, written only where the
+            target resolves the asset it names. The site-collection and regional
+            settings stay out of scope and are reported.
         warnings: Optional sink for resolution-level notes (subsites skipped,
             web parts, workflows, InfoPath forms, BCS external lists and pages with
             no copyable body detected but not migrated).
