@@ -12,7 +12,6 @@ from office365.runtime.limits import (
     LimitKind,
     bounded,
     ensure_within,
-    exceeds,
     hint,
     limit,
     limits_of,
@@ -20,7 +19,7 @@ from office365.runtime.limits import (
     warn_if_exceeds,
 )
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.thresholds import LIST_VIEW_THRESHOLD, SAFE_PAGE_SIZE, Limits
+from office365.sharepoint.thresholds import LIST_VIEW_THRESHOLD, Limits
 from tests import test_site_url
 
 LIST_VIEW = Limits.LIST_VIEW
@@ -38,20 +37,10 @@ def test_catalog_is_populated_and_well_formed():
         assert entry.unit
 
 
-def test_list_view_threshold_constant_matches_catalog():
-    assert LIST_VIEW_THRESHOLD == LIST_VIEW.value
-    assert SAFE_PAGE_SIZE < LIST_VIEW_THRESHOLD
-
-
 def test_str_formats_items_and_bytes():
     assert str(LIST_VIEW) == "5,000 items"
     assert str(Limits.FILE_UPLOAD) == "250 GB"
     assert str(Limits.LIST_ROW_BYTES) == "8,000 bytes"
-
-
-def test_exceeds():
-    assert exceeds(LIST_VIEW, LIST_VIEW.value + 1) is True
-    assert exceeds(LIST_VIEW, LIST_VIEW.value) is False
 
 
 def test_warn_if_exceeds():

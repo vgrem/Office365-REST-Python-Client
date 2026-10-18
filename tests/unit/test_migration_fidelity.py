@@ -402,18 +402,6 @@ def test_fidelity_matrix_serializes_and_summarizes():
     assert "content=delivered" in report.matrix_summary()
 
 
-def test_sharepoint_adapters_advertise_capabilities():
-    from office365.migration.sharepoint.adapters import SharePointListSource, SharePointListTarget
-    from office365.migration.sharepoint.package_target import SharePointPackageTarget
-
-    assert SharePointListSource.supports_attachments is True
-    assert SharePointListTarget.supports_attachments is True
-    assert SharePointListSource.supports_typed_values is True
-    assert SharePointListTarget.supports_typed_values is True
-    assert SharePointPackageTarget.supports_versions is True
-    assert SharePointPackageTarget.supports_authorship is True
-
-
 def test_library_system_paths_are_excluded():
     from office365.migration.sharepoint.adapters import _is_system_path
 

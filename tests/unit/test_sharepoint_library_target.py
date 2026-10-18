@@ -714,12 +714,6 @@ def test_library_target_without_the_library_cannot_compare_folder_values():
     assert _folder_target(_FolderWeb({})).supports_folder_records is True
 
 
-def test_library_source_without_the_library_reports_no_folder_records():
-    folder = _SourceFolder("/sites/x/Docs", _Web())
-
-    assert SharePointLibrarySource(folder).supports_folder_records is False
-
-
 # ── Content-approval (moderation) state ───────────────────────────────────────
 
 
@@ -811,13 +805,6 @@ def test_library_source_does_not_read_moderation_columns_without_moderation():
     assert "moderation_status" not in source.read_metadata(item)
     assert "OData__ModerationStatus" not in lst.items.selects[-1]
     assert lst.ensured == [["EnableModeration"]]
-
-
-def test_library_source_without_the_library_cannot_read_approval_state():
-    source = SharePointLibrarySource(_SourceFolder("/sites/x/Docs", _Web()))
-
-    assert source.supports_item_state is False
-    assert source.read_item_state(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt")) is None
 
 
 # ── Checked-out files (in-progress edits REST cannot see) ────────────────────

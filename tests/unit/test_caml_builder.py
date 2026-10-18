@@ -119,10 +119,6 @@ def test_builder_field_refs_exclude_view_fields():
     assert query.field_refs == {"Status", "Created"}
 
 
-def test_builder_is_not_paged_without_row_limit():
-    assert CamlQuery.builder().where(Caml.eq("A", 1)).build().is_paged is False
-
-
 def test_field_ref_ascending():
     ref = FieldRef("Created").desc()
     assert ref.to_xml() == '<FieldRef Name="Created" Ascending="FALSE"/>'

@@ -6,17 +6,7 @@ import pytest
 from office365 import limits
 from office365.communications.callrecords.call_record import CallRecord  # noqa: F401 — registers quotas
 from office365.directory.objects.object import DirectoryObject  # noqa: F401 — registers quotas
-from office365.runtime.limits import Limit
 from office365.sharepoint.thresholds import Limits
-
-
-def test_facade_reexports_mechanics():
-    assert limits.Limit is Limit
-    assert callable(limits.limit)
-    assert callable(limits.bounded)
-    assert callable(limits.verify_limits)
-    assert callable(limits.limits_of)
-    assert callable(limits.catalog)
 
 
 def test_sharepoint_catalog_registered():

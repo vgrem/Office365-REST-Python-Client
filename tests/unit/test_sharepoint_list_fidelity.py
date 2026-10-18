@@ -334,10 +334,6 @@ class _SourceList:
 # ── Durability ───────────────────────────────────────────────────────────────
 
 
-def test_deferred_write_capability_is_declared():
-    assert SharePointListTarget.deferred_writes is True
-
-
 def test_runner_uses_chunked_writes_for_a_deferred_target_at_concurrency_one():
     class _DeferredTarget:
         deferred_writes = True

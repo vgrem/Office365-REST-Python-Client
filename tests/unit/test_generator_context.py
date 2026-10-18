@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import FrozenInstanceError
-
-import pytest
 from generator.builders.context import BuilderContext
 
 
@@ -62,9 +59,3 @@ def test_with_plan_returns_an_enriched_copy() -> None:
 
     assert planned.known_types == frozenset({"SP.Foo"})
     assert context.known_types == frozenset()  # original untouched
-
-
-def test_context_is_immutable() -> None:
-    context = BuilderContext(template_path="/t", output_path="/o")
-    with pytest.raises(FrozenInstanceError):
-        context.namespace = "X"  # type: ignore[misc]

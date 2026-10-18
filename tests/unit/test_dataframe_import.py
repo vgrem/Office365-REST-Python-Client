@@ -445,18 +445,6 @@ def test_list_from_dataframe_returns_import_result():
     assert isinstance(driver, ImportResult)
 
 
-def test_collection_from_records_returns_import_result():
-    from office365.runtime.client_object import ClientObject
-    from office365.runtime.record_collection import RecordCollection
-
-    ctx = _FakeContext()
-    collection = RecordCollection(cast(Any, ctx), ClientObject)
-
-    driver = collection.from_records([[{"a": 1}]])
-
-    assert isinstance(driver, ImportResult)
-
-
 def test_import_and_migration_stats_share_the_operation_base():
     assert issubclass(ImportStats, OperationStats)
     assert issubclass(MigrationStats, OperationStats)

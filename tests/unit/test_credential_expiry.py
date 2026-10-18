@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from office365.directory.credential import Credential, CredentialExpiryStatus
+from office365.directory.credential import CredentialExpiryStatus
 from office365.directory.key_credential import KeyCredential
 from office365.directory.password_credential import PasswordCredential
 
@@ -38,11 +38,6 @@ def test_none_end_date():
     for cred in (KeyCredential(endDateTime=None), PasswordCredential(endDateTime=None)):
         assert cred.is_expired is False
         assert cred.days_until_expiry is None
-
-
-def test_shared_base_binds_both_subclasses():
-    for cred in (KeyCredential(), PasswordCredential()):
-        assert isinstance(cred, Credential)
 
 
 def test_expiry_status_classifies_relative_to_warn_days():

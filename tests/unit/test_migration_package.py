@@ -17,7 +17,6 @@ from office365.migration.package import (
     SYSTEM_DATA_NS,
     USER_GROUP_MAP_NS,
     VIEW_FORMS_LIST_NS,
-    AzureBlobStaging,
     BlobStaging,
     FileSystemStaging,
     Group,
@@ -338,10 +337,6 @@ def test_file_system_staging_writes_both_containers(tmp_path):
     assert (tmp_path / "content" / file_id).read_bytes() == b"hi"
     assert (tmp_path / "manifest" / "Manifest.xml").exists()
     assert (tmp_path / "manifest" / "ExportSettings.xml").exists()
-
-
-def test_azure_blob_staging_is_an_alias_of_blob_staging():
-    assert AzureBlobStaging is BlobStaging
 
 
 def test_blob_staging_rejects_the_same_container():

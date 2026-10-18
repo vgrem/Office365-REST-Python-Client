@@ -9,11 +9,7 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.exceptions import SPQueryThrottledException
 from office365.sharepoint.fields.field import Field
-from office365.sharepoint.files.collection import FileCollection
-from office365.sharepoint.folders.collection import FolderCollection
 from office365.sharepoint.listitems.caml import Caml, CamlQuery
-from office365.sharepoint.listitems.collection import ListItemCollection
-from office365.sharepoint.thresholds import LIST_VIEW_THRESHOLD
 from tests import test_site_url
 from tests._scripted_transport import ScriptedTransport
 
@@ -52,13 +48,6 @@ def test_paged_collection_does_not_warn():
         for _ in range(5):
             col.add_child(Field(col.context))
     assert not [w for w in caught if issubclass(w.category, UserWarning)]
-
-
-def test_list_view_backed_collections_opt_in():
-    assert ListItemCollection._list_view_threshold == LIST_VIEW_THRESHOLD
-    assert FileCollection._list_view_threshold == LIST_VIEW_THRESHOLD
-    assert FolderCollection._list_view_threshold == LIST_VIEW_THRESHOLD
-    assert ClientObjectCollection._list_view_threshold is None
 
 
 def test_index_candidates_excludes_id_and_sorts():

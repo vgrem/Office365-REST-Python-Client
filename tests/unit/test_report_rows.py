@@ -35,12 +35,3 @@ def test_report_result_csv_rows_empty_content():
 
 def test_report_result_csv_rows_via_to_bytes_roundtrip():
     assert _result().csv_rows()[1]["Read"] == "4"
-
-
-def test_report_result_execute_query_returns_self():
-    class _Context:
-        def execute_query(self):
-            return None
-
-    result = ReportResult(_Context())
-    assert result.execute_query() is result

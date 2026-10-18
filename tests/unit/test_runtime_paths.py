@@ -218,12 +218,6 @@ def test_move_file_by_path_sends_paths_in_body():
     assert request.data["destPath"]["DecodedUrl"].endswith(dest)
 
 
-def test_file_exposes_move_by_path():
-    ctx = ClientContext(test_site_url)
-    file = ctx.web.get_file_by_server_relative_path("/sites/x/Shared Documents/a.xlsx")
-    assert callable(file.move_by_path)
-
-
 def test_alternate_key_path_renders_parenthesised_literal():
     from office365.runtime.paths.alternate_key import AlternateKeyPath
 

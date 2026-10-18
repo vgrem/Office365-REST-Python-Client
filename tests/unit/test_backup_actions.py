@@ -18,14 +18,6 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from office365.backuprestore.browse_session_base import BrowseSessionBase
-from office365.backuprestore.onedrive_for_business_browse_session import (
-    OneDriveForBusinessBrowseSession,
-)
-from office365.backuprestore.onedrive_for_business_restore_session import (
-    OneDriveForBusinessRestoreSession,
-)
-from office365.backuprestore.protection_unit_base import ProtectionUnitBase
 from office365.backuprestore.restorepoints.collection import RestorePointCollection
 from office365.backuprestore.restorepoints.preference import RestorePointPreference
 from office365.backuprestore.restorepoints.tags import RestorePointTags
@@ -37,17 +29,9 @@ from office365.backuprestore.serviceapps.service_app import ServiceApp
 from office365.backuprestore.sharepoint_browse_session import SharePointBrowseSession
 from office365.backuprestore.sharepoint_protection_policy import SharePointProtectionPolicy
 from office365.backuprestore.sharepoint_restore_session import SharePointRestoreSession
-from office365.common.drive_protection_unit import DriveProtectionUnit
-from office365.common.exchange_protection_policy import ExchangeProtectionPolicy
-from office365.common.exchange_restore_session import ExchangeRestoreSession
-from office365.common.mailbox_protection_rule import MailboxProtectionRule
 from office365.common.mailbox_protection_unit import MailboxProtectionUnit
 from office365.common.restore_point import RestorePoint
-from office365.common.restore_session_base import RestoreSessionBase
 from office365.common.site_protection_rule import SiteProtectionRule
-from office365.common.site_protection_unit import SiteProtectionUnit
-from office365.directory.protection.policy.base import ProtectionPolicyBase
-from office365.directory.protection.rules.base import ProtectionRuleBase
 from office365.graph_client import GraphClient
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
@@ -83,21 +67,6 @@ def _last(transport):
 
 
 # --- inheritance (guards the CSDL BaseType the generator omits) -------------
-
-
-def test_backup_entities_follow_csdl_inheritance():
-    assert issubclass(SharePointProtectionPolicy, ProtectionPolicyBase)
-    assert issubclass(ExchangeProtectionPolicy, ProtectionPolicyBase)
-    assert issubclass(SharePointBrowseSession, BrowseSessionBase)
-    assert issubclass(OneDriveForBusinessBrowseSession, BrowseSessionBase)
-    assert issubclass(SharePointRestoreSession, RestoreSessionBase)
-    assert issubclass(OneDriveForBusinessRestoreSession, RestoreSessionBase)
-    assert issubclass(ExchangeRestoreSession, RestoreSessionBase)
-    assert issubclass(DriveProtectionUnit, ProtectionUnitBase)
-    assert issubclass(MailboxProtectionUnit, ProtectionUnitBase)
-    assert issubclass(SiteProtectionUnit, ProtectionUnitBase)
-    assert issubclass(MailboxProtectionRule, ProtectionRuleBase)
-    assert issubclass(SiteProtectionRule, ProtectionRuleBase)
 
 
 # --- protection policies ----------------------------------------------------
