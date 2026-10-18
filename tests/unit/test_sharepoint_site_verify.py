@@ -4,7 +4,12 @@ import json
 
 import pytest
 from office365.migration.sharepoint import site_verify
-from office365.migration.sharepoint.site_verify import LIST_SECURITY, WEB_SCOPE_STRUCTURE, verify_site
+from office365.migration.sharepoint.site_verify import (
+    LIST_SECURITY,
+    SITE_SCOPE,
+    WEB_SCOPE_STRUCTURE,
+    verify_site,
+)
 from office365.migration.sharepoint.verify import StructureReport
 
 
@@ -46,6 +51,7 @@ def clean(monkeypatch):
     ):
         monkeypatch.setattr(site_verify, func, _note(name))
     monkeypatch.setattr(site_verify, "_web_scope_findings", _note("web-scope"))
+    monkeypatch.setattr(site_verify, "_site_scope_findings", _note(SITE_SCOPE))
     return calls
 
 
@@ -57,9 +63,10 @@ def test_a_clean_web_is_ok_and_complete(contexts, clean):
     assert report.issues == []
     assert report.url == "https://contoso.sharepoint.com/sites/team_out"
     assert report.findings == {}
-    assert report.checked == ["settings", "branding", WEB_SCOPE_STRUCTURE]
+    assert report.checked == ["settings", "branding", WEB_SCOPE_STRUCTURE, SITE_SCOPE]
     assert report.summary() == (
-        "OK | https://contoso.sharepoint.com/sites/team_out | settings: 0, branding: 0, web-scope structure: 0"
+        "OK | https://contoso.sharepoint.com/sites/team_out | settings: 0, branding: 0, "
+        "web-scope structure: 0, site scope: 0"
     )
     assert json.loads(json.dumps(report.to_dict()))["ok"] is True
 
@@ -84,7 +91,7 @@ def test_findings_make_the_web_a_mismatch_and_are_counted(contexts, clean, monke
     }
     assert report.summary() == (
         "MISMATCH | https://contoso.sharepoint.com/sites/team_out | settings: 1, branding: 0, "
-        "web-scope structure: 0, pages: 2"
+        "web-scope structure: 0, site scope: 0, pages: 2"
     )
     assert report.issues[0].startswith("site settings:")
     assert len(report.issues) == len(report.findings["settings"]) + len(report.findings["pages"])
@@ -130,14 +137,16 @@ def _raise_access_denied(source_web, target_web):
 
 
 def test_only_the_requested_checks_run(contexts, clean):
-    report = verify_site(*contexts, settings=False, branding=False, web_scope_structure=False, pages=True)
+    report = verify_site(
+        *contexts, settings=False, branding=False, web_scope_structure=False, site_scope=False, pages=True
+    )
 
     assert clean == ["pages"]
     assert report.checked == ["pages"]
 
 
 def test_nothing_requested_reports_nothing_to_check(contexts, clean):
-    report = verify_site(*contexts, settings=False, branding=False, web_scope_structure=False)
+    report = verify_site(*contexts, settings=False, branding=False, web_scope_structure=False, site_scope=False)
 
     assert report.ok
     assert report.summary() == "OK | https://contoso.sharepoint.com/sites/team_out | nothing to check"
@@ -202,7 +211,7 @@ def test_branding_is_its_own_dimension(contexts, clean, monkeypatch):
 
     assert not report.ok
     assert list(report.findings) == ["branding"]
-    assert report.summary().endswith("settings: 0, branding: 1, web-scope structure: 0")
+    assert report.summary().endswith("settings: 0, branding: 1, web-scope structure: 0, site scope: 0")
 
 
 def test_the_url_falls_back_to_the_context_when_a_projected_read_dropped_it(contexts, clean):

@@ -76,6 +76,13 @@ from office365.migration.sharepoint.security import (
     verify_list_security,
     verify_site_security,
 )
+from office365.migration.sharepoint.site_scope import (
+    SiteScope,
+    SiteScopeDiff,
+    capture_site_scope,
+    compare_site_scope,
+    site_scope_note,
+)
 from office365.migration.sharepoint.site_settings import (
     SITE_SETTINGS_PRESERVE,
     SITE_SETTINGS_SKIP,
@@ -140,6 +147,8 @@ __all__ = [
     "LIST_SECURITY",
     "ListSecurityReport",
     "PermissionLevel",
+    "SiteScope",
+    "SiteScopeDiff",
     "SiteVerificationReport",
     "StructureReport",
     "ViewDefinition",
@@ -160,10 +169,12 @@ __all__ = [
     "capture_navigation",
     "capture_permission_levels",
     "capture_site_groups",
+    "capture_site_scope",
     "apply_home_page",
     "capture_home_page",
     "capture_site_pages",
     "compare_list_structures",
+    "compare_site_scope",
     "compare_web_scope_structure",
     "copy_site_pages",
     "detect_handoff",
@@ -175,6 +186,7 @@ __all__ = [
     "parse_site_settings_mode",
     "provision_list_structure",
     "sharepoint_scan_pairs",
+    "site_scope_note",
     "verify_list_security",
     "verify_list_structure",
     "verify_navigation",

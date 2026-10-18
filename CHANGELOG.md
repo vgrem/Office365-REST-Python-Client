@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **A site-scope comparison: the features and regional settings a migration never
+  replays are now reported, not assumed.** A migration copies content, structure and
+  branding, but a target site without the publishing, records-management or
+  document-id feature is not the same site even when every list arrived — and a web
+  with a different time zone renders and filters dates differently. Nothing looked at
+  either. `office365.migration.sharepoint.site_scope` adds a read-only comparison:
+  `compare_site_scope(source_context, target_context)` compares the features activated
+  on **the web** and on **the site collection** plus the comparable regional settings
+  (time zone, `LocaleId`, work days, first day/week of the year, calendar,
+  `AdjustHijriDays`, date/time separators, `Time24`, `DateFormat`), and
+  `site_scope_note(diff, source_url)` turns a gap into one warning line naming the
+  feature GUIDs to `Enable-SPFeature`. Only what the source has and the target lacks
+  is a finding: a feature the target activated on its own appears in `to_dict()` as
+  `extra_web_features`/`extra_site_features` and never fails the report. Neither is
+  repaired — activating a feature has side effects a run never asked for (publishing
+  installs page layouts and swaps the master page) and deactivating it is not undone
+  by a re-run, while regional settings have no working REST write path — so both stay
+  explicit out-of-band decisions. `verify_site(..., site_scope=True)` runs it as the
+  `site scope` dimension (on by default, next to `branding`), and the whole-site
+  example prints it with the rest of its post-run reconciliation.
 - **A migration run reports how fast it went, and can be tuned.** `MigrationOptions`
   already carried `concurrency` and `batch_size`, but nothing measured their effect
   — a run's only speed signal was a wall-clock you took yourself. `SessionTask.status()`

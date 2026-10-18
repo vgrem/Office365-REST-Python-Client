@@ -2,9 +2,9 @@
 
 Each web-scope concern the whole-site resolver touches has its own verifier —
 :func:`verify_web_settings`, :func:`verify_web_branding`,
-:func:`compare_web_scope_structure`, :func:`verify_navigation`,
-:func:`verify_page_copy`, :func:`verify_site_security` and per list
-:func:`verify_list_structure`. Calling them one by one is what the
+:func:`compare_web_scope_structure`, :func:`compare_site_scope`,
+:func:`verify_navigation`, :func:`verify_page_copy`, :func:`verify_site_security`
+and per list :func:`verify_list_structure`. Calling them one by one is what the
 example did, which makes it easy to forget one and impossible to answer "did this
 web migrate?" with a single value.
 
@@ -28,6 +28,7 @@ from office365.migration.sharepoint.branding import verify_web_branding
 from office365.migration.sharepoint.navigation import verify_navigation
 from office365.migration.sharepoint.pages import verify_page_copy
 from office365.migration.sharepoint.security import verify_list_security, verify_site_security
+from office365.migration.sharepoint.site_scope import compare_site_scope, site_scope_note
 from office365.migration.sharepoint.site_settings import verify_web_settings
 from office365.migration.sharepoint.structure import (
     compare_web_scope_structure,
@@ -40,12 +41,15 @@ if TYPE_CHECKING:
     from office365.sharepoint.lists.list import List as SPList
     from office365.sharepoint.webs.web import Web
 
-__all__ = ["LIST_SECURITY", "SiteVerificationReport", "WEB_SCOPE_STRUCTURE", "verify_site"]
+__all__ = ["LIST_SECURITY", "SITE_SCOPE", "SiteVerificationReport", "WEB_SCOPE_STRUCTURE", "verify_site"]
 
 WEB_SCOPE_STRUCTURE = "web-scope structure"
 
 #: Check name for a list's own ACL (as opposed to the web's or an item's).
 LIST_SECURITY = "list security"
+
+#: Check name for the site-level scope a migration never replays (features, regional settings).
+SITE_SCOPE = "site scope"
 
 
 def _web_url(web: "Web") -> str:
@@ -56,6 +60,12 @@ def _web_url(web: "Web") -> str:
             return str(value)
     context = getattr(web, "context", None)
     return str(getattr(context, "base_url", "") or "")
+
+
+def _site_scope_findings(source_context: "ClientContext", target_context: "ClientContext") -> List[str]:
+    """The features/regional settings the target lacks, as notes (empty = nothing missing)."""
+    note = site_scope_note(compare_site_scope(source_context, target_context), _web_url(source_context.web))
+    return [note] if note else []
 
 
 def _web_scope_findings(source_web: "Web", target_web: "Web") -> List[str]:
@@ -131,6 +141,7 @@ def verify_site(
     security: bool = False,
     settings: bool = True,
     branding: bool = True,
+    site_scope: bool = True,
 ) -> SiteVerificationReport:
     """Verify a migrated web against its source (read-only).
 
@@ -152,6 +163,9 @@ def verify_site(
         settings: Reconcile the web's ``Title``/``Description``.
         branding: Reconcile the web's master page, logo, alternate CSS and theme
             folder (compared source-path-rebased).
+        site_scope: Report the features activated on the source site (web and site
+            collection) that the target does not have, and the regional settings
+            that differ. Read-only: neither is replayed by a migration.
 
     Returns:
         A :class:`SiteVerificationReport`; a check that raises is recorded in
@@ -172,6 +186,7 @@ def verify_site(
         "settings": (lambda: verify_web_settings(source_web, target_web), settings),
         "branding": (lambda: verify_web_branding(source_web, target_web), branding),
         WEB_SCOPE_STRUCTURE: (lambda: _web_scope_findings(source_web, target_web), web_scope_structure),
+        SITE_SCOPE: (lambda: _site_scope_findings(source_context, target_context), site_scope),
         "navigation": (lambda: verify_navigation(source_web, target_web), navigation),
         "pages": (lambda: verify_page_copy(source_web, target_web), pages),
         "security": (lambda: verify_site_security(source_web, target_web), security),

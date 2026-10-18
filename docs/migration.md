@@ -958,7 +958,7 @@ the shipped pairs' expected output.
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
 | Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and a file on an **un-published (minor) version** is copied as its draft — both reported as warnings, since the readable version is all REST exposes) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | navigation and pages are web concerns, not adapter concerns: the whole-site resolver copies quick launch/top nav (`migrate_navigation`) and both kinds of page (`migrate_pages`) — a modern site page's canvas, title, description, layout, banner and promoted state, a classic wiki page's `WikiField` body — then publishes the ones the source had published; publishing pages stay a handoff, wiki markup is not rewritten, and a serialized web part keeps the source list/library ids it binds to | same | same |
-| Site settings (web scope) | each web's `Title`/`Description` are copied onto the target web when they differ (`migrate_site_settings`), as is its branding (master page, logo, alternate CSS, theme folder) — rebased onto the target's path and only where the target has the asset; the site-collection/regional settings are not carried over REST | same | same |
+| Site settings (web scope) | each web's `Title`/`Description` are copied onto the target web when they differ (`migrate_site_settings`), as is its branding (master page, logo, alternate CSS, theme folder) — rebased onto the target's path and only where the target has the asset; the site-collection/regional settings and activated features are not carried over REST, only compared and reported (`compare_site_scope`, `verify_site(..., site_scope=True)`) | same | same |
 | Workflows / InfoPath forms / BCS external lists | not migrated (the resolver reports every association, InfoPath form and external list as a handoff) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
 
@@ -1282,6 +1282,43 @@ copy cannot carry — a master page or theme the target lacks, site-collection a
 regional settings — is named by
 the `site_settings` fidelity dimension rather than reported as drift.
 
+### Verifying site scope
+
+Two site-level facts decide what the target site *can do*, and a migration replays
+neither. They are compared rather than assumed:
+
+```python
+from office365.migration.sharepoint import compare_site_scope, site_scope_note
+
+diff = compare_site_scope(source_ctx, target_ctx)  # read-only, both sides
+print(site_scope_note(diff, "https://…/sites/team_in"))  # None when nothing is missing
+```
+
+`compare_site_scope` reads the features activated on **the web** and on **the site
+collection**, plus the comparable regional settings (time zone, `LocaleId`, work
+days, first day and week of the year, calendar, `AdjustHijriDays`, date/time
+separators, `Time24`, `DateFormat`). Only what the *source* has and the target
+lacks is a finding: a feature the target activated on its own is carried in
+`to_dict()` under `extra_web_features` / `extra_site_features`, but it is not a
+fidelity loss and never turns the report into a mismatch.
+
+Neither is repaired, for two different reasons. Activating a feature has side
+effects the source never asked for at this point in a run — a publishing feature
+installs page layouts and swaps the master page — and deactivating one is not
+something a re-run undoes, so it stays an explicit out-of-band decision:
+`Enable-SPFeature` with the GUID the note prints. Regional settings have no working
+REST write path (setting a time zone id does not change the web's zone), which is
+also why the settings copy never attempts them.
+
+`verify_site(..., site_scope=True)` runs this as the `site scope` dimension, next
+to `branding`, and it is on by default — a run that is silent about features is
+reporting that the target has all of the source's, not that nobody looked.
+
+Both paths were exercised against a live tenant: a migrated pair reports
+`site scope: 0`, and two unrelated sites report 22 missing web features and 34
+missing site-collection ones. A *regional* difference is only unit-tested — a tenant
+cannot be talked into one over REST, which is the whole reason it is reported.
+
 ### Verifying site pages
 
 Pages are not files with a hash, so the check compares the artifact that carries
@@ -1317,15 +1354,17 @@ report = verify_site(
     pages=True,
     security=True,
 )
-print(report.summary())  # "MISMATCH | https://…/sites/team_out | settings: 1, web-scope structure: 0, pages: 2"
+print(report.summary())  # "MISMATCH | … | settings: 0, branding: 0, web-scope structure: 0, site scope: 0, pages: 1"
 print(report.ok, report.complete)
 for note in report.issues:
     print(note)
 ```
 
-The checks are opt-in, matching what a run claimed to do: `settings` and
-`web_scope_structure` are on by default, `navigation`, `pages` and `security` are
-passed when the corresponding run flags were set, and `lists=[(source, target), …]`
+The checks are opt-in, matching what a run claimed to do: `settings`, `branding`,
+`web_scope_structure` and `site_scope` are on by default (they report what a run
+did **not** deliver, so silence has to be earned), `navigation`, `pages` and
+`security` are passed when the corresponding run flags were set, and
+`lists=[(source, target), …]`
 adds per-list structure reconciliation (the same comparison as
 `verify_list_structure`). `security=True` covers both container scopes as two
 separate dimensions — `security` (web groups + web role assignments, via
