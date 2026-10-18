@@ -378,6 +378,73 @@ Four honest limits, all Exchange's rather than the adapter's:
   needs an upload session, which this target does not use, so it raises rather than
   truncating.
 
+### Exporting a calendar
+
+A calendar exports through the same job with a different pair of adapters:
+`CalendarSource` enumerates one item per event, `IcsExportTarget` writes an
+iCalendar document plus the same kind of sidecar.
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import CalendarSource, IcsExportTarget
+
+calendar = client.me.calendar.get().execute_query()
+job = MigrationJob(CalendarSource(calendar), IcsExportTarget("./calendar-export"))
+job.plan()
+job.run()
+print(job.verify().summary())  # each .ics's MD5 vs the document rendered from the source event
+```
+
+The layout mirrors the mail export:
+
+```text
+<root>/Calendar/2026-03-02_Quarterly-review_4b1e9f02.ics   # iCalendar document
+<root>/Calendar/2026-03-02_Quarterly-review_4b1e9f02.json  # sidecar record
+<root>/manifest.jsonl                                      # one sidecar per line
+```
+
+Verification is a byte checksum here — unlike mail, nothing downstream
+re-serializes an `.ics`: the file is *rendered* from the event record, so the
+same event always produces the same bytes (`DTSTAMP` is the event's own
+last-modified time, never the export's). An all-day event becomes a
+`VALUE=DATE` range, an HTML body goes into the standard
+`X-ALT-DESC;FMTTYPE=text/html` instead of being flattened into lossy plain text,
+and the reminder becomes a `VALARM`.
+
+Verification is exact only if the *names* are exact, so the export keys on the
+Graph event id, not on `iCalUid`: Exchange gives a meeting an `iCalUid` but not a
+plain appointment (an event created through the API reads back `iCalUid: null`),
+so keying on it would let a re-run see the same event under a new identity and
+write a second copy. The `iCalUid` is still recorded, and becomes the `.ics`
+`UID` when present, because that is what other calendar clients match on.
+
+Time zones are written as Graph states them — a wall clock plus `TZID=Europe/Kiev`
+when the zone is named, a `Z` timestamp when it is not — so no IANA/Windows
+translation can drift. Note that Exchange normalises on read: an event created as
+09:00 `Europe/Kiev` is echoed back with your zone in the create response but
+re-read as `07:00` `UTC`, so a UTC-only export is normal rather than a bug. The
+body is normalised the same way (`text` comes back as converted HTML), and a
+default 15-minute reminder appears on events created without one.
+
+Four honest limits:
+
+- **A recurring event is exported once**, as its series master: an `RRULE` in the
+  `.ics` and Graph's own `recurrence` object in the sidecar. The occurrences are
+  not separate items, because importing them *as well as* the series would
+  duplicate every meeting. `CalendarExportOptions(include_recurring_instances=True)`
+  exports them anyway for archive-style backups.
+- **Cancelled events are skipped** unless `include_cancelled=True`: a cancelled
+  event is a tombstone, and the import creates live events.
+- **The `.ics` is for other clients; the sidecar is for the import.** iCalendar
+  cannot carry Graph's recurrence object, the online-meeting provider or the
+  sensitivity/importance pair without loss, so an import reads the sidecar and
+  treats the `.ics` as the portable copy. One calendar per source — a mailbox
+  with several is one job per calendar.
+- **It is a projection, not a backup of the mailbox item.** Attachments
+  (`hasAttachments`), extended properties and per-attendee proposed times are
+  recorded as flags, not carried: calendar attachments are the event's, not the
+  `.ics`'s.
+
 ## SPMT-style sessions
 
 `MigrationSession` mirrors the

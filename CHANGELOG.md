@@ -36,6 +36,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   manifest, so an export writes its own index from the plan instead of re-reading
   the source.
 
+**Migration (calendar)**
+
+- `CalendarSource` + `IcsExportTarget` (`office365.migration.outlook`) export a
+  Graph calendar as a portable ICS tree through the same `MigrationJob`: one `.ics`
+  (iCalendar, CRLF and RFC 5545 folded, with `TZID`, `RRULE`, `VALARM`, `X-ALT-DESC`
+  for HTML bodies) plus one JSON sidecar per event, and a `manifest.jsonl` index.
+  The document is rendered from the event record, so `verify()` is an exact byte
+  checksum. A recurring event exports once as its series master (occurrences and
+  cancellations are opt-in: importing both a series and its instances would
+  duplicate every meeting), and Graph's own `recurrence` object travels in the
+  sidecar so an import can replay it without parsing `RRULE`.
+
 ### Fixed
 
 **Migration (client-side)**

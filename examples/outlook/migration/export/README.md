@@ -1,12 +1,13 @@
-# Export a mailbox
+# Export a mailbox or a calendar
 
-Take a mailbox — or one folder and its subtree — out as a portable EML tree that
-opens in any mail client and imports anywhere. Part of the
-[Outlook tour](../../README.md).
+Take a mailbox — or one folder and its subtree — out as a portable EML tree, or a
+calendar out as an ICS tree; both open in any mail/calendar client and import
+anywhere. Part of the [Outlook tour](../../README.md).
 
 | What | File | Notes |
 |------|------|-------|
 | Folder → EML tree | [`export_folder_eml.py`](./export_folder_eml.py) | `--flat`, `--no-drafts`, `--preserve-timestamps`; ends with `manifest.jsonl` |
+| Calendar → ICS tree | [`export_calendar_ics.py`](./export_calendar_ics.py) | `--root-name`, `--instances`, `--cancelled`; same index |
 
 ## What lands on disk
 
@@ -55,3 +56,47 @@ Three things the job gives you for free, and why mail exports need them:
 - **Drafts may not have an `internetMessageId`** — they are keyed by Graph id,
   which changes when the draft moves, so a re-run of a moved draft reports a
   second copy rather than overwriting the first.
+
+## Calendar → ICS tree
+
+```bash
+uv run python examples/outlook/migration/export/export_calendar_ics.py --output ./calendar-export
+```
+
+```text
+<output>/
+  Calendar/2026-03-02_Quarterly-review_4b1e9f02.ics   # iCalendar document
+  Calendar/2026-03-02_Quarterly-review_4b1e9f02.json  # the sidecar record
+  manifest.jsonl                                       # one sidecar per line
+```
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import CalendarSource, IcsExportTarget
+
+job = MigrationJob(CalendarSource(calendar), IcsExportTarget("./calendar-export"))
+job.plan()
+job.run()
+print(job.verify().summary())
+```
+
+The payload is *rendered* from the event record rather than fetched, so the same
+event always produces the same bytes and a byte checksum verifies the tree —
+`verify()` here is exact, not approximate.
+
+Deliberate choices, all of them visible in the sidecar:
+
+- **One item per series, not per occurrence.** A recurring event exports as its
+  series master (an `RRULE` plus Graph's `recurrence` object), because importing
+  both the series and its instances would duplicate the meeting.
+  `--instances` overrides that for archival exports.
+- **Cancelled events are skipped** (`--cancelled` includes them): they are
+  tombstones, and an import creates live events.
+- **HTML bodies ride in `X-ALT-DESC;FMTTYPE=text/html`** — the standard place for
+  HTML in `.ics` — instead of being flattened into a lossy plain-text
+  `DESCRIPTION`.
+- **Time zones are passed through**, a wall clock plus `TZID=Europe/Kiev`, so
+  Graph's windows/IANA names travel unchanged and no conversion can drift.
+- **Attendees are descriptive.** `ATTENDEE`/`ORGANIZER` lines are written for
+  other clients to read; an import recreates them from the sidecar, since Graph
+  decides `responseStatus` and `isOrganizer` itself.

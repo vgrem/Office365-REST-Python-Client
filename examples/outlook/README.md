@@ -195,6 +195,7 @@ Bulk moves for retention, backup and migration — the same `export_to` /
 | Message → MIME (`.eml`) | [`messages/export_mime.py`](./messages/export_mime.py) |
 | Folder tree → portable EML (resumable, verified) | [`migration/export/export_folder_eml.py`](./migration/export/export_folder_eml.py) |
 | Portable EML → mailbox (folders + flags restored) | [`migration/import/import_folder_eml.py`](./migration/import/import_folder_eml.py) |
+| Calendar → portable ICS (resumable, verified) | [`migration/export/export_calendar_ics.py`](./migration/export/export_calendar_ics.py) |
 | Attachments out of a folder | [`messages/export_attachments.py`](./messages/export_attachments.py) |
 | A whole folder, concurrently | [`messages/export_mail_async.py`](./messages/export_mail_async.py) |
 | Contacts → CSV / CSV → contacts | [`contacts/export_csv.py`](./contacts/export_csv.py) · [`contacts/import_csv.py`](./contacts/import_csv.py) |

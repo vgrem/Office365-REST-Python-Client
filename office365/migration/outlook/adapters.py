@@ -135,8 +135,18 @@ class MailFolderSource(DataSource):
         return _md5(self.read(item))
 
 
-class MailExportTarget(DataTarget):
-    """Writes a portable EML tree: one ``.eml`` plus one JSON sidecar per message."""
+class SidecarTreeTarget(DataTarget):
+    """Writes an export tree: one payload file plus one JSON sidecar per item.
+
+    The convention both Outlook exports share — the payload is the portable
+    artefact (MIME bytes, an ``.ics`` document), the sidecar is the record an
+    import replays, and ``commit()`` rebuilds the index from the sidecars so a
+    resumed run's manifest is complete.
+    """
+
+    #: Suffix of the payload file, and the sidecar key recording its path.
+    content_suffix = ".eml"
+    payload_key = "eml_path"
 
     def __init__(self, root: str | Path, write_manifest: bool = True) -> None:
         self._root = Path(root)
@@ -165,22 +175,23 @@ class MailExportTarget(DataTarget):
         data = payload if isinstance(payload, bytes) else bytes(payload)
         path.write_bytes(data)
         envelope = dict(item.metadata or {})
-        envelope.setdefault("eml_path", item.dest_path)
+        envelope.setdefault(self.payload_key, item.dest_path)
         envelope.setdefault("source_id", item.source_id)
         envelope["size_bytes"] = len(data)
         self._sidecar(item).write_text(json.dumps(envelope, indent=2, default=str), encoding="utf-8")
 
     def list_paths(self) -> Iterable[str]:
-        """Every ``.eml`` under the root (sidecars and the index are not content)."""
-        return (p.relative_to(self._root).as_posix() for p in sorted(self._root.rglob("*.eml")))
+        """Every payload file under the root (sidecars and the index are not content)."""
+        pattern = f"*{self.content_suffix}"
+        return (p.relative_to(self._root).as_posix() for p in sorted(self._root.rglob(pattern)))
 
     def checksum(self, item: MigrationItem) -> str:
         return _md5(self._path(item).read_bytes())
 
     def apply_timestamps(self, item: MigrationItem) -> None:
-        """Stamp the ``.eml`` with the message's last-modified time (``preserve_timestamps``).
+        """Stamp the payload file with the item's last-modified time (``preserve_timestamps``).
 
-        A mail export has no per-item metadata the filesystem honours, so the file
+        An export tree has no per-item metadata the filesystem honours, so the file
         mtime is the only timestamp it can really preserve; the sidecar keeps the
         original values either way.
         """
@@ -195,7 +206,7 @@ class MailExportTarget(DataTarget):
         os.utime(path, (seconds, seconds))
 
     def read_metadata(self, item: MigrationItem) -> dict[str, Any] | None:
-        """The sidecar record (what the export recorded about this message)."""
+        """The sidecar record (what the export recorded about this item)."""
         sidecar = self._sidecar(item)
         return json.loads(sidecar.read_text(encoding="utf-8")) if sidecar.exists() else None
 
@@ -213,4 +224,11 @@ class MailExportTarget(DataTarget):
         pass
 
 
-__all__ = ["MANIFEST_NAME", "MailExportTarget", "MailFolderSource"]
+class MailExportTarget(SidecarTreeTarget):
+    """Writes a portable EML tree: one ``.eml`` plus one JSON sidecar per message."""
+
+    content_suffix = ".eml"
+    payload_key = "eml_path"
+
+
+__all__ = ["MANIFEST_NAME", "MailExportTarget", "MailFolderSource", "SidecarTreeTarget"]
