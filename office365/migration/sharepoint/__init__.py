@@ -98,10 +98,12 @@ from office365.migration.sharepoint.structure import (
     FieldDefinition,
     ListStructure,
     ViewDefinition,
+    WebScopeProvisionReport,
     WebScopeStructure,
     capture_list_structure,
     compare_web_scope_structure,
     provision_list_structure,
+    provision_web_scope_columns,
     web_scope_note,
 )
 from office365.migration.sharepoint.tenant_assessor import MigrationTenantAssessor
@@ -155,6 +157,7 @@ __all__ = [
     "WebBranding",
     "WebBrandingReport",
     "WebNavigation",
+    "WebScopeProvisionReport",
     "WebScopeStructure",
     "WebSettings",
     "WebSettingsReport",
@@ -185,6 +188,7 @@ __all__ = [
     "page_handoff_note",
     "parse_site_settings_mode",
     "provision_list_structure",
+    "provision_web_scope_columns",
     "sharepoint_scan_pairs",
     "site_scope_note",
     "verify_list_security",

@@ -8,6 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Web-scope site columns are provisioned on the target web, not only replayed
+  through the lists that use them.** Structure replay was per list, so a column a web
+  defines at *site* scope was recreated as a list column on every migrated list that
+  happened to have it and nowhere else: the web-level definition, and its inheritance
+  by the web's other lists, stayed missing (a live whole-site run reported exactly
+  that: `web-scope structure: 1` for a column named `RegWeb`). The new
+  `provision_web_scope_columns(source_web, target_web, list_id_map=…)` — called by the
+  resolver once per web, **before** the per-list replay so a replayed list reuses the
+  web column instead of minting a second, list-scoped copy — creates every source site
+  column the target web lacks and returns a `WebScopeProvisionReport`
+  (`created`/`present`/`skipped`/`failed`, `summary()`, `warnings()`, `to_dict()`).
+  A column is recreated from its source `SchemaXml` (origin attributes stripped by
+  `Field.schema_xml_for_copy`, which SharePoint otherwise rejects), a lookup is
+  repointed at the target list, and a managed-metadata column goes through
+  `TaxonomyField.create` so it binds the *target* web's hidden taxonomy list and note
+  field rather than the source's — verified live: the recreated `RegWeb` reports the
+  same `TermSetId` and carries its own hidden `Note` companion. Each create is
+  verified by presence afterwards, because SharePoint Online registers the column and
+  *then* raises `SPFieldValidationException` ("The object has been updated by another
+  user since it was last fetched") — treating that exception as failure would have
+  made every column "fail" while it existed. Re-running is a no-op. Gated by the same
+  `provision_structure` flag as list structure, and best-effort: a column bound to a
+  BCS model, a lookup into a list outside the migration, or a schema that cannot be
+  read is skipped and reported. A web-scope **content type** is still only reported
+  (`verify_site(..., web_scope_structure=True)`): REST refuses a field link on a
+  site-scope content type, so a recreated one would be empty.
 - **A site-scope comparison: the features and regional settings a migration never
   replays are now reported, not assumed.** A migration copies content, structure and
   branding, but a target site without the publishing, records-management or

@@ -1,6 +1,7 @@
 """Tests for the SharePoint whole-site (migrate_all) resolver and session wiring."""
 
 import hashlib
+import re
 import unittest
 from types import SimpleNamespace
 from unittest import mock
@@ -154,14 +155,34 @@ class _WorkflowAssociations:
 
 
 class _Field:
-    """A web field as the web-scope comparison sees it."""
+    """A web field as the web-scope comparison and provisioning see it."""
 
-    def __init__(self, internal_name, hidden=False, from_base_type=False, can_be_deleted=True, sealed=False):
+    def __init__(
+        self,
+        internal_name,
+        hidden=False,
+        from_base_type=False,
+        can_be_deleted=True,
+        sealed=False,
+        schema_xml=None,
+    ):
         self.internal_name = internal_name
         self.hidden = hidden
         self.from_base_type = from_base_type
         self.can_be_deleted = can_be_deleted
         self.sealed = sealed
+        self.schema_xml = schema_xml
+        self.title = internal_name
+        self.field_type_kind = 2
+        self.type_as_string = "Text"
+        self.required = False
+        self.read_only_field = False
+        self.group = None
+        self.description = None
+        self.properties = {}
+
+    def schema_xml_for_copy(self):
+        return self.schema_xml
 
 
 class _ContentType:
@@ -170,6 +191,26 @@ class _ContentType:
     def __init__(self, name, hidden=False):
         self.name = name
         self.hidden = hidden
+
+
+class _SingleFieldView:
+    """``web.fields.get_by_internal_name_or_title(name)`` — a get that 404s when absent."""
+
+    def __init__(self, entry):
+        self._entry = entry
+
+    def get(self):
+        return self
+
+    def execute_query(self):
+        if self._entry is None:
+            raise RuntimeError("Field not found")
+        return self._entry
+
+
+def _schema_name(schema_xml):
+    match = re.search(r'Name="([^"]+)"', schema_xml)
+    return match.group(1) if match else "Field"
 
 
 class _WebCollectionView:
@@ -186,6 +227,14 @@ class _WebCollectionView:
 
     def execute_query(self):
         return list(self._entries)
+
+    def get_by_internal_name_or_title(self, name):
+        found = next((entry for entry in self._entries if getattr(entry, "internal_name", None) == name), None)
+        return _SingleFieldView(found)
+
+    def create_field_as_xml(self, schema_xml):
+        self._entries.append(_Field(_schema_name(schema_xml), schema_xml=schema_xml))
+        return self
 
 
 class _Web:
@@ -623,7 +672,7 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
             _Lists([_docs()]),
             title="child",
             url="https://contoso.sharepoint.com/sites/source/child",
-            fields=[_Field("RegionCol")],
+            fields=[_Field("RegionCol", schema_xml='<Field Type="Text" Name="RegionCol" StaticName="RegionCol" />')],
             content_types=[_ContentType("Contract")],
         )
         source_root = _Web(
@@ -648,10 +697,13 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         warnings: list[str] = []
         resolve_site_task(task, context, include_subwebs=True, warnings=warnings)
 
-        # A created subsite gets its lists replayed, not the web-scope definitions.
-        note = next(message for message in warnings if "web-scope structure is not replayed" in message)
-        self.assertIn("1 column(s): RegionCol", note)
+        # The created subsite's web-scope *column* is provisioned; a content type
+        # cannot be (REST refuses its field links), so only that stays a finding.
+        created = _find_web(target_root, "child")
+        self.assertEqual([field.internal_name for field in created.fields.execute_query()], ["RegionCol"])
+        note = next(message for message in warnings if "web-scope structure is incomplete" in message)
         self.assertIn("1 content type(s): Contract", note)
+        self.assertNotIn("RegionCol", note)
         self.assertIn("list-scoped copy", note)
 
     def test_web_scope_structure_note_is_quiet_when_the_target_matches(self):
@@ -693,6 +745,63 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         resolve_site_task(task, context, include_subwebs=True, warnings=warnings)
 
         self.assertEqual([message for message in warnings if "web-scope structure" in message], [])
+
+    def test_web_scope_columns_are_not_provisioned_when_structure_is_off(self):
+        source = _Web(
+            _Lists([_tasks()]),
+            title="Source",
+            url="https://contoso.sharepoint.com/sites/source",
+            fields=[_Field("RegionCol", schema_xml='<Field Type="Text" Name="RegionCol" />')],
+        )
+        target = _Web(
+            _Lists([]),
+            title="Target",
+            url="https://contoso.sharepoint.com/sites/target",
+        )
+        registry = {
+            source.url.rstrip("/").casefold(): source,
+            target.url.rstrip("/").casefold(): target,
+        }
+        context = _Context(target.url, target, registry)
+        task = MigrationTask.sharepoint(source.url, target.url, migrate_all=True)
+
+        warnings: list[str] = []
+        resolve_site_task(task, context, provision_structure=False, warnings=warnings)
+
+        self.assertEqual(target.fields.execute_query(), [])
+        note = next(message for message in warnings if "web-scope structure is incomplete" in message)
+        self.assertIn("1 column(s): RegionCol", note)
+
+    def test_web_scope_columns_are_provisioned_before_the_list_replay(self):
+        source = _Web(
+            _Lists([_tasks()]),
+            title="Source",
+            url="https://contoso.sharepoint.com/sites/source",
+            fields=[_Field("RegionCol", schema_xml='<Field Type="Text" Name="RegionCol" />')],
+        )
+        target = _Web(
+            _Lists([]),
+            title="Target",
+            url="https://contoso.sharepoint.com/sites/target",
+        )
+        registry = {
+            source.url.rstrip("/").casefold(): source,
+            target.url.rstrip("/").casefold(): target,
+        }
+        context = _Context(target.url, target, registry)
+        task = MigrationTask.sharepoint(source.url, target.url, migrate_all=True)
+        # What the target web carried when each list's structure was replayed.
+        seen: list[list[str]] = []
+
+        def _record(*args, **kwargs):
+            seen.append([field.internal_name for field in target.fields.execute_query()])
+            return []
+
+        self.provision.side_effect = _record
+
+        resolve_site_task(task, context)
+
+        self.assertEqual(seen, [["RegionCol"]])
 
     def test_provision_structure_can_be_disabled(self):
         source = _context([_docs()])

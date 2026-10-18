@@ -48,6 +48,7 @@ from office365.migration.sharepoint.structure import (
     compare_web_scope_structure,
     normalize_guid,
     provision_list_structure,
+    provision_web_scope_columns,
     web_scope_note,
 )
 from office365.migration.tasks import FILE_SHARE, SHAREPOINT, MigrationTask
@@ -287,6 +288,28 @@ def _apply_web_branding(
     return report
 
 
+def _provision_web_scope_structure(
+    source_web: Web,
+    target_web: Web,
+    enable: bool,
+    list_id_map: dict[str, str] | None,
+    warnings: list[str],
+) -> None:
+    """Register the web's own site columns before the per-list replay (best-effort)."""
+    if not enable:
+        return
+    try:
+        report = provision_web_scope_columns(source_web, target_web, list_id_map=list_id_map)
+    except Exception as e:  # noqa: BLE001 — web-scope provisioning is best-effort; never abort resolution
+        warnings.append(f"web-scope column provisioning failed for {_web_url(target_web)}: {e}")
+        return
+    summary = report.summary()
+    if summary:
+        logger.info(summary)
+        warnings.append(summary)
+    warnings.extend(report.warnings())
+
+
 def _report_web_scope_structure(source_web: Web, target_web: Web, warnings: list[str]) -> None:
     """Append a note naming the web-scope structure the target web lacks (best-effort)."""
     try:
@@ -338,9 +361,6 @@ def _resolve_web(
         else None
     )
     _report_handoff(source_context.web, source_lists, warnings, page_report)
-    # Structure provisioning replays each list's columns/content types onto the
-    # target *list*; say which web-level definitions that leaves behind.
-    _report_web_scope_structure(source_context.web, target_context.web, warnings)
     selected: list[SPList] = []
     for source_list in source_lists:
         title = source_list.title
@@ -367,6 +387,13 @@ def _resolve_web(
         target_id = targets_by_title.get(title) if title else None
         if source_id and target_id and source_id not in list_id_map:
             list_id_map[source_id] = target_id
+
+    # The web's own site columns are registered *before* any list is replayed: a
+    # list's Fields collection includes the site columns it inherits, so a replayed
+    # list then uses the web column instead of minting a second, list-scoped copy.
+    # Afterwards, say which web-level definitions the target still lacks.
+    _provision_web_scope_structure(source_context.web, target_context.web, provision_structure, list_id_map, warnings)
+    _report_web_scope_structure(source_context.web, target_context.web, warnings)
 
     for source_list, target_list in resolved:
         if provision_structure:

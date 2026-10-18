@@ -390,9 +390,9 @@ The recursion is **live-verified, end to end**: on a source site whose tree held
 template with its lists replayed (same titles and base templates), and a two-row
 subsite list with a custom column came out with that column provisioned, both
 values intact, the source/target verification reporting `OK`. Two limits are
-worth naming: the web-scope **site columns and site content types** themselves are
-not created — they are replayed only *through the lists that use them* (see
-*Provisioning list structure* below) — and the mirrored webs are recreations, so
+worth naming: a web-scope **site content type** is not created — content types are
+replayed only *through the lists that use them* (see *Provisioning list structure*
+below) — and the mirrored webs are recreations, so
 their ids, web-part data bindings and version history do not match the source's
 (pages are copied per web, subwebs included — see *Site pages* below).
 
@@ -504,30 +504,44 @@ Captured content types also name every built-in/SharePoint-owned column
 (`Title`, `FileLeafRef`, framework columns) that capture deliberately does not
 recreate; those are left to the target list's own defaults rather than sent as
 guaranteed link failures.
-- **Structure is replayed per list, not at web scope.** A **site column**
-(one whose `Scope` is the web's server-relative URL, e.g. `/sites/team_in`, not the
-list's) and a **site content type** are only ever seen *through the lists that use
-them*: a column a list already carries is recreated on the target list from
-that list's `SchemaXml` (its web-level `Scope`/`Group` registration is left
-behind), and a custom content type a list carries is recreated on the target list
-by name, description and group — SharePoint Online assigns the new content type
-its own identifier, so the source's `string_id` is not preserved. Nothing is
-registered at the web level, so a column or content type that no migrated list
-uses — and its inheritance by the target web's *other* lists — is not reproduced;
-create those out of band (CSOM/PnP). Attaching a *fresh* site column to a content
-type is impossible over REST anyway: `FieldLinks` rejects it (`Column '<name>'
-does not exist`) until the column is reachable from the list.
+- **Site columns are registered at web scope before any list is replayed.** A
+  **site column** (one whose `Scope` is the web's server-relative URL, e.g.
+  `/sites/team_in`, not the list's) used to be seen only *through the lists that
+  use it*; `provision_list_structure` now has a web-level companion in the
+  resolver: `provision_web_scope_columns` runs once per web, before the per-list
+  replay, and creates every source site column the target web lacks. Ordering is
+  the point — a list's `Fields` collection includes the site columns it inherits,
+  so the replayed list then *reuses* the web column instead of minting a second,
+  list-scoped copy of it. Each column is recreated from its source `SchemaXml`
+  (`SourceID`/`Version` stripped by `Field.schema_xml_for_copy`, because
+  SharePoint rejects a copied origin header), a lookup is repointed at the target
+  list, and a managed-metadata column goes through `TaxonomyField.create` so it
+  binds the *target* web's hidden taxonomy list and note field instead of the
+  source's. The create is verified by presence afterwards: SharePoint Online
+  registers the column and *then* raises `SPFieldValidationException` ("The object
+  has been updated by another user since it was last fetched"), so the exception is
+  not evidence of failure. Re-running is a no-op (`already present`).
 
-  The gap is reported rather than left silent: the resolver compares the two webs
-  (`compare_web_scope_structure`) and appends what the target web lacks —
-  `web-scope structure is not replayed: the target of <url> lacks 1 column(s):
-  RegWeb — …`. That comparison is read-only (two projected GETs per web), matches
-  columns by internal name and content types by name, and ignores hidden,
-  system, framework and sealed columns, so a note names real gaps rather than
-  platform plumbing. It counts *definitions*, not user intent: a site collection
-  root also carries app- and feature-provisioned site columns (compliance,
-  taxonomy, community, tenant "modern" UI columns), so a long list means "the
-  target web is not a schema clone of the source web", not "recreate N columns".
+  A **web-scope content type** is still not created. Content types are replayed
+  per list, by name, description and group — SharePoint Online assigns the new
+  content type its own identifier, so the source's `string_id` is not preserved —
+  and attaching a *fresh* site column to a content type is impossible over REST
+  anyway: `FieldLinks` rejects it (`Column '<name>' does not exist`) until the
+  column is reachable from the list. A definition no migrated list uses is
+  therefore still missing, and its inheritance by the target web's *other* lists is
+  not reproduced; create those out of band (CSOM/PnP).
+
+  What is left is reported rather than left silent: the resolver compares the two
+  webs *after* provisioning (`compare_web_scope_structure`) and appends what the
+  target web still lacks — `web-scope structure is incomplete: the target of <url>
+  lacks 1 content type(s): Contract — …`. That comparison is read-only (two
+  projected GETs per web), matches columns by internal name and content types by
+  name, and ignores hidden, system, framework and sealed columns, so a note names
+  real gaps rather than platform plumbing. It counts *definitions*, not user
+  intent: a site collection root also carries app- and feature-provisioned site
+  columns (compliance, taxonomy, community, tenant "modern" UI columns), so a long
+  list means "the target web is not a schema clone of the source web", not
+  "recreate N columns".
 
 A structure-provisioning warning is also recorded on the resolved target adapter,
 so a whole-site session reports it through `session.warnings()` instead of only in
@@ -954,7 +968,7 @@ the shipped pairs' expected output.
 | Permissions | best-effort (same-tenant, resolved users) | best-effort (same-tenant) | best-effort (same-tenant, unique ACLs only) |
 | Site groups / web role assignments | n/a (whole-site resolver only) | n/a | best-effort (same-tenant; custom groups + membership, associated-group membership excluded) |
 | Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
-| Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure` (per list: web-scope site columns and site content types are not registered on the target) | same | same |
+| Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure`; the whole-site resolver registers web-scope **site columns** first (`provision_web_scope_columns`), while a web-scope **content type** stays reported (`verify_site(..., web_scope_structure=True)`) | same | same |
 | Lookup / Person / MMD values | unsupported (values copied verbatim) | unsupported (values copied verbatim) | best-effort (single- and multi-value Lookup remapped across migrated lists; Person by login; MMD carried by term id; multi-choice by value) |
 | Check-out / draft / approval state | unsupported | best-effort (approval status + comments carried for files **and** list items when moderation is enabled; a draft file's `Modified` cannot be restored with it; a **checked-out** file is copied from its last checked-in version and a file on an **un-published (minor) version** is copied as its draft — both reported as warnings, since the readable version is all REST exposes) | best-effort (approval status + comments carried when the list enables moderation; check-out and in-progress draft state are not) |
 | Navigation / pages / web parts | navigation and pages are web concerns, not adapter concerns: the whole-site resolver copies quick launch/top nav (`migrate_navigation`) and both kinds of page (`migrate_pages`) — a modern site page's canvas, title, description, layout, banner and promoted state, a classic wiki page's `WikiField` body — then publishes the ones the source had published; publishing pages stay a handoff, wiki markup is not rewritten, and a serialized web part keeps the source list/library ids it binds to | same | same |
@@ -966,13 +980,13 @@ the shipped pairs' expected output.
 > carried by the item adapters: they are schema/policy, and the SharePoint resolver
 > replays them over REST with `provision_list_structure` (whole-site and single-list
 > resolution do this by default). The matrix reports the adapter-level truth.
-> Replay is **per list**: a site column (its `Scope` names the web, not the list)
-> that a list carries is recreated
-> from that list's `SchemaXml` (its web-level registration is not), and a custom
-> content type used by the list is recreated on the target list. A site column or
-> content type that no migrated list uses is not created, and REST would not let a
-> fresh site column be linked to a content type anyway (`Column '<name>' does not
-> exist`) — see *Provisioning list structure*.
+> Replay is **per list**, with one web-level exception: a site column (its `Scope`
+> names the web, not the list) is first registered at web scope by
+> `provision_web_scope_columns`, so a list that carries it reuses that definition
+> instead of a list-scoped copy; a custom content type used by the list is recreated
+> on the target list. A content type that no migrated list uses is not created, and
+> REST would not let a fresh site column be linked to a content type anyway
+> (`Column '<name>' does not exist`) — see *Provisioning list structure*.
 
 > Site groups and web-level role assignments are likewise **not** an adapter
 > dimension: `describe_fidelity` models a source/target *pair*, whereas site

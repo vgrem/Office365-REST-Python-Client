@@ -77,11 +77,13 @@ __all__ = [
     "FieldDefinition",
     "ListStructure",
     "ViewDefinition",
+    "WebScopeProvisionReport",
     "WebScopeStructure",
     "capture_list_structure",
     "compare_web_scope_structure",
     "normalize_guid",
     "provision_list_structure",
+    "provision_web_scope_columns",
     "rewrite_lookup_schema",
     "web_scope_note",
 ]
@@ -532,7 +534,7 @@ def _taxonomy_allow_multiple(schema_xml: str) -> bool:
     return 'Type="TaxonomyFieldTypeMulti"' in schema_xml
 
 
-def _ensure_taxonomy_field(sp_list: SPList, definition: FieldDefinition, warnings: List[str]) -> None:
+def _ensure_taxonomy_field(container: SPList | Web, definition: FieldDefinition, warnings: List[str]) -> Optional[Field]:
     """Recreate a managed-metadata column bound to the same term set on the target.
 
     A taxonomy column cannot be replayed from its ``SchemaXml``: that schema names
@@ -540,6 +542,9 @@ def _ensure_taxonomy_field(sp_list: SPList, definition: FieldDefinition, warning
     up pointing at columns that do not exist on the target and every value is
     dropped. ``TaxonomyField.create`` lets SharePoint provision a fresh hidden
     note column and bind ``LookupList`` to the target web's TaxonomyHiddenList.
+
+    Returns the pending column (its create is only submitted on the context's next
+    ``execute_query()``), or ``None`` when it could not even be queued.
     """
     name = definition.internal_name
     term_set = _taxonomy_property(definition.schema_xml, "TermSetId")
@@ -547,12 +552,12 @@ def _ensure_taxonomy_field(sp_list: SPList, definition: FieldDefinition, warning
         warning = f"taxonomy column '{name}' was not recreated: its term set id could not be read"
         logger.warning(warning)
         warnings.append(warning)
-        return
+        return None
     from office365.sharepoint.taxonomy.field import TaxonomyField
 
     try:
-        TaxonomyField.create(
-            sp_list.fields,
+        return TaxonomyField.create(
+            container.fields,
             name,
             term_set,
             _taxonomy_property(definition.schema_xml, "SspId"),
@@ -562,6 +567,7 @@ def _ensure_taxonomy_field(sp_list: SPList, definition: FieldDefinition, warning
         warning = f"taxonomy column '{name}' could not be recreated: {exc}"
         logger.warning(warning)
         warnings.append(warning)
+        return None
 
 
 def _is_provisionable_content_type(definition: ContentTypeDefinition) -> bool:
@@ -1133,9 +1139,184 @@ def web_scope_note(missing: WebScopeStructure, source_url: Optional[str] = None)
     if missing.content_types:
         parts.append(f"{len(missing.content_types)} content type(s): {_sample_names(missing.content_types)}")
     return (
-        f"web-scope structure is not replayed: the target of {source_url or 'this web'} lacks "
+        f"web-scope structure is incomplete: the target of {source_url or 'this web'} lacks "
         + "; ".join(parts)
-        + " — a migrated list that uses one still gets a list-scoped copy, but the web-level "
-        "definition and its inheritance by the web's other lists are missing; create it out of "
-        "band (CSOM/PnP) if anything else depends on it"
+        + " — structure replay is per list, so a list that uses one still gets a list-scoped copy, "
+        "but the web-level definition (and its inheritance by the web's other lists) is missing; "
+        "web-scope columns are replayed when structure provisioning is on, and a web-scope content "
+        "type cannot be attached over REST, so create that out of band (CSOM/PnP)"
     )
+
+
+@dataclass
+class WebScopeProvisionReport:
+    """What web-scope column provisioning did, and what the server would not do.
+
+    Attributes:
+        created: Internal names of the columns now registered on the target web.
+        present: Internal names the target web already carried.
+        skipped: Notes for the source columns deliberately not created — a column
+            bound to a BCS model, a lookup into a list the migration does not carry,
+            or a column whose schema could not be read.
+        failed: Internal name -> why the server would not create it.
+    """
+
+    created: List[str] = dc_field(default_factory=list)
+    present: List[str] = dc_field(default_factory=list)
+    skipped: List[str] = dc_field(default_factory=list)
+    failed: Dict[str, str] = dc_field(default_factory=dict)
+
+    @property
+    def is_empty(self) -> bool:
+        """Whether every source column was already present (nothing to do, nothing to say)."""
+        return not self.created and not self.skipped and not self.failed
+
+    def warnings(self) -> List[str]:
+        """The skipped and failed columns as warning lines."""
+        notes = list(self.skipped)
+        notes.extend(f"web column '{name}' was not created: {reason}" for name, reason in sorted(self.failed.items()))
+        return notes
+
+    def summary(self) -> str:
+        """One line naming what was created, or ``""`` when nothing was."""
+        if not self.created and not self.failed:
+            return ""
+        parts = [f"{len(self.created)} created"]
+        if self.present:
+            parts.append(f"{len(self.present)} already present")
+        if self.skipped:
+            parts.append(f"{len(self.skipped)} skipped")
+        if self.failed:
+            parts.append(f"{len(self.failed)} failed")
+        return "web-scope columns: " + ", ".join(parts)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """A JSON-serializable form."""
+        return {
+            "created": list(self.created),
+            "present": list(self.present),
+            "skipped": list(self.skipped),
+            "failed": dict(self.failed),
+        }
+
+
+def _web_field_definition(web: Web, name: str) -> Optional[FieldDefinition]:
+    """One web column's full definition (``SchemaXml`` included), or ``None``."""
+    try:
+        field = web.fields.get_by_internal_name_or_title(name).get().execute_query()
+    except Exception as e:  # noqa: BLE001 — an unreadable column is reported by the caller
+        logger.debug("read web column '%s' failed: %s", name, e)
+        return None
+    return _field_definition(field)
+
+
+def _web_column_exists(web: Web, name: str) -> bool:
+    """Whether ``name`` is a field of ``web`` now (the verification after a create)."""
+    try:
+        web.fields.get_by_internal_name_or_title(name).get().execute_query()
+    except Exception:  # noqa: BLE001 — absent or unreadable means "not there"
+        return False
+    return True
+
+
+def _create_web_column(web: Web, schema_xml: str, name: str, report: WebScopeProvisionReport) -> None:
+    """Create one column from its schema and verify it by presence.
+
+    SharePoint Online registers the column and *then* raises
+    ``SPFieldValidationException`` ("The object has been updated by another user
+    since it was last fetched"), so the exception is not evidence of failure: what
+    the web carries afterwards is.
+    """
+    error: Optional[BaseException] = None
+    try:
+        web.fields.create_field_as_xml(schema_xml).execute_query()
+    except Exception as e:  # noqa: BLE001 — verified by presence below instead
+        error = e
+        logger.debug("create web column '%s' raised: %s", name, e)
+    if _web_column_exists(web, name):
+        report.created.append(name)
+        return
+    report.failed[name] = str(error or "the column is not on the web after the create")
+
+
+def _provision_web_column(
+    source_web: Web,
+    target_web: Web,
+    name: str,
+    list_id_map: Dict[str, str] | None,
+    report: WebScopeProvisionReport,
+) -> None:
+    """Create one missing web column, recording in ``report`` why it is not there."""
+    definition = _web_field_definition(source_web, name)
+    if definition is None or not definition.schema_xml:
+        report.skipped.append(f"web column '{name}' was not recreated: its schema could not be read")
+        return
+    schema_xml: str = definition.schema_xml
+    if _is_external_data_definition(definition):
+        report.skipped.append(
+            f"web column '{name}' was not recreated: it is bound to an external (BCS) content type, "
+            "which a client-side migration cannot provision"
+        )
+        return
+    if _is_taxonomy_definition(definition):
+        notes: List[str] = []
+        created = _ensure_taxonomy_field(target_web, definition, notes)
+        if created is not None:
+            try:
+                created.execute_query()
+            except Exception as e:  # noqa: BLE001 — verified by presence below instead
+                logger.debug("create web taxonomy column '%s' raised: %s", name, e)
+        if _web_column_exists(target_web, name):
+            report.created.append(name)
+        else:
+            report.failed[name] = notes[-1] if notes else "the taxonomy column is not on the web after the create"
+        return
+    rewritten, unresolved = rewrite_lookup_schema(schema_xml, list_id_map)
+    if unresolved is not None:
+        report.skipped.append(
+            f"web column '{name}' was not recreated: it is a lookup into list {{{unresolved}}}, "
+            "which is not part of this migration"
+        )
+        return
+    _create_web_column(target_web, rewritten or schema_xml, name, report)
+
+
+def provision_web_scope_columns(
+    source_web: Web,
+    target_web: Web,
+    *,
+    list_id_map: Dict[str, str] | None = None,
+) -> WebScopeProvisionReport:
+    """Register the source web's site columns on ``target_web`` (idempotent).
+
+    Structure replay is per list, so a column a web defines at *site* scope was
+    recreated as a list column on every target list that happened to have it and
+    nowhere else: the web-level definition, and its inheritance by any other list,
+    stayed missing. This closes that gap for the columns REST can create.
+
+    Run it **before** the per-list replay: a list's ``Fields`` collection includes
+    the site columns it inherits, so a replayed list then uses the web column
+    instead of minting a second, list-scoped copy of it.
+
+    A column is recreated from its source ``SchemaXml`` (origin attributes stripped
+    by :meth:`~office365.sharepoint.fields.field.Field.schema_xml_for_copy`), a
+    lookup is repointed at the target list, and a managed-metadata column goes
+    through ``TaxonomyField.create`` so it binds the target web's own hidden
+    taxonomy list instead of the source's. Content types are deliberately not
+    attempted: SharePoint Online refuses a field link on a site-scope content type
+    over REST, so a recreated one would be empty.
+
+    Args:
+        source_web: The web the migration reads structure from.
+        target_web: The web the columns are registered on.
+        list_id_map: Normalized source list id -> target list id, for a lookup
+            column (see :func:`rewrite_lookup_schema`).
+    """
+    report = WebScopeProvisionReport()
+    target_names = set(_web_scope_columns(target_web))
+    for name in _web_scope_columns(source_web):
+        if name in target_names:
+            report.present.append(name)
+            continue
+        _provision_web_column(source_web, target_web, name, list_id_map, report)
+    return report
