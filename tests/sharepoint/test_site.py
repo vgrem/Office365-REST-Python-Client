@@ -5,12 +5,19 @@ from __future__ import annotations
 import uuid
 from typing import ClassVar, Optional
 
+from office365.runtime.exceptions import AccessDeniedException
 from office365.sharepoint.lists.templates.type import ListTemplateType
 from office365.sharepoint.portal.sites.creation_response import SPSiteCreationResponse
 from office365.sharepoint.portal.sites.status import SiteStatus
 from office365.sharepoint.sites.site import Site
 
-from tests import test_admin_credentials, test_site_url, test_user_principal_name_alt
+from tests import (
+    test_admin_credentials,
+    test_client_id,
+    test_site_url,
+    test_tenant,
+    test_user_principal_name_alt,
+)
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
@@ -105,16 +112,29 @@ class TestSite(SPTestCase):
         self.assertIsNotNone(result.value)
 
     def test_13_delete_site(self):
-        """Delete the created communication site."""
+        """Delete the created communication site.
+
+        Deleting a site collection is a tenant-administrator operation: unless the
+        configured test account is a SharePoint administrator the service answers
+        403, and the site created earlier stays behind.
+        """
         site_response = TestSite.site_response
         if not site_response:
             self.skipTest("No site response from previous test")
         from office365.sharepoint.client_context import ClientContext
 
-        admin_ctx = ClientContext(self.client.base_url).with_credentials(test_admin_credentials)
+        admin_ctx = ClientContext(self.client.base_url).with_username_and_password(
+            test_tenant, test_client_id, test_admin_credentials.userName, test_admin_credentials.password
+        )
         site_id = site_response.SiteId
         self.assertIsNotNone(site_id)
-        admin_ctx.site_manager.delete(site_id).execute_query()
+        try:
+            admin_ctx.site_manager.delete(site_id).execute_query()
+        except AccessDeniedException:
+            self.skipTest(
+                f"{test_admin_credentials.userName} is not a SharePoint administrator; "
+                f"site {site_response.SiteUrl} was left in place"
+            )
 
     # def test_16_get_block_download_policy_for_files_data(self):
     #    result = self.client.site.get_block_download_policy_for_files_data().execute_query()

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 from office365.sharepoint.publishing.pages.service import SitePageService
 from office365.sharepoint.publishing.video.service_discoverer import (
     VideoServiceDiscoverer,
@@ -58,8 +60,15 @@ class TestPublishing(SPTestCase):
         self.assertIsNotNone(result.value)
 
     def test_09_get_page_diagnostics(self):
-        """Get page diagnostics for a specific page."""
-        result = self.client.page_diagnostics.by_page("/sites/team/SitePages/Home.aspx").execute_query()
+        """Get page diagnostics for the site's own home page.
+
+        The path is server-relative to the site being tested, and diagnostics exist
+        only for a page the site actually serves: a path under another site (or a
+        page that has not been rendered yet) answers ``500 Unable to get Page
+        Diagnostics results at this time``.
+        """
+        page_path = f"{urlparse(self.client.base_url).path}/SitePages/Home.aspx"
+        result = self.client.page_diagnostics.by_page(page_path).execute_query()
         self.assertIsNotNone(result.value)
 
     def test_10_checkout_page(self):

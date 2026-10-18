@@ -13,6 +13,7 @@ from office365.sharepoint.entity import Entity
 from office365.sharepoint.principal.users.user import User
 from office365.sharepoint.search.query.auto_completion_results import QueryAutoCompletionResults
 from office365.sharepoint.search.query.popular_tenant_query import PopularTenantQuery
+from office365.sharepoint.search.query.sort.sort import Sort
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
 from office365.sharepoint.search.query.tenant_custom_query_suggestions import TenantCustomQuerySuggestions
 from office365.sharepoint.search.request import SearchRequest
@@ -148,6 +149,7 @@ class SearchService(Entity):
         trim_duplicates: Optional[bool] = None,
         row_limit: Optional[int] = None,
         enable_sorting: Optional[bool] = None,
+        sort_list: Optional[List[Sort]] = None,
         **kwargs: Any,
     ) -> ClientResult[SearchResult]:
         """The operation is used to retrieve search results through the use of the HTTP protocol
@@ -160,6 +162,10 @@ class SearchService(Entity):
               selecting, and sending the search results.
             row_limit (int): The number of search results the protocol client wants to receive, starting at the index
               specified in the StartRow element. The RowLimit value MUST be greater than or equal to zero.
+            enable_sorting (bool): Specifies whether sorting of results is enabled or not. MUST ignore the SortList
+              specified if this value is set to false.
+            sort_list (list[Sort]): Specifies the list of properties with which to sort the search results, so the
+              request body carries the same sorting the GET form spells as ``sortList``.
         """
         return_type = ClientResult(self.context, SearchResult())
         request = SearchRequest(
@@ -168,6 +174,7 @@ class SearchService(Entity):
             TrimDuplicates=trim_duplicates if trim_duplicates is not None else False,
             RowLimit=row_limit,
             EnableSorting=enable_sorting,
+            SortList=ClientValueCollection(Sort, sort_list) if sort_list else ClientValueCollection(Sort),
             **kwargs,
         )
         payload = {"request": request}

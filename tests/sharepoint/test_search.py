@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
+from office365.runtime.exceptions import AccessDeniedException
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.search.query.sort.sort import Sort
 from office365.sharepoint.search.query.suggestion_results import QuerySuggestionResults
@@ -36,10 +37,17 @@ class TestSearch(SPTestCase):
         self.assertIsNotNone(result.resource_path)
 
     def test_02_export_search_settings(self):
-        """Export search settings for the current user."""
+        """Export search settings for the current user.
+
+        Reading the query log is a search-administrator operation: on a tenant
+        where the test account is not one, the service answers 403 Unauthorized.
+        """
         current_user = self.client.web.current_user
         export_start_data = datetime.today() - timedelta(days=100)
-        result = self.client.search.export(current_user, export_start_data).execute_query()
+        try:
+            result = self.client.search.export(current_user, export_start_data).execute_query()
+        except AccessDeniedException:
+            self.skipTest(f"{test_username} is not a search administrator")
         self.assertIsNotNone(result.value)
 
     def test_03_export_popular_tenant_queries(self):
