@@ -958,8 +958,12 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
   items alike.
 - **Authorship** — the client-side targets restore `Author`/`Editor` by resolving
   each source principal through `web.ensure_user` and writing a `FieldUserValue`.
-  Principals `EnsureUser` cannot resolve are skipped (the verification reports the
-  resulting mismatch); the server-side package emits `UserGroup.xml` ids instead.
+  The values are resolved and cached, then written **in the same system update as
+  the timestamps** (or in one final write when timestamps are not preserved): a
+  separate authorship write cost a second request per item and re-approved the
+  document the approval step had just restored. Principals `EnsureUser` cannot
+  resolve are skipped (the verification reports the resulting mismatch); the
+  server-side package emits `UserGroup.xml` ids instead.
 - **Permissions** — the source reads the item's `role_assignments`; the target
   breaks inheritance and recreates them, resolving principals by login name and
   roles by name. Only items with an **unique** ACL are copied — the REST surface
@@ -1294,7 +1298,9 @@ Record timestamps and authorship are written as a **system update** — CSOM
 `Created`/`Modified`/`Author`/`Editor` *without* creating a new version, so a
 migrated record keeps the single version it arrived with instead of gaining one
 version per fidelity write. (Passing `bNewDocumentUpdate=False` would create a
-new version for every write.) Because SharePoint has no client-side path to set
+new version for every write.) Both property groups travel in that **one** call —
+authorship is resolved first and folded in, rather than paying a system update of
+its own that the timestamp write would then repeat. Because SharePoint has no client-side path to set
 an attachment's own system metadata (an attachment has no backing list item),
 attachments are migrated **content-only**: they are presence- and md5-checked, and
 the timestamp/authorship/permission diffs exclude them with a single

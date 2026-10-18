@@ -471,6 +471,7 @@ def test_timestamps_fold_in_pending_authorship_for_one_final_write():
     assert final["Author"].LookupId == 9  # noqa: PLR2004
     assert final["Editor"].LookupId == 9  # noqa: PLR2004
     assert dates_in_utc is True
+    assert len(row.updates) == 1  # authorship did not pay a write of its own
 
 
 # ── Authorship ───────────────────────────────────────────────────────────────
@@ -490,12 +491,18 @@ def test_apply_authorship_resolves_users_and_sets_person_fields():
 
     target.apply_authorship(item)
 
+    # Resolved and cached, not written: the fidelity write is the last one.
+    assert row.updates == []
+
+    target.finalize_fidelity(item)
+
     assert web.ensure_calls == ["vgrem@mediadev8.onmicrosoft.com"]  # the claims prefix is stripped
     form_values, _, _ = row.updates[0]
     assert form_values["Author"].LookupId == 9  # noqa: PLR2004
     assert form_values["Editor"].LookupId == 9  # noqa: PLR2004
     assert form_values["Author"].LookupValue == login
     assert row.updates[0][2] is True  # a system update (no new version)
+    assert len(row.updates) == 1  # one write for the whole item
 
 
 def test_apply_authorship_skips_unresolved_principals():
@@ -512,6 +519,8 @@ def test_apply_authorship_skips_unresolved_principals():
 
     assert row.updates == []  # nothing to write
     assert target.warnings == []  # EnsureUser returned nothing, not an error
+    target.finalize_fidelity(item)
+    assert row.updates == []  # still nothing: no cached values
 
 
 def test_read_authorship_resolves_author_and_editor_logins():
@@ -578,6 +587,7 @@ def test_authorship_replays_approval_state_when_no_timestamps_follow():
     target._record_for(item, {"OData__ModerationStatus": 1})
 
     target.apply_authorship(item)
+    target.finalize_fidelity(item)
 
     form_values, _, _ = row.updates[0]
     assert form_values == {"_ModerationStatus": "1"}

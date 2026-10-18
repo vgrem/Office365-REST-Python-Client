@@ -875,13 +875,17 @@ class TestApplyFidelity(unittest.TestCase):
             def apply_timestamps(self, item):
                 calls.append("apply_timestamps")
 
+            def finalize_fidelity(self, item):
+                calls.append("finalize_fidelity")
+
             def apply_item_state(self, item, state):
                 calls.append(f"apply_item_state:{state['_ModerationStatus']}")
 
         _apply_fidelity(_Source(), _Target(), MigrationItem("/s/doc", "doc"), self._options())
 
         self.assertEqual(calls[-1], "apply_item_state:0")
-        self.assertLess(calls.index("apply_timestamps"), calls.index("apply_item_state:0"))
+        self.assertLess(calls.index("apply_timestamps"), calls.index("finalize_fidelity"))
+        self.assertLess(calls.index("finalize_fidelity"), calls.index("apply_item_state:0"))
 
     def test_an_approved_item_is_not_rewritten(self):
         calls: list[str] = []

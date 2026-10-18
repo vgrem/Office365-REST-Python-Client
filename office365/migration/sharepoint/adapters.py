@@ -2267,9 +2267,9 @@ class SharePointListTarget:
         system update (the CSOM ``UpdateOverwriteVersion`` path), so the metadata
         lands **without** creating a new version and a migrated record keeps its
         original version instead of accumulating one version per fidelity write.
-        ``datesInUTC=True`` requires the ``...Z`` UTC form. When authorship was
-        applied for the same item, its ``Author``/``Editor`` values are folded into
-        this final write so the two land atomically.
+        ``datesInUTC=True`` requires the ``...Z`` UTC form. Authorship values
+        resolved for the same item are folded into this final write so both land
+        atomically, in one system update.
         """
         target_item = self._target_item(item)
         if target_item is None:
@@ -2290,12 +2290,16 @@ class SharePointListTarget:
             _report_rejected_fields(result, self.warnings, f"timestamps {item.dest_path}")
 
     def apply_authorship(self, item: MigrationItem) -> None:
-        """Best-effort: restore ``Author``/``Editor`` from the source principals.
+        """Best-effort: resolve ``Author``/``Editor`` and cache them for one write.
 
         A principal is applied only when its login name resolves to a target user
         (``EnsureUser``); unresolved principals are skipped (same-tenant only).
-        Written as a system update (``bNewDocumentUpdate=True``) so it does not
-        create a new version; the values are also cached for the timestamp write.
+
+        Nothing is sent here. ``ValidateUpdateListItem`` is one request per call, so
+        writing the resolved principals immediately and then again with the
+        timestamps cost every preserved item two system updates. The values are
+        cached and folded into the timestamps write, or written by
+        :meth:`finalize_fidelity` when timestamps are not preserved.
         """
         target_item = self._target_item(item)
         if target_item is None:
@@ -2317,6 +2321,22 @@ class SharePointListTarget:
         # on a run that restores authorship without timestamps it is the last one.
         form_values.update(self._pending_approval.get(item.dest_path, {}))
         self._pending_authorship[item.dest_path] = dict(form_values)
+
+    def finalize_fidelity(self, item: MigrationItem) -> None:
+        """Write the fidelity values that were only cached for this item.
+
+        The last hook wins the write: with timestamps preserved that is
+        :meth:`apply_timestamps`; without them it is this method, so the item still
+        gets one system update instead of one per property group. It runs before
+        the approval write, which has to stay last (a system update re-approves).
+        """
+        form_values = self._pending_authorship.pop(item.dest_path, {})
+        form_values.update(self._pending_approval.pop(item.dest_path, {}))
+        if not form_values:
+            return
+        target_item = self._target_item(item)
+        if target_item is None:
+            return
         result = target_item.validate_update_list_item(
             form_values, dates_in_utc=True, new_document_update=True
         ).execute_query()
@@ -3081,7 +3101,8 @@ class SharePointLibraryTarget:
         system fields. For files it runs as a system update
         (``bNewDocumentUpdate=True``, the CSOM ``UpdateOverwriteVersion`` path) so
         the metadata lands without creating a new version; folders have no version
-        history. ``preserve_versions`` still needs the server-side API.
+        history. ``preserve_versions`` still needs the server-side API. Authorship
+        values resolved for the same item ride along in this write.
         """
         form_values: dict = {}
         created, modified = self._utc_to_local(item.created, item.modified)
@@ -3103,10 +3124,15 @@ class SharePointLibraryTarget:
         _report_rejected_fields(result, self.warnings, f"timestamps {item.dest_path}")
 
     def apply_authorship(self, item: MigrationItem) -> None:
-        """Best-effort: restore ``Author``/``Editor`` from the source principals.
+        """Best-effort: resolve ``Author``/``Editor`` and cache them for one write.
 
         A principal is applied only when its login name resolves to a target user
         (``EnsureUser``); unresolved principals are skipped (same-tenant only).
+
+        Nothing is sent here: a separate write per item doubled the cost of a
+        preserved run, and a system update re-approves a document, so the cached
+        values are better folded into the timestamps write (or in
+        :meth:`finalize_fidelity` when timestamps are not preserved).
         """
         securable = self._securable(item)
         if securable is None:
@@ -3125,6 +3151,21 @@ class SharePointLibraryTarget:
         if editor is not None:
             form_values["Editor"] = FieldUserValue(editor.id, editor.login_name)
         self._pending_authorship[item.dest_path] = dict(form_values)
+
+    def finalize_fidelity(self, item: MigrationItem) -> None:
+        """Write the fidelity values that were only cached for this item.
+
+        The last hook wins the write: with timestamps preserved that is
+        :meth:`apply_timestamps`; without them it is this method, so an item costs
+        one system update instead of one per property group. Runs before the
+        approval write, which must stay last.
+        """
+        form_values = self._pending_authorship.pop(item.dest_path, {})
+        if not form_values:
+            return
+        securable = self._securable(item)
+        if securable is None:
+            return
         result = securable.validate_update_list_item(
             form_values,
             dates_in_utc=True,

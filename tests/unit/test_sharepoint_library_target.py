@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from office365.migration.base import MigrationItem
+from office365.migration.base import MigrationItem, Principal
 from office365.migration.sharepoint.adapters import SharePointLibrarySource, SharePointLibraryTarget
 
 
@@ -426,10 +426,27 @@ class _TimestampFolder:
         self.context = context
 
 
+class _TargetUser:
+    def __init__(self, user_id: int, login_name: str) -> None:
+        self.id = user_id
+        self.login_name = login_name
+
+
+class _EnsureUser:
+    def __init__(self, user: _TargetUser) -> None:
+        self._user = user
+
+    def execute_query(self) -> _TargetUser:
+        return self._user
+
+
 class _TimestampWeb:
     def __init__(self, time_zone: _FakeTimeZone) -> None:
         self.regional_settings = _RegionalSettings(time_zone)
         self._files: dict[str, _SecurableFile] = {}
+
+    def ensure_user(self, login: str) -> _EnsureUser:
+        return _EnsureUser(_TargetUser(9, login))
 
     def get_file_by_server_relative_url(self, url: str) -> _SecurableFile:
         return self._files.setdefault(url, _SecurableFile())
@@ -475,6 +492,50 @@ def test_library_target_caches_time_zone_conversions():
 
     assert len(time_zone.calls) == 1  # converted once, then cached
     assert time_zone.calls[0].replace(tzinfo=None) == datetime(2021, 6, 1, 15, 0, 0)
+
+
+def test_library_target_defers_authorship_until_the_metadata_write():
+    # A separate authorship write doubled the system updates of a preserved run; the
+    # resolved principals are cached and land with (or after) the timestamps instead.
+    web = _TimestampWeb(_FakeTimeZone(offset_hours=0))
+    target = SharePointLibraryTarget(_TimestampFolder(_TimestampContext(web)))
+    item = MigrationItem("/sites/src/doc.txt", "doc.txt", item_type="file")
+    item.author = Principal("i:0#.f|membership|vgrem@x.onmicrosoft.com", "1", "Vadim")
+
+    target.apply_authorship(item)
+
+    updates = web._files["/sites/x/Docs/doc.txt"].listItemAllFields.updates
+    assert updates == []  # resolved, nothing sent yet
+
+    target.finalize_fidelity(item)
+
+    form_values, dates_in_utc, new_document_update = updates[0]
+    assert form_values["Author"].LookupId == 9  # noqa: PLR2004
+    assert dates_in_utc is True
+    assert new_document_update is True  # a system update (no new version)
+    assert len(updates) == 1
+
+
+def test_library_target_folds_authorship_into_the_timestamp_write():
+    web = _TimestampWeb(_FakeTimeZone(offset_hours=0))
+    target = SharePointLibraryTarget(_TimestampFolder(_TimestampContext(web)))
+    item = MigrationItem(
+        "/sites/src/doc.txt",
+        "doc.txt",
+        item_type="file",
+        created="2021-06-01T15:00:00+00:00",
+        modified="2022-07-02T16:00:00+00:00",
+    )
+    item.author = Principal("i:0#.f|membership|vgrem@x.onmicrosoft.com", "1", "Vadim")
+
+    target.apply_authorship(item)
+    target.apply_timestamps(item)
+
+    updates = web._files["/sites/x/Docs/doc.txt"].listItemAllFields.updates
+    assert len(updates) == 1  # authorship did not pay a write of its own
+    form_values, _, _ = updates[0]
+    assert form_values["Created"] == "2021-06-01 15:00:00"
+    assert form_values["Author"].LookupId == 9  # noqa: PLR2004
 
 
 # ── Folder column values (a folder is a list item too) ────────────────────────

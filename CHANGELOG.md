@@ -130,6 +130,11 @@ a set of write/lookup primitives that the generated surface lacked.
   handled; fidelity writes are applied in order (permissions, authorship,
   timestamps) and folded into one system update, so they no longer create
   versions and the exact instant is restored on both list and document items.
+- Preserved runs: authorship sent its own `ValidateUpdateListItem` and the
+  timestamp write then repeated the same values, so every preserved item cost two
+  system updates (three with approval state). The principals are resolved and
+  cached first and written **once** — with the timestamps when they are preserved,
+  otherwise in a single final write before the approval step.
 - Record lists: content is verified instead of reported `unverifiable`, writes
   flush and checkpoint per chunk, and `conflict_resolution=OVERWRITE` now reaches
   record targets.
