@@ -15,10 +15,25 @@ from office365.runtime.transport.offload import get_offload_executor, run_offloa
 #: Default slice size (bytes) used by the streaming helpers.
 DEFAULT_STREAM_CHUNK_SIZE = 8192
 
-#: Default connect timeout (seconds) used by the bundled transports. It bounds
-#: connection establishment without capping long transfers, because the read
-#: phase stays unbounded (``None``).
+#: Default connect timeout (seconds) used by the bundled transports: bounds
+#: connection establishment.
 DEFAULT_CONNECT_TIMEOUT = 10.0
+
+#: Default read timeout (seconds): bounds the wait for the next byte from the
+#: server. A connection that stops responding therefore fails in minutes instead
+#: of blocking the caller forever, while a long transfer that keeps trickling is
+#: unaffected — the clock restarts on every byte, so this is a gap bound, not a
+#: total-transfer bound. Raise it per request or per transport; pass
+#: :data:`NO_TIMEOUT` to remove it.
+DEFAULT_READ_TIMEOUT = 300.0
+
+#: Default write timeout (seconds) for transports that distinguish it (httpx):
+#: bounds the wait for the socket to accept the next chunk of a request body.
+DEFAULT_WRITE_TIMEOUT = 300.0
+
+#: Default pool timeout (seconds) for transports that distinguish it (httpx):
+#: bounds the wait for a free connection from the connection pool.
+DEFAULT_POOL_TIMEOUT = 10.0
 
 HeadersCallback = Callable[[Mapping[str, str]], None]
 

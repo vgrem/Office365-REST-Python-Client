@@ -104,7 +104,7 @@ class ClientRequest(ABC):
             verify: SSL verification — ``True``, ``False``, or a CA bundle path.
                 ``None`` (default) defers to the session/environment default.
             timeout: Request timeout — a number or a ``(connect, read)`` tuple.
-                When ``None`` the bundled default (10 s connect, unbounded read)
+                When ``None`` the bundled default (10 s connect, 300 s read)
                 applies; pass
                 :data:`~office365.runtime.transport.base.NO_TIMEOUT` to disable.
             session: Custom ``requests.Session`` with pre-configured adapters

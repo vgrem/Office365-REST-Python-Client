@@ -93,13 +93,14 @@ def test_aclose_closes_both_clients() -> None:
     assert sync_client.is_closed
 
 
-def test_default_timeout_bounds_connect_only() -> None:
+def test_default_timeout_bounds_connect_read_write_and_pool() -> None:
     transport = HttpxTransport()
     try:
         for client in (transport._client, transport._async_client):
             assert client.timeout.connect == 10.0  # noqa: PLR2004
-            assert client.timeout.read is None
-            assert client.timeout.write is None
+            assert client.timeout.read == 300.0  # noqa: PLR2004
+            assert client.timeout.write == 300.0  # noqa: PLR2004
+            assert client.timeout.pool == 10.0  # noqa: PLR2004
     finally:
         asyncio.run(transport.aclose())
 

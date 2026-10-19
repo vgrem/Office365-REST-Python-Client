@@ -42,7 +42,10 @@ from requests.structures import CaseInsensitiveDict
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.transport.base import (
     DEFAULT_CONNECT_TIMEOUT,
+    DEFAULT_POOL_TIMEOUT,
+    DEFAULT_READ_TIMEOUT,
     DEFAULT_STREAM_CHUNK_SIZE,
+    DEFAULT_WRITE_TIMEOUT,
     BaseTransport,
     HeadersCallback,
     NoTimeoutType,
@@ -56,8 +59,9 @@ class HttpxTransport(BaseTransport):
         verify: TLS verification (``True``, ``False`` or a CA bundle path),
             applied to both clients.
         timeout: Default timeout — a number, an :class:`httpx.Timeout`, or
-            ``None`` to use the bundled default (10 s connect, unbounded read).
-            Pass :data:`~office365.runtime.transport.base.NO_TIMEOUT` to disable
+            ``None`` to use the bundled default (10 s connect, 300 s read/write,
+            10 s pool). Pass :data:`~office365.runtime.transport.base.NO_TIMEOUT`
+            to disable
             timeouts entirely. A per-request timeout overrides it.
         follow_redirects: Whether to follow redirects (default ``True`` to match
             ``requests``).
@@ -106,12 +110,17 @@ class HttpxTransport(BaseTransport):
     def _resolve_timeout(httpx: Any, timeout: Any | None) -> Any:
         """Map the public ``timeout`` to an ``httpx`` timeout value.
 
-        ``None`` selects the bundled default (bounded connect, unbounded read),
-        :data:`NO_TIMEOUT` disables timeouts, and anything else (a number or an
-        ``httpx.Timeout``) is forwarded unchanged.
+        ``None`` selects the bundled default (bounded connect, read, write and
+        pool), :data:`NO_TIMEOUT` disables timeouts, and anything else (a number
+        or an ``httpx.Timeout``) is forwarded unchanged.
         """
         if timeout is None:
-            return httpx.Timeout(connect=DEFAULT_CONNECT_TIMEOUT, read=None, write=None, pool=None)
+            return httpx.Timeout(
+                connect=DEFAULT_CONNECT_TIMEOUT,
+                read=DEFAULT_READ_TIMEOUT,
+                write=DEFAULT_WRITE_TIMEOUT,
+                pool=DEFAULT_POOL_TIMEOUT,
+            )
         if isinstance(timeout, NoTimeoutType):
             return None
         return timeout

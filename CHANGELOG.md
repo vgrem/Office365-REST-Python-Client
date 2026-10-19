@@ -48,6 +48,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   duplicate every meeting), and Graph's own `recurrence` object travels in the
   sidecar so an import can replay it without parsing `RRULE`.
 
+### Changed
+
+**Transports**
+
+- The bundled transports now bound the read phase as well as the connect phase:
+  the default timeout is `(10 s connect, 300 s read)` for `RequestsTransport`
+  and `10 s connect / 300 s read / 300 s write / 10 s pool` for
+  `HttpxTransport` (`DEFAULT_READ_TIMEOUT`, `DEFAULT_WRITE_TIMEOUT`,
+  `DEFAULT_POOL_TIMEOUT`). A server that stops responding mid-response now
+  fails with a transient transport error (`ConnectionError`/`Timeout`, so
+  `with_auto_retry` retries it) instead of blocking the caller forever —
+  previously only the connect phase was bounded. The read bound
+  is a per-byte gap, not a total-transfer bound, so a long upload or download
+  that keeps moving is unaffected. Override it per transport (`timeout=(10, 600)`)
+  or per request, and pass `NO_TIMEOUT` to remove it.
+
 ### Fixed
 
 **Migration (client-side)**

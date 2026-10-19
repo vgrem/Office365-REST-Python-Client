@@ -325,6 +325,24 @@ ctx = (
 > For MSAL authentication traffic to `login.microsoftonline.com`, set the
 > `HTTPS_PROXY` environment variable instead — MSAL reads it directly.
 
+Transports ship **bounded** defaults, so a dead connection fails instead of
+hanging a script: connect 10 s and read 300 s (`RequestsTransport`), plus write
+300 s and pool acquisition 10 s (`HttpxTransport`). The read bound is the gap
+between bytes, not a cap on the whole transfer — a slow but healthy 2 GB
+download is unaffected. Override it per transport with a number or a
+`(connect, read)` tuple, or per request where one is accepted; pass
+`NO_TIMEOUT` to remove the bound entirely:
+
+```python
+from office365.runtime.transport.base import NO_TIMEOUT
+
+# one long-running endpoint needs more patience than the default
+ctx.with_transport(timeout=(10, 900))
+
+# ...or no limit at all (e.g. a multi-hour streamed export)
+ctx.with_transport(timeout=NO_TIMEOUT)
+```
+
 ### CSV export
 
 Collections export straight to CSV (or a pandas DataFrame with the `pandas`

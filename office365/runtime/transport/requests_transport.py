@@ -11,16 +11,19 @@ from requests.adapters import HTTPAdapter
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.transport.base import (
     DEFAULT_CONNECT_TIMEOUT,
+    DEFAULT_READ_TIMEOUT,
     BaseTransport,
     NoTimeoutType,
     TimeoutValue,
 )
 
 #: Default timeout applied when none is configured: bounds the connect phase
-#: (10 s) while leaving the read phase unbounded, so long streamed
-#: uploads/downloads are unaffected. Pass
+#: (10 s) and the read phase (300 s). A server that stops responding therefore
+#: fails after the read timeout instead of blocking the caller forever, while a
+#: long upload/download that keeps moving is unaffected. ``requests`` has no
+#: separate write timeout, so a stalled body is covered by the read value. Pass
 #: :data:`~office365.runtime.transport.base.NO_TIMEOUT` to disable it.
-DEFAULT_TIMEOUT: Optional[Tuple[float, Optional[float]]] = (DEFAULT_CONNECT_TIMEOUT, None)
+DEFAULT_TIMEOUT: Optional[Tuple[float, Optional[float]]] = (DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT)
 
 #: Default number of host connection pools kept per session (``HTTPAdapter``).
 DEFAULT_POOL_CONNECTIONS = 10
@@ -62,7 +65,7 @@ class RequestsTransport(BaseTransport):
             so a custom CA bundle set on a supplied ``session`` is honored.
             A per-request ``verify`` always wins.
         timeout: Request timeout — a number or a ``(connect, read)`` tuple. When
-            ``None`` the :data:`DEFAULT_TIMEOUT` (10 s connect, unbounded read)
+            ``None`` the :data:`DEFAULT_TIMEOUT` (10 s connect, 300 s read)
             applies; pass ``NO_TIMEOUT`` to disable timeouts entirely.
         pool_connections: Number of host connection pools kept per session.
         pool_maxsize: Maximum connections kept per host pool.
@@ -183,7 +186,7 @@ class RequestsTransport(BaseTransport):
             kwargs["auth"] = request.auth
         # A per-request timeout wins over the transport-level one; both accept a
         # single value or a ``(connect, read)`` tuple. When neither is set the
-        # transport default (connect-bounded, read-unbounded) applies.
+        # transport default (10 s connect, 300 s read) applies.
         timeout = request.timeout if request.timeout is not None else self._timeout
         if timeout is not None:
             kwargs["timeout"] = timeout
