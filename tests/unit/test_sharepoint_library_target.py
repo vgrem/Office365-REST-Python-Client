@@ -927,7 +927,7 @@ def test_library_source_carries_a_folders_timestamps_and_authorship():
     assert item.item_type == "folder"
     assert item.dest_path == "Area1/"
     assert (item.created, item.modified) == ("2021-03-04T05:06:07+00:00", "2021-03-05T06:07:08+00:00")
-    assert (item.author_id, item.editor_id) == (3, 4)
+    assert (item.author.user_id, item.editor.user_id) == (3, 4)  # noqa: PLR2004
     assert (item.author.login_name, item.editor.login_name) == ("vgrem@x", "mdoe@x")
     assert source.read_authorship(item) == ("vgrem@x", "mdoe@x")
 

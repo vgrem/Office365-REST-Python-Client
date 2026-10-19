@@ -82,8 +82,6 @@ class MigrationItem:
     error_code: str | None = None  # failure category/code (e.g. exception type name)
     modified: str | None = None  # source last-modified (ISO-8601), for incremental
     created: str | None = None  # source created (ISO-8601)
-    author_id: int | None = None  # source author user id (system ``AuthorId``)
-    editor_id: int | None = None  # source last-modified-by user id (system ``EditorId``)
     source_id: str | None = None  # source item identity (e.g. file UniqueId), for the old→new map
     version_label: str | None = None  # current version label (e.g. ``"3.0"``)
     # Older versions, oldest first, as ``(label, content)`` — populated only for a
@@ -151,12 +149,18 @@ class Principal:
     Migration API's ``UserGroup.xml`` ``SystemId`` requires, in its canonical
     form (see :func:`normalize_puid`). A GUID or a claims login there fails the
     ingestion job, so only a resolved PUID is carried.
+
+    ``user_id`` is the **site-local numeric id** that referred to this user at the
+    source (``AuthorId``/``EditorId`` on a list item, a ``site_users`` id). It means
+    nothing in another site — ``UserGroup.xml`` is written from ``system_id`` — so
+    it is a convenience for reading a value back, not an identity.
     """
 
     login_name: str
     system_id: str | None = None
     display_name: str | None = None
     email: str | None = None
+    user_id: int | None = None
 
 
 @dataclass

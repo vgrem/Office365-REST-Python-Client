@@ -30,16 +30,16 @@ def test_migration_item_metadata_round_trips():
         "dst",
         created="2020-01-01T00:00:00",
         modified="2021-01-01T00:00:00",
-        author_id=1,
-        editor_id=2,
+        author=Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice", user_id=1),
+        editor=Principal("i:0#.f|membership|b@contoso.com", "1003200065102864", "Bob", user_id=2),
     )
 
     restored = item_from_dict(item_to_dict(item))
 
     assert restored.created == "2020-01-01T00:00:00"
     assert restored.modified == "2021-01-01T00:00:00"
-    assert restored.author_id == 1
-    assert restored.editor_id == 2  # noqa: PLR2004
+    assert restored.author is not None and restored.author.user_id == 1
+    assert restored.editor is not None and restored.editor.user_id == 2  # noqa: PLR2004
 
 
 def test_migration_item_principal_round_trips_json_safely():

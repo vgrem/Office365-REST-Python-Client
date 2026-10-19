@@ -87,6 +87,39 @@ error: Cannot access attribute "serverRelativeUrl" for class "File"
 - **Some model classes were renamed or removed** while regenerating the schema — see the
   `Removed` section of the 3.0.0 changelog entry.
 
+## Breaking changes after 3.0.0
+
+### 3.4.0: `MigrationItem.author_id` / `editor_id` moved to `Principal.user_id`
+
+The migration API used to carry the source's numeric user ids on the item:
+
+```python
+item.author_id  # 7  — the source's AuthorId
+item.editor_id  # 12
+```
+
+They are now on the resolved principal, which is where the rest of the identity
+already lived:
+
+```python
+item.author.user_id  # 7
+item.editor.user_id  # 12
+```
+
+`item.author` / `item.editor` are not new (the adapters have filled them since
+authorship landed), so code that reads a login name or a PUID is unaffected. What
+breaks is constructing a `MigrationItem(author_id=…, editor_id=…)` — that is now a
+`TypeError` — and reading the two attributes, which no longer exist. An unresolved
+author is `None`, so guard accordingly:
+
+```python
+user_id = item.author.user_id if item.author else None
+```
+
+The numeric id is **site-local**: it identified a user inside the site it came from
+and is never written to the target. The `ItemReport` CSV/JSON keeps its
+`author_id`/`editor_id` columns, now populated from the principal.
+
 ## Staying on 2.x
 
 3.x did not ship camelCase aliases, so 2.x-style attribute access does not work on 3.x —

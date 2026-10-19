@@ -1107,15 +1107,11 @@ class SharePointListSource:
                 item_type="record",
                 modified=iso_or_none(record.get("Modified")),
                 created=iso_or_none(record.get("Created")),
-                author_id=author_id,
-                editor_id=editor_id,
             )
             # Resolve the source author/editor once so an authorship-preserving
             # target can restore them by login name (ids are tenant-local).
-            if author_id is not None:
-                planned.author = self._principal_for(author_id)
-            if editor_id is not None:
-                planned.editor = self._principal_for(editor_id)
+            planned.author = self._principal_for(author_id)
+            planned.editor = self._principal_for(editor_id)
             result.append(planned)
             for attachment in item.properties.get("AttachmentFiles") or []:
                 pending_attachments.append((item_id, attachment))
@@ -1570,6 +1566,7 @@ class SharePointListSource:
                 system_id=system_id,
                 display_name=user.title,
                 email=user.properties.get("Email"),
+                user_id=key,
             )
         except Exception as e:  # noqa: BLE001 — a missing user degrades to no authorship
             self.warnings.append(f"user {key} could not be resolved: {e}")
@@ -2597,13 +2594,9 @@ class SharePointLibrarySource:
                 item_type="folder",
                 modified=iso_or_none(folder.time_last_modified),
                 created=iso_or_none(folder.time_created),
-                author_id=author_id,
-                editor_id=editor_id,
             )
-            if author_id is not None:
-                folder_item.author = self._principal_for(author_id)
-            if editor_id is not None:
-                folder_item.editor = self._principal_for(editor_id)
+            folder_item.author = self._principal_for(author_id)
+            folder_item.editor = self._principal_for(editor_id)
             result.append(folder_item)
             emit_progress(progress, done=len(result), stage="planning", items=[folder])
         for file in loaded:
@@ -2623,15 +2616,11 @@ class SharePointLibrarySource:
                 item_type="file",
                 modified=iso_or_none(file.time_last_modified),
                 created=iso_or_none(file.time_created),
-                author_id=author_id,
-                editor_id=editor_id,
                 source_id=str(file.unique_id) if file.unique_id else None,
                 version_label=file.ui_version_label,
             )
-            if author_id is not None:
-                item.author = self._principal_for(author_id)
-            if editor_id is not None:
-                item.editor = self._principal_for(editor_id)
+            item.author = self._principal_for(author_id)
+            item.editor = self._principal_for(editor_id)
             result.append(item)
             emit_progress(progress, done=len(result), stage="planning", items=[file])
         self._report_checkouts(result)
@@ -2850,6 +2839,7 @@ class SharePointLibrarySource:
                 system_id=system_id,
                 display_name=user.title,
                 email=user.properties.get("Email"),
+                user_id=key,
             )
         except Exception as e:  # noqa: BLE001 — a missing user degrades to no authorship
             self.warnings.append(f"user {key} could not be resolved: {e}")

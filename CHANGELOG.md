@@ -120,6 +120,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   planning the whole source and raising at the first write. A caller that plans with
   `preserve_versions`/`preserve_timestamps`/… on an unsuitable pair now sees
   `NotImplementedError` one phase earlier.
+- **`MigrationItem` no longer carries `author_id`/`editor_id`** (breaking). Those were
+the site-local numeric ids the *source* used (`AuthorId`/`EditorId`), kept on the
+item only because nothing else could hold them; they now live where the rest of the
+identity does, as `Principal.user_id` on `item.author`/`item.editor` — set by the
+adapters from the same id they already resolved, so the change costs no requests.
+A `Principal` is the identity that travels (`system_id` is what `UserGroup.xml`
+writes) and `user_id` is scoped to its site, which is exactly why it does not
+deserve an item field. The `ItemReport` keeps its `author_id`/`editor_id` columns,
+now read from the principal, so report consumers are unaffected; the one visible
+difference is that an item whose author could not be resolved reports an empty
+column instead of an id that no principal carries. Constructing a `MigrationItem`
+with `author_id=`/`editor_id=` now raises `TypeError` — pass
+`author=Principal(..., user_id=…)` instead.
 
 ### Fixed
 

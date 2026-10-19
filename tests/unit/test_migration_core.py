@@ -18,7 +18,7 @@ from office365.migration import (
     MigrationSession,
 )
 from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget, JsonFileSource, JsonFileTarget
-from office365.migration.base import ItemStatus, MigrationItem
+from office365.migration.base import ItemStatus, MigrationItem, Principal
 from office365.migration.checkpoint import Checkpoint
 from office365.migration.runner import MigrationRunner, _apply_fidelity
 from office365.migration.sharepoint.transfer import _transfer_files_parallel
@@ -362,6 +362,28 @@ def test_report_summary_is_enriched(tmp_path):
     assert item["extension"]
     assert item["file_name"]
     assert item["error_code"] == ""
+
+
+def test_report_author_id_is_the_principals_site_local_id(tmp_path):
+    # The ItemReport column is a report-level convenience: the numeric id lives on
+    # ``item.author`` (nothing else can hold a site-local id), and an item whose
+    # author could not be resolved reports nothing rather than a stale number.
+    from office365.migration.report import build_report
+
+    src, dst = tmp_path / "src", tmp_path / "dst"
+    _seed_tree(src)
+    job = MigrationJob(FileSystemSource(src), FileSystemTarget(dst))
+    job.plan()
+    job.run()
+
+    first, second = job.manifest.items[0], job.manifest.items[1]
+    first.author = Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice", user_id=7)
+    second.author = None
+
+    rows = build_report(job).items
+
+    assert rows[0]["author_id"] == 7  # noqa: PLR2004
+    assert rows[1]["author_id"] is None
 
 
 def test_report_failure_carries_error_code(tmp_path):

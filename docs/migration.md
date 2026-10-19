@@ -1217,6 +1217,15 @@ fidelity actually landed, the read counterparts are used too:
 `read_authorship(item)` on both sides, and `read_permissions(item)` on the target.
 Both the document-library and record-list REST adapters implement all of them.
 
+An item's `author`/`editor` are `Principal`s — `login_name`, `system_id` (the PUID
+`UserGroup.xml` writes), `display_name`, `email`, and the **site-local numeric
+`user_id`** the source used to refer to that user (`AuthorId`/`EditorId`). The id
+is a convenience for reading a value back (the `ItemReport`'s `author_id` column
+is the only consumer) and means nothing in another site, which is why it lives on
+the principal rather than as a separate field on the item. An unresolved author is
+`None` — the report then leaves the column empty instead of printing an id that no
+principal carries.
+
 To see what a pair will actually honor **before** a run, ask for a report —
 `MigrationJob.fidelity()`, or `MigrationSession.fidelity()` for every task:
 
