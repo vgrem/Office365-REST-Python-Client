@@ -903,6 +903,48 @@ class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
         self.assertEqual(self.capture.call_args[0][0].title, "Documents")
         self.assertEqual(self.provision.call_args[0][0].title, "Documents")
 
+    def test_a_plain_list_ignores_the_migration_api_setting(self):
+        # The package builder emits <File>/<Folder> objects only, so a record has no
+        # shape in Manifest.xml: routing a plain list to it wrote the record's repr
+        # into an SPFile. Records have no version history either, so REST loses
+        # nothing — but the caller is told, because they asked for the server side.
+        source = _context([_tasks()])
+        task = MigrationTask.sharepoint(
+            "https://contoso.sharepoint.com/sites/source",
+            source.base_url,
+            source_list="Tasks",
+            target_list="Tasks",
+        )
+
+        with mock.patch(
+            "office365.migration.sharepoint.resolvers._package_target",
+            return_value=SimpleNamespace(warnings=[]),
+        ) as package:
+            _, dst = resolve_task(task, source, MigrationSettings(use_migration_api=True))
+
+        package.assert_not_called()
+        self.assertIsInstance(dst, SharePointListTarget)
+        self.assertTrue(any("carries files and folders only" in w for w in dst.warnings), dst.warnings)
+
+    def test_a_document_library_uses_the_package_target_when_asked(self):
+        source = _context([_docs()])
+        task = MigrationTask.sharepoint(
+            "https://contoso.sharepoint.com/sites/source",
+            source.base_url,
+            source_list="Documents",
+            target_list="Documents",
+        )
+        package_target = SimpleNamespace(warnings=[])
+
+        with mock.patch(
+            "office365.migration.sharepoint.resolvers._package_target",
+            return_value=package_target,
+        ) as package:
+            _, dst = resolve_task(task, source, MigrationSettings(use_migration_api=True))
+
+        package.assert_called_once()
+        self.assertIs(dst, package_target)
+
     def test_migrate_all_defers_to_site_resolver(self):
         task = MigrationTask.sharepoint(
             "https://contoso.sharepoint.com/sites/source",

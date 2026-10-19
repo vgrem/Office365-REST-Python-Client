@@ -73,6 +73,20 @@ def test_write_accumulates_files_and_folders(tmp_path):
     assert len(package.content) == 1
 
 
+def test_write_refuses_a_list_record(tmp_path):
+    # A package can express an SPFile/SPFolder, not a row of a plain list: writing
+    # one used to land the record's *repr* inside an SPFile, silently and with no
+    # warning. It has to fail loudly instead.
+    target = _target(tmp_path)
+    record = MigrationItem("src/1_.000", "1_.000", item_type="record")
+
+    with pytest.raises(ValueError, match="not 'record'"):
+        target.write(record, {"Title": "Write the report"})
+
+    assert target.build().manifest is not None
+    assert not target._builder._files  # nothing was staged
+
+
 def test_commit_stages_and_submits(tmp_path):
     site = _Site()
     target = _target(tmp_path, site=site, azure_queue_report_uri="https://a/queue?sig=z")

@@ -491,6 +491,16 @@ content through a server-side package, because the package builder does not emit
 columns, content types, or views today — the target's structure is still captured
 and replayed over REST first.
 
+`use_migration_api=True` applies to **document libraries**. A package can express an
+`SPFile` and an `SPFolder` and nothing else — `Manifest.xml` has no `<List>` object —
+so a plain list has no shape on that path. Rather than failing the run, a list task
+falls back to the REST adapters (`SharePointListTarget`) and the target carries a
+warning saying why; nothing is lost, because a list record has no version history and
+REST restores authorship and timestamps just as well. The package target also refuses
+a record outright if one reaches it (`ValueError`), since it previously wrote the
+record's `dict` repr into an `SPFile`'s content — a corrupt file, no exception, no
+warning.
+
 **The settings surface is wider than the engine, and that is reported, not
 implied.** `MigrationSettings` mirrors the cmdlet, but a client-side run cannot do
 everything SPMT does — it does not migrate the term store, it cannot skip lists by
@@ -1114,7 +1124,10 @@ authoritative record of what has been copied, and a log is best-effort.
 The server-side package target is the only one that preserves version history: the
 runner reads each file's older versions (`source.read_version_history`) and passes
 them to `PackageBuilder.add_file`, which the Migration API promotes into a real
-version history. Timestamps ride the same package; authorship (`UserGroup.xml`
+version history. That column describes a **document library**: a package carries
+files and folders, and a plain list falls back to the client-side column (with a
+warning) because `Manifest.xml` has no `<List>` object. Timestamps ride the same
+package; authorship (`UserGroup.xml`
 principal ids) and resolved-user ACLs (`DeploymentRoles` +
 `DeploymentRoleAssignments`) are applied by the service (see
 [Client-side vs server-side](#client-side-vs-server-side)). REST cannot restore
@@ -1475,7 +1488,7 @@ Blob Storage; it cannot read from local disk or S3.
 |---|---|---|---|
 | M365 → filesystem / S3 / other | client-side adapters | no | content + best-effort timestamps/ACLs |
 | filesystem / other → M365 | client-side adapters | no | content + best-effort |
-| filesystem / other → M365 | server-side Migration API | **yes** | versions + authorship (ACL best-effort) |
+| filesystem / other → M365 | server-side Migration API (document libraries) | **yes** | versions + authorship (ACL best-effort) |
 | M365 → M365 | either | only for server-side | — |
 
 ### You don't need an Azure account

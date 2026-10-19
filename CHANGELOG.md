@@ -145,6 +145,16 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   on a live list: 52 requests instead of 130, identical findings). Anything that
   writes to the target (a fidelity write, a flushed chunk, or `configure()`
   starting a new run) drops the memo.
+- **A plain list is no longer routed to the server-side package.** `use_migration_api`
+  now applies to document libraries only: a package can express an `SPFile` and an
+  `SPFolder`, and `Manifest.xml` has no `<List>` object, so a list record had no shape
+  there — `SharePointPackageTarget.write()` turned it into an `<File>` whose content
+  was the record's `dict` repr (`b"{'Title': 'Write the report', 'Status': 'Active'}"`),
+  with no exception and no warning. A list task now falls back to the REST adapters and
+  the target says so (`… is a list, not a document library: the server-side Migration
+  API carries files and folders only`), losing nothing — a record has no version
+  history. The package target additionally **refuses** any item type other than `file`
+  or `folder` (`ValueError`) instead of writing whatever it was handed.
 
 ## [3.3.0] - 2026-10-18
 

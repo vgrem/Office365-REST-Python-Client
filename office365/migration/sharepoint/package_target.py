@@ -41,6 +41,12 @@ def _resolve_site_url(site, site_url: str | None) -> str:
     return resolved
 
 
+#: The only item shapes ``Manifest.xml`` can express: an ``SPFile`` and a
+#: ``SPFolder`` (a document's ``SPListItem`` rides alongside its file). A list
+#: record — a row of a plain list — has no object type here at all.
+_PACKAGE_ITEM_TYPES = frozenset({"file", "folder"})
+
+
 class SharePointPackageTarget:
     """A ``DataTarget`` that builds a package and submits a server-side ingestion job.
 
@@ -52,6 +58,13 @@ class SharePointPackageTarget:
     assignments become ``DeploymentRoles``/``DeploymentRoleAssignments`` grants for
     resolved users (by PUID) and SharePoint groups (by title). Unresolved
     principals are skipped with a warning.
+
+    A package carries **files and folders only** (a document's ``SPListItem`` rides
+    alongside its file). A row of a plain list has no object type in
+    ``Manifest.xml``, so :meth:`write` refuses one rather than writing the record's
+    repr into an ``SPFile`` — records have no version history either, so the REST
+    :class:`~office365.migration.sharepoint.adapters.SharePointListTarget` loses
+    nothing a package could have carried.
     """
 
     # Marks this target as able to restore version history (see DataTarget).
@@ -132,6 +145,12 @@ class SharePointPackageTarget:
     def write(self, item: MigrationItem, payload: object) -> None:
         author = self._ensure_user(item.author)
         editor = self._ensure_user(item.editor)
+        if item.item_type not in _PACKAGE_ITEM_TYPES:
+            raise ValueError(
+                f"the server-side package target writes files and folders, not {item.item_type!r} "
+                f"({item.dest_path}): a list record has no <List> object in Manifest.xml — "
+                "migrate records with SharePointListTarget (REST) instead"
+            )
         if item.item_type == "folder":
             self._builder.add_folder(
                 item.dest_path,

@@ -727,7 +727,22 @@ def _build_target(
     content_type_map: ContentTypeMap | None = None,
 ) -> Target:
     if settings is not None and settings.use_migration_api:
-        return _package_target(task, context, target_list)
+        if is_document_library(target_list):
+            return _package_target(task, context, target_list)
+        # A package can express a file, a folder and a file's list item — nothing
+        # else: there is no ``<List>`` provisioning object, so a record has no
+        # shape in ``Manifest.xml`` and would be written as a file whose content is
+        # the record's repr. Records have no version history to preserve either, so
+        # the REST path loses nothing a package could have carried.
+        target = SharePointListTarget(target_list, content_type_map=content_type_map)
+        _attach_warnings(
+            target,
+            [
+                f"{target_list.title!r} is a list, not a document library: the server-side Migration API "
+                "carries files and folders only, so this task migrates records over REST"
+            ],
+        )
+        return target
     if is_document_library(target_list):
         return SharePointLibraryTarget(folder, sp_list=target_list, content_type_map=content_type_map)
     return SharePointListTarget(target_list, content_type_map=content_type_map)
