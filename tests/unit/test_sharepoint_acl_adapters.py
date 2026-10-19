@@ -5,7 +5,6 @@ from __future__ import annotations
 from office365.migration.base import Principal, is_puid, normalize_puid
 from office365.migration.sharepoint.adapters import (
     SharePointLibrarySource,
-    _is_user_principal,
     _perm_mask,
     _read_role_assignments,
     _resolve_group_ownership,
@@ -26,7 +25,9 @@ class _Role:
 
 
 class _Member:
-    def __init__(self, login: str, principal_type: PrincipalType, member_id: int, title: str | None = None) -> None:
+    def __init__(
+        self, login: str, principal_type: PrincipalType | None, member_id: int, title: str | None = None
+    ) -> None:
         self.login_name = login
         self.user_principal_name = login
         self.principal_type = principal_type
@@ -65,12 +66,6 @@ def test_perm_mask_is_decimal_and_defensive():
     assert _perm_mask(object()) is None
 
 
-def test_is_user_principal():
-    assert _is_user_principal(_Member("u", PrincipalType.User, 1))
-    assert not _is_user_principal(_Member("g", PrincipalType.SecurityGroup, 2))
-    assert not _is_user_principal(object())
-
-
 def test_read_role_assignments_captures_masks_and_resolves_users_only():
     resolved: list[int] = []
 
@@ -101,17 +96,19 @@ def test_principal_type_separates_users_sharepoint_groups_and_the_rest():
     user = _Member("i:0#.f|membership|a@contoso.com", PrincipalType.User, 10)
     sharepoint_group = _Member("default:members", PrincipalType.SharePointGroup, 20, title="Test site Members")
     security_group = _Member("sg-team", PrincipalType.SecurityGroup, 30)
+    unprojected = _Member("dl-everyone", None, 40)  # PrincipalType was not returned
     securable = _Securable(
         [
             _Assignment(user, [_Role("Read", 176, 138612833)]),
             _Assignment(sharepoint_group, [_Role("Contribute", 1, 2)]),
             _Assignment(security_group, [_Role("Read", 176, 138612833)]),
+            _Assignment(unprojected, [_Role("Read", 176, 138612833)]),
         ]
     )
 
     entries = _read_role_assignments(securable, normalize=lambda name: "default:members" if "Members" in name else name)
 
-    assert [entry.principal_type for entry in entries] == ["user", "group", None]
+    assert [entry.principal_type for entry in entries] == ["user", "group", None, None]
     # A group keeps its title: the normalized name ("default:members") would not
     # match a group on the target, and the title is what the service looks up.
     assert entries[1].principal_name == "default:members"
@@ -234,6 +231,9 @@ class _OwnerResource:
 
 
 class _SiteGroup:
+    # A real ``Group`` extends ``Principal``, so it does carry a kind.
+    principal_type = PrincipalType.SharePointGroup
+
     def __init__(self, title: str, owner) -> None:
         self.title = title
         self.owner = _OwnerResource(owner)

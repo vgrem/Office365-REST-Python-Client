@@ -580,36 +580,27 @@ def _perm_mask(role_definition: Any) -> str | None:
 _MAX_GROUP_OWNER_DEPTH = 4
 
 
-def _principal_title(member: Any) -> str | None:
-    """A role-assignment member's title (the ``Title`` property or the raw bag)."""
-    title = getattr(member, "title", None)
-    if title:
-        return title
-    properties = getattr(member, "properties", None)
-    return properties.get("Title") if isinstance(properties, dict) else None
-
-
-def _is_user_principal(member: Any) -> bool:
-    """Whether a role-assignment member is a user (not a group)."""
-    return _principal_kind(member) == "user"
-
-
 def _principal_kind(member: Any) -> str | None:
-    """Classify a role-assignment member: ``"user"``, ``"group"`` or ``None``.
+    """Classify a role-assignment member for the server-side package target.
 
-    Only a SharePoint group is ``"group"``: the package target matches it on the
-    target by title, which works because site groups are site-scoped, not
-    tenant-scoped. A distribution list or a security group is neither a user nor a
-    restorable group, so it stays ``None`` and is skipped with a warning.
+    The question is narrower than "what is this principal?": can ``UserGroup.xml``
+    express it at all? A user can (by PUID) and a **site group** can (by title,
+    which works because site groups are site-scoped), so those are ``"user"`` and
+    ``"group"``; a distribution list, a security group and any principal whose
+    ``PrincipalType`` was not projected stay ``None``. Only the package target
+    consults this — the REST replay resolves a principal by its name shape and
+    grants a DL/security group normally, which is why this is not a property of
+    ``Principal`` in the library.
+
+    ``member`` may be ``None`` (an owner that could not be read), and
+    ``principal_type`` is ``None`` for a value the enum does not know —
+    ``parse_enum`` yields ``None`` rather than raising (verified), so both are
+    treated as unclassifiable instead of guessed at.
     """
     ptype = getattr(member, "principal_type", None)
-    if ptype is None:
-        return None
-    # ``PrincipalType`` is a plain ``Enum`` (not ``IntEnum``); accept a raw int too.
-    value = getattr(ptype, "value", ptype)
-    if value == PrincipalType.User.value:
+    if ptype == PrincipalType.User:
         return "user"
-    if value == PrincipalType.SharePointGroup.value:
+    if ptype == PrincipalType.SharePointGroup:
         return "group"
     return None
 
@@ -908,7 +899,7 @@ def _resolve_group_ownership(
         if _principal_kind(owner) == "user":
             principal = resolve(getattr(owner, "id", None)) if resolve is not None else None
             return principal, groups
-        owner_title = _principal_title(owner)
+        owner_title = getattr(owner, "title", None)
         if not owner_title:
             break
         groups.append(owner_title)
@@ -976,7 +967,7 @@ def _read_role_assignments(
             principal_type=_principal_kind(member),
         )
         if entry.principal_type == "group":
-            entry.display_name = _principal_title(member) or name
+            entry.display_name = member.title or name
         if resolve is not None and entry.principal_type == "user":
             principal = resolve(getattr(member, "id", None))
             if principal is not None:
