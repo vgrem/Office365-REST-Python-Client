@@ -68,6 +68,7 @@ class MigrationJob:
         self._assess_hook: Any = None
         self._started_at: datetime | None = None
         self._finished_at: datetime | None = None
+        self._fidelity_report: Any = None
 
     # ── Configuration ────────────────────────────────────────────
 
@@ -204,11 +205,17 @@ class MigrationJob:
     def plan(self, progress: Callable[["Progress"], None] | None = None) -> Manifest:
         """Enumerate the source into a persisted manifest.
 
+        The fidelity forecast is stated **before** the enumeration and the plan fails
+        fast on a requested flag the adapter pair cannot honor: enumerating a
+        half-million item library only to be rejected at the first write is the
+        expensive way to learn it.
+
         When the manifest path already holds a plan, that plan is the baseline of
         a delta comparison (:attr:`delta`) before it is replaced.
         """
         self._checkpoint.phase = MigrationPhase.PLANNING
         started = datetime.now(timezone.utc)
+        self._forecast_fidelity()
         # No labels here: a SharePoint source has not read its list yet, so its
         # server-relative URL is still unknown — ``plan.completed`` carries both.
         log_event("plan.started")
@@ -301,14 +308,39 @@ class MigrationJob:
     def fidelity(self):
         """Describe the requested fidelity this job's adapter pair can honor.
 
-        Purely informational (never raises); use it to report capabilities before
-        :meth:`run`. The run itself still fails fast on an unhonorable flag. The
-        report also carries the full per-dimension fidelity matrix
-        (``report.dimensions`` / ``report.matrix_summary()``).
+        Never raises; use it to report capabilities before :meth:`run`. The report
+        also carries the full per-dimension fidelity matrix (``report.dimensions`` /
+        ``report.matrix_summary()``). Cheap and side-effect free (it probes adapter
+        hooks, it does not touch the service), so the forecast :meth:`plan` emitted is
+        cached and this returns the same object rather than recomputing it.
         """
-        from office365.migration.fidelity import describe_fidelity
+        if self._fidelity_report is None:
+            from office365.migration.fidelity import describe_fidelity
 
-        return describe_fidelity(self._source, self._target, self._options)
+            self._fidelity_report = describe_fidelity(self._source, self._target, self._options)
+        return self._fidelity_report
+
+    def _forecast_fidelity(self) -> object:
+        """Log the forecast, then fail fast on a flag this pair cannot honor.
+
+        The log line comes first so the reason is on record even when the caller
+        swallows the exception; the raise itself is the runner's own check, reused so
+        the message a caller sees at plan time is the one it would see at run time.
+        """
+        from office365.migration.runner import _assert_fidelity_supported
+
+        report = self.fidelity()
+        log_event(
+            "plan.fidelity",
+            f"fidelity: {report.matrix_summary()}",
+            preserved=list(report.preserved),
+            unsupported=list(report.unsupported),
+            dimensions=dict(report.dimensions),
+            notes=list(report.notes),
+            dimension_notes=dict(report.dimension_notes),
+        )
+        _assert_fidelity_supported(self._options, self._source, self._target)
+        return report
 
     def verify(self, spot_checks: int = 20):
         """Reconcile source vs target after migration.

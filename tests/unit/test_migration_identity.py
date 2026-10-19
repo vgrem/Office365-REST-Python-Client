@@ -325,3 +325,8 @@ class _Job:
         self.finished_at = None
         self.duration = None
         self.phase = MigrationPhase.RUNNING
+
+    def fidelity(self):
+        from office365.migration.fidelity import FidelityReport
+
+        return FidelityReport()

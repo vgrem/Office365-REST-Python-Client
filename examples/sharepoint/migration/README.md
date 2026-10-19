@@ -273,7 +273,7 @@ Azure. It is a learning/debugging aid, not a step you must run first.
 | Monitor server-side ingestion jobs concurrently (async) | [`monitor/monitor_async.py`](./monitor/monitor_async.py) | SharePoint admin |
 
 ```python
-job.export_reports("reports")  # SummaryReport / ItemReport / FailureReport (CSV + JSON)
+job.export_reports("reports")  # Summary / Item / Failure / FidelityReport (CSV + JSON)
 print(job.verify().summary())  # reconcile source vs target
 ```
 

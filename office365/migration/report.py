@@ -21,11 +21,19 @@ if TYPE_CHECKING:
 
 @dataclass
 class MigrationReport:
-    """Record sets for a migration run (one summary row, per-item rows)."""
+    """Record sets for a migration run (one summary row, per-item rows).
+
+    ``fidelity`` is the run's *promise*, one row per modeled dimension: what the
+    adapter pair delivered, what it could only approximate, and the reason for
+    everything it did not carry. It is written as ``FidelityReport`` next to the item
+    reports so the hand-off pack states the losses instead of leaving them to be
+    discovered.
+    """
 
     summary: list[dict[str, object]] = field(default_factory=list)
     items: list[dict[str, object]] = field(default_factory=list)
     failures: list[dict[str, object]] = field(default_factory=list)
+    fidelity: list[dict[str, object]] = field(default_factory=list)
 
 
 def _gb(value: int) -> float:
@@ -45,6 +53,15 @@ def _identity_fields(job: "MigrationJob") -> dict[str, object]:
     return identity_map.summary() if identity_map is not None else {}
 
 
+def _fidelity_rows(job: "MigrationJob") -> list[dict[str, object]]:
+    """One row per modeled fidelity dimension (status + reason when not delivered)."""
+    report = job.fidelity()
+    return [
+        {"dimension": name, "status": status, "note": report.dimension_notes.get(name, "")}
+        for name, status in report.dimensions.items()
+    ]
+
+
 def build_report(job: "MigrationJob") -> MigrationReport:
     """Project a job's state into report records."""
     stats = job.stats
@@ -52,6 +69,7 @@ def build_report(job: "MigrationJob") -> MigrationReport:
     migrated_gb = _gb(stats.bytes_transferred)
     duration_secs = job.duration
     gb_per_hour = round(migrated_gb / (duration_secs / 3600), 2) if duration_secs else None
+    fidelity = job.fidelity()
     summary = [
         {
             "source": job.source_label,
@@ -73,6 +91,8 @@ def build_report(job: "MigrationJob") -> MigrationReport:
             "started_at": iso(job.started_at),
             "finished_at": iso(job.finished_at),
             "duration_secs": round(duration_secs, 1) if duration_secs is not None else None,
+            "fidelity_ok": fidelity.ok,
+            "fidelity_summary": fidelity.summary(),
             **_identity_fields(job),
         }
     ]
@@ -95,11 +115,11 @@ def build_report(job: "MigrationJob") -> MigrationReport:
         for item in job.manifest.items
     ]
     failures = [row for row in items if row["status"] == "failed"]
-    return MigrationReport(summary=summary, items=items, failures=failures)
+    return MigrationReport(summary=summary, items=items, failures=failures, fidelity=_fidelity_rows(job))
 
 
 def export_reports(job: "MigrationJob", output_dir: str | Path) -> list[str]:
-    """Write SummaryReport, ItemReport, and FailureReport (CSV + JSON).
+    """Write SummaryReport, ItemReport, FailureReport and FidelityReport (CSV + JSON).
 
     The failure report is only written when failures exist.
 
@@ -116,6 +136,7 @@ def export_reports(job: "MigrationJob", output_dir: str | Path) -> list[str]:
         ("SummaryReport", report.summary),
         ("ItemReport", report.items),
         ("FailureReport", report.failures),
+        ("FidelityReport", report.fidelity),
     ):
         if not records:
             continue

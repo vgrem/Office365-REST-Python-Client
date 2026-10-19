@@ -1217,8 +1217,14 @@ print(report.matrix_summary())  # "content=delivered, versions=unsupported, ..."
 print(report.to_dict())  # JSON-serializable, for reports/status
 ```
 
-The report is informational (it never raises); the run itself still fails fast on
-an unhonorable flag. `MigrationSettings.preserve_timestamps` / `.preserve_permissions`
+`fidelity()` is informational and never raises. **`plan()` does not stay
+silent**, though: it states the forecast before it enumerates — one `plan.fidelity`
+event carrying the matrix, the requested flags and the reason for every dimension
+that is not `delivered` — and then fails fast on a requested flag the
+pair cannot honor, *before* the enumeration rather than at the first write. Planning
+a 500 k-item library only to be rejected on item one is the expensive way to learn
+it. The exception is the runner's own check, so the message is identical either way.
+`MigrationSettings.preserve_timestamps` / `.preserve_permissions`
 feed the matching options into every session task by default.
 
 ### Mapping identities (`IdentityMap`)
@@ -1508,7 +1514,10 @@ to the filesystem (see [Fidelity](#fidelity)).
 ## Verification & reports
 
 `job.verify()` returns a `VerificationReport` and `job.export_reports(dir)`
-writes Summary/Item/Failure reports as CSV + JSON. Verification is layered and
+writes Summary/Item/Failure/**Fidelity** reports as CSV + JSON. The last one is the
+run's *promise* recorded next to its results: one row per modeled dimension with its
+status and, when it is not `delivered`, the reason — so the hand-off pack states what
+was not carried instead of leaving the client to discover it. Verification is layered and
 explicit about what it could not confirm:
 
 | Check | When | Finding bucket |

@@ -25,6 +25,14 @@ class _Source:
     def checksum(self, item):
         return self._checksums.get(item.dest_path, "")
 
+    def apply_timestamps(self, item):
+        """Present because the plan-time forecast probes the *apply* hooks.
+
+        This fake is read-side only, but a pair that reports timestamps on read while
+        refusing to write them is not a shape any real adapter has, and ``plan()``
+        would reject the flag before the verification under test ever ran.
+        """
+
     def read_metadata(self, item):
         return (self._metadata or {}).get(item.dest_path)
 
@@ -55,6 +63,14 @@ class _Target:
 
     def checksum(self, item):
         return self._checksums.get(item.dest_path, "")
+
+    def apply_timestamps(self, item):
+        """Present because the plan-time forecast probes the *apply* hooks.
+
+        This fake is read-side only, but a pair that reports timestamps on read while
+        refusing to write them is not a shape any real adapter has, and ``plan()``
+        would reject the flag before the verification under test ever ran.
+        """
 
     def read_metadata(self, item):
         return (self._metadata or {}).get(item.dest_path)

@@ -66,6 +66,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   duplicate every meeting), and Graph's own `recurrence` object travels in the
   sidecar so an import can replay it without parsing `RRULE`.
 
+**Migration (fidelity forecast)**
+
+- `MigrationJob.plan()` now states the fidelity forecast before it enumerates: one
+  `plan.fidelity` event carrying the per-dimension matrix and the reason for every
+  dimension that is not `delivered`. `MigrationJob.fidelity()` returns that cached
+  report (it never raises). `export_reports` writes a new `FidelityReport` — one row
+  per dimension with its status and reason — and the summary row gains
+  `fidelity_ok`/`fidelity_summary`, so the run's promise sits in the hand-off pack
+  next to its results instead of nowhere.
+
 ### Changed
 
 **Transports**
@@ -81,6 +91,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is a per-byte gap, not a total-transfer bound, so a long upload or download
   that keeps moving is unaffected. Override it per transport (`timeout=(10, 600)`)
   or per request, and pass `NO_TIMEOUT` to remove it.
+
+**Migration**
+
+- `MigrationJob.plan()` now fails fast on a requested fidelity flag the adapter pair
+  cannot honor — before the enumeration, with the runner's own message — instead of
+  planning the whole source and raising at the first write. A caller that plans with
+  `preserve_versions`/`preserve_timestamps`/… on an unsuitable pair now sees
+  `NotImplementedError` one phase earlier.
 
 ### Fixed
 
