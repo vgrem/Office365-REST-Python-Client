@@ -122,7 +122,8 @@ def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str
         set_(
             "versions",
             status.BEST_EFFORT,
-            "history content is preserved; per-version author/timestamp are not carried",
+            "history content is preserved; the service stamps every version with the file's TimeLastModified "
+            "(per-version dates in the manifest are ignored)",
         )
     else:
         set_(

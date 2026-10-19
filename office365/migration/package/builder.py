@@ -376,14 +376,35 @@ class PackageBuilder:
         *,
         description: str | None = None,
         owner: int | None = None,
+        owner_is_user: bool = True,
         members: list[int] | None = None,
     ) -> int:
-        """Register a SharePoint group in ``UserGroup.xml``; returns its integer id."""
+        """Register a SharePoint group in ``UserGroup.xml``; returns its integer id.
+
+        ``Owner`` is required by the schema, and ``owner_is_user`` says whether it
+        names a ``<User>`` (a PUID-backed principal) or another ``<Group>`` — a
+        group may own itself, as a tenant's default ``Owners`` group normally does.
+        """
         group_id = self._next_principal_id()
         self._user_group_map.groups.append(
-            Group(id=group_id, name=name, description=description, owner=owner, members=list(members or []))
+            Group(
+                id=group_id,
+                name=name,
+                description=description,
+                owner=owner,
+                owner_is_user=owner_is_user,
+                members=list(members or []),
+            )
         )
         return group_id
+
+    def set_group_owner(self, group_id: int, owner: int, *, owner_is_user: bool = True) -> None:
+        """Point a group at its owner (after the fact, e.g. at the group itself)."""
+        for group in self._user_group_map.groups:
+            if group.id == group_id:
+                group.owner = owner
+                group.owner_is_user = owner_is_user
+                return
 
     def add_role(
         self,

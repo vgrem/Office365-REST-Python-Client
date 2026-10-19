@@ -74,7 +74,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   report (it never raises). `export_reports` writes a new `FidelityReport` — one row
   per dimension with its status and reason — and the summary row gains
   `fidelity_ok`/`fidelity_summary`, so the run's promise sits in the hand-off pack
-  next to its results instead of nowhere.
+  next to its results instead of nowhere. The `versions` reason now states what the
+  service actually does with history: every version is stamped with the file's
+  `TimeLastModified`, because per-version dates in the manifest are ignored
+  (measured on a live ingestion job).
+
+**Migration (group ACLs)**
+
+- The server-side package target grants **SharePoint groups** as well as users: a
+  role assignment whose member is a `PrincipalType.SharePointGroup` is captured
+  with its **title** (`PermissionEntry.principal_type="group"`, `display_name` =
+  the title, since the normalized `default:Members` name matches nothing on the
+  target) and emitted as a `UserGroup.xml` `<Group>` plus a `PrincipalId` grant.
+  Previously the docs claimed groups were skipped — live-verified they are not
+  skipped, they were simply never attempted. A `<Group>` **must** name an `Owner`:
+  an ownerless one fails the *entire* ingestion job at schema validation
+  (`The required attribute 'Owner' is missing`), not just that grant, so
+  `PermissionEntry` gained `owner` (a user with a PUID) and `owner_groups` (the
+  owner chain, nearest first — a group's owner may be another group, as a site's
+  `Visitors` group is owned by its `Owners` group, which owns itself). A group with
+  no readable owner is written self-owned rather than dropped or allowed to fail
+  the job. Distribution lists, security groups and unresolved principals are still
+  skipped with a warning: they are not site groups and do not match by title.
 
 ### Changed
 

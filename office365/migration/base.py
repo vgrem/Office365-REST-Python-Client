@@ -176,12 +176,26 @@ class PermissionEntry:
     principal_name: str
     roles: list[str] = field(default_factory=list)
     # PUID (``UserInfo.UserId.NameId``) for a user principal; ``None`` for a group
-    # or an unresolved principal (the package target skips those).
+    # or an unresolved principal.
     system_id: str | None = None
     display_name: str | None = None
     email: str | None = None
     # Role name -> decimal permission mask (e.g. ``"Read" -> "756052856929"``).
     role_masks: dict[str, str] = field(default_factory=dict)
+    # Principal kind, when the source knows it: ``"user"``, ``"group"`` (a
+    # SharePoint group, matched on the target by title) or ``None`` for anything
+    # else — a distribution list, a security group, an unresolved principal. The
+    # server-side package target grants a group by name; the client-side REST path
+    # and the permission diff ignore this field.
+    principal_type: str | None = None
+    # The group's owner, resolved to a PUID, for a ``principal_type="group"``
+    # entry: ``UserGroup.xml`` requires an ``Owner`` on every ``<Group>``. ``None``
+    # when the owner is a group (see ``owner_groups``) or is not resolvable.
+    owner: "Principal | None" = None
+    # The owner chain above this group, **nearest first**: a group's owner may be
+    # another group (a site's ``Visitors`` group is normally owned by its
+    # ``Owners`` group), and each one needs its own ``<Group>`` entry.
+    owner_groups: list[str] = field(default_factory=list)
 
 
 @dataclass

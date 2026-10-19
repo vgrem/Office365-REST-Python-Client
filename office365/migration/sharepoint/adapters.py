@@ -575,15 +575,43 @@ def _perm_mask(role_definition: Any) -> str | None:
         return None
 
 
+# How far a group's owner chain is followed (a group owned by a group owned by a
+# user is the normal depth for the default site groups).
+_MAX_GROUP_OWNER_DEPTH = 4
+
+
+def _principal_title(member: Any) -> str | None:
+    """A role-assignment member's title (the ``Title`` property or the raw bag)."""
+    title = getattr(member, "title", None)
+    if title:
+        return title
+    properties = getattr(member, "properties", None)
+    return properties.get("Title") if isinstance(properties, dict) else None
+
+
 def _is_user_principal(member: Any) -> bool:
     """Whether a role-assignment member is a user (not a group)."""
+    return _principal_kind(member) == "user"
+
+
+def _principal_kind(member: Any) -> str | None:
+    """Classify a role-assignment member: ``"user"``, ``"group"`` or ``None``.
+
+    Only a SharePoint group is ``"group"``: the package target matches it on the
+    target by title, which works because site groups are site-scoped, not
+    tenant-scoped. A distribution list or a security group is neither a user nor a
+    restorable group, so it stays ``None`` and is skipped with a warning.
+    """
     ptype = getattr(member, "principal_type", None)
     if ptype is None:
-        return False
-    if ptype == PrincipalType.User:
-        return True
+        return None
     # ``PrincipalType`` is a plain ``Enum`` (not ``IntEnum``); accept a raw int too.
-    return getattr(ptype, "value", ptype) == PrincipalType.User.value
+    value = getattr(ptype, "value", ptype)
+    if value == PrincipalType.User.value:
+        return "user"
+    if value == PrincipalType.SharePointGroup.value:
+        return "group"
+    return None
 
 
 def _is_system_principal(user: Any) -> bool:
@@ -841,6 +869,72 @@ class _TargetPrincipals:
         return self._roles.get(name)
 
 
+def _find_site_group(web: Any, title: str) -> Any:
+    """The site group with this title (case-insensitive), or ``None``."""
+    key = title.casefold()
+    for group in web.site_groups.get().execute_query():
+        if (group.title or "").casefold() == key:
+            return group
+    return None
+
+
+def _resolve_group_ownership(
+    web: Any,
+    title: str,
+    resolve: Callable[[Any], "Principal | None"] | None,
+) -> tuple["Principal | None", list[str]]:
+    """A site group's owner chain: a user with a PUID, plus the groups on the way up.
+
+    ``UserGroup.xml`` requires an ``Owner`` on every ``<Group>`` — live-verified: a
+    group emitted without one fails the whole ingestion job with ``The required
+    attribute 'Owner' is missing`` — and an owner may itself be a group (a team
+    site's ``Visitors`` group is owned by its ``Owners`` group, which owns itself;
+    both live-verified). The returned titles are **nearest first**; the last one is
+    owned by the returned user, or owns itself when the chain closes on itself or
+    leaves the tenant (a group created by the migration app is owned by the app,
+    which has no PUID).
+    """
+    groups: list[str] = []
+    seen: set[str] = {title.casefold()}
+    current = title
+    for _ in range(_MAX_GROUP_OWNER_DEPTH):
+        try:
+            group = _find_site_group(web, current)
+            if group is None:
+                break
+            owner = group.owner.get().execute_query()
+        except Exception:  # noqa: BLE001 - best-effort: an unresolved owner is reported, not raised
+            break
+        if _principal_kind(owner) == "user":
+            principal = resolve(getattr(owner, "id", None)) if resolve is not None else None
+            return principal, groups
+        owner_title = _principal_title(owner)
+        if not owner_title:
+            break
+        groups.append(owner_title)
+        if owner_title.casefold() in seen:
+            break
+        seen.add(owner_title.casefold())
+        current = owner_title
+    return None, groups
+
+
+def _attach_group_owners(
+    entries: list[PermissionEntry],
+    web: Any,
+    resolve: Callable[[Any], "Principal | None"] | None,
+    cache: dict[str, tuple["Principal | None", list[str]]],
+) -> None:
+    """Fill ``PermissionEntry.owner``/``owner_groups`` for group entries (per title)."""
+    for entry in entries:
+        if entry.principal_type != "group":
+            continue
+        title = entry.display_name or entry.principal_name
+        if title not in cache:
+            cache[title] = _resolve_group_ownership(web, title, resolve)
+        entry.owner, entry.owner_groups = cache[title]
+
+
 def _read_role_assignments(
     securable,
     resolve: Callable[[Any], "Principal | None"] | None = None,
@@ -852,9 +946,12 @@ def _read_role_assignments(
     the same shape so the permission diff compares like with like. ``normalize``
     (when supplied) canonicalizes a principal name — default groups collapse to
     ``default:<Kind>`` so a renamed site still compares as preserved. Role names are
-    paired with their decimal ``PermMask`` (``role_masks``), and — when ``resolve``
-    is supplied — a user principal is enriched with its PUID/display name/email so
-    the server-side package target can emit a faithful ``UserGroup.xml`` entry.
+    paired with their decimal ``PermMask`` (``role_masks``), the principal kind is
+    recorded in ``principal_type``, and — when ``resolve`` is supplied — a user
+    principal is enriched with its PUID/display name/email so the server-side
+    package target can emit a faithful ``UserGroup.xml`` entry. A SharePoint group
+    keeps its **title** in ``display_name`` (the normalized name would not match on
+    the target).
     """
     assignments = securable.role_assignments.expand(["Member", "RoleDefinitionBindings"]).get().execute_query()
     result: list[PermissionEntry] = []
@@ -876,8 +973,11 @@ def _read_role_assignments(
             principal_name=normalize(name) if normalize is not None else name,
             roles=roles,
             role_masks=role_masks,
+            principal_type=_principal_kind(member),
         )
-        if resolve is not None and _is_user_principal(member):
+        if entry.principal_type == "group":
+            entry.display_name = _principal_title(member) or name
+        if resolve is not None and entry.principal_type == "user":
             principal = resolve(getattr(member, "id", None))
             if principal is not None:
                 entry.system_id = principal.system_id
@@ -915,6 +1015,8 @@ class SharePointListSource:
         self._items: dict[str, Any] = {}
         self._attachments: dict[str, Any] = {}
         self._users: dict[int, Principal | None] = {}
+        # Group title -> (owner user, owner group chain); a ``<Group>`` needs both.
+        self._group_owners: dict[str, tuple[Principal | None, list[str]]] = {}
         self._default_groups: _DefaultGroups | None = None
         self._source_fields_cache: list[Any] | None = None
         self._user_columns_cache: set[str] | None = None
@@ -1456,7 +1558,9 @@ class SharePointListSource:
         source_item = self._items.get(item.dest_path)
         if source_item is None or not _has_unique_role_assignments(source_item):
             return []
-        return _read_role_assignments(source_item, resolve=self._principal_for, normalize=self._normalize_name)
+        entries = _read_role_assignments(source_item, resolve=self._principal_for, normalize=self._normalize_name)
+        _attach_group_owners(entries, self._list.context.web, self._principal_for, self._group_owners)
+        return entries
 
     def _principal_for(self, user_id: Any) -> "Principal | None":
         """Resolve a site-user id to a :class:`Principal` (login + PUID), cached."""
@@ -2451,6 +2555,8 @@ class SharePointLibrarySource:
         # (``TimeCreated``/``TimeLastModified``) can be diffed after the run.
         self._folders: dict[str, "Folder"] = {}
         self._users: dict[int, "Principal | None"] = {}
+        # Group title -> (owner user, owner group chain); a ``<Group>`` needs both.
+        self._group_owners: dict[str, tuple["Principal | None", list[str]]] = {}
         self._default_groups: _DefaultGroups | None = None
         self._item_authors: dict[str, tuple[int | None, int | None]] | None = None
         self._item_unique: dict[str, bool] | None = None
@@ -2677,7 +2783,9 @@ class SharePointLibrarySource:
                 securable.properties["HasUniqueRoleAssignments"] = unique
         if not _has_unique_role_assignments(securable):
             return []
-        return _read_role_assignments(securable, resolve=self._principal_for, normalize=self._normalize_name)
+        entries = _read_role_assignments(securable, resolve=self._principal_for, normalize=self._normalize_name)
+        _attach_group_owners(entries, self._folder.context.web, self._principal_for, self._group_owners)
+        return entries
 
     def _normalize_name(self, name: str) -> str:
         """Canonicalize a principal name (default groups -> ``default:<Kind>``)."""

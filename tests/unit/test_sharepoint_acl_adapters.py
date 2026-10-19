@@ -8,6 +8,7 @@ from office365.migration.sharepoint.adapters import (
     _is_user_principal,
     _perm_mask,
     _read_role_assignments,
+    _resolve_group_ownership,
 )
 from office365.sharepoint.principal.type import PrincipalType
 
@@ -25,11 +26,12 @@ class _Role:
 
 
 class _Member:
-    def __init__(self, login: str, principal_type: PrincipalType, member_id: int) -> None:
+    def __init__(self, login: str, principal_type: PrincipalType, member_id: int, title: str | None = None) -> None:
         self.login_name = login
         self.user_principal_name = login
         self.principal_type = principal_type
         self.id = member_id
+        self.title = title or login
 
 
 class _Assignment:
@@ -93,6 +95,27 @@ def test_read_role_assignments_captures_masks_and_resolves_users_only():
     assert entries[0].display_name == "Alice"
     assert entries[1].system_id is None  # a group is never resolved to a PUID
     assert resolved == [10]
+
+
+def test_principal_type_separates_users_sharepoint_groups_and_the_rest():
+    user = _Member("i:0#.f|membership|a@contoso.com", PrincipalType.User, 10)
+    sharepoint_group = _Member("default:members", PrincipalType.SharePointGroup, 20, title="Test site Members")
+    security_group = _Member("sg-team", PrincipalType.SecurityGroup, 30)
+    securable = _Securable(
+        [
+            _Assignment(user, [_Role("Read", 176, 138612833)]),
+            _Assignment(sharepoint_group, [_Role("Contribute", 1, 2)]),
+            _Assignment(security_group, [_Role("Read", 176, 138612833)]),
+        ]
+    )
+
+    entries = _read_role_assignments(securable, normalize=lambda name: "default:members" if "Members" in name else name)
+
+    assert [entry.principal_type for entry in entries] == ["user", "group", None]
+    # A group keeps its title: the normalized name ("default:members") would not
+    # match a group on the target, and the title is what the service looks up.
+    assert entries[1].principal_name == "default:members"
+    assert entries[1].display_name == "Test site Members"
 
 
 def test_is_puid():
@@ -197,3 +220,67 @@ def test_principal_for_keeps_a_valid_puid():
     assert principal.login_name == "i:0#.f|membership|vgrem@mediadev8.onmicrosoft.com"
     assert principal.display_name == "Vadim"
     assert source.warnings == []
+
+
+class _OwnerResource:
+    def __init__(self, owner) -> None:
+        self._owner = owner
+
+    def get(self) -> _OwnerResource:
+        return self
+
+    def execute_query(self) -> object:
+        return self._owner
+
+
+class _SiteGroup:
+    def __init__(self, title: str, owner) -> None:
+        self.title = title
+        self.owner = _OwnerResource(owner)
+
+
+class _GroupCollection:
+    def __init__(self, groups: list[_SiteGroup]) -> None:
+        self._groups = groups
+
+    def get(self) -> _GroupCollection:
+        return self
+
+    def execute_query(self) -> list[_SiteGroup]:
+        return self._groups
+
+
+class _OwnerWeb:
+    def __init__(self, groups: list[_SiteGroup]) -> None:
+        self.site_groups = _GroupCollection(groups)
+
+
+def test_resolve_group_ownership_follows_the_chain_to_a_user():
+    # Live shape: Visitors is owned by the Owners group, which is owned by a user.
+    alice = _Member("i:0#.f|membership|a@contoso.com", PrincipalType.User, 10, title="Alice")
+    owners = _SiteGroup("Owners", alice)
+    web = _OwnerWeb([_SiteGroup("Visitors", owners), owners])
+
+    def resolve(user_id):
+        return Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice")
+
+    owner, groups = _resolve_group_ownership(web, "Visitors", resolve)
+
+    assert groups == ["Owners"]  # nearest first
+    assert owner is not None and owner.system_id == "1003200065102863"
+
+
+def test_resolve_group_ownership_stops_at_a_self_owned_group():
+    # Live shape: a team site's Owners group owns itself.
+    owners = _SiteGroup("Owners", None)
+    owners.owner = _OwnerResource(owners)
+    web = _OwnerWeb([owners])
+
+    owner, groups = _resolve_group_ownership(web, "Owners", resolve=lambda _id: None)
+
+    assert owner is None  # the chain closes on itself: the group owns itself
+    assert groups == ["Owners"]
+
+
+def test_resolve_group_ownership_reports_a_group_missing_on_the_site():
+    assert _resolve_group_ownership(_OwnerWeb([]), "Ghosts", resolve=lambda _id: None) == (None, [])

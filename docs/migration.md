@@ -34,7 +34,7 @@ different content and deliver different fidelity:
 | Content | files + folders, **record lists + attachments**, list structure | **document libraries** (files/folders + version history) |
 | Version history | ✗ | ✓ the runner reads each file's history and the package carries `<Versions>` |
 | Authors / ModifiedBy | not preserved | ✓ applied from `UserGroup.xml` (integer principal id, matched by PUID) |
-| Permissions | best-effort same-tenant ACLs at all three container scopes: **items**, a **list's own ACLs** and **web permission levels, groups and role assignments** (with `--preserve-permissions`) | best-effort same-tenant ACL — **resolved users only** (groups / unresolved principals skipped with a warning) |
+| Permissions | best-effort same-tenant ACLs at all three container scopes: **items**, a **list's own ACLs** and **web permission levels, groups and role assignments** (with `--preserve-permissions`) | best-effort same-tenant ACL — **resolved users** (by PUID) and **SharePoint groups** (by title); anything else is skipped with a warning |
 | Columns / content types / views / formatting | captured + provisioned over REST (column + view `CustomFormatter` JSON included) | **not emitted** by the builder today |
 | Azure Storage | not needed | required (SharePoint-owned containers; no Azure account) |
 | Throughput | per-item HTTP, throttle-aware, resumable | bulk server-side ingestion; poll a job |
@@ -1120,6 +1120,15 @@ principal ids) and resolved-user ACLs (`DeploymentRoles` +
 [Client-side vs server-side](#client-side-vs-server-side)). REST cannot restore
 version history, so `preserve_versions` always requires a Migration API package and
 fails fast on the client-side target. Timestamps and permissions are applied
+
+The version history itself is content-accurate: labels and bytes come back exactly
+as read (`1.0`/`v1`, `2.0`/`v2`, current `v3`). **Per-version dates are not
+honorable** — the service stamps every `<Versions>` entry with the file's
+`TimeLastModified`. Putting `TimeCreated`/`TimeLastModified` on individual version
+entries is accepted and then ignored: asked for 2019-01-01 / 2019-06-01 / 2020-01-01
+on one file, a live ingestion job returned `2020-01-01` for every version, the same
+file-level date a second file carried unpatched. So expect history with the right
+contents and labels under a single (file-level) date.
 client-side **when the adapters support them** — the runner fails fast otherwise,
 rather than silently migrating without the requested fidelity:
 
@@ -1156,7 +1165,8 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
   assignment the source does not grant. On the server-side
   package target, `preserve_permissions=True` emits
   `DeploymentRoles`/`DeploymentRoleAssignments` for **resolved users** (matched by
-  PUID; groups/unresolved principals are skipped with a warning). Both assume the
+  PUID) and for **SharePoint groups** (matched by title); a distribution list, a
+  security group or an unresolved principal is skipped with a warning. Both assume the
   source logins already resolve on the target — inside one tenant they do. When
   they don't (another tenant, or normalized logins), hand the run an
   [identity map](#mapping-identities-identitymap).
@@ -1297,10 +1307,10 @@ the shipped pairs' expected output.
 | Dimension | Library → package | Library → REST | List → REST |
 |---|---|---|---|
 | Content | delivered | delivered | delivered |
-| Versions | best-effort (history content; per-version author/time not carried) | unsupported | unsupported |
+| Versions | best-effort (history content, labels and bytes; every version carries the file's `TimeLastModified` because the service ignores per-version dates) | unsupported | unsupported |
 | Created/Modified | delivered | delivered | delivered |
 | Author/Editor | best-effort (resolved PUID users only) | best-effort (resolved users only) | best-effort (resolved users only) |
-| Permissions | best-effort (same-tenant, resolved users) | best-effort (same-tenant) | best-effort (same-tenant, unique ACLs only) |
+| Permissions | best-effort (same-tenant, resolved users and SharePoint groups) | best-effort (same-tenant) | best-effort (same-tenant, unique ACLs only) |
 | Site groups / web role assignments | n/a (whole-site resolver only) | n/a | best-effort (same-tenant; custom groups + membership, associated-group membership excluded) |
 | Attachments | n/a | n/a | delivered (content only; system metadata not settable) |
 | Columns / content types / views / list settings | unsupported by the adapters — replay them with `provision_list_structure`; the whole-site resolver registers web-scope **site columns** first (`provision_web_scope_columns`), while a web-scope **content type** stays reported (`verify_site(..., web_scope_structure=True)`) | same | same |
@@ -1419,14 +1429,32 @@ columns, content types, or views: provision those client-side first (see
 skips the library's own `Forms/` scaffolding, which SharePoint recreates on the
 target. The end-to-end import is validated against a live tenant for
 file/folder content, **version history**, **authorship** (`Author`/`ModifiedBy`),
-and — with `preserve_permissions=True` — **same-tenant ACLs for resolved users**.
+and — with `preserve_permissions=True` — **same-tenant ACLs for resolved users
+and for SharePoint groups**.
 Each `UserGroup.xml` user carries its PUID (`SystemId`) in its canonical 16-digit
 hex form: `normalize_puid` strips a `0x` prefix or stray whitespace rather than
 carrying it into an attribute the service parses as a number. Each granted level
 is emitted as a `DeploymentRoles` `<Role>` with a fresh non-system id and a
 decimal `PermMask`, and is matched by `Title` to the target's existing permission
-level, so no duplicate is created. Groups and principals that cannot be resolved
-to a PUID are skipped and reported as warnings.
+level, so no duplicate is created.
+
+**SharePoint groups are grantable, and need an owner.** A role assignment whose
+member is a `PrincipalType.SharePointGroup` is captured with its **title** (the
+normalized `default:Members` name would match nothing on the target) and emitted
+as a `<Group>` plus a `PrincipalId` grant, so it applies to the target's group of
+the same name. Live-verified end-to-end: a custom group and a default `Visitors`
+grant both survived an ingestion job. One requirement is not optional — a
+`<Group>` **must** name an `Owner`, and a group emitted without one fails the
+**entire** job at schema validation, not just that grant
+(`The required attribute 'Owner' is missing`). A group's owner may itself be a
+group (a team site's `Visitors` group is owned by its `Owners` group, which owns
+itself), so the owner chain is read from the source and emitted; when no owner can
+be read at all, the group is written self-owned rather than dropped. Two honest
+limits: the import does **not** rewrite the owner of a group that already exists on
+the target (measured), and whether a group the import *creates* takes the manifest
+owner was not tested. A distribution list, a security group or an unresolved
+principal is **not** a site group, is site- or tenant-scoped differently, and is
+skipped with a warning — as before.
 
 ## Storage & vendor neutrality
 

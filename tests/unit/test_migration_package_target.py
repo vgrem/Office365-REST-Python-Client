@@ -233,6 +233,94 @@ def test_apply_permissions_skips_principal_without_a_puid(tmp_path):
     assert b"DeploymentRoleAssignments" not in target.build().manifest
 
 
+def test_apply_permissions_grants_a_sharepoint_group_by_title(tmp_path):
+    target = _target(tmp_path)
+    target.configure(MigrationOptions(preserve_permissions=True))
+    item = MigrationItem("src/b.txt", "b.txt", item_type="file")
+    target.write(item, b"hi")
+    target.apply_permissions(
+        item,
+        [
+            PermissionEntry(
+                principal_name="default:members",
+                roles=["Read"],
+                display_name="Test site Members",
+                role_masks={"Read": "756052856929"},
+                principal_type="group",
+                owner=Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice"),
+            )
+        ],
+    )
+
+    package = target.build()
+    group_map = ET.fromstring(package.user_group_map)
+    groups = [element for element in group_map.iter() if element.tag.endswith("}Group")]
+    assert [group.get("Name") for group in groups] == ["Test site Members"]  # its title, not the normalized name
+    users = [element for element in group_map.iter() if element.tag.endswith("}User")]
+    assert [user.get("SystemId") for user in users] == ["1003200065102863"]  # the owner's PUID
+    assert groups[0].get("Owner") == users[0].get("Id")
+    assert groups[0].get("OwnerIsUser") == "true"
+    assert f'PrincipalId="{groups[0].get("Id")}"' in package.manifest.decode()
+    assert target.warnings == []
+
+
+def test_apply_permissions_registers_a_group_once_across_items(tmp_path):
+    target = _target(tmp_path)
+    target.configure(MigrationOptions(preserve_permissions=True))
+    entries = [
+        PermissionEntry(
+            principal_name="Team Owners",
+            roles=["Contribute"],
+            display_name="Team Owners",
+            role_masks={"Contribute": "1073742006"},
+            principal_type="group",
+            owner=Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice"),
+        )
+    ]
+    for name in ("a.txt", "b.txt"):
+        item = MigrationItem(f"src/{name}", name, item_type="file")
+        target.write(item, b"hi")
+        target.apply_permissions(item, entries)
+
+    package = target.build()
+    group_map = ET.fromstring(package.user_group_map)
+    groups = [element for element in group_map.iter() if element.tag.endswith("}Group")]
+    assert len(groups) == 1
+    xml = package.manifest.decode()
+    grants = [element for element in xml.split("<") if "PrincipalId=" in element]
+    assert len(grants) == 2  # noqa: PLR2004 - one grant per file, both to the same group
+    assert {grant.split('PrincipalId="')[1].split('"')[0] for grant in grants} == {groups[0].get("Id")}
+
+
+def test_apply_permissions_writes_a_group_self_owned_when_its_owner_is_unknown(tmp_path):
+    target = _target(tmp_path)
+    item = MigrationItem("src/b.txt", "b.txt", item_type="file")
+    target.write(item, b"hi")
+    target.apply_permissions(
+        item,
+        [
+            PermissionEntry(
+                principal_name="Team Owners",
+                roles=["Read"],
+                display_name="Team Owners",
+                role_masks={"Read": "756052856929"},
+                principal_type="group",
+            )
+        ],
+    )
+
+    # UserGroup.xml rejects a <Group> without an Owner, and that fails the whole job;
+    # a group may own itself (a tenant's default Owners group does), so the grant stays.
+    package = target.build()
+    group_map = ET.fromstring(package.user_group_map)
+    groups = [element for element in group_map.iter() if element.tag.endswith("}Group")]
+    assert [group.get("Name") for group in groups] == ["Team Owners"]
+    assert groups[0].get("Owner") == groups[0].get("Id")
+    assert groups[0].get("OwnerIsUser") == "false"
+    assert 'PrincipalId="1"' in package.manifest.decode()
+    assert any("written self-owned" in warning for warning in target.warnings)
+
+
 def test_apply_permissions_skips_a_non_puid_system_id(tmp_path):
     target = _target(tmp_path)
     item = MigrationItem("src/b.txt", "b.txt", item_type="file")
@@ -269,3 +357,36 @@ def test_package_target_reports_full_fidelity_when_requested(tmp_path):
 
     assert sorted(report.preserved) == ["permissions", "timestamps", "versions"]
     assert report.unsupported == []
+
+
+def test_apply_permissions_points_a_group_at_its_owner_group(tmp_path):
+    # Live shape: Visitors is owned by Owners, which owns itself.
+    target = _target(tmp_path)
+    item = MigrationItem("src/b.txt", "b.txt", item_type="file")
+    target.write(item, b"hi")
+    target.apply_permissions(
+        item,
+        [
+            PermissionEntry(
+                principal_name="default:Visitors",
+                roles=["Read"],
+                display_name="Test site Visitors",
+                role_masks={"Read": "756052856929"},
+                principal_type="group",
+                owner_groups=["Test site Owners"],
+            )
+        ],
+    )
+
+    group_map = ET.fromstring(target.build().user_group_map)
+    groups = {
+        element.get("Name"): (element.get("Id"), element.get("Owner"), element.get("OwnerIsUser"))
+        for element in group_map.iter()
+        if element.tag.endswith("}Group")
+    }
+    visitors, owners = groups["Test site Visitors"], groups["Test site Owners"]
+    assert visitors[1] == owners[0]  # Visitors' owner is the Owners group
+    assert visitors[2] == "false"  # ... which is a group, not a user
+    assert owners[1] == owners[0]  # the Owners group owns itself, as on the source
+    assert owners[2] == "false"
+    assert target.warnings == []

@@ -50,8 +50,8 @@ class SharePointPackageTarget:
     ``Author``/``ModifiedBy`` become ``UserGroup.xml`` principals (matched by the
     integer id), and — with ``preserve_permissions`` — each item's role
     assignments become ``DeploymentRoles``/``DeploymentRoleAssignments`` grants for
-    resolved users (best-effort, same-tenant; groups/unresolved principals are
-    skipped with a warning).
+    resolved users (by PUID) and SharePoint groups (by title). Unresolved
+    principals are skipped with a warning.
     """
 
     # Marks this target as able to restore version history (see DataTarget).
@@ -104,6 +104,7 @@ class SharePointPackageTarget:
         self._package: "Package | None" = None
         self._web_url = web_url
         self._users: dict[str, int] = {}
+        self._groups: dict[str, int] = {}
         self._unresolved: set[str] = set()
         self._roles: dict[str, str] = {}
         self._role_seq = 0
@@ -158,22 +159,29 @@ class SharePointPackageTarget:
     def apply_permissions(self, item: MigrationItem, permissions: list[PermissionEntry]) -> None:
         """Emit a ``DeploymentRoleAssignments`` grant for a written file/folder.
 
-        Only a **resolved user** (a PUID ``system_id``) can be granted server-side;
-        groups and unresolved principals are skipped with a warning rather than
-        failing the job. A role without a decimal mask is skipped likewise.
+        A **resolved user** is granted by PUID and a **SharePoint group** by name
+        (``UserGroup.xml`` ``<Group>``); anything else — a distribution list, a
+        security group, an unresolved principal — is skipped with a warning rather
+        than failing the job, as is a role without a decimal mask. A role is matched
+        on the target by title, so an existing permission level is reused.
+
+        A group the target does not have is created by the service, empty: its
+        membership is a site-security concern (``apply_site_security``), not
+        something an item ACL can carry. A group also needs an **owner** — the
+        schema rejects a ``<Group>`` without one *and that fails the whole job* — so
+        the owner chain read from the source is emitted too (a user by PUID, a
+        group as another ``<Group>``), and a group whose owner cannot be read at all
+        is written **self-owned** (``OwnerIsUser="false"``), which SharePoint
+        permits: a tenant's default ``Owners`` group owns itself.
         """
         object_id = self._builder.object_id(item.dest_path)
         if object_id is None:
             return
         assignments: list[tuple[str, int]] = []
         for entry in permissions:
-            if not is_puid(entry.system_id):
-                self.warnings.append(
-                    f"permission for {entry.principal_name!r} skipped: no usable PUID "
-                    "(only resolved users carry ACLs on the server-side path)"
-                )
+            principal_id = self._ensure_principal(entry)
+            if principal_id is None:
                 continue
-            principal_id = self._register_user(entry.principal_name, entry.system_id, entry.display_name, entry.email)
             for role in entry.roles:
                 role_id = self._ensure_role(role, entry.role_masks.get(role))
                 if role_id is not None:
@@ -188,6 +196,82 @@ class SharePointPackageTarget:
             role_def_web_url=self._web_url,
             assignments=assignments,
         )
+
+    def _ensure_principal(self, entry: PermissionEntry) -> int | None:
+        """The ``UserGroup.xml`` id for a permission entry (user, group, or ``None``)."""
+        if entry.principal_type == "group":
+            name = entry.display_name or entry.principal_name
+            if name in self._groups:
+                return self._groups[name]
+            # An owner group must exist earlier in UserGroup.xml than the group it owns,
+            # so the owner chain is registered first.
+            owner_id, owner_is_user, known = self._group_owner(entry, name)
+            group_id = self._builder.add_group(name)
+            self._groups[name] = group_id
+            if owner_id is None:
+                owner_id, owner_is_user = group_id, False
+                if not known:
+                    self.warnings.append(
+                        f"group {name!r} is written self-owned: no owner was read from the source, and a "
+                        "<Group> must name one"
+                    )
+            self._builder.set_group_owner(group_id, owner_id, owner_is_user=owner_is_user)
+            return group_id
+        if not is_puid(entry.system_id):
+            self.warnings.append(
+                f"permission for {entry.principal_name!r} skipped: no usable PUID "
+                "(a user needs one; only a SharePoint group resolves without it)"
+            )
+            return None
+        return self._register_user(entry.principal_name, entry.system_id, entry.display_name, entry.email)
+
+    def _group_owner(self, entry: PermissionEntry, name: str) -> tuple[int | None, bool, bool]:
+        """The ``Owner`` id for a group entry, whether it names a user, and whether it is known.
+
+        A user owner is registered by PUID; a group owner is registered as a
+        ``<Group>`` of its own (with its own chain), which is how a site's
+        ``Visitors`` group is owned by its ``Owners`` group on the source. A chain
+        that closes through the group itself means the group is **self-owned** —
+        read from the source, not an assumption (a tenant's ``Owners`` group is).
+        """
+        owner = entry.owner
+        if owner is not None and is_puid(owner.system_id):
+            return self._register_user(owner.login_name, owner.system_id, owner.display_name, owner.email), True, True
+        chain = entry.owner_groups
+        if any(title.casefold() == name.casefold() for title in chain):
+            return None, False, True
+        if chain:
+            return self._register_group_chain(chain, owner), False, True
+        return None, False, False
+
+    def _register_group_chain(self, titles: list[str], top: "Principal | None") -> int:
+        """Register an owner chain (nearest first); returns the nearest group's id.
+
+        The furthest group is owned by ``top`` — a user with a PUID, or itself when
+        the source chain closed on itself or left the tenant.
+        """
+        owner_id: int | None = None
+        owner_is_user = False
+        for title in reversed(titles):
+            if title in self._groups:
+                owner_id, owner_is_user = self._groups[title], False
+                continue
+            group_id = self._builder.add_group(title)
+            self._groups[title] = group_id
+            if owner_id is not None:
+                self._builder.set_group_owner(group_id, owner_id, owner_is_user=owner_is_user)
+            elif top is not None and is_puid(top.system_id):
+                self._builder.set_group_owner(
+                    group_id,
+                    self._register_user(top.login_name, top.system_id, top.display_name, top.email),
+                    owner_is_user=True,
+                )
+            else:
+                self._builder.set_group_owner(group_id, group_id, owner_is_user=False)
+            owner_id, owner_is_user = group_id, False
+        if owner_id is None:  # pragma: no cover - titles is non-empty on this path
+            raise ValueError("a group owner chain must name at least one group")
+        return owner_id
 
     def _ensure_user(self, principal: "Principal | None") -> str | None:
         """Register a principal in ``UserGroup.xml`` (by login + PUID); returns its id string."""
