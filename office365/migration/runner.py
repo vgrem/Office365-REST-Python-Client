@@ -73,6 +73,31 @@ def _assert_fidelity_supported(options: MigrationOptions, source, target: DataTa
         )
 
 
+def _resolve_identities(options: MigrationOptions, item: MigrationItem) -> None:
+    """Map the item's author/editor onto target principals (no-op without a map).
+
+    Applied before the target writes because a target may consume ``item.author``
+    during ``write`` (the server-side package target does, for ``UserGroup.xml``)
+    — mapping afterwards would be too late. Idempotent: the map resolves a name
+    that is already a target login to itself, so a resumed item is not re-mapped
+    into a miss.
+    """
+    identity_map = options.identity_map
+    if identity_map is None:
+        return
+    item.author = identity_map.resolve_principal(item.author)
+    item.editor = identity_map.resolve_principal(item.editor)
+
+
+def _read_payloads(source, chunk: list[MigrationItem], options: MigrationOptions) -> list[object]:
+    """Resolve identities, then read one payload per item (the read path is per-item)."""
+    payloads: list[object] = []
+    for item in chunk:
+        _resolve_identities(options, item)
+        payloads.append(source.read(item))
+    return payloads
+
+
 def _apply_fidelity(source, target: DataTarget, item: MigrationItem, options: MigrationOptions) -> None:
     """Best-effort fidelity after a successful write (timestamps / authorship / ACLs).
 
@@ -81,6 +106,8 @@ def _apply_fidelity(source, target: DataTarget, item: MigrationItem, options: Mi
     """
     if options.preserve_permissions:
         permissions = source.read_permissions(item)
+        if permissions and options.identity_map is not None:
+            permissions = options.identity_map.resolve_permissions(permissions)
         if permissions:
             _call_optional(target, "apply_permissions", item, permissions)
     if options.preserve_authorship:
@@ -301,7 +328,7 @@ class MigrationRunner:
         def _flush() -> None:
             if not chunk:
                 return
-            payloads = [source.read(item) for item in chunk]
+            payloads = _read_payloads(source, chunk, options)
             for item in chunk:
                 _load_versions(source, target, item)
             failures = target.write_many(chunk, payloads, concurrency=options.concurrency)
@@ -374,6 +401,7 @@ class MigrationRunner:
             return False
         dest = resolve_dest(item, target, options.conflict_resolution)
         item.dest_path = dest
+        _resolve_identities(options, item)
         payload = source.read(item)
         _load_versions(source, target, item)
         target.write(item, payload)

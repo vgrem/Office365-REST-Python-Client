@@ -494,8 +494,8 @@ and replayed over REST first.
 **The settings surface is wider than the engine, and that is reported, not
 implied.** `MigrationSettings` mirrors the cmdlet, but a client-side run cannot do
 everything SPMT does — it does not migrate the term store, it cannot skip lists by
-name, it carries no cross-tenant user map and it has no multi-round or Azure
-storage plumbing. A knob that silently does nothing is a trap, so
+name, its user map is a CSV you supply (no directory lookup) and it has no
+multi-round or Azure storage plumbing. A knob that silently does nothing is a trap, so
 `MigrationSettings.unhonored()` returns one ready-to-print note per setting whose
 current value asks for behavior the engine does not implement (a setting whose
 default *is* what the engine does stays silent), and a session appends them to
@@ -1156,8 +1156,10 @@ MigrationJob(source, target, MigrationOptions(preserve_timestamps=True, preserve
   assignment the source does not grant. On the server-side
   package target, `preserve_permissions=True` emits
   `DeploymentRoles`/`DeploymentRoleAssignments` for **resolved users** (matched by
-  PUID; groups/unresolved principals are skipped with a warning). Both are
-  **same-tenant**; cross-tenant identity mapping is not implemented.
+  PUID; groups/unresolved principals are skipped with a warning). Both assume the
+  source logins already resolve on the target — inside one tenant they do. When
+  they don't (another tenant, or normalized logins), hand the run an
+  [identity map](#mapping-identities-identitymap).
 - **Site security (web scope)** — with `preserve_permissions`, the SharePoint
   resolver also creates each web's **custom permission levels**, re-creates its
   **custom site groups** (flags + membership) and its **web-level role
@@ -1218,6 +1220,63 @@ print(report.to_dict())  # JSON-serializable, for reports/status
 The report is informational (it never raises); the run itself still fails fast on
 an unhonorable flag. `MigrationSettings.preserve_timestamps` / `.preserve_permissions`
 feed the matching options into every session task by default.
+
+### Mapping identities (`IdentityMap`)
+
+Authorship and ACLs are *principals*, and a principal is a tenant-local fact: on
+another tenant `i:0#.f|membership|anna@contoso.com` is nobody, and the source PUID
+is meaningless. `IdentityMap` translates them. The engine applies it to the item's
+`author`/`editor` **before** the write (the server-side package consumes them while
+building `UserGroup.xml`) and to every ACL entry as it is applied — so it works the
+same for the REST and the package target, and no adapter knows about it.
+
+```python
+from office365.migration import IdentityMap, MigrationOptions, UnmappedPolicy
+
+identity = IdentityMap.from_csv(
+    "users.csv",  # source,target[,system_id]
+    domain_rewrites={"contoso.com": "fabrikam.com"},  # the "same people, new domain" case
+    unmapped_policy=UnmappedPolicy.FALLBACK_OWNER,
+    fallback_owner="migration-admin@fabrikam.com",
+)
+job = MigrationJob(
+    source, target, MigrationOptions(preserve_authorship=True, preserve_permissions=True, identity_map=identity)
+)
+job.plan()
+job.run()
+print(identity.unmapped)  # ['contractor@partner.example', ...]
+```
+
+Resolution is three rules, cheapest first:
+
+1. **Exact** — the source login, its claims tail (`…|anna@contoso.com`) or the CSV's
+   own key, compared case-insensitively. A CSV row therefore matches
+   `anna@contoso.com` *and* `i:0#.f|membership|anna@contoso.com`.
+2. **Domain rewrite** — swap the e-mail domain, keeping the rest of the login and
+   the claims prefix. Exact domains only (`contoso.com`, not `*.contoso.com`), so
+   the rule never guesses at a subdomain hierarchy.
+3. **Unmapped policy** — `skip` (default: authorship is cleared, the ACL entry is
+   not applied), `fail` (raise `UnmappedPrincipalError` at the first miss), or
+   `fallback_owner` (substitute one known account).
+
+Every miss is kept in `identity.unmapped` and counted in the run report
+(`identity_unmapped`, `identity_unmapped_principals`, `identity_policy`), so a
+`skip` is a *reported* loss rather than a silent one. Three honest limits:
+
+- **There is no directory lookup.** The map never guesses from display names or
+  e-mail equality on the target; a name it was not given is a name it does not
+  know. `MigrationSettings.user_mapping_file` is the only source of identities
+  (`automatic_user_mapping=False` turns mapping off).
+- **Groups are not mapped.** Only user principals are; a group assignment arrives
+  unresolved, exactly as before.
+- **The source PUID is dropped when a principal is remapped** (a PUID identifies a
+  user in *its own* tenant, and a package that carried the old one would emit an
+  unresolvable `SystemId`). Supply the third CSV column when the target PUID is
+  known; otherwise the REST target resolves by login via `EnsureUser`.
+
+Verification compares the **mapped** identity, not the source login: the source's
+`read_authorship` reports what the run intended to write, so a target that failed
+to apply the mapped principal is still caught — and a run with no map is unchanged.
 
 ### Fidelity matrix
 

@@ -7,10 +7,13 @@ from __future__ import annotations
 import re
 from dataclasses import asdict, dataclass, field, fields
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from office365.runtime.limits import DEFAULT_BATCH_SIZE
 from office365.runtime.operations import OperationStats
+
+if TYPE_CHECKING:
+    from office365.migration.identity import IdentityMap
 
 
 class ConflictResolution(str, Enum):
@@ -217,6 +220,11 @@ class MigrationOptions:
     modified_after: str | None = None
     batch_size: int = DEFAULT_BATCH_SIZE
     concurrency: int = 1  # parallel workers for bulk file upload / batched writes
+    # Source → target principal map for authorship and ACLs (cross-tenant, or a
+    # tenant whose logins were normalized). ``None`` keeps source logins as they
+    # are, which is correct inside one tenant. See
+    # :class:`~office365.migration.identity.IdentityMap`.
+    identity_map: "IdentityMap | None" = None
 
 
 def item_to_dict(item: MigrationItem) -> dict:

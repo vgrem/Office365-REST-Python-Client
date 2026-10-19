@@ -39,6 +39,12 @@ def _extension(path: str) -> str:
     return ext if dot else ""
 
 
+def _identity_fields(job: "MigrationJob") -> dict[str, object]:
+    """Identity-map counters for the summary row (empty when no map is configured)."""
+    identity_map = job.options.identity_map
+    return identity_map.summary() if identity_map is not None else {}
+
+
 def build_report(job: "MigrationJob") -> MigrationReport:
     """Project a job's state into report records."""
     stats = job.stats
@@ -67,6 +73,7 @@ def build_report(job: "MigrationJob") -> MigrationReport:
             "started_at": iso(job.started_at),
             "finished_at": iso(job.finished_at),
             "duration_secs": round(duration_secs, 1) if duration_secs is not None else None,
+            **_identity_fields(job),
         }
     ]
     items = [

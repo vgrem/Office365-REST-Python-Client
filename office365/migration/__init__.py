@@ -41,6 +41,7 @@ from office365.migration.base import (
 from office365.migration.checkpoint import Checkpoint
 from office365.migration.delta import DeltaReport, MovedItem, compute_delta
 from office365.migration.fidelity import FidelityReport, FidelityStatus, describe_fidelity
+from office365.migration.identity import IdentityMap, UnmappedPolicy, UnmappedPrincipalError
 from office365.migration.job import MigrationJob
 from office365.migration.logging import (
     JsonLogFormatter,
@@ -103,6 +104,8 @@ _LAZY_EXPORTS = {
 }
 
 __all__ = [
+    "UnmappedPolicy",
+    "UnmappedPrincipalError",
     "AssessmentOptions",
     "AssessmentReport",
     "Checkpoint",
@@ -116,6 +119,7 @@ __all__ = [
     "Manifest",
     "MigrationItem",
     "MigrationJob",
+    "IdentityMap",
     "MigrationOptions",
     "MigrationPhase",
     "MigrationReport",

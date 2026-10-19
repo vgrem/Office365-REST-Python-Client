@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+**Migration (identity)**
+
+- `IdentityMap` (`office365.migration`) maps source principals onto target
+  principals for authorship and ACLs, so a run can cross tenants (or follow a
+  login rename) without hand-editing the payload: entries from a CSV
+  (`source,target[,system_id]`), plus e-mail domain rewrites (`contoso.com` →
+  `fabrikam.com`, keeping the claims prefix) and an unmapped policy
+  (`skip` / `fail` / `fallback_owner`). The engine applies it to `item.author`,
+  `item.editor` and every `PermissionEntry` for both the REST and server-side
+  package targets, and a remapped principal drops the source PUID (a PUID only
+  means something in its own tenant) unless the CSV supplies the target one.
+  Unmapped principals are never silent: they are collected in `IdentityMap.unmapped`
+  and reported in the run summary (`identity_mappings`, `identity_rewritten`,
+  `identity_unmapped`, `identity_unmapped_principals`, `identity_policy`).
+  `MigrationSettings.user_mapping_file` now feeds it, and `automatic_user_mapping=False`
+  turns mapping off — both were previously listed as unhonored settings. There is
+  no directory lookup and groups are still not mapped.
+
 **Migration (mail)**
 
 - `MailFolderSource` + `MailExportTarget` (`office365.migration.outlook`) export a

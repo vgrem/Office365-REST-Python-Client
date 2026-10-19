@@ -16,6 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from office365.migration.base import MigrationOptions
+from office365.migration.identity import IdentityMap
 
 __all__ = ["MigrationSettings"]
 
@@ -37,8 +38,6 @@ _UNHONORED: tuple[tuple[str, object, str], ...] = (
     ("migrate_term_groups", False, "a session does not migrate the term store (use export_tree/import_tree)"),
     ("keep_all_versions", True, "every readable version is carried, with no cap"),
     ("number_of_versions", 10, "the package carries every readable version, so a cap is not applied"),
-    ("automatic_user_mapping", True, "cross-tenant identity mapping is not implemented"),
-    ("user_mapping_file", None, "cross-tenant identity mapping is not implemented"),
     ("lookup_reference_policy", 0, "lookups are remapped onto the migrated target list"),
     ("working_folder", None, "the client-side path keeps no working folder"),
     ("enable_multi_round", False, "multi-round runs are not implemented"),
@@ -117,7 +116,17 @@ class MigrationSettings:
         return notes
 
     def to_options(self, **overrides) -> MigrationOptions:
-        """Build :class:`MigrationOptions` from the settings (``overrides`` win)."""
+        """Build :class:`MigrationOptions` from the settings (``overrides`` win).
+
+        ``user_mapping_file`` becomes an :class:`~office365.migration.identity.IdentityMap`
+        (CSV, ``source,target[,system_id]``) unless ``automatic_user_mapping`` is
+        false, which turns mapping off. With no file, principals pass through
+        unchanged — there is no directory lookup, which is what a same-tenant run
+        wants and what a cross-tenant run has to replace with a file.
+        """
+        identity_map = None
+        if self.user_mapping_file and self.automatic_user_mapping:
+            identity_map = IdentityMap.from_file(self.user_mapping_file)
         values = {
             "preserve_permissions": self.preserve_permissions,
             "preserve_timestamps": self.preserve_timestamps,
@@ -126,6 +135,7 @@ class MigrationSettings:
             "exclude_patterns": [f"*.{extension.lstrip('.')}" for extension in self.skip_files_with_extension],
             "created_after": self.migrate_files_created_after,
             "modified_after": self.migrate_files_modified_after,
+            "identity_map": identity_map,
         }
         values.update(overrides)
         return MigrationOptions(**values)
