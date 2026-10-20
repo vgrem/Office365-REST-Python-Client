@@ -134,7 +134,7 @@ contact always produces the same bytes and a byte checksum verifies the tree —
 Deliberate choices, all of them visible in the sidecar:
 
 - **The Graph id is the key, not a name.** A contact has no `internetMessageId` and
-  no `iCalUid` — Exchange assigns neither — so nothing the source knows survives an
+  no `iCalUId` — Exchange assigns neither — so nothing the source knows survives an
   import. The file name carries a hash of the Graph id, which is stable on disk.
 - **Child folders are walked by default** (`--no-subfolders` turns it off) and keep
   their place in the tree, so `Vendors` under `Work` does not flatten into the root.

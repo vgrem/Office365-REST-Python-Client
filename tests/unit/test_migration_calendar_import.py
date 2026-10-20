@@ -151,7 +151,7 @@ class _Calendar:
     def _listing(self, request):
         return {
             "value": [
-                {"id": event["id"], "subject": event.get("subject"), "start": event.get("start"), "iCalUid": None}
+                {"id": event["id"], "subject": event.get("subject"), "start": event.get("start"), "iCalUId": None}
                 for event in self.events.values()
                 if event["id"] not in self.hidden
             ]
@@ -197,7 +197,7 @@ class _Calendar:
         wrapped = _WRAPPER + str(body.get("content") or "") + "</body></html>" if body.get("content") else None
         return {
             "id": event_id,
-            "iCalUid": None,  # measured: an event created through the API has no iCalUid
+            "iCalUId": None,  # measured: an event created through the API has no iCalUId
             "subject": payload.get("subject"),
             "body": {"contentType": "html", "content": wrapped},
             "start": payload.get("start"),
@@ -304,8 +304,8 @@ def test_payload_keeps_the_wall_clock_zone_and_the_recurrence():
     assert payload["start"] == {"dateTime": "2026-03-09T09:00:00.0000000", "timeZone": "Europe/Kiev"}
     assert payload["recurrence"] == _SERIES["recurrence"]
     assert payload["transactionId"] == event_transaction_id(_SERIES)
-    # Server-assigned: sending them back is at best ignored (measured on iCalUid).
-    for owned in ("iCalUid", "organizer", "attendees", "createdDateTime"):
+    # Server-assigned: sending them back is at best ignored (measured on iCalUId).
+    for owned in ("iCalUId", "organizer", "attendees", "createdDateTime"):
         assert owned not in payload, owned
 
 

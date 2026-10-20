@@ -50,7 +50,7 @@ Six honest limits, all measured against Exchange:
   Exchange mail an invitation to each of them, so a historical import would spam
   people with meetings they already had. ``CalendarImportOptions.restore_attendees``
   turns it on, and the run reports how many entries were left out.
-* Exchange assigns the meeting metadata on create — ``iCalUid``, the organizer,
+* Exchange assigns the meeting metadata on create — ``iCalUId``, the organizer,
   attendee responses, ``created``/``modified`` — so those cannot be restored, and
   the imported event is organised by the importing mailbox.
 * The body is re-serialized (an HTML body gains Exchange's ``<head>``/``<style>``
@@ -92,7 +92,7 @@ from office365.runtime.operations import emit_progress
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 #: Properties an import reads back off the target calendar to recognise its own work.
-_EXISTING_COLUMNS = ["id", "subject", "start", "iCalUid"]
+_EXISTING_COLUMNS = ["id", "subject", "start", "iCalUId"]
 
 #: Graph's error code for a reused ``transactionId`` (a concurrent run got there first).
 _DUPLICATE_TRANSACTION = "ErrorDuplicateTransactionId"
@@ -299,7 +299,7 @@ class CalendarTarget(DataTarget):
         """Whether an equal event is already in the target calendar.
 
         Matched on subject plus start, because nothing the source knows survives the
-        create (a created event comes back with ``iCalUid: null`` and a fresh id).
+        create (a created event comes back with ``iCalUId: null`` and a fresh id).
         Duplicates *at the source* are honoured: the index keeps a list per key and
         each source item claims its own entry, so two same-titled events at the same
         hour are still imported twice.

@@ -4,6 +4,12 @@ The transport scripts Graph the way the service answers: one page of events for 
 calendar, and the calendar's own properties. The event shapes below are the ones the
 Exchange-backed endpoint really returns (measured: ``start``/``end`` are wall-clock
 literals with a zone name, recurrence is a pattern/range object).
+
+The identity property is spelled ``iCalUId`` — capital ``ID`` — on the wire (measured:
+``/me/calendar/events`` answers ``"iCalUId": "040000008200E00074C5B7101A82E008..."``),
+which is also how the generated ``Event.ical_uid`` getter reads it. The fixtures used to
+say ``iCalUid``, i.e. they agreed with the exporter's own typo instead of the service,
+and so could not see that the field was being dropped.
 """
 
 from __future__ import annotations
@@ -27,7 +33,7 @@ _CALENDAR = {"id": "cal-1", "name": "Calendar"}
 
 _SINGLE = {
     "id": "e1",
-    "iCalUid": "040000008200E00074C5B7101A82E0080000000",
+    "iCalUId": "040000008200E00074C5B7101A82E0080000000",
     "subject": "Quarterly review; budget, headcount",
     "body": {"contentType": "html", "content": "<p>Agenda: <b>Q1</b></p>"},
     "start": {"dateTime": "2026-03-02T09:00:00.0000000", "timeZone": "Europe/Kiev"},
@@ -65,7 +71,7 @@ _SINGLE = {
 
 _ALL_DAY = {
     "id": "e2",
-    "iCalUid": None,
+    "iCalUId": None,
     "subject": "Company offsite",
     "body": {"contentType": "text", "content": "All day"},
     "start": {"dateTime": "2026-03-05T00:00:00.0000000", "timeZone": "UTC"},
@@ -93,7 +99,7 @@ _ALL_DAY = {
 
 _SERIES = {
     "id": "e3",
-    "iCalUid": "040000008200E00074C5B7101A82E0080000000series",
+    "iCalUId": "040000008200E00074C5B7101A82E0080000000series",
     "subject": "Weekly standup",
     "body": {"contentType": "text", "content": "Standup"},
     "start": {"dateTime": "2026-03-09T09:00:00.0000000", "timeZone": "UTC"},
@@ -125,7 +131,7 @@ _SERIES = {
 _OCCURRENCE = {
     **_SERIES,
     "id": "e4",
-    "iCalUid": "040000008200E00074C5B7101A82E0080000000series",
+    "iCalUId": "040000008200E00074C5B7101A82E0080000000series",
     "type": "occurrence",
     "seriesMasterId": "e3",
     "recurrence": None,
@@ -136,7 +142,7 @@ _OCCURRENCE = {
 _CANCELLED = {
     **_SINGLE,
     "id": "e5",
-    "iCalUid": "040000008200E00074C5B7101A82E0080000000cancelled",
+    "iCalUId": "040000008200E00074C5B7101A82E0080000000cancelled",
     "subject": "Cancelled 1:1",
     "isCancelled": True,
     "start": {"dateTime": "2026-03-04T09:00:00.0000000", "timeZone": "UTC"},
@@ -209,7 +215,7 @@ def test_source_records_the_envelope_an_import_replays():
 
     envelope = item.metadata
     assert item.source_id == "e1"  # the Graph id, not iCalUid: see event_key()
-    assert envelope["ical_uid"] == _SINGLE["iCalUid"]
+    assert envelope["ical_uid"] == _SINGLE["iCalUId"]
     assert envelope["subject"] == "Quarterly review; budget, headcount"
     assert envelope["start"] == {"dateTime": "2026-03-02T09:00:00.0000000", "timeZone": "Europe/Kiev"}
     assert envelope["body"] == {"content_type": "html", "content": "<p>Agenda: <b>Q1</b></p>"}
@@ -228,6 +234,22 @@ def test_source_records_the_envelope_an_import_replays():
     assert envelope["calendar_display_path"] == "Calendar"
     assert item.created == "2026-02-01T08:00:00+00:00"
     assert item.modified == "2026-02-20T11:30:00+00:00"
+
+
+def test_envelope_reads_the_ical_uid_under_the_name_graph_spells_it():
+    """The sidecar's ``ical_uid`` comes from the service's ``iCalUId``, not a guess.
+
+    ``get_property()`` is a stringly lookup that answers ``None`` for a misspelled name,
+    so reading ``iCalUid`` (one capital short) silently wrote ``ical_uid: null`` into
+    every exported sidecar and fell back to the Graph id for the ICS ``UID``.
+    """
+    transport = _transport()
+    events = CalendarSource(_calendar(_client(transport))).list_items()
+    event = events[0]
+
+    assert _SINGLE["iCalUId"]  # the fixture really carries the identity
+    assert event.metadata["ical_uid"] == _SINGLE["iCalUId"]
+    assert event_ics(event.metadata).decode("utf-8").count(f"UID:{_SINGLE['iCalUId']}\r\n") == 1
 
 
 def test_source_reads_the_ics_it_renders_and_counts_its_bytes():
@@ -253,7 +275,7 @@ def test_ics_renders_time_ranges_attendees_and_reminders():
     assert "BEGIN:VEVENT\r\n" in text
     # The key is the Graph id (stable), the ICS UID is the iCalUid (what other
     # calendar clients match on) — the two identities are deliberately different.
-    assert f"UID:{_SINGLE['iCalUid']}\r\n" in text
+    assert f"UID:{_SINGLE['iCalUId']}\r\n" in text
     assert "DTSTART;TZID=Europe/Kiev:20260302T090000\r\n" in text
     assert "DTEND;TZID=Europe/Kiev:20260302T100000\r\n" in text
     # The zone rides in TZID, so the wall clock is written unchanged (no UTC shift).
@@ -285,7 +307,7 @@ def test_ics_writes_an_all_day_event_as_a_date_range():
     assert "DTSTART;VALUE=DATE:20260305\r\n" in text
     assert "DTEND;VALUE=DATE:20260306\r\n" in text
     assert "TRANSP:TRANSPARENT\r\n" not in text.replace("STATUS:TENTATIVE", "")  # an OOF day is opaque
-    assert "UID:e2" in text  # no iCalUid: the Graph id is the fallback identity
+    assert "UID:e2" in text  # no iCalUId: the Graph id is the fallback identity
 
 
 def test_ics_renders_a_recurrence_pattern_as_an_rrule():

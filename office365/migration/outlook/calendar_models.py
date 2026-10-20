@@ -32,7 +32,7 @@ from office365.runtime.converters.scalars import iso_or_none
 #: ``$select`` (each was probed against the Exchange-backed endpoint).
 EVENT_COLUMNS = [
     "id",
-    "iCalUid",
+    "iCalUId",
     "subject",
     "body",
     "bodyPreview",
@@ -163,15 +163,15 @@ class CalendarExportOptions:
 def event_key(event) -> str:
     """The identity an export is keyed by: the Graph event id.
 
-    Deliberately not ``iCalUid``: Exchange assigns one to a *meeting* but not to a
+    Deliberately not ``iCalUId``: Exchange assigns one to a *meeting* but not to a
     plain appointment (measured — an event created through the API comes back with
-    ``iCalUid: null`` even on a later read), so keying on it would let a re-run see
+    ``iCalUId: null`` even on a later read), so keying on it would let a re-run see
     the same event under a new identity and write a second copy. The Graph id is
-    stable for the event's life in its calendar. ``iCalUid`` is still what other
+    stable for the event's life in its calendar. ``iCalUId`` is still what other
     calendar clients match on, so it rides in the sidecar and becomes the ``.ics``
     ``UID`` when present.
     """
-    return str(event.id or event.get_property("iCalUid") or "")
+    return str(event.id or event.ical_uid or "")
 
 
 def event_dest_path(event, calendar_path: str) -> str:
@@ -262,7 +262,7 @@ def event_envelope(
     locations = [_as_dict(item).get("displayName") for item in (event.get_property("locations") or [])]
     envelope: dict[str, Any] = {
         "graph_id": event.id,
-        "ical_uid": event.get_property("iCalUid"),
+        "ical_uid": event.ical_uid,
         "calendar_path": calendar_path,
         "calendar_display_path": display_path or calendar_path,
         "subject": event.get_property("subject"),
@@ -517,7 +517,7 @@ class CalendarImportOptions:
 def event_dedup_key(envelope: dict[str, Any]) -> tuple[str, str | None, str | None]:
     """The key a target matches an existing event on: subject and start.
 
-    A created event comes back with ``iCalUid: null`` and a fresh Graph id, so neither
+    A created event comes back with ``iCalUId: null`` and a fresh Graph id, so neither
     of the source's identities survives the import — subject plus wall clock (and the
     zone it is in) is what is left to recognise a re-run's own work by.
     """
@@ -544,7 +544,7 @@ def event_create_payload(
 
     ``start``/``end`` are the pair of wall clock and *Windows* zone name the export
     recorded, passed back unchanged — Exchange accepts its own names, so no
-    IANA conversion is needed. Anything Exchange assigns itself (``iCalUid``, the
+    IANA conversion is needed. Anything Exchange assigns itself (``iCalUId``, the
     organizer, attendee responses, ``created``/``modified``) is not sent.
     """
     options = options or CalendarImportOptions()
@@ -607,7 +607,7 @@ def event_digest(envelope: dict[str, Any], options: CalendarImportOptions | None
     Not the ``.ics`` bytes: the other side of an import is Exchange, which
     re-serializes the body and assigns the meeting metadata, so the comparable
     artefact is the *event*. Two things are therefore outside the digest — everything
-    the service owns (``iCalUid``, the organizer, attendee responses, created and
+    the service owns (``iCalUId``, the organizer, attendee responses, created and
     modified times) and the body's markup (see :func:`_body_text`). Attendees and
     categories count only when ``options`` says the import restores them, which is
     why the source and the target of one job must share the options object.

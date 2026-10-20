@@ -96,7 +96,7 @@ print(job.verify().summary())
   show-as, sensitivity, importance, the reminder and Outlook categories are all
   replayed from the sidecar, and a series is recreated as a `seriesMaster` with
   Graph's own `recurrence` object.
-- **Idempotency.** A created event comes back with `iCalUid: null` and a fresh Graph
+- **Idempotency.** A created event comes back with `iCalUId: null` and a fresh Graph
   id, so the target matches on `(subject, wall clock, zone)`: a re-run skips what it
   already created, and two source events that share all three are both imported.
 - **A deterministic `transactionId`** — two concurrent runs collide on the server
@@ -110,7 +110,7 @@ print(job.verify().summary())
   does not suppress it (measured) — so an import would mail every invitee of every
   meeting in the tree. `--attendees` opts in; the run otherwise reports how many
   attendee entries it left out.
-- **Exchange owns the meeting metadata** — `iCalUid`, the organizer, per-attendee
+- **Exchange owns the meeting metadata** — `iCalUId`, the organizer, per-attendee
   responses and the created/modified times are assigned by the service, and the
   signed-in user becomes the organizer.
 - **The body is re-serialized** (Exchange wraps it in its own `<html><head><style>…`),

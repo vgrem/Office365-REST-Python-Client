@@ -412,11 +412,14 @@ last-modified time, never the export's). An all-day event becomes a
 and the reminder becomes a `VALARM`.
 
 Verification is exact only if the *names* are exact, so the export keys on the
-Graph event id, not on `iCalUid`: Exchange gives a meeting an `iCalUid` but not a
-plain appointment (an event created through the API reads back `iCalUid: null`),
+Graph event id, not on `iCalUId`: Exchange gives a meeting an `iCalUId` but not a
+plain appointment (an event created through the API reads back `iCalUId: null`),
 so keying on it would let a re-run see the same event under a new identity and
-write a second copy. The `iCalUid` is still recorded, and becomes the `.ics`
-`UID` when present, because that is what other calendar clients match on.
+write a second copy. The `iCalUId` is still recorded, and becomes the `.ics`
+`UID` when present, because that is what other calendar clients match on. The wire
+name is `iCalUId` — capital `ID` — which is also what the generated `Event.ical_uid`
+getter reads; `get_property()` answers `None` for a name it does not know, so getting
+one letter wrong is silent.
 
 Time zones are written as Graph states them — a wall clock plus `TZID=Europe/Kiev`
 when the zone is named, a `Z` timestamp when it is not — so no IANA/Windows
@@ -474,7 +477,7 @@ print(job.verify().summary())  # digest of the restorable fields, not the .ics b
   be used: it rewrites `timeZone` to `UTC`, drops `transactionId`, and rejects a dict
   `start` — all three measured.
 - **A re-run skips what it already created.** A created event comes back with
-  `iCalUid: null` and a fresh Graph id, so neither source identity survives; the
+  `iCalUId: null` and a fresh Graph id, so neither source identity survives; the
   target matches on `(subject, wall clock, zone)` instead. Two source events that
   share all three are both imported — each claims its own entry in the target index.
 - **`transactionId` is deterministic** (`sha1` of the source id), so two concurrent
@@ -495,7 +498,7 @@ Four honest limits, all Exchange's rather than the adapter's:
   does not suppress it (measured), so an import would mail every invitee of every
   meeting in the tree. `CalendarImportOptions(restore_attendees=True)` opts in, and
   the run reports how many attendee entries it left out.
-- **Exchange owns the meeting metadata.** `iCalUid`, the organizer, per-attendee
+- **Exchange owns the meeting metadata.** `iCalUId`, the organizer, per-attendee
   responses, and the created/modified times are assigned by the service; the
   authenticated user becomes the organizer whatever the sidecar says.
 - **The body is re-serialized**, gaining Exchange's `<html><head><style>…` envelope,
@@ -536,8 +539,8 @@ folder chain. Verification is a byte checksum, for the same reason as the calend
 export: the `.vcf` is *rendered* from the contact record, so the same contact always
 produces the same bytes.
 
-A contact has no `internetMessageId` and no `iCalUid` — Exchange assigns neither an
-`internetMessageId` nor an `iCalUid` equivalent — so the export keys on the Graph
+A contact has no `internetMessageId` and no `iCalUId` — Exchange assigns neither an
+`internetMessageId` nor an `iCalUId` equivalent — so the export keys on the Graph
 contact id and the file name carries a hash of it.
 
 Four honest limits:

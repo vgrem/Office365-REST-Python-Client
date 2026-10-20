@@ -117,7 +117,7 @@ CALENDAR_IMPORT_DIMENSIONS: Dict[str, Dimension] = {
     ),
     "timestamps": (
         FidelityStatus.UNSUPPORTED,
-        "Exchange assigns created/modified, the importing user becomes the organizer and iCalUid is service-assigned",
+        "Exchange assigns created/modified, the importing user becomes the organizer and iCalUId is service-assigned",
     ),
     "attachments": (
         FidelityStatus.UNSUPPORTED,

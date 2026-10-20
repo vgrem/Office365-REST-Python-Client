@@ -254,6 +254,16 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
 
 **Migration (Outlook)**
 
+- Calendar export records the **`iCalUId`** the service actually sends. The envelope
+  read `get_property("iCalUid")` — one capital short of Graph's spelling — and
+  `get_property()` answers `None` for a name it does not know, so every exported
+  calendar sidecar carried `"ical_uid": null` and the `.ics` `UID` fell back to the
+  tenant-local Graph event id (`UID:e1`) instead of the interoperable identifier other
+  calendar clients match on. `event_envelope()` now reads the model's own
+  `Event.ical_uid` getter and `EVENT_COLUMNS` selects `iCalUId`, so the sidecar and the
+  `.ics` both carry the meeting identity. A tree exported by 3.3.0 keeps its fallback
+  `UID` (re-export to pick up the real one); the replay itself is unchanged, since
+  import matches on `graph_id` and the created event gets a fresh `iCalUId` anyway.
 - Calendar export writes a **JSON-safe sidecar**: Graph's `recurrence` object is
   flattened through `to_json()` instead of being handed to `json.dumps` as a typed
   value. A recurring event's sidecar previously carried

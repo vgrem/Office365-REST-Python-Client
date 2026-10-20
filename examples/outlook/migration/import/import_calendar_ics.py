@@ -12,7 +12,7 @@ What survives the round trip: the time range and its zone, subject, body, locati
 show-as, sensitivity, importance, the reminder, Outlook categories and the
 recurrence of a series. What does not: the attendees (restoring them makes Exchange
 send a real invitation to every one of them — measured — so it is opt-in), and the
-meeting metadata Exchange assigns itself (``iCalUid``, organizer, responses, the
+meeting metadata Exchange assigns itself (``iCalUId``, organizer, responses, the
 created/modified times).
 
 Requires delegated permission ``Calendars.ReadWrite``.
