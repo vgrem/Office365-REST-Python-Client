@@ -93,7 +93,8 @@ class ClientValue:
                     return False
             return True
 
-        result = {k: serialize_value(v, json_format) for k, v in self if _is_valid_value(v)}
+        # ``__``-prefixed names are response bookkeeping, not fields of the value.
+        result = {k: serialize_value(v, json_format) for k, v in self if _is_valid_value(v) and not k.startswith("__")}
         _add_type_metadata(result, json_format, self.entity_type_name)
         return result
 

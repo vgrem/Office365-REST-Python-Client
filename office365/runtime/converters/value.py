@@ -53,13 +53,20 @@ def _serialize_enum(value: Enum, json_format: Optional[ODataJsonFormat]) -> Any:
     return value.name
 
 
-def serialize_value(value: Any, json_format: Optional[ODataJsonFormat] = None) -> Any:
+def serialize_value(  # noqa: PLR0911 - one return per stored-value kind
+    value: Any, json_format: Optional[ODataJsonFormat] = None
+) -> Any:
     """Convert a stored value to its JSON representation.
 
     Handles ``ClientObject``/``ClientValue``/``ClientValueCollection`` (via their
     ``to_json``), ``Enum`` -> value, ``datetime``/``date`` -> ISO 8601, ``bytes``
-    -> UTF-8, ``UUID`` -> str. Any other value (scalar, ``None``, ``dict``,
-    ``list``, ``ClientResult``) passes through unchanged.
+    -> UTF-8, ``UUID`` -> str. A plain ``dict``/``list``/``tuple`` is descended into,
+    so a container assembled by hand (a nested payload, a ``to_json`` result, a
+    request body) is as JSON-safe as a generated value. Any other value (scalar,
+    ``None``, ``ClientResult``) passes through unchanged.
+
+    ``to_json`` is consulted *before* the container branches: a collection type may
+    subclass ``dict``/``list`` and still need its own serialization.
     """
     if isinstance(value, Enum):
         return _serialize_enum(value, json_format)
@@ -71,6 +78,10 @@ def serialize_value(value: Any, json_format: Optional[ODataJsonFormat] = None) -
         return value.isoformat()
     if hasattr(value, "to_json"):
         return value.to_json(json_format)
+    if isinstance(value, dict):
+        return {k: serialize_value(item, json_format) for k, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [serialize_value(item, json_format) for item in value]
     return value
 
 

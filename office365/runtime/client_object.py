@@ -609,7 +609,11 @@ class ClientObject:
             include_control_info = self.entity_type_name is not None and json_format.include_control_information
             persistable = self._persistable_names
             json = {k: self.get_property(k) for k in self._properties if k in self._changes or k in persistable}
-        json = {k: serialize_value(v, json_format) for k, v in json.items()}
+        # ``__``-prefixed keys are this client's own bookkeeping, ingested from a
+        # response (``__etag`` for ``If-Match``, ``__odata_type``, ``__deferred``):
+        # they describe the response, never the entity, so no payload carries them.
+        # A dialect's control marker (``__metadata``) is added *after* this filter.
+        json = {k: serialize_value(v, json_format) for k, v in json.items() if not k.startswith("__")}
 
         if json and include_control_info:
             _add_type_metadata(json, json_format, self.entity_type_name)

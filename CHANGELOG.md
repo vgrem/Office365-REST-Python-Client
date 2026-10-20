@@ -329,6 +329,18 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   `permissions`/`versions` as unsupported. SharePoint pairs declare nothing and are
   unchanged.
 
+### Fixed
+
+- `ClientObject.to_json()` and `ClientValue.to_json()` (`office365.runtime`) no
+  longer emit `__`-prefixed bookkeeping. A response hands back `__etag` (so
+  `If-Match` can be built), `__deferred` and `__odata_type`; those describe the
+  response, not the entity, and a `to_json()` that asked for a plain dict used to
+  put them in a payload. A dialect's own control marker (`__metadata`) is still
+  added, after the filter. `serialize_value` (`office365.runtime.converters`)
+  now descends into a plain `dict`/`list`/`tuple` as well, so a payload assembled
+  by hand is JSON-safe by construction rather than by `default=str` at the call
+  site; a collection type that subclasses a container keeps its own `to_json`.
+
 ## [3.3.0] - 2026-10-18
 
 Two stories: the SharePoint migration layer grew from "copy items" to a resumable,

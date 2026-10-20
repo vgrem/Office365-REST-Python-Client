@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import json
 import unittest
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -109,6 +110,32 @@ class TestSerializeValue(unittest.TestCase):
 
         self.assertEqual(serialize_value(FieldType.Text, JsonLightFormat()), 2)
 
+    def test_plain_containers_are_descended_into(self):
+        # A hand-assembled payload must be as JSON-safe as a generated value: the
+        # conversion cannot stop at the container boundary.
+        payload = {
+            "when": datetime(2026, 3, 2, 9, 0),
+            "tags": [value__Level.Premium, {"when": datetime(2026, 3, 2)}],
+            "pair": (uuid.UUID(int=0), None),
+        }
+        result = serialize_value(payload)
+        self.assertEqual(
+            result,
+            {
+                "when": "2026-03-02T09:00:00",
+                "tags": ["premium", {"when": "2026-03-02T00:00:00"}],
+                "pair": ["00000000-0000-0000-0000-000000000000", None],
+            },
+        )
+        json.dumps(result)  # JSON-safe by construction, not by rescue
+
+    def test_collection_subclass_keeps_its_own_serialization(self):
+        # ``to_json`` is consulted before the container branches, or a collection
+        # type that subclasses list would lose its type metadata.
+        from office365.runtime.types.collections import StringCollection
+
+        self.assertEqual(serialize_value(StringCollection(["a"])), ["a"])
+
     def test_named_string_enum_keeps_its_value(self):
         # A hand-written Graph enum already stores its wire value.
         from office365.outlook.mail.importance import Importance
@@ -130,11 +157,35 @@ class TestClientValueToJson(unittest.TestCase):
         self.assertEqual(StringCollection(["a", "b"]).to_json(), ["a", "b"])
         self.assertEqual(ClientValueCollection(value__Level, [value__Level.Standard]).to_json(), ["standard"])
 
+    def test_internal_bookkeeping_is_not_a_field(self):
+        # ``__etag`` is ingested from a response so ``If-Match`` can be built; it
+        # describes the response, so it must not appear in a serialized value.
+        profile = UserProfile()
+        profile.set_property("__etag", 'W/"1"')
+        profile.set_property("displayName", "A")
+        serialized = profile.to_json()
+        self.assertNotIn("__etag", serialized)
+        self.assertEqual(serialized["displayName"], "A")
+
 
 class TestClientObjectToJson(unittest.TestCase):
     def test_user(self):
         user = _new_user({"accountEnabled": True, "userPrincipalName": "a@b.c"})
         self.assertEqual(user.to_json(), {"accountEnabled": True, "userPrincipalName": "a@b.c"})
+
+    def test_internal_bookkeeping_never_reaches_the_payload(self):
+        # A response bag carries ``__etag``/``__odata_type``/``__deferred``; a request
+        # body must not, in either dialect.
+        user = _new_user({"__etag": 'W/"1"', "__deferred": {"uri": "x"}, "accountEnabled": True})
+        self.assertEqual(user.to_json(), {"accountEnabled": True})
+        for json_format in (V4JsonFormat(), JsonLightFormat()):
+            serialized = user.to_json(json_format)
+            self.assertEqual(serialized["accountEnabled"], True)
+            for ingested in ("__etag", "__deferred", "__odata_type"):
+                self.assertNotIn(ingested, serialized)
+        # The dialect's own control marker is rebuilt after the filter, so it survives
+        # while the response's is gone.
+        self.assertEqual(user.to_json(JsonLightFormat())["__metadata"], {"type": "microsoft.graph.User"})
 
 
 class TestAddTypeMetadata(unittest.TestCase):
