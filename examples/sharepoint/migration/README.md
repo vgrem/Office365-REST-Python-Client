@@ -249,6 +249,21 @@ cd examples/sharepoint/migration/migrate
 python migrate_library_serverside.py                  # defaults to examples/data
 ```
 
+The manifest carries each file and its list item, **not** the library's columns,
+content types or views, so a target pointed at a bare library ingests into a plain
+library (field values whose columns do not exist are dropped). When the source is
+another SharePoint library, hand the snapshot over — `configure()` replays it over
+REST before the job is submitted:
+
+```python
+from office365.migration.sharepoint.structure import capture_list_structure
+
+target = SharePointPackageTarget(..., sp_list=target_library, structure=capture_list_structure(source_library))
+```
+
+A task resolved by `resolve_task` already replays the source list's structure itself
+and passes no snapshot.
+
 #### See the package first (optional, no tenant)
 
 ```bash

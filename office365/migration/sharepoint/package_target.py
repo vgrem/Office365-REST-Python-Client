@@ -17,9 +17,11 @@ from office365.migration.base import MigrationItem, PermissionEntry, Principal, 
 from office365.migration.package.builder import PackageBuilder
 from office365.migration.package.staging import create_staging
 from office365.migration.server_job import MigrationServerJob
+from office365.migration.sharepoint.structure import ListStructure, provision_list_structure
 
 if TYPE_CHECKING:
     from office365.migration.package.builder import Package
+    from office365.sharepoint.lists.list import List as SPList
 
 __all__ = ["SharePointPackageTarget"]
 
@@ -65,6 +67,13 @@ class SharePointPackageTarget:
     repr into an ``SPFile`` — records have no version history either, so the REST
     :class:`~office365.migration.sharepoint.adapters.SharePointListTarget` loses
     nothing a package could have carried.
+
+    The manifest carries a file's list item — its field values — not the library's
+    own shape: ``DeploymentManifest`` has objects for content types, fields and
+    views, and this target does not emit them. A snapshot handed in as ``structure``
+    is therefore **replayed over REST before the job is submitted**
+    (:meth:`apply_structure`), which is what the task resolver does for a
+    same-tenant run and what a bundle produced elsewhere needs instead.
     """
 
     # Marks this target as able to restore version history (see DataTarget).
@@ -90,6 +99,8 @@ class SharePointPackageTarget:
         azure_queue_report_uri: str | None = None,
         encryption_key: bytes | None = None,
         staging=None,
+        sp_list: "SPList | None" = None,
+        structure: "ListStructure | None" = None,
     ) -> None:
         self._site = site
         self._web_id = web_id
@@ -114,6 +125,11 @@ class SharePointPackageTarget:
             source_type=source_type,
         )
         self.job_id: str | None = None
+        self._sp_list = sp_list
+        self._structure = structure
+        self._structure_applied = False
+        if structure is not None and sp_list is None:
+            raise ValueError("a structure snapshot needs the target list (sp_list) to be applied to")
         self._package: "Package | None" = None
         self._web_url = web_url
         self._users: dict[str, int] = {}
@@ -130,13 +146,40 @@ class SharePointPackageTarget:
     # ── DataTarget ───────────────────────────────────────────────
 
     def configure(self, options) -> None:
-        """Derive per-run policy from the options before writes start.
+        """Derive per-run policy from the options and provision the target before writes.
 
         A requested ``preserve_permissions`` switches ``ExportSettings`` to
-        ``IncludeSecurity="All"`` so the service consumes the emitted ACLs.
+        ``IncludeSecurity="All"`` so the service consumes the emitted ACLs, and a
+        captured ``structure`` is replayed onto the library (:meth:`apply_structure`)
+        so the columns the manifest's field values name already exist when the
+        ingestion job runs.
         """
         if getattr(options, "preserve_permissions", False):
             self._builder.set_include_security("All")
+        self.apply_structure()
+
+    def apply_structure(self) -> list[str]:
+        """Replay the captured list structure onto the target library (once, idempotent).
+
+        The manifest carries files, folders and their list items — not the library's
+        columns, content types, views or container settings — so those must exist
+        **before** the ingestion job, both for the item values to land and for the
+        target to look like the source. ``provision_list_structure`` is
+        ``on_conflict="skip"``, so a re-run writes nothing; whatever it could not
+        reproduce comes back as warnings on :attr:`warnings`.
+
+        Returns:
+            The warnings from this call (empty when there is no snapshot, or when it
+            has already been applied).
+        """
+        if self._structure is None or self._structure_applied:
+            return []
+        if self._sp_list is None:  # pragma: no cover - guarded in __init__
+            raise ValueError("a structure snapshot needs the target list (sp_list) to be applied to")
+        self._structure_applied = True
+        warnings = provision_list_structure(self._sp_list, self._structure)
+        self.warnings.extend(warnings)
+        return warnings
 
     def exists(self, item: MigrationItem) -> bool:
         # The server-side API handles overwrite/merge; nothing is checked client-side.
@@ -361,6 +404,9 @@ class SharePointPackageTarget:
         """Stage the package and submit the ingestion job (called by the runner)."""
         if not (self._content_uri and self._manifest_uri):
             raise ValueError("content_uri and manifest_uri are required to submit an ingestion job")
+        # A caller that never ran ``configure`` (a hand-built job) still needs the
+        # structure in place before the first item is ingested.
+        self.apply_structure()
         self.stage()
         server = MigrationServerJob(self._site)
         if self._encryption_key is not None:

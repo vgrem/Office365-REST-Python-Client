@@ -8,7 +8,19 @@ import xml.etree.ElementTree as ET
 import pytest
 from office365.migration.base import MigrationItem, MigrationOptions, PermissionEntry, Principal
 from office365.migration.package import FileSystemStaging
+from office365.migration.sharepoint import package_target
 from office365.migration.sharepoint.package_target import SharePointPackageTarget
+from office365.migration.sharepoint.structure import ListStructure
+
+
+class _SPList:
+    """The target library object ``provision_list_structure`` would provision into."""
+
+    title = "Documents"
+
+
+def _structure():
+    return ListStructure(title="Documents", base_template=101, base_type=1)
 
 
 class _Result:
@@ -116,6 +128,59 @@ def test_commit_uses_encrypted_submit_with_a_key(tmp_path):
     kind, kwargs = site.calls[0]
     assert kind == "encrypted"
     assert kwargs["aes256_cbc_key"] == b"secret"
+
+
+def test_configure_replays_a_captured_structure_once(tmp_path, monkeypatch):
+    # The manifest carries a file's list item, not the library's columns: a snapshot
+    # handed in has to be applied *before* the job runs, and only once even though
+    # both ``configure`` and ``commit`` ask for it.
+    calls: list = []
+
+    def fake_provision(sp_list, structure, **kwargs):
+        calls.append((sp_list, structure, kwargs))
+        return ["view 'All Items' was created without LinkTitle"]
+
+    monkeypatch.setattr(package_target, "provision_list_structure", fake_provision)
+    sp_list, structure = _SPList(), _structure()
+    target = _target(tmp_path, sp_list=sp_list, structure=structure)
+    target.write(MigrationItem("src/b.txt", "b.txt", item_type="file"), b"hi")
+
+    target.configure(MigrationOptions())
+    target.commit()
+
+    assert [call[0] for call in calls] == [sp_list]
+    assert calls[0][1] is structure
+    assert target.warnings == ["view 'All Items' was created without LinkTitle"]
+
+
+def test_a_structure_snapshot_needs_the_target_list(tmp_path):
+    with pytest.raises(ValueError, match="needs the target list"):
+        _target(tmp_path, structure=_structure())
+
+
+def test_commit_applies_the_structure_without_configure(tmp_path, monkeypatch):
+    # A hand-built job may never call ``configure``; the ingestion must still land
+    # on a library that has the columns the manifest names.
+    calls: list = []
+    monkeypatch.setattr(package_target, "provision_list_structure", lambda *a, **k: calls.append(a) or [])
+    target = _target(tmp_path, sp_list=_SPList(), structure=_structure())
+    target.write(MigrationItem("src/b.txt", "b.txt", item_type="file"), b"hi")
+
+    target.commit()
+
+    assert len(calls) == 1
+    assert target.job_id == "job-1"
+
+
+def test_without_a_structure_nothing_is_provisioned(tmp_path, monkeypatch):
+    calls: list = []
+    monkeypatch.setattr(package_target, "provision_list_structure", lambda *a, **k: calls.append(a) or [])
+    target = _target(tmp_path)
+
+    target.configure(MigrationOptions())
+    target.commit()
+
+    assert calls == []
 
 
 def test_events_and_errors_read_the_progress_log(tmp_path):

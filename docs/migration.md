@@ -552,7 +552,9 @@ the (existing) target list before content is copied; pass
 replay happens even when `MigrationSettings(use_migration_api=True)` routes
 content through a server-side package, because the package builder does not emit
 columns, content types, or views today — the target's structure is still captured
-and replayed over REST first.
+and replayed over REST first. A package target built **directly** (no task
+resolver) does the same when it is handed the snapshot — see
+`SharePointPackageTarget(structure=...)` under *Provisioning list structure*.
 
 `use_migration_api=True` applies to **document libraries**. A package can express an
 `SPFile` and an `SPFolder` and nothing else — `Manifest.xml` has no `<List>` object —
@@ -753,6 +755,31 @@ warnings = provision_list_structure(target_ctx.web.lists.get_by_title("Projects"
 for warning in warnings:
     print("structure warning:", warning)
 ```
+
+The server-side package target does the same for you when it is handed a snapshot —
+the manifest carries a file's list item, not the library's columns, so they have to
+exist **before** the ingestion job runs. Pass `sp_list=` (the target library object)
+and `structure=`, and `configure()` — which the runner calls before the first write —
+replays it; `commit()` repeats the guard for a hand-built job, and both are no-ops on
+a re-run:
+
+```python
+from office365.migration.sharepoint.package_target import SharePointPackageTarget
+from office365.migration.sharepoint.structure import capture_list_structure
+
+target = SharePointPackageTarget(
+    target_ctx.site,
+    web.id,
+    content_uri=...,
+    manifest_uri=...,
+    sp_list=target_library,
+    structure=capture_list_structure(source_library),
+)
+```
+
+This is the path for a caller that has no source list to capture from in the same
+run — a bundle produced elsewhere. A task resolved by `resolve_task` already replays
+the structure itself, before it picks the target, so it does not pass one.
 
 Two SharePoint Online REST limits are surfaced honestly rather than hidden:
 

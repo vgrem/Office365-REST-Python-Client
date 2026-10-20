@@ -99,6 +99,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `TimeLastModified`, because per-version dates in the manifest are ignored
   (measured on a live ingestion job).
 
+**Migration (package target)**
+
+- `SharePointPackageTarget` accepts a captured list structure (`sp_list=` +
+  `structure=`) and replays it over REST **before** the ingestion job. The manifest
+  carries a file's list item, not the library's columns, content types, views or
+  container settings, so a package target built by hand (`migrate_library_serverside.py`,
+  a bundle produced on another machine) used to ingest into a bare library: field
+  values whose columns did not exist were silently dropped. `configure()` — the hook
+  the runner calls before the first write — now applies the snapshot through
+  `provision_list_structure`, `commit()` repeats the guard for a hand-built job, and
+  `on_conflict="skip"` makes both a no-op on a re-run; whatever the target cannot
+  reproduce is reported on `target.warnings` instead of being assumed. Live-verified:
+  a bare library gained the captured `ProjCode` column with no warnings, and a second
+  call wrote nothing. A task resolved by `resolve_task` already replays the structure
+  itself and does not pass one.
+
 **Migration (group ACLs)**
 
 - The server-side package target grants **SharePoint groups** as well as users: a
