@@ -93,6 +93,11 @@ def _routes():
             {"d": {"results": [{"Name": "Project", "StringId": _CT_ID, "Group": "Custom"}]}},
         ),
         # phase 2 -----------------------------------------------------------------
+        (
+            HttpMethod.Get,
+            "Fields?$select=InternalName",
+            {"d": {"results": [{"InternalName": "Title"}, {"InternalName": "ProjectType"}]}},
+        ),
         (HttpMethod.Get, "views/GetByTitle", _NOT_FOUND),
         (HttpMethod.Post, "views/Add", {"d": {"Title": "All Items"}}),
     ]
@@ -149,6 +154,63 @@ def test_provision_creates_columns_content_type_links_and_view():
     assert len(reads) == _LINK_READS
     assert any(u.endswith("views/GetByTitle('All Items')") for u in urls)
     assert any(u.endswith("views/Add") for u in urls)
+
+
+def _view_only_routes(*, target_columns, view_exists=False):
+    """Routes for a snapshot that carries one view and nothing else."""
+    return [
+        (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": False}}),
+        (
+            HttpMethod.Get,
+            "Fields?$select=InternalName",
+            {"d": {"results": [{"InternalName": name} for name in target_columns]}},
+        ),
+        (HttpMethod.Get, "views/GetByTitle", {} if view_exists else _NOT_FOUND),
+        (HttpMethod.Post, "views/Add", {"d": {"Title": "All Items"}}),
+    ]
+
+
+def _view_structure(*column_names):
+    return _structure(
+        fields=[],
+        content_types=[],
+        content_types_enabled=False,
+        views=[ViewDefinition(title="All Items", field_internal_names=list(column_names))],
+    )
+
+
+def _view_add_parameters(transport):
+    return [p for p in _posts(transport) if p.url.endswith("views/Add")][0].data["parameters"]
+
+
+def test_provision_drops_a_view_column_the_target_cannot_hold():
+    # Measured live: a plain list's default view names LinkTitle, which a document
+    # library has no column for, so replaying it verbatim failed the whole resolve
+    # on ``Column 'LinkTitle' does not exist``.
+    ctx, transport = _setup(_view_only_routes(target_columns=["Title"]))
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _view_structure("Title", "LinkTitle"))
+
+    assert _view_add_parameters(transport)["ViewFields"]["results"] == ["Title"]
+    assert warnings == ["view 'All Items' was created without LinkTitle: the target list has no such column"]
+
+
+def test_provision_falls_back_to_the_view_defaults_when_no_captured_column_exists():
+    ctx, transport = _setup(_view_only_routes(target_columns=["Title"]))
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _view_structure("LinkTitle"))
+
+    assert _view_add_parameters(transport).get("ViewFields", {}).get("results", []) == []
+    assert warnings == ["view 'All Items' was created without LinkTitle: the target list has no such column"]
+
+
+def test_provision_keeps_every_view_column_the_target_has():
+    ctx, transport = _setup(_view_only_routes(target_columns=["Title", "LinkTitle"]))
+
+    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _view_structure("Title", "LinkTitle"))
+
+    assert _view_add_parameters(transport)["ViewFields"]["results"] == ["Title", "LinkTitle"]
+    assert warnings == []
 
 
 def test_provision_enables_content_types_only_when_off():
@@ -816,6 +878,9 @@ def _formatting_routes(*, field_read_back=None, view_read_back=None):
             "Fields?$select=InternalName,CustomFormatter",
             {"d": {"results": [{"InternalName": "Status", "CustomFormatter": field_read_back}]}},
         ),
+        # the column-name read for the view replay: after the formatter read-back,
+        # whose key is a superstring of it
+        (HttpMethod.Get, "Fields?$select=InternalName", {"d": {"results": [{"InternalName": "Status"}]}}),
         (
             HttpMethod.Get,
             "views",
@@ -851,13 +916,14 @@ def test_provision_leaves_matching_formatting_alone():
                 "views/GetByTitle('All Items')",
                 {"d": {"Title": "All Items", "CustomFormatter": _VIEW_FORMATTER}},
             ),
+            (HttpMethod.Get, "Fields?$select=InternalName", {"d": {"results": [{"InternalName": "Status"}]}}),
         ]
     )
 
     provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _formatting_structure())
 
     assert [p for p in _posts(transport) if p.headers.get("X-HTTP-Method") == "MERGE"] == []
-    assert not any("$select=InternalName" in u for u in _urls(transport))
+    assert not any("$select=InternalName,CustomFormatter" in u for u in _urls(transport))
 
 
 def test_provision_reports_a_formatter_the_target_would_not_take():

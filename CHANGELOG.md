@@ -175,6 +175,11 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   API carries files and folders only`), losing nothing — a record has no version
   history. The package target additionally **refuses** any item type other than `file`
   or `folder` (`ValueError`) instead of writing whatever it was handed.
+- **A view keeps the columns the target list can hold.** Replaying a view named every
+  captured column verbatim, so a pair whose templates disagree on a built-in column
+  failed the whole replay on `Column 'LinkTitle' does not exist`; the view is now
+  created with the columns that exist and the drop is returned as
+  `view 'X' was created without LinkTitle: the target list has no such column`.
 - **A source and target that disagree about files versus records are refused when the
   task is resolved, not at the first write.** A file share (or a document library) aimed
   at a plain list resolved fine and then failed *every* item with

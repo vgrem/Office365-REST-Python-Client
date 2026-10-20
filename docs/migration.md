@@ -794,6 +794,13 @@ Captured content types also name every built-in/SharePoint-owned column
 (`Title`, `FileLeafRef`, framework columns) that capture deliberately does not
 recreate; those are left to the target list's own defaults rather than sent as
 guaranteed link failures.
+- **A view column the target list cannot hold is dropped and reported.** A view is
+  recreated with the captured columns the target list actually has, so a pair whose
+  templates disagree on a built-in column (`LinkTitle` on a plain list, `LinkFilename`
+  on a document library) provisions the view instead of failing the whole replay on
+  `Column 'LinkTitle' does not exist`. The drop comes back as
+  `view 'X' was created without LinkTitle: the target list has no such column`, and
+  costs one projected `Fields` read per list that carries views.
 - **Site columns are registered at web scope before any list is replayed.** A
   **site column** (one whose `Scope` is the web's server-relative URL, e.g.
   `/sites/team_in`, not the list's) used to be seen only *through the lists that

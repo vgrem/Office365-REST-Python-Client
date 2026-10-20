@@ -709,6 +709,10 @@ def provision_list_structure(
     attached over REST, so they are skipped and returned as warnings rather than
     failing the whole provisioning.
 
+    A view is recreated with the captured columns the target list actually has; a
+    column its type cannot hold (a plain list's ``LinkTitle`` on a document
+    library) is dropped and reported rather than failing the replay.
+
     Args:
         sp_list: The target SharePoint list (its container must already exist).
         structure: A snapshot from :func:`capture_list_structure`.
@@ -813,10 +817,11 @@ def provision_list_structure(
         if content_type_map is not None:
             content_type_map.update(ContentTypeMap.build(structure.content_types, loaded.values()).entries)
 
+    view_columns = _existing_field_names(sp_list) if structure.views else set()
     for view in structure.views:
         sp_list.views.ensure_view(
             view.title,
-            fields=list(view.field_internal_names) or None,
+            fields=_view_fields(view, view_columns, warnings),
             row_limit=view.row_limit,
             view_type=view.view_type,
             paged=view.paged,
@@ -829,6 +834,36 @@ def provision_list_structure(
     sp_list.execute_query()
     _apply_formatting(sp_list, structure, warnings)
     return warnings
+
+
+def _existing_field_names(sp_list: SPList) -> Set[str]:
+    """The internal names of the columns ``sp_list`` actually carries.
+
+    One read, and only when the snapshot has views to replay. It is what lets a view
+    be recreated on a list whose type cannot hold every captured column (a plain
+    list's ``LinkTitle`` on a document library) instead of failing the whole replay
+    on ``Column 'LinkTitle' does not exist`` — measured live, 2026-02.
+    """
+    return {
+        field.internal_name
+        for field in sp_list.fields.select(["InternalName"]).get().execute_query()
+        if field.internal_name
+    }
+
+
+def _view_fields(view: ViewDefinition, view_columns: Set[str], warnings: List[str]) -> List[str] | None:
+    """The captured view's columns, minus the ones the target has no column for.
+
+    ``None`` means "the view's own defaults": either the snapshot named no columns or
+    none of them exist on the target. A dropped column is reported, never silent —
+    the view is still created, which is why the replay stays best-effort.
+    """
+    wanted = [name for name in view.field_internal_names if name]
+    missing = [name for name in wanted if name not in view_columns]
+    if not missing:
+        return wanted or None
+    warnings.append(f"view '{view.title}' was created without {', '.join(missing)}: the target list has no such column")
+    return [name for name in wanted if name in view_columns] or None
 
 
 def _apply_formatting(sp_list: SPList, structure: ListStructure, warnings: List[str]) -> None:
