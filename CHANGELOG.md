@@ -65,6 +65,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cancellations are opt-in: importing both a series and its instances would
   duplicate every meeting), and Graph's own `recurrence` object travels in the
   sidecar so an import can replay it without parsing `RRULE`.
+- `IcsTreeSource` + `CalendarTarget` import that tree back into a calendar through
+  the same `MigrationJob`, recreating each event — and each series as a
+  `seriesMaster` with Graph's own `recurrence` object — from the sidecar, which is
+  the import contract (an `.ics` alone is refused: iCalendar cannot carry the
+  recurrence object, so replaying a series from the document would silently turn
+  every meeting into a single event). The payload is posted as a Graph-spelled dict
+  through a raw `CreateEntityQuery`, because `EventCollection.add()` rewrites
+  `timeZone` to `UTC`, drops `transactionId` and rejects a dict `start` (all three
+  measured). A re-run skips what it already created — a created event comes back
+  with `iCalUid: null` and a fresh id, so the target matches on
+  `(subject, wall clock, zone)` and lets two source events that share all three
+  import as two — and a deterministic `transactionId` makes two concurrent runs
+  collide on the server, where the collision is adopted rather than failed.
+  `CalendarImportOptions` decides what is restored: attendees are **opt-in**
+  (`restore_attendees=False`, because creating an event with attendees makes
+  Exchange send a real invitation to each of them, and `responseRequested: false`
+  does not suppress it — measured), categories are on, and the run reports how many
+  attendee entries it left out. Verification is `event_digest` — the restorable
+  fields, with the service-owned ones and the body markup excluded — because
+  Exchange re-serializes the event.
 
 **Migration (fidelity forecast)**
 
@@ -155,6 +175,21 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   API carries files and folders only`), losing nothing — a record has no version
   history. The package target additionally **refuses** any item type other than `file`
   or `folder` (`ValueError`) instead of writing whatever it was handed.
+
+**Migration (Outlook)**
+
+- Calendar export writes a **JSON-safe sidecar**: Graph's `recurrence` object is
+  flattened through `to_json()` instead of being handed to `json.dumps` as a typed
+  value. A recurring event's sidecar previously carried
+  `"recurrence": "PatternedRecurrence(pattern=…)"` — `repr` text, produced by
+  `json.dumps(..., default=str)` — which no import could replay.
+- Calendar import **verifies in the source's timezone**. Exchange renders event
+  times in the signed-in mailbox's own zone, so a migration into a mailbox set to a
+  different zone reported every event as a content mismatch while the instants were
+  identical (an event created as `09:00 Europe/Kiev` reads back as `06:00 UTC`
+  unasked — measured). The verification read now asks for the item's own zone with
+  `Prefer: outlook.timezone`, exposed as the new `prefer_outlook_timezone`
+  (`office365.runtime.http.prefer`, works with Windows and IANA names).
 
 ## [3.3.0] - 2026-10-18
 

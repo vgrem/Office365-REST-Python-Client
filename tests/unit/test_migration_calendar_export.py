@@ -332,6 +332,31 @@ def test_export_writes_a_tree_a_sidecar_and_a_manifest(tmp_path: Path):
     assert json.loads(manifest[0])["ics_path"].endswith(".ics")
 
 
+def test_export_writes_a_json_safe_sidecar(tmp_path: Path):
+    """The sidecar is the import contract: a typed Graph value must not land as its ``repr``.
+
+    ``recurrence`` arrives as a typed ``PatternedRecurrence``; dumping it with
+    ``json.dumps(..., default=str)`` wrote ``PatternedRecurrence(pattern=…, range=…)``
+    into every series' sidecar, which no import can read back.
+    """
+    transport = _transport()
+    job = MigrationJob(CalendarSource(_calendar(_client(transport))), IcsExportTarget(tmp_path))
+    job.plan()
+    job.run()
+
+    sidecars = sorted(tmp_path.rglob("*.json"))
+    series = next(path for path in sidecars if "standup" in path.read_text(encoding="utf-8"))
+    record = json.loads(series.read_text(encoding="utf-8"))
+
+    assert isinstance(record["recurrence"], dict)
+    assert record["recurrence"]["pattern"]["type"] == "weekly"
+    assert record["recurrence"]["range"]["numberOfOccurrences"] == 6  # noqa: PLR2004 — from the scripted series
+    # Enums travel as their wire name, not as ``FreeBusyStatus.tentative``.
+    single = next(path for path in sidecars if "Quarterly-review" in path.read_text(encoding="utf-8"))
+    assert json.loads(single.read_text(encoding="utf-8"))["show_as"] == "tentative"
+    assert isinstance(record["online_meeting_provider"], str)  # a wire name, not an enum repr
+
+
 def test_export_verifies_by_checksum(tmp_path: Path):
     client = _client(_transport())
     job = MigrationJob(CalendarSource(_calendar(client)), IcsExportTarget(tmp_path / "export"))

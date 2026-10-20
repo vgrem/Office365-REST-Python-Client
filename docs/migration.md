@@ -420,11 +420,15 @@ write a second copy. The `iCalUid` is still recorded, and becomes the `.ics`
 
 Time zones are written as Graph states them — a wall clock plus `TZID=Europe/Kiev`
 when the zone is named, a `Z` timestamp when it is not — so no IANA/Windows
-translation can drift. Note that Exchange normalises on read: an event created as
-09:00 `Europe/Kiev` is echoed back with your zone in the create response but
-re-read as `07:00` `UTC`, so a UTC-only export is normal rather than a bug. The
-body is normalised the same way (`text` comes back as converted HTML), and a
-default 15-minute reminder appears on events created without one.
+translation can drift. Note that Exchange renders times in the *mailbox's* zone on
+read: an event created as 09:00 `Europe/Kiev` is echoed back in the zone that was
+sent in the create response, but re-read as `07:00` `UTC` from a mailbox set to UTC,
+so a differently-zoned export is normal rather than a bug. A read can ask for
+another frame with `Prefer: outlook.timezone` (the
+`office365.runtime.http.prefer.prefer_outlook_timezone` helper), which is what the
+import's verification does. The body is normalised the same way (`text` comes back as
+converted HTML), and a default 15-minute reminder appears on events created
+without one.
 
 Four honest limits:
 
@@ -444,6 +448,65 @@ Four honest limits:
   (`hasAttachments`), extended properties and per-attendee proposed times are
   recorded as flags, not carried: calendar attachments are the event's, not the
   `.ics`'s.
+
+### Importing a calendar
+
+The inverse is the same job with the adapters swapped: `IcsTreeSource` reads the
+`.ics` documents (the sidecar becomes the item's envelope) and `CalendarTarget`
+creates each event through Graph.
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import CalendarImportOptions, CalendarTarget, IcsTreeSource
+
+calendar = client.me.calendar.get().execute_query()
+options = CalendarImportOptions()
+job = MigrationJob(IcsTreeSource("./calendar-export"), CalendarTarget(calendar, options))
+job.plan()
+job.run()
+print(job.verify().summary())  # digest of the restorable fields, not the .ics bytes
+```
+
+- **The sidecar is the import contract.** An `.ics` on its own is refused: iCalendar
+  cannot carry Graph's `recurrence` object, so replaying a series from the document
+  alone would silently flatten every meeting into a single event.
+- **The payload is a Graph-spelled dict, POSTed raw.** `EventCollection.add()` cannot
+  be used: it rewrites `timeZone` to `UTC`, drops `transactionId`, and rejects a dict
+  `start` — all three measured.
+- **A re-run skips what it already created.** A created event comes back with
+  `iCalUid: null` and a fresh Graph id, so neither source identity survives; the
+  target matches on `(subject, wall clock, zone)` instead. Two source events that
+  share all three are both imported — each claims its own entry in the target index.
+- **`transactionId` is deterministic** (`sha1` of the source id), so two concurrent
+  runs collide on the server instead of both writing. A collision is adopted: the
+  event the other run created *is* the work.
+- **Pass one options object to both adapters.** `CalendarImportOptions` decides which
+  fields the import restores, and the verification digest counts attendees and
+  categories only when the options say they are restored, so two copies of the
+  options make the two sides of a job disagree.
+- **A recurrence written by an older exporter is refused** with an actionable error
+  instead of being dropped: a sidecar that carries `repr` text rather than a JSON
+  object is a series that cannot be replayed, so re-export and import that tree.
+
+Four honest limits, all Exchange's rather than the adapter's:
+
+- **Attendees are not restored by default.** Creating an event with attendees makes
+  Exchange send an invitation to every one of them, and `responseRequested: false`
+  does not suppress it (measured), so an import would mail every invitee of every
+  meeting in the tree. `CalendarImportOptions(restore_attendees=True)` opts in, and
+  the run reports how many attendee entries it left out.
+- **Exchange owns the meeting metadata.** `iCalUid`, the organizer, per-attendee
+  responses, and the created/modified times are assigned by the service; the
+  authenticated user becomes the organizer whatever the sidecar says.
+- **The body is re-serialized**, gaining Exchange's `<html><head><style>…` envelope,
+  so an import is verified by a digest of the restorable fields rather than by
+  bytes.
+- **Verification asks for the source's timezone.** Exchange renders event times in
+  the signed-in mailbox's own zone otherwise, so importing into a mailbox set to a
+  different zone would report every event as a content mismatch while the instants
+  were identical: a read of an event created as `09:00 Europe/Kiev` comes back as
+  `06:00 UTC` unasked and as `09:00 Europe/Kiev` with `Prefer: outlook.timezone`
+  (measured).
 
 ## SPMT-style sessions
 

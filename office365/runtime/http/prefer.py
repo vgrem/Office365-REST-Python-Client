@@ -41,6 +41,10 @@ CREATE_IF_MISSING = "create-if-missing"
 #: persisted entity rather than an empty ``204``.
 RETURN_REPRESENTATION = "return=representation"
 
+#: Preference name that selects the timezone calendar event times are rendered in
+#: (Microsoft Graph / Outlook calendar).
+OUTLOOK_TIMEZONE = "outlook.timezone"
+
 
 def _prefer_values(request: RequestOptions) -> list[str]:
     """The ``Prefer`` header values already set on a request, split on commas."""
@@ -145,3 +149,27 @@ def prefer_include_unknown_enum_members(request: RequestOptions) -> None:
     every query that needs it).
     """
     request.set_header("Prefer", INCLUDE_UNKNOWN_ENUM_MEMBERS)
+
+
+def prefer_outlook_timezone(request: RequestOptions, time_zone: str) -> None:
+    """Attach ``Prefer: outlook.timezone="<zone>"`` to a request.
+
+    Calendar event times are rendered in the signed-in mailbox's own timezone by
+    default, whatever zone the event was stored in. This preference reads them in
+    the zone named here instead — measured against Exchange, for an event created
+    as ``2026-05-04T09:00:00`` ``W. Europe Standard Time`` and read back three ways:
+
+    * no preference -> ``2026-05-04T07:00:00`` ``UTC``
+    * ``outlook.timezone="W. Europe Standard Time"`` -> ``2026-05-04T09:00:00``
+      ``W. Europe Standard Time``
+    * ``outlook.timezone="Europe/Kiev"`` -> ``2026-05-04T10:00:00`` ``Europe/Kiev``
+      (the same instant, one hour ahead of UTC in May)
+
+    Windows zone names (what a migrated event carries) and IANA names both work.
+    The value is quoted per RFC 7240.
+
+    Args:
+        request: The request to annotate.
+        time_zone: A Windows or IANA timezone name, e.g. "W. Europe Standard Time".
+    """
+    add_prefer(request, f'{OUTLOOK_TIMEZONE}="{time_zone}"')

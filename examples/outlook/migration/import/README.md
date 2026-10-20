@@ -1,11 +1,12 @@
-# Import an EML tree
+# Import an EML or ICS tree
 
-Put a portable EML tree back into a mailbox — the inverse of
+Put a portable EML or ICS tree back into a mailbox or a calendar — the inverse of
 [`migration/export`](../export/README.md). Part of the [Outlook tour](../../README.md).
 
 | What | File | Notes |
 |------|------|-------|
-| EML tree → mailbox | [`import_folder_eml.py`](./import_folder_eml.py) | `--source`, `--root-name`, `--no-read-state`, `--no-categories` |
+| EML tree → mailbox | [`import_folder_eml.py`](./import_folder_eml.py) | `--source`, `--folder`, `--root-name`, `--no-read-state`, `--no-categories` |
+| ICS tree → calendar | [`import_calendar_ics.py`](./import_calendar_ics.py) | `--source`, `--calendar`, `--attendees`, `--no-categories` |
 
 ```bash
 uv run python examples/outlook/migration/import/import_folder_eml.py \
@@ -67,6 +68,55 @@ from office365.migration.outlook import mime_digest
 
 mime_digest(Path("m1.eml").read_bytes()) == mime_digest(message.get_content().execute_query().value)  # True
 ```
+
+## Calendar → ICS tree
+
+```bash
+uv run python examples/outlook/migration/import/import_calendar_ics.py \
+  --source ./calendar-export \
+  --attendees            # optional: replay invitations (sends real ones)
+```
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import CalendarImportOptions, CalendarTarget, IcsTreeSource
+
+options = CalendarImportOptions()  # one object, shared by both adapters
+job = MigrationJob(IcsTreeSource("./calendar-export", options), CalendarTarget(calendar, options))
+job.plan()
+job.run()
+print(job.verify().summary())
+```
+
+## What the calendar import restores
+
+- **The event.** Time range and zone, subject, body (plain or HTML), location,
+  show-as, sensitivity, importance, the reminder and Outlook categories are all
+  replayed from the sidecar, and a series is recreated as a `seriesMaster` with
+  Graph's own `recurrence` object.
+- **Idempotency.** A created event comes back with `iCalUid: null` and a fresh Graph
+  id, so the target matches on `(subject, wall clock, zone)`: a re-run skips what it
+  already created, and two source events that share all three are both imported.
+- **A deterministic `transactionId`** — two concurrent runs collide on the server
+  instead of both writing, and a collision is adopted, because the event the other
+  run created is the work.
+
+## What it cannot restore
+
+- **Attendees are dropped by default.** Creating an event with attendees makes
+  Exchange send a real invitation to each of them, and `responseRequested: false`
+  does not suppress it (measured) — so an import would mail every invitee of every
+  meeting in the tree. `--attendees` opts in; the run otherwise reports how many
+  attendee entries it left out.
+- **Exchange owns the meeting metadata** — `iCalUid`, the organizer, per-attendee
+  responses and the created/modified times are assigned by the service, and the
+  signed-in user becomes the organizer.
+- **The body is re-serialized** (Exchange wraps it in its own `<html><head><style>…`),
+  so verification is a digest of the restorable fields, not the `.ics` bytes. The
+  digest read asks for the *source's* timezone (`Prefer: outlook.timezone`), because
+  Exchange otherwise renders times in the signed-in mailbox's zone and a migration
+  into a mailbox set to another zone would report every event as a mismatch while
+  the instants were identical.
 
 ## When this is the wrong tool
 

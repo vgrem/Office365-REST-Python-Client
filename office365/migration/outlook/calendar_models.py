@@ -1,4 +1,4 @@
-"""Calendar export model — the projection, the per-event record, and the ICS writer.
+"""Calendar model — the export projection, the ICS writer, and the import replay.
 
 An exported event is two files: an ``.ics`` (the portable artefact — Outlook,
 Google Calendar and Thunderbird all open it) and a JSON sidecar carrying what
@@ -8,12 +8,17 @@ the import contract; the ``.ics`` is regenerated from it, so an export is
 reproducible: the same event always produces the same bytes.
 
 Unlike mail, this file is *built* rather than fetched, so a byte checksum is a
-valid verification: there is no server re-serialization in the middle.
+valid verification of an export: there is no server re-serialization in the
+middle. An *import* is the other way round — Exchange re-serializes what it
+accepts — so it is verified by a digest of the event's restorable fields
+(:func:`event_digest`).
 """
 
 from __future__ import annotations
 
 import hashlib
+import html
+import json
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -122,6 +127,13 @@ _FREQUENCY = {
 
 #: RFC 5545 §3.1 caps a content line at 75 octets; a continuation starts with a space.
 MAX_LINE_OCTETS = 75
+
+#: Markup whose text is not content, and comments — dropped before a body is reduced
+#: to text. Exchange wraps every body it accepts in its own ``<html><head>…<style>…``.
+_MARKUP_BLOCK = re.compile(r"<(head|style|script)\b.*?</\1\s*>", re.IGNORECASE | re.DOTALL)
+_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+_TAG = re.compile(r"<[^>]+>")
+_SPACE = re.compile(r"\s+")
 
 #: A Graph ``dateTime`` is a wall-clock literal with a 7-digit fraction and no
 #: offset (``2026-03-02T09:00:00.0000000``); the zone rides in ``timeZone``.
@@ -276,9 +288,12 @@ def event_envelope(
         "modified": iso_or_none(event.get_property("lastModifiedDateTime")),
         "type": _wire(event.get_property("type")),
         "series_master_id": event.get_property("seriesMasterId"),
-        "recurrence": event.get_property("recurrence"),
+        # Graph's own object, flattened through ``to_json()``: the raw property is a
+        # typed ``PatternedRecurrence``, and the sidecar is JSON — ``default=str``
+        # would have written its ``repr``, which no import can read back.
+        "recurrence": _as_dict(event.get_property("recurrence")) or None,
         "is_online_meeting": bool(event.get_property("isOnlineMeeting")),
-        "online_meeting_provider": event.get_property("onlineMeetingProvider"),
+        "online_meeting_provider": _wire(event.get_property("onlineMeetingProvider")),
         "join_url": online.get("joinUrl"),
         "has_attachments": bool(event.get_property("hasAttachments")),
         "web_link": event.get_property("webLink"),
@@ -476,12 +491,206 @@ def event_ics(envelope: dict[str, Any]) -> bytes:
     return "\r\n".join(_fold(line) for line in lines).encode("utf-8")
 
 
+@dataclass
+class CalendarImportOptions:
+    """What an import of an exported calendar restores.
+
+    Pass the *same* options object to both adapters of an import job: the source
+    computes the content digest of what the target promises to restore, so the two
+    sides have to agree on the fields to be comparable (see :func:`event_digest`).
+    """
+
+    #: Re-add the attendee list. **Off by default**, because creating an event with
+    #: attendees makes Exchange send an invitation to every one of them (measured:
+    #: a copy lands in the organizer's Sent Items, and ``responseRequested: false``
+    #: does not suppress it) — so a historical import would spam colleagues with
+    #: meetings they already had. With it off the attendees stay in the sidecar and
+    #: the run reports how many were dropped.
+    restore_attendees: bool = False
+    #: Re-apply the category labels.
+    restore_categories: bool = True
+    #: Give every created event a deterministic ``transactionId``, so two concurrent
+    #: runs of the same import collide on the server rather than both writing.
+    use_transaction_ids: bool = True
+
+
+def event_dedup_key(envelope: dict[str, Any]) -> tuple[str, str | None, str | None]:
+    """The key a target matches an existing event on: subject and start.
+
+    A created event comes back with ``iCalUid: null`` and a fresh Graph id, so neither
+    of the source's identities survives the import — subject plus wall clock (and the
+    zone it is in) is what is left to recognise a re-run's own work by.
+    """
+    wall, zone = _wall(envelope.get("start"))
+    return (str(envelope.get("subject") or ""), wall, zone)
+
+
+def event_transaction_id(envelope: dict[str, Any]) -> str:
+    """A deterministic ``transactionId`` for an exported event."""
+    key = str(envelope.get("graph_id") or envelope.get("ical_uid") or envelope.get("ics_path") or "")
+    return "mig-" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:32]
+
+
+def event_create_payload(
+    envelope: dict[str, Any],
+    options: CalendarImportOptions | None = None,
+) -> dict[str, Any]:
+    """The Graph ``POST /events`` body for a sidecar record.
+
+    Returns Graph's own spelling, so the target can post it verbatim: sending the
+    typed ``DateTimeTimeZone`` helper instead loses the zone (it comes back ``UTC``)
+    and the ``transactionId``, and ``EventCollection.add()`` rejects a dict for
+    ``start`` outright (both measured).
+
+    ``start``/``end`` are the pair of wall clock and *Windows* zone name the export
+    recorded, passed back unchanged — Exchange accepts its own names, so no
+    IANA conversion is needed. Anything Exchange assigns itself (``iCalUid``, the
+    organizer, attendee responses, ``created``/``modified``) is not sent.
+    """
+    options = options or CalendarImportOptions()
+    start = _as_dict(envelope.get("start"))
+    end = _as_dict(envelope.get("end"))
+    if not start.get("dateTime") or not end.get("dateTime"):
+        raise ValueError("the sidecar record has no start/end dateTime: an event cannot be created without a time range")
+    payload: dict[str, Any] = {
+        "subject": envelope.get("subject") or "",
+        "start": {"dateTime": start["dateTime"], "timeZone": start.get("timeZone") or "UTC"},
+        "end": {"dateTime": end["dateTime"], "timeZone": end.get("timeZone") or "UTC"},
+    }
+    body = _as_dict(envelope.get("body"))
+    if body.get("content"):
+        # Graph spells the content type as an enum; the sidecar keeps the wire name.
+        is_html = str(body.get("content_type") or "").lower() == "html"
+        payload["body"] = {"contentType": "HTML" if is_html else "Text", "content": body["content"]}
+    if envelope.get("is_all_day"):
+        payload["isAllDay"] = True
+    if envelope.get("location"):
+        payload["location"] = {"displayName": envelope["location"]}
+    locations = [name for name in envelope.get("locations") or [] if name]
+    if locations:
+        payload["locations"] = [{"displayName": name} for name in locations]
+    attendees = _attendee_payloads(envelope)
+    if attendees and options.restore_attendees:
+        payload["attendees"] = attendees
+    categories = [name for name in envelope.get("categories") or [] if name]
+    if categories and options.restore_categories:
+        payload["categories"] = categories
+    for name, key in (
+        ("showAs", "show_as"),
+        ("sensitivity", "sensitivity"),
+        ("importance", "importance"),
+    ):
+        if envelope.get(key):
+            payload[name] = envelope[key]
+    if "is_reminder_on" in envelope:
+        payload["isReminderOn"] = bool(envelope.get("is_reminder_on"))
+        minutes = envelope.get("reminder_minutes")
+        if payload["isReminderOn"] and isinstance(minutes, int) and minutes > 0:
+            payload["reminderMinutesBeforeStart"] = minutes
+    recurrence = envelope.get("recurrence")
+    if isinstance(recurrence, str):
+        raise ValueError(
+            f"the sidecar records the recurrence as text ({recurrence[:60]!r}): it was written by a version of the"
+            " exporter that serialised Graph's typed object with ``repr``, so the series cannot be replayed —"
+            " re-export the calendar and import that tree"
+        )
+    if isinstance(recurrence, dict) and recurrence:
+        payload["recurrence"] = recurrence
+    if options.use_transaction_ids:
+        payload["transactionId"] = event_transaction_id(envelope)
+    return payload
+
+
+def event_digest(envelope: dict[str, Any], options: CalendarImportOptions | None = None) -> str:
+    """A digest of the fields an import restores, for verifying that it did.
+
+    Not the ``.ics`` bytes: the other side of an import is Exchange, which
+    re-serializes the body and assigns the meeting metadata, so the comparable
+    artefact is the *event*. Two things are therefore outside the digest — everything
+    the service owns (``iCalUid``, the organizer, attendee responses, created and
+    modified times) and the body's markup (see :func:`_body_text`). Attendees and
+    categories count only when ``options`` says the import restores them, which is
+    why the source and the target of one job must share the options object.
+    """
+    options = options or CalendarImportOptions()
+    canonical: dict[str, Any] = {
+        "subject": envelope.get("subject") or "",
+        "start": _wall(envelope.get("start")),
+        "end": _wall(envelope.get("end")),
+        "all_day": bool(envelope.get("is_all_day")),
+        "location": envelope.get("location") or "",
+        "locations": sorted(name for name in envelope.get("locations") or [] if name),
+        "show_as": envelope.get("show_as"),
+        "sensitivity": envelope.get("sensitivity"),
+        "importance": envelope.get("importance"),
+        "reminder": (bool(envelope.get("is_reminder_on")), envelope.get("reminder_minutes") or 0),
+        "recurrence": envelope.get("recurrence"),
+        "body": _body_text(envelope.get("body")),
+    }
+    if options.restore_attendees:
+        canonical["attendees"] = sorted(
+            (str(item.get("address") or "").lower(), str(item.get("type") or "required"))
+            for item in _attendee_payloads(envelope)
+        )
+    if options.restore_categories:
+        canonical["categories"] = sorted(str(name) for name in envelope.get("categories") or [])
+    serialized = json.dumps(canonical, sort_keys=True, default=str)
+    return hashlib.md5(serialized.encode("utf-8")).hexdigest()
+
+
+def _attendee_payloads(envelope: dict[str, Any]) -> list[dict[str, Any]]:
+    """The attendee list Graph accepts, from the addresses the sidecar recorded."""
+    payloads: list[dict[str, Any]] = []
+    for attendee in envelope.get("attendees") or []:
+        address = _as_dict(attendee).get("address")
+        if not address:
+            continue
+        item: dict[str, Any] = {"emailAddress": {"address": address}, "type": attendee.get("type") or "required"}
+        if attendee.get("name"):
+            item["emailAddress"]["name"] = attendee["name"]
+        payloads.append(item)
+    return payloads
+
+
+def _wall(value: Any) -> tuple[str | None, str | None]:
+    """A Graph ``{dateTime, timeZone}`` pair as a comparable ``(wall clock, zone)``.
+
+    Graph varies the fractional-second width between what is sent and what comes
+    back, so the fraction is dropped rather than compared.
+    """
+    moment = _as_dict(value)
+    parsed = _parse_graph_datetime(moment.get("dateTime"))
+    zone = moment.get("timeZone")
+    return (parsed.strftime("%Y-%m-%dT%H:%M:%S") if parsed else None, str(zone) if zone else None)
+
+
+def _body_text(body: Any) -> str:
+    """A body reduced to its text, for comparison only.
+
+    Exchange re-serializes every body it accepts: a plain-text body comes back wrapped
+    in HTML, and an HTML body gains a ``<head>`` with a generated ``<style>`` block.
+    The markup is therefore not comparable — the text is.
+    """
+    content = _as_dict(body).get("content")
+    if not content:
+        return ""
+    text = _COMMENT.sub("", str(content))
+    text = _MARKUP_BLOCK.sub("", text)
+    text = _TAG.sub(" ", text)
+    return _SPACE.sub(" ", html.unescape(text)).strip()
+
+
 __all__ = [
     "EVENT_COLUMNS",
     "STANDALONE_EVENT_TYPES",
     "CalendarExportOptions",
+    "CalendarImportOptions",
+    "event_create_payload",
+    "event_dedup_key",
     "event_dest_path",
+    "event_digest",
     "event_envelope",
     "event_ics",
     "event_key",
+    "event_transaction_id",
 ]

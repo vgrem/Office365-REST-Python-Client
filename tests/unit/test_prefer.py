@@ -7,6 +7,7 @@ from office365.runtime.http.prefer import (
     RETURN_REPRESENTATION,
     add_prefer,
     prefer_create_if_missing,
+    prefer_outlook_timezone,
     prefer_return_representation,
     prefer_upsert,
 )
@@ -49,3 +50,11 @@ def test_add_prefer_does_not_duplicate_an_existing_value() -> None:
     add_prefer(request, CREATE_IF_MISSING, RETURN_REPRESENTATION)
 
     assert request.headers["Prefer"] == f"{CREATE_IF_MISSING}, {RETURN_REPRESENTATION}"
+
+
+def test_prefer_outlook_timezone_quotes_the_zone_and_merges() -> None:
+    request = _request({"Prefer": "return=representation"})
+
+    prefer_outlook_timezone(request, "W. Europe Standard Time")
+
+    assert request.headers["Prefer"] == 'return=representation, outlook.timezone="W. Europe Standard Time"'

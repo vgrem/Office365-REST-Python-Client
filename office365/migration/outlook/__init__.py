@@ -1,23 +1,35 @@
-"""Outlook migration product: mailbox assessment, mail export/import, calendar export.
+"""Outlook migration product: mailbox assessment, mail export/import, calendar export/import.
 
 Reuses the shared assessment model (containers, scans, reports, export); the
 product-specific parts are the mailbox walker (:class:`MailboxAssessor`) with its
 scanners (e.g. the ``MailFolders`` folder inventory), and the adapters that move a
 mailbox through a portable EML tree: :class:`MailFolderSource` ->
 :class:`MailExportTarget` on the way out, :class:`EmlTreeSource` ->
-:class:`MailboxTarget` on the way back in.
+:class:`MailboxTarget` on the way back in. A calendar does the same with an ICS
+sidecar tree: :class:`CalendarSource` -> :class:`IcsExportTarget`, and
+:class:`IcsTreeSource` -> :class:`CalendarTarget`.
 """
 
 from office365.migration.outlook.adapters import MANIFEST_NAME, MailExportTarget, MailFolderSource
 from office365.migration.outlook.assessor import MailboxAssessor
-from office365.migration.outlook.calendar_adapters import CalendarSource, IcsExportTarget
+from office365.migration.outlook.calendar_adapters import (
+    CalendarSource,
+    CalendarTarget,
+    IcsExportTarget,
+    IcsTreeSource,
+)
 from office365.migration.outlook.calendar_models import (
     EVENT_COLUMNS,
     CalendarExportOptions,
+    CalendarImportOptions,
+    event_create_payload,
+    event_dedup_key,
     event_dest_path,
+    event_digest,
     event_envelope,
     event_ics,
     event_key,
+    event_transaction_id,
 )
 from office365.migration.outlook.eml_import import EmlTreeSource, MailboxTarget
 from office365.migration.outlook.models import (
@@ -36,9 +48,12 @@ __all__ = [
     "MANIFEST_NAME",
     "OUTLOOK_SCANS",
     "CalendarExportOptions",
+    "CalendarImportOptions",
     "CalendarSource",
+    "CalendarTarget",
     "EmlTreeSource",
     "IcsExportTarget",
+    "IcsTreeSource",
     "MailExportOptions",
     "MailExportTarget",
     "MailFolderData",
@@ -49,10 +64,14 @@ __all__ = [
     "MailboxFolderScan",
     "MailboxTarget",
     "OutlookOptions",
+    "event_create_payload",
+    "event_dedup_key",
     "event_dest_path",
+    "event_digest",
     "event_envelope",
     "event_ics",
     "event_key",
+    "event_transaction_id",
     "mail_dest_path",
     "mail_envelope",
     "mail_slug",
