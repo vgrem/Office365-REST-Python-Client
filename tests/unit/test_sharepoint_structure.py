@@ -1,13 +1,17 @@
 """Tests for the SharePoint list-structure capture snapshot."""
 
 import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from office365.migration.sharepoint.structure import (
     ListStructure,
     WebScopeStructure,
     capture_list_structure,
     compare_web_scope_structure,
+    load_list_structure,
+    save_list_structure,
     web_scope_note,
 )
 from office365.sharepoint.fields.type import FieldType
@@ -479,6 +483,49 @@ class TestListStructureSerialization(unittest.TestCase):
         empty = ListStructure(title="Empty")
 
         self.assertEqual(ListStructure.from_dict(empty.to_dict()), empty)
+
+
+class TestStructureSidecar(unittest.TestCase):
+    """The bundle sidecar: a snapshot written next to the payload, read back on import."""
+
+    def setUp(self):
+        self._dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self._dir.cleanup)
+        self.path = Path(self._dir.name) / "Documents.structure.json"
+
+    def test_save_and_load_round_trip(self):
+        structure = ListStructure(
+            title="Documents",
+            base_template=101,
+            base_type=1,
+            fields=[],
+            content_types=[],
+            views=[],
+        )
+
+        written = save_list_structure(structure, self.path)
+
+        self.assertEqual(written, self.path)
+        self.assertEqual(load_list_structure(self.path), structure)
+
+    def test_save_creates_the_parent_directory(self):
+        path = Path(self._dir.name) / "bundle" / "Documents.structure.json"
+
+        save_list_structure(ListStructure(title="Documents"), path)
+
+        self.assertTrue(path.is_file())
+
+    def test_the_file_is_the_plain_to_dict_form_so_a_capture_loads_here(self):
+        structure = ListStructure(title="Documents")
+        save_list_structure(structure, self.path)
+
+        self.assertEqual(json.loads(self.path.read_text(encoding="utf-8")), structure.to_dict())
+
+    def test_a_non_object_document_is_refused(self):
+        self.path.write_text("[1, 2]", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "not a list-structure snapshot"):
+            load_list_structure(self.path)
 
 
 class _Web:

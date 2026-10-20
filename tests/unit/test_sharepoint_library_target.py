@@ -15,8 +15,11 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from office365.migration.base import MigrationItem, Principal
+from office365.migration.base import MigrationItem, MigrationOptions, Principal
+from office365.migration.map import ContentTypeMap
+from office365.migration.sharepoint import adapters
 from office365.migration.sharepoint.adapters import SharePointLibrarySource, SharePointLibraryTarget
+from office365.migration.sharepoint.structure import ListStructure
 
 
 class _Entry:
@@ -1063,3 +1066,64 @@ def test_library_target_omits_the_approval_state_it_cannot_read():
     metadata = target.read_metadata(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt"))
 
     assert "moderation_status" not in metadata
+
+
+class _SPList:
+    """The target library object ``provision_list_structure`` would provision into."""
+
+    title = "Documents"
+
+
+def _structure() -> ListStructure:
+    return ListStructure(title="Documents", base_template=101, base_type=1)
+
+
+def test_library_target_replays_a_captured_structure_once(monkeypatch):
+    # A bundle carries the library's columns and views in a sidecar, not in each
+    # file, so they have to be provisioned before the first upload — once, even
+    # though the runner's ``configure`` and a caller may both ask.
+    calls: list = []
+
+    def fake_provision(sp_list, structure, **kwargs):
+        calls.append((sp_list, structure, kwargs))
+        return ["view 'All Items' was created without LinkTitle"]
+
+    monkeypatch.setattr(adapters, "provision_list_structure", fake_provision)
+    sp_list, structure = _SPList(), _structure()
+    target = SharePointLibraryTarget(_TargetFolder(), sp_list=sp_list, structure=structure)
+
+    target.configure(MigrationOptions())
+    target.apply_structure()
+
+    assert [call[0] for call in calls] == [sp_list]
+    assert calls[0][1] is structure
+    assert target.warnings == ["view 'All Items' was created without LinkTitle"]
+
+
+def test_library_target_structure_needs_the_target_list():
+    with pytest.raises(ValueError, match="needs the target list"):
+        SharePointLibraryTarget(_TargetFolder(), structure=_structure())
+
+
+def test_library_target_without_a_structure_provisions_nothing(monkeypatch):
+    calls: list = []
+    monkeypatch.setattr(adapters, "provision_list_structure", lambda *a, **k: calls.append(a) or [])
+
+    SharePointLibraryTarget(_TargetFolder(), sp_list=_SPList()).configure(MigrationOptions())
+
+    assert calls == []
+
+
+def test_library_target_provisions_into_the_callers_content_type_map(monkeypatch):
+    # Filling the map in place is what makes the folder's ContentTypeId resolve to
+    # the recreated content type instead of being coerced to the library default.
+    captured: list = []
+    monkeypatch.setattr(adapters, "provision_list_structure", lambda *a, **k: captured.append(k) or [])
+    mapping = ContentTypeMap()
+    target = SharePointLibraryTarget(
+        _TargetFolder(), sp_list=_SPList(), content_type_map=mapping, structure=_structure()
+    )
+
+    target.configure(MigrationOptions())
+
+    assert captured[0]["content_type_map"] is mapping.entries

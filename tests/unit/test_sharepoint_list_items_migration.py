@@ -22,8 +22,9 @@ import pytest
 if TYPE_CHECKING:
     from office365.sharepoint.lists.list import List as SPList
 
-from office365.migration.base import MigrationItem
+from office365.migration.base import MigrationItem, MigrationOptions
 from office365.migration.map import ContentTypeMap
+from office365.migration.sharepoint import adapters
 from office365.migration.sharepoint.adapters import (
     DEFAULT_LIST_IDENTITY_FIELD,
     SharePointListSource,
@@ -31,6 +32,7 @@ from office365.migration.sharepoint.adapters import (
     _content_checksum,
     _MultiValueCreateTarget,
 )
+from office365.migration.sharepoint.structure import ListStructure
 
 
 class _QueryOptions:
@@ -1368,3 +1370,41 @@ def test_list_checksums_ignore_taxonomy_label_and_wss_id():
     checksum = target.checksum(source_item)
 
     assert checksum == source.checksum(source_item)
+
+
+def test_list_target_replays_a_captured_structure_once(monkeypatch):
+    # A bundle's records are payload; the columns they name travel in the sidecar, so
+    # the structure has to land on the target before the first record is written.
+    calls: list = []
+
+    def fake_provision(sp_list, structure, **kwargs):
+        calls.append((sp_list, structure, kwargs))
+        return ["column 'ProjCode' was created with a different type"]
+
+    monkeypatch.setattr(adapters, "provision_list_structure", fake_provision)
+    target_list = _TargetList()
+    structure = ListStructure(title="Tasks", base_template=100, base_type=0)
+    target = SharePointListTarget(cast("SPList", target_list), structure=structure)
+
+    target.configure(MigrationOptions())
+    target.apply_structure()
+
+    assert [call[0] for call in calls] == [target_list]
+    assert calls[0][1] is structure
+    assert target.warnings == ["column 'ProjCode' was created with a different type"]
+
+
+def test_list_target_provisions_into_the_callers_content_type_map(monkeypatch):
+    captured: list = []
+    monkeypatch.setattr(adapters, "provision_list_structure", lambda *a, **k: captured.append(k) or [])
+    mapping = ContentTypeMap()
+    target = SharePointListTarget(
+        cast("SPList", _TargetList()),
+        content_type_map=mapping,
+        structure=ListStructure(title="Tasks"),
+    )
+
+    target.configure(MigrationOptions())
+
+    assert captured[0]["content_type_map"] is mapping.entries
+    assert target.on_conflict == "skip"

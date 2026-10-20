@@ -51,10 +51,12 @@ sent as guaranteed link failures.
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 from dataclasses import asdict, dataclass
 from dataclasses import field as dc_field
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
 from xml.etree import ElementTree
 
@@ -78,17 +80,24 @@ __all__ = [
     "ContentTypeDefinition",
     "FieldDefinition",
     "ListStructure",
+    "STRUCTURE_SUFFIX",
     "ViewDefinition",
     "WebScopeProvisionReport",
     "WebScopeStructure",
     "capture_list_structure",
     "compare_web_scope_structure",
+    "load_list_structure",
     "normalize_guid",
     "provision_list_structure",
     "provision_web_scope_columns",
     "rewrite_lookup_schema",
+    "save_list_structure",
     "web_scope_note",
 ]
+
+#: Suffix of a structure sidecar (``Documents.structure.json``) — what
+#: ``capture_structure.py`` writes and a bundle import reads back.
+STRUCTURE_SUFFIX = ".structure.json"
 
 #: Field properties requested per column. ``SchemaXml`` is explicit because it is
 #: the payload used to recreate the column on another list.
@@ -354,6 +363,52 @@ class ListStructure:
             content_types=[ContentTypeDefinition.from_dict(item) for item in data.get("content_types") or []],
             views=[ViewDefinition.from_dict(item) for item in data.get("views") or []],
         )
+
+
+def save_list_structure(structure: ListStructure, path: str | Path) -> Path:
+    """Write a snapshot as JSON — the structure sidecar of an export bundle.
+
+    The file is exactly :meth:`ListStructure.to_dict`, so a snapshot captured by
+    ``capture_structure.py`` loads back unchanged and one written here opens there.
+    Nothing is versioned: :meth:`ListStructure.from_dict` ignores keys it does not
+    know, so a newer snapshot still loads in an older reader.
+
+    The sidecar belongs **next to** the exported content, not inside it — a files
+    source copies every file it finds, so a ``structure.json`` inside the tree would
+    be migrated as content.
+
+    Args:
+        structure: The snapshot to write.
+        path: Destination file (parent directories are created).
+
+    Returns:
+        The path written.
+    """
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(structure.to_dict(), indent=2), encoding="utf-8")
+    return target
+
+
+def load_list_structure(path: str | Path) -> ListStructure:
+    """Read a snapshot written by :func:`save_list_structure` (or by hand).
+
+    Args:
+        path: The JSON sidecar to read.
+
+    Returns:
+        The snapshot, ready for :func:`provision_list_structure`.
+
+    Raises:
+        ValueError: The file's top level is not a JSON object.
+    """
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(
+            f"{str(path)!r} is not a list-structure snapshot: the top level is a JSON "
+            f"{type(data).__name__}, not an object"
+        )
+    return ListStructure.from_dict(data)
 
 
 def capture_list_structure(sp_list: SPList) -> ListStructure:

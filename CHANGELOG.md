@@ -99,7 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `TimeLastModified`, because per-version dates in the manifest are ignored
   (measured on a live ingestion job).
 
-**Migration (package target)**
+**Migration (bundles)**
 
 - `SharePointPackageTarget` accepts a captured list structure (`sp_list=` +
   `structure=`) and replays it over REST **before** the ingestion job. The manifest
@@ -114,6 +114,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a bare library gained the captured `ProjCode` column with no warnings, and a second
   call wrote nothing. A task resolved by `resolve_task` already replays the structure
   itself and does not pass one.
+- A library export can be **re-imported into a library that has none of its shape**.
+  `save_list_structure` / `load_list_structure` read and write the bundle's sidecar
+  (plain `ListStructure.to_dict()` JSON, the same file `capture_structure.py`
+  writes), and `SharePointLibraryTarget` / `SharePointListTarget` accept it as
+  `structure=`. Before, the content half of a bundle imported fine and the shape half
+  was simply absent: a file uploaded into a bare library carries no column values and
+  a record naming a missing column loses it. The snapshot is replayed by
+  `configure()` — the runner's pre-write hook — so a directly-built target provisions
+  too, a re-run is a no-op, and a `content_type_map` passed to the record target is
+  filled in place so records land under the recreated content types. Keep the sidecar
+  *beside* the content directory, not inside it: a files source migrates every file
+  it finds. Live-verified end to end through `migrate_library.py` (which now writes
+  the sidecar on export and auto-detects it on import): a bare target library had no
+  `CostCenter` column, gained it on import, and verified
+  `OK | source: 1, target: 1, checked: 1, missing: 0, extra: 0, issues: 0`.
 
 **Migration (group ACLs)**
 

@@ -102,8 +102,10 @@ from office365.migration.sharepoint.structure import (
     WebScopeStructure,
     capture_list_structure,
     compare_web_scope_structure,
+    load_list_structure,
     provision_list_structure,
     provision_web_scope_columns,
+    save_list_structure,
     web_scope_note,
 )
 from office365.migration.sharepoint.tenant_assessor import MigrationTenantAssessor
@@ -187,8 +189,10 @@ __all__ = [
     "is_infopath_form_url",
     "page_handoff_note",
     "parse_site_settings_mode",
+    "load_list_structure",
     "provision_list_structure",
     "provision_web_scope_columns",
+    "save_list_structure",
     "sharepoint_scan_pairs",
     "site_scope_note",
     "verify_list_security",

@@ -27,7 +27,7 @@ from office365.migration.base import (
     conflict_to_on_conflict,
     normalize_puid,
 )
-from office365.migration.sharepoint.structure import normalize_guid
+from office365.migration.sharepoint.structure import ListStructure, normalize_guid, provision_list_structure
 from office365.migration.sharepoint.transfer import Failure
 from office365.runtime.converters.records import records_from_items
 from office365.runtime.converters.scalars import iso_or_none, parse_datetime, parse_int
@@ -1599,6 +1599,12 @@ class SharePointListTarget:
     when the target list's content types were recreated with fresh identifiers:
     every record's ``ContentTypeId`` is rewritten to the target id so items land
     under the recreated content type instead of the wrong (or a missing) one.
+
+    Pass ``structure`` (a :class:`~office365.migration.sharepoint.structure.ListStructure`
+    from :func:`~office365.migration.sharepoint.structure.load_list_structure`) to
+    replay a captured list shape onto this target before the first record is written —
+    what importing an export bundle needs, since the bundle's payload is records and
+    its columns/content types/views travel in the sidecar, not in each item.
     """
 
     # Marks this target as accepting list-item attachments as extra items (see DataTarget).
@@ -1628,6 +1634,7 @@ class SharePointListTarget:
             on_conflict=self._on_conflict_override,
             identity_field=self._identity_field,
             content_type_map=self._content_type_map,
+            structure=self._structure,
         )
 
     def __init__(
@@ -1638,8 +1645,11 @@ class SharePointListTarget:
         on_conflict: str | None = None,
         identity_field: str | None = DEFAULT_LIST_IDENTITY_FIELD,
         content_type_map: "ContentTypeMap | None" = None,
+        structure: "ListStructure | None" = None,
     ) -> None:
         self._list = target_list
+        self._structure = structure
+        self._structure_applied = False
         self._key_columns = [key] if isinstance(key, str) else (list(key) if key else [])
         self._key_field = key_field
         self._on_conflict_override = on_conflict
@@ -1692,6 +1702,29 @@ class SharePointListTarget:
             self._on_conflict = conflict_to_on_conflict(options.conflict_resolution)
         # A run boundary: verification reads memoized by the previous run are stale.
         self._fresh_reads.clear()
+        self.apply_structure()
+
+    def apply_structure(self) -> list[str]:
+        """Replay the captured list structure onto the target list (once, idempotent).
+
+        A bundle carries its list shape in a sidecar, not in each record, so the
+        columns (and views) must exist before the first record lands — otherwise a
+        value whose column is missing is dropped by the server. Idempotent
+        (``on_conflict="skip"``), and a no-op when no snapshot was passed.
+
+        Returns:
+            The warnings from this call (empty when there is no snapshot, or when it
+            has already been applied).
+        """
+        if self._structure is None or self._structure_applied:
+            return []
+        self._structure_applied = True
+        # Filling the caller's map in place is what lets a bundle's records land
+        # under the recreated content type instead of being coerced to the default.
+        entries = self._content_type_map.entries if self._content_type_map is not None else None
+        warnings = provision_list_structure(self._list, self._structure, content_type_map=entries)
+        self.warnings.extend(warnings)
+        return warnings
 
     def label(self) -> str:
         return f"list:{self._list.title}"
@@ -2953,6 +2986,12 @@ class SharePointLibraryTarget:
     department is written onto the created folder's item. ``content_type_map``
     rewrites the folder's content type id to its target counterpart, exactly as it
     does for an item record.
+
+    Pass ``structure`` (a :class:`~office365.migration.sharepoint.structure.ListStructure`
+    from :func:`~office365.migration.sharepoint.structure.load_list_structure`) to
+    replay a captured shape onto the library before the first file is uploaded — the
+    columns, content types, views and container settings of a bundle travel in its
+    sidecar, not in each file.
     """
 
     #: Files carry content-approval state (``apply_item_state``). Documents refuse a
@@ -2969,6 +3008,7 @@ class SharePointLibraryTarget:
             concurrency=self._concurrency,
             sp_list=sp_list,
             content_type_map=self._content_type_map,
+            structure=self._structure,
         )
 
     def __init__(
@@ -2977,7 +3017,12 @@ class SharePointLibraryTarget:
         concurrency: int = 1,
         sp_list: "SPList | None" = None,
         content_type_map: "ContentTypeMap | None" = None,
+        structure: "ListStructure | None" = None,
     ) -> None:
+        if structure is not None and sp_list is None:
+            raise ValueError("a structure snapshot needs the target list (sp_list) to be applied to")
+        self._structure = structure
+        self._structure_applied = False
         self._folder = library_folder
         self._concurrency = concurrency
         # The folder-record mapping is the record mapping: reuse the list target so a
@@ -3048,6 +3093,26 @@ class SharePointLibraryTarget:
         if self._principals_cache is None:
             self._principals_cache = _TargetPrincipals(self._folder.context.web, self.warnings)
         return self._principals_cache
+
+    def configure(self, options) -> None:
+        """Replay the captured structure onto the library before the first upload.
+
+        Called by :class:`MigrationRunner` before the run. A bundle carries the
+        library's columns, content types, views and container settings in a sidecar,
+        not in each file, so they have to exist before the files land — a file
+        uploaded into a bare library stores no column values of its own.
+        """
+        self.apply_structure()
+
+    def apply_structure(self) -> list[str]:
+        """Provision the snapshot passed as ``structure`` (once, idempotent)."""
+        if self._structure is None or self._structure_applied or self._sp_list is None:
+            return []
+        self._structure_applied = True
+        entries = self._content_type_map.entries if self._content_type_map is not None else None
+        warnings = provision_list_structure(self._sp_list, self._structure, content_type_map=entries)
+        self.warnings.extend(warnings)
+        return warnings
 
     def label(self) -> str:
         return f"library:{self._folder.server_relative_url}"

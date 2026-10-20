@@ -794,10 +794,11 @@ content types are matched and recreated by **name**.
 
   ```python
   from office365.migration.map import ContentTypeMap
+  from office365.migration.sharepoint import SharePointListTarget
 
-  mapping = {}
-  provision_list_structure(target_list, structure, content_type_map=mapping)
-  target = SharePointListTarget(target_list, content_type_map=ContentTypeMap(mapping))
+  # The target fills the map while it replays the snapshot (see below), so the
+  # projection can rewrite every record's ContentTypeId to the recreated one.
+  target = SharePointListTarget(target_list, content_type_map=ContentTypeMap(), structure=structure)
   ```
 
   The whole-site (`resolve_site_task`) and single-list resolvers build and apply
@@ -884,6 +885,70 @@ guaranteed link failures.
 A structure-provisioning warning is also recorded on the resolved target adapter,
 so a whole-site session reports it through `session.warnings()` instead of only in
 the log.
+
+### Exporting and importing a library as a bundle
+
+A bundle is a directory of content plus **one sidecar holding the list's shape**:
+
+```
+bundle/
+  content/                     # the payload: folders and files, library-relative
+    Report.docx
+    Archive/old.docx
+  Documents.structure.json     # the shape: columns, content types, views, settings
+```
+
+The sidecar sits **beside** `content/`, never inside it — a files source migrates
+every file it finds, so a snapshot in the tree would be copied into the library.
+`save_list_structure` / `load_list_structure` read and write it (the file is
+plain `ListStructure.to_dict()` JSON, which `capture_structure.py` also writes):
+
+```python
+from office365.migration import ConflictResolution, MigrationJob, MigrationOptions
+from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget
+from office365.migration.sharepoint import (
+    SharePointLibrarySource,
+    SharePointLibraryTarget,
+    capture_list_structure,
+    load_list_structure,
+    save_list_structure,
+)
+
+# export
+job = MigrationJob(
+    SharePointLibrarySource(source_folder),
+    FileSystemTarget("bundle/content", include_folders=True),
+    options=MigrationOptions(conflict_resolution=ConflictResolution.OVERWRITE),
+)
+job.plan()
+job.run()
+save_list_structure(capture_list_structure(source_library), "bundle/Documents.structure.json")
+
+# import — the shape is replayed onto the target library before the first upload
+job = MigrationJob(
+    FileSystemSource("bundle/content"),
+    SharePointLibraryTarget(
+        target_folder,
+        sp_list=target_library,
+        structure=load_list_structure("bundle/Documents.structure.json"),
+    ),
+)
+job.plan()
+job.run()
+```
+
+The replay is `configure()`'s job — the hook the runner calls before the first
+write — so it also happens when the target is used directly, and a re-run is a no-op
+because `provision_list_structure` conflicts by skipping. A record bundle imports the
+same way through `SharePointListTarget(target_list, structure=...)`, which fills a
+`content_type_map` you pass in as a side effect so records land under the recreated
+content types. Measured on a live library pair: the target had no `CostCenter`
+column before the import and had it after, with the file content verified
+`OK | source: 1, target: 1, checked: 1, missing: 0, extra: 0, issues: 0`.
+
+What a bundle cannot carry is the part the manifest also cannot: workflows, InfoPath
+forms, publishing pages, alerts, the term store and site-collection settings are
+handoff notes, not payload (see *Fidelity*).
 
 ### List container settings
 
