@@ -508,6 +508,106 @@ Four honest limits, all Exchange's rather than the adapter's:
   `06:00 UTC` unasked and as `09:00 Europe/Kiev` with `Prefer: outlook.timezone`
   (measured).
 
+### Exporting contacts
+
+Contacts follow the same shape as a calendar: one item per contact, a `.vcf` plus
+a sidecar, and a `manifest.jsonl` at the root.
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import ContactSource, VcfExportTarget
+
+contacts = client.me.contact_folders["contacts"].get().execute_query()
+job = MigrationJob(ContactSource(contacts), VcfExportTarget("./contacts-export"))
+job.plan()
+job.run()
+print(job.verify().summary())  # each .vcf's MD5 vs the document rendered from the source contact
+```
+
+```text
+<root>/Contacts/Alice-Example_4b1e9f02.vcf        # vCard 3.0 document
+<root>/Contacts/Alice-Example_4b1e9f02.json      # sidecar record
+<root>/manifest.jsonl                            # one sidecar per line
+```
+
+`ContactSource` walks the folder's children too, and a contact from a child folder
+lands in the matching subdirectory (`Contacts/Vendors/…`), so the tree carries the
+folder chain. Verification is a byte checksum, for the same reason as the calendar
+export: the `.vcf` is *rendered* from the contact record, so the same contact always
+produces the same bytes.
+
+A contact has no `internetMessageId` and no `iCalUid` — Exchange assigns neither an
+`internetMessageId` nor an `iCalUid` equivalent — so the export keys on the Graph
+contact id and the file name carries a hash of it.
+
+Four honest limits:
+
+- **No photo.** The `contact` entity on this endpoint exposes no `hasPhoto`
+  column (measured: not in a full property read), so detecting one costs a
+  `GET /photo` that 404s for every contact that has no image. Photos are therefore
+  declared unsupported rather than probed.
+- **A birthday compares by date, not instant.** Exchange stores `11:59` in the
+  mailbox's zone whatever is sent — `11:59:00Z` and `11:59:00+00:00` both read back
+  as `1953-05-01 11:59` — so the export records the date and the digest normalises
+  it. A birthday's original time of day is not recoverable.
+- **The `.vcf` is for other clients; the sidecar is for the import.** vCard 3.0
+  cannot carry the office fields, the address components or the categories without
+  a lossy mapping, so an import reads the sidecar and treats the `.vcf` as the
+  portable copy.
+- **It is a projection, not a backup of the mailbox item.** Categories travel, but
+  a category that contains a comma does not exist in Exchange (the service rejects
+  the whole contact with `ErrorPropertyUpdate`), so the `.vcf`'s escaped
+  `CATEGORIES` values split back into names that Exchange will accept.
+
+### Importing contacts
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import ContactImportOptions, ContactTarget, VcfTreeSource
+
+contacts = client.me.contact_folders["contacts"].get().execute_query()
+options = ContactImportOptions()
+job = MigrationJob(VcfTreeSource("./contacts-export"), ContactTarget(contacts, options))
+job.plan()
+job.run()
+print(job.verify().summary())  # digest of the restorable fields, not the .vcf bytes
+```
+
+- **The sidecar is mandatory.** An `.vcf` without its `.json` raises rather than
+  importing a contact with the office fields, address components and categories
+  dropped — unlike mail, where a missing sidecar degrades to the MIME itself.
+- **The payload is a Graph-spelled dict, POSTed raw.** `ContactCollection.add()`
+  takes four arguments and drops everything else (measured), so the target builds
+  the body itself.
+- **A re-run skips what it already created.** A contact has no `transactionId`, so
+  concurrency is not handled by the service refusing a second write; the target
+  matches on `(display name, first address)` instead. Two contacts differing only
+  by that pair are both imported, and two concurrent runs can import the same
+  contact twice.
+- **A category that carries a comma is refused** with the offending name, because
+  Exchange answers `ErrorPropertyUpdate` ("Property update did not succeed.") to the
+  whole contact — measured, and the message alone names neither the field nor the
+  value.
+
+Four honest limits, all Exchange's rather than the adapter's:
+
+- **Timestamps are not restorable.** Exchange stamps `createdDateTime` and
+  `lastModifiedDateTime` with the import time, so `preserve_timestamps` is refused
+  up front by the runner rather than silently dropped.
+- **A re-loaded contact doubles its lists.** Reading a contact back *through the
+  object the create returned* appends to every collection-valued property
+  (`emailAddresses`, `businessPhones`, `homePhones`, `imAddresses`, `categories`,
+  `children` — all measured), so the target verifies through a fresh handle on the
+  folder the contact lives in.
+- **The `name` of an address-only email is filled in.** An `emailAddresses` entry
+  without a `name` reads back named after the address, so the digest compares
+  `(address, name or address)`.
+- **Child folders are created through the specialised collection.**
+  `ContactFolder.child_folders` is the generated plain `EntityCollection`: it has no
+  idempotent `ensure`, and its `add(name)` posts an empty body (measured:
+  "The property 'wellKnownName or displayName' is required"). The target therefore
+  builds a `ContactFolderCollection` on the parent's `childFolders` path.
+
 ## SPMT-style sessions
 
 `MigrationSession` mirrors the
@@ -1528,16 +1628,16 @@ The table below is the shipped SharePoint pairs' expected output.
 
 A declared matrix names the dimensions that product actually has, so it is shorter:
 
-| Dimension | Mail export | Mail import | Calendar export | Calendar import |
-|---|---|---|---|---|
-| Content | delivered (MIME bytes + sidecar) | delivered | delivered | delivered |
-| Folder / series structure | delivered (folder path + display chain) | delivered (folder chain recreated) | best-effort (one item per series master; occurrences and cancellations are opt-in) | delivered (`seriesMaster` with Graph's own `recurrence`) |
-| Created/Modified | delivered (payload file mtime; the sidecar keeps both dates) | unsupported (`receivedDateTime` is not settable — Exchange stamps the import time) | delivered (`DTSTAMP` is the event's `lastModifiedDateTime`) | unsupported (Exchange assigns `created`/`modified`) |
-| Item state | delivered (read state, categories, importance, draft flag) | best-effort (one PATCH replays read state, categories and importance; the follow-up flag is not) | delivered (show-as, sensitivity, importance, reminder, categories) | delivered |
-| Attendees | n/a | n/a | delivered (`ATTENDEE`/`ORGANIZER` lines) | best-effort (dropped unless `restore_attendees=True`: adding them makes Exchange invite every attendee) |
-| Attachments | delivered (inside the MIME) | delivered | unsupported (only `hasAttachments` is recorded) | unsupported |
-| Permissions | unsupported | unsupported | unsupported | unsupported |
-| Versions | unsupported | unsupported | unsupported | unsupported |
+| Dimension | Mail export | Mail import | Calendar export | Calendar import | Contacts export | Contacts import |
+|---|---|---|---|---|---|---|
+| Content | delivered (MIME bytes + sidecar) | delivered | delivered | delivered | delivered (vCard 3.0 bytes + sidecar) | delivered |
+| Folder / series structure | delivered (folder path + display chain) | delivered (folder chain recreated) | best-effort (one item per series master; occurrences and cancellations are opt-in) | delivered (`seriesMaster` with Graph's own `recurrence`) | delivered (folder path + display chain) | delivered (folder chain recreated) |
+| Created/Modified | delivered (payload file mtime; the sidecar keeps both dates) | unsupported (`receivedDateTime` is not settable — Exchange stamps the import time) | delivered (`DTSTAMP` is the event's `lastModifiedDateTime`) | unsupported (Exchange assigns `created`/`modified`) | delivered (payload file mtime; the sidecar keeps both dates) | unsupported (Exchange stamps the import time) |
+| Item state | delivered (read state, categories, importance, draft flag) | best-effort (one PATCH replays read state, categories and importance; the follow-up flag is not) | delivered (show-as, sensitivity, importance, reminder, categories) | delivered | delivered (categories and every office field) | delivered (categories via `restore_categories`) |
+| Attendees | n/a | n/a | delivered (`ATTENDEE`/`ORGANIZER` lines) | best-effort (dropped unless `restore_attendees=True`: adding them makes Exchange invite every attendee) | n/a | n/a |
+| Attachments | delivered (inside the MIME) | delivered | unsupported (only `hasAttachments` is recorded) | unsupported | unsupported (a photo would cost a `GET /photo` per contact; the entity has no `hasPhoto` column) | unsupported |
+| Permissions | unsupported | unsupported | unsupported | unsupported | unsupported (delegation is mailbox policy, not a contact property) | unsupported (same) |
+| Versions | unsupported | unsupported | unsupported | unsupported | unsupported (Graph exposes no contact history) | unsupported (same) |
 
 > Columns, content types, views and container settings are deliberately *not*
 > carried by the item adapters: they are schema/policy, and the SharePoint resolver

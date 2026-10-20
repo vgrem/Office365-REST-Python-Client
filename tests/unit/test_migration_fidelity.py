@@ -562,6 +562,42 @@ def test_the_calendar_pairs_name_the_attendee_trade_off(tmp_path):
     assert "restore_attendees" not in exported.dimension_notes.get("attendees", "")
 
 
+def test_the_contact_pairs_declare_what_a_vcard_cannot_carry(tmp_path):
+    from office365.migration.fidelity import describe_fidelity
+    from office365.migration.outlook import (
+        ContactExportOptions,
+        ContactImportOptions,
+        ContactSource,
+        ContactTarget,
+        VcfExportTarget,
+        VcfTreeSource,
+    )
+
+    exported = describe_fidelity(
+        ContactSource(_Folder(), ContactExportOptions()), VcfExportTarget(tmp_path), MigrationOptions()
+    )
+    imported = describe_fidelity(
+        VcfTreeSource(tmp_path), ContactTarget(_Folder(), ContactImportOptions()), MigrationOptions()
+    )
+
+    assert list(exported.dimensions) == [
+        "content",
+        "structure",
+        "timestamps",
+        "item_state",
+        "attachments",
+        "permissions",
+        "versions",
+    ]
+    assert exported.dimensions["timestamps"] == "delivered"
+    assert exported.dimensions["attachments"] == "unsupported"
+    assert "photo" in exported.dimension_notes["attachments"]
+    # Exchange stamps a contact with the import time, so a re-run cannot restore the
+    # contact's own created/modified — a declared loss, not an oversight.
+    assert imported.dimensions["timestamps"] == "unsupported"
+    assert "import time" in imported.dimension_notes["timestamps"]
+
+
 def test_the_forecast_report_carries_the_declared_matrix(tmp_path):
     import csv
     import io

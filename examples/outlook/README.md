@@ -197,6 +197,8 @@ Bulk moves for retention, backup and migration — the same `export_to` /
 | Portable EML → mailbox (folders + flags restored) | [`migration/import/import_folder_eml.py`](./migration/import/import_folder_eml.py) |
 | Calendar → portable ICS (resumable, verified) | [`migration/export/export_calendar_ics.py`](./migration/export/export_calendar_ics.py) |
 | Portable ICS → calendar (series + categories restored) | [`migration/import/import_calendar_ics.py`](./migration/import/import_calendar_ics.py) |
+| Contacts → portable vCard (resumable, verified) | [`migration/export/export_contacts_vcf.py`](./migration/export/export_contacts_vcf.py) |
+| Portable vCard → contacts (folders + categories restored) | [`migration/import/import_contacts_vcf.py`](./migration/import/import_contacts_vcf.py) |
 | Attachments out of a folder | [`messages/export_attachments.py`](./messages/export_attachments.py) |
 | A whole folder, concurrently | [`messages/export_mail_async.py`](./messages/export_mail_async.py) |
 | Contacts → CSV / CSV → contacts | [`contacts/export_csv.py`](./contacts/export_csv.py) · [`contacts/import_csv.py`](./contacts/import_csv.py) |

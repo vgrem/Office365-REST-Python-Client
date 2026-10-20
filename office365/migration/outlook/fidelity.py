@@ -27,6 +27,8 @@ from office365.migration.fidelity import FidelityStatus
 __all__ = [
     "CALENDAR_EXPORT_DIMENSIONS",
     "CALENDAR_IMPORT_DIMENSIONS",
+    "CONTACTS_EXPORT_DIMENSIONS",
+    "CONTACTS_IMPORT_DIMENSIONS",
     "MAIL_EXPORT_DIMENSIONS",
     "MAIL_IMPORT_DIMENSIONS",
 ]
@@ -123,4 +125,51 @@ CALENDAR_IMPORT_DIMENSIONS: Dict[str, Dimension] = {
     ),
     "permissions": (FidelityStatus.UNSUPPORTED, "calendar sharing is a tenant policy, not an event property"),
     "versions": (FidelityStatus.UNSUPPORTED, "Exchange keeps no per-event version history in Graph"),
+}
+
+_NO_CONTACT_PHOTO = (
+    "a contact's photo is a sub-resource with no ``hasPhoto`` column on this endpoint, so finding out whether one"
+    " exists costs a GET that 404s per contact (measured); out of scope rather than one request per contact"
+)
+
+CONTACTS_EXPORT_DIMENSIONS: Dict[str, Dimension] = {
+    "content": (FidelityStatus.DELIVERED, ""),
+    "structure": (
+        FidelityStatus.DELIVERED,
+        "the folder subtree is recorded as each contact's folder path, and the sidecar keeps the display chain",
+    ),
+    "timestamps": (
+        FidelityStatus.DELIVERED,
+        "the payload file's mtime is stamped from the contact, and the sidecar keeps created/modified either way",
+    ),
+    "item_state": (
+        FidelityStatus.DELIVERED,
+        "Outlook categories, the birthday, notes, the assistant/manager pair and the postal addresses ride in the"
+        " sidecar",
+    ),
+    "attachments": (FidelityStatus.UNSUPPORTED, _NO_CONTACT_PHOTO),
+    "permissions": (
+        FidelityStatus.UNSUPPORTED,
+        "a contact folder's delegation is a mailbox policy, not a contact property",
+    ),
+    "versions": (FidelityStatus.UNSUPPORTED, "Graph exposes no version history for contacts"),
+}
+
+CONTACTS_IMPORT_DIMENSIONS: Dict[str, Dimension] = {
+    "content": (FidelityStatus.DELIVERED, ""),
+    "structure": (FidelityStatus.DELIVERED, "the folder chain is recreated from each sidecar's display path"),
+    "item_state": (
+        FidelityStatus.DELIVERED,
+        "categories, birthday, notes, the assistant/manager pair and the postal addresses are restored",
+    ),
+    "timestamps": (
+        FidelityStatus.UNSUPPORTED,
+        "Exchange stamps a created contact with the import time; created/modified are not settable fields",
+    ),
+    "attachments": (FidelityStatus.UNSUPPORTED, _NO_CONTACT_PHOTO),
+    "permissions": (
+        FidelityStatus.UNSUPPORTED,
+        "a contact folder's delegation is a mailbox policy, not a contact property",
+    ),
+    "versions": (FidelityStatus.UNSUPPORTED, "Graph exposes no version history for contacts"),
 }

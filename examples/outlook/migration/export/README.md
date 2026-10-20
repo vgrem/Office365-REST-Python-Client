@@ -1,13 +1,15 @@
-# Export a mailbox or a calendar
+# Export a mailbox, a calendar or contacts
 
-Take a mailbox — or one folder and its subtree — out as a portable EML tree, or a
-calendar out as an ICS tree; both open in any mail/calendar client and import
-anywhere. Part of the [Outlook tour](../../README.md).
+Take a mailbox — or one folder and its subtree — out as a portable EML tree, a
+calendar out as an ICS tree, or a contact folder out as a vCard tree; all three open
+in any mail/calendar/contacts client and import anywhere. Part of the
+[Outlook tour](../../README.md).
 
 | What | File | Notes |
 |------|------|-------|
 | Folder → EML tree | [`export_folder_eml.py`](./export_folder_eml.py) | `--flat`, `--no-drafts`, `--preserve-timestamps`; ends with `manifest.jsonl` |
 | Calendar → ICS tree | [`export_calendar_ics.py`](./export_calendar_ics.py) | `--root-name`, `--instances`, `--cancelled`; same index |
+| Contacts → vCard tree | [`export_contacts_vcf.py`](./export_contacts_vcf.py) | `--root-name`, `--no-subfolders`, `--preserve-timestamps`; same index |
 
 ## What lands on disk
 
@@ -100,3 +102,49 @@ Deliberate choices, all of them visible in the sidecar:
 - **Attendees are descriptive.** `ATTENDEE`/`ORGANIZER` lines are written for
   other clients to read; an import recreates them from the sidecar, since Graph
   decides `responseStatus` and `isOrganizer` itself.
+
+## Contacts → vCard tree
+
+```bash
+uv run python examples/outlook/migration/export/export_contacts_vcf.py --output ./contacts-export
+```
+
+```text
+<output>/
+  Contacts/Alice-Example_4b1e9f02.vcf        # vCard 3.0 document
+  Contacts/Alice-Example_4b1e9f02.json      # the sidecar record
+  Contacts/Vendors/Vendor-Ltd_c1a24d70.vcf  # a child folder keeps its place
+  manifest.jsonl                            # one sidecar per line
+```
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import ContactSource, VcfExportTarget
+
+job = MigrationJob(ContactSource(folder), VcfExportTarget("./contacts-export"))
+job.plan()
+job.run()
+print(job.verify().summary())
+```
+
+The payload is *rendered* from the contact record rather than fetched, so the same
+contact always produces the same bytes and a byte checksum verifies the tree —
+`verify()` here is exact, not approximate.
+
+Deliberate choices, all of them visible in the sidecar:
+
+- **The Graph id is the key, not a name.** A contact has no `internetMessageId` and
+  no `iCalUid` — Exchange assigns neither — so nothing the source knows survives an
+  import. The file name carries a hash of the Graph id, which is stable on disk.
+- **Child folders are walked by default** (`--no-subfolders` turns it off) and keep
+  their place in the tree, so `Vendors` under `Work` does not flatten into the root.
+- **The birthday is recorded as a date.** Exchange stores `11:59` in the mailbox's
+  zone whatever is sent (both `11:59Z` and `11:59+00:00` read back as `11:59`), so
+  the original time of day is not recoverable and is not pretended.
+- **The sidecar is the import contract.** vCard 3.0 has nowhere to put the office
+  fields, the address components or the categories without a lossy mapping; an
+  import reads the sidecar and treats the `.vcf` as the portable copy.
+- **Photos are out of scope.** The `contact` entity on this endpoint exposes no
+  `hasPhoto` column, so finding one costs a `GET /photo` that 404s per contact
+  without a photo — declared unsupported rather than probed.
+

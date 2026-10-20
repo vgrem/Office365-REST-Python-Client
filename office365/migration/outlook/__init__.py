@@ -1,4 +1,4 @@
-"""Outlook migration product: mailbox assessment, mail export/import, calendar export/import.
+"""Outlook migration product: mailbox assessment, mail, calendar and contacts export/import.
 
 Reuses the shared assessment model (containers, scans, reports, export); the
 product-specific parts are the mailbox walker (:class:`MailboxAssessor`) with its
@@ -7,7 +7,9 @@ mailbox through a portable EML tree: :class:`MailFolderSource` ->
 :class:`MailExportTarget` on the way out, :class:`EmlTreeSource` ->
 :class:`MailboxTarget` on the way back in. A calendar does the same with an ICS
 sidecar tree: :class:`CalendarSource` -> :class:`IcsExportTarget`, and
-:class:`IcsTreeSource` -> :class:`CalendarTarget`.
+:class:`IcsTreeSource` -> :class:`CalendarTarget`. Contacts do the same with a vCard
+sidecar tree: :class:`ContactSource` -> :class:`VcfExportTarget`, and
+:class:`VcfTreeSource` -> :class:`ContactTarget`.
 """
 
 from office365.migration.outlook.adapters import MANIFEST_NAME, MailExportTarget, MailFolderSource
@@ -31,6 +33,24 @@ from office365.migration.outlook.calendar_models import (
     event_key,
     event_transaction_id,
 )
+from office365.migration.outlook.contacts_adapters import (
+    ContactSource,
+    ContactTarget,
+    VcfExportTarget,
+    VcfTreeSource,
+)
+from office365.migration.outlook.contacts_models import (
+    CONTACT_COLUMNS,
+    ContactExportOptions,
+    ContactImportOptions,
+    contact_create_payload,
+    contact_dedup_key,
+    contact_dest_path,
+    contact_digest,
+    contact_envelope,
+    contact_key,
+    contact_vcard,
+)
 from office365.migration.outlook.eml_import import EmlTreeSource, MailboxTarget
 from office365.migration.outlook.models import (
     MailExportOptions,
@@ -44,6 +64,7 @@ from office365.migration.outlook.registry import OUTLOOK_SCANS, outlook_scan_pai
 from office365.migration.outlook.scanner import MailboxFolderRecord, MailboxFolderScan, MailFolderData, OutlookOptions
 
 __all__ = [
+    "CONTACT_COLUMNS",
     "EVENT_COLUMNS",
     "MANIFEST_NAME",
     "OUTLOOK_SCANS",
@@ -51,6 +72,10 @@ __all__ = [
     "CalendarImportOptions",
     "CalendarSource",
     "CalendarTarget",
+    "ContactExportOptions",
+    "ContactImportOptions",
+    "ContactSource",
+    "ContactTarget",
     "EmlTreeSource",
     "IcsExportTarget",
     "IcsTreeSource",
@@ -64,6 +89,15 @@ __all__ = [
     "MailboxFolderScan",
     "MailboxTarget",
     "OutlookOptions",
+    "VcfExportTarget",
+    "VcfTreeSource",
+    "contact_create_payload",
+    "contact_dedup_key",
+    "contact_dest_path",
+    "contact_digest",
+    "contact_envelope",
+    "contact_key",
+    "contact_vcard",
     "event_create_payload",
     "event_dedup_key",
     "event_dest_path",

@@ -1,12 +1,14 @@
-# Import an EML or ICS tree
+# Import an EML, ICS or vCard tree
 
-Put a portable EML or ICS tree back into a mailbox or a calendar — the inverse of
-[`migration/export`](../export/README.md). Part of the [Outlook tour](../../README.md).
+Put a portable EML, ICS or vCard tree back into a mailbox, a calendar or a contact
+folder — the inverse of [`migration/export`](../export/README.md). Part of the
+[Outlook tour](../../README.md).
 
 | What | File | Notes |
 |------|------|-------|
 | EML tree → mailbox | [`import_folder_eml.py`](./import_folder_eml.py) | `--source`, `--folder`, `--root-name`, `--no-read-state`, `--no-categories` |
 | ICS tree → calendar | [`import_calendar_ics.py`](./import_calendar_ics.py) | `--source`, `--calendar`, `--attendees`, `--no-categories` |
+| vCard tree → contacts | [`import_contacts_vcf.py`](./import_contacts_vcf.py) | `--source`, `--folder`, `--no-categories` |
 
 ```bash
 uv run python examples/outlook/migration/import/import_folder_eml.py \
@@ -127,3 +129,54 @@ print(job.verify().summary())
   throughput this client cannot match.
 - **Dual-write co-existence** (GWSMO and friends). Sync is a service with a scheduler,
   not a one-shot job.
+
+## vCard tree → contacts
+
+```bash
+uv run python examples/outlook/migration/import/import_contacts_vcf.py --source ./contacts-export
+```
+
+```py
+from office365.migration import MigrationJob
+from office365.migration.outlook import ContactImportOptions, ContactTarget, VcfTreeSource
+
+options = ContactImportOptions()  # one object, shared by both adapters
+job = MigrationJob(VcfTreeSource("./contacts-export", options), ContactTarget(folder, options))
+job.plan()
+job.run()
+print(job.verify().summary())
+```
+
+## What the contact import restores
+
+- **The contact.** Every office field, both addresses (with their components), the
+  home/business/mobile phones, the IM addresses, the children, the notes, the
+  categories and the folder it lived in — the folder chain is recreated under the
+  target with `ContactFolderCollection.ensure`, so a re-run does not add a second
+  `Vendors`.
+- **Idempotency.** A contact has no `transactionId`, so concurrency is not handled by
+  the service refusing a second write: the target matches on
+  `(display name, first address)` instead. A re-run skips what it already created;
+  two contacts that share both are both imported, and two *concurrent* runs can
+  import the same contact twice.
+- **A deterministic create body.** `ContactCollection.add()` takes four arguments and
+  drops everything else (measured), so the target builds the Graph-spelled payload
+  itself and posts it raw.
+
+## What it cannot restore
+
+- **The created/modified times.** Exchange stamps the import time, so
+  `preserve_timestamps` is refused up front by the runner rather than silently
+  dropped.
+- **The photo.** Out of scope on both sides, for the reason the export section gives.
+- **A category that carries a comma.** Exchange rejects the *whole* contact with
+  `ErrorPropertyUpdate` ("Property update did not succeed.") when one category
+  contains a comma — the vCard separator — and the message names neither the field
+  nor the value. The payload is refused client-side with the offending name instead.
+
+Verification is a digest of the restorable fields, read back through a **fresh**
+handle on the folder: re-loading a contact through the object the create returned
+*appends* to every collection-valued property (measured — `emailAddresses`,
+`businessPhones`, `homePhones`, `imAddresses`, `categories` and `children` all
+doubled), which would look like a mismatch on every round trip.
+

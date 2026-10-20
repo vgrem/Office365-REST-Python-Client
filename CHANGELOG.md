@@ -86,6 +86,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   fields, with the service-owned ones and the body markup excluded — because
   Exchange re-serializes the event.
 
+**Migration (contacts)**
+
+- `ContactSource` + `VcfExportTarget` (`office365.migration.outlook`) export a
+  contact folder and its child folders as a portable vCard tree through the same
+  `MigrationJob`: one `.vcf` (vCard 3.0, CRLF and folded at 75 octets) plus one JSON
+  sidecar per contact, and a `manifest.jsonl` index. The document is rendered from
+  the contact record, so `verify()` is an exact byte checksum, and the file name
+  carries a hash of the Graph id — a contact has no `internetMessageId` and no
+  `iCalUid`, so nothing the source knows survives an import. `ContactExportOptions`
+  controls the root name, the child-folder walk and extra projected properties.
+- `VcfTreeSource` + `ContactTarget` import that tree back into a contact folder,
+  recreating the folder chain with the exported names and replaying every office
+  field, both addresses, the phones, the IM addresses, the children, the notes and
+  the categories — the `.vcf` is what another client opens, the sidecar is what the
+  import restores, and an `.vcf` without one raises instead of importing a thinner
+  contact. The create body is built locally and posted raw, because
+  `ContactCollection.add()` takes four arguments and drops the rest (measured).
+  A re-run skips what the folder already has — a contact has no `transactionId`, so
+  the target matches on `(display name, first address)` instead, which also means
+  two concurrent runs can import the same contact twice (documented, not hidden) —
+  and verification is `contact_digest`, a digest of the restorable fields read back
+  through a fresh handle, because Exchange normalises a birthday's time of day and
+  fills in a missing e-mail `name`. Reported rather than assumed: a photo is out of
+  scope on both sides (the entity exposes no `hasPhoto` column, so detecting one
+  costs a `GET /photo` that 404s per contact) and timestamps are not restorable (so
+  `preserve_timestamps` is refused up front). A category containing a comma is
+  refused client-side with the offending name, since Exchange rejects the whole
+  contact (`ErrorPropertyUpdate`) and the message names neither the field nor the
+  value.
+
 **Migration (fidelity forecast)**
 
 - `MigrationJob.plan()` now states the fidelity forecast before it enumerates: one
