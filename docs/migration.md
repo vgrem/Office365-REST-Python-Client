@@ -1386,8 +1386,18 @@ to apply the mapped principal is still caught — and a run with no map is uncha
 implicit. The matrix is probed from the adapter pair's capability attributes
 (`supports_versions`, `supports_authorship`, `supports_attachments`) and optional
 hooks (`apply_timestamps`, `read_permissions`/`apply_permissions`); a non-delivered
-dimension always carries a reason in `report.dimension_notes`. The table below is
-the shipped pairs' expected output.
+dimension always carries a reason in `report.dimension_notes`.
+
+That probe only knows SharePoint's shapes, so an adapter **declares** its own matrix
+instead when the product is not SharePoint: a mapping of
+`dimension -> (status, reason)` on the `fidelity_dimensions` attribute of either
+adapter (the source is asked first, because the source names the product). A
+declaration replaces the probe rather than being merged with it — a mailbox has no
+views or navigation, and reporting them would be noise — and an unknown status name
+raises instead of being reported, so a typo surfaces at the first forecast. The
+Outlook tables live in `office365/migration/outlook/fidelity.py`.
+
+The table below is the shipped SharePoint pairs' expected output.
 
 | Dimension | Library → package | Library → REST | List → REST |
 |---|---|---|---|
@@ -1405,6 +1415,19 @@ the shipped pairs' expected output.
 | Site settings (web scope) | each web's `Title`/`Description` are copied onto the target web when they differ (`migrate_site_settings`), as is its branding (master page, logo, alternate CSS, theme folder) — rebased onto the target's path and only where the target has the asset; the site-collection/regional settings and activated features are not carried over REST, only compared and reported (`compare_site_scope`, `verify_site(..., site_scope=True)`) | same | same |
 | Workflows / InfoPath forms / BCS external lists | not migrated (the resolver reports every association, InfoPath form and external list as a handoff) | same | same |
 | Sharing links | unsupported (following tenant policy; not recreated per item) | same | same |
+
+A declared matrix names the dimensions that product actually has, so it is shorter:
+
+| Dimension | Mail export | Mail import | Calendar export | Calendar import |
+|---|---|---|---|---|
+| Content | delivered (MIME bytes + sidecar) | delivered | delivered | delivered |
+| Folder / series structure | delivered (folder path + display chain) | delivered (folder chain recreated) | best-effort (one item per series master; occurrences and cancellations are opt-in) | delivered (`seriesMaster` with Graph's own `recurrence`) |
+| Created/Modified | delivered (payload file mtime; the sidecar keeps both dates) | unsupported (`receivedDateTime` is not settable — Exchange stamps the import time) | delivered (`DTSTAMP` is the event's `lastModifiedDateTime`) | unsupported (Exchange assigns `created`/`modified`) |
+| Item state | delivered (read state, categories, importance, draft flag) | best-effort (one PATCH replays read state, categories and importance; the follow-up flag is not) | delivered (show-as, sensitivity, importance, reminder, categories) | delivered |
+| Attendees | n/a | n/a | delivered (`ATTENDEE`/`ORGANIZER` lines) | best-effort (dropped unless `restore_attendees=True`: adding them makes Exchange invite every attendee) |
+| Attachments | delivered (inside the MIME) | delivered | unsupported (only `hasAttachments` is recorded) | unsupported |
+| Permissions | unsupported | unsupported | unsupported | unsupported |
+| Versions | unsupported | unsupported | unsupported | unsupported |
 
 > Columns, content types, views and container settings are deliberately *not*
 > carried by the item adapters: they are schema/policy, and the SharePoint resolver

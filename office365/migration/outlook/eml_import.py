@@ -38,6 +38,7 @@ from typing import Any, Iterable, cast
 
 from office365.migration.adapters import DataSource, DataTarget, MigrationProgress
 from office365.migration.base import MigrationItem
+from office365.migration.outlook.fidelity import MAIL_IMPORT_DIMENSIONS
 from office365.migration.outlook.models import MAX_IMPORT_MIME_BYTES, MailImportOptions, mime_digest
 from office365.runtime.operations import emit_progress
 from office365.runtime.paths.v4.entity import EntityPath
@@ -61,6 +62,9 @@ class EmlTreeSource(DataSource):
     Each item's envelope is the JSON sidecar the export wrote beside the message, so
     folder names, categories and read state survive into the import plan.
     """
+
+    #: What a mailbox import preserves; see ``outlook.fidelity``.
+    fidelity_dimensions = MAIL_IMPORT_DIMENSIONS
 
     def __init__(self, root: str | Path) -> None:
         self._root = Path(root)
@@ -127,6 +131,8 @@ class MailboxTarget(DataTarget):
     child folders under it, using the exported ``folder_display_path`` names so a
     folder called ``All Mail`` does not come back as ``All-Mail``.
     """
+
+    fidelity_dimensions = MAIL_IMPORT_DIMENSIONS
 
     def __init__(self, folder, options: MailImportOptions | None = None) -> None:
         self._root = folder

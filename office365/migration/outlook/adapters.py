@@ -39,6 +39,7 @@ from typing import Any, Iterable
 
 from office365.migration.adapters import DataSource, DataTarget, MigrationProgress
 from office365.migration.base import MigrationItem
+from office365.migration.outlook.fidelity import MAIL_EXPORT_DIMENSIONS
 from office365.migration.outlook.models import (
     MAIL_COLUMNS,
     MailExportOptions,
@@ -63,6 +64,9 @@ class MailFolderSource(DataSource):
     Each item carries its envelope in ``metadata``, so the export's index is
     written from the manifest itself — no second pass over the mailbox.
     """
+
+    #: A mailbox has none of the SharePoint dimensions; see ``outlook.fidelity``.
+    fidelity_dimensions = MAIL_EXPORT_DIMENSIONS
 
     def __init__(self, folder, options: MailExportOptions | None = None) -> None:
         self._folder = folder
@@ -227,6 +231,7 @@ class SidecarTreeTarget(DataTarget):
 class MailExportTarget(SidecarTreeTarget):
     """Writes a portable EML tree: one ``.eml`` plus one JSON sidecar per message."""
 
+    fidelity_dimensions = MAIL_EXPORT_DIMENSIONS
     content_suffix = ".eml"
     payload_key = "eml_path"
 

@@ -190,6 +190,18 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   unasked — measured). The verification read now asks for the item's own zone with
   `Prefer: outlook.timezone`, exposed as the new `prefer_outlook_timezone`
   (`office365.runtime.http.prefer`, works with Windows and IANA names).
+- Migration fidelity reports **a product's own dimensions** instead of SharePoint's.
+  `describe_fidelity` used to probe the adapter pair and always print the fourteen
+  SharePoint dimensions, so a mail export forecast read
+  `attachments=unsupported — list-item attachments are carried only between list
+  adapters` and `views=unsupported`. An adapter can now carry a
+  `fidelity_dimensions` mapping of `dimension -> (status, reason)`; the source is
+  asked first, a declaration replaces the probe, and an unknown status name raises
+  rather than being reported. The four Outlook directions declare theirs in
+  `office365.migration.outlook.fidelity`, and a mail export now reports
+  `content`/`structure`/`timestamps`/`item_state`/`attachments` — delivered — plus
+  `permissions`/`versions` as unsupported. SharePoint pairs declare nothing and are
+  unchanged.
 
 ## [3.3.0] - 2026-10-18
 

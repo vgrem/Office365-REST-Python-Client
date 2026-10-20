@@ -20,6 +20,14 @@ The report carries two views:
   ``dimension_notes``. The matrix is broader than the requested flags: it also
   names dimensions no adapter carries (so their absence is explicit, never
   implicit), and is the machine-readable form of the table in ``docs/migration.md``.
+
+A product whose dimensions are not SharePoint's declares its own table and the
+engine reports it verbatim: the source (or target) adapter carries a
+``fidelity_dimensions`` mapping of ``dimension -> (status, reason)``. That is why
+a mail export reports ``content``/``structure``/``timestamps``/``item_state``/
+``attachments`` instead of ``views``/``navigation``/``site_settings`` — the
+dimension names came from the SharePoint probe, not from the engine. Without a
+declaration the probe below runs, so nothing changes for the SharePoint pairs.
 """
 
 from __future__ import annotations
@@ -105,8 +113,56 @@ def _supports(obj: Any, name: str) -> bool:
     return callable(getattr(obj, name, None))
 
 
+def _declared_dimensions(source: Any, target: Any) -> Any:
+    """The matrix a product declares on its adapter, if it declares one.
+
+    The *source* is asked first: it names the product (``MailFolderSource`` for an
+    export, ``EmlTreeSource`` for the matching import). A pair where only the target
+    declares is still honoured, because a target may be the one that knows.
+    """
+    for adapter in (source, target):
+        declared = getattr(adapter, "fidelity_dimensions", None)
+        if declared:
+            return declared
+    return None
+
+
+def _normalize_dimensions(
+    declared: Any,
+) -> tuple[dict[str, str], dict[str, str]]:
+    """Render a declared ``{dimension: (status, reason)}`` table as the report's two dicts.
+
+    ``(status, reason)``, a bare status or a bare status *name* are all accepted, so a
+    table can stay a readable literal. A reason is only
+    kept for a dimension that is not ``delivered``, matching the probe's rule; an
+    unknown status raises ``ValueError`` rather than being reported as-is, because a
+    typo in a declaration should fail loudly at the first forecast.
+    """
+    dims: dict[str, str] = {}
+    notes: dict[str, str] = {}
+    for name, declared_status in declared.items():
+        if isinstance(declared_status, str):
+            status, note = FidelityStatus(declared_status), ""
+        elif isinstance(declared_status, FidelityStatus):
+            status, note = declared_status, ""
+        else:
+            status, note = FidelityStatus(declared_status[0]), declared_status[1]
+        dims[name] = status.value
+        if note and status is not FidelityStatus.DELIVERED:
+            notes[name] = note
+    return dims, notes
+
+
 def _dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str]]:
-    """The full fidelity matrix for an adapter pair (capability-probed, conservative)."""
+    """The fidelity matrix for an adapter pair: the product's own table, else the probe."""
+    declared = _declared_dimensions(source, target)
+    if declared is not None:
+        return _normalize_dimensions(declared)
+    return _sharepoint_dimensions(source, target)
+
+
+def _sharepoint_dimensions(source: Any, target: Any) -> tuple[dict[str, str], dict[str, str]]:
+    """The full fidelity matrix for a SharePoint adapter pair (capability-probed, conservative)."""
     status = FidelityStatus
     dims: dict[str, str] = {}
     notes: dict[str, str] = {}
@@ -236,6 +292,10 @@ def describe_fidelity(source: Any, target: Any, options: MigrationOptions) -> Fi
     it is unsupported on the client-side REST path. Authorship needs
     ``DataTarget.apply_authorship`` (client-side) or ``supports_authorship`` (the
     server-side package target).
+
+    The matrix is not probed when an adapter declares ``fidelity_dimensions`` — a
+    product that is not SharePoint states its own dimensions, and they are reported
+    as declared.
 
     Args:
         source: The source adapter.

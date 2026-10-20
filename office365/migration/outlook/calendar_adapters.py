@@ -83,6 +83,7 @@ from office365.migration.outlook.calendar_models import (
     event_key,
 )
 from office365.migration.outlook.eml_import import SIDECAR_SUFFIX
+from office365.migration.outlook.fidelity import CALENDAR_EXPORT_DIMENSIONS, CALENDAR_IMPORT_DIMENSIONS
 from office365.migration.outlook.models import mail_slug
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.converters.scalars import iso_or_none
@@ -107,6 +108,9 @@ class CalendarSource(DataSource):
     Each item carries its envelope in ``metadata``, so the export's index is written
     from the manifest itself — no second pass over the calendar.
     """
+
+    #: What a calendar export preserves; see ``outlook.fidelity``.
+    fidelity_dimensions = CALENDAR_EXPORT_DIMENSIONS
 
     def __init__(self, calendar, options: CalendarExportOptions | None = None) -> None:
         self._calendar = calendar
@@ -178,6 +182,7 @@ class CalendarSource(DataSource):
 class IcsExportTarget(SidecarTreeTarget):
     """Writes a portable ICS tree: one ``.ics`` plus one JSON sidecar per event."""
 
+    fidelity_dimensions = CALENDAR_EXPORT_DIMENSIONS
     content_suffix = ".ics"
     payload_key = "ics_path"
 
@@ -190,6 +195,9 @@ class IcsTreeSource(DataSource):
     express Graph's recurrence object, and reading a calendar back out of iCalendar
     would invent an import that silently turns every series into a single meeting.
     """
+
+    #: What a calendar import preserves; see ``outlook.fidelity``.
+    fidelity_dimensions = CALENDAR_IMPORT_DIMENSIONS
 
     def __init__(self, root: str | Path, options: CalendarImportOptions | None = None) -> None:
         self._root = Path(root)
@@ -264,6 +272,8 @@ class CalendarTarget(DataTarget):
     posted verbatim (:func:`event_create_payload`), because the typed helpers mangle
     the time zone and drop the ``transactionId``.
     """
+
+    fidelity_dimensions = CALENDAR_IMPORT_DIMENSIONS
 
     def __init__(self, calendar, options: CalendarImportOptions | None = None) -> None:
         self._calendar = calendar

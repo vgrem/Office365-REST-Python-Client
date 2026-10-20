@@ -426,3 +426,157 @@ def test_item_to_dict_is_json_safe_with_version_blobs():
     assert "versions" not in data  # transient blobs are never persisted
     assert data["version_label"] == "2.0"
     json.dumps(data)  # must not raise on bytes
+
+
+# -- a product may declare its own dimensions ------------------------------------
+#
+# The matrix began as a probe of the SharePoint adapters, so its dimension names are
+# SharePoint's (views, navigation, site settings …). A mailbox has none of those, and
+# the first Outlook forecast said `attachments: unsupported — list-item attachments are
+# carried only between list adapters`, which is true of a list and meaningless for mail.
+
+
+class _DeclaredSource(_Source):
+    fidelity_dimensions = {
+        "content": "delivered",
+        "item_state": ("best-effort", "the follow-up flag is not replayed"),
+        "views": ("delivered", "this reason must be dropped: a delivered dimension carries none"),
+        # A name no SharePoint probe would ever emit, so a "source wins" test cannot pass
+        # by accident on a matrix that is simply the documented 14.
+        "attendees": "best-effort",
+    }
+
+
+class _DeclaredTarget(_Target):
+    fidelity_dimensions = {"content": "unsupported", "target_only": "delivered"}
+
+
+class _Folder:
+    """Just enough of a Graph mail folder for an adapter's label."""
+
+    id = "inbox"
+    display_name = "Inbox"
+
+
+def test_a_declared_matrix_replaces_the_sharepoint_probe():
+    from office365.migration.fidelity import FidelityStatus, describe_fidelity
+
+    report = describe_fidelity(_DeclaredSource([]), _Target(), MigrationOptions())
+
+    assert list(report.dimensions) == ["content", "item_state", "views", "attendees"]
+    assert report.dimensions["content"] == FidelityStatus.DELIVERED.value
+    assert report.dimensions["item_state"] == FidelityStatus.BEST_EFFORT.value
+    assert report.dimension_notes == {"item_state": "the follow-up flag is not replayed"}
+    assert "navigation" not in report.dimensions
+
+
+def test_the_source_names_the_product_so_its_table_wins():
+    from office365.migration.fidelity import describe_fidelity
+
+    report = describe_fidelity(_DeclaredSource([]), _DeclaredTarget(), MigrationOptions())
+
+    assert "target_only" not in report.dimensions
+    assert "attendees" in report.dimensions  # only the source's table has it
+    assert report.dimensions["content"] == "delivered"  # the target calls it unsupported
+
+
+def test_a_target_that_declares_a_matrix_is_honoured_without_a_source_table():
+    from office365.migration.fidelity import describe_fidelity
+
+    report = describe_fidelity(_Source([]), _DeclaredTarget(), MigrationOptions())
+
+    assert list(report.dimensions) == ["content", "target_only"]
+    assert report.dimensions["content"] == "unsupported"
+
+
+def test_an_unknown_declared_status_fails_loudly():
+    from office365.migration.fidelity import describe_fidelity
+
+    class _Typo(_Source):
+        fidelity_dimensions = {"content": ("deliverd", "typo")}
+
+    with pytest.raises(ValueError):
+        describe_fidelity(_Typo([]), _Target(), MigrationOptions())
+
+
+def test_the_mail_export_pair_reports_mail_dimensions(tmp_path):
+    from office365.migration.fidelity import describe_fidelity
+    from office365.migration.outlook import MailExportOptions, MailExportTarget, MailFolderSource
+
+    report = describe_fidelity(
+        MailFolderSource(_Folder(), MailExportOptions()), MailExportTarget(tmp_path), MigrationOptions()
+    )
+
+    assert list(report.dimensions) == [
+        "content",
+        "structure",
+        "timestamps",
+        "item_state",
+        "attachments",
+        "permissions",
+        "versions",
+    ]
+    assert report.dimensions["attachments"] == "delivered"
+    assert "list-item" not in report.dimension_notes.get("attachments", "")
+    for name in ("structure", "timestamps", "item_state", "attachments"):
+        assert report.dimensions[name] != "unsupported", name
+
+
+def test_the_mail_import_pair_says_timestamps_cannot_be_restored(tmp_path):
+    from office365.migration.fidelity import describe_fidelity
+    from office365.migration.outlook import EmlTreeSource, MailboxTarget, MailImportOptions
+
+    report = describe_fidelity(
+        EmlTreeSource(tmp_path), MailboxTarget(_Folder(), MailImportOptions()), MigrationOptions()
+    )
+
+    # Measured on a live import: Exchange stamps the message with the import time and
+    # `receivedDateTime` is not settable, so this is a declared loss, not a mystery.
+    assert report.dimensions["timestamps"] == "unsupported"
+    assert "receivedDateTime" in report.dimension_notes["timestamps"]
+    assert report.dimensions["attachments"] == "delivered"
+
+
+def test_the_calendar_pairs_name_the_attendee_trade_off(tmp_path):
+    from office365.migration.fidelity import describe_fidelity
+    from office365.migration.outlook import (
+        CalendarExportOptions,
+        CalendarImportOptions,
+        CalendarSource,
+        CalendarTarget,
+        IcsExportTarget,
+        IcsTreeSource,
+    )
+
+    exported = describe_fidelity(
+        CalendarSource(_Folder(), CalendarExportOptions()), IcsExportTarget(tmp_path), MigrationOptions()
+    )
+    imported = describe_fidelity(
+        IcsTreeSource(tmp_path), CalendarTarget(_Folder(), CalendarImportOptions()), MigrationOptions()
+    )
+
+    assert exported.dimensions["structure"] == "best-effort"
+    assert "series master" in exported.dimension_notes["structure"]
+    assert imported.dimensions["attendees"] == "best-effort"
+    assert "restore_attendees" in imported.dimension_notes["attendees"]
+    assert "restore_attendees" not in exported.dimension_notes.get("attendees", "")
+
+
+def test_the_forecast_report_carries_the_declared_matrix(tmp_path):
+    import csv
+    import io
+
+    from office365.migration.job import MigrationJob
+    from office365.migration.outlook import MailExportTarget, MailFolderSource
+    from office365.migration.report import export_reports
+
+    job = MigrationJob(MailFolderSource(_Folder()), MailExportTarget(tmp_path))
+    job.fidelity()
+
+    written = export_reports(job, tmp_path / "reports")
+    fidelity_csv = tmp_path / "reports" / "FidelityReport.csv"
+    rows = list(csv.DictReader(io.StringIO(fidelity_csv.read_text(encoding="utf-8"))))
+
+    assert any(path.endswith("FidelityReport.csv") for path in written)
+    assert "views" not in {row["dimension"] for row in rows}
+    assert {row["dimension"] for row in rows} == set(job.fidelity().dimensions)
