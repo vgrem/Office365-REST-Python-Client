@@ -81,18 +81,23 @@ from office365.migration.outlook.calendar_models import (
     event_envelope,
     event_ics,
     event_key,
+    event_kind,
 )
 from office365.migration.outlook.eml_import import SIDECAR_SUFFIX
 from office365.migration.outlook.fidelity import CALENDAR_EXPORT_DIMENSIONS, CALENDAR_IMPORT_DIMENSIONS
 from office365.migration.outlook.models import mail_slug
+from office365.outlook.calendar.events.event import Event
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.converters.scalars import iso_or_none
 from office365.runtime.http.prefer import prefer_outlook_timezone
 from office365.runtime.operations import emit_progress
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
-#: Properties an import reads back off the target calendar to recognise its own work.
-_EXISTING_COLUMNS = ["id", "subject", "start", "iCalUId"]
+#: The narrow read an import uses to recognise its own work: identity, name, and the
+#: wall clock the key is built from. Spelled through the model, so a rename cannot
+#: leave it stale — and deliberately narrower than ``EVENT_COLUMNS``, because this
+#: one runs per item during a dedupe pass.
+_EXISTING_COLUMNS = [Event.wire_name(attr) for attr in ("id", "subject", "start", "ical_uid")]
 
 #: Graph's error code for a reused ``transactionId`` (a concurrent run got there first).
 _DUPLICATE_TRANSACTION = "ErrorDuplicateTransactionId"
@@ -127,11 +132,7 @@ class CalendarSource(DataSource):
         display = getattr(self._calendar, "name", None) or root
         items: list[MigrationItem] = []
         for event in self._calendar.events.select(EVENT_COLUMNS).get_all().execute_query():
-            # ``type`` is enum-typed on the model, so the getter answers with a member
-            # (or with the enum default when the column is absent): compare names.
-            raw_kind = event.get_property("type")
-            kind = getattr(raw_kind, "name", raw_kind)
-            if not self._include(event, kind):
+            if not self._include(event):
                 continue
             item = self._item(event, root, display)
             self._events[item.dest_path] = event
@@ -140,11 +141,11 @@ class CalendarSource(DataSource):
         self._enumerated = True
         return items
 
-    def _include(self, event, kind: str | None) -> bool:
+    def _include(self, event) -> bool:
         """Whether an event is exported on its own (a series master, not an instance)."""
-        if event.get_property("isCancelled") and not self._options.include_cancelled:
+        if event.is_cancelled and not self._options.include_cancelled:
             return False
-        if kind in (None, *STANDALONE_EVENT_TYPES):
+        if event_kind(event) in (None, *STANDALONE_EVENT_TYPES):
             return True
         return self._options.include_recurring_instances
 
@@ -156,8 +157,8 @@ class CalendarSource(DataSource):
             # An event has no byte size until its ``.ics`` is rendered; ``read()`` fills it.
             size_bytes=0,
             item_type="event",
-            modified=iso_or_none(event.get_property("lastModifiedDateTime")),
-            created=iso_or_none(event.get_property("createdDateTime")),
+            modified=iso_or_none(event.last_modified_datetime),
+            created=iso_or_none(event.created_datetime),
             source_id=event_key(event),
             metadata=event_envelope(event, path, self._options.extra_properties, display),
         )
@@ -395,7 +396,7 @@ class CalendarTarget(DataTarget):
         if self._index is None:
             index: dict[tuple[str, str | None, str | None], list[Any]] = {}
             for event in self._calendar.events.select(_EXISTING_COLUMNS).get_all().execute_query():
-                key = event_dedup_key({"subject": event.get_property("subject"), "start": event.get_property("start")})
+                key = event_dedup_key({"subject": event.subject, "start": event.start})
                 index.setdefault(key, []).append(event)
             self._index = index
         return self._index

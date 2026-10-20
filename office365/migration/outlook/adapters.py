@@ -104,7 +104,7 @@ class MailFolderSource(DataSource):
 
     def _item(self, message, path: str, display: str) -> MigrationItem:
         received = message.received_date_time
-        modified = message.get_property("lastModifiedDateTime") or received
+        modified = message.last_modified_datetime or received
         dest = mail_dest_path(message, path)
         return MigrationItem(
             source_path=dest,

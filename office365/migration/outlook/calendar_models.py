@@ -26,45 +26,15 @@ from enum import Enum
 from typing import Any
 
 from office365.migration.outlook.models import mail_slug
+from office365.outlook.calendar.events.event import Event
 from office365.runtime.converters.scalars import iso_or_none
 
-#: Graph event properties an export reads. All of them are selectable in one
-#: ``$select`` (each was probed against the Exchange-backed endpoint).
-EVENT_COLUMNS = [
-    "id",
-    "iCalUId",
-    "subject",
-    "body",
-    "bodyPreview",
-    "start",
-    "end",
-    "isAllDay",
-    "location",
-    "locations",
-    "organizer",
-    "attendees",
-    "categories",
-    "showAs",
-    "sensitivity",
-    "importance",
-    "isReminderOn",
-    "reminderMinutesBeforeStart",
-    "createdDateTime",
-    "lastModifiedDateTime",
-    "type",
-    "seriesMasterId",
-    "recurrence",
-    "isOnlineMeeting",
-    "onlineMeetingProvider",
-    "onlineMeeting",
-    "hasAttachments",
-    "webLink",
-    "transactionId",
-    "responseStatus",
-    "isOrganizer",
-    "allowNewTimeProposals",
-    "responseRequested",
-]
+#: Graph event properties an export reads: every column the model declares.
+#: Derived rather than listed, so a $select cannot disagree with the getters that
+#: consume it — the class of bug that produced ``iCalUid`` (one capital short of
+#: the real ``iCalUId``, silently ``None``) is now unrepresentable. Navigation
+#: properties are excluded by construction: ``$select`` rejects them.
+EVENT_COLUMNS = Event.select_all()
 
 #: Event types that stand on their own. An ``occurrence``/``exception`` belongs to
 #: its ``seriesMaster`` (exported once, as a series), so exporting the instances
@@ -185,14 +155,14 @@ def event_dest_path(event, calendar_path: str) -> str:
     start = _started(event)
     stamp = start.strftime("%Y-%m-%d") if start else ""
     digest = hashlib.sha1(event_key(event).encode("utf-8")).hexdigest()[:8]
-    stem = "_".join(part for part in (stamp, mail_slug(event.get_property("subject")), digest) if part)
+    stem = "_".join(part for part in (stamp, mail_slug(event.subject), digest) if part)
     name = f"{stem}.ics"
     return f"{calendar_path}/{name}" if calendar_path else name
 
 
 def _started(event) -> datetime | None:
     """The event's start as a naive wall-clock datetime (its own zone), if set."""
-    value = _as_dict(event.get_property("start")).get("dateTime")
+    value = _as_dict(event.start).get("dateTime")
     return _parse_graph_datetime(value)
 
 
@@ -237,6 +207,15 @@ def _wire(value: Any) -> Any:
     return value.name if isinstance(value, Enum) else value
 
 
+def event_kind(event) -> str | None:
+    """The wire name of an event's ``type``: ``singleInstance``, ``seriesMaster``, …
+
+    The model's getter answers with the generated enum on v1.0 (whose members carry
+    the CSDL ordinals, ``'"0"'``.., as values), so the name is the wire form.
+    """
+    return _wire(event.type_)
+
+
 def _address(recipient: Any) -> dict[str, str | None]:
     """An event's organizer/attendee as ``{"name", "address"}``."""
     email_address = _as_dict(_as_dict(recipient).get("emailAddress"))
@@ -257,46 +236,46 @@ def event_envelope(
     own object, not an ``RRULE`` — the ICS writer renders an ``RRULE`` from it, but
     the import replays the object it can round-trip exactly.
     """
-    body = _as_dict(event.get_property("body"))
-    online = _as_dict(event.get_property("onlineMeeting"))
-    locations = [_as_dict(item).get("displayName") for item in (event.get_property("locations") or [])]
+    body = _as_dict(event.body)
+    online = _as_dict(event.online_meeting)
+    locations = [_as_dict(item).get("displayName") for item in (event.locations or [])]
     envelope: dict[str, Any] = {
         "graph_id": event.id,
         "ical_uid": event.ical_uid,
         "calendar_path": calendar_path,
         "calendar_display_path": display_path or calendar_path,
-        "subject": event.get_property("subject"),
+        "subject": event.subject,
         "body": {"content_type": body.get("contentType"), "content": body.get("content")},
-        "start": _as_dict(event.get_property("start")),
-        "end": _as_dict(event.get_property("end")),
-        "is_all_day": bool(event.get_property("isAllDay")),
-        "is_cancelled": bool(event.get_property("isCancelled")),
-        "show_as": _wire(event.get_property("showAs")),
-        "sensitivity": _wire(event.get_property("sensitivity")),
-        "importance": _wire(event.get_property("importance")),
-        "location": _as_dict(event.get_property("location")).get("displayName"),
+        "start": _as_dict(event.start),
+        "end": _as_dict(event.end),
+        "is_all_day": bool(event.is_all_day),
+        "is_cancelled": bool(event.is_cancelled),
+        "show_as": _wire(event.show_as),
+        "sensitivity": _wire(event.sensitivity),
+        "importance": _wire(event.importance),
+        "location": _as_dict(event.location).get("displayName"),
         "locations": [name for name in locations if name],
-        "organizer": _address(event.get_property("organizer")),
+        "organizer": _address(event.organizer),
         "attendees": [
             {**_address(attendee), "type": _as_dict(attendee).get("type"), "response": _response(attendee)}
-            for attendee in (event.get_property("attendees") or [])
+            for attendee in (event.attendees or [])
         ],
-        "categories": list(event.get_property("categories") or []),
-        "is_reminder_on": bool(event.get_property("isReminderOn")),
-        "reminder_minutes": event.get_property("reminderMinutesBeforeStart"),
-        "created": iso_or_none(event.get_property("createdDateTime")),
-        "modified": iso_or_none(event.get_property("lastModifiedDateTime")),
-        "type": _wire(event.get_property("type")),
-        "series_master_id": event.get_property("seriesMasterId"),
+        "categories": list(event.categories or []),
+        "is_reminder_on": bool(event.is_reminder_on),
+        "reminder_minutes": event.reminder_minutes_before_start,
+        "created": iso_or_none(event.created_datetime),
+        "modified": iso_or_none(event.last_modified_datetime),
+        "type": event_kind(event),
+        "series_master_id": event.series_master_id,
         # Graph's own object, flattened through ``to_json()``: the raw property is a
         # typed ``PatternedRecurrence``, and the sidecar is JSON — ``default=str``
         # would have written its ``repr``, which no import can read back.
-        "recurrence": _as_dict(event.get_property("recurrence")) or None,
-        "is_online_meeting": bool(event.get_property("isOnlineMeeting")),
-        "online_meeting_provider": _wire(event.get_property("onlineMeetingProvider")),
+        "recurrence": _as_dict(event.recurrence) or None,
+        "is_online_meeting": bool(event.is_online_meeting),
+        "online_meeting_provider": _wire(event.online_meeting_provider),
         "join_url": online.get("joinUrl"),
-        "has_attachments": bool(event.get_property("hasAttachments")),
-        "web_link": event.get_property("webLink"),
+        "has_attachments": bool(event.has_attachments),
+        "web_link": event.web_link,
         "ics_path": event_dest_path(event, calendar_path),
     }
     for name in extra_properties or []:

@@ -75,6 +75,7 @@ from office365.migration.outlook.contacts_models import (
 from office365.migration.outlook.eml_import import SIDECAR_SUFFIX
 from office365.migration.outlook.fidelity import CONTACTS_EXPORT_DIMENSIONS, CONTACTS_IMPORT_DIMENSIONS
 from office365.migration.outlook.models import mail_slug
+from office365.outlook.contacts.contact import Contact
 from office365.outlook.contacts.folders.collection import ContactFolderCollection
 from office365.runtime.converters.scalars import iso_or_none
 from office365.runtime.operations import emit_progress
@@ -82,7 +83,10 @@ from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.create_entity import CreateEntityQuery
 
 #: The properties an import reads back to recognise a contact it already created.
-_EXISTING_COLUMNS = ["id", "displayName", "emailAddresses"]
+#: Identity and the two fields a dedupe checks; narrower than ``CONTACT_COLUMNS``
+#: on purpose — it runs per item. Spelled through the model so a rename cannot
+#: leave it stale.
+_EXISTING_COLUMNS = [Contact.wire_name(attr) for attr in ("id", "display_name", "email_addresses")]
 
 
 def _md5(data: bytes) -> str:
@@ -145,8 +149,8 @@ class ContactSource(DataSource):
 
     def _item(self, contact, path: str, display: str) -> MigrationItem:
         dest = contact_dest_path(contact, path)
-        modified = contact.get_property("lastModifiedDateTime")
-        created = contact.get_property("createdDateTime")
+        modified = contact.last_modified_datetime
+        created = contact.created_datetime
         return MigrationItem(
             source_path=dest,
             dest_path=dest,
@@ -414,10 +418,10 @@ class ContactTarget(DataTarget):
             for contact in folder.contacts.select(_EXISTING_COLUMNS).get_all().execute_query():
                 key = contact_dedup_key(
                     {
-                        "display_name": contact.get_property("displayName"),
+                        "display_name": contact.display_name,
                         "email_addresses": [
                             {"address": getattr(item, "address", None), "name": getattr(item, "name", None)}
-                            for item in (contact.get_property("emailAddresses") or [])
+                            for item in (contact.email_addresses or [])
                         ],
                     }
                 )

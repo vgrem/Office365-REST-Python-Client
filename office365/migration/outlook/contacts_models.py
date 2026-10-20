@@ -37,43 +37,14 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
+from office365.outlook.contacts.contact import Contact
 from office365.runtime.converters.scalars import iso_or_none
 
-#: Graph contact properties an export reads. Probed: every one of them answers in a
-#: single ``$select``, and every one of them survives a create → read round trip.
-CONTACT_COLUMNS = [
-    "id",
-    "displayName",
-    "givenName",
-    "surname",
-    "middleName",
-    "initials",
-    "nickName",
-    "title",
-    "fileAs",
-    "generation",
-    "companyName",
-    "department",
-    "jobTitle",
-    "profession",
-    "manager",
-    "assistantName",
-    "officeLocation",
-    "businessHomePage",
-    "birthday",
-    "personalNotes",
-    "spouseName",
-    "children",
-    "imAddresses",
-    "businessPhones",
-    "homePhones",
-    "mobilePhone",
-    "emailAddresses",
-    "categories",
-    "businessAddress",
-    "homeAddress",
-    "otherAddress",
-]
+#: Graph contact properties an export reads: every column the model declares.
+#: Derived rather than listed, for the reason the calendar projection is: a hand-kept
+#: list drifts from the getters that consume it, and a ``$select`` that omits a column
+#: is indistinguishable from a contact that has no value for it.
+CONTACT_COLUMNS = Contact.select_all()
 
 #: The five components of a Graph ``physicalAddress``, in the order they render in
 #: a vCard ``ADR`` line (``pobox;extended;street;locality;region;code;country`` has
@@ -149,7 +120,7 @@ def contact_dest_path(contact, folder_path: str) -> str:
     from office365.migration.outlook.models import mail_slug  # local: avoid a cycle at import time
 
     digest = hashlib.sha1(contact_key(contact).encode("utf-8")).hexdigest()[:8]
-    stem = "_".join(part for part in (mail_slug(contact.get_property("displayName")), digest) if part)
+    stem = "_".join(part for part in (mail_slug(contact.display_name), digest) if part)
     name = f"{stem or digest}.vcf"
     return f"{folder_path}/{name}" if folder_path else name
 
@@ -171,42 +142,42 @@ def contact_envelope(
         "graph_id": contact_key(contact),
         "folder_path": folder_path,
         "folder_display_path": display_path or folder_path,
-        "display_name": contact.get_property("displayName"),
-        "given_name": contact.get_property("givenName"),
-        "surname": contact.get_property("surname"),
-        "middle_name": contact.get_property("middleName"),
-        "initials": contact.get_property("initials"),
-        "nick_name": contact.get_property("nickName"),
-        "title": contact.get_property("title"),
-        "file_as": contact.get_property("fileAs"),
-        "generation": contact.get_property("generation"),
-        "company_name": contact.get_property("companyName"),
-        "department": contact.get_property("department"),
-        "job_title": contact.get_property("jobTitle"),
-        "profession": contact.get_property("profession"),
-        "manager": contact.get_property("manager"),
-        "assistant_name": contact.get_property("assistantName"),
-        "office_location": contact.get_property("officeLocation"),
-        "business_home_page": contact.get_property("businessHomePage"),
-        "birthday": iso_or_none(contact.get_property("birthday")),
-        "personal_notes": contact.get_property("personalNotes"),
-        "spouse_name": contact.get_property("spouseName"),
-        "children": [str(value) for value in (contact.get_property("children") or [])],
-        "im_addresses": [str(value) for value in (contact.get_property("imAddresses") or [])],
-        "business_phones": [str(value) for value in (contact.get_property("businessPhones") or [])],
-        "home_phones": [str(value) for value in (contact.get_property("homePhones") or [])],
-        "mobile_phone": contact.get_property("mobilePhone"),
+        "display_name": contact.display_name,
+        "given_name": contact.given_name,
+        "surname": contact.surname,
+        "middle_name": contact.middle_name,
+        "initials": contact.initials,
+        "nick_name": contact.nick_name,
+        "title": contact.title,
+        "file_as": contact.file_as,
+        "generation": contact.generation,
+        "company_name": contact.company_name,
+        "department": contact.department,
+        "job_title": contact.job_title,
+        "profession": contact.profession,
+        "manager": contact.manager,
+        "assistant_name": contact.assistant_name,
+        "office_location": contact.office_location,
+        "business_home_page": contact.business_home_page,
+        "birthday": iso_or_none(contact.birthday),
+        "personal_notes": contact.personal_notes,
+        "spouse_name": contact.spouse_name,
+        "children": [str(value) for value in (contact.children or [])],
+        "im_addresses": [str(value) for value in (contact.im_addresses or [])],
+        "business_phones": [str(value) for value in (contact.business_phones or [])],
+        "home_phones": [str(value) for value in (contact.home_phones or [])],
+        "mobile_phone": contact.mobile_phone,
         "email_addresses": [
             {"name": _as_dict(item).get("name"), "address": _as_dict(item).get("address")}
-            for item in (contact.get_property("emailAddresses") or [])
+            for item in (contact.email_addresses or [])
         ],
-        "categories": [str(value) for value in (contact.get_property("categories") or [])],
-        "created": iso_or_none(contact.get_property("createdDateTime")),
-        "modified": iso_or_none(contact.get_property("lastModifiedDateTime")),
+        "categories": [str(value) for value in (contact.categories or [])],
+        "created": iso_or_none(contact.created_datetime),
+        "modified": iso_or_none(contact.last_modified_datetime),
         "vcf_path": contact_dest_path(contact, folder_path),
     }
     for side in ("business_address", "home_address", "other_address"):
-        envelope[side] = _address(contact.get_property(_camel(side)))
+        envelope[side] = _address(getattr(contact, side))
     for name in extra_properties or []:
         envelope[name] = contact.get_property(name)
     return envelope
@@ -356,7 +327,7 @@ def contact_create_payload(
     for side in ("business_address", "home_address", "other_address"):
         address = {_ADDRESS_KEYS[part]: value for part, value in (envelope.get(side) or {}).items() if value}
         if address:
-            payload[_camel(side)] = address
+            payload[_wire_name(side)] = address
     if options.restore_categories:
         categories = [str(name) for name in envelope.get("categories") or [] if name]
         # Measured: Exchange rejects the whole contact (``ErrorPropertyUpdate``,
@@ -460,10 +431,9 @@ def _as_dict(value: Any) -> Dict[str, Any]:
     return properties if isinstance(properties, dict) else {}
 
 
-def _camel(name: str) -> str:
-    """``business_address`` → ``businessAddress`` (the Graph spelling)."""
-    head, *tail = name.split("_")
-    return head + "".join(part.title() for part in tail)
+def _wire_name(attr: str) -> str:
+    """The Graph spelling of a contact attribute, taken from its declaration."""
+    return Contact.wire_name(attr)
 
 
 def _text(value: Any) -> str:

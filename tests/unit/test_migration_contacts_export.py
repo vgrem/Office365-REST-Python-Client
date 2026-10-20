@@ -24,6 +24,7 @@ from office365.migration.outlook import (
     contact_vcard,
 )
 from office365.migration.outlook.contacts_models import CONTACT_COLUMNS
+from office365.outlook.contacts.contact import Contact
 from tests._scripted_transport import MethodRoutingTransport
 
 _FOLDER = {"id": "f1", "displayName": "Contacts"}
@@ -236,6 +237,17 @@ def test_the_projection_asks_for_the_fields_the_envelope_records():
     assert "emailAddresses" in CONTACT_COLUMNS
     # ``hasPhoto`` is deliberately absent: the endpoint does not answer it (measured).
     assert "hasPhoto" not in CONTACT_COLUMNS
+
+
+def test_the_export_projection_is_the_model_projection():
+    """``CONTACT_COLUMNS`` is derived from the model, not kept beside it.
+
+    A hand-kept list drifts from the getters that consume it, and a ``$select`` that
+    omits a column is indistinguishable from a contact that has no value for it —
+    which is how the calendar projection silently lost ``isCancelled``.
+    """
+    assert CONTACT_COLUMNS == Contact.select_all()
+    assert not set(CONTACT_COLUMNS) & set(Contact.expandable())
 
 
 # -- the vCard document --------------------------------------------------------

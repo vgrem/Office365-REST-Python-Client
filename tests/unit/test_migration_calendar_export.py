@@ -26,7 +26,8 @@ from office365.migration.outlook import (
     CalendarSource,
     IcsExportTarget,
 )
-from office365.migration.outlook.calendar_models import MAX_LINE_OCTETS, event_ics
+from office365.migration.outlook.calendar_models import EVENT_COLUMNS, MAX_LINE_OCTETS, event_ics
+from office365.outlook.calendar.events.event import Event
 from tests._scripted_transport import MethodRoutingTransport
 
 _CALENDAR = {"id": "cal-1", "name": "Calendar"}
@@ -407,3 +408,18 @@ def test_export_is_reproducible(tmp_path: Path):
     # Byte-identical: the document depends on the event, not on when it was exported.
     for path, payload in first.items():
         assert payload == second[path], path
+
+
+def test_the_export_projection_is_the_model_projection():
+    """``EVENT_COLUMNS`` is derived from the model, not kept beside it.
+
+    It used to be a hand-kept list and had drifted: it named 33 columns and omitted
+    ``isCancelled``, which the export filters on. A real ``$select`` answers only the
+    columns it is given, so a cancelled event came back with ``is_cancelled: None``
+    and was exported even though ``include_cancelled`` defaults to False. Deriving the
+    projection makes that class of omission unrepresentable, and the navigation
+    properties stay out of it automatically — ``$select`` rejects them.
+    """
+    assert EVENT_COLUMNS == Event.select_all()
+    assert "isCancelled" in EVENT_COLUMNS
+    assert not set(EVENT_COLUMNS) & set(Event.expandable())

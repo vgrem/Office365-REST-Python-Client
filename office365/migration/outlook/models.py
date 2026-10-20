@@ -251,7 +251,7 @@ def mail_envelope(
         "is_read": message.is_read,
         "is_draft": message.is_draft,
         "importance": message.importance,
-        "categories": list(message.get_property("categories") or []),
+        "categories": list(message.categories or []),
         "has_attachments": message.has_attachments,
         "conversation_id": message.conversation_id,
         "parent_folder_id": message.parent_folder_id,

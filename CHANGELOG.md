@@ -278,6 +278,22 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
 
 **Migration (Outlook)**
 
+- Calendar and contact exports **derive their projection from the model**, and a
+  cancelled event no longer slips through. `EVENT_COLUMNS`/`CONTACT_COLUMNS` were
+  hand-kept `$select` lists; the calendar one named 33 columns and omitted
+  `isCancelled`, which the export filters on — and `$select` answers *only* the
+  columns it names (measured: a read asking for `id` alone returns a bag with `id`
+  and nothing else), so a cancelled event was exported with `is_cancelled: false`
+  even though `CalendarExportOptions.include_cancelled` defaults to False. Both
+  constants are now `Event.select_all()`/`Contact.select_all()` —
+  41 and 40 wire names, navigation properties excluded by construction — and the
+  adapters' narrower dedupe reads are spelled through `wire_name()`. The envelopes
+  read the model's getters (`event.subject`, `contact.display_name`) instead of
+  `get_property("displayName")`, so a wire name lives in exactly one place and the
+  `iCalUId`-style typo that `get_property` answers with `None` is unrepresentable.
+  Live: a seeded calendar exported, imported into a second calendar, re-imported
+  (3 skipped as already present) with matching digests; the same round trip for a
+  two-folder contact tree.
 - Calendar export records the **`iCalUId`** the service actually sends. The envelope
   read `get_property("iCalUid")` — one capital short of Graph's spelling — and
   `get_property()` answers `None` for a name it does not know, so every exported
