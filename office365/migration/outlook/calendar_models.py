@@ -22,12 +22,12 @@ import json
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
 from typing import Any
 
 from office365.migration.outlook.models import mail_slug
 from office365.outlook.calendar.events.event import Event
-from office365.runtime.converters.scalars import iso_or_none
+from office365.runtime.converters.scalars import iso_or_none, parse_datetime
+from office365.runtime.converters.value import serialize_value
 
 #: Graph event properties an export reads: every column the model declares.
 #: Derived rather than listed, so a $select cannot disagree with the getters that
@@ -105,11 +105,6 @@ _COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 _TAG = re.compile(r"<[^>]+>")
 _SPACE = re.compile(r"\s+")
 
-#: A Graph ``dateTime`` is a wall-clock literal with a 7-digit fraction and no
-#: offset (``2026-03-02T09:00:00.0000000``); the zone rides in ``timeZone``.
-_FRACTION = re.compile(r"\.\d+")
-_COMPACT = re.compile(r"[^0-9]")
-
 
 @dataclass
 class CalendarExportOptions:
@@ -167,14 +162,19 @@ def _started(event) -> datetime | None:
 
 
 def _parse_graph_datetime(value: Any) -> datetime | None:
-    """Parse a Graph wall-clock literal, tolerating any fraction width (py3.8-safe)."""
-    if not value:
+    """A Graph date-time literal as a *naive wall clock*, or ``None``.
+
+    The parsing itself is the library's (``parse_datetime`` normalises any
+    fractional-second width — Graph sends seven digits and ``%f`` reads six). What is
+    decided here is this module's own semantics: values are compared and formatted as
+    wall clocks (the zone travels separately in ``timeZone``), so an offset is dropped,
+    and a date-only literal — which a recurrence ``endDate`` is — is not a moment.
+    """
+    text = str(value or "").strip()
+    if "T" not in text:
         return None
-    text = _FRACTION.sub("", str(value).strip())
-    try:
-        return datetime.strptime(text[:19], "%Y-%m-%dT%H:%M:%S")
-    except ValueError:
-        return None
+    parsed = parse_datetime(text)
+    return parsed.replace(tzinfo=None) if parsed else None
 
 
 def _as_dict(value: Any) -> dict[str, Any]:
@@ -197,23 +197,14 @@ def _as_dict(value: Any) -> dict[str, Any]:
     return properties if isinstance(properties, dict) else {}
 
 
-def _wire(value: Any) -> Any:
-    """A Graph enum as the name the wire uses.
-
-    The generated Outlook enums carry *numeric* values on v1.0 (``FreeBusyStatus``
-    is ``'0'..'4'``) while the service speaks the member name, so ``.name`` is the
-    wire form — ``str()`` or ``.value`` would record ``FullBusyStatus.tentative``.
-    """
-    return value.name if isinstance(value, Enum) else value
-
-
 def event_kind(event) -> str | None:
     """The wire name of an event's ``type``: ``singleInstance``, ``seriesMaster``, …
 
-    The model's getter answers with the generated enum on v1.0 (whose members carry
-    the CSDL ordinals, ``'"0"'``.., as values), so the name is the wire form.
+    The getter answers with the generated enum, whose members carry the CSDL ordinals
+    (``EventType.singleInstance.value == "0"``) rather than what the service speaks;
+    ``serialize_value`` is the library's answer to that — the member *name*.
     """
-    return _wire(event.type_)
+    return serialize_value(event.type_)
 
 
 def _address(recipient: Any) -> dict[str, str | None]:
@@ -250,9 +241,9 @@ def event_envelope(
         "end": _as_dict(event.end),
         "is_all_day": bool(event.is_all_day),
         "is_cancelled": bool(event.is_cancelled),
-        "show_as": _wire(event.show_as),
-        "sensitivity": _wire(event.sensitivity),
-        "importance": _wire(event.importance),
+        "show_as": serialize_value(event.show_as),
+        "sensitivity": serialize_value(event.sensitivity),
+        "importance": serialize_value(event.importance),
         "location": _as_dict(event.location).get("displayName"),
         "locations": [name for name in locations if name],
         "organizer": _address(event.organizer),
@@ -272,7 +263,7 @@ def event_envelope(
         # would have written its ``repr``, which no import can read back.
         "recurrence": _as_dict(event.recurrence) or None,
         "is_online_meeting": bool(event.is_online_meeting),
-        "online_meeting_provider": _wire(event.online_meeting_provider),
+        "online_meeting_provider": serialize_value(event.online_meeting_provider),
         "join_url": online.get("joinUrl"),
         "has_attachments": bool(event.has_attachments),
         "web_link": event.web_link,
