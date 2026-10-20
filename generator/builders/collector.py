@@ -32,6 +32,7 @@ class TypeReferenceCollector:
         "Optional": "typing",
         "TYPE_CHECKING": "typing",
         "ResourcePath": "office365.runtime.paths.resource_path",
+        "odata": "office365.runtime.types.odata_property",
         "EntityCollection": "office365.entity_collection",
         "ClientValueCollection": "office365.runtime.client_value_collection",
         "ClientResult": "office365.runtime.client_result",

@@ -7,6 +7,7 @@ from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
+from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
     from office365.directory.extensions.extended_property import (
@@ -23,16 +24,19 @@ if TYPE_CHECKING:
 class Post(Entity):
     """Represents an individual Post item within a conversationThread entity."""
 
+    @odata(name="conversationId")
     @property
     def conversation_id(self) -> Optional[str]:
         """The ID of the conversation the post belongs to."""
         return self.properties.get("conversationId", None)
 
+    @odata(name="receivedDateTime")
     @property
     def received_datetime(self) -> datetime:
         """The date and time the post was received."""
         return self.properties.get("receivedDateTime", datetime.min)
 
+    @odata(name="body")
     @property
     def body(self) -> ItemBody:
         """Gets the body property"""
@@ -40,11 +44,13 @@ class Post(Entity):
 
         return self.properties.get("body", ItemBody())
 
+    @odata(name="conversationThreadId")
     @property
     def conversation_thread_id(self) -> Optional[str]:
         """Gets the conversationThreadId property"""
         return self.properties.get("conversationThreadId", None)
 
+    @odata(name="from")
     @property
     def from_(self) -> Recipient:
         """Gets the from property"""
@@ -52,11 +58,13 @@ class Post(Entity):
 
         return self.properties.get("from", Recipient())
 
+    @odata(name="hasAttachments")
     @property
     def has_attachments(self) -> Optional[bool]:
         """Gets the hasAttachments property"""
         return self.properties.get("hasAttachments", None)
 
+    @odata(name="newParticipants")
     @property
     def new_participants(self) -> ClientValueCollection[Recipient]:
         """Gets the newParticipants property"""
@@ -64,6 +72,7 @@ class Post(Entity):
 
         return self.properties.get("newParticipants", ClientValueCollection[Recipient](Recipient))
 
+    @odata(name="sender")
     @property
     def sender(self) -> Recipient:
         """Gets the sender property"""
@@ -71,6 +80,7 @@ class Post(Entity):
 
         return self.properties.get("sender", Recipient())
 
+    @odata(name="attachments", navigation=True)
     @property
     def attachments(self) -> EntityCollection[Attachment]:
         """Gets the attachments property"""
@@ -81,6 +91,7 @@ class Post(Entity):
             EntityCollection[Attachment](self.context, Attachment, ResourcePath("attachments", self.resource_path)),
         )
 
+    @odata(name="extensions", navigation=True)
     @property
     def extensions(self) -> EntityCollection[Extension]:
         """Gets the extensions property"""
@@ -91,6 +102,7 @@ class Post(Entity):
             EntityCollection[Extension](self.context, Extension, ResourcePath("extensions", self.resource_path)),
         )
 
+    @odata(name="inReplyTo", navigation=True)
     @property
     def in_reply_to(self) -> Post:
         """Gets the inReplyTo property"""
@@ -98,6 +110,7 @@ class Post(Entity):
 
         return self.properties.get("inReplyTo", Post(self.context, ResourcePath("inReplyTo", self.resource_path)))
 
+    @odata(name="multiValueExtendedProperties", navigation=True)
     @property
     def multi_value_extended_properties(self) -> EntityCollection[MultiValueLegacyExtendedProperty]:
         """Gets the multiValueExtendedProperties property"""
@@ -114,6 +127,7 @@ class Post(Entity):
             ),
         )
 
+    @odata(name="singleValueExtendedProperties", navigation=True)
     @property
     def single_value_extended_properties(self) -> EntityCollection[SingleValueLegacyExtendedProperty]:
         """Gets the singleValueExtendedProperties property"""

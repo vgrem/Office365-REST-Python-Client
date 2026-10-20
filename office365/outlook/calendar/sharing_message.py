@@ -19,11 +19,13 @@ class CalendarSharingMessage(Message):
         """"""
         return self.properties.setdefault("sharingMessageAction", CalendarSharingMessageAction())
 
+    @odata(name="canAccept")
     @property
     def can_accept(self) -> Optional[bool]:
         """Gets the canAccept property"""
         return self.properties.get("canAccept", None)
 
+    @odata(name="sharingMessageActions")
     @property
     def sharing_message_actions(self) -> ClientValueCollection[CalendarSharingMessageAction]:
         """Gets the sharingMessageActions property"""
@@ -35,6 +37,7 @@ class CalendarSharingMessage(Message):
             "sharingMessageActions", ClientValueCollection[CalendarSharingMessageAction](CalendarSharingMessageAction)
         )
 
+    @odata(name="suggestedCalendarName")
     @property
     def suggested_calendar_name(self) -> Optional[str]:
         """Gets the suggestedCalendarName property"""

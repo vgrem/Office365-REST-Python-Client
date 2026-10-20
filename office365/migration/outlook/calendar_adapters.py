@@ -127,7 +127,10 @@ class CalendarSource(DataSource):
         display = getattr(self._calendar, "name", None) or root
         items: list[MigrationItem] = []
         for event in self._calendar.events.select(EVENT_COLUMNS).get_all().execute_query():
-            kind = event.get_property("type")
+            # ``type`` is enum-typed on the model, so the getter answers with a member
+            # (or with the enum default when the column is absent): compare names.
+            raw_kind = event.get_property("type")
+            kind = getattr(raw_kind, "name", raw_kind)
             if not self._include(event, kind):
                 continue
             item = self._item(event, root, display)

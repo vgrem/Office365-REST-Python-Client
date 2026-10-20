@@ -15,11 +15,13 @@ class OutlookItem(Entity):
         """
         return self.properties.get("ChangeKey", None)
 
+    @odata(name="categories")
     @property
     def categories(self) -> StringCollection:
         """The categories associated with the item"""
         return self.properties.get("categories", StringCollection())
 
+    @odata(name="createdDateTime")
     @property
     def created_datetime(self) -> datetime:
         """
@@ -28,6 +30,7 @@ class OutlookItem(Entity):
         """
         return self.properties.get("createdDateTime", datetime.min)
 
+    @odata(name="lastModifiedDateTime")
     @property
     def last_modified_datetime(self) -> datetime:
         """

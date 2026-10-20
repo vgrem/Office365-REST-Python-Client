@@ -68,6 +68,37 @@ class ClientObject:
         cls._limit_meta = collect_limit_meta(cls)
         cls._class_limit_decls = collect_class_limits(cls)
 
+    @classmethod
+    def select_all(cls) -> List[str]:
+        """The declared columns of this type: every wire name ``$select`` accepts.
+
+        A navigation property is left out: the service reaches it through the path,
+        not through a projection, and naming one in ``$select`` is an error. The
+        names come from the same declarations the getters read, so a projection
+        built here cannot spell a column differently from the code that consumes it.
+        """
+        return list(dict.fromkeys(name for name, m in cls._odata_meta.items() if not m.navigation))
+
+    @classmethod
+    def expandable(cls) -> List[str]:
+        """The declared navigation properties of this type: what ``$expand`` can reach."""
+        return list(dict.fromkeys(name for name, m in cls._odata_meta.items() if m.navigation))
+
+    @classmethod
+    def wire_name(cls, attr: str) -> str:
+        """The OData name of a declared getter, given its Python attribute name.
+
+        Raises:
+            AttributeError: when the attribute carries no declaration, naming the
+                declared attributes so a typo fails here rather than as ``None``
+                further down the read path.
+        """
+        for name, m in cls._odata_meta.items():
+            if m.attr == attr:
+                return name
+        declared = sorted(m.attr for m in cls._odata_meta.values() if m.attr)
+        raise AttributeError(f"{cls.__name__}.{attr} is not a declared property; declared: {', '.join(declared)}")
+
     def __init__(
         self,
         context: ClientRuntimeContext,

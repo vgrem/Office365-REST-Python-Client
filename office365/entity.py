@@ -10,6 +10,7 @@ from office365.runtime.paths.v4.entity import EntityPath
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
 from office365.runtime.queries.update_entity import UpdateEntityQuery
 from office365.runtime.queries.upsert_entity import UpsertEntityQuery, raise_if_upsert_unsupported
+from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
     from office365.graph_client import GraphClient
@@ -138,6 +139,7 @@ class Entity(ClientObject):
             self._entity_type_name = "microsoft.graph." + name[0].lower() + name[1:]
         return self._entity_type_name
 
+    @odata(name="id")
     @property
     def id(self) -> str | None:
         """Gets the unique identifier of the entity.

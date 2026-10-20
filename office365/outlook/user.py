@@ -39,7 +39,7 @@ class OutlookUser(Entity):
         self.context.add_query(qry)
         return return_type
 
-    @odata(name="masterCategories")
+    @odata(name="masterCategories", navigation=True)
     @property
     def master_categories(self) -> OutlookCategoryCollection:
         """A list of categories defined for the user."""

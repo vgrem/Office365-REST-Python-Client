@@ -42,6 +42,7 @@ class Contact(OutlookItem):
         """The contact's business phone numbers."""
         return self.properties.setdefault("businessPhones", StringCollection())
 
+    @odata(name="displayName")
     @property
     def display_name(self) -> Optional[str]:
         """
@@ -52,6 +53,7 @@ class Contact(OutlookItem):
         """
         return self.properties.get("displayName", None)
 
+    @odata(name="manager")
     @property
     def manager(self) -> Optional[str]:
         """
@@ -64,6 +66,7 @@ class Contact(OutlookItem):
         """Sets name of the contact's manager."""
         self.set_property("manager", value)
 
+    @odata(name="mobilePhone")
     @property
     def mobile_phone(self) -> Optional[str]:
         """The contact's mobile phone number."""
@@ -86,6 +89,7 @@ class Contact(OutlookItem):
         """The contact's email addresses."""
         return self.properties.setdefault("emailAddresses", ClientValueCollection(EmailAddress))
 
+    @odata(name="extensions", navigation=True)
     @property
     def extensions(self) -> EntityCollection[Extension]:
         """The collection of open extensions defined for the contact. Nullable."""
@@ -93,12 +97,13 @@ class Contact(OutlookItem):
             "extensions", EntityCollection(self.context, Extension, ResourcePath("extensions", self.resource_path))
         )
 
+    @odata(name="photo", navigation=True)
     @property
     def photo(self) -> ProfilePhoto:
         """Optional contact picture. You can get or set a photo for a contact."""
         return self.properties.get("photo", ProfilePhoto(self.context, ResourcePath("photo", self.resource_path)))
 
-    @odata(name="multiValueExtendedProperties")
+    @odata(name="multiValueExtendedProperties", navigation=True)
     @property
     def multi_value_extended_properties(self) -> EntityCollection[MultiValueLegacyExtendedProperty]:
         """The collection of multi-value extended properties defined for the Contact."""
@@ -111,7 +116,7 @@ class Contact(OutlookItem):
             ),
         )
 
-    @odata(name="singleValueExtendedProperties")
+    @odata(name="singleValueExtendedProperties", navigation=True)
     @property
     def single_value_extended_properties(self) -> EntityCollection[SingleValueLegacyExtendedProperty]:
         """The collection of single-value extended properties defined for the Contact."""
@@ -124,11 +129,13 @@ class Contact(OutlookItem):
             ),
         )
 
+    @odata(name="assistantName")
     @property
     def assistant_name(self) -> Optional[str]:
         """Gets the assistantName property"""
         return self.properties.get("assistantName", None)
 
+    @odata(name="birthday")
     @property
     def birthday(self) -> datetime:
         """Gets the birthday property"""
@@ -140,41 +147,49 @@ class Contact(OutlookItem):
         """Gets the businessAddress property"""
         return self.properties.get("businessAddress", PhysicalAddress())
 
+    @odata(name="businessHomePage")
     @property
     def business_home_page(self) -> Optional[str]:
         """Gets the businessHomePage property"""
         return self.properties.get("businessHomePage", None)
 
+    @odata(name="children")
     @property
     def children(self) -> StringCollection:
         """Gets the children property"""
         return self.properties.get("children", StringCollection(None))
 
+    @odata(name="companyName")
     @property
     def company_name(self) -> Optional[str]:
         """Gets the companyName property"""
         return self.properties.get("companyName", None)
 
+    @odata(name="department")
     @property
     def department(self) -> Optional[str]:
         """Gets the department property"""
         return self.properties.get("department", None)
 
+    @odata(name="fileAs")
     @property
     def file_as(self) -> Optional[str]:
         """Gets the fileAs property"""
         return self.properties.get("fileAs", None)
 
+    @odata(name="generation")
     @property
     def generation(self) -> Optional[str]:
         """Gets the generation property"""
         return self.properties.get("generation", None)
 
+    @odata(name="givenName")
     @property
     def given_name(self) -> Optional[str]:
         """Gets the givenName property"""
         return self.properties.get("givenName", None)
 
+    @odata(name="homePhones")
     @property
     def home_phones(self) -> StringCollection:
         """Gets the homePhones property"""
@@ -186,11 +201,13 @@ class Contact(OutlookItem):
         """Gets the imAddresses property"""
         return self.properties.get("imAddresses", StringCollection(None))
 
+    @odata(name="initials")
     @property
     def initials(self) -> Optional[str]:
         """Gets the initials property"""
         return self.properties.get("initials", None)
 
+    @odata(name="jobTitle")
     @property
     def job_title(self) -> Optional[str]:
         """Gets the jobTitle property"""
@@ -200,31 +217,37 @@ class Contact(OutlookItem):
     def job_title(self, value: str):
         self.set_property("jobTitle", value)
 
+    @odata(name="middleName")
     @property
     def middle_name(self) -> Optional[str]:
         """Gets the middleName property"""
         return self.properties.get("middleName", None)
 
+    @odata(name="nickName")
     @property
     def nick_name(self) -> Optional[str]:
         """Gets the nickName property"""
         return self.properties.get("nickName", None)
 
+    @odata(name="officeLocation")
     @property
     def office_location(self) -> Optional[str]:
         """Gets the officeLocation property"""
         return self.properties.get("officeLocation", None)
 
+    @odata(name="otherAddress")
     @property
     def other_address(self) -> PhysicalAddress:
         """Gets the otherAddress property"""
         return self.properties.get("otherAddress", PhysicalAddress())
 
+    @odata(name="parentFolderId")
     @property
     def parent_folder_id(self) -> Optional[str]:
         """Gets the parentFolderId property"""
         return self.properties.get("parentFolderId", None)
 
+    @odata(name="personalNotes")
     @property
     def personal_notes(self) -> Optional[str]:
         """Gets the personalNotes property"""
@@ -236,6 +259,7 @@ class Contact(OutlookItem):
         """Gets the primaryEmailAddress property"""
         return self.properties.get("primaryEmailAddress", EmailAddress())
 
+    @odata(name="profession")
     @property
     def profession(self) -> Optional[str]:
         """Gets the profession property"""
@@ -247,11 +271,13 @@ class Contact(OutlookItem):
         """Gets the secondaryEmailAddress property"""
         return self.properties.get("secondaryEmailAddress", EmailAddress())
 
+    @odata(name="spouseName")
     @property
     def spouse_name(self) -> Optional[str]:
         """Gets the spouseName property"""
         return self.properties.get("spouseName", None)
 
+    @odata(name="surname")
     @property
     def surname(self) -> Optional[str]:
         """Gets the surname property"""
@@ -263,21 +289,25 @@ class Contact(OutlookItem):
         """Gets the tertiaryEmailAddress property"""
         return self.properties.get("tertiaryEmailAddress", EmailAddress())
 
+    @odata(name="title")
     @property
     def title(self) -> Optional[str]:
         """Gets the title property"""
         return self.properties.get("title", None)
 
+    @odata(name="yomiCompanyName")
     @property
     def yomi_company_name(self) -> Optional[str]:
         """Gets the yomiCompanyName property"""
         return self.properties.get("yomiCompanyName", None)
 
+    @odata(name="yomiGivenName")
     @property
     def yomi_given_name(self) -> Optional[str]:
         """Gets the yomiGivenName property"""
         return self.properties.get("yomiGivenName", None)
 
+    @odata(name="yomiSurname")
     @property
     def yomi_surname(self) -> Optional[str]:
         """Gets the yomiSurname property"""

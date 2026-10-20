@@ -16,6 +16,7 @@ class ODataPropertyMeta:
     name: str
     attr: str = ""
     persist: bool = False
+    navigation: bool = False
     filterable: bool = False
     nullable: bool = True
     sortable: bool = False
@@ -28,7 +29,10 @@ def odata(name: str, **attrs: bool | str):
 
     Args:
         name: The JSON key name in the Graph API response.
-        **attrs: Optional attributes (persist, filterable, nullable, ...)
+        **attrs: Optional attributes (persist, navigation, nullable, ...).
+
+    ``navigation=True`` marks a CSDL ``NavigationProperty``: it is reached with
+    ``$expand`` and cannot appear in ``$select``.
     """
 
     def decorator(method):

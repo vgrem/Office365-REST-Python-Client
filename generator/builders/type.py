@@ -368,6 +368,9 @@ class TypeBuilder(ast.NodeTransformer):
             collector.add_custom(prop)
             if prop.is_object_type:
                 collector.add_object_type(prop)
+        if self._added_props and self._kind != "ComplexType":
+            # Entity getters declare their OData metadata next to the property.
+            collector.add("odata")
 
         if self._generate_methods_enabled():
             for method in self._methods:

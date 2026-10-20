@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 class ContactFolder(Entity):
     """A folder that contains contacts."""
 
+    @odata(name="contacts", navigation=True)
     @property
     def contacts(self) -> ContactCollection:
         """The contacts in the folder. Navigation property. Read-only. Nullable."""
@@ -25,7 +26,7 @@ class ContactFolder(Entity):
             "contacts", ContactCollection(self.context, ResourcePath("contacts", self.resource_path))
         )
 
-    @odata(name="childFolders")
+    @odata(name="childFolders", navigation=True)
     @property
     def child_folders(self) -> EntityCollection["ContactFolder"]:
         """The collection of child folders in the folder. Navigation property. Read-only. Nullable."""
@@ -34,7 +35,7 @@ class ContactFolder(Entity):
             EntityCollection(self.context, ContactFolder, ResourcePath("childFolders", self.resource_path)),
         )
 
-    @odata(name="multiValueExtendedProperties")
+    @odata(name="multiValueExtendedProperties", navigation=True)
     @property
     def multi_value_extended_properties(self) -> EntityCollection[MultiValueLegacyExtendedProperty]:
         """The collection of multi-value extended properties defined for the Contact folder."""
@@ -47,7 +48,7 @@ class ContactFolder(Entity):
             ),
         )
 
-    @odata(name="singleValueExtendedProperties")
+    @odata(name="singleValueExtendedProperties", navigation=True)
     @property
     def single_value_extended_properties(self) -> EntityCollection[SingleValueLegacyExtendedProperty]:
         """The collection of single-value extended properties defined for the Contact folder."""
@@ -60,11 +61,13 @@ class ContactFolder(Entity):
             ),
         )
 
+    @odata(name="displayName")
     @property
     def display_name(self) -> Optional[str]:
         """Gets the displayName property"""
         return self.properties.get("displayName", None)
 
+    @odata(name="parentFolderId")
     @property
     def parent_folder_id(self) -> Optional[str]:
         """Gets the parentFolderId property"""

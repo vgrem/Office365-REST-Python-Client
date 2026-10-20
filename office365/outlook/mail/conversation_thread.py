@@ -37,6 +37,7 @@ class ConversationThread(Entity):
         """The Cc: recipients for the thread."""
         return self.properties.get("ccRecipients", ClientValueCollection(Recipient))
 
+    @odata(name="hasAttachments")
     @property
     def has_attachments(self) -> Optional[bool]:
         """Indicates whether any of the posts within this thread has at least one attachment."""
@@ -48,6 +49,7 @@ class ConversationThread(Entity):
         """The To: recipients for the thread."""
         return self.properties.get("toRecipients", ClientValueCollection(Recipient))
 
+    @odata(name="posts", navigation=True)
     @property
     def posts(self) -> EntityCollection[Post]:
         """"""
@@ -55,6 +57,7 @@ class ConversationThread(Entity):
             "posts", EntityCollection(self.context, Post, ResourcePath("posts", self.resource_path))
         )
 
+    @odata(name="isLocked")
     @property
     def is_locked(self) -> Optional[bool]:
         """Gets the isLocked property"""
@@ -66,11 +69,13 @@ class ConversationThread(Entity):
         """Gets the lastDeliveredDateTime property"""
         return self.properties.get("lastDeliveredDateTime", datetime.min)
 
+    @odata(name="preview")
     @property
     def preview(self) -> Optional[str]:
         """Gets the preview property"""
         return self.properties.get("preview", None)
 
+    @odata(name="topic")
     @property
     def topic(self) -> Optional[str]:
         """Gets the topic property"""

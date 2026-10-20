@@ -81,16 +81,19 @@ class MailFolder(Entity):
         self.context.add_query(qry)
         return self
 
+    @odata(name="childFolderCount")
     @property
     def child_folder_count(self) -> Optional[int]:
         """The number of immediate child mailFolders in the current mailFolder."""
         return self.properties.get("childFolderCount", None)
 
+    @odata(name="displayName")
     @property
     def display_name(self) -> Optional[str]:
         """The name of the Mail folder"""
         return self.properties.get("displayName", None)
 
+    @odata(name="isHidden")
     @property
     def is_hidden(self) -> Optional[bool]:
         """
@@ -99,22 +102,25 @@ class MailFolder(Entity):
         """
         return self.properties.get("isHidden", None)
 
+    @odata(name="parentFolderId")
     @property
     def parent_folder_id(self) -> Optional[str]:
         """The unique identifier for the mailFolder's parent mailFolder."""
         return self.properties.get("parentFolderId", None)
 
+    @odata(name="totalItemCount")
     @property
     def total_item_count(self) -> Optional[int]:
         """The number of items in the mailFolder."""
         return self.properties.get("totalItemCount", None)
 
+    @odata(name="unreadItemCount")
     @property
     def unread_item_count(self) -> Optional[int]:
         """The number of items in the mailFolder marked as unread."""
         return self.properties.get("unreadItemCount", None)
 
-    @odata(name="childFolders")
+    @odata(name="childFolders", navigation=True)
     @property
     def child_folders(self) -> MailFolderCollection:
         """The collection of child folders in the mailFolder."""
@@ -124,7 +130,7 @@ class MailFolder(Entity):
             "childFolders", MailFolderCollection(self.context, ResourcePath("childFolders", self.resource_path))
         )
 
-    @odata(name="messageRules")
+    @odata(name="messageRules", navigation=True)
     @property
     def message_rules(self) -> MessageRuleCollection:
         """"""
@@ -132,6 +138,7 @@ class MailFolder(Entity):
             "messageRules", MessageRuleCollection(self.context, ResourcePath("messageRules", self.resource_path))
         )
 
+    @odata(name="messages", navigation=True)
     @property
     def messages(self) -> MessageCollection:
         """The collection of messages in the mailFolder."""
@@ -139,7 +146,7 @@ class MailFolder(Entity):
             "messages", MessageCollection(self.context, ResourcePath("messages", self.resource_path))
         )
 
-    @odata(name="multiValueExtendedProperties")
+    @odata(name="multiValueExtendedProperties", navigation=True)
     @property
     def multi_value_extended_properties(self) -> EntityCollection[MultiValueLegacyExtendedProperty]:
         """The collection of multi-value extended properties defined for the MailFolder."""
@@ -152,7 +159,7 @@ class MailFolder(Entity):
             ),
         )
 
-    @odata(name="singleValueExtendedProperties")
+    @odata(name="singleValueExtendedProperties", navigation=True)
     @property
     def single_value_extended_properties(self) -> EntityCollection[SingleValueLegacyExtendedProperty]:
         """The collection of single-value extended properties defined for the MailFolder."""

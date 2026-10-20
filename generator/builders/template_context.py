@@ -107,7 +107,12 @@ class TemplateContext:
         if runtime_import:
             body_lines.append(f"    {runtime_import}")
         body_lines.append(f'    return self.properties.get("{prop_name}", {default_value})')
-        property_code = "@property\n" + f"def {method_name}(self) -> {type_annotation}:\n" + "\n".join(body_lines)
+        # The wire name travels with the property: callers never spell it again,
+        # and ``navigation`` records that $expand, not $select, reaches this one.
+        decorator = f'@odata(name="{prop_name}"' + (", navigation=True)" if builder.is_object_type else ")")
+        property_code = (
+            decorator + "\n@property\n" + f"def {method_name}(self) -> {type_annotation}:\n" + "\n".join(body_lines)
+        )
 
         parsed = ast.parse(property_code)
         return cast(ast.FunctionDef, parsed.body[0])

@@ -262,6 +262,7 @@ class Message(OutlookItem):
         self.context.add_query(qry)
         return self
 
+    @odata(name="hasAttachments")
     @property
     def has_attachments(self) -> Optional[bool]:
         """
@@ -272,7 +273,7 @@ class Message(OutlookItem):
         """
         return self.properties.get("hasAttachments", None)
 
-    @odata(name="attachments", persist=True)
+    @odata(name="attachments", persist=True, navigation=True)
     @property
     def attachments(self) -> AttachmentCollection:
         """The fileAttachment and itemAttachment attachments for the message."""
@@ -280,6 +281,7 @@ class Message(OutlookItem):
             "attachments", AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path))
         )
 
+    @odata(name="extensions", navigation=True)
     @property
     def extensions(self) -> EntityCollection[Extension]:
         """The collection of open extensions defined for the message. Nullable."""
@@ -287,6 +289,7 @@ class Message(OutlookItem):
             "extensions", EntityCollection(self.context, Extension, ResourcePath("extensions", self.resource_path))
         )
 
+    @odata(name="body")
     @property
     def body(self) -> ItemBody:
         """The body of the message. It can be in HTML or text format."""
@@ -311,21 +314,25 @@ class Message(OutlookItem):
         item_body = ItemBody(content=content, contentType=BodyType(content_type.lower()))
         self.set_property("body", item_body)
 
+    @odata(name="bodyPreview")
     @property
     def body_preview(self) -> Optional[str]:
         """The first 255 characters of the message body. It is in text format."""
         return self.properties.get("bodyPreview", None)
 
+    @odata(name="conversationId")
     @property
     def conversation_id(self) -> Optional[str]:
         """The ID of the conversation the email belongs to."""
         return self.properties.get("conversationId", None)
 
+    @odata(name="conversationIndex")
     @property
     def conversation_index(self) -> Optional[str]:
         """Indicates the position of the message within the conversation."""
         return self.properties.get("conversationIndex", None)
 
+    @odata(name="flag")
     @property
     def flag(self) -> FollowupFlag:
         """
@@ -343,11 +350,13 @@ class Message(OutlookItem):
         """
         return self.properties.get("from", Recipient())
 
+    @odata(name="importance")
     @property
     def importance(self) -> Optional[str]:
         """The importance of the message."""
         return self.properties.get("importance", None)
 
+    @odata(name="inferenceClassification")
     @property
     def inference_classification(self) -> Optional[str]:
         """
@@ -366,11 +375,13 @@ class Message(OutlookItem):
         """
         return self.properties.get("internetMessageHeaders", ClientValueCollection(InternetMessageHeader))
 
+    @odata(name="internetMessageId")
     @property
     def internet_message_id(self) -> Optional[str]:
         """The message ID in the format specified by RFC2822"""
         return self.properties.get("internetMessageId", None)
 
+    @odata(name="isDeliveryReceiptRequested")
     @property
     def is_delivery_receipt_requested(self) -> Optional[bool]:
         """
@@ -378,6 +389,7 @@ class Message(OutlookItem):
         """
         return self.properties.get("isDeliveryReceiptRequested", None)
 
+    @odata(name="isDraft")
     @property
     def is_draft(self) -> Optional[bool]:
         """
@@ -385,11 +397,13 @@ class Message(OutlookItem):
         """
         return self.properties.get("isDraft", None)
 
+    @odata(name="isRead")
     @property
     def is_read(self) -> Optional[bool]:
         """Indicates whether the message has been read."""
         return self.properties.get("isRead", None)
 
+    @odata(name="isReadReceiptRequested")
     @property
     def is_read_receipt_requested(self) -> Optional[bool]:
         """
@@ -409,6 +423,7 @@ class Message(OutlookItem):
         """The date and time the message was sent."""
         return self.properties.get("sentDateTime", datetime.min)
 
+    @odata(name="subject")
     @property
     def subject(self) -> Optional[str]:
         """The subject of the message."""
@@ -443,6 +458,7 @@ class Message(OutlookItem):
         """The replyTo: recipients for the reply to the message."""
         return self.properties.setdefault("replyTo", ClientValueCollection(Recipient))
 
+    @odata(name="sender")
     @property
     def sender(self) -> Recipient:
         """The account that is actually used to generate the message. In most cases, this value is the same as the
@@ -451,11 +467,13 @@ class Message(OutlookItem):
         Find out more about setting the from and sender properties of a message."""
         return self.properties.get("sender", Recipient())
 
+    @odata(name="parentFolderId")
     @property
     def parent_folder_id(self) -> Optional[str]:
         """The unique identifier for the message's parent mailFolder."""
         return self.properties.get("parentFolderId", None)
 
+    @odata(name="webLink")
     @property
     def web_link(self) -> Optional[str]:
         """
@@ -472,7 +490,7 @@ class Message(OutlookItem):
         """
         return self.properties.get("webLink", None)
 
-    @odata(name="multiValueExtendedProperties")
+    @odata(name="multiValueExtendedProperties", navigation=True)
     @property
     def multi_value_extended_properties(self) -> EntityCollection[MultiValueLegacyExtendedProperty]:
         """The collection of multi-value extended properties defined for the event."""
@@ -485,7 +503,7 @@ class Message(OutlookItem):
             ),
         )
 
-    @odata(name="singleValueExtendedProperties")
+    @odata(name="singleValueExtendedProperties", navigation=True)
     @property
     def single_value_extended_properties(self) -> EntityCollection[SingleValueLegacyExtendedProperty]:
         """The collection of single-value extended properties defined for the message"""
@@ -526,6 +544,7 @@ class Message(OutlookItem):
     def entity_type_name(self) -> str:
         return "microsoft.graph.Message"
 
+    @odata(name="from")
     @property
     def from_(self) -> Recipient:
         """Gets the from property"""

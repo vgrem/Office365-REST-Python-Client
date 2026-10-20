@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Optional, cast
 
 from office365.outlook.mail.attachments.attachment import Attachment
+from office365.runtime.types.odata_property import odata
 
 
 class FileAttachment(Attachment):
@@ -19,6 +20,7 @@ class FileAttachment(Attachment):
     def entity_type_name(self) -> str:
         return "microsoft.graph.fileAttachment"
 
+    @odata(name="contentId")
     @property
     def content_id(self) -> Optional[str]:
         """The ID of the attachment in the Exchange store."""
@@ -29,6 +31,7 @@ class FileAttachment(Attachment):
         """ """
         return self.properties.get("content_location", None)
 
+    @odata(name="contentBytes")
     @property
     def content_bytes(self) -> Optional[bytes]:
         """The base64-encoded contents of the file."""

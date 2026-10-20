@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+**Model metadata**
+
+- Generated Graph getters now declare their OData wire name in place
+  (`@odata(name="iCalUId")`, `office365.runtime.types.odata_property`), so nothing
+  spells a wire name twice and the awkward ones resolve:
+  `declared_type(Event, "iCalUId")` answers `str` where it used to answer `None`
+  (a `to_snake_case` guess spells it `i_cal_u_id`). `ODataPropertyMeta.navigation`
+  marks a CSDL `NavigationProperty` — the ones `$expand` reaches and `$select`
+  cannot name — so `Event.attachments` is distinguishable from a column.
+  `office365/outlook` is fully declared: `scripts/mark_odata.py` back-fills the
+  declaration onto files the generator will not re-render (it only renders members
+  that are missing), and `generator/templates/graph` emits it for new ones. A
+  declaration that exists but says less than the metadata — a navigation property
+  without the flag, as every previously-hand-marked getter had — is finished in
+  place. The declarations are answerable at runtime, so a projection is derived
+  rather than hand-written: `Event.select_all()` returns the 41 wire names `$select`
+  accepts (navigation properties excluded, `id` included via `Entity`),
+  `Event.expandable()` returns the 7 `$expand`-only ones, and
+  `Event.wire_name("ical_uid")` answers `"iCalUId"` rather than the snake-case
+  misspelling; an attribute with no declaration raises `AttributeError` listing the
+  ones that do. Declaring an enum-typed property makes a read answer with the
+  generated enum member instead of the raw string; `CalendarSource` compares `type`
+  through the member name, so calendar exports are unaffected.
+
 **Migration (identity)**
 
 - `IdentityMap` (`office365.migration`) maps source principals onto target

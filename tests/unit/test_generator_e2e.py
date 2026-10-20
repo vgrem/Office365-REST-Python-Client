@@ -57,6 +57,7 @@ _V4_CSDL = """<?xml version="1.0" encoding="utf-8"?>
       <EntityType Name="Widget">
         <Key><PropertyRef Name="id" /></Key>
         <Property Name="id" Type="Edm.String" Nullable="false" />
+        <NavigationProperty Name="widgets" Type="Collection(microsoft.graph.Widget)" ContainsTarget="true" />
       </EntityType>
       <Action Name="reset" IsBound="true">
         <Parameter Name="bindingParameter" Type="microsoft.graph.Widget" />
@@ -106,6 +107,9 @@ def test_sharepoint_generates_all_kinds_and_methods(tmp_path: Path) -> None:
 
     assert "class Widget(Entity):" in entity
     assert "def do_thing" in entity  # bound FunctionImport -> generated method
+    # Every generated getter carries its wire name, so no caller spells it again.
+    assert '@odata(name="Title")' in entity
+    assert "from office365.runtime.types.odata_property import odata" in entity
     assert "class WidgetSettings(ClientValue):" in complex_type
     assert "kind: WidgetKind = WidgetKind.alpha" in complex_type  # planned enum default
     assert "class WidgetKind(Enum):" in enum
@@ -154,6 +158,9 @@ def test_graph_generates_all_kinds_and_methods(tmp_path: Path) -> None:
 
     assert "class Widget(Entity):" in entity
     assert "def reset" in entity  # bound Action -> generated method
+    # A navigation property is declared as such: $expand reaches it, $select cannot.
+    assert '@odata(name="widgets", navigation=True)' in entity
+    assert '@odata(name="id")' in entity
     assert "class WidgetSettings(ClientValue):" in complex_type
     assert "kind: WidgetKind = WidgetKind.alpha" in complex_type
     assert "class WidgetKind(Enum):" in enum

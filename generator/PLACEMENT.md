@@ -63,3 +63,32 @@ into it with the prefix stripped —
 3. `python -m generator.generate_model <service> --force` generates.
 
 The tool proposes; a human commits. **Routing is never written automatically.**
+
+## Declared property metadata
+
+Each generated getter carries its wire name — the OData JSON key — in an
+`@odata(name="…")` declaration above the `@property`, and a CSDL
+`NavigationProperty` adds `navigation=True` (it is reached with `$expand`, never
+named in `$select`). `office365.runtime.types.odata_property` collects the
+declarations into `ClientObject._odata_meta`, which is what `declared_type()` and
+the write path read.
+
+The name is always taken from the metadata, never derived from the attribute:
+`iCalUId` and `icalUid` both survive a snake-case round trip and only one of them
+is a real column.
+
+The generator renders only members that are *missing*, so a template change does
+not reach files that already exist. For those there is a one-time codemod, which
+reads the name each getter already queries and marks it (validating the literal
+against the metadata, and skipping anything it cannot confirm):
+
+```bash
+uv run python scripts/mark_odata.py office365/outlook --dry-run  # what would change
+uv run python scripts/mark_odata.py office365/outlook
+uv run ruff check --fix office365/outlook   # sort the new import
+```
+
+It is idempotent, and `tests/unit/test_odata_metadata.py` pins it that way for the
+package it has been run over. A second pass over the same tree finds nothing: a
+declaration that exists but says less than the metadata (a navigation property
+without `navigation=True`) is rewritten in place rather than duplicated.

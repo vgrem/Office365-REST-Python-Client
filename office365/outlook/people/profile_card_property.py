@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
+from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
     from office365.directory.profile_card_annotation import ProfileCardAnnotation
@@ -22,6 +23,7 @@ class ProfileCardProperty(Entity):
     custom attributes on a profile card using the profile card API.
     """
 
+    @odata(name="annotations")
     @property
     def annotations(self) -> ClientValueCollection[ProfileCardAnnotation]:
         """Gets the annotations property"""
@@ -29,11 +31,13 @@ class ProfileCardProperty(Entity):
 
         return self.properties.get("annotations", ClientValueCollection[ProfileCardAnnotation](ProfileCardAnnotation))
 
+    @odata(name="directoryPropertyName")
     @property
     def directory_property_name(self) -> Optional[str]:
         """Gets the directoryPropertyName property"""
         return self.properties.get("directoryPropertyName", None)
 
+    @odata(name="isVisible")
     @property
     def is_visible(self) -> Optional[bool]:
         """Gets the isVisible property"""

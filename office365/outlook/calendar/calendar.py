@@ -73,6 +73,7 @@ class Calendar(Entity):
         self.context.add_query(qry)
         return return_type
 
+    @odata(name="allowedOnlineMeetingProviders")
     @property
     def allowed_online_meeting_providers(self) -> StringCollection:
         """
@@ -81,6 +82,7 @@ class Calendar(Entity):
         """
         return self.properties.get("allowedOnlineMeetingProviders", StringCollection())
 
+    @odata(name="canEdit")
     @property
     def can_edit(self) -> Optional[bool]:
         """
@@ -90,6 +92,7 @@ class Calendar(Entity):
         """
         return self.properties.get("canEdit", None)
 
+    @odata(name="canShare")
     @property
     def can_share(self) -> Optional[bool]:
         """
@@ -98,6 +101,7 @@ class Calendar(Entity):
         """
         return self.properties.get("canShare", None)
 
+    @odata(name="canViewPrivateItems")
     @property
     def can_view_private_items(self) -> Optional[bool]:
         """
@@ -105,6 +109,7 @@ class Calendar(Entity):
         """
         return self.properties.get("canViewPrivateItems", None)
 
+    @odata(name="changeKey")
     @property
     def change_key(self) -> Optional[str]:
         """
@@ -113,6 +118,7 @@ class Calendar(Entity):
         """
         return self.properties.get("changeKey", None)
 
+    @odata(name="color")
     @property
     def color(self) -> Optional[str]:
         """
@@ -131,11 +137,13 @@ class Calendar(Entity):
         """
         return self.properties.get("defaultOnlineMeetingProvider", OnlineMeetingProviderType.unknown)
 
+    @odata(name="name")
     @property
     def name(self) -> Optional[str]:
         """The calendar name"""
         return self.properties.get("name", None)
 
+    @odata(name="isDefaultCalendar")
     @property
     def is_default_calendar(self) -> Optional[bool]:
         """
@@ -143,6 +151,7 @@ class Calendar(Entity):
         """
         return self.properties.get("isDefaultCalendar", None)
 
+    @odata(name="isRemovable")
     @property
     def is_removable(self) -> Optional[bool]:
         """
@@ -150,6 +159,7 @@ class Calendar(Entity):
         """
         return self.properties.get("isRemovable", None)
 
+    @odata(name="isTallyingResponses")
     @property
     def is_tallying_responses(self) -> Optional[bool]:
         """
@@ -158,6 +168,7 @@ class Calendar(Entity):
         """
         return self.properties.get("isTallyingResponses", None)
 
+    @odata(name="owner")
     @property
     def owner(self):
         """If set, this represents the user who created or added the calendar.
@@ -166,12 +177,13 @@ class Calendar(Entity):
         """
         return self.properties.get("owner", EmailAddress())
 
+    @odata(name="events", navigation=True)
     @property
     def events(self) -> EventCollection:
         """The events in the calendar. Navigation property. Read-only."""
         return self.properties.get("events", EventCollection(self.context, ResourcePath("events", self.resource_path)))
 
-    @odata(name="calendarView")
+    @odata(name="calendarView", navigation=True)
     @property
     def calendar_view(self) -> EventCollection:
         """The calendar view for the calendar. Navigation property. Read-only."""
@@ -179,7 +191,7 @@ class Calendar(Entity):
             "calendarView", EventCollection(self.context, ResourcePath("calendarView", self.resource_path))
         )
 
-    @odata(name="calendarPermissions")
+    @odata(name="calendarPermissions", navigation=True)
     @property
     def calendar_permissions(self) -> CalendarPermissionCollection:
         """The permissions of the users with whom the calendar is shared."""
@@ -188,7 +200,7 @@ class Calendar(Entity):
             CalendarPermissionCollection(self.context, ResourcePath("calendarPermissions", self.resource_path)),
         )
 
-    @odata(name="multiValueExtendedProperties")
+    @odata(name="multiValueExtendedProperties", navigation=True)
     @property
     def multi_value_extended_properties(self) -> EntityCollection[MultiValueLegacyExtendedProperty]:
         """The collection of multi-value extended properties defined for the Calendar."""
@@ -201,7 +213,7 @@ class Calendar(Entity):
             ),
         )
 
-    @odata(name="singleValueExtendedProperties")
+    @odata(name="singleValueExtendedProperties", navigation=True)
     @property
     def single_value_extended_properties(self) -> EntityCollection[SingleValueLegacyExtendedProperty]:
         """The collection of single-value extended properties defined for the calendar. Read-only. Nullable."""
@@ -214,6 +226,7 @@ class Calendar(Entity):
             ),
         )
 
+    @odata(name="hexColor")
     @property
     def hex_color(self) -> Optional[str]:
         """Gets the hexColor property"""

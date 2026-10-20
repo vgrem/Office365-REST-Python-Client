@@ -15,6 +15,7 @@ class Conversation(Entity):
     All threads and posts in a conversation share the same subject.
     """
 
+    @odata(name="hasAttachments")
     @property
     def has_attachments(self) -> Optional[bool]:
         """
@@ -29,6 +30,7 @@ class Conversation(Entity):
         """The Timestamp type represents date and time information using ISO 8601 format and is always in UTC time."""
         return self.properties.get("lastDeliveredDateTime", datetime.min)
 
+    @odata(name="preview")
     @property
     def preview(self) -> Optional[str]:
         """
@@ -37,6 +39,7 @@ class Conversation(Entity):
         """
         return self.properties.get("preview", None)
 
+    @odata(name="topic")
     @property
     def topic(self) -> Optional[str]:
         """
@@ -45,11 +48,13 @@ class Conversation(Entity):
         """
         return self.properties.get("topic", None)
 
+    @odata(name="uniqueSenders")
     @property
     def unique_senders(self) -> StringCollection:
         """All the users that sent a message to this Conversation."""
         return self.properties.get("uniqueSenders", StringCollection())
 
+    @odata(name="threads", navigation=True)
     @property
     def threads(self) -> EntityCollection[ConversationThread]:
         """A collection of all the conversation threads in the conversation."""

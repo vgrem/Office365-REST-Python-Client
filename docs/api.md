@@ -62,6 +62,25 @@ qry.ViewXml = (
 items = ctx.web.lists.get_by_title("Tasks").get_items(qry).execute_query()
 ```
 
+### Projection
+
+`select()` takes the names the service uses, and those names are declared on the
+model, so you do not have to type them:
+
+```python
+from office365.outlook.calendar.events.event import Event
+
+events = client.me.calendar.events.select(Event.select_all()).get_all().execute_query()
+```
+
+`select_all()` answers every column `$select` accepts, and `expandable()` answers
+the navigation properties it does not — `attachments`, `instances`,
+`singleValueExtendedProperties`. Both are derived from the same declarations the
+getters read, so a projection cannot drift from the code that consumes it: a name
+like `iCalUId` (which no snake-case rule derives from `ical_uid`) is written once,
+on the getter. `Event.wire_name("ical_uid")` returns it, and raises `AttributeError`
+for an attribute that has no declaration instead of guessing.
+
 ### Paging
 
 `get_all()` follows server-driven paging (`@odata.nextLink`) so you never write
