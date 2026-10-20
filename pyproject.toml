@@ -155,5 +155,9 @@ lint.pylint.max-statements = 60
 
 [tool.pyright]
 pythonVersion = "3.8"
+# Third-party imports resolve from the project venv, so the optional extras have to
+# be installed (`uv sync --all-extras`, see README-dev.md). A hardcoded
+# `.venv/lib/python3.11/site-packages` used to sit here and pointed at nothing.
+venv = ".venv"
+venvPath = "."
 include = [ "office365" ]
-extraPaths = [ ".venv/lib/python3.11/site-packages" ]
