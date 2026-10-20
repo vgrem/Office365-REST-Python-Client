@@ -340,6 +340,19 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   now descends into a plain `dict`/`list`/`tuple` as well, so a payload assembled
   by hand is JSON-safe by construction rather than by `default=str` at the call
   site; a collection type that subclasses a container keeps its own `to_json`.
+- `DateTimeTimeZone.parse()` (`office365.outlook.calendar`) now reads what callers
+  actually pass. A `dict` in Graph's own spelling raised
+  `AttributeError: 'dict' object has no attribute 'replace'`, which made
+  `EventCollection.add(start={"dateTime": …, "timeZone": …})` unusable; a
+  `datetime` was flattened to UTC even when it carried a zone. It accepts a
+  `datetime` (an aware one keeps its own zone, an unnamed offset is converted so
+  the instant survives, a naive one is read as UTC as before), a Graph dict, a
+  string, or `None`, and emits the wire form Graph documents — seven fractional
+  digits, no offset appended (measured: Exchange accepts both and honours a named
+  zone, so an offset in `dateTime` was only a competing second zone). New
+  `DateTimeTimeZone.as_datetime()` reads the wall clock back, and is deliberately
+  naive: turning "W. Europe Standard Time" into an offset needs a time-zone
+  database this runtime does not ship.
 
 ## [3.3.0] - 2026-10-18
 

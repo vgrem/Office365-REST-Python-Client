@@ -10,11 +10,13 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import cast
 
+import pytz
 from office365.communications.callrecords.call_record import CallRecord
 from office365.communications.callrecords.type import CallType
 from office365.directory.users.password_profile import PasswordProfile
 from office365.directory.users.profile import UserProfile
 from office365.directory.users.user import User
+from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.client_result import ClientResult
@@ -186,6 +188,50 @@ class TestClientObjectToJson(unittest.TestCase):
         # The dialect's own control marker is rebuilt after the filter, so it survives
         # while the response's is gone.
         self.assertEqual(user.to_json(JsonLightFormat())["__metadata"], {"type": "microsoft.graph.User"})
+
+
+class TestDateTimeTimeZone(unittest.TestCase):
+    def test_a_datetime_becomes_the_canonical_wire_form(self):
+        # Graph reads `dateTime` as a wall clock and takes the zone from `timeZone`,
+        # so the fraction is Graph's seven digits and no offset is appended.
+        value = DateTimeTimeZone.parse(datetime(2026, 5, 4, 9, 0))
+        self.assertEqual(value.dateTime, "2026-05-04T09:00:00.0000000")
+        self.assertEqual(value.timeZone, "UTC")
+        self.assertEqual(value.to_json(), {"dateTime": "2026-05-04T09:00:00.0000000", "timeZone": "UTC"})
+
+    def test_an_aware_datetime_keeps_its_own_zone(self):
+        # Measured live: Exchange honours a named zone in `timeZone`, so collapsing a
+        # zoned datetime to UTC would discard what the caller already knew.
+        value = DateTimeTimeZone.parse(pytz.timezone("Europe/Kyiv").localize(datetime(2026, 5, 4, 9, 0)))
+        self.assertEqual(value.dateTime, "2026-05-04T09:00:00.0000000")
+        self.assertEqual(value.timeZone, "Europe/Kyiv")
+
+    def test_an_unnamed_offset_keeps_the_instant(self):
+        # A `timezone(timedelta)` has no name to send, so the wall clock moves to UTC
+        # rather than the instant being lost.
+        value = DateTimeTimeZone.parse(datetime(2026, 5, 4, 9, 0, tzinfo=timezone(timedelta(hours=3))))
+        self.assertEqual(value.dateTime, "2026-05-04T06:00:00.0000000")
+        self.assertEqual(value.timeZone, "UTC")
+
+    def test_a_graph_dict_is_read_as_a_value(self):
+        # The regression: `parse` assumed a datetime and raised
+        # `AttributeError: 'dict' object has no attribute 'replace'`, which is what a
+        # caller passing Graph's own spelling to `EventCollection.add` hit.
+        value = DateTimeTimeZone.parse(
+            {"dateTime": "2026-05-04T09:00:00.0000000", "timeZone": "W. Europe Standard Time"}
+        )
+        self.assertEqual(value.dateTime, "2026-05-04T09:00:00.0000000")
+        self.assertEqual(value.timeZone, "W. Europe Standard Time")
+
+    def test_a_string_and_none_pass_through(self):
+        self.assertEqual(DateTimeTimeZone.parse("2026-05-04T09:00:00.0000000").dateTime, "2026-05-04T09:00:00.0000000")
+        self.assertIsNone(DateTimeTimeZone.parse(None))
+
+    def test_as_datetime_reads_the_wall_clock(self):
+        value = DateTimeTimeZone(dateTime="2026-05-04T07:00:00.0000000", timeZone="UTC")
+        self.assertEqual(value.as_datetime(), datetime(2026, 5, 4, 7, 0))
+        self.assertIsNone(DateTimeTimeZone().as_datetime())
+        self.assertIsNone(DateTimeTimeZone(dateTime="not a date").as_datetime())
 
 
 class TestAddTypeMetadata(unittest.TestCase):
