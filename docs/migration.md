@@ -564,6 +564,17 @@ a record outright if one reaches it (`ValueError`), since it previously wrote th
 record's `dict` repr into an `SPFile`'s content — a corrupt file, no exception, no
 warning.
 
+**A pair that disagrees about files versus records is refused when the task is
+resolved.** A file has no list-record shape and a record is not a file body, so a
+file-share or library source aimed at a plain list used to resolve and then fail every
+item (`TypeError: object is not iterable`), and a list source aimed at a document
+library wrote each record's `dict` repr into a file named after the item's id —
+`Total: 2 | Success: 2 | Errors: 0`, two files named `1` and `2` (both measured).
+`resolve_task` now raises a `ValueError` naming the two lists and what to point the
+task at, and each adapter refuses the wrong payload shape as well, so a hand-built
+pair cannot corrupt a target either. Migrate files into a document library and records
+into a list.
+
 **The settings surface is wider than the engine, and that is reported, not
 implied.** `MigrationSettings` mirrors the cmdlet, but a client-side run cannot do
 everything SPMT does — it does not migrate the term store, it cannot skip lists by

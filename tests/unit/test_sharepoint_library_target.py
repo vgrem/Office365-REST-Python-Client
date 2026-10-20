@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+import pytest
 from office365.migration.base import MigrationItem, Principal
 from office365.migration.sharepoint.adapters import SharePointLibrarySource, SharePointLibraryTarget
 
@@ -163,6 +164,18 @@ def test_library_target_write_uploads_files():
 
     assert folder.uploaded == ("a.txt", b"data")
     assert folder.ensured == []
+
+
+def test_library_target_refuses_a_record_payload():
+    folder = _TargetFolder()
+    target = SharePointLibraryTarget(folder)
+    item = MigrationItem("/sites/src/1", "1", item_type="record")
+
+    # Live, this wrote the record's repr into a file named "1" and reported success.
+    with pytest.raises(ValueError, match="a list record is not a file body"):
+        target.write(item, {"Title": "Write the report"})
+
+    assert folder.uploaded is None
 
 
 def test_library_target_write_many_creates_folders_and_transfers_files(monkeypatch):

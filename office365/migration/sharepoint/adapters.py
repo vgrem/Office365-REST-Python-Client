@@ -1747,6 +1747,13 @@ class SharePointListTarget:
 
     def _record_for(self, item: MigrationItem, payload: object) -> dict:
         """The payload with the target content-type id and source-id marker applied."""
+        if not isinstance(payload, dict):
+            # Without this the cast fails as ``TypeError: object is not iterable``, which
+            # names neither the item nor the reason: a file's bytes have no record shape.
+            raise ValueError(
+                f"{item.dest_path!r} is a {item.item_type!r} with a {type(payload).__name__} payload: this target "
+                "writes list records, and a file has no record shape — migrate files into a document library"
+            )
         record = dict(cast(dict, payload))
         if self._content_type_map:
             content_type_id = record.get("ContentTypeId")
@@ -3074,6 +3081,13 @@ class SharePointLibraryTarget:
             if isinstance(payload, dict):
                 self._apply_folder_values(item, payload)
             return
+        if isinstance(payload, dict):
+            # ``str(payload).encode()`` below would write the record's ``repr`` into a file
+            # nobody asked for, and report it as a success: refuse instead.
+            raise ValueError(
+                f"{item.dest_path!r} is a {item.item_type!r} with a dict payload: this target writes files, and a "
+                "list record is not a file body — migrate records into a list"
+            )
         content = payload if isinstance(payload, bytes) else str(payload).encode("utf-8")
         self._folder.upload_file(item.dest_path, content).execute_query()
 

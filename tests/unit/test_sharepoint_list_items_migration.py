@@ -17,6 +17,8 @@ from __future__ import annotations
 import hashlib
 from typing import TYPE_CHECKING, cast
 
+import pytest
+
 if TYPE_CHECKING:
     from office365.sharepoint.lists.list import List as SPList
 
@@ -678,6 +680,19 @@ def test_list_target_marks_records_and_lists_paths():
     paths = target.list_paths()
     assert "1" in paths
     assert "1/spec.txt" in paths
+
+
+def test_list_target_refuses_a_file_payload():
+    target_list = _TargetList()
+    target = SharePointListTarget(cast("SPList", target_list))
+    item = MigrationItem("Docs/a.txt", "a.txt", item_type="file")
+
+    # Live, this raised ``TypeError: object is not iterable`` from ``dict(payload)``:
+    # it named neither the item nor the reason, and the run reported every file failed.
+    with pytest.raises(ValueError, match="a file has no record shape"):
+        target.write(item, b"hello")
+
+    assert target_list.queued == []
 
 
 def test_list_target_writes_attachment_via_identity():

@@ -175,6 +175,16 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   API carries files and folders only`), losing nothing — a record has no version
   history. The package target additionally **refuses** any item type other than `file`
   or `folder` (`ValueError`) instead of writing whatever it was handed.
+- **A source and target that disagree about files versus records are refused when the
+  task is resolved, not at the first write.** A file share (or a document library) aimed
+  at a plain list resolved fine and then failed *every* item with
+  `TypeError: object is not iterable`; the other direction was worse — a list aimed at a
+  document library wrote each record's `dict` repr into a file named after the item's id
+  and reported `Total: 2 | Success: 2 | Errors: 0`. Both now raise a `ValueError` naming
+  the two lists and what to point the task at. The adapters refuse the wrong payload
+  shape as well (`SharePointListTarget` a non-dict payload,
+  `SharePointLibraryTarget` a dict one), so a hand-built pair cannot corrupt a target
+  either.
 
 **Migration (Outlook)**
 

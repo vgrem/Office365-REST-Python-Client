@@ -649,6 +649,28 @@ def _template_type(source_list: SPList) -> ListTemplateType:
     return ListTemplateType.DocumentLibrary if is_document_library(source_list) else ListTemplateType.GenericList
 
 
+def _shape_refusal(source_title: "str | None", source_holds_files: bool, target_title: "str | None") -> str:
+    """Why a source/target pair cannot carry content, in the terms the caller used.
+
+    A file has no list-record shape and a record is not a file body, so a pair that
+    disagrees about files vs records cannot migrate anything: the record target fails
+    on the first write (``TypeError: object is not iterable``) and the file target
+    writes the record's ``repr`` into a file. Refusing at resolve time costs one
+    round-trip and says what to change.
+    """
+    source = repr(source_title) if source_title else "the source"
+    target = repr(target_title) if target_title else "the target"
+    if source_holds_files:
+        return (
+            f"{source} holds files and {target} is a list, not a document library: a file has no "
+            "list-record shape, so nothing would be written — point the task at a document library"
+        )
+    return (
+        f"{source} holds list records and {target} is a document library: a record is not a file, "
+        "and the library target would write one whose content is the record's repr — point the task at a list"
+    )
+
+
 def _file_share(
     task: MigrationTask, context: ClientContext, settings: "MigrationSettings | None"
 ) -> tuple[Source, Target]:
@@ -657,6 +679,8 @@ def _file_share(
     source = FileSystemSource(task.file_share_source)
     target_context = _context_for(context, task.target_site_url)
     target_list, folder = _target_folder(target_context, task)
+    if not is_document_library(target_list):
+        raise ValueError(_shape_refusal(task.file_share_source, True, target_list.title))
     return source, _build_target(task, target_context, settings, target_list, folder)
 
 
@@ -672,6 +696,8 @@ def _sharepoint(
     source_list = source_context.web.get_list_by_title(task.source_list).get().execute_query()
     source = _list_source(source_list)
     target_list, folder = _target_folder(target_context, task)
+    if is_document_library(source_list) != is_document_library(target_list):
+        raise ValueError(_shape_refusal(source_list.title, is_document_library(source_list), target_list.title))
     # Always replay structure over REST. The server-side package path does not
     # emit columns/content types/views yet, so skipping this would silently drop
     # them from the target (the package builder only carries the library, folders,

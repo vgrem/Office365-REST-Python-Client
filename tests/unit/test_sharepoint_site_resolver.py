@@ -6,6 +6,7 @@ import unittest
 from types import SimpleNamespace
 from unittest import mock
 
+from office365.migration.adapters.filesystem import FileSystemSource
 from office365.migration.session import MigrationSession
 from office365.migration.settings import MigrationSettings
 from office365.migration.sharepoint.adapters import (
@@ -945,6 +946,42 @@ class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
         package.assert_called_once()
         self.assertIs(dst, package_target)
 
+    def test_a_library_migrated_into_a_list_is_refused(self):
+        # Live, the first write of a file's bytes into the record target raised
+        # ``TypeError: object is not iterable`` from ``dict(payload)`` — one failed
+        # item per file, naming neither the item nor the reason.
+        source = _context([_docs(), _tasks()])
+        task = MigrationTask.sharepoint(
+            "https://contoso.sharepoint.com/sites/source",
+            source.base_url,
+            source_list="Documents",
+            target_list="Tasks",
+        )
+
+        with self.assertRaises(ValueError) as caught:
+            resolve_task(task, source)
+
+        self.assertIn("'Documents' holds files and 'Tasks' is a list", str(caught.exception))
+        # Refused before the structure replay, which for this shape died on its own
+        # (``Column 'LinkTitle' does not exist``) instead of saying what was wrong.
+        self.provision.assert_not_called()
+
+    def test_a_list_migrated_into_a_library_is_refused(self):
+        # Live with provision_structure=False, this pair reported ``Success 2`` and
+        # left two files named "1" and "2" whose content was the record's repr.
+        source = _context([_docs(), _tasks()])
+        task = MigrationTask.sharepoint(
+            "https://contoso.sharepoint.com/sites/source",
+            source.base_url,
+            source_list="Tasks",
+            target_list="Documents",
+        )
+
+        with self.assertRaises(ValueError) as caught:
+            resolve_task(task, source)
+
+        self.assertIn("'Tasks' holds list records and 'Documents' is a document library", str(caught.exception))
+
     def test_migrate_all_defers_to_site_resolver(self):
         task = MigrationTask.sharepoint(
             "https://contoso.sharepoint.com/sites/source",
@@ -953,6 +990,29 @@ class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
         )
         with self.assertRaises(NotImplementedError):
             resolve_task(task, _context([]))
+
+
+class TestFileShareTask(_StructureStub, unittest.TestCase):
+    def test_a_file_share_needs_a_document_library(self):
+        # Live, this pair resolved to SharePointListTarget and every file failed with
+        # ``TypeError: object is not iterable`` — with a warning that claimed the task
+        # "migrates records over REST", which a file share has none of.
+        source = _context([_docs(), _tasks()])
+        task = MigrationTask.file_share("/data/share", source.base_url, target_list="Tasks")
+
+        with self.assertRaises(ValueError) as caught:
+            resolve_task(task, source)
+
+        self.assertIn("'/data/share' holds files and 'Tasks' is a list", str(caught.exception))
+
+    def test_a_file_share_into_a_document_library_resolves(self):
+        source = _context([_docs()])
+        task = MigrationTask.file_share("/data/share", source.base_url, target_list="Documents")
+
+        src, dst = resolve_task(task, source)
+
+        self.assertIsInstance(src, FileSystemSource)
+        self.assertIsInstance(dst, SharePointLibraryTarget)
 
 
 class TestSessionSiteTask(_StructureStub, unittest.TestCase):
