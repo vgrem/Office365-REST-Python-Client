@@ -149,6 +149,23 @@ if status.is_success:
     print(status.resource_id, status.resource_location)
 ```
 
+`wait()` is `stream()` with the failure policy applied: when a callback is not
+enough — a progress bar that wants the snapshot, a UI that shows a stall, a
+worker that logs each step — iterate instead:
+
+```python
+for status in poller.stream():  # async twin: async for status in poller.astream()
+    print(status.status, status.percentage_complete, status.last_action_date_time)
+
+# or, from a waitable result (keeps result.last_status current):
+for status in result.stream():
+    ...
+```
+
+A stream yields every snapshot, the terminal one last, and raises nothing for a
+failed or cancelled outcome — the caller sees it. Breaking out of the loop stops
+polling. [Waitable results](#waitable-results) have the same pair.
+
 | Argument | Meaning |
 |---|---|
 | `interval` | Seconds between polls when the server sends no `Retry-After` (default `5`) |
@@ -182,17 +199,21 @@ present — i.e. the response was not an accepted async operation.
 ### Status vocabulary
 
 `OperationStatus` is a dataclass snapshot: `status`, `http_status`,
-`percentage_complete`, `resource_id`, `resource_location`, `error`, and the raw
-`response`. Its `is_success` / `is_failure` / `is_terminal` / `is_cancelled`
-predicates normalize the service's wording, so Graph (`completed`) and Azure
-(`Succeeded`) both work:
+`percentage_complete`, `resource_id`, `resource_location`, `error`, the raw
+`response`, plus the operation's own timeline — `created_date_time`,
+`last_action_date_time` (both timezone-aware, so `now - last_action_date_time` is
+an honest age) and `retry_after` (what this response asked the client to wait).
+Its `is_success` / `is_failure` / `is_terminal` / `is_cancelled` /
+`is_partially_succeeded` predicates normalize the service's wording, so Graph
+(`completed`) and Azure (`Succeeded`) both work:
 
 ```python
-from office365.runtime.lro import CANCELLED_STATUSES, FAILURE_STATUSES, SUCCESS_STATUSES
+from office365.runtime.lro import CANCELLED_STATUSES, FAILURE_STATUSES, PARTIAL_STATUSES, SUCCESS_STATUSES
 
 SUCCESS_STATUSES  # {"completed", "succeeded", "success", "finished"}
 FAILURE_STATUSES  # {"failed", "failure", "cancelled", "canceled", "error"}
 CANCELLED_STATUSES  # {"cancelled", "canceled"}
+PARTIAL_STATUSES  # {"partiallysucceeded", "partiallysuccessful", "partiallycompleted"}
 ```
 
 - A `3xx` (redirect to the final result) is terminal.
@@ -202,6 +223,12 @@ CANCELLED_STATUSES  # {"cancelled", "canceled"}
   `status.is_cancelled` to tell the two apart.
 - `OperationCancelledError` (a subclass of `OperationFailedError`) is raised for
   a cancelled terminal status; `OperationError` is the base of all three.
+- A **partially succeeded** operation is terminal but neither a success nor a
+  failure: `wait()` returns it instead of raising, and
+  `status.is_partially_succeeded` says so. SharePoint copy and migration jobs
+  report item-level failures this way.
+- Any other word is "keep polling" — so a service with its own vocabulary needs
+  a status it recognizes, or the wait runs to the timeout.
 
 ### Cancellation
 

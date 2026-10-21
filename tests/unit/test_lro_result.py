@@ -81,6 +81,39 @@ def test_long_running_result_wait_async():
     assert result.resource_id == "9"
 
 
+def test_long_running_result_streams_snapshots():
+    client = _graph_client(
+        sync_payloads=[
+            _lro(202, {"status": "inProgress", "percentageComplete": 12}, {"Retry-After": "0"}),
+            _lro(202, {"status": "completed", "resourceId": "42"}),
+        ]
+    )
+    result = LongRunningOperationResult(client, _MONITOR)
+    seen = [status.status for status in result.stream()]
+    assert seen == ["inProgress", "completed"]
+    # A stream keeps the result's view current, so `cancel()` and the resource
+    # properties work the same as after `wait()`.
+    assert result.last_status is not None
+    assert result.last_status.is_success
+    assert result.resource_id == "42"
+
+
+def test_long_running_result_astream():
+    client = _graph_client(
+        async_payloads=[
+            _lro(202, {"status": "inProgress"}, {"Retry-After": "0"}),
+            _lro(202, {"status": "completed", "resourceId": "9"}),
+        ]
+    )
+    result = LongRunningOperationResult(client, _MONITOR)
+
+    async def collect() -> list[str | None]:
+        return [status.status async for status in result.astream()]
+
+    assert asyncio.run(collect()) == ["inProgress", "completed"]
+    assert result.resource_id == "9"
+
+
 def test_long_running_result_requires_monitor_url():
     result = LongRunningOperationResult(_graph_client())
     with pytest.raises(ValueError, match="monitor URL"):

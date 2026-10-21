@@ -38,7 +38,8 @@ import json
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Awaitable, Callable
+from datetime import datetime, timezone
+from typing import TYPE_CHECKING, Any, AsyncIterator, Awaitable, Callable, Iterator
 
 from requests import Response
 
@@ -70,6 +71,14 @@ FAILURE_STATUSES = frozenset({"failed", "failure", "cancelled", "canceled", "err
 
 #: Operation statuses that mean the work was cancelled rather than failed.
 CANCELLED_STATUSES = frozenset({"cancelled", "canceled"})
+
+#: Operation statuses that mean the work finished, but not all of it succeeded.
+#:
+#: SharePoint and Graph report ``partiallySucceeded`` for a copy/migration job
+#: whose failures were item-level. It is *terminal* — polling again will not make
+#: it better — so it must stop the wait, but it is neither a success nor a
+#: failure of the operation as a whole.
+PARTIAL_STATUSES = frozenset({"partiallysucceeded", "partiallysuccessful", "partiallycompleted"})
 
 _PENDING_HTTP = 202
 
@@ -113,6 +122,23 @@ def _percentage(data: Any) -> float | None:
         return None
 
 
+def _timestamp(data: Any, *keys: str) -> datetime | None:
+    """Read an ISO-8601 timestamp as a timezone-aware datetime.
+
+    The service sends ``...Z`` or an explicit offset; an offset-less value is
+    read as UTC so that an age (``now - last_action_date_time``) is never a
+    silent mix of wall clocks.
+    """
+    raw = _first(data, *keys)
+    if not isinstance(raw, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else parsed.replace(tzinfo=timezone.utc)
+
+
 @dataclass
 class OperationStatus:
     """A single snapshot of a long-running operation.
@@ -124,6 +150,12 @@ class OperationStatus:
         percentage_complete: Completion percentage (0-100) when reported.
         resource_id: Identifier of the produced/modified resource, when reported.
         resource_location: URL of the produced/modified resource (or final result).
+        created_date_time: When the operation was created, timezone-aware (UTC
+            when the service sends no offset).
+        last_action_date_time: When the operation last changed — the anchor for
+            stall detection (``now - last_action_date_time``).
+        retry_after: Seconds this poll response asked the client to wait, when it
+            sent ``Retry-After``.
         error: Error payload when the operation failed.
         response: The raw terminal/poll response (carries the result body, e.g. a
             report export), excluded from ``repr``.
@@ -134,6 +166,9 @@ class OperationStatus:
     percentage_complete: float | None = None
     resource_id: str | None = None
     resource_location: str | None = None
+    created_date_time: datetime | None = None
+    last_action_date_time: datetime | None = None
+    retry_after: float | None = None
     error: Any = None
     response: Response | None = field(default=None, repr=False)
 
@@ -141,12 +176,16 @@ class OperationStatus:
     def from_response(cls, response: Response) -> "OperationStatus":
         """Build a snapshot from a poll response."""
         data = _parse_json(response)
+        retry_after = response_retry_after(response)
         return cls(
             status=_first(data, "status", "operationStatus"),
             http_status=int(getattr(response, "status_code", 0) or 0),
             percentage_complete=_percentage(data),
             resource_id=_first(data, "resourceId"),
             resource_location=_first(data, "resourceLocation", "targetResourceLocation"),
+            created_date_time=_timestamp(data, "createdDateTime"),
+            last_action_date_time=_timestamp(data, "lastActionDateTime"),
+            retry_after=None if retry_after is None else float(retry_after),
             error=_first(data, "error"),
             response=response,
         )
@@ -173,6 +212,16 @@ class OperationStatus:
         return self.http_status >= 400  # noqa: PLR2004
 
     @property
+    def is_partially_succeeded(self) -> bool:
+        """Whether the operation finished with some item-level failures.
+
+        Terminal, and neither :attr:`is_success` nor :attr:`is_failure`: the work
+        stopped, most of it succeeded, and ``wait()`` returns instead of raising.
+        Inspect :attr:`error` (or the service-specific report) for what failed.
+        """
+        return self._status_key in PARTIAL_STATUSES
+
+    @property
     def is_cancelled(self) -> bool:
         """Whether the operation was cancelled (by the caller or the service).
 
@@ -195,7 +244,7 @@ class OperationStatus:
             return True
         key = self._status_key
         if key is not None:
-            return key in SUCCESS_STATUSES or key in FAILURE_STATUSES
+            return key in SUCCESS_STATUSES or key in FAILURE_STATUSES or key in PARTIAL_STATUSES
         return self.http_status != _PENDING_HTTP
 
 
@@ -459,6 +508,33 @@ class OperationPoller:
         except RuntimeError:  # loop closed between the check and the call
             pass
 
+    def stream(
+        self,
+        *,
+        timeout: float | None = None,
+        on_progress: OperationCallback | None = None,
+    ) -> Iterator[OperationStatus]:
+        """Poll (blocking) and yield every :class:`OperationStatus` snapshot.
+
+        The loop :meth:`wait` runs, exposed as an iterator: each poll yields its
+        snapshot, the terminal one last. Nothing is raised for a failed or
+        cancelled terminal status — the caller sees it and decides:
+
+        ```python
+        for status in poller.stream():
+            print(status.status, status.percentage_complete)
+        ```
+
+        Args:
+            timeout: Override the instance timeout for this call.
+            on_progress: Override the instance progress callback.
+
+        Raises:
+            OperationTimeoutError: When the deadline elapses before a terminal state.
+            ClientRequestException: On a permanent (non-throttling) HTTP failure.
+        """
+        return self._snapshots(timeout=timeout, on_progress=on_progress)
+
     def wait(
         self,
         *,
@@ -467,6 +543,8 @@ class OperationPoller:
         raise_on_failure: bool = True,
     ) -> OperationStatus:
         """Poll (blocking) until the operation is terminal.
+
+        The terminal snapshot of :meth:`stream`, with the failure policy applied.
 
         Args:
             timeout: Override the instance timeout for this call.
@@ -477,18 +555,26 @@ class OperationPoller:
         Returns:
             The terminal :class:`OperationStatus`.
         """
-        client_request = self._context.pending_request()
-        transport = self._transport or client_request.transport
-        effective_timeout = self._timeout if timeout is None else timeout
-        deadline = self._clock() + effective_timeout
-        while True:
-            if self._cancelled.is_set():
-                return self._finish(self._cancelled_status(), raise_on_failure)
-            status = self._poll_sync(client_request, transport)
-            self._record(status, on_progress)
-            if status.http_status not in _RETRYABLE_HTTP and status.is_terminal:
-                return self._finish(status, raise_on_failure)
-            self._pause(status, deadline, effective_timeout)
+        status: OperationStatus | None = None
+        for snapshot in self.stream(timeout=timeout, on_progress=on_progress):
+            status = snapshot
+        assert status is not None  # the loop always yields at least one snapshot
+        return self._finish(status, raise_on_failure)
+
+    async def astream(
+        self,
+        *,
+        timeout: float | None = None,
+        on_progress: OperationCallback | None = None,
+    ) -> AsyncIterator[OperationStatus]:
+        """Poll without blocking the loop, yielding every snapshot.
+
+        Async twin of :meth:`stream`: ``async for status in poller.astream()``.
+        The wait between polls yields to the event loop, so concurrently-running
+        tasks keep making progress.
+        """
+        async for status in self._snapshots_async(timeout=timeout, on_progress=on_progress):
+            yield status
 
     async def wait_async(
         self,
@@ -510,6 +596,50 @@ class OperationPoller:
                 — cancelling the task stops *waiting* only; the service operation
                 keeps running.
         """
+        status: OperationStatus | None = None
+        async for snapshot in self._snapshots_async(
+            timeout=timeout,
+            on_progress=on_progress,
+            cancel_on_task_cancel=cancel_on_task_cancel,
+        ):
+            status = snapshot
+        assert status is not None
+        return self._finish(status, raise_on_failure)
+
+    # -- the polling loop --------------------------------------------------
+
+    def _snapshots(
+        self,
+        *,
+        timeout: float | None,
+        on_progress: OperationCallback | None,
+    ) -> Iterator[OperationStatus]:
+        """Poll once per iteration and yield each snapshot until it is terminal."""
+        client_request = self._context.pending_request()
+        transport = self._transport or client_request.transport
+        effective_timeout = self._timeout if timeout is None else timeout
+        deadline = self._clock() + effective_timeout
+        while True:
+            if self._cancelled.is_set():
+                # Synthetic: the service has not reported anything, so the progress
+                # callback is not told that it did.
+                yield self._cancelled_status()
+                return
+            status = self._poll_sync(client_request, transport)
+            self._record(status, on_progress)
+            yield status
+            if status.http_status not in _RETRYABLE_HTTP and status.is_terminal:
+                return
+            self._pause(status, deadline, effective_timeout)
+
+    async def _snapshots_async(
+        self,
+        *,
+        timeout: float | None,
+        on_progress: OperationCallback | None,
+        cancel_on_task_cancel: bool = False,
+    ) -> AsyncIterator[OperationStatus]:
+        """Async twin of :meth:`_snapshots`."""
         client_request = self._context.pending_request()
         transport = self._async_transport or client_request.async_transport
         effective_timeout = self._timeout if timeout is None else timeout
@@ -521,11 +651,13 @@ class OperationPoller:
         try:
             while True:
                 if self._cancelled.is_set():
-                    return self._finish(self._cancelled_status(), raise_on_failure)
+                    yield self._cancelled_status()
+                    return
                 status = await self._poll_async(client_request, transport)
                 self._record(status, on_progress)
+                yield status
                 if status.http_status not in _RETRYABLE_HTTP and status.is_terminal:
-                    return self._finish(status, raise_on_failure)
+                    return
                 await self._pause_async(status, deadline, effective_timeout)
         except asyncio.CancelledError:
             if cancel_on_task_cancel:
@@ -740,12 +872,49 @@ class LongRunningOperationResult(ClientResult[str]):
         self._last_status = await poller.wait_async(on_progress=on_progress, raise_on_failure=raise_on_failure)
         return self._last_status
 
+    def stream(
+        self,
+        *,
+        interval: float = 5.0,
+        timeout: float = 1800.0,
+        on_progress: OperationCallback | None = None,
+    ) -> Iterator[OperationStatus]:
+        """Poll and yield every status snapshot until the operation is terminal."""
+        poller = self.to_poller(interval=interval, timeout=timeout, on_progress=on_progress)
+        self._poller = poller
+        return self._track(poller.stream(on_progress=on_progress))
+
+    def astream(
+        self,
+        *,
+        interval: float = 5.0,
+        timeout: float = 1800.0,
+        on_progress: OperationCallback | None = None,
+    ) -> AsyncIterator[OperationStatus]:
+        """Await polling and yield every snapshot (async twin of :meth:`stream`)."""
+        poller = self.to_poller(interval=interval, timeout=timeout, on_progress=on_progress)
+        self._poller = poller
+        return self._track_async(poller.astream(on_progress=on_progress))
+
+    def _track(self, snapshots: Iterator[OperationStatus]) -> Iterator[OperationStatus]:
+        """Keep :attr:`last_status` current while the caller consumes a stream."""
+        for status in snapshots:
+            self._last_status = status
+            yield status
+
+    async def _track_async(self, snapshots: AsyncIterator[OperationStatus]) -> AsyncIterator[OperationStatus]:
+        """Async twin of :meth:`_track`."""
+        async for status in snapshots:
+            self._last_status = status
+            yield status
+
     def cancel(self) -> None:
         """Request cancellation of the tracked operation.
 
         Cancels the poller used by the most recent :meth:`wait` / :meth:`wait_async`
-        call, so an in-flight wait stops at the next poll boundary. See
-        :meth:`OperationPoller.cancel` for the full semantics.
+        (or :meth:`stream` / :meth:`astream`) call, so an in-flight wait stops at
+        the next poll boundary. See :meth:`OperationPoller.cancel` for the full
+        semantics.
         """
         if self._poller is not None:
             self._poller.cancel()

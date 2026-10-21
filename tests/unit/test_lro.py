@@ -13,6 +13,7 @@ from __future__ import annotations
 import asyncio
 import threading
 import time
+from datetime import datetime, timezone
 from typing import Any
 
 import pytest
@@ -131,6 +132,56 @@ def test_status_202_without_status_is_pending():
     status = OperationStatus.from_response(_response(202))
     assert status.status is None
     assert not status.is_terminal
+
+
+def test_status_partially_succeeded_is_terminal_but_neither_outcome():
+    # Measured shape: SharePoint copy/migration jobs report item-level failures as
+    # `PartiallySucceeded`. Polling again cannot improve it, so it must end the wait.
+    status = OperationStatus.from_response(_response(200, {"status": "partiallySucceeded", "error": {"code": "x"}}))
+    assert status.is_terminal
+    assert status.is_partially_succeeded
+    assert not status.is_success
+    assert not status.is_failure
+
+
+def test_wait_stops_on_partially_succeeded():
+    # The regression: an unknown status is "keep polling", so a partially
+    # succeeded job was polled until `OperationTimeoutError`.
+    clock = _Clock()
+    transport = ScriptedTransport([_lro(200, {"status": "PartiallySucceeded"})])
+    status = _poller(transport, clock, interval=3).wait()
+    assert status.is_partially_succeeded
+    assert transport.calls == 1
+
+
+def test_status_reads_timestamps_and_retry_after():
+    status = OperationStatus.from_response(
+        _response(
+            202,
+            {
+                "status": "inProgress",
+                "createdDateTime": "2026-10-21T09:00:00Z",
+                "lastActionDateTime": "2026-10-21T09:05:30.0000000+02:00",
+            },
+            {"Retry-After": "7"},
+        )
+    )
+    # Timestamps are timezone-aware, so an age is an honest subtraction.
+    assert status.created_date_time == datetime(2026, 10, 21, 9, 0, tzinfo=timezone.utc)
+    assert status.last_action_date_time == datetime(2026, 10, 21, 7, 5, 30, tzinfo=timezone.utc)
+    assert status.retry_after == 7.0  # noqa: PLR2004
+
+
+def test_an_offsetless_timestamp_is_read_as_utc():
+    body = {"status": "inProgress", "lastActionDateTime": "2026-10-21T09:00:00"}
+    status = OperationStatus.from_response(_response(202, body))
+    assert status.last_action_date_time == datetime(2026, 10, 21, 9, 0, tzinfo=timezone.utc)
+
+
+def test_an_unparseable_timestamp_is_absent():
+    status = OperationStatus.from_response(_response(202, {"status": "inProgress", "createdDateTime": "soon"}))
+    assert status.created_date_time is None
+    assert status.retry_after is None
 
 
 # -- poll-URL resolution ----------------------------------------------------
@@ -254,6 +305,71 @@ def test_instance_progress_callback_is_used():
     poller = _poller(transport, _Clock(), on_progress=lambda s: seen.append(s.status or ""))
     poller.wait()
     assert seen == ["completed"]
+
+
+# -- streaming snapshots ----------------------------------------------------
+
+
+def test_stream_yields_every_snapshot():
+    clock = _Clock()
+    transport = ScriptedTransport(
+        [
+            _lro(202, {"status": "inProgress", "percentageComplete": 10}, {"Retry-After": "1"}),
+            _lro(202, {"status": "inProgress", "percentageComplete": 60}),
+            _lro(202, {"status": "completed"}),
+        ]
+    )
+    poller = _poller(transport, clock)
+    seen = list(poller.stream())
+    assert [s.status for s in seen] == ["inProgress", "inProgress", "completed"]
+    assert [s.percentage_complete for s in seen] == [10.0, 60.0, None]
+    assert seen[-1].is_success
+    # The first gap is the server's Retry-After, the second the default interval:
+    # a stream is the same loop, so it paces identically.
+    assert clock.t == 6.0  # noqa: PLR2004
+
+
+def test_stream_returns_a_failed_terminal_status_instead_of_raising():
+    transport = ScriptedTransport([_lro(202, {"status": "failed", "error": {"code": "x"}})])
+    seen = list(_poller(transport, _Clock()).stream())
+    assert [s.status for s in seen] == ["failed"]
+    assert seen[-1].is_failure
+
+
+def test_stream_reports_a_cancellation_as_the_last_snapshot():
+    transport = ScriptedTransport([_lro(202, {"status": "completed"})])
+    poller = _poller(transport, _Clock())
+    poller.cancel()
+    seen = list(poller.stream())
+    assert [s.status for s in seen] == ["cancelled"]
+    assert transport.calls == 0
+
+
+def test_stream_stops_polling_when_abandoned():
+    transport = ScriptedTransport([_lro(202, {"status": "inProgress"}) for _ in range(5)])
+    snapshots = _poller(transport, _Clock()).stream()
+    next(snapshots)
+    snapshots.close()
+    assert transport.calls == 1
+
+
+def test_astream_yields_every_snapshot():
+    clock = _Clock()
+    transport = AsyncScriptedTransport(
+        [
+            _lro(202, {"status": "inProgress"}, {"Retry-After": "1"}),
+            _lro(202, {"status": "completed", "resourceId": "9"}),
+        ]
+    )
+    poller = OperationPoller(_ctx(), _MONITOR, async_transport=transport, clock=clock.now, async_sleep=clock.asleep)
+
+    async def collect() -> list[OperationStatus]:
+        return [status async for status in poller.astream()]
+
+    seen = asyncio.run(collect())
+    assert [s.status for s in seen] == ["inProgress", "completed"]
+    assert seen[-1].resource_id == "9"
+    assert clock.t == 1.0
 
 
 # -- continuation tokens ----------------------------------------------------

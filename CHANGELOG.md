@@ -214,6 +214,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the job. Distribution lists, security groups and unresolved principals are still
   skipped with a warning: they are not site groups and do not match by title.
 
+**Long-running operations**
+
+- An operation is now **watchable, not just waitable**: `OperationPoller.stream()`
+  / `astream()` (and the same pair on `LongRunningOperationResult`) yield every
+  `OperationStatus` snapshot, the terminal one last, and raise nothing for a
+  failed or cancelled outcome — `wait()` is the same loop with the failure policy
+  applied. Abandoning the loop stops polling.
+- `OperationStatus` carries the operation's **timeline**: `created_date_time` and
+  `last_action_date_time` (timezone-aware, UTC when the service sends no offset,
+  so `now - last_action_date_time` is a stall check rather than a wall-clock mix)
+  and `retry_after` (what the poll response asked for). A `partiallySucceeded`
+  operation is **terminal but neither outcome** — SharePoint copy and migration
+  jobs report item-level failures that way, and it used to be an unknown status,
+  i.e. polled until `OperationTimeoutError`; `wait()` now returns it and
+  `status.is_partially_succeeded` reports it.
+
 ### Changed
 
 **Transports**
