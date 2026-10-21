@@ -396,7 +396,11 @@ class CalendarTarget(DataTarget):
         if self._index is None:
             index: dict[tuple[str, str | None, str | None], list[Any]] = {}
             for event in self._calendar.events.select(_EXISTING_COLUMNS).get_all().execute_query():
-                key = event_dedup_key({"subject": event.subject, "start": event.start})
+                # The key is a sidecar shape, so hand it the wire form of the start
+                # (a fetched event carries a typed ``DateTimeTimeZone``).
+                key = event_dedup_key(
+                    {"subject": event.subject, "start": event.start.to_json() if event.start else None}
+                )
                 index.setdefault(key, []).append(event)
             self._index = index
         return self._index

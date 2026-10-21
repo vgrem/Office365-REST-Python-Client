@@ -24,8 +24,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
+from office365.communications.onlinemeetings.online_meeting_info import OnlineMeetingInfo
 from office365.migration.outlook.models import mail_slug
 from office365.outlook.calendar.events.event import Event
+from office365.outlook.mail.item_body import ItemBody
+from office365.outlook.mail.location import Location
 from office365.runtime.converters.scalars import iso_or_none, parse_datetime
 from office365.runtime.converters.value import serialize_value
 
@@ -157,8 +160,7 @@ def event_dest_path(event, calendar_path: str) -> str:
 
 def _started(event) -> datetime | None:
     """The event's start as a naive wall-clock datetime (its own zone), if set."""
-    value = _as_dict(event.start).get("dateTime")
-    return _parse_graph_datetime(value)
+    return event.start.as_datetime() if event.start else None
 
 
 def _parse_graph_datetime(value: Any) -> datetime | None:
@@ -177,26 +179,6 @@ def _parse_graph_datetime(value: Any) -> datetime | None:
     return parsed.replace(tzinfo=None) if parsed else None
 
 
-def _as_dict(value: Any) -> dict[str, Any]:
-    """A Graph nested value as a plain dict.
-
-    A fetched event hands back *typed* ``ClientValue`` objects (``start`` is a
-    ``DateTimeTimeZone``, ``body`` an ``ItemBody``), so the raw property bag is only
-    reachable through ``to_json()`` — ``get_property`` returns the wrapper.
-    """
-    if value is None:
-        return {}
-    if isinstance(value, dict):
-        return value
-    to_json = getattr(value, "to_json", None)
-    if callable(to_json):
-        payload = to_json()
-        if isinstance(payload, dict):
-            return payload
-    properties = getattr(value, "properties", None)
-    return properties if isinstance(properties, dict) else {}
-
-
 def event_kind(event) -> str | None:
     """The wire name of an event's ``type``: ``singleInstance``, ``seriesMaster``, …
 
@@ -209,8 +191,7 @@ def event_kind(event) -> str | None:
 
 def _address(recipient: Any) -> dict[str, str | None]:
     """An event's organizer/attendee as ``{"name", "address"}``."""
-    email_address = _as_dict(_as_dict(recipient).get("emailAddress"))
-    return {"name": email_address.get("name"), "address": email_address.get("address")}
+    return {"name": recipient.emailAddress.name, "address": recipient.emailAddress.address}
 
 
 def event_envelope(
@@ -227,28 +208,33 @@ def event_envelope(
     own object, not an ``RRULE`` — the ICS writer renders an ``RRULE`` from it, but
     the import replays the object it can round-trip exactly.
     """
-    body = _as_dict(event.body)
-    online = _as_dict(event.online_meeting)
-    locations = [_as_dict(item).get("displayName") for item in (event.locations or [])]
+    # A nested value can be *null* on the wire, which the getter's default does not
+    # cover (the key exists, so it answers ``None``); read it as the empty instance.
+    body = event.body or ItemBody()
+    location = event.location or Location()
+    online = event.online_meeting or OnlineMeetingInfo()
+    locations = [item.displayName for item in (event.locations or [])]
     envelope: dict[str, Any] = {
         "graph_id": event.id,
         "ical_uid": event.ical_uid,
         "calendar_path": calendar_path,
         "calendar_display_path": display_path or calendar_path,
         "subject": event.subject,
-        "body": {"content_type": body.get("contentType"), "content": body.get("content")},
-        "start": _as_dict(event.start),
-        "end": _as_dict(event.end),
+        "body": {"content_type": serialize_value(body.contentType), "content": body.content},
+        # ``to_json()`` is the library's serializer: the sidecar keeps Graph's own
+        # ``{dateTime, timeZone}`` pair, which is what an import posts back verbatim.
+        "start": event.start.to_json(),
+        "end": event.end.to_json(),
         "is_all_day": bool(event.is_all_day),
         "is_cancelled": bool(event.is_cancelled),
         "show_as": serialize_value(event.show_as),
         "sensitivity": serialize_value(event.sensitivity),
         "importance": serialize_value(event.importance),
-        "location": _as_dict(event.location).get("displayName"),
+        "location": location.displayName,
         "locations": [name for name in locations if name],
         "organizer": _address(event.organizer),
         "attendees": [
-            {**_address(attendee), "type": _as_dict(attendee).get("type"), "response": _response(attendee)}
+            {**_address(attendee), "type": attendee.type, "response": _response(attendee)}
             for attendee in (event.attendees or [])
         ],
         "categories": list(event.categories or []),
@@ -261,10 +247,10 @@ def event_envelope(
         # Graph's own object, flattened through ``to_json()``: the raw property is a
         # typed ``PatternedRecurrence``, and the sidecar is JSON — ``default=str``
         # would have written its ``repr``, which no import can read back.
-        "recurrence": _as_dict(event.recurrence) or None,
+        "recurrence": event.recurrence.to_json() if event.recurrence else None,
         "is_online_meeting": bool(event.is_online_meeting),
         "online_meeting_provider": serialize_value(event.online_meeting_provider),
-        "join_url": online.get("joinUrl"),
+        "join_url": online.joinUrl,
         "has_attachments": bool(event.has_attachments),
         "web_link": event.web_link,
         "ics_path": event_dest_path(event, calendar_path),
@@ -275,8 +261,13 @@ def event_envelope(
 
 
 def _response(attendee: Any) -> str | None:
-    """An attendee's response state (``status.response``), as Graph spells it."""
-    return _as_dict(_as_dict(attendee).get("status")).get("response")
+    """An attendee's response state (``status.response``), as Graph spells it.
+
+    ``Attendee.status`` is annotated ``str`` on the model while Exchange sends the
+    nested ``ResponseStatus`` object, so the value arrives as a plain ``dict``.
+    """
+    status = attendee.status
+    return status.get("response") if isinstance(status, dict) else getattr(status, "response", None)
 
 
 def _escape(text: Any) -> str:
@@ -332,8 +323,8 @@ def _rrule(recurrence: Any) -> str | None:
     recurrence); the sidecar keeps the object either way, so a lost ``RRULE`` costs
     a calendar's interop, never the import.
     """
-    pattern = _as_dict(_as_dict(recurrence).get("pattern"))
-    window = _as_dict(_as_dict(recurrence).get("range"))
+    pattern = (recurrence or {}).get("pattern") or {}
+    window = (recurrence or {}).get("range") or {}
     frequency = _FREQUENCY.get(str(pattern.get("type") or ""))
     if not frequency:
         return None
@@ -411,14 +402,14 @@ def event_ics(envelope: dict[str, Any]) -> bytes:
     if stamp is not None:
         lines.append(f"DTSTAMP:{stamp.strftime('%Y%m%dT%H%M%S')}Z")
     for name, key in (("DTSTART", "start"), ("DTEND", "end")):
-        line = _datetime_line(name, _as_dict(envelope.get(key)), is_all_day)
+        line = _datetime_line(name, envelope.get(key) or {}, is_all_day)
         if line:
             lines.append(line)
     lines.append(f"SUMMARY:{_escape(envelope.get('subject'))}")
     location = envelope.get("location")
     if location:
         lines.append(f"LOCATION:{_escape(location)}")
-    body = _as_dict(envelope.get("body"))
+    body = envelope.get("body") or {}
     content = body.get("content")
     if content:
         if body.get("content_type") == "html":
@@ -436,7 +427,7 @@ def event_ics(envelope: dict[str, Any]) -> bytes:
         ("TRANSP", _TRANSP.get(str(envelope.get("show_as") or ""))),
     )
     lines.extend(f"{name}:{value}" for name, value in mapping if value)
-    organizer = _as_dict(envelope.get("organizer"))
+    organizer = envelope.get("organizer") or {}
     if organizer.get("address"):
         name = f'CN="{organizer["name"]}"' if organizer.get("name") else ""
         lines.append(f"ORGANIZER{';' + name if name else ''}:mailto:{organizer['address']}")
@@ -518,8 +509,8 @@ def event_create_payload(
     organizer, attendee responses, ``created``/``modified``) is not sent.
     """
     options = options or CalendarImportOptions()
-    start = _as_dict(envelope.get("start"))
-    end = _as_dict(envelope.get("end"))
+    start = envelope.get("start") or {}
+    end = envelope.get("end") or {}
     if not start.get("dateTime") or not end.get("dateTime"):
         raise ValueError("the sidecar record has no start/end dateTime: an event cannot be created without a time range")
     payload: dict[str, Any] = {
@@ -527,7 +518,7 @@ def event_create_payload(
         "start": {"dateTime": start["dateTime"], "timeZone": start.get("timeZone") or "UTC"},
         "end": {"dateTime": end["dateTime"], "timeZone": end.get("timeZone") or "UTC"},
     }
-    body = _as_dict(envelope.get("body"))
+    body = envelope.get("body") or {}
     if body.get("content"):
         # Graph spells the content type as an enum; the sidecar keeps the wire name.
         is_html = str(body.get("content_type") or "").lower() == "html"
@@ -612,7 +603,7 @@ def _attendee_payloads(envelope: dict[str, Any]) -> list[dict[str, Any]]:
     """The attendee list Graph accepts, from the addresses the sidecar recorded."""
     payloads: list[dict[str, Any]] = []
     for attendee in envelope.get("attendees") or []:
-        address = _as_dict(attendee).get("address")
+        address = attendee.get("address")
         if not address:
             continue
         item: dict[str, Any] = {"emailAddress": {"address": address}, "type": attendee.get("type") or "required"}
@@ -628,7 +619,7 @@ def _wall(value: Any) -> tuple[str | None, str | None]:
     Graph varies the fractional-second width between what is sent and what comes
     back, so the fraction is dropped rather than compared.
     """
-    moment = _as_dict(value)
+    moment = value or {}
     parsed = _parse_graph_datetime(moment.get("dateTime"))
     zone = moment.get("timeZone")
     return (parsed.strftime("%Y-%m-%dT%H:%M:%S") if parsed else None, str(zone) if zone else None)
@@ -641,7 +632,7 @@ def _body_text(body: Any) -> str:
     in HTML, and an HTML body gains a ``<head>`` with a generated ``<style>`` block.
     The markup is therefore not comparable — the text is.
     """
-    content = _as_dict(body).get("content")
+    content = (body or {}).get("content")
     if not content:
         return ""
     text = _COMMENT.sub("", str(content))

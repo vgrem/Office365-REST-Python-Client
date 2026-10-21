@@ -167,10 +167,9 @@ def contact_envelope(
         "business_phones": [str(value) for value in (contact.business_phones or [])],
         "home_phones": [str(value) for value in (contact.home_phones or [])],
         "mobile_phone": contact.mobile_phone,
-        "email_addresses": [
-            {"name": _as_dict(item).get("name"), "address": _as_dict(item).get("address")}
-            for item in (contact.email_addresses or [])
-        ],
+        # ``EmailAddress.name``/``.address`` are already spelled in Python; no wire
+        # spelling is involved in reading them.
+        "email_addresses": [{"name": item.name, "address": item.address} for item in (contact.email_addresses or [])],
         "categories": [str(value) for value in (contact.categories or [])],
         "created": iso_or_none(contact.created_datetime),
         "modified": iso_or_none(contact.last_modified_datetime),
@@ -397,38 +396,30 @@ def _email_addresses(envelope: dict[str, Any]) -> List[Tuple[str, str]]:
     """
     pairs: List[Tuple[str, str]] = []
     for entry in envelope.get("email_addresses") or []:
-        address = str(_as_dict(entry).get("address") or "").strip().lower()
+        address = str(entry.get("address") or "").strip().lower()
         if not address:
             continue
-        name = str(_as_dict(entry).get("name") or "").strip() or address
+        name = str(entry.get("name") or "").strip() or address
         pairs.append((address, name))
     return sorted(pairs)
 
 
 def _address(value: Any) -> Dict[str, Optional[str]]:
-    """A Graph ``physicalAddress`` as a plain dict of its five parts."""
-    source = _as_dict(value)
-    return {part: source.get(_ADDRESS_KEYS[part]) or None for part in _ADDRESS_PARTS}
+    """A Graph ``physicalAddress`` as a plain dict of its five parts.
 
-
-def _as_dict(value: Any) -> Dict[str, Any]:
-    """A Graph nested value as a plain dict.
-
-    A fetched contact hands back *typed* ``ClientValue`` objects (``homeAddress`` is
-    a ``PhysicalAddress``, each email an ``EmailAddress``), so the raw bag is only
-    reachable through ``to_json()`` — ``get_property`` returns the wrapper.
+    The typed fields are read directly: two of them are spelled in Graph's
+    camelCase on the model (``postalCode``, ``countryOrRegion``), and the part names
+    are this module's own vocabulary — the sidecar's keys.
     """
     if value is None:
-        return {}
-    if isinstance(value, dict):
-        return value
-    to_json = getattr(value, "to_json", None)
-    if callable(to_json):
-        payload = to_json()
-        if isinstance(payload, dict):
-            return payload
-    properties = getattr(value, "properties", None)
-    return properties if isinstance(properties, dict) else {}
+        return dict.fromkeys(_ADDRESS_PARTS)
+    return {
+        "street": value.street or None,
+        "city": value.city or None,
+        "state": value.state or None,
+        "postal_code": value.postalCode or None,
+        "country_or_region": value.countryOrRegion or None,
+    }
 
 
 def _wire_name(attr: str) -> str:
