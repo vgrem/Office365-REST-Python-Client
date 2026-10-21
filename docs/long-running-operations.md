@@ -78,11 +78,29 @@ these actions. The raw `OperationPoller` does **not** — see below.
 
 When the service models the operation as a *resource* (rather than only a monitor
 URL), the entity itself is pollable. `PollableOperation` supplies
-`wait()` / `wait_async()`, `operation_status`, `is_operation_complete()` /
+`wait()` / `wait_async()`, `stream()` / `astream()`, `cancel()` /
+`cancel_async()`, `operation_status`, `is_operation_complete()` /
 `is_operation_failed()`, `next_poll_delay()` and `is_transient_poll_error()`;
 the concrete classes add typed properties — and generated operation entities
 (`LongRunningOperation`, `security.CaseOperation`, `PrintOperation`, … and their
 subtypes) get the mixin automatically.
+
+`wait()` returns the entity, refreshed; `stream()` yields the same snapshots the
+polling loop sees, so a progress bar can follow `percentageComplete` without
+giving up the entity:
+
+```python
+operation = client.sites[site_id].operations["op-id"].get().execute_query()
+for status in operation.stream():  # async twin: async for status in operation.astream()
+    print(status.status, status.percentage_complete)
+print(operation.resource_location)
+```
+
+A transient `404` — the entity a service publishes a moment after accepting the
+work — is an *attempt*, not an observation: the wait retries it at
+`next_poll_delay()` and the progress hook is not told that anything happened. An
+entity has no generic cancel request, so `cancel()` stops *waiting* only; a
+service that can abandon the work exposes its own method.
 
 **Teams** — `clone()` / `create()` return a `TeamsAsyncOperation`; `execute_query()`
 submits it (HTTP `202`), then poll:
@@ -269,11 +287,17 @@ Cancellation semantics:
 ## The engine behind the poller
 
 `OperationPoller` is `office365.runtime.operation.Operation` specialised to one
-kind of poll: a `GET` of a monitor URL. The base class owns everything else — the
-deadline, `Retry-After` pacing, the progress hook, the cancel, and the rule that a
-stream raises nothing — so `stream()` / `astream()` yield every snapshot,
+kind of poll: a `GET` of a monitor URL. `PollableOperation` is the same base
+specialised to another: re-read the entity. The base class owns everything else —
+the deadline, `Retry-After` pacing, the progress hook, the cancel, and the rule
+that a stream raises nothing — so `stream()` / `astream()` yield every snapshot,
 `wait()` / `wait_async()` are that loop with the failure policy applied, and
 `cancel()` / `cancel_async()` stop the wait at the next poll boundary.
+
+A family differs in three things, all of them data or one small override: what one
+attempt is (`_step` / `_step_async`), which HTTP codes mean "poll again"
+(`transient_statuses=`), and what `wait()` hands back (`_outcome`). The poller
+returns the terminal `OperationStatus`; the entity mixin returns the entity.
 
 Writing your own operation is then one method — or two, for the async twin:
 

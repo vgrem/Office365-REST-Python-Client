@@ -211,6 +211,75 @@ def test_rich_long_running_operation_wait():
     assert operation.resource_location == "https://loc"
 
 
+def test_pollable_stream_yields_snapshots_and_keeps_the_entity(monkeypatch: pytest.MonkeyPatch):
+    """A stream is the same loop as ``wait`` — the entity is what ``wait`` returns."""
+    responses = iter(
+        [
+            _response(202, {"status": "running"}, {"Retry-After": "1"}),
+            _response(202, {"status": "completed", "resourceId": "42"}),
+        ]
+    )
+    monkeypatch.setattr("office365.runtime.pollable.reload_operation", lambda op: next(responses))
+    clock = _Clock()
+    op = _FakeOperation({"status": "running"})
+    statuses = list(op.stream(clock=clock.now, sleep=clock.sleep))
+    assert [s.status for s in statuses] == ["running", "completed"]
+    assert statuses[-1].resource_id == "42"
+    # The wait is kept, so cancel() can reach it and last_status stays answerable.
+    assert op._operation_wait is not None
+    assert op._operation_wait.last_status is statuses[-1]
+    assert clock.t == 1.0
+
+
+def test_pollable_stream_raises_nothing_for_a_failed_outcome(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(
+        "office365.runtime.pollable.reload_operation",
+        lambda op: _response(202, {"status": "failed", "error": {"code": "x"}}),
+    )
+    op = _FakeOperation({"status": "failed"})
+    statuses = list(op.stream(clock=_Clock().now, sleep=_Clock().sleep))
+    assert len(statuses) == 1
+    assert statuses[0].is_failure
+    with pytest.raises(OperationFailedError):
+        op.wait(clock=_Clock().now, sleep=_Clock().sleep)
+
+
+def test_a_404_gap_is_not_reported_to_the_progress_hook(monkeypatch: pytest.MonkeyPatch):
+    """The gap is an attempt, not an observation: nothing happened to report."""
+    responses: list[Any] = [_not_found(), _response(202, {"status": "completed"})]
+
+    def _reload(_op: Any) -> Any:
+        item = responses.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    monkeypatch.setattr("office365.runtime.pollable.reload_operation", _reload)
+    seen: list[str] = []
+    op = _FakeOperation({"status": "notStarted"})
+    list(
+        op.stream(
+            clock=_Clock().now, sleep=_Clock().sleep, interval=0, on_progress=lambda s: seen.append(s.status or "")
+        )
+    )
+    assert seen == ["completed"]
+
+
+def test_pollable_wait_can_be_cancelled():
+    """An entity wait is now cancellable: the mixin hands it to the shared engine."""
+    op = _FakeOperation({"status": "running"})
+    op._operation_wait = _StubWait()
+    op.cancel()
+    assert op._operation_wait.cancelled  # type: ignore[attr-defined]
+
+
+class _StubWait:
+    cancelled = False
+
+    def cancel(self) -> None:
+        self.cancelled = True
+
+
 # -- Teams async polling ----------------------------------------------------
 
 
