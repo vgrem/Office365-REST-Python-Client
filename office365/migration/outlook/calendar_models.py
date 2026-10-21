@@ -261,13 +261,8 @@ def event_envelope(
 
 
 def _response(attendee: Any) -> str | None:
-    """An attendee's response state (``status.response``), as Graph spells it.
-
-    ``Attendee.status`` is annotated ``str`` on the model while Exchange sends the
-    nested ``ResponseStatus`` object, so the value arrives as a plain ``dict``.
-    """
-    status = attendee.status
-    return status.get("response") if isinstance(status, dict) else getattr(status, "response", None)
+    """An attendee's response state (``status.response``), as Graph spells it."""
+    return attendee.status.response if attendee.status else None
 
 
 def _escape(text: Any) -> str:

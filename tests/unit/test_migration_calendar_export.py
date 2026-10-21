@@ -27,7 +27,9 @@ from office365.migration.outlook import (
     IcsExportTarget,
 )
 from office365.migration.outlook.calendar_models import EVENT_COLUMNS, MAX_LINE_OCTETS, event_ics
+from office365.outlook.calendar.attendees.attendee import Attendee
 from office365.outlook.calendar.events.event import Event
+from office365.outlook.calendar.response_status import ResponseStatus
 from tests._scripted_transport import MethodRoutingTransport
 
 _CALENDAR = {"id": "cal-1", "name": "Calendar"}
@@ -235,6 +237,21 @@ def test_source_records_the_envelope_an_import_replays():
     assert envelope["calendar_display_path"] == "Calendar"
     assert item.created == "2026-02-01T08:00:00+00:00"
     assert item.modified == "2026-02-20T11:30:00+00:00"
+
+
+def test_an_attendees_response_status_is_a_typed_value():
+    """``status`` is Exchange's ``ResponseStatus`` object, not a string.
+
+    Measured: an attendee comes back as ``{"emailAddress": …, "type": "required",
+    "status": {"response": "accepted"}}``. The model declared ``status: str``, so the
+    value stayed a bare ``dict`` — ``attendee.status.response`` raised, and every reader
+    had to duck-type it (``calendar_models._response`` took the dict branch).
+    """
+    attendee = Attendee()
+    attendee.set_property("status", {"response": "accepted"})
+
+    assert isinstance(attendee.status, ResponseStatus)
+    assert attendee.status.response == "accepted"
 
 
 def test_envelope_reads_the_ical_uid_under_the_name_graph_spells_it():
