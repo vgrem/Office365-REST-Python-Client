@@ -229,6 +229,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   jobs report item-level failures that way, and it used to be an unknown status,
   i.e. polled until `OperationTimeoutError`; `wait()` now returns it and
   `status.is_partially_succeeded` reports it.
+- `RespondAsyncRequest.execute()` / `execute_async()` return an operation **either
+  way**: a pollable one when the service accepted `202`, and one that is already
+  terminal (no monitor URL, `wait()` answers without a request) when the service
+  completed the call in the submitting round-trip. `Prefer: respond-async` is a
+  preference, so a caller opting in had to branch on which answer it got — and
+  `None` also meant "no operation", which is indistinguishable from "it is
+  already done". `LongRunningOperationResult.completed(...)` is the new
+  constructor for the settled case, `is_completed` says which one you hold, and a
+  repeat `wait()` on a terminal operation no longer re-polls.
 
 ### Changed
 
@@ -282,6 +291,13 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   `payload()`, `dest_path`, `dedup_key`, `digest()` and `id`. The record holds a payload
   and where it came from, never an entity, which is what lets an import verify a sidecar
   against a contact the service returned with no client and no context.
+
+**Long-running operations**
+
+- `LongRunningOperationResult.monitor_url` is `str | None`: `None` means "there is
+  no monitor URL", which is now a real state (an operation that finished in the
+  submitting round-trip) rather than an empty string. An empty string read like a
+  URL to every `if result.monitor_url:` that forgot to test it.
 
 ### Fixed
 

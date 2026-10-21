@@ -61,7 +61,7 @@ print(copied.web_url)
 |---|---|
 | `result.wait(...)` / `wait_async(...)` | Poll to terminal, return the `OperationStatus` |
 | `result.wait_for_item()` / `wait_for_item_async()` | Poll, then load and return the produced `DriveItem` |
-| `result.monitor_url` | The operation-status URL captured from `Location` |
+| `result.monitor_url` | The operation-status URL captured from `Location` (`None` for work that finished in one round-trip) |
 | `result.last_status` | The most recent `OperationStatus` snapshot |
 | `result.resource_id` / `result.resource_location` | The produced resource, once reported |
 
@@ -296,19 +296,28 @@ status = await poller.wait_async()
 
 Some endpoints expose the async pattern *opt-in*: send `Prefer: respond-async` and
 the service may accept with `202` (or answer synchronously when it's fast).
-`RespondAsyncRequest` executes a **fresh** query with that preference and, when
-accepted, returns a pollable `LongRunningOperationResult` — otherwise `None`, and
-the query's return type holds the synchronous result:
+`RespondAsyncRequest` executes a **fresh** query with that preference and returns
+an operation either way:
+
+- accepted → a pollable `LongRunningOperationResult` carrying the monitor URL;
+- answered synchronously → a result that is **already terminal**, with the
+  query's return type holding the payload. `wait()` returns its status without a
+  request (`status="completed"`, `http_status` = the real one, `monitor_url` is
+  `None`).
+
+So opting in is one line of control flow, not two:
 
 ```python
 from office365.runtime.respond_async import RespondAsyncRequest
 
 operation = await RespondAsyncRequest(context, fresh_query, wait=5).execute_async()
-if operation is not None:
-    await operation.wait_async(on_progress=lambda s: print(s.percentage_complete))
+status = await operation.wait_async(on_progress=lambda s: print(s.percentage_complete))
+assert status.is_success
 ```
 
-This is the mechanism behind long-running workbook operations.
+`operation.is_completed` says which way it went — useful for logging "answered
+synchronously" — but you never have to branch to get a result. This is the
+mechanism behind long-running workbook operations.
 
 - [Poll a workbook operation](products/patterns/lro/workbook_operation_async.md)
 

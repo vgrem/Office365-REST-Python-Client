@@ -3,8 +3,9 @@
 Covers :mod:`office365.runtime.respond_async` (``RespondAsyncRequest``), which
 bridges the OData ``respond-async`` preference (as used by Excel workbook
 operations) onto the generic LRO poller: a ``202 Accepted`` becomes a waitable
-``LongRunningOperationResult`` while a synchronous response is fed into the
-query's regular result.
+``LongRunningOperationResult``, and a synchronous answer becomes one that is
+already terminal — either way the caller holds an operation, while a synchronous
+response also lands in the query's regular result.
 """
 
 from __future__ import annotations
@@ -62,8 +63,26 @@ def test_sync_completion_populates_query_result():
     client = _graph_client(sync_payloads=[_lro(200, b"User,Count\nalice,3\n")])
     result, query = _report_query(client)
     operation = RespondAsyncRequest(client, query).execute()
-    assert operation is None
     assert result.value == b"User,Count\nalice,3\n"
+    # The preference was refused: the operation is born terminal, so a caller that
+    # opted into the async pattern does not branch on which way the service answered.
+    assert operation.is_completed
+    assert operation.monitor_url is None
+    assert operation.last_status is not None
+    assert operation.last_status.http_status == 200  # noqa: PLR2004
+    assert operation.last_status.is_success
+
+
+def test_sync_completion_waits_without_a_request():
+    transport = ScriptedTransport([_lro(200, b"csv")])
+    client = _graph_client()
+    client.pending_request().transport = transport
+    _, query = _report_query(client)
+    operation = RespondAsyncRequest(client, query).execute()
+    status = operation.wait()
+    assert status.is_success
+    assert [s.status for s in operation.stream()] == ["completed"]
+    assert transport.calls == 1  # only the submission; nothing was polled
 
 
 def test_accepted_returns_pollable_result_and_waits():
@@ -113,10 +132,14 @@ def test_error_status_raises():
 
 
 def test_202_without_monitor_url_is_treated_as_sync():
+    # Accepted-but-not-pollable cannot be waited on; the response is still fed into
+    # the query, and the result is terminal rather than a poller that would raise.
     client = _graph_client(sync_payloads=[_lro(202, b"")])
     result, query = _report_query(client)
-    assert RespondAsyncRequest(client, query).execute() is None
+    operation = RespondAsyncRequest(client, query).execute()
     assert result.value == b""
+    assert operation.is_completed
+    assert operation.monitor_url is None
 
 
 # -- asynchronous submission ------------------------------------------------
@@ -126,8 +149,10 @@ def test_async_completion_populates_query_result():
     client = _graph_client(async_payloads=[_lro(200, b"csv")])
     result, query = _report_query(client)
     operation = asyncio.run(RespondAsyncRequest(client, query).execute_async())
-    assert operation is None
     assert result.value == b"csv"
+    assert operation.is_completed
+    status = asyncio.run(operation.wait_async())
+    assert status.is_success
 
 
 def test_async_accepted_returns_pollable_result():
@@ -147,7 +172,7 @@ def test_async_accepted_can_be_polled():
     )
     _, query = _report_query(client)
     operation = asyncio.run(RespondAsyncRequest(client, query).execute_async())
-    assert operation is not None
+    assert not operation.is_completed  # accepted: terminal only after polling
     status = asyncio.run(operation.wait_async(interval=0.0))
     assert status.is_success
     assert operation.resource_id == "7"

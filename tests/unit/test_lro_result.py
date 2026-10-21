@@ -12,6 +12,7 @@ Covers the two Phase 7 pieces layered on the generic
 from __future__ import annotations
 
 import asyncio
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -19,7 +20,7 @@ from office365.graph_client import GraphClient
 from office365.onedrive.driveitems.copy_result import DriveItemCopyResult, _parse_drives_url
 from office365.onedrive.listitems.item_reference import ItemReference
 from office365.runtime.lro import LongRunningOperationResult, OperationError
-from tests._scripted_transport import AsyncScriptedTransport, ScriptedTransport
+from tests._scripted_transport import AsyncScriptedTransport, ScriptedTransport, build_response
 
 _MONITOR = "https://graph.microsoft.com/monitor/abc"
 
@@ -112,6 +113,36 @@ def test_long_running_result_astream():
 
     assert asyncio.run(collect()) == ["inProgress", "completed"]
     assert result.resource_id == "9"
+
+
+def test_completed_result_is_terminal_without_a_monitor():
+    response = build_response(SimpleNamespace(url=_MONITOR), {"http_status": 200, "body": {"id": "1"}})
+    result = LongRunningOperationResult.completed(_graph_client(), response)
+    assert result.is_completed
+    assert result.monitor_url is None
+    assert result.last_status is not None
+    assert result.last_status.status == "completed"
+    # No poll is attempted, so a result without a monitor URL is still waitable.
+    assert result.wait() is result.last_status
+    assert [s.status for s in result.stream()] == ["completed"]
+    assert asyncio.run(result.wait_async()) is result.last_status
+    with pytest.raises(ValueError, match="monitor URL"):
+        result.to_poller()
+
+
+def test_a_repeat_wait_does_not_poll_a_terminal_operation():
+    client = _graph_client(
+        sync_payloads=[
+            _lro(202, {"status": "inProgress"}, {"Retry-After": "0"}),
+            _lro(202, {"status": "completed", "resourceId": "42"}),
+        ]
+    )
+    transport = client.pending_request().transport
+    result = LongRunningOperationResult(client, _MONITOR)
+    assert result.wait().is_success
+    calls = transport.calls
+    assert result.wait() is result.last_status
+    assert transport.calls == calls
 
 
 def test_long_running_result_requires_monitor_url():

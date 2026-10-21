@@ -788,6 +788,11 @@ class LongRunningOperationResult(ClientResult[str]):
     SharePoint) that are pre-authenticated for the original caller, so by default
     no credentials are attached when polling — pass ``authenticate=True`` only for
     services (e.g. Azure) that require them.
+
+    The same type describes work that finished in the submitting round-trip
+    (:meth:`completed`): it has no monitor URL, and ``wait()`` answers the status
+    it was given without a request, so a caller that opted into the async pattern
+    does not have to branch on which way the service answered.
     """
 
     def __init__(
@@ -804,15 +809,53 @@ class LongRunningOperationResult(ClientResult[str]):
         self._last_status: OperationStatus | None = None
         self._poller: OperationPoller | None = None
 
+    @classmethod
+    def completed(
+        cls,
+        context: "ClientRuntimeContext",
+        response: Response,
+        *,
+        authenticate: bool = False,
+        final_state_via: str = "auto",
+    ) -> "LongRunningOperationResult":
+        """Describe work the service finished in the submitting round-trip.
+
+        ``Prefer: respond-async`` is a *preference*: a quick call is answered
+        normally. That answer is already the outcome, so the result is born
+        terminal — ``wait()`` returns its status without polling, and the query
+        holds the payload. ``status`` is reported as ``"completed"`` because the
+        round-trip that started the work also ended it.
+
+        Args:
+            context: The client runtime context that owns the credentials.
+            response: The synchronous response the query was fed with.
+        """
+        result = cls(context, None, authenticate=authenticate, final_state_via=final_state_via)
+        result._last_status = OperationStatus(
+            status="completed",
+            http_status=int(getattr(response, "status_code", 0) or 0),
+            response=response,
+        )
+        return result
+
     @property
-    def monitor_url(self) -> str:
-        """The operation-status URL (the result value)."""
-        return self.value
+    def monitor_url(self) -> str | None:
+        """The operation-status URL, or ``None`` when the work completed in one round-trip."""
+        return self.value or None
 
     @property
     def last_status(self) -> OperationStatus | None:
-        """The most recent snapshot, or ``None`` before the first poll."""
+        """The most recent snapshot.
+
+        ``None`` before the first poll; already the terminal snapshot for an
+        operation that :meth:`completed` synchronously.
+        """
         return self._last_status
+
+    @property
+    def is_completed(self) -> bool:
+        """Whether a terminal snapshot is already known (no poll needed)."""
+        return self._settled() is not None
 
     @property
     def resource_id(self) -> str | None:
@@ -844,6 +887,19 @@ class LongRunningOperationResult(ClientResult[str]):
             on_progress=on_progress,
         )
 
+    def _settled(self) -> OperationStatus | None:
+        """The terminal snapshot already known, if waiting again would change nothing.
+
+        A synchronously completed operation has one from birth; a polled one keeps
+        the one ``wait()`` returned. A terminal *failure* is deliberately not
+        cached-and-replayed: re-waiting a failed operation retries the poll (and
+        raises again), which is what a caller looping on ``wait()`` expects.
+        """
+        status = self._last_status
+        if status is not None and status.is_terminal and not status.is_failure:
+            return status
+        return None
+
     def wait(
         self,
         *,
@@ -853,6 +909,9 @@ class LongRunningOperationResult(ClientResult[str]):
         raise_on_failure: bool = True,
     ) -> OperationStatus:
         """Poll (blocking) until the operation is terminal and return the status."""
+        settled = self._settled()
+        if settled is not None:
+            return settled
         poller = self.to_poller(interval=interval, timeout=timeout, on_progress=on_progress)
         self._poller = poller
         self._last_status = poller.wait(on_progress=on_progress, raise_on_failure=raise_on_failure)
@@ -867,6 +926,9 @@ class LongRunningOperationResult(ClientResult[str]):
         raise_on_failure: bool = True,
     ) -> OperationStatus:
         """Await the operation to completion and return the terminal status."""
+        settled = self._settled()
+        if settled is not None:
+            return settled
         poller = self.to_poller(interval=interval, timeout=timeout, on_progress=on_progress)
         self._poller = poller
         self._last_status = await poller.wait_async(on_progress=on_progress, raise_on_failure=raise_on_failure)
@@ -880,6 +942,9 @@ class LongRunningOperationResult(ClientResult[str]):
         on_progress: OperationCallback | None = None,
     ) -> Iterator[OperationStatus]:
         """Poll and yield every status snapshot until the operation is terminal."""
+        settled = self._settled()
+        if settled is not None:
+            return iter((settled,))
         poller = self.to_poller(interval=interval, timeout=timeout, on_progress=on_progress)
         self._poller = poller
         return self._track(poller.stream(on_progress=on_progress))
@@ -892,9 +957,16 @@ class LongRunningOperationResult(ClientResult[str]):
         on_progress: OperationCallback | None = None,
     ) -> AsyncIterator[OperationStatus]:
         """Await polling and yield every snapshot (async twin of :meth:`stream`)."""
+        settled = self._settled()
+        if settled is not None:
+            return self._only(settled)
         poller = self.to_poller(interval=interval, timeout=timeout, on_progress=on_progress)
         self._poller = poller
         return self._track_async(poller.astream(on_progress=on_progress))
+
+    async def _only(self, status: OperationStatus) -> AsyncIterator[OperationStatus]:
+        """An async stream of a single, already-known snapshot."""
+        yield status
 
     def _track(self, snapshots: Iterator[OperationStatus]) -> Iterator[OperationStatus]:
         """Keep :attr:`last_status` current while the caller consumes a stream."""

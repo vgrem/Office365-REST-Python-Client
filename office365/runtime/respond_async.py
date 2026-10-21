@@ -10,15 +10,17 @@ answered normally, so the preference is a hint rather than a guarantee.
 This module bridges that pair onto the generic poller in
 :mod:`office365.runtime.lro`. It builds the request for a query, attaches the
 preference, and executes it through the normal request pipeline (auth,
-``client-request-id``, throttling) — then:
+``client-request-id``, throttling) — then returns a
+:class:`~office365.runtime.lro.LongRunningOperationResult` either way:
 
-* returns a :class:`~office365.runtime.lro.LongRunningOperationResult` when the
-  service accepted the request asynchronously; poll it with ``wait()`` /
-  ``wait_async()``, or
-* returns ``None`` when the service completed the request synchronously, after
-  feeding the response into the query so its regular return value is populated.
+* when the service accepted the request asynchronously, the result carries the
+  monitor URL — poll it with ``wait()`` / ``wait_async()``;
+* when the service completed it synchronously, the response has already been fed
+  into the query (so its regular return value is populated) and the result is
+  *already terminal* — ``wait()`` returns its status without a request.
 
-Example::
+Whether the preference was granted is then a detail of *how long* ``wait()``
+took, not a different code path::
 
     from office365.runtime.queries.create_entity import CreateEntityQuery
     from office365.runtime.respond_async import RespondAsyncRequest
@@ -26,8 +28,8 @@ Example::
     row = rows.create_typed_object()
     query = CreateEntityQuery(rows, row, row)
     operation = RespondAsyncRequest(context, query, wait=10).execute()
-    if operation is not None:
-        operation.wait()  # the server accepted the work asynchronously
+    status = operation.wait()  # polls only if the server accepted the work
+    assert status.is_success
 """
 
 from __future__ import annotations
@@ -95,38 +97,42 @@ class RespondAsyncRequest:
             final_state_via=self._final_state_via,
         )
 
-    def _finish_sync(self, response: Any) -> None:
+    def _settle(self, response: Any) -> LongRunningOperationResult:
+        """Feed a synchronous response into the query and describe it as a result."""
         request = self._context.pending_request()
         request.handle_response(response, self._query)
         request.afterExecute(response)
+        return LongRunningOperationResult.completed(
+            self._context,
+            response,
+            authenticate=self._authenticate,
+            final_state_via=self._final_state_via,
+        )
 
-    def execute(self) -> LongRunningOperationResult | None:
+    def execute(self) -> LongRunningOperationResult:
         """Submit the query (blocking).
 
         Returns:
-            A :class:`LongRunningOperationResult` when the service answered
-            ``202 Accepted``; otherwise ``None`` and the query's ``return_type``
-            holds the synchronous result.
+            A :class:`LongRunningOperationResult`. Pollable when the service
+            answered ``202 Accepted``; otherwise already terminal, with the
+            query's ``return_type`` holding the synchronous result.
         """
         request = self._build_request()
         response = self._context.pending_request().execute_request_direct(request)
-        result = self._maybe_result(response)
-        if result is None:
-            self._finish_sync(response)
-        return result
+        accepted = self._maybe_result(response)
+        return self._settle(response) if accepted is None else accepted
 
-    async def execute_async(self) -> LongRunningOperationResult | None:
+    async def execute_async(self) -> LongRunningOperationResult:
         """Submit the query without blocking the loop.
 
         Async twin of :meth:`execute`; awaits the transport. The returned result
-        is polled with ``await result.wait_async()``.
+        is polled with ``await result.wait_async()`` — which returns immediately
+        when the service answered synchronously.
         """
         request = self._build_request()
         response = await self._context.pending_request().execute_request_direct_async(request)
-        result = self._maybe_result(response)
-        if result is None:
-            self._finish_sync(response)
-        return result
+        accepted = self._maybe_result(response)
+        return self._settle(response) if accepted is None else accepted
 
 
 __all__ = ["RespondAsyncRequest"]

@@ -232,13 +232,13 @@ await operation.poll_for_status_async(timeout_sec=600, polling_interval=15)
 
 ### [Poll a workbook operation](../lro/workbook_operation_async.py)
 
-Opt into the async pattern with `Prefer: respond-async`; when the service accepts,
-the result is awaitable, otherwise the query holds the synchronous answer:
+Opt into the async pattern with `Prefer: respond-async`. The result is awaitable
+either way — it polls when the service accepted, and is already terminal (with the
+query holding the answer) when the service answered synchronously:
 
 ```python
 operation = await RespondAsyncRequest(ctx, query, wait=5).execute_async()
-if operation is not None:
-    await operation.wait_async()
+status = await operation.wait_async()  # costs nothing if it already finished
 ```
 
 ### [Resume an operation from a continuation token](../lro/resume_from_token.py)

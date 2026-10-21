@@ -5,8 +5,8 @@ Batching is for many short, independent requests. A long-running operation — a
 drive-item copy, for instance — answers ``202 Accepted`` with a monitor URL that
 must be captured so the operation can be awaited. A batch envelope does *not*
 route that URL back to the operation's result, so a batched copy yields a
-``DriveItemCopyResult`` whose ``monitor_url`` is empty: the copy runs, but nothing
-waits for it. This example shows a small guard that detects a
+``DriveItemCopyResult`` whose ``monitor_url`` is ``None``: the copy runs, but
+nothing waits for it. This example shows a small guard that detects a
 ``LongRunningOperationResult`` among a batch's return types and fails loudly, then
 does it the right way — submit the LRO on its own and await it.
 

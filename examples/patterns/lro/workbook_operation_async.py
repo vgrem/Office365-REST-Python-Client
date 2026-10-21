@@ -4,10 +4,10 @@ Submit a workbook session with ``Prefer: respond-async`` and poll it if accepted
 The Excel API lets a caller opt into the long-running-operation pattern: send
 ``Prefer: respond-async`` and the service may answer ``202 Accepted`` with a
 monitor URL instead of holding the request open. ``RespondAsyncRequest`` executes
-a *fresh* query with that preference and returns a pollable
-``LongRunningOperationResult`` when accepted — or ``None`` when the service
-answers synchronously (which is common for a quick session creation). Either
-way, the query's return type receives the session.
+a *fresh* query with that preference and returns an operation either way: a
+pollable one when accepted, an already-terminal one when the service answers
+synchronously (common for a quick session creation — then the query's return
+type holds the session and ``wait_async()`` costs nothing).
 
 Requires delegated permission ``Files.ReadWrite``.
 
@@ -53,12 +53,12 @@ async def main() -> None:
         query = ServiceOperationQuery(workbook, "createSession", None, {"persistChanges": True}, None, session)
         operation = await RespondAsyncRequest(workbook.context, query, wait=5).execute_async()
 
-        if operation is not None:
+        if operation.is_completed:
+            print("Answered synchronously.")
+        else:
             print(f"Accepted (202); polling {operation.monitor_url} ...")
             await operation.wait_async(on_progress=report)
             print()
-        else:
-            print("Answered synchronously.")
 
         session_id = session.value.id
         if not session_id:
