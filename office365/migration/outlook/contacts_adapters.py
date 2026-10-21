@@ -235,9 +235,9 @@ class VcfTreeSource(DataSource):
             dest_path=dest,
             size_bytes=path.stat().st_size,
             item_type="contact",
-            modified=envelope.get("modified"),
-            created=envelope.get("created") or envelope.get("modified"),
-            source_id=envelope.get("graph_id"),
+            modified=envelope.get("lastModifiedDateTime"),
+            created=envelope.get("createdDateTime") or envelope.get("lastModifiedDateTime"),
+            source_id=envelope.get("id"),
             metadata=envelope,
         )
 
@@ -416,15 +416,7 @@ class ContactTarget(DataTarget):
         if cached is None:
             index: dict[tuple[str, str], list[Any]] = {}
             for contact in folder.contacts.select(_EXISTING_COLUMNS).get_all().execute_query():
-                key = contact_dedup_key(
-                    {
-                        "display_name": contact.display_name,
-                        "email_addresses": [
-                            {"address": getattr(item, "address", None), "name": getattr(item, "name", None)}
-                            for item in (contact.email_addresses or [])
-                        ],
-                    }
-                )
+                key = contact_dedup_key(contact.to_json())
                 index.setdefault(key, []).append(contact)
             self._indexed[directory] = index
             cached = index

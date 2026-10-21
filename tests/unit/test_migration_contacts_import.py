@@ -39,50 +39,50 @@ _FOLDER = {"id": "f1", "displayName": "Imported contacts"}
 
 def _envelope(**overrides: Any) -> dict[str, Any]:
     envelope: dict[str, Any] = {
-        "graph_id": "c1",
+        "id": "c1",
         "folder_path": "Contacts",
         "folder_display_path": "Contacts",
-        "display_name": "Alice Example",
-        "given_name": "Alice",
+        "displayName": "Alice Example",
+        "givenName": "Alice",
         "surname": "Example",
-        "middle_name": "B",
+        "middleName": "B",
         "initials": "AB",
-        "nick_name": "Al",
+        "nickName": "Al",
         "title": "Dr.",
-        "file_as": "Example, Alice",
+        "fileAs": "Example, Alice",
         "generation": "Jr.",
-        "company_name": "Contoso",
+        "companyName": "Contoso",
         "department": "Finance",
-        "job_title": "Controller",
+        "jobTitle": "Controller",
         "profession": "Accountant",
         "manager": "Bob Boss",
-        "assistant_name": "Cara Help",
-        "office_location": "HQ 3",
-        "business_home_page": "https://contoso.example/alice",
+        "assistantName": "Cara Help",
+        "officeLocation": "HQ 3",
+        "businessHomePage": "https://contoso.example/alice",
         "birthday": "1953-05-01T11:59:00+00:00",
-        "personal_notes": "Line one\nLine two",
-        "spouse_name": "Sam Example",
+        "personalNotes": "Line one\nLine two",
+        "spouseName": "Sam Example",
         "children": ["Kim"],
-        "im_addresses": ["sip:alice@contoso.com"],
-        "business_phones": ["+1 555 0100"],
-        "home_phones": ["+1 555 0199"],
-        "mobile_phone": "+1 555 0150",
-        "email_addresses": [
+        "imAddresses": ["sip:alice@contoso.com"],
+        "businessPhones": ["+1 555 0100"],
+        "homePhones": ["+1 555 0199"],
+        "mobilePhone": "+1 555 0150",
+        "emailAddresses": [
             {"name": "Alice Example", "address": "alice@contoso.com"},
             {"name": "alice@contoso.example", "address": "alice@contoso.example"},
         ],
         "categories": ["Finance", "Board quarterly"],
-        "created": "2020-01-02T03:04:05+00:00",
-        "modified": "2021-02-03T04:05:06+00:00",
-        "business_address": {
+        "createdDateTime": "2020-01-02T03:04:05+00:00",
+        "lastModifiedDateTime": "2021-02-03T04:05:06+00:00",
+        "businessAddress": {
             "street": "1 Main St",
             "city": "Springfield",
             "state": "IL",
-            "postal_code": "62701",
-            "country_or_region": "USA",
+            "postalCode": "62701",
+            "countryOrRegion": "USA",
         },
-        "home_address": {"street": None, "city": None, "state": None, "postal_code": None, "country_or_region": None},
-        "other_address": {"street": None, "city": "Kyiv", "state": None, "postal_code": None, "country_or_region": None},
+        "homeAddress": {},
+        "otherAddress": {"city": "Kyiv", "countryOrRegion": "Ukraine"},
         "vcf_path": "Contacts/Alice-Example_c1.vcf",
     }
     envelope.update(overrides)
@@ -90,24 +90,24 @@ def _envelope(**overrides: Any) -> dict[str, Any]:
 
 
 #: A source duplicate: same display name and same address, which the import must honour.
-_TWIN = _envelope(graph_id="c2", file_as="Twin, Alice", vcf_path="Contacts/Alice-Example-twin_c2.vcf")
+_TWIN = _envelope(id="c2", fileAs="Twin, Alice", vcf_path="Contacts/Alice-Example-twin_c2.vcf")
 
 _MINIMAL = {
-    "graph_id": "c3",
+    "id": "c3",
     "folder_path": "Contacts",
     "folder_display_path": "Contacts",
-    "display_name": "Bob Example",
-    "email_addresses": [{"name": None, "address": "bob@contoso.com"}],
+    "displayName": "Bob Example",
+    "emailAddresses": [{"address": "bob@contoso.com"}],
     "vcf_path": "Contacts/Bob-Example_c3.vcf",
 }
 
 #: A contact under the export root's child folder.
 _NESTED = _envelope(
-    graph_id="c4",
+    id="c4",
     folder_path="Contacts/Vendors",
     folder_display_path="Contacts/Vendors",
-    display_name="Vendor Ltd",
-    email_addresses=[],
+    displayName="Vendor Ltd",
+    emailAddresses=[],
     vcf_path="Contacts/Vendors/Vendor-Ltd_c4.vcf",
 )
 
@@ -237,7 +237,7 @@ def test_source_reads_the_sidecar_tree(tmp_path: Path):
 
     assert [item.dest_path for item in items] == ["Contacts/Alice-Example_c1.vcf", "Contacts/Vendors/Vendor-Ltd_c4.vcf"]
     assert all(item.item_type == "contact" for item in items)
-    assert items[0].metadata["display_name"] == "Alice Example"
+    assert items[0].metadata["displayName"] == "Alice Example"
     assert items[1].metadata["folder_display_path"] == "Contacts/Vendors"
     assert items[0].source_id == "c1"
 
@@ -297,11 +297,23 @@ def test_payload_carries_the_contact_fields_an_import_restores():
         assert owned not in payload, owned
 
 
-def test_payload_names_an_address_only_email_entry():
-    """Exchange fills the name in anyway; sending it makes the round trip comparable."""
+def test_payload_posts_an_email_entry_as_the_sidecar_holds_it():
+    """An address-only entry stays address-only: Exchange fills the name, the digest allows for it."""
     payload = contact_create_payload(_MINIMAL)
 
-    assert payload["emailAddresses"] == [{"address": "bob@contoso.com", "name": "bob@contoso.com"}]
+    assert payload["emailAddresses"] == [{"address": "bob@contoso.com"}]
+
+
+def test_payload_posts_a_declared_column_it_was_never_told_about():
+    """A contact field the model declares is replayed without this module naming it."""
+    payload = contact_create_payload(_envelope(yomiGivenName="Arisu"))
+
+    assert payload["yomiGivenName"] == "Arisu"
+
+
+def test_the_digest_follows_a_declared_column_it_was_never_told_about():
+    """The same field therefore also takes part in verification."""
+    assert contact_digest(_envelope(yomiGivenName="Arisu")) != contact_digest(_envelope())
 
 
 def test_payload_refuses_a_category_that_carries_a_comma():
@@ -323,7 +335,7 @@ def test_payload_drops_categories_unless_asked():
 
 def test_payload_refuses_a_contact_without_a_display_name():
     with pytest.raises(ValueError, match="no display name"):
-        contact_create_payload(_envelope(display_name="  "))
+        contact_create_payload(_envelope(displayName="  "))
 
 
 # -- the digest ----------------------------------------------------------------
@@ -339,9 +351,9 @@ def test_a_birthday_compares_by_date_because_exchange_rewrites_the_time():
 
 
 def test_an_email_compares_as_address_and_name_or_address():
-    named = _envelope(email_addresses=[{"name": "Alice", "address": "alice@contoso.com"}])
-    unnamed = _envelope(email_addresses=[{"name": None, "address": "alice@contoso.com"}])
-    filled = _envelope(email_addresses=[{"name": "alice@contoso.com", "address": "alice@contoso.com"}])
+    named = _envelope(emailAddresses=[{"name": "Alice", "address": "alice@contoso.com"}])
+    unnamed = _envelope(emailAddresses=[{"address": "alice@contoso.com"}])
+    filled = _envelope(emailAddresses=[{"name": "alice@contoso.com", "address": "alice@contoso.com"}])
 
     # Exchange fills in the address as the name, so `None` and the filled-in form agree…
     assert contact_digest(unnamed) == contact_digest(filled)
@@ -350,9 +362,9 @@ def test_an_email_compares_as_address_and_name_or_address():
 
 
 def test_the_digest_ignores_server_owned_fields():
-    assert contact_digest(_envelope(graph_id="c9", created=None, modified=None, vcf_path="x.vcf")) == contact_digest(
-        _envelope()
-    )
+    assert contact_digest(
+        _envelope(id="c9", createdDateTime=None, lastModifiedDateTime=None, vcf_path="x.vcf")
+    ) == contact_digest(_envelope())
 
 
 def test_the_digest_follows_the_categories_option():
@@ -477,7 +489,7 @@ def test_import_refuses_a_payload_that_is_not_a_contact(tmp_path: Path):
 
 def test_import_refuses_a_sidecar_the_service_would_reject(tmp_path: Path):
     store = _Store()
-    root = _root(tmp_path, {"Contacts/nameless_c1.vcf": _envelope(display_name=None)})
+    root = _root(tmp_path, {"Contacts/nameless_c1.vcf": _envelope(displayName=None)})
     job = MigrationJob(VcfTreeSource(root), _target(store))
 
     job.plan()

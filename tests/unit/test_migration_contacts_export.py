@@ -179,36 +179,42 @@ def test_source_records_the_envelope_an_import_replays():
     envelope = item.metadata
 
     assert item.source_id == "c1"
-    assert envelope["display_name"] == "Alice Example"
-    assert envelope["given_name"] == "Alice"
-    assert envelope["file_as"] == "Example, Alice"
-    assert envelope["job_title"] == "Controller"
-    assert envelope["business_phones"] == ["+1 555 0100", "+1 555 0101"]
-    assert envelope["email_addresses"] == [
+    assert envelope["displayName"] == "Alice Example"
+    assert envelope["givenName"] == "Alice"
+    assert envelope["fileAs"] == "Example, Alice"
+    assert envelope["jobTitle"] == "Controller"
+    assert envelope["businessPhones"] == ["+1 555 0100", "+1 555 0101"]
+    assert envelope["emailAddresses"] == [
         {"name": "Alice Example", "address": "alice@contoso.com"},
         {"name": "alice@contoso.example", "address": "alice@contoso.example"},
     ]
     assert envelope["categories"] == ["Finance", "Board, quarterly"]
     # The typed ``PhysicalAddress`` is flattened: a repr would be unreadable on import.
-    assert envelope["business_address"] == {
+    assert envelope["businessAddress"] == {
         "street": "1 Main St",
         "city": "Springfield",
         "state": "IL",
-        "postal_code": "62701",
-        "country_or_region": "USA",
+        "postalCode": "62701",
+        "countryOrRegion": "USA",
     }
-    assert envelope["other_address"] == {
-        "street": None,
-        "city": "Kyiv",
-        "state": None,
-        "postal_code": None,
-        "country_or_region": None,
-    }
+    # Exactly as Graph answered it: the parts it did not send are absent, not padded
+    # with ``None`` — the sidecar records the response, it does not reshape it.
+    assert envelope["otherAddress"] == {"city": "Kyiv"}
+    assert envelope["homeAddress"] == {}
     assert envelope["birthday"] == "1953-05-01T11:59:00+00:00"
     assert envelope["vcf_path"] == item.dest_path
     assert envelope["folder_display_path"] == "Contacts"
     assert item.created == "2020-01-02T03:04:05+00:00"
     assert item.modified == "2021-02-03T04:05:06+00:00"
+
+
+def test_the_sidecar_names_only_columns_the_model_declares():
+    """The sidecar is the model's payload, so its vocabulary is the declaration's."""
+    envelope = _source().list_items()[0].metadata
+    bookkeeping = {"folder_path", "folder_display_path", "vcf_path"}
+
+    assert set(envelope) - bookkeeping <= set(CONTACT_COLUMNS)
+    assert "displayName" in envelope  # the wire spelling, not the attribute name
 
 
 def test_source_translates_a_child_folder_display_path():
@@ -320,7 +326,7 @@ def test_export_writes_a_vcf_a_sidecar_and_a_manifest(tmp_path: Path):
     assert (tmp_path / "Contacts" / "Vendors" / f"Vendor-Ltd_{_digest('c3')}.vcf").exists()
     manifest = (tmp_path / MANIFEST_NAME).read_text(encoding="utf-8").splitlines()
     assert len(manifest) == 3  # noqa: PLR2004 — one sidecar record per contact
-    assert json.loads(manifest[0])["display_name"] == "Alice Example"
+    assert json.loads(manifest[0])["displayName"] == "Alice Example"
 
 
 def test_export_preserves_the_contact_digest_round_trip(tmp_path: Path):

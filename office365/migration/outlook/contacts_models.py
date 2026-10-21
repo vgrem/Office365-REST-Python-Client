@@ -7,11 +7,18 @@ the display name plus the primary address (:func:`contact_dedup_key`), and what 
 left to verify an import by is a digest of the fields it promised to restore
 (:func:`contact_digest`).
 
+**The sidecar is the contact as Graph spells it.** ``Contact.to_json()`` already
+answers every column the export selected, with the typed values flattened by the
+library's own serialiser, so an export adds only what a model cannot know — the folder
+the contact came from and the ``.vcf`` beside it — and an import posts that record back
+minus what Exchange assigns. Nothing here enumerates contact fields: add a column to
+the model and it is exported, recorded, replayed and verified without this module
+changing.
+
 Three Exchange behaviours are measured, not assumed, and each one shapes the code:
 
-* **All the fields this module records are selectable in one ``$select``** — 31
-  properties in a single read, so an export of N contacts is N content reads plus
-  the folder walk.
+* **The whole contact is selectable in one ``$select``** — every column the model
+  declares, so an export of N contacts is N content reads plus the folder walk.
 * **A birthday is normalised to a fixed time of day.** ``1953-05-01T00:00:00Z`` and
   ``1953-05-01T11:59:00+00:00`` are both stored as, and read back as,
   ``1953-05-01 11:59:00+00:00`` — so the digest compares the *date*, and a replay
@@ -35,10 +42,9 @@ import json
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 from office365.outlook.contacts.contact import Contact
-from office365.runtime.converters.scalars import iso_or_none
 
 #: Graph contact properties an export reads: every column the model declares.
 #: Derived rather than listed, for the reason the calendar projection is: a hand-kept
@@ -46,20 +52,21 @@ from office365.runtime.converters.scalars import iso_or_none
 #: is indistinguishable from a contact that has no value for it.
 CONTACT_COLUMNS = Contact.select_all()
 
-#: The five components of a Graph ``physicalAddress``, in the order they render in
-#: a vCard ``ADR`` line (``pobox;extended;street;locality;region;code;country`` has
-#: two empty leading components, so the mapping is explicit rather than positional).
-_ADDRESS_PARTS = ("street", "city", "state", "postal_code", "country_or_region")
+#: What Exchange assigns to a contact, so an import must not replay it. The sidecar's
+#: remaining vocabulary needs no list of its own: a field is a contact field if the model
+#: declares it, which is why :data:`_RESTORED` is the projection minus this set — a column
+#: the model gains is exported, replayed and verified without a function here changing,
+#: and the export's own bookkeeping (``folder_path``, ``vcf_path``, a manifest's
+#: ``source_id``/``size_bytes``) is excluded for the same reason: not being declared.
+_SERVER_ASSIGNED = frozenset(
+    {"id", "changeKey", "parentFolderId", "primaryEmailAddress", "createdDateTime", "lastModifiedDateTime"}
+)
+_RESTORED = frozenset(CONTACT_COLUMNS) - _SERVER_ASSIGNED
 
-#: Graph spells a physical address in camelCase; the sidecar keeps snake_case like
-#: every other key, so the mapping is one table both directions read.
-_ADDRESS_KEYS = {
-    "street": "street",
-    "city": "city",
-    "state": "state",
-    "postal_code": "postalCode",
-    "country_or_region": "countryOrRegion",
-}
+#: The five components of a Graph ``physicalAddress`` in the order a vCard ``ADR`` line
+#: renders them — ``pobox;extended;street;locality;region;code;country`` has two empty
+#: leading components, so the order is stated rather than taken from the dict.
+_ADR_PARTS = ("street", "city", "state", "postalCode", "countryOrRegion")
 
 #: RFC 6350 §3.1 caps a content line at 75 octets; a continuation starts with a space.
 _MAX_LINE_OCTETS = 75
@@ -131,52 +138,25 @@ def contact_envelope(
     extra_properties: list[str] | None = None,
     display_path: str | None = None,
 ) -> dict[str, Any]:
-    """The sidecar record for a contact: everything an import replays.
+    """The sidecar record for a contact: the model's own payload, plus where it came from.
 
-    All values are JSON-safe *by construction* — nested typed values go through
-    ``to_json()`` and nothing is rescued by ``json.dumps(..., default=str)``, which
-    is what would otherwise write a ``PhysicalAddress(city=…)`` repr that no import
-    could read back.
+    ``contact.to_json()`` is the contact as Graph spells it — every column the export
+    selected, with ``PhysicalAddress``/``EmailAddress`` values already flattened by the
+    runtime's serialiser — so the only keys added here are the ones a model cannot
+    know: the folder the contact lives in, the ``.vcf`` beside it, and any extra column
+    the export was asked to record. Nothing is copied field by field, so a column the
+    model gains is exported and replayed without this function changing.
+
+    All values are JSON-safe *by construction* — they came from a JSON response and went
+    through ``to_json()`` — and none is rescued by ``json.dumps(..., default=str)``,
+    which is what would otherwise write a ``PhysicalAddress(city=…)`` repr.
     """
-    envelope: dict[str, Any] = {
-        "graph_id": contact_key(contact),
-        "folder_path": folder_path,
-        "folder_display_path": display_path or folder_path,
-        "display_name": contact.display_name,
-        "given_name": contact.given_name,
-        "surname": contact.surname,
-        "middle_name": contact.middle_name,
-        "initials": contact.initials,
-        "nick_name": contact.nick_name,
-        "title": contact.title,
-        "file_as": contact.file_as,
-        "generation": contact.generation,
-        "company_name": contact.company_name,
-        "department": contact.department,
-        "job_title": contact.job_title,
-        "profession": contact.profession,
-        "manager": contact.manager,
-        "assistant_name": contact.assistant_name,
-        "office_location": contact.office_location,
-        "business_home_page": contact.business_home_page,
-        "birthday": iso_or_none(contact.birthday),
-        "personal_notes": contact.personal_notes,
-        "spouse_name": contact.spouse_name,
-        "children": [str(value) for value in (contact.children or [])],
-        "im_addresses": [str(value) for value in (contact.im_addresses or [])],
-        "business_phones": [str(value) for value in (contact.business_phones or [])],
-        "home_phones": [str(value) for value in (contact.home_phones or [])],
-        "mobile_phone": contact.mobile_phone,
-        # ``EmailAddress.name``/``.address`` are already spelled in Python; no wire
-        # spelling is involved in reading them.
-        "email_addresses": [{"name": item.name, "address": item.address} for item in (contact.email_addresses or [])],
-        "categories": [str(value) for value in (contact.categories or [])],
-        "created": iso_or_none(contact.created_datetime),
-        "modified": iso_or_none(contact.last_modified_datetime),
-        "vcf_path": contact_dest_path(contact, folder_path),
-    }
-    for side in ("business_address", "home_address", "other_address"):
-        envelope[side] = _address(getattr(contact, side))
+    envelope = contact.to_json()
+    envelope.update(
+        folder_path=folder_path,
+        folder_display_path=display_path or folder_path,
+        vcf_path=contact_dest_path(contact, folder_path),
+    )
     for name in extra_properties or []:
         envelope[name] = contact.get_property(name)
     return envelope
@@ -189,11 +169,15 @@ def contact_vcard(envelope: dict[str, Any]) -> bytes:
     the portable artefact of an export, and because this module renders the bytes
     itself an export *can* be verified by them (unlike a mail import, where Exchange
     re-serialises everything it accepts).
+
+    Reads the sidecar, so it names the fields in Graph's spelling like the rest of the
+    record does — the same keys ``to_json()`` wrote and ``contact_create_payload``
+    posts.
     """
     name = [
         envelope.get("surname") or "",
-        envelope.get("given_name") or "",
-        envelope.get("middle_name") or "",
+        envelope.get("givenName") or "",
+        envelope.get("middleName") or "",
         envelope.get("title") or "",
         envelope.get("generation") or "",
     ]
@@ -201,50 +185,44 @@ def contact_vcard(envelope: dict[str, Any]) -> bytes:
         "BEGIN:VCARD",
         "VERSION:3.0",
         "N:" + ";".join(_vcard_escape(part) for part in name),
-        "FN:" + _vcard_escape(envelope.get("display_name") or ""),
-        "UID:" + _vcard_escape(envelope.get("graph_id") or ""),
+        "FN:" + _vcard_escape(envelope.get("displayName") or ""),
+        "UID:" + _vcard_escape(envelope.get("id") or ""),
     ]
-    _add(lines, "NICKNAME", envelope.get("nick_name"))
-    _add(lines, "TITLE", envelope.get("job_title"))
+    _add(lines, "NICKNAME", envelope.get("nickName"))
+    _add(lines, "TITLE", envelope.get("jobTitle"))
     _add(lines, "ROLE", envelope.get("profession"))
-    if envelope.get("company_name") or envelope.get("department"):
-        org = [envelope.get("company_name") or "", envelope.get("department") or ""]
+    if envelope.get("companyName") or envelope.get("department"):
+        org = [envelope.get("companyName") or "", envelope.get("department") or ""]
         lines.append("ORG:" + ";".join(_vcard_escape(part) for part in org))
-    _add(lines, "X-MS-OFFICE-LOCATION", envelope.get("office_location"))
-    for number in envelope.get("business_phones") or []:
+    _add(lines, "X-MS-OFFICE-LOCATION", envelope.get("officeLocation"))
+    for number in envelope.get("businessPhones") or []:
         lines.append(f"TEL;TYPE=WORK,VOICE:{_vcard_escape(number)}")
-    for number in envelope.get("home_phones") or []:
+    for number in envelope.get("homePhones") or []:
         lines.append(f"TEL;TYPE=HOME,VOICE:{_vcard_escape(number)}")
-    if envelope.get("mobile_phone"):
-        lines.append(f"TEL;TYPE=CELL:{_vcard_escape(envelope['mobile_phone'])}")
-    for email in envelope.get("email_addresses") or []:
+    if envelope.get("mobilePhone"):
+        lines.append(f"TEL;TYPE=CELL:{_vcard_escape(envelope['mobilePhone'])}")
+    for email in envelope.get("emailAddresses") or []:
         if email.get("address"):
             lines.append(f"EMAIL;TYPE=INTERNET:{_vcard_escape(email['address'])}")
-    for im_address in envelope.get("im_addresses") or []:
+    for im_address in envelope.get("imAddresses") or []:
         lines.append(f"X-MS-IMADDRESS:{_vcard_escape(im_address)}")
-    for side, kind in (("business_address", "WORK"), ("home_address", "HOME"), ("other_address", "OTHER")):
+    for side, kind in (("businessAddress", "WORK"), ("homeAddress", "HOME"), ("otherAddress", "OTHER")):
         address = envelope.get(side) or {}
-        if any(address.get(part) for part in _ADDRESS_PARTS):
-            adr = [
-                "",
-                "",
-                address.get("street") or "",
-                address.get("city") or "",
-                address.get("state") or "",
-                address.get("postal_code") or "",
-                address.get("country_or_region") or "",
-            ]
-            lines.append(f"ADR;TYPE={kind}:" + ";".join(_vcard_escape(part) for part in adr))
+        if any(address.get(part) for part in _ADR_PARTS):
+            # The two empty leading components are ``pobox`` and ``extended``, which
+            # Graph does not model.
+            adr = ["", ""] + [_vcard_escape(address.get(part) or "") for part in _ADR_PARTS]
+            lines.append(f"ADR;TYPE={kind}:" + ";".join(adr))
     birthday = _date_only(envelope.get("birthday"))
     if birthday:
         lines.append("BDAY:" + birthday)
-    if envelope.get("personal_notes"):
-        lines.append("NOTE:" + _vcard_escape(envelope["personal_notes"]))
+    if envelope.get("personalNotes"):
+        lines.append("NOTE:" + _vcard_escape(envelope["personalNotes"]))
     if envelope.get("categories"):
         categories = ",".join(_vcard_escape(name) for name in envelope["categories"])
         lines.append("CATEGORIES:" + categories)
-    _add(lines, "URL", envelope.get("business_home_page"))
-    stamp = _vcard_stamp(envelope.get("modified"))
+    _add(lines, "URL", envelope.get("businessHomePage"))
+    stamp = _vcard_stamp(envelope.get("lastModifiedDateTime"))
     if stamp:
         lines.append("REV:" + stamp)
     lines.append("END:VCARD")
@@ -261,7 +239,7 @@ def contact_dedup_key(envelope: dict[str, Any]) -> tuple[str, str]:
     """
     first = _email_addresses(envelope)
     return (
-        str(envelope.get("display_name") or "").strip().lower(),
+        str(envelope.get("displayName") or "").strip().lower(),
         first[0][0] if first else "",
     )
 
@@ -272,72 +250,34 @@ def contact_create_payload(
 ) -> dict[str, Any]:
     """The Graph ``POST /contacts`` body for a sidecar record.
 
-    Returns Graph's own spelling so the target can post it verbatim, and omits what
-    Exchange assigns itself (``id``, ``createdDateTime``, ``lastModifiedDateTime``,
-    ``changeKey``, ``parentFolderId``). A contact has no ``transactionId``, so
-    concurrency is handled by the target's own dedupe index rather than by the
-    service.
+    The sidecar *is* a contact as Graph spells it, so the body is that record: replaying
+    a contact is posting it back, restricted to the fields the model declares (minus the
+    ones Exchange assigns) — so a column the model gains is posted here without being
+    named, and the export's own bookkeeping is not. An address-only email entry is posted
+    as it stands; Exchange names it after the address, which is the fill-in
+    :func:`contact_digest` allows for.
+
+    A contact has no ``transactionId``, so concurrency is handled by the target's own
+    dedupe index rather than by the service.
     """
     options = options or ContactImportOptions()
-    display_name = str(envelope.get("display_name") or "").strip()
+    payload = {key: value for key, value in envelope.items() if value and key in _RESTORED}
+    display_name = str(payload.get("displayName") or "").strip()
     if not display_name:
         raise ValueError("the sidecar record has no display name: Exchange rejects a contact without one")
-    payload: dict[str, Any] = {"displayName": display_name}
-    for name, key in (
-        ("givenName", "given_name"),
-        ("surname", "surname"),
-        ("middleName", "middle_name"),
-        ("initials", "initials"),
-        ("nickName", "nick_name"),
-        ("title", "title"),
-        ("fileAs", "file_as"),
-        ("generation", "generation"),
-        ("companyName", "company_name"),
-        ("department", "department"),
-        ("jobTitle", "job_title"),
-        ("profession", "profession"),
-        ("manager", "manager"),
-        ("assistantName", "assistant_name"),
-        ("officeLocation", "office_location"),
-        ("businessHomePage", "business_home_page"),
-        ("personalNotes", "personal_notes"),
-        ("spouseName", "spouse_name"),
-        ("mobilePhone", "mobile_phone"),
-    ):
-        value = envelope.get(key)
-        if value:
-            payload[name] = value
-    for name, key in (
-        ("businessPhones", "business_phones"),
-        ("homePhones", "home_phones"),
-        ("imAddresses", "im_addresses"),
-        ("children", "children"),
-    ):
-        values = [str(value) for value in envelope.get(key) or [] if value]
-        if values:
-            payload[name] = values
-    emails = [{"address": address, "name": name or address} for address, name in _email_addresses(envelope)]
-    if emails:
-        payload["emailAddresses"] = emails
-    # ``birthday`` is a DateTimeOffset; the sidecar's ISO string is one (measured:
-    # Exchange rewrites the time of day to 11:59 local and keeps the date).
-    if envelope.get("birthday"):
-        payload["birthday"] = envelope["birthday"]
-    for side in ("business_address", "home_address", "other_address"):
-        address = {_ADDRESS_KEYS[part]: value for part, value in (envelope.get(side) or {}).items() if value}
-        if address:
-            payload[_wire_name(side)] = address
+    # Mandatory, and the sidecar may hold it unstripped — so it is set last, from the
+    # value this function validated.
+    payload["displayName"] = display_name
     if options.restore_categories:
-        categories = [str(name) for name in envelope.get("categories") or [] if name]
         # Measured: Exchange rejects the whole contact (``ErrorPropertyUpdate``,
         # "Property update did not succeed.") when one category carries a comma — the
         # vCard separates categories with it. Refuse with the offending name instead
         # of failing opaquely, and let the runner count this item as an error.
-        bad = [name for name in categories if "," in name]
+        bad = [name for name in payload.get("categories") or [] if "," in str(name)]
         if bad:
             raise ValueError(f"a contact category cannot contain a comma: {bad[0]!r}")
-        if categories:
-            payload["categories"] = categories
+    else:
+        payload.pop("categories", None)
     return payload
 
 
@@ -345,47 +285,34 @@ def contact_digest(envelope: dict[str, Any], options: ContactImportOptions | Non
     """A digest of the fields an import restores, for verifying that it did.
 
     Not the ``.vcf`` bytes: the other side of an import is Exchange, which assigns the
-    identifiers and reformats a birthday's time of day, so the comparable artefact is
-    the *contact*. Three normalisations are measured rather than defensive: a
-    birthday compares by date (Exchange stores 11:59 whatever is sent), an email
-    compares as ``(address, name or address)`` (an address-only entry reads back
-    named after itself), and the address components compare as strings, empty for
-    absent.
+    identifiers and reformats what it is given, so the comparable artefact is the
+    *contact* — the record an import replays, which is the sidecar minus what the
+    service owns. Three normalisations are measured rather than defensive: a birthday
+    compares by date (Exchange stores 11:59 whatever is sent), an email compares as
+    ``(address, name or address)`` (an address-only entry reads back named after
+    itself), and the labels a service keeps unordered compare sorted.
+
+    Only the fields the model declares take part, so a sidecar's own keys (the folder it
+    came from, its ``.vcf``, a manifest's size) cannot make an export disagree with the
+    import that replays it.
     """
     options = options or ContactImportOptions()
-    canonical: Dict[str, Any] = {
-        "display_name": _text(envelope.get("display_name")),
-        "names": [
-            _text(envelope.get(name))
-            for name in ("given_name", "surname", "middle_name", "initials", "nick_name", "title", "generation")
-        ],
-        "file_as": _text(envelope.get("file_as")),
-        "org": [
-            _text(envelope.get(name))
-            for name in ("company_name", "department", "job_title", "profession", "manager", "assistant_name")
-        ],
-        "office_location": _text(envelope.get("office_location")),
-        "home_page": _text(envelope.get("business_home_page")),
-        "phones": [
-            [_text(number) for number in envelope.get("business_phones") or []],
-            [_text(number) for number in envelope.get("home_phones") or []],
-            _text(envelope.get("mobile_phone")),
-        ],
-        "emails": _email_addresses(envelope),
-        "im_addresses": sorted(_text(value) for value in envelope.get("im_addresses") or []),
-        "children": sorted(_text(value) for value in envelope.get("children") or []),
-        "spouse": _text(envelope.get("spouse_name")),
-        "notes": _text(envelope.get("personal_notes")),
-        "birthday": _date_only(envelope.get("birthday")),
-        "addresses": [
-            [_text((envelope.get(side) or {}).get(part)) for part in _ADDRESS_PARTS]
-            for side in ("business_address", "home_address", "other_address")
-        ],
-    }
-    if options.restore_categories:
-        canonical["categories"] = sorted(_text(name) for name in envelope.get("categories") or [])
-    serialized = json.dumps(canonical, sort_keys=True)
-    return hashlib.md5(serialized.encode("utf-8")).hexdigest()
+    restored = {key: value for key, value in envelope.items() if key in _RESTORED}
+    if not options.restore_categories:
+        restored.pop("categories", None)
+    canonical: Dict[str, Any] = {key: _comparable(value) for key, value in restored.items()}
+    canonical["birthday"] = _date_only(envelope.get("birthday"))
+    canonical["emailAddresses"] = _email_addresses(envelope)
+    for side in ("businessAddress", "homeAddress", "otherAddress"):
+        canonical[side] = [_text((envelope.get(side) or {}).get(part)) for part in _ADR_PARTS]
+    for name in ("children", "imAddresses", "categories"):
+        if name in canonical:
+            canonical[name] = sorted(_text(value) for value in canonical[name] or [])
+    # A field the sidecar omits and a field Exchange answers empty are the same
+    # statement, so empties leave the canonical form — which is what lets one digest
+    # span the difference between "not recorded" and "recorded as nothing".
+    canonical = {key: value for key, value in canonical.items() if value not in ("", [], {})}
+    return hashlib.md5(json.dumps(canonical, sort_keys=True).encode("utf-8")).hexdigest()
 
 
 def _email_addresses(envelope: dict[str, Any]) -> List[Tuple[str, str]]:
@@ -395,7 +322,7 @@ def _email_addresses(envelope: dict[str, Any]) -> List[Tuple[str, str]]:
     that compared the raw pair would report every imported contact as a mismatch.
     """
     pairs: List[Tuple[str, str]] = []
-    for entry in envelope.get("email_addresses") or []:
+    for entry in envelope.get("emailAddresses") or []:
         address = str(entry.get("address") or "").strip().lower()
         if not address:
             continue
@@ -404,27 +331,17 @@ def _email_addresses(envelope: dict[str, Any]) -> List[Tuple[str, str]]:
     return sorted(pairs)
 
 
-def _address(value: Any) -> Dict[str, Optional[str]]:
-    """A Graph ``physicalAddress`` as a plain dict of its five parts.
-
-    The typed fields are read directly: two of them are spelled in Graph's
-    camelCase on the model (``postalCode``, ``countryOrRegion``), and the part names
-    are this module's own vocabulary — the sidecar's keys.
-    """
+def _comparable(value: Any) -> Any:
+    """A JSON value with the noise a service adds removed: text stripped, ``None`` as ``""``."""
     if value is None:
-        return dict.fromkeys(_ADDRESS_PARTS)
-    return {
-        "street": value.street or None,
-        "city": value.city or None,
-        "state": value.state or None,
-        "postal_code": value.postalCode or None,
-        "country_or_region": value.countryOrRegion or None,
-    }
-
-
-def _wire_name(attr: str) -> str:
-    """The Graph spelling of a contact attribute, taken from its declaration."""
-    return Contact.wire_name(attr)
+        return ""
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, list):
+        return [_comparable(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _comparable(item) for key, item in value.items()}
+    return value
 
 
 def _text(value: Any) -> str:
