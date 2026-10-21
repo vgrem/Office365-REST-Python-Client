@@ -238,6 +238,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   already done". `LongRunningOperationResult.completed(...)` is the new
   constructor for the settled case, `is_completed` says which one you hold, and a
   repeat `wait()` on a terminal operation no longer re-polls.
+- One **engine** behind every wait: `office365.runtime.operation.Operation` owns the
+  deadline, `Retry-After` pacing, jitter (`jitter=`), the progress hook, cooperative
+  cancel (which wakes a blocked `wait()` in another thread, or on the loop) and the
+  rule that a stream raises nothing; a family supplies what one poll *is*
+  (`_step` / `_step_async`) and what `wait()` hands back (`_outcome`).
+  `OperationPoller` (monitor URL) and `PollableOperation` (operation entity) are
+  specialisations of it, and `transient_statuses=` is data: which HTTP codes mean
+  "poll again" is a constructor argument, not a branch.
+- `PollableOperation` gains `stream()` / `astream()` and `cancel()` /
+  `cancel_async()`, which it had neither of. Its `404` gap is now an *attempt, not
+  an observation*: the wait retries it at `next_poll_delay()` and does not tell the
+  progress hook that the entity did anything.
+- `MigrationServerJob.job_wait()` (and `SharePointPackageTarget.job_wait()`) returns
+  the wait on an ingestion job instead of running it — a `MigrationJobWait`, so a
+  caller can stream the polls (`percentage_complete` per snapshot), cancel the wait,
+  or monitor several jobs concurrently in one event loop. A sync `status_fn` given
+  to an async wait is bridged with `asyncio.to_thread` (the read is a blocking GET).
 
 ### Changed
 
@@ -334,6 +351,15 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   no monitor URL", which is now a real state (an operation that finished in the
   submitting round-trip) rather than an empty string. An empty string read like a
   URL to every `if result.monitor_url:` that forgot to test it.
+- `MigrationServerJob.monitor()` / `monitor_async()` measure their deadline on the
+  clock, so a slow `GetMigrationJobProgress` read counts against the budget: the
+  loop they replaced added `interval` per iteration and never read the clock, so an
+  endpoint taking longer than the whole timeout still polled indefinitely. The
+  timeout raises `OperationTimeoutError` (a `TimeoutError`, so `except TimeoutError`
+  is unchanged), and a job that ends `failed` is still *reported* as `"failed"`
+  rather than raised — a monitor says what happened; the caller decides.
+- `PollableOperation.wait()`'s `sleep` argument now defaults to `None` (the
+  interruptible pause) rather than `time.sleep`, so a `cancel()` can wake it.
 
 ### Fixed
 

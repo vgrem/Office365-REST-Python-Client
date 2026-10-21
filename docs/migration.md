@@ -1756,7 +1756,27 @@ target.monitor()  # polls GetMigrationJobProgress
 ```
 
 `MigrationServerJob` can also be driven directly (`submit` / `submit_encrypted` /
-`progress` / `status_fn` / `monitor`).
+`progress` / `status_fn` / `monitor` / `monitor_async`). The wait itself is
+`job.job_wait(job_id)` — a `MigrationJobWait`, which is the library's shared
+long-running-operation wait specialised to "one poll = read the job's counters".
+`monitor()` is that wait with `raise_on_failure=False`: a job that ends `failed`
+returns `"failed"`, because a monitor reports what happened rather than judging
+it, while a job that never ends raises `OperationTimeoutError` (a `TimeoutError`).
+Holding the wait instead of calling `monitor()` buys the stream, the cancel and
+concurrency:
+
+```python
+waits = [job.job_wait(job_id, async_status_fn=job.status_fn_async()) for job_id in job_ids]
+for wait in waits:
+    for status in wait.stream():  # or: async for status in wait.astream()
+        print(wait.job_id, status.status, status.percentage_complete)
+```
+
+`status_fn` / `status_fn_async` each carry their own paging token, so a wait owns
+one job's append-only event log. Supplying a sync `status_fn` to an async wait
+bridges it with `asyncio.to_thread` — the read is a blocking `GET` — while an async
+reader cannot be used from `wait()`; the wait says so rather than blocking the
+loop quietly.
 
 With `encryption_key` set, the staging AES-256-CBC encrypts every content and
 manifest blob (unique random IV, stored as the base64 `IV` blob property) — which

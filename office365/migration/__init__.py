@@ -53,7 +53,7 @@ from office365.migration.manifest import Manifest
 from office365.migration.map import ContentTypeMap
 from office365.migration.report import MigrationReport, build_report, export_reports
 from office365.migration.runner import MigrationRunner
-from office365.migration.server_job import MigrationServerJob
+from office365.migration.server_job import MigrationJobWait, MigrationServerJob
 from office365.migration.session import MigrationSession, SessionTask
 from office365.migration.settings import MigrationSettings
 from office365.migration.tasks import MigrationTask
@@ -124,6 +124,7 @@ __all__ = [
     "MigrationPhase",
     "MigrationReport",
     "MigrationRunner",
+    "MigrationJobWait",
     "MigrationServerJob",
     "MigrationSession",
     "MigrationSettings",

@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 from office365.migration.base import MigrationItem, PermissionEntry, Principal, is_puid
 from office365.migration.package.builder import PackageBuilder
 from office365.migration.package.staging import create_staging
-from office365.migration.server_job import MigrationServerJob
+from office365.migration.server_job import MigrationJobWait, MigrationServerJob
 from office365.migration.sharepoint.structure import ListStructure, provision_list_structure
 
 if TYPE_CHECKING:
@@ -425,11 +425,17 @@ class SharePointPackageTarget:
                 self._azure_queue_report_uri,
             )
 
-    def monitor(self, interval: float = 5, timeout: float = 1800, progress=None) -> str:
-        """Poll the submitted job to completion (``GetMigrationJobProgress``)."""
+    def job_wait(self, interval: float = 5, timeout: float = 1800, progress=None) -> MigrationJobWait:
+        """The wait on the submitted job, without running it (stream it, or cancel it)."""
         if self.job_id is None:
             raise ValueError("no job submitted yet — call commit() first")
-        return MigrationServerJob(self._site).monitor(self.job_id, interval=interval, timeout=timeout, progress=progress)
+        return MigrationServerJob(self._site).job_wait(
+            self.job_id, interval=interval, timeout=timeout, progress=progress
+        )
+
+    def monitor(self, interval: float = 5, timeout: float = 1800, progress=None) -> str:
+        """Poll the submitted job to completion (``GetMigrationJobProgress``)."""
+        return self.job_wait(interval=interval, timeout=timeout, progress=progress).wait(raise_on_failure=False)
 
     @property
     def staging(self):

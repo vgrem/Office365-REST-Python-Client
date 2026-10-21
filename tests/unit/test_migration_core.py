@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import io
 import tempfile
 import unittest
@@ -22,6 +23,7 @@ from office365.migration.base import ItemStatus, MigrationItem, Principal
 from office365.migration.checkpoint import Checkpoint
 from office365.migration.runner import MigrationRunner, _apply_fidelity
 from office365.migration.sharepoint.transfer import _transfer_files_parallel
+from office365.runtime.operation import OperationTimeoutError
 from office365.runtime.types.event_handler import EventHandler
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.folders.folder import Folder
@@ -582,6 +584,103 @@ class TestMigrationServerJob(unittest.TestCase):
 
         with self.assertRaises(TimeoutError):
             job.monitor("job-1", lambda jid: ("running", 1, None), interval=0.01, timeout=0.05)
+
+    def test_monitor_reports_a_failed_job_instead_of_raising(self):
+        """Monitoring reports what happened; the caller decides what "failed" means."""
+        job = MigrationServerJob(mock.Mock())
+        statuses = iter([("processing", 1, None), ("failed", 1, None)])
+
+        result = job.monitor("job-1", lambda jid: next(statuses), interval=0, timeout=10)
+
+        self.assertEqual(result, "failed")
+
+    def test_job_wait_counts_the_poll_itself_against_the_deadline(self):
+        """A slow poll is not free: the deadline is read from the clock.
+
+        The loop this replaced added ``interval`` per iteration and never read the
+        clock, so a ``GetMigrationJobProgress`` call taking longer than the whole
+        budget still polled, slept, polled — and timed out only after enough
+        iterations had added up. Here two 20 s polls against a 30 s budget end the
+        wait instead of starting a third.
+        """
+        state = {"t": 0.0, "polls": 0}
+
+        def slow_status(job_id):
+            state["polls"] += 1
+            state["t"] += 20.0
+            return "processing", 1, None
+
+        wait = MigrationServerJob(mock.Mock()).job_wait(
+            "job-1",
+            status_fn=slow_status,
+            interval=5,
+            timeout=30,
+            clock=lambda: state["t"],
+            sleep=lambda seconds: state.__setitem__("t", state["t"] + seconds),
+        )
+        with self.assertRaises(OperationTimeoutError):
+            wait.wait()
+        self.assertEqual(state["polls"], 2)  # noqa: PLR2004
+
+    def test_job_wait_streams_the_polls(self):
+        statuses = iter([("processing", 1, 4), ("processing", 2, 4), ("succeeded", 4, 4)])
+        wait = MigrationServerJob(mock.Mock()).job_wait("job-1", status_fn=lambda jid: next(statuses), interval=0)
+
+        seen = [(s.status, s.percentage_complete) for s in wait.stream()]
+
+        self.assertEqual(seen[0], ("processing", 25.0))
+        self.assertEqual(seen[-1], ("succeeded", 100.0))
+
+        finished = MigrationServerJob(mock.Mock()).job_wait(
+            "job-1", status_fn=lambda jid: ("succeeded", 4, 4), interval=0
+        )
+        self.assertEqual(finished.wait(), "succeeded")
+
+    def test_job_wait_can_be_cancelled(self):
+        polls = []
+
+        def status_fn(job_id):
+            polls.append(job_id)
+            return "processing", len(polls), None
+
+        wait = MigrationServerJob(mock.Mock()).job_wait("job-1", status_fn=status_fn, interval=0)
+        statuses = []
+        for status in wait.stream():
+            statuses.append(status.status)
+            if len(statuses) == 3:  # noqa: PLR2004 - "after a few polls"
+                wait.cancel()
+
+        self.assertEqual(statuses, ["processing", "processing", "processing", "cancelled"])
+        self.assertEqual(len(polls), 3)  # noqa: PLR2004
+
+    def test_job_wait_async_bridges_a_sync_status_fn(self):
+        """A sync reader given to an async wait runs off the loop, not on it."""
+        statuses = iter([("processing", 1, None), ("succeeded", 2, None)])
+        wait = MigrationServerJob(mock.Mock()).job_wait("job-1", status_fn=lambda jid: next(statuses), interval=0)
+
+        result = asyncio.run(wait.wait_async())
+
+        self.assertEqual(result, "succeeded")
+
+    def test_an_unrecognised_status_keeps_polling(self):
+        """A job counter has no HTTP status: terminality is about the status string."""
+        state = {"t": 0.0, "polls": 0}
+
+        def status(job_id):
+            state["polls"] += 1
+            return "Pending", 0, None
+
+        wait = MigrationServerJob(mock.Mock()).job_wait(
+            "job-1",
+            status_fn=status,
+            interval=1,
+            timeout=3,
+            clock=lambda: state["t"],
+            sleep=lambda seconds: state.__setitem__("t", state["t"] + seconds),
+        )
+        with self.assertRaises(OperationTimeoutError):
+            wait.wait()
+        self.assertGreater(state["polls"], 1)
 
 
 class _File:

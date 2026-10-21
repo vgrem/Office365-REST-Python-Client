@@ -2,8 +2,8 @@
 Monitor SharePoint Migration API jobs without blocking the event loop.
 
 ``GetMigrationJobProgress`` is the recommended status API for an ingestion job,
-and ``MigrationServerJob.monitor()`` already polls it — but synchronously, with
-``time.sleep``. ``monitor_async()`` is its awaitable twin: the progress GET and
+and ``MigrationServerJob.monitor()`` already polls it — but synchronously, on the
+calling thread. ``monitor_async()`` is its awaitable twin: the progress GET and
 the wait between polls run on the event loop, so several jobs can be watched at
 once and each one's append-only event log is still reduced to a monotonic
 ``(status, objectsProcessed, total)``.
