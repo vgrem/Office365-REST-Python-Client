@@ -9,6 +9,7 @@ from generator.builders.type import TypeBuilder
 from generator.odata.method import MethodInformation
 from generator.odata.property import PropertyInformation
 from generator.odata.type_information import TypeInformation
+from office365.runtime.client_value import ClientValue
 
 _TEMPLATES = Path(__file__).resolve().parents[2] / "generator" / "templates" / "sharepoint"
 _TEMPLATES_GRAPH = Path(__file__).resolve().parents[2] / "generator" / "templates" / "graph"
@@ -59,6 +60,39 @@ def test_navigation_types_are_imported_lazily_and_under_type_checking(tmp_path: 
     # EntityCollection resolves to the SharePoint module, not the Graph one
     assert "from office365.sharepoint.entity_collection import EntityCollection" in source
     assert "from office365.entity_collection import EntityCollection" not in source
+
+
+class _Value(ClientValue):
+    """A stand-in for a generated complex value type."""
+
+
+class _ValueResolver(_FixedResolver):
+    """Resolves every custom type to a value class, so it is not a navigation."""
+
+    def resolve(self, type_name):
+        return _Value
+
+
+def test_a_value_typed_entity_getter_declares_its_type_at_runtime(tmp_path: Path):
+    """A getter that constructs its value needs the name at module level.
+
+    The return annotation is read at run time to decide how to hydrate a payload
+    (``declared_type``); a name that exists only under ``if TYPE_CHECKING:``
+    raises NameError there, so the column resolved to no type at all and
+    ``set_property`` stored a bare dict where the model promises a value object.
+    """
+    schema = TypeInformation(BaseTypeFullName="EntityType", FullName="SP.TestEvent", IsValueObject=False)
+    schema.add_property(PropertyInformation(Name="start", TypeName="SP.DateValue"))
+    options = {"template_path": str(_TEMPLATES), "output_path": str(tmp_path), "modules": "office365.sharepoint"}
+    builder = TypeBuilder(schema, options, resolver=_ValueResolver("office365.sharepoint.date_value"))
+    builder.build()
+    source = builder.render()
+    ast.parse(source)
+
+    import_line = "from office365.sharepoint.date_value import DateValue"
+    assert source.count(import_line) == 1  # module level, and not repeated in the getter
+    assert "def start(self) -> DateValue:" in source
+    assert "if TYPE_CHECKING:" not in source
 
 
 def test_complex_value_collection_does_not_emit_bracketed_import(tmp_path: Path):

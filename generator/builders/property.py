@@ -54,8 +54,9 @@ class PropertyBuilder:
     def runtime_import(self) -> Optional[str]:
         """Local import for the type the getter constructs at runtime.
 
-        Entity/complex types (and collection item types) are imported lazily so a
-        cyclic navigation annotation doesn't force a module-level cycle.
+        Only a navigation type (module-level would cycle) and a cyclic value type
+        (must not load at module import time) are imported inside the getter; any
+        other value/enum type is already imported at module level.
         """
         if self._resolver is None:
             return None
@@ -65,14 +66,20 @@ class PropertyBuilder:
         name = self.client_item_type_name if self.is_collection_type else self.client_type_name
         if not name or name in _SCALAR_TYPE_NAMES:
             return None
-        if not self.is_object_type and not self.is_collection_type and self.resolve_client_type() is None:
-            # The getter defaults an unresolved value type to None, so the local
-            # import would be unused (the annotation import is under TYPE_CHECKING).
+        # A navigation is imported here (module level would cycle); a value/enum
+        # type only when it is cyclic, since otherwise the module level import
+        # TypeReferenceCollector.add_custom emits is already there. An unresolved
+        # value type defaults to None, so the import would be unused.
+        if not self.is_object_type and not (self.cyclic and self.constructs_default()):
             return None
         module = self._resolver.module_for(self.schema.TypeName)
         if not module:
             return None
         return f"from {module} import {name}"
+
+    def constructs_default(self) -> bool:
+        """Whether the getter evaluates the type itself (a ``X()`` default, not ``None``)."""
+        return self.is_collection_type or self.resolve_client_type() is not None
 
     def build_param(self):
         """Build an ast.arg parameter"""

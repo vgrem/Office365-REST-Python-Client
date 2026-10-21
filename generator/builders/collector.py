@@ -16,10 +16,12 @@ class TypeReferenceCollector:
     """Collects Python type references required by a generated OData type.
 
     Runtime imports (builtins, wrappers, query classes) are emitted at module
-    top level; entity/client-value types used only in annotations are emitted
-    under ``if TYPE_CHECKING:`` so they don't create import cycles. Navigation
-    types are imported lazily inside the generated getter (see
-    ``PropertyBuilder.runtime_import``).
+    top level, and so is a value/enum type an entity getter constructs on its own:
+    the getter's return annotation is read at run time (`declared_type`, which
+    drives hydration), so a name importable only under ``if TYPE_CHECKING:``
+    resolves to nothing. Entity/navigation types are emitted under
+    ``if TYPE_CHECKING:`` (and imported lazily inside the getter), because a
+    module-level import of one would cycle.
     """
 
     KNOWN: ClassVar[dict[str, str]] = {
@@ -85,17 +87,18 @@ class TypeReferenceCollector:
             self._entries[type_name] = module
 
     def add_custom(self, prop: PropertyBuilder) -> None:
-        """Track annotation imports for client-value types (runtime via the getter).
+        """Track annotation imports for client-value types.
 
         Collections contribute their wrapper (``ClientValueCollection``) plus the
-        item type; scalars/custom types contribute the type itself. The item/type
-        import is emitted under ``TYPE_CHECKING`` and lazily inside the getter —
-        except for dataclass fields whose default factory calls the type, which
-        need a real import.
+        item type; scalars/custom types contribute the type itself. A type the
+        field or getter constructs at run time is imported at module level — both
+        the dataclass ``default_factory=X`` and the entity getter's return
+        annotation need it resolvable; a cyclic one stays under ``TYPE_CHECKING``
+        and is imported inside the getter instead.
         """
         if prop.is_object_type:
             return
-        runtime = self.needs_dataclass and prop.needs_runtime_import()
+        runtime = prop.needs_runtime_import()
         if prop.is_collection_type:
             if prop.client_type_name.startswith("EntityCollection"):
                 self.add("EntityCollection")

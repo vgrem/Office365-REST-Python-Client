@@ -20,7 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cannot name — so `Event.attachments` is distinguishable from a column.
   `office365/outlook` is fully declared: `scripts/mark_odata.py` back-fills the
   declaration onto files the generator will not re-render (it only renders members
-  that are missing), and `generator/templates/graph` emits it for new ones. A
+  that are missing), and `generator/templates/graph` emits it for new ones — with a
+  value or enum type a getter constructs imported at module level instead of under
+  `TYPE_CHECKING` only, so the annotation a new file gets is resolvable at run time. A
   declaration that exists but says less than the metadata — a navigation property
   without the flag, as every previously-hand-marked getter had — is finished in
   place. The declarations are answerable at runtime, so a projection is derived
