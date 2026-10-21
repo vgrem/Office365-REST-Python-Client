@@ -81,7 +81,7 @@ class CountCollection(DeltaCollection[ClientObjectT]):
             request.headers.pop("Accept", None)
             request.ensure_header("ConsistencyLevel", "eventual")
 
-        def _process_response(response: Response) -> None:
+        def _handle_response(response: Response) -> None:
             value = int(response.content.decode("utf-8"))
             return_type.set_property("__value", value)
 
@@ -89,6 +89,6 @@ class CountCollection(DeltaCollection[ClientObjectT]):
         (
             self.context.add_query(qry)
             .before_execute(_construct_request)
-            .after_execute(_process_response, include_response=True)
+            .after_execute(_handle_response, include_response=True)
         )
         return return_type

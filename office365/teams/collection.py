@@ -152,7 +152,7 @@ class TeamCollection(EntityCollection[Team]):
         """
         return_type = TeamsAsyncOperation(self.context, EntityPath(None, self.resource_path))
 
-        def _process_response(resp: requests.Response) -> None:
+        def _handle_response(resp: requests.Response) -> None:
             loc = resp.headers.get("Location")
             if loc is not None:
                 operation_path = ODataPathBuilder.parse_url(loc)
@@ -160,7 +160,7 @@ class TeamCollection(EntityCollection[Team]):
 
         payload = self._create_payload(display_name, description, template, owners)
         qry = CreateEntityQuery(self, payload, return_type)
-        self.context.add_query(qry).after_execute(_process_response, include_response=True)
+        self.context.add_query(qry).after_execute(_handle_response, include_response=True)
         return return_type
 
     def create_and_wait(
@@ -186,7 +186,7 @@ class TeamCollection(EntityCollection[Team]):
         return_type = Team(self.context)
         self.add_child(return_type)
 
-        def _process_response(resp: requests.Response) -> None:
+        def _handle_response(resp: requests.Response) -> None:
             content_loc = resp.headers.get("Content-Location")
             assert content_loc is not None
             team_path = ODataPathBuilder.parse_url(content_loc)
@@ -203,5 +203,5 @@ class TeamCollection(EntityCollection[Team]):
 
         payload = self._create_payload(display_name, description, template, owners)
         qry = CreateEntityQuery(self, payload, return_type)
-        self.context.add_query(qry).after_execute(_process_response, include_response=True)
+        self.context.add_query(qry).after_execute(_handle_response, include_response=True)
         return return_type

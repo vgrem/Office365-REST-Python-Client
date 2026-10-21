@@ -41,7 +41,7 @@ class ODataV4BatchRequest(ODataRequest):
         request.data = self._prepare_payload(query)
         return request
 
-    def process_response(self, response: Response, query: BatchQuery) -> None:  # type: ignore[reportIncompatibleMethodOverride]
+    def handle_response(self, response: Response, query: BatchQuery) -> None:  # type: ignore[reportIncompatibleMethodOverride]
         """Processes the batch response and handles each individual response.
 
         Args:
@@ -61,7 +61,7 @@ class ODataV4BatchRequest(ODataRequest):
                 if record_batch_failure(query.context, sub_qry, ClientRequestException.from_response(sub_resp)):
                     continue
                 raise
-            super().process_response(sub_resp, sub_qry)
+            super().handle_response(sub_resp, sub_qry)
 
     def execute_query_with_retry(
         self,
@@ -209,7 +209,7 @@ class ODataV4BatchRequest(ODataRequest):
                     if record_batch_failure(query.context, sub_qry, exc):
                         continue
                     raise
-                super(ODataV4BatchRequest, self).process_response(sub_resp, sub_qry)
+                super(ODataV4BatchRequest, self).handle_response(sub_resp, sub_qry)
         return failures, retry_after
 
     @staticmethod

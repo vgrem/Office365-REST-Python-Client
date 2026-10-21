@@ -6,7 +6,7 @@ from typing_extensions import Self
 
 from office365.planner.assignment import PlannerAssignment
 from office365.runtime.client_value import ClientValue
-from office365.runtime.converters.value import deserialize_value, serialize_value
+from office365.runtime.converters.value import coerce_value, serialize_value
 from office365.runtime.odata.json_format import ODataJsonFormat
 
 
@@ -22,7 +22,7 @@ class PlannerAssignments(ClientValue):
     def set_property(self, k: str | int, v: Any, persist_changes: bool = True) -> Self:
         # Map raw JSON objects onto the typed assignment so reads stay strongly typed.
         if isinstance(v, dict):
-            v = deserialize_value(self._item_type, v, None, persist_changes)
+            v = coerce_value(self._item_type, v, None, persist_changes)
         return super().set_property(k, v, persist_changes)
 
     def add(self, user_id: str, *, order_hint: str = " !") -> str:

@@ -848,7 +848,7 @@ class DriveItem(BaseItem):
         def _construct_request(request: RequestOptions) -> None:
             request.stream = True
 
-        def _process_response(response: requests.Response) -> None:
+        def _handle_response(response: requests.Response) -> None:
             bytes_read = 0
             for chunk in response.iter_content(chunk_size=chunk_size):
                 bytes_read += len(chunk)
@@ -856,7 +856,7 @@ class DriveItem(BaseItem):
                     chunk_downloaded(bytes_read)
                 file_object.write(chunk)
 
-        self.get_content().before_execute(_construct_request).after_execute(_process_response, include_response=True)
+        self.get_content().before_execute(_construct_request).after_execute(_handle_response, include_response=True)
         return self
 
     async def download_session_async(
@@ -1011,7 +1011,7 @@ class DriveItem(BaseItem):
             def _create_request(request: RequestOptions) -> None:
                 request.url += f"?@microsoft.graph.conflictBehavior={conflict_behavior.value}"
 
-            def _process_response(resp: requests.Response) -> None:
+            def _handle_response(resp: requests.Response) -> None:
                 location = resp.headers.get("Location", None)
                 if location is None:
                     return
@@ -1020,7 +1020,7 @@ class DriveItem(BaseItem):
             payload = {"name": name, "parentReference": parent_reference}
             qry = ServiceOperationQuery(self, "copy", None, payload, None, return_type)
             self.context.add_query(qry).before_execute(_create_request).after_execute(
-                _process_response, include_response=True
+                _handle_response, include_response=True
             )
 
         if isinstance(parent, DriveItem):

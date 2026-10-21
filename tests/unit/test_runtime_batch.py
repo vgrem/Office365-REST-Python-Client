@@ -390,7 +390,7 @@ def test_batch_function_query_returns_binary_content():
     response.headers["Content-Type"] = "multipart/mixed; boundary=batch_response"
     response._content = body
 
-    ODataBatchV3Request("https://contoso.sharepoint.com", JsonLightFormat()).process_response(response, batch)
+    ODataBatchV3Request("https://contoso.sharepoint.com", JsonLightFormat()).handle_response(response, batch)
 
     assert content.value == binary
 

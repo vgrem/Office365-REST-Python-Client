@@ -1,7 +1,7 @@
 """Type-aware scalar value conversion (the "fields" layer of the conversion stack).
 
 Each function converts a raw value (string, JSON scalar) into its typed form —
-the deserialization half of the pipeline. ``serialize_value``/``deserialize_value``
+the deserialization half of the pipeline. ``serialize_value``/``coerce_value``
 in ``value.py`` build on these for object-level conversion.
 """
 

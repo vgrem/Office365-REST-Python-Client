@@ -108,7 +108,7 @@ class AttachmentCollection(EntityCollection[Attachment]):
                     auth_token = parse_query_param(request.url, "authtoken")
                     request.set_header("Authorization", f"Bearer {auth_token}")
 
-                def _process_response(response: requests.Response) -> None:
+                def _handle_response(response: requests.Response) -> None:
                     location = response.headers.get("Location", None)
                     if location is None:
                         return
@@ -116,7 +116,7 @@ class AttachmentCollection(EntityCollection[Attachment]):
                     return_type.set_property("id", attachment_id)
 
                 session_request.beforeExecute += _construct_request
-                session_request.afterExecute += _process_response
+                session_request.afterExecute += _handle_response
                 session_request.execute_query(qry)
 
         self.context.add_query(qry).after_execute(_start_upload, execute_first=True)

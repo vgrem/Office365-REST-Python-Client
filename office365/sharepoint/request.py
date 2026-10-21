@@ -125,7 +125,7 @@ class SharePointRequest(ODataRequest):
 
     def build_request(self, query: ClientQuery) -> RequestOptions:
         request = super().build_request(query)
-        if isinstance(self.json_format, JsonLightFormat):
+        if self.json_format.dialect.tunnels_methods:
             if isinstance(query, DeleteEntityQuery):
                 request.ensure_header("X-HTTP-Method", "DELETE")
                 request.ensure_header("IF-MATCH", "*")
@@ -149,10 +149,8 @@ class SharePointRequest(ODataRequest):
             request = RequestOptions(f"{self.service_root_url}/contextInfo")
             request.method = HttpMethod.Post
             response = client.execute_request_direct(request)
-            json_format = JsonLightFormat()
-            json_format.function = "GetContextWebInformation"
             return_value = ContextWebInformation()
-            client.map_json(response.json(), return_value, json_format)
+            client.hydrate(return_value, response.json(), wrapper="GetContextWebInformation")
             return return_value
 
         return retry(

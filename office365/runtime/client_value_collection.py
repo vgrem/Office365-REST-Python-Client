@@ -11,7 +11,6 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.converters.scalars import parse_enum
 from office365.runtime.converters.value import serialize_value
 from office365.runtime.odata.json_format import ODataJsonFormat
-from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 ValueT = TypeVar("ValueT")
 
@@ -146,7 +145,7 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
         Args:
             json_format: Controls serialization behavior:
                 - None: Returns simple array
-                - JsonLightFormat: Returns metadata-enriched structure
+                - JsonProfile: Returns metadata-enriched structure
 
         Returns:
             list or dict: Serialized data
@@ -158,13 +157,10 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
                 "__metadata": {"type": "Collection(Edm.String)"}
             }
         """
-        json: list[Any] | dict[str, Any] = [serialize_value(v) for v in self]
-        if isinstance(json_format, JsonLightFormat) and json_format.include_control_information:
-            json = {
-                json_format.collection: json,
-                json_format.metadata_type: {"type": self.entity_type_name},
-            }
-        return json
+        items = [serialize_value(v) for v in self]
+        if json_format is None:
+            return items
+        return json_format.wrap(self, items)
 
     def create_typed_value(self, initial_value: ValueT | None = None) -> ValueT:
         """Creates a new item of the collection's type.

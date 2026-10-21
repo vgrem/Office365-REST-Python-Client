@@ -290,7 +290,7 @@ class Team(Entity):
         """
         return_type = TeamsAsyncOperation(self.context)
 
-        def _process_response(resp: requests.Response) -> None:
+        def _handle_response(resp: requests.Response) -> None:
             loc = resp.headers.get("Location")
             if loc is not None:
                 return_type._resource_path = ODataPathBuilder.parse_url(loc)
@@ -307,7 +307,7 @@ class Team(Entity):
         if classification is not None:
             payload["classification"] = classification
         qry = ServiceOperationQuery(self, "clone", None, payload, None, None)
-        self.context.add_query(qry).after_execute(_process_response, include_response=True)
+        self.context.add_query(qry).after_execute(_handle_response, include_response=True)
         return return_type
 
     def clone_and_wait(
@@ -337,7 +337,7 @@ class Team(Entity):
         return_type = Team(self.context)
         self.context.teams.add_child(return_type)
 
-        def _process_response(resp: requests.Response) -> None:
+        def _handle_response(resp: requests.Response) -> None:
             loc = resp.headers.get("Location")
             assert loc is not None
             operation = TeamsAsyncOperation(self.context, ODataPathBuilder.parse_url(loc))
@@ -361,7 +361,7 @@ class Team(Entity):
         if classification is not None:
             payload["classification"] = classification
         qry = ServiceOperationQuery(self, "clone", None, payload, None, None)
-        self.context.add_query(qry).after_execute(_process_response, include_response=True)
+        self.context.add_query(qry).after_execute(_handle_response, include_response=True)
         return return_type
 
     def send_activity_notification(

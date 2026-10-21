@@ -3,7 +3,7 @@
 CSV files and JSON/Excel/pandas records are normalized into plain ``dict``
 records (via :func:`coerce_records`) which the collection ``from_*`` methods
 turn into entities via the shared conversion core (``create_typed_object`` ->
-``set_property`` -> ``deserialize_value``/``declared_type``).
+``set_property`` -> ``coerce_value``/``declared_type``).
 """
 
 from __future__ import annotations

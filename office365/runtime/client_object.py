@@ -17,9 +17,8 @@ from typing_extensions import Self
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.converters.value import (
-    _add_type_metadata,
+    coerce_value,
     declared_type,
-    deserialize_value,
     serialize_value,
     to_snake_case,
 )
@@ -464,7 +463,7 @@ class ClientObject:
     def set_property(self, name: str, value: Any, persist_changes: bool = True) -> Self:
         """Set a property, coercing the value to its declared type.
 
-        Uses the shared conversion core (``deserialize_value``/``declared_type``) so
+        Uses the shared conversion core (``coerce_value``/``declared_type``) so
         deserialization and the CSV/JSON pipeline use the same conversions.
 
         Args:
@@ -485,7 +484,7 @@ class ClientObject:
         # would otherwise be discarded).
         if isinstance(current, Enum) and name not in self._properties:
             current = None
-        self._properties[name] = deserialize_value(declared_type(type(self), name), value, current, persist_changes)
+        self._properties[name] = coerce_value(declared_type(type(self), name), value, current, persist_changes)
         return self
 
     def ensure_property(self, name: str) -> Self:
@@ -603,10 +602,8 @@ class ClientObject:
             Dictionary (or list, for collections) representing the serialized object
         """
         if json_format is None:
-            include_control_info = False
             json = {k: self.get_property(k) for k in self._properties}
         else:
-            include_control_info = self.entity_type_name is not None and json_format.include_control_information
             persistable = self._persistable_names
             json = {k: self.get_property(k) for k in self._properties if k in self._changes or k in persistable}
         # ``__``-prefixed keys are this client's own bookkeeping, ingested from a
@@ -615,6 +612,4 @@ class ClientObject:
         # A dialect's control marker (``__metadata``) is added *after* this filter.
         json = {k: serialize_value(v, json_format) for k, v in json.items() if not k.startswith("__")}
 
-        if json and include_control_info:
-            _add_type_metadata(json, json_format, self.entity_type_name)
-        return json
+        return json if json_format is None else json_format.wrap(self, json)

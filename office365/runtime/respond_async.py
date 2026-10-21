@@ -97,7 +97,7 @@ class RespondAsyncRequest:
 
     def _finish_sync(self, response: Any) -> None:
         request = self._context.pending_request()
-        request.process_response(response, self._query)
+        request.handle_response(response, self._query)
         request.afterExecute(response)
 
     def execute(self) -> LongRunningOperationResult | None:

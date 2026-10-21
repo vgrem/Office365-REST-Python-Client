@@ -50,7 +50,7 @@ class ODataBatchV3Request(ODataRequest):
         request.data = self._prepare_payload(query)
         return request
 
-    def process_response(self, response: Response, query: BatchQuery) -> None:  # type: ignore[reportIncompatibleMethodOverride]
+    def handle_response(self, response: Response, query: BatchQuery) -> None:  # type: ignore[reportIncompatibleMethodOverride]
         """Process a batch response by handling each sub-response.
 
         Args:
@@ -79,7 +79,7 @@ class ODataBatchV3Request(ODataRequest):
         callback-driven follow-up queries are queued for the next round.
         """
         with context.current_query_scope(sub_qry):
-            super().process_response(sub_resp, sub_qry)
+            super().handle_response(sub_resp, sub_qry)
             context.pending_request().afterExecute(sub_resp)
 
     def execute_query_with_retry(

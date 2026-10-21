@@ -1,53 +1,24 @@
 from __future__ import annotations
 
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.dialect import JsonDialect, dialect_for_level
+from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.odata.v3.metadata_level import ODataV3MetadataLevel
 
 
-class JsonLightFormat(ODataJsonFormat):
-    """JSON Light format for SharePoint Online/One Drive for Business"""
+class JsonLightFormat(JsonProfile):
+    """JSON Light format for SharePoint Online/One Drive for Business
+
+    The spelling of the payload is the metadata level's dialect (see
+    :mod:`office365.runtime.odata.dialect`); the level itself only decides
+    whether control information is written at all.
+    """
 
     def __init__(self, metadata_level: ODataV3MetadataLevel = ODataV3MetadataLevel.Verbose):
         super().__init__(metadata_level)
-        self.function: str | None = None
 
     @property
-    def security(self):
-        return "d"
-
-    @property
-    def collection(self):
-        if self.metadata_level == ODataV3MetadataLevel.Verbose:
-            return "results"
-        else:
-            return "value"
-
-    @property
-    def collection_next(self):
-        """Property name for a reference to the next page of results"""
-        return "__next"
-
-    @property
-    def collection_delta(self):
-        """Property name for a reference to the next page of results"""
-        return "__delta"
-
-    @property
-    def metadata_type(self):
-        return "__metadata"
-
-    @property
-    def deferred_type(self):
-        return "__deferred"
-
-    @property
-    def value_tag(self):
-        return "__value"
-
-    @property
-    def etag(self):
-        """The entity tag that represents the version of the object."""
-        return "__etag"
+    def dialect(self) -> JsonDialect:
+        return dialect_for_level(self.metadata_level)
 
     @property
     def media_type(self):

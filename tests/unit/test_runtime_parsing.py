@@ -54,7 +54,7 @@ class TestResponseParsing(unittest.TestCase):
         resp._content = b"<html><body>Expired form digest</body></html>"
 
         with self.assertRaises(ClientRequestException) as cm:
-            request.process_response(resp, query)
+            request.handle_response(resp, query)
 
         self.assertIs(cm.exception.response, resp)
 
@@ -71,7 +71,7 @@ class TestResponseParsing(unittest.TestCase):
         resp.headers["Content-Type"] = "application/json"
         resp._content = b'{"name": "test", "version": 1}'
 
-        request.process_response(resp, query)
+        request.handle_response(resp, query)
         self.assertEqual(result.value, b'{"name": "test", "version": 1}')
 
     def test_regular_query_still_parses_json(self):
@@ -86,7 +86,7 @@ class TestResponseParsing(unittest.TestCase):
         resp.headers["Content-Type"] = "application/json"
         resp._content = b'{"name": "test", "version": 1}'
 
-        request.process_response(resp, query)
+        request.handle_response(resp, query)
         self.assertIsNot(result.value, b'{"name": "test", "version": 1}')
 
     def test_raw_content_returns_bytes_for_octet_stream(self):
@@ -101,7 +101,7 @@ class TestResponseParsing(unittest.TestCase):
         resp.headers["Content-Type"] = "application/octet-stream"
         resp._content = b"\x00\x01\x02"
 
-        request.process_response(resp, query)
+        request.handle_response(resp, query)
         self.assertEqual(result.value, b"\x00\x01\x02")
 
 
@@ -308,7 +308,7 @@ class TestODataResponseType(unittest.TestCase):
             ],
         }
         col = DirectoryObjectCollection(ctx)
-        _graph_request().map_json(payload, col, V4JsonFormat())
+        _graph_request().hydrate(col, payload, V4JsonFormat())
 
         self.assertEqual(len(col), 5)  # noqa: PLR2004
         self.assertIsInstance(col[0], User)
@@ -326,7 +326,7 @@ class TestODataResponseType(unittest.TestCase):
         ctx = ClientContext(test_site_url)
         payload = {"value": [{"@odata.type": "#microsoft.graph.administrativeUnit", "id": "au1"}]}
         col = DirectoryObjectCollection(ctx)
-        _graph_request().map_json(payload, col, V4JsonFormat())
+        _graph_request().hydrate(col, payload, V4JsonFormat())
 
         self.assertEqual(len(col), 1)
         self.assertIsInstance(col[0], DirectoryObject)
@@ -336,7 +336,7 @@ class TestODataResponseType(unittest.TestCase):
         ctx = ClientContext(test_site_url)
         payload = {"@odata.type": "#microsoft.graph.user", "id": "u1", "displayName": "Alice"}
         user = User(ctx)
-        _graph_request().map_json(payload, user, V4JsonFormat())
+        _graph_request().hydrate(user, payload, V4JsonFormat())
 
         self.assertEqual(user.entity_type_name, "microsoft.graph.User")
         self.assertEqual(user.get_property("id"), "u1")
@@ -348,7 +348,7 @@ class TestODataResponseType(unittest.TestCase):
         ctx = ClientContext(test_site_url)
         payload = {"d": {"__metadata": {"type": "SP.Web"}, "Id": "web-1", "Url": "https://x"}}
         web = ctx.web
-        ODataRequest(test_site_url, JsonLightFormat()).map_json(payload, web, JsonLightFormat())
+        ODataRequest(test_site_url, JsonLightFormat()).hydrate(web, payload, JsonLightFormat())
 
         self.assertEqual(web.entity_type_name, "SP.Web")
         self.assertNotIn("__metadata", web.properties)

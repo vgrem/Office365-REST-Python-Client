@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import copy
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 from requests import Response
 
@@ -14,7 +13,6 @@ from office365.runtime.converters.value import serialize_value
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_format import ODataJsonFormat
-from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
@@ -72,15 +70,14 @@ class ODataRequest(ClientRequest):
                 request.data = self._build_payload(query)
         return request
 
-    def process_response(self, response: Response, query: ClientQuery) -> None:
+    def handle_response(self, response: Response, query: ClientQuery) -> None:
         """
-        Processes the HTTP response according to OData specifications.
+        Handles an HTTP response according to OData specifications.
 
         Args:
             response: The HTTP response
             query: The original query that generated this response
         """
-        json_format = copy.deepcopy(self.json_format)
         return_type = query.return_type
         if return_type is None:
             return
@@ -94,89 +91,35 @@ class ODataRequest(ClientRequest):
         if content_type != "application/json" or is_raw_content:
             if isinstance(return_type, ClientResult):
                 return_type.set_property("__value", response.content)
-        else:
-            if isinstance(json_format, JsonLightFormat):
-                if isinstance(query, (ServiceOperationQuery, FunctionQuery)):
-                    json_format.function = query.name
+            return
 
-            try:
-                self.map_json(response.json(), return_type, json_format)
-            except ValueError as e:
-                raise ClientRequestException(str(e), response=response) from e
+        # A function/service operation answers under its own name in JSON Light;
+        # the wrapper is an argument here, never state on the shared profile.
+        wrapper = None
+        if self.json_format.dialect.container is not None and isinstance(query, (ServiceOperationQuery, FunctionQuery)):
+            wrapper = query.name
+        try:
+            self.hydrate(return_type, response.json(), wrapper=wrapper)
+        except ValueError as e:
+            raise ClientRequestException(str(e), response=response) from e
 
-    def map_json(
+    def hydrate(
         self,
-        json: Any,
-        return_type: Union[ClientValue, ClientResult, ClientObject],
+        target: Union[ClientValue, ClientResult, ClientObject],
+        payload: Any,
         json_format: Optional[ODataJsonFormat] = None,
+        wrapper: Optional[str] = None,
     ) -> None:
         """
-        Maps JSON response to client objects.
+        Hydrates a client object from a decoded JSON payload.
 
         Args:
-            json: The JSON response data
-            return_type: The target object to map data to
-            json_format: Optional format override
+            target: The target object to map data to
+            payload: The decoded JSON response body
+            json_format: Optional profile override
+            wrapper: Key the payload is wrapped under, if the dialect wraps it
         """
-        if json_format is None:
-            json_format = self.json_format
-
-        if json and return_type is not None:
-            for k, v in self._next_property(json, json_format):
-                return_type.set_property(str(k), v, False)
-
-    def _next_property(self, json: Any, json_format: ODataJsonFormat) -> Iterator[Tuple[Union[str, int], Any]]:
-        """
-        Generator that yields properties from JSON response according to OData format.
-
-        Args:
-            json: The JSON data to process
-            json_format: The format specification
-
-        Yields:
-            Property name-value pairs
-        """
-        if isinstance(json_format, JsonLightFormat):
-            json = json.get(json_format.security, json)
-            json = json.get(json_format.function, json)
-
-        if isinstance(json, dict):
-            if isinstance(json.get(json_format.collection, None), list):
-                next_link_url = json.get(json_format.collection_next, None)
-                json = json.get(json_format.collection, json)
-                if next_link_url:
-                    yield "__nextLinkUrl", next_link_url
-
-            if isinstance(json, list):
-                for index, item in enumerate(json):
-                    transformed = None
-                    if isinstance(item, dict):
-                        transformed = {k: v for k, v in self._next_property(item, json_format)}
-                    yield index, transformed if isinstance(item, dict) else item
-            elif isinstance(json, dict):
-                for name, value in json.items():
-                    yield from self._next_object_property(name, value, json_format)
-            else:
-                yield "__value", json
-        elif json is not None:
-            yield "__value", json
-
-    def _next_object_property(self, name: str, value: Any, json_format: ODataJsonFormat) -> Iterator[Tuple[str, Any]]:
-        """Yields a single property from a JSON object according to the OData format."""
-        if isinstance(json_format, JsonLightFormat):
-            is_valid = name != json_format.metadata_type and not (isinstance(value, dict) and "__deferred" in value)
-        else:
-            is_valid = "@odata" not in name
-
-        if is_valid:
-            if isinstance(value, dict):
-                yield name, {k: v for k, v in self._next_property(value, json_format)}
-            else:
-                yield name, value
-        elif name == json_format.etag:
-            yield "__etag", value
-        elif name == json_format.metadata_type and isinstance(value, str):
-            yield "__odata_type", value
+        (json_format or self.json_format).hydrate(target, payload, wrapper)
 
     def _build_payload(self, query: ClientQuery) -> Union[Dict[str, Any], List[Any], str, bytes]:
         """

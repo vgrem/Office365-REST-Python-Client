@@ -79,7 +79,7 @@ def reload_operation(operation: "ClientObject") -> Response:
     request_options = request.build_request(query)
     with operation.context.current_query_scope(query):
         response = request.execute_request_direct(request_options)
-        request.process_response(response, query)
+        request.handle_response(response, query)
     return response
 
 
@@ -90,7 +90,7 @@ async def reload_operation_async(operation: "ClientObject") -> Response:
     request_options = request.build_request(query)
     with operation.context.current_query_scope(query):
         response = await request.execute_request_direct_async(request_options)
-        request.process_response(response, query)
+        request.handle_response(response, query)
     return response
 
 

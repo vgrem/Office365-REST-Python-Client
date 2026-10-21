@@ -931,7 +931,7 @@ class File(AbstractFile):
                     file_object.seek(0)
                     file_object.truncate()
 
-            def _process_response(response: requests.Response) -> None:
+            def _handle_response(response: requests.Response) -> None:
                 self.context.pending_request().beforeExecute -= _construct_request
                 total = int(response.headers.get("Content-Length", 0)) or None
                 bytes_read = 0
@@ -941,7 +941,7 @@ class File(AbstractFile):
                     )
 
             self.context.add_query(qry).before_execute(_construct_request, once=False).after_execute(
-                _process_response, include_response=True
+                _handle_response, include_response=True
             )
 
         if use_path:

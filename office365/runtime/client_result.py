@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar
 from typing_extensions import Self
 
 from office365.runtime.client_value import ClientValue
-from office365.runtime.converters.value import deserialize_value
+from office365.runtime.converters.value import coerce_value
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.retry import DEFAULT_RETRY_EXCEPTIONS
 
@@ -67,7 +67,7 @@ class ClientResult(Generic[ClientValueT]):
         elif isinstance(current, dict):
             current[key] = value
         elif isinstance(current, (datetime, Enum)):
-            coerced = deserialize_value(None, value, current, persist_changes)
+            coerced = coerce_value(None, value, current, persist_changes)
             if coerced is not None:
                 self._value = coerced
         else:

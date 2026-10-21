@@ -1,8 +1,9 @@
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.dialect import V4, JsonDialect
+from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.odata.v4.metadata_level import ODataV4MetadataLevel
 
 
-class V4JsonFormat(ODataJsonFormat):
+class V4JsonFormat(JsonProfile):
     """JSON format (V4)"""
 
     def __init__(self, metadata_level: str = ODataV4MetadataLevel.Minimal):
@@ -13,35 +14,8 @@ class V4JsonFormat(ODataJsonFormat):
         self.streaming = False
 
     @property
-    def metadata_type(self) -> str:
-        """The OData entity type in Microsoft Graph that describes the represented object."""
-        return "@odata.type"
-
-    @property
-    def value_tag(self) -> str:
-        """The OData entity type in Microsoft Graph that describes the represented object."""
-        return "@odata.value"
-
-    @property
-    def collection(self) -> str:
-        return "value"
-
-    @property
-    def collection_next(self) -> str:
-        """
-        Property name for a reference to the next page of results
-        """
-        return "@odata.nextLink"
-
-    @property
-    def collection_delta(self) -> str:
-        """ """
-        return "@odata.deltaLink"
-
-    @property
-    def etag(self) -> str:
-        """The entity tag that represents the version of the object."""
-        return "@odata.etag"
+    def dialect(self) -> JsonDialect:
+        return V4
 
     @property
     def media_type(self) -> str:

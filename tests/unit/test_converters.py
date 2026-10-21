@@ -25,7 +25,7 @@ from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.converters.csv_writer import write_csv
 from office365.runtime.converters.records import iter_records
 from office365.runtime.converters.scalars import iso_z, parse_datetime, parse_int
-from office365.runtime.converters.value import _add_type_metadata, declared_type, deserialize_value, serialize_value
+from office365.runtime.converters.value import coerce_value, declared_type, serialize_value
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.types.collections import StringCollection
@@ -234,17 +234,19 @@ class TestDateTimeTimeZone(unittest.TestCase):
         self.assertIsNone(DateTimeTimeZone(dateTime="not a date").as_datetime())
 
 
-class TestAddTypeMetadata(unittest.TestCase):
+class _Named:
+    entity_type_name = "Microsoft.Graph.User"
+
+
+class TestWrapTypeMetadata(unittest.TestCase):
     def test_json_light(self):
         fmt = JsonLightFormat()
-        result: dict = {}
-        _add_type_metadata(result, fmt, "Microsoft.Graph.User")
+        result = fmt.wrap(_Named(), {"id": "u1"})
         self.assertEqual(result[fmt.metadata_type], {"type": "Microsoft.Graph.User"})
 
     def test_plain_odata(self):
         fmt = V4JsonFormat()
-        result: dict = {}
-        _add_type_metadata(result, fmt, "Microsoft.Graph.User")
+        result = fmt.wrap(_Named(), {"id": "u1"})
         self.assertEqual(result[fmt.metadata_type], "#Microsoft.Graph.User")
 
 
@@ -287,9 +289,7 @@ class TestDeclaredType(unittest.TestCase):
 class TestCoerceValue(unittest.TestCase):
     def test_nested_client_value(self):
         current = PasswordProfile()
-        result = deserialize_value(
-            PasswordProfile, {"password": "x", "forceChangePasswordNextSignIn": "True"}, current, True
-        )
+        result = coerce_value(PasswordProfile, {"password": "x", "forceChangePasswordNextSignIn": "True"}, current, True)
         self.assertIs(result, current)
         self.assertEqual(current.password, "x")
         self.assertIs(current.forceChangePasswordNextSignIn, True)

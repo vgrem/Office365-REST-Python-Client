@@ -80,10 +80,10 @@ class SearchEntity(Entity):
             resource_type_name = search_hit.get_property("resource").get("@odata.type", None)
             resource_type = EntityType.resolve(resource_type_name)
             resource = resource_type(self.context, EntityPath())
-            self.context.pending_request().map_json(search_hit.resource, resource)
+            self.context.pending_request().hydrate(resource, search_hit.resource)
             search_hit.set_property("resource", resource)
 
-        def _process_response(
+        def _handle_response(
             result: ClientResult[ClientValueCollection[SearchResponse]],
         ) -> None:
             result_items = result.value
@@ -94,7 +94,7 @@ class SearchEntity(Entity):
         payload = {"requests": ClientValueCollection(SearchRequest, [search_request])}
         return_type = ClientResult(self.context, ClientValueCollection(SearchResponse))
         qry = ServiceOperationQuery(self, "query", None, payload, None, return_type)
-        self.context.add_query(qry).after_execute(_process_response)
+        self.context.add_query(qry).after_execute(_handle_response)
         return return_type
 
     @require_permission(delegated=["Mail.Read"], application=["Mail.Read"])

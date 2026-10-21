@@ -648,10 +648,8 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
             # The server drives paging (``__next``/``$skiptoken``); a ``$skip``
             # fallback would conflict with the token on the final page.
             return False
-        from office365.runtime.odata.v3.json_light_format import JsonLightFormat
-
-        json_format = getattr(self.context.pending_request(), "json_format", None)
-        if not isinstance(json_format, JsonLightFormat):
+        dialect = getattr(getattr(self.context.pending_request(), "json_format", None), "dialect", None)
+        if dialect is None or not dialect.paginates_by_offset:
             return False
         return len(self.current_page) == self._page_size
 

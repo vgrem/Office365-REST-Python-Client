@@ -65,7 +65,7 @@ class ChannelCollection(EntityCollection[Channel]):
         return_type = Channel(self.context, EntityPath(None, self.resource_path))
         self.add_child(return_type)
 
-        def _process_response(resp: requests.Response) -> None:
+        def _handle_response(resp: requests.Response) -> None:
             if resp.status_code != HTTPStatus.ACCEPTED:
                 return
             location = resp.headers.get("Location")
@@ -83,7 +83,7 @@ class ChannelCollection(EntityCollection[Channel]):
             wait_for_operation(operation, success_callback=_on_succeeded)
 
         qry = CreateEntityQuery(self, payload, return_type)
-        self.context.add_query(qry).after_execute(_process_response, include_response=True)
+        self.context.add_query(qry).after_execute(_handle_response, include_response=True)
         return return_type
 
     def get_all_messages(self) -> ChatMessageCollection:

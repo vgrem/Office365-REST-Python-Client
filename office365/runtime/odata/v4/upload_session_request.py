@@ -62,7 +62,7 @@ class UploadSessionRequest(ClientRequest):
         request.data = self._range_data
         return request
 
-    def process_response(self, response: Response, query: ClientQuery) -> None:
+    def handle_response(self, response: Response, query: ClientQuery) -> None:
         """Handle the response after uploading a chunk."""
         response.raise_for_status()
         self.last_response = response

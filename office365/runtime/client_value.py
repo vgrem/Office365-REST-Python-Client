@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 from typing_extensions import Self
 
-from office365.runtime.converters.value import _add_type_metadata, declared_type, deserialize_value, serialize_value
+from office365.runtime.converters.value import coerce_value, declared_type, serialize_value
 from office365.runtime.odata.json_format import ODataJsonFormat
 
 
@@ -49,7 +49,7 @@ class ClientValue:
         if v is None:
             setattr(self, k, None)
             return self
-        setattr(self, k, deserialize_value(declared_type(type(self), k), v, getattr(self, k, None), persist_changes))
+        setattr(self, k, coerce_value(declared_type(type(self), k), v, getattr(self, k, None), persist_changes))
         return self
 
     def get_property(self, name: str, default_value: Any = None) -> Any:
@@ -95,8 +95,7 @@ class ClientValue:
 
         # ``__``-prefixed names are response bookkeeping, not fields of the value.
         result = {k: serialize_value(v, json_format) for k, v in self if _is_valid_value(v) and not k.startswith("__")}
-        _add_type_metadata(result, json_format, self.entity_type_name)
-        return result
+        return result if json_format is None else json_format.wrap(self, result)
 
     @property
     def entity_type_name(self) -> Optional[str]:

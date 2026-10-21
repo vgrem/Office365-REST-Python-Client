@@ -2,9 +2,9 @@
 
 The shared conversion layer: ``serialize_value`` maps stored values to their JSON
 form (used by ``ClientObject``/``ClientValue``/``ClientValueCollection``
-``to_json``), and ``deserialize_value``/``declared_type`` map raw values to their
-declared type (used by ``set_property``). ``_add_type_metadata`` attaches the
-OData type marker.
+``to_json``), and ``coerce_value``/``declared_type`` map raw values to their
+declared type (used by ``set_property``). Control information is not this
+layer's business: a profile attaches it (``JsonProfile.wrap``).
 """
 
 from __future__ import annotations
@@ -18,7 +18,6 @@ from typing import Any, Dict, Optional, Tuple, Union, get_args, get_origin, get_
 
 from office365.runtime.converters.scalars import parse_bool, parse_datetime, parse_enum, try_float, try_int
 from office365.runtime.odata.json_format import ODataJsonFormat
-from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 
 _UNSET = object()
 _NoneType = type(None)
@@ -38,15 +37,16 @@ def _serialize_enum(value: Enum, json_format: Optional[ODataJsonFormat]) -> Any:
 
     OData V3 (SharePoint) enums travel as their numeric value
     (``FieldTypeKind`` is ``Edm.Int32``); OData V4 / Graph enums travel as
-    the member *name* ("teamsForBusiness"). Enums generated with string
-    values already match their name; older Graph ones (e.g. auto-numbered
-    ``unknown = 0``) must fall back to the name, not the ordinal.
+    the member *name* ("teamsForBusiness") — the dialect says which. Enums
+    generated with string values already match their name; older Graph ones
+    (e.g. auto-numbered ``unknown = 0``) must fall back to the name, not the
+    ordinal.
 
     A generated Graph enum carries the *CSDL ordinal* as a string
     (``TaskStatus.completed = "2"``), which is not a wire value — Graph
     rejects it, so a digit-only string falls back to the member name too.
     """
-    if isinstance(json_format, JsonLightFormat) and isinstance(value.value, int):
+    if json_format is not None and not json_format.dialect.enum_by_name and isinstance(value.value, int):
         return value.value
     if isinstance(value.value, str):
         return value.name if value.value.isdigit() else value.value
@@ -83,17 +83,6 @@ def serialize_value(  # noqa: PLR0911 - one return per stored-value kind
     if isinstance(value, (list, tuple)):
         return [serialize_value(item, json_format) for item in value]
     return value
-
-
-def _add_type_metadata(
-    result: Dict[str, Any], json_format: Optional[ODataJsonFormat], entity_type_name: Optional[str]
-) -> None:
-    """Attach the OData type metadata marker when the format requests it."""
-    if json_format is not None and json_format.include_control_information and entity_type_name is not None:
-        if isinstance(json_format, JsonLightFormat):
-            result[json_format.metadata_type] = {"type": entity_type_name}
-        else:
-            result[json_format.metadata_type] = "#" + entity_type_name
 
 
 def to_snake_case(name: str) -> str:
@@ -202,7 +191,7 @@ def deserialize_nested(base: Any, value: Any, persist_changes: bool) -> Any:
     return base
 
 
-def deserialize_value(target_type: Any, value: Any, current: Any, persist_changes: bool) -> Any:
+def coerce_value(target_type: Any, value: Any, current: Any, persist_changes: bool) -> Any:
     """Coerce a raw value for storage by its declared type, falling back to the current instance.
 
     Declared scalars/enums go through ``deserialize_declared``; declared

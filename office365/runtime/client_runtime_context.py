@@ -318,13 +318,13 @@ class ClientRuntimeContext(ABC):
             return self
         query = self._queries[-1]
 
-        def _process_response(resp: Response) -> None:
+        def _handle_response(resp: Response) -> None:
             resp.raise_for_status()
             if callable(action):
                 action(resp if include_response else query.return_type)
 
         self.pending_request().after_execute(
-            _process_response,
+            _handle_response,
             once=True,
             condition=lambda: self.current_query is not None and self.current_query.id == query.id,
         )
@@ -701,13 +701,13 @@ class ClientRuntimeContext(ABC):
                     self._current_query = qry
                     if on_error is None:
                         request._raise_for_status(response)
-                        request.process_response(response, qry)
+                        request.handle_response(response, qry)
                         request.afterExecute(response)
                         processed = index + 1
                         continue
                     try:
                         request._raise_for_status(response)
-                        request.process_response(response, qry)
+                        request.handle_response(response, qry)
                         request.afterExecute(response)
                     except BaseException as error:  # noqa: BLE001 - collected, batch continues
                         on_error(qry, error)
@@ -815,13 +815,13 @@ class ClientRuntimeContext(ABC):
                     self._current_query = qry
                     if on_error is None:
                         request._raise_for_status(response)
-                        request.process_response(response, qry)
+                        request.handle_response(response, qry)
                         request.afterExecute(response)
                         processed = index + 1
                         continue
                     try:
                         request._raise_for_status(response)
-                        request.process_response(response, qry)
+                        request.handle_response(response, qry)
                         request.afterExecute(response)
                     except BaseException as error:  # noqa: BLE001 - collected, batch continues
                         on_error(qry, error)
@@ -1000,11 +1000,11 @@ class ClientRuntimeContext(ABC):
             request.url += "/$metadata"
             request.method = HttpMethod.Get
 
-        def _process_response(response: Response) -> None:
+        def _handle_response(response: Response) -> None:
             return_type.set_property("__value", response.content)
 
         qry = ClientQuery(self)
-        (self.add_query(qry).before_execute(_construct_request).after_execute(_process_response, include_response=True))
+        (self.add_query(qry).before_execute(_construct_request).after_execute(_handle_response, include_response=True))
         return return_type
 
     def _get_next_query(self, count: int = 1) -> ClientQuery:
