@@ -17,6 +17,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Iterator, Optional, Tuple, Union
 
+from office365.runtime.converters.value import serialize_value
 from office365.runtime.odata.dialect import JsonDialect
 
 if TYPE_CHECKING:
@@ -115,6 +116,28 @@ class JsonProfile(ABC):
         if payload:
             payload[marker] = {"type": name} if self.dialect.type_wrapped else "#" + name
         return payload
+
+    def build_payload(self, source: Any) -> Any:
+        """Serialize a query's parameters into the body the service will read.
+
+        Parameters are not a document: a ``None`` parameter means "not
+        provided" and is dropped, and no column is bookkeeping, so nothing is
+        filtered here beyond that. Nested values carry this profile, so a
+        collection of values is spelled exactly as its dialect spells it.
+
+        Args:
+            source: The parameters (a value, a container, or ``None``)
+
+        Returns:
+            The JSON-ready body
+        """
+        if source is None:
+            return {}
+        if isinstance(source, dict):
+            return {k: self.build_payload(v) for k, v in source.items() if v is not None}
+        if isinstance(source, (list, tuple)):
+            return [self.build_payload(item) for item in source]
+        return serialize_value(source, self)
 
     def hydrate(self, target: Any, payload: Any, wrapper: Optional[str] = None) -> None:
         """Ingest ``payload`` into ``target`` through this dialect.

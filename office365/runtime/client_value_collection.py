@@ -157,7 +157,7 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
                 "__metadata": {"type": "Collection(Edm.String)"}
             }
         """
-        items = [serialize_value(v) for v in self]
+        items = [serialize_value(v, json_format) for v in self]
         if json_format is None:
             return items
         return json_format.wrap(self, items)

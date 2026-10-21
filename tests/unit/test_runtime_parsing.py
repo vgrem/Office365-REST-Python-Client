@@ -20,6 +20,7 @@ from office365.intune.devices.device import Device
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
+from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.exceptions import (
     DuplicatedObjectException,
     ObjectNotFoundException,
@@ -561,3 +562,47 @@ class TestQueryPayloadSerialization(unittest.TestCase):
         self.assertEqual(payload["nested"]["endDateTime"], start.isoformat())
         self.assertEqual(payload["items"], [start.isoformat()])
         self.assertNotIn("absent", payload)
+
+
+class _SortValue:
+    """A value that declares a type, spelled the way a ``ClientValue`` would."""
+
+    entity_type_name = "SP.Search.Query.Sort"
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def to_json(self, json_format=None):
+        payload = {"name": self.name}
+        return json_format.wrap(self, payload) if json_format is not None else payload
+
+
+class TestBuildPayload(unittest.TestCase):
+    """A query body is built by the profile, so it is always spelled for the
+    service that will read it — no second, marker-less serializer in the request."""
+
+    def test_absent_parameters_are_dropped_and_falsy_ones_kept(self):
+        payload = JsonLightFormat().build_payload({"a": None, "b": 0, "c": False, "d": "", "e": []})
+        self.assertEqual(payload, {"b": 0, "c": False, "d": "", "e": []})
+
+    def test_no_parameters_is_an_empty_body(self):
+        self.assertEqual(JsonLightFormat().build_payload(None), {})
+
+    def test_value_nested_in_parameters_declares_its_type(self):
+        payload = JsonLightFormat().build_payload({"sort": _SortValue("Modified"), "nested": {"sort": _SortValue("A")}})
+        self.assertEqual(
+            payload,
+            {
+                "sort": {"name": "Modified", "__metadata": {"type": "SP.Search.Query.Sort"}},
+                "nested": {"sort": {"name": "A", "__metadata": {"type": "SP.Search.Query.Sort"}}},
+            },
+        )
+
+    def test_collection_items_are_spelled_the_way_the_dialect_spells_them(self):
+        collection = ClientValueCollection(_SortValue, [_SortValue("Modified")])
+        payload = JsonLightFormat().build_payload({"SortList": collection})
+        self.assertEqual(
+            payload["SortList"]["results"],
+            [{"name": "Modified", "__metadata": {"type": "SP.Search.Query.Sort"}}],
+        )
+        self.assertIn("__metadata", payload["SortList"])

@@ -1055,7 +1055,8 @@ class ClientRuntimeContext(ABC):
             queries.append(self._queries.popleft())
 
         batches = []
-        for chunk in partition_by_limits(queries, items_per_batch, max_batch_bytes):
+        json_format = getattr(self.pending_request(), "json_format", None)
+        for chunk in partition_by_limits(queries, items_per_batch, max_batch_bytes, json_format):
             batches.append(BatchQuery(self, chunk))
         return batches
 

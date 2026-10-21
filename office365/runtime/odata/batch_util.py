@@ -20,6 +20,7 @@ from office365.runtime.client_request_exception import ClientRequestException
 
 if TYPE_CHECKING:
     from office365.runtime.client_runtime_context import ClientRuntimeContext
+    from office365.runtime.odata.json_format import JsonProfile
     from office365.runtime.queries.client_query import ClientQuery
 
 # Batch-level HTTP statuses that indicate the whole request was rejected before
@@ -30,28 +31,37 @@ _BATCH_OVERHEAD = 1024  # multipart/JSON envelope allowance per batch
 _PART_OVERHEAD = 256  # per-sub-request header/boundary allowance
 
 
-def estimate_query_bytes(query) -> int:
+def estimate_query_bytes(query: "ClientQuery", json_format: Optional["JsonProfile"] = None) -> int:
     """Estimate the wire size of a batched sub-request without building a request.
 
     Builds the URL from the query's resource path and serializes its payload
-    locally — no transport/auth side effects.
+    locally — no transport/auth side effects — through the same profile the
+    request itself uses, so the estimate is of the body that will be sent
+    rather than of a payload nothing will ask for.
+
+    Args:
+        query: The sub-query to measure
+        json_format: The profile the batch request carries; ``None`` measures
+            the payload with no dialect-specific spelling.
     """
     url = getattr(query, "url", "") or ""
     size = len(str(url).encode("utf-8"))
 
     payload = getattr(query, "parameters_type", None)
-    body = None
     if payload is not None:
-        if isinstance(payload, dict):
-            body = json.dumps(payload, separators=(",", ":"))
-        elif isinstance(payload, (str, bytes)):
-            body = str(payload)
+        if isinstance(payload, (bytes, bytearray)):
+            size += len(bytes(payload))
+        elif isinstance(payload, str):
+            size += len(payload.encode("utf-8"))
         else:
             try:
-                body = json.dumps(payload.to_json(None), separators=(",", ":"))
+                if json_format is None:
+                    body = json.dumps(payload, separators=(",", ":"), default=str)
+                else:
+                    body = json.dumps(json_format.build_payload(payload), separators=(",", ":"), default=str)
             except Exception:
                 body = str(payload)
-        size += len(str(body).encode("utf-8"))
+            size += len(body.encode("utf-8"))
 
     headers = getattr(query, "custom_headers", None) or {}
     for k, v in headers.items():
@@ -63,11 +73,18 @@ def partition_by_limits(
     queries: Sequence,
     max_items: Optional[int],
     max_bytes: Optional[int],
+    json_format: Optional["JsonProfile"] = None,
 ) -> list[list]:
     """Split queries into batches respecting item and byte caps (order preserved).
 
     A single oversized query still becomes its own one-item batch, so a request
     rejected purely because of size is sent alone.
+
+    Args:
+        queries: The sub-queries to split, in submission order
+        max_items: Maximum queries per batch
+        max_bytes: Maximum estimated payload size per batch
+        json_format: The profile the batch request carries, for the byte estimate
     """
     batches: list[list] = []
     current: list = []
@@ -76,7 +93,7 @@ def partition_by_limits(
         if max_items is not None and len(current) >= max_items:
             batches.append(current)
             current, current_bytes = [], _BATCH_OVERHEAD
-        item_bytes = estimate_query_bytes(query)
+        item_bytes = estimate_query_bytes(query, json_format)
         if max_bytes is not None and current and current_bytes + item_bytes > max_bytes:
             batches.append(current)
             current, current_bytes = [], _BATCH_OVERHEAD

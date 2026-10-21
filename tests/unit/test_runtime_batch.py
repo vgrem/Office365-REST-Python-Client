@@ -312,6 +312,22 @@ def test_partition_respects_byte_cap():
     assert len(batches) >= 2  # noqa: PLR2004 — big payloads don't all land in one batch
 
 
+def test_estimate_matches_the_body_the_profile_builds():
+    """The estimate is of the body that will be sent: a value nested in the
+    parameters is serialized with its type marker, not repr()'d."""
+
+    class _Value:
+        entity_type_name = "SP.Thing"
+
+        def to_json(self, json_format=None):
+            return {"x": 1} if json_format is None else {"x": 1, "__metadata": {"type": "SP.Thing"}}
+
+    measured = _FakeQuery("u", {"thing": _Value()})
+    as_sent = _FakeQuery("u", {"thing": {"x": 1, "__metadata": {"type": "SP.Thing"}}})
+
+    assert estimate_query_bytes(measured, JsonLightFormat()) == estimate_query_bytes(as_sent)
+
+
 def test_oversized_single_stays_alone():
     huge = _FakeQuery("u", {"data": "x" * 100000})
     queries = [huge, _FakeQuery("u", None)]

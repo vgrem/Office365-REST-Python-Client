@@ -14,10 +14,12 @@ import types
 import uuid
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, Dict, Optional, Tuple, Union, get_args, get_origin, get_type_hints
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, get_args, get_origin, get_type_hints
 
 from office365.runtime.converters.scalars import parse_bool, parse_datetime, parse_enum, try_float, try_int
-from office365.runtime.odata.json_format import ODataJsonFormat
+
+if TYPE_CHECKING:
+    from office365.runtime.odata.json_format import ODataJsonFormat
 
 _UNSET = object()
 _NoneType = type(None)

@@ -9,7 +9,6 @@ from office365.runtime.client_request import ClientRequest
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
-from office365.runtime.converters.value import serialize_value
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.odata.json_format import ODataJsonFormat
@@ -123,33 +122,19 @@ class ODataRequest(ClientRequest):
 
     def _build_payload(self, query: ClientQuery) -> Union[Dict[str, Any], List[Any], str, bytes]:
         """
-        Normalizes OData request payload.
+        Builds the request body for a query.
 
         Args:
             query: The query containing parameters to serialize
 
         Returns:
-            Normalized payload dictionary or list
+            The JSON body (or the raw bytes of a binary one)
         """
-
-        def _normalize_payload(payload: Any) -> Any:
-            if isinstance(payload, (ClientObject, ClientValue)):
-                return payload.to_json(self._default_json_format)
-            elif isinstance(payload, dict):
-                return {k: _normalize_payload(v) for k, v in payload.items() if v is not None}
-            elif isinstance(payload, list):
-                return [_normalize_payload(item) for item in payload]
-            elif payload is None:
-                return {}
-            # Scalars (datetime, date, Enum, UUID, bytes) still need their
-            # JSON representation; serialize_value passes anything else through.
-            return serialize_value(payload, self._default_json_format)
-
         # A raw binary body (file upload content) is not JSON — never decode it.
         if isinstance(query.parameters_type, (bytes, bytearray)):
             return query.parameters_type
 
-        json = _normalize_payload(query.parameters_type)
+        json = self._default_json_format.build_payload(query.parameters_type)
         if isinstance(query, ServiceOperationQuery) and query.parameters_name is not None:
             json = {query.parameters_name: json}
         return json

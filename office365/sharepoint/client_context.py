@@ -420,7 +420,9 @@ class ClientContext(ClientRuntimeContext):
         from office365.runtime.odata.batch_util import partition_by_limits
         from office365.runtime.queries.batch import BatchQuery
 
-        return [BatchQuery(self, chunk) for chunk in partition_by_limits(queries, items_per_batch, max_batch_bytes)]
+        json_format = self.pending_request().json_format
+        chunks = partition_by_limits(queries, items_per_batch, max_batch_bytes, json_format)
+        return [BatchQuery(self, chunk) for chunk in chunks]
 
     def _resolve_deferred(self, barrier: DeferredOperationQuery) -> None:
         """Resolve a deferred barrier in place, firing its handlers.

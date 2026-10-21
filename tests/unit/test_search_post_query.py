@@ -42,7 +42,14 @@ def test_post_query_carries_a_sort_list():
 
     body = _request_body(transport)
     assert body["EnableSorting"] is True
-    assert body["SortList"]["results"] == [{"Direction": 0, "Property": "Modified"}]
+    # Each sort declares its own type, and the list declares the element type.
+    # Measured against a live site: the service resolves those type names (a
+    # wrong one is rejected by name) and sorts identically with or without the
+    # per-item marker, so the marker must describe the item it sits on.
+    assert body["SortList"]["results"] == [
+        {"Direction": 0, "Property": "Modified", "__metadata": {"type": "Microsoft.SharePoint.Client.Search.Query.Sort"}}
+    ]
+    assert body["SortList"]["__metadata"]["type"] == "Collection(Microsoft.SharePoint.Client.Search.Query.Sort)"
     assert transport.calls[0].endswith("SearchService/postquery")
 
 
