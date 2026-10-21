@@ -533,6 +533,25 @@ print(job.verify().summary())  # each .vcf's MD5 vs the document rendered from t
 <root>/manifest.jsonl                            # one sidecar per line
 ```
 
+The sidecar *is* the contact as Graph spells it — `Contact.to_json()` — plus the three
+keys a model cannot know (`folder_path`, `folder_display_path`, `vcf_path`). That record
+is `ContactRecord`: `of(contact, folder)` builds it from a loaded contact,
+`from_json(sidecar)` reads it back with no client and no context, and it answers the
+artefacts a migration needs — `vcard()`, `payload()`, `digest()`, `dest_path`,
+`dedup_key`:
+
+```py
+import json
+from pathlib import Path
+
+from office365.migration.outlook import ContactRecord
+
+sidecar = Path("./contacts-export/Contacts/Alice-Example_4b1e9f02.json")
+record = ContactRecord.from_json(json.loads(sidecar.read_text(encoding="utf-8")))
+record.payload()  # the POST /contacts body an import posts
+record.digest()  # what verification compares, on either machine
+```
+
 `ContactSource` walks the folder's children too, and a contact from a child folder
 lands in the matching subdirectory (`Contacts/Vendors/…`), so the tree carries the
 folder chain. Verification is a byte checksum, for the same reason as the calendar
@@ -580,8 +599,8 @@ print(job.verify().summary())  # digest of the restorable fields, not the .vcf b
   importing a contact with the office fields, address components and categories
   dropped — unlike mail, where a missing sidecar degrades to the MIME itself.
 - **The payload is a Graph-spelled dict, POSTed raw.** `ContactCollection.add()`
-  takes four arguments and drops everything else (measured), so the target builds
-  the body itself.
+  takes four arguments and drops everything else (measured), so the target posts
+  `ContactRecord.payload()` itself.
 - **A re-run skips what it already created.** A contact has no `transactionId`, so
   concurrency is not handled by the service refusing a second write; the target
   matches on `(display name, first address)` instead. Two contacts differing only

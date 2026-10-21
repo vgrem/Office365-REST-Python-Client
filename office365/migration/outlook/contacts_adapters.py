@@ -64,13 +64,7 @@ from office365.migration.outlook.contacts_models import (
     CONTACT_COLUMNS,
     ContactExportOptions,
     ContactImportOptions,
-    contact_create_payload,
-    contact_dedup_key,
-    contact_dest_path,
-    contact_digest,
-    contact_envelope,
-    contact_key,
-    contact_vcard,
+    ContactRecord,
 )
 from office365.migration.outlook.eml_import import SIDECAR_SUFFIX
 from office365.migration.outlook.fidelity import CONTACTS_EXPORT_DIMENSIONS, CONTACTS_IMPORT_DIMENSIONS
@@ -148,19 +142,17 @@ class ContactSource(DataSource):
             self._collect(child, f"{path}/{name}", f"{display}/{child_display}", items, progress)
 
     def _item(self, contact, path: str, display: str) -> MigrationItem:
-        dest = contact_dest_path(contact, path)
-        modified = contact.last_modified_datetime
-        created = contact.created_datetime
+        record = ContactRecord.of(contact, path, extra_properties=self._options.extra_properties, display_path=display)
         return MigrationItem(
-            source_path=dest,
-            dest_path=dest,
+            source_path=record.dest_path,
+            dest_path=record.dest_path,
             # A contact has no byte size until its ``.vcf`` is rendered; ``read()`` fills it.
             size_bytes=0,
             item_type="contact",
-            modified=iso_or_none(modified),
-            created=iso_or_none(created),
-            source_id=contact_key(contact),
-            metadata=contact_envelope(contact, path, self._options.extra_properties, display),
+            modified=iso_or_none(contact.last_modified_datetime),
+            created=iso_or_none(contact.created_datetime),
+            source_id=record.id,
+            metadata=record.to_json(),
         )
 
     def _handle(self, item: MigrationItem):
@@ -175,7 +167,7 @@ class ContactSource(DataSource):
 
     def read(self, item: MigrationItem) -> bytes:
         """The contact's vCard document, rendered from the record in ``metadata``."""
-        data = contact_vcard(item.metadata or {})
+        data = ContactRecord.from_json(item.metadata or {}).vcard()
         item.size_bytes = len(data)
         return data
 
@@ -267,14 +259,14 @@ class VcfTreeSource(DataSource):
         birthday's time of day, so the comparable artefact is the contact's
         restorable fields rather than the document that carried them.
         """
-        return contact_digest(item.metadata or {}, self._options)
+        return ContactRecord.from_json(item.metadata or {}).digest(self._options)
 
 
 class ContactTarget(DataTarget):
     """Recreates exported contacts in a Graph contact folder.
 
     The source of truth is the sidecar, not the ``.vcf``: the create body is posted
-    verbatim (:func:`contact_create_payload`) because ``ContactCollection.add()``
+    verbatim (:meth:`ContactRecord.payload`) because ``ContactCollection.add()``
     builds its own body from four arguments and drops everything else.
     """
 
@@ -342,7 +334,7 @@ class ContactTarget(DataTarget):
         if item.dest_path in self._present:
             return True
         _, folder = self._folder(item)
-        key = contact_dedup_key(item.metadata or {})
+        key = ContactRecord.from_json(item.metadata or {}).dedup_key
         claimed = self._claimed.get(key, 0)
         index = self._folder_index(folder)
         if claimed >= len(index.get(key) or []):
@@ -360,9 +352,9 @@ class ContactTarget(DataTarget):
         """
         if item.item_type != "contact":
             raise ValueError(f"a contact folder imports contacts, not {item.item_type!r} ({item.dest_path})")
-        envelope = item.metadata or {}
+        record = ContactRecord.from_json(item.metadata or {})
         try:
-            body = contact_create_payload(envelope, self._options)
+            body = record.payload(self._options)
         except ValueError as e:
             raise ValueError(f"{item.dest_path}: {e}") from None
         _, folder = self._folder(item)
@@ -370,10 +362,10 @@ class ContactTarget(DataTarget):
         contact = collection.create_typed_object()
         collection.context.add_query(CreateEntityQuery(collection, body, contact))
         collection.context.execute_query()
-        if not self._options.restore_categories and envelope.get("categories"):
+        if not self._options.restore_categories and record.to_json().get("categories"):
             self._categories_dropped += 1
         self._present[item.dest_path] = contact
-        key = contact_dedup_key(envelope)
+        key = record.dedup_key
         self._folder_index(folder).setdefault(key, []).append(contact)
         self._claimed[key] = self._claimed.get(key, 0) + 1
 
@@ -397,7 +389,7 @@ class ContactTarget(DataTarget):
         # created one *appends* to its collection-valued properties (``emailAddresses``,
         # the phone lists, ``categories``), so the digest would see every list twice.
         read = folder.contacts[contact.id].select(CONTACT_COLUMNS).get().execute_query()
-        return contact_digest(contact_envelope(read, ""), self._options)
+        return ContactRecord.of(read).digest(self._options)
 
     def commit(self, options: Any = None) -> None:  # noqa: ARG002 — runner hook signature
         """Report once what the run deliberately did not restore."""
@@ -416,7 +408,7 @@ class ContactTarget(DataTarget):
         if cached is None:
             index: dict[tuple[str, str], list[Any]] = {}
             for contact in folder.contacts.select(_EXISTING_COLUMNS).get_all().execute_query():
-                key = contact_dedup_key(contact.to_json())
+                key = ContactRecord.from_json(contact.to_json()).dedup_key
                 index.setdefault(key, []).append(contact)
             self._indexed[directory] = index
             cached = index

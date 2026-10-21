@@ -20,11 +20,9 @@ from office365.migration import MigrationJob
 from office365.migration.base import MigrationItem
 from office365.migration.outlook import (
     ContactImportOptions,
+    ContactRecord,
     ContactTarget,
     VcfTreeSource,
-    contact_create_payload,
-    contact_dedup_key,
-    contact_digest,
 )
 from tests._scripted_transport import MethodRoutingTransport
 
@@ -35,6 +33,11 @@ def _verb(request) -> str:
 
 
 _FOLDER = {"id": "f1", "displayName": "Imported contacts"}
+
+
+def _record(**overrides: Any) -> ContactRecord:
+    """The record a sidecar with these fields holds (no client, no context)."""
+    return ContactRecord.from_json(_envelope(**overrides))
 
 
 def _envelope(**overrides: Any) -> dict[str, Any]:
@@ -245,7 +248,7 @@ def test_source_reads_the_sidecar_tree(tmp_path: Path):
 def test_source_checksum_is_the_digest_the_target_can_compute(tmp_path: Path):
     item = VcfTreeSource(_root(tmp_path)).list_items()[0]
 
-    assert VcfTreeSource(_root(tmp_path)).checksum(item) == contact_digest(_envelope())
+    assert VcfTreeSource(_root(tmp_path)).checksum(item) == _record().digest()
 
 
 def test_source_refuses_a_vcf_without_a_sidecar(tmp_path: Path):
@@ -273,7 +276,7 @@ def test_source_refuses_a_directory_that_is_not_an_export(tmp_path: Path):
 
 
 def test_payload_carries_the_contact_fields_an_import_restores():
-    payload = contact_create_payload(_envelope())
+    payload = _record().payload()
 
     assert payload["displayName"] == "Alice Example"
     assert (payload["givenName"], payload["surname"]) == ("Alice", "Example")
@@ -299,21 +302,21 @@ def test_payload_carries_the_contact_fields_an_import_restores():
 
 def test_payload_posts_an_email_entry_as_the_sidecar_holds_it():
     """An address-only entry stays address-only: Exchange fills the name, the digest allows for it."""
-    payload = contact_create_payload(_MINIMAL)
+    payload = ContactRecord.from_json(_MINIMAL).payload()
 
     assert payload["emailAddresses"] == [{"address": "bob@contoso.com"}]
 
 
 def test_payload_posts_a_declared_column_it_was_never_told_about():
     """A contact field the model declares is replayed without this module naming it."""
-    payload = contact_create_payload(_envelope(yomiGivenName="Arisu"))
+    payload = _record(yomiGivenName="Arisu").payload()
 
     assert payload["yomiGivenName"] == "Arisu"
 
 
 def test_the_digest_follows_a_declared_column_it_was_never_told_about():
     """The same field therefore also takes part in verification."""
-    assert contact_digest(_envelope(yomiGivenName="Arisu")) != contact_digest(_envelope())
+    assert _record(yomiGivenName="Arisu").digest() != _record().digest()
 
 
 def test_payload_refuses_a_category_that_carries_a_comma():
@@ -321,21 +324,21 @@ def test_payload_refuses_a_category_that_carries_a_comma():
     # succeed.") to a whole contact when one category holds a comma, so the refusal
     # names the category instead of failing opaquely at the server.
     with pytest.raises(ValueError) as exc:
-        contact_create_payload(_envelope(categories=["Board, quarterly"]))
+        _record(categories=["Board, quarterly"]).payload()
 
     assert "Board, quarterly" in str(exc.value)
     assert "comma" in str(exc.value)
 
 
 def test_payload_drops_categories_unless_asked():
-    payload = contact_create_payload(_envelope(), ContactImportOptions(restore_categories=False))
+    payload = _record().payload(ContactImportOptions(restore_categories=False))
 
     assert "categories" not in payload
 
 
 def test_payload_refuses_a_contact_without_a_display_name():
     with pytest.raises(ValueError, match="no display name"):
-        contact_create_payload(_envelope(displayName="  "))
+        _record(displayName="  ").payload()
 
 
 # -- the digest ----------------------------------------------------------------
@@ -346,8 +349,8 @@ def test_a_birthday_compares_by_date_because_exchange_rewrites_the_time():
     midnight = _envelope(birthday="1953-05-01T00:00:00Z")
     noon = _envelope(birthday="1953-05-01T11:59:00+00:00")
 
-    assert contact_digest(midnight) == contact_digest(noon)
-    assert contact_digest(_envelope(birthday="1953-05-02T00:00:00Z")) != contact_digest(noon)
+    assert ContactRecord.from_json(midnight).digest() == ContactRecord.from_json(noon).digest()
+    assert _record(birthday="1953-05-02T00:00:00Z").digest() != ContactRecord.from_json(noon).digest()
 
 
 def test_an_email_compares_as_address_and_name_or_address():
@@ -356,29 +359,29 @@ def test_an_email_compares_as_address_and_name_or_address():
     filled = _envelope(emailAddresses=[{"name": "alice@contoso.com", "address": "alice@contoso.com"}])
 
     # Exchange fills in the address as the name, so `None` and the filled-in form agree…
-    assert contact_digest(unnamed) == contact_digest(filled)
+    assert ContactRecord.from_json(unnamed).digest() == ContactRecord.from_json(filled).digest()
     # …but a real name is a different contact record.
-    assert contact_digest(named) != contact_digest(unnamed)
+    assert ContactRecord.from_json(named).digest() != ContactRecord.from_json(unnamed).digest()
 
 
 def test_the_digest_ignores_server_owned_fields():
-    assert contact_digest(
-        _envelope(id="c9", createdDateTime=None, lastModifiedDateTime=None, vcf_path="x.vcf")
-    ) == contact_digest(_envelope())
+    owned = _envelope(id="c9", createdDateTime=None, lastModifiedDateTime=None, vcf_path="x.vcf")
+
+    assert ContactRecord.from_json(owned).digest() == _record().digest()
 
 
 def test_the_digest_follows_the_categories_option():
     dropped = ContactImportOptions(restore_categories=False)
 
-    assert contact_digest(_envelope(categories=[]), dropped) == contact_digest(_envelope(), dropped)
-    assert contact_digest(_envelope(categories=[])) != contact_digest(_envelope())
+    assert _record(categories=[]).digest(dropped) == _record().digest(dropped)
+    assert _record(categories=[]).digest() != _record().digest()
 
 
 def test_the_dedup_key_is_the_name_and_the_first_address():
-    assert contact_dedup_key(_envelope()) == ("alice example", "alice@contoso.com")
-    assert contact_dedup_key(_MINIMAL) == ("bob example", "bob@contoso.com")
+    assert _record().dedup_key == ("alice example", "alice@contoso.com")
+    assert ContactRecord.from_json(_MINIMAL).dedup_key == ("bob example", "bob@contoso.com")
     # No address left: the name alone is all there is to recognise it by.
-    assert contact_dedup_key(_NESTED) == ("vendor ltd", "")
+    assert ContactRecord.from_json(_NESTED).dedup_key == ("vendor ltd", "")
 
 
 # -- the target ----------------------------------------------------------------

@@ -142,7 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   A re-run skips what the folder already has — a contact has no `transactionId`, so
   the target matches on `(display name, first address)` instead, which also means
   two concurrent runs can import the same contact twice (documented, not hidden) —
-  and verification is `contact_digest`, a digest of the restorable fields read back
+  and verification is `ContactRecord.digest()`, a digest of the restorable fields read back
   through a fresh handle, because Exchange normalises a birthday's time of day and
   fills in a missing e-mail `name`. Reported rather than assumed: a photo is out of
   scope on both sides (the entity exposes no `hasPhoto` column, so detecting one
@@ -250,6 +250,22 @@ difference is that an item whose author could not be resolved reports an empty
 column instead of an id that no principal carries. Constructing a `MigrationItem`
 with `author_id=`/`editor_id=` now raises `TypeError` — pass
 `author=Principal(..., user_id=…)` instead.
+
+**Migration (contacts)**
+
+- **A contact's sidecar record is the contact as Graph spells it**: `Contact.to_json()`
+  plus the three keys a model cannot know (`folder_path`, `folder_display_path`,
+  `vcf_path`). The keys are therefore Graph's camelCase (`displayName`,
+  `emailAddresses`, the phone lists, `businessAddress` with
+  `postalCode`/`countryOrRegion`) and the id column is `id`, not a snake_case copy with
+  `graph_id` — so a sidecar written by a pre-release build is not readable by this one.
+  The functions that read that record — `contact_envelope`, `contact_vcard`,
+  `contact_create_payload`, `contact_dest_path`, `contact_dedup_key`, `contact_digest`,
+  `contact_key` — are now the methods of one `ContactRecord`: `of(contact, folder)`
+  during an export, `from_json(sidecar)` to read it back, then `to_json()`, `vcard()`,
+  `payload()`, `dest_path`, `dedup_key`, `digest()` and `id`. The record holds a payload
+  and where it came from, never an entity, which is what lets an import verify a sidecar
+  against a contact the service returned with no client and no context.
 
 ### Fixed
 

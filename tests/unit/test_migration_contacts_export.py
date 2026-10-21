@@ -20,10 +20,8 @@ from office365.migration.outlook import (
     ContactExportOptions,
     ContactSource,
     VcfExportTarget,
-    contact_digest,
-    contact_vcard,
 )
-from office365.migration.outlook.contacts_models import CONTACT_COLUMNS
+from office365.migration.outlook.contacts_models import CONTACT_COLUMNS, ContactRecord
 from office365.outlook.contacts.contact import Contact
 from tests._scripted_transport import MethodRoutingTransport
 
@@ -234,7 +232,7 @@ def test_source_checksum_is_the_vcard_bytes_this_product_renders():
     source = _source()
     item = source.list_items()[0]
 
-    assert source.checksum(item) == hashlib.md5(contact_vcard(item.metadata)).hexdigest()
+    assert source.checksum(item) == hashlib.md5(ContactRecord.from_json(item.metadata).vcard()).hexdigest()
 
 
 def test_the_projection_asks_for_the_fields_the_envelope_records():
@@ -339,7 +337,7 @@ def test_export_preserves_the_contact_digest_round_trip(tmp_path: Path):
     item = next(item for item in job.source.list_items() if item.dest_path.endswith(wanted))
     sidecar = json.loads((tmp_path / item.dest_path).with_suffix(".json").read_text(encoding="utf-8"))
 
-    assert contact_digest(sidecar) == contact_digest(item.metadata)
+    assert ContactRecord.from_json(sidecar).digest() == ContactRecord.from_json(item.metadata).digest()
 
 
 def test_export_verifies_the_bytes_it_rendered(tmp_path: Path):
