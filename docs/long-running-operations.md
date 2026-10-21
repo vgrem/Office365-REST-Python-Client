@@ -266,6 +266,50 @@ Cancellation semantics:
   woken immediately, and a running `wait_async()` is woken on its event loop. A
   synthetic `OperationStatus(status="cancelled")` is reported.
 
+## The engine behind the poller
+
+`OperationPoller` is `office365.runtime.operation.Operation` specialised to one
+kind of poll: a `GET` of a monitor URL. The base class owns everything else — the
+deadline, `Retry-After` pacing, the progress hook, the cancel, and the rule that a
+stream raises nothing — so `stream()` / `astream()` yield every snapshot,
+`wait()` / `wait_async()` are that loop with the failure policy applied, and
+`cancel()` / `cancel_async()` stop the wait at the next poll boundary.
+
+Writing your own operation is then one method — or two, for the async twin:
+
+```python
+from office365.runtime.operation import Operation, OperationStatus
+
+
+class QueueJobOperation(Operation[str]):
+    def __init__(self, queue, job_id, **options):
+        super().__init__(**options)
+        self._queue, self._job_id = queue, job_id
+
+    def _step(self) -> OperationStatus:
+        job = self._queue.get(self._job_id)  # one attempt
+        return OperationStatus(status=job.state, percentage_complete=job.percent)
+
+    async def _step_async(self) -> OperationStatus:
+        job = await self._queue.aget(self._job_id)
+        return OperationStatus(status=job.state, percentage_complete=job.percent)
+
+    def _outcome(self, status):  # what wait() hands back
+        return self._job_id
+
+
+job_id = QueueJobOperation(queue, "job-7").wait(interval=2, timeout=600)
+```
+
+A subclass supplies `_step` / `_step_async` and, when the service has a cancel
+request, `_send_cancel` / `_send_cancel_async`. Two things are data rather than
+overrides: `transient_statuses=` (the HTTP codes that mean "busy, try again"
+rather than an outcome — `429`/`503` for a monitor URL, `404` too for an entity a
+service publishes a moment after accepting the work) and `jitter=` (the fraction
+of each delay to spread, so many clients polling one endpoint do not stay in
+step; `0.0` is exact). `_observable(status)` decides whether an attempt is worth
+reporting as a snapshot: a `404` gap is an attempt, not an observation.
+
 ## Resume across processes: continuation tokens
 
 The monitor URL is the only state needed to resume. `ContinuationToken` captures
