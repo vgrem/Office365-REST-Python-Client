@@ -218,21 +218,20 @@ def test_source_records_the_envelope_an_import_replays():
 
     envelope = item.metadata
     assert item.source_id == "e1"  # the Graph id, not iCalUid: see event_key()
-    assert envelope["ical_uid"] == _SINGLE["iCalUId"]
+    assert envelope["iCalUId"] == _SINGLE["iCalUId"]
     assert envelope["subject"] == "Quarterly review; budget, headcount"
     assert envelope["start"] == {"dateTime": "2026-03-02T09:00:00.0000000", "timeZone": "Europe/Kiev"}
-    assert envelope["body"] == {"content_type": "html", "content": "<p>Agenda: <b>Q1</b></p>"}
+    assert envelope["body"] == {"contentType": "html", "content": "<p>Agenda: <b>Q1</b></p>"}
     assert envelope["attendees"][0] == {
-        "name": "Bob",
-        "address": "bob@contoso.com",
+        "emailAddress": {"name": "Bob", "address": "bob@contoso.com"},
         "type": "required",
-        "response": "accepted",
+        "status": {"response": "accepted"},
     }
-    assert envelope["organizer"] == {"name": "Alice", "address": "alice@contoso.com"}
+    assert envelope["organizer"] == {"emailAddress": {"name": "Alice", "address": "alice@contoso.com"}}
     assert envelope["categories"] == ["Finance", "Q1"]
-    assert (envelope["show_as"], envelope["sensitivity"], envelope["importance"]) == ("tentative", "private", "high")
-    assert envelope["join_url"] == "https://teams.microsoft.com/l/meetup-join/1"
-    assert envelope["reminder_minutes"] == 15  # noqa: PLR2004
+    assert (envelope["showAs"], envelope["sensitivity"], envelope["importance"]) == ("tentative", "private", "high")
+    assert envelope["onlineMeeting"] == {"joinUrl": "https://teams.microsoft.com/l/meetup-join/1"}
+    assert envelope["reminderMinutesBeforeStart"] == 15  # noqa: PLR2004
     assert envelope["ics_path"] == item.dest_path
     assert envelope["calendar_display_path"] == "Calendar"
     assert item.created == "2026-02-01T08:00:00+00:00"
@@ -266,7 +265,7 @@ def test_envelope_reads_the_ical_uid_under_the_name_graph_spells_it():
     event = events[0]
 
     assert _SINGLE["iCalUId"]  # the fixture really carries the identity
-    assert event.metadata["ical_uid"] == _SINGLE["iCalUId"]
+    assert event.metadata["iCalUId"] == _SINGLE["iCalUId"]
     assert event_ics(event.metadata).decode("utf-8").count(f"UID:{_SINGLE['iCalUId']}\r\n") == 1
 
 
@@ -393,8 +392,9 @@ def test_export_writes_a_json_safe_sidecar(tmp_path: Path):
     assert record["recurrence"]["range"]["numberOfOccurrences"] == 6  # noqa: PLR2004 — from the scripted series
     # Enums travel as their wire name, not as ``FreeBusyStatus.tentative``.
     single = next(path for path in sidecars if "Quarterly-review" in path.read_text(encoding="utf-8"))
-    assert json.loads(single.read_text(encoding="utf-8"))["show_as"] == "tentative"
-    assert isinstance(record["online_meeting_provider"], str)  # a wire name, not an enum repr
+    single_record = json.loads(single.read_text(encoding="utf-8"))
+    assert single_record["showAs"] == "tentative"
+    assert isinstance(single_record["onlineMeetingProvider"], str)  # a wire name, not an enum repr
 
 
 def test_export_verifies_by_checksum(tmp_path: Path):

@@ -49,37 +49,45 @@ _MAILBOX_ZONE = "UTC"
 
 def _envelope(**overrides: Any) -> dict[str, Any]:
     envelope: dict[str, Any] = {
-        "graph_id": "e1",
-        "ical_uid": None,
+        "id": "e1",
+        "iCalUId": None,
         "subject": "Quarterly review",
-        "body": {"content_type": "html", "content": "<p>Agenda: <b>Q1</b></p>"},
+        "body": {"contentType": "html", "content": "<p>Agenda: <b>Q1</b></p>"},
         "start": {"dateTime": "2026-03-02T09:00:00.0000000", "timeZone": "Europe/Kiev"},
         "end": {"dateTime": "2026-03-02T10:00:00.0000000", "timeZone": "Europe/Kiev"},
-        "is_all_day": False,
-        "is_cancelled": False,
-        "show_as": "tentative",
+        "isAllDay": False,
+        "isCancelled": False,
+        "showAs": "tentative",
         "sensitivity": "private",
         "importance": "high",
-        "location": "Room 1",
-        "locations": ["Room 1"],
-        "organizer": {"name": "Alice", "address": "alice@contoso.com"},
+        "location": {"displayName": "Room 1"},
+        "locations": [{"displayName": "Room 1"}],
+        "organizer": {"emailAddress": {"name": "Alice", "address": "alice@contoso.com"}},
         "attendees": [
-            {"name": "Bob", "address": "bob@contoso.com", "type": "required", "response": "accepted"},
-            {"name": None, "address": "carol@contoso.com", "type": "optional", "response": "none"},
+            {
+                "emailAddress": {"name": "Bob", "address": "bob@contoso.com"},
+                "type": "required",
+                "status": {"response": "accepted"},
+            },
+            {
+                "emailAddress": {"address": "carol@contoso.com"},
+                "type": "optional",
+                "status": {"response": "none"},
+            },
         ],
         "categories": ["Finance", "Q1"],
-        "is_reminder_on": True,
-        "reminder_minutes": 15,
-        "created": "2026-02-01T08:00:00+00:00",
-        "modified": "2026-02-20T11:30:00+00:00",
+        "isReminderOn": True,
+        "reminderMinutesBeforeStart": 15,
+        "createdDateTime": "2026-02-01T08:00:00+00:00",
+        "lastModifiedDateTime": "2026-02-20T11:30:00+00:00",
         "type": "singleInstance",
-        "series_master_id": None,
+        "seriesMasterId": None,
         "recurrence": None,
-        "is_online_meeting": False,
-        "online_meeting_provider": None,
-        "join_url": None,
-        "has_attachments": False,
-        "web_link": "https://outlook.office365.com/owa/?itemid=e1",
+        "isOnlineMeeting": False,
+        "onlineMeetingProvider": None,
+        "onlineMeeting": None,
+        "hasAttachments": False,
+        "webLink": "https://outlook.office365.com/owa/?itemid=e1",
         "ics_path": "Imported/2026-03-02_Quarterly-review_e1.ics",
     }
     envelope.update(overrides)
@@ -87,8 +95,8 @@ def _envelope(**overrides: Any) -> dict[str, Any]:
 
 
 _SERIES = _envelope(
-    graph_id="e3",
-    ical_uid="040000008200E00074C5B7101A82E0080000000series",
+    id="e3",
+    iCalUId="040000008200E00074C5B7101A82E0080000000series",
     subject="Weekly standup",
     start={"dateTime": "2026-03-09T09:00:00.0000000", "timeZone": "Europe/Kiev"},
     end={"dateTime": "2026-03-09T09:15:00.0000000", "timeZone": "Europe/Kiev"},
@@ -96,7 +104,7 @@ _SERIES = _envelope(
     categories=[],
     location=None,
     locations=[],
-    web_link=None,
+    webLink=None,
     recurrence={
         "pattern": {"type": "weekly", "interval": 1, "daysOfWeek": ["monday"], "firstDayOfWeek": "monday"},
         "range": {"type": "numbered", "startDate": "2026-03-09", "numberOfOccurrences": 6},
@@ -419,7 +427,7 @@ def test_resume_skips_the_events_it_already_created(tmp_path: Path):
 def test_two_source_events_with_the_same_subject_and_start_are_both_imported(tmp_path: Path):
     """A calendar can hold duplicates; recognising "already there" must not collapse them."""
     calendar = _Calendar()
-    twin = _envelope(graph_id="e2")
+    twin = _envelope(id="e2")
     root = _root(tmp_path, {"Imported/e1.ics": _envelope(), "Imported/e2.ics": twin})
     client = _client(calendar)
 
@@ -472,7 +480,7 @@ def test_write_refuses_a_sidecar_without_a_time_range(tmp_path: Path):
     target = _target(_client(_Calendar()))
     item = MigrationItem("Imported/e1.ics", "Imported/e1.ics", 0, "event", metadata=_envelope(start=None))
 
-    with pytest.raises(ValueError, match="Imported/e1.ics: the sidecar record has no start/end"):
+    with pytest.raises(ValueError, match="Imported/e1.ics: the sidecar has no start/end"):
         target.write(item, b"")
 
 
@@ -507,13 +515,15 @@ def test_commit_stays_quiet_when_attendees_are_restored(tmp_path: Path):
 
 def test_digest_ignores_what_the_service_owns():
     """Organizer, iCalUid, responses and timestamps are assigned, not restored."""
-    restored = _envelope(organizer={"name": "Marta Doe", "address": "mdoe@microsoft.com"}, ical_uid="ABC")
+    restored = _envelope(
+        organizer={"emailAddress": {"name": "Marta Doe", "address": "mdoe@microsoft.com"}}, iCalUId="ABC"
+    )
 
     assert event_digest(restored, CalendarImportOptions()) == event_digest(_envelope(), CalendarImportOptions())
 
 
 def test_digest_ignores_the_markup_exchange_adds():
-    wrapped = _envelope(body={"content_type": "html", "content": _WRAPPER + "<p>Agenda: <b>Q1</b></p></body></html>"})
+    wrapped = _envelope(body={"contentType": "html", "content": _WRAPPER + "<p>Agenda: <b>Q1</b></p></body></html>"})
 
     assert event_digest(wrapped, CalendarImportOptions()) == event_digest(_envelope(), CalendarImportOptions())
 

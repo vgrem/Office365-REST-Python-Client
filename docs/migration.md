@@ -445,8 +445,11 @@ Four honest limits:
 - **The `.ics` is for other clients; the sidecar is for the import.** iCalendar
   cannot carry Graph's recurrence object, the online-meeting provider or the
   sensitivity/importance pair without loss, so an import reads the sidecar and
-  treats the `.ics` as the portable copy. One calendar per source — a mailbox
-  with several is one job per calendar.
+  treats the `.ics` as the portable copy. The sidecar is the event as Graph spells
+  it — `Event.to_json()` plus the three keys a model cannot know (`calendar_path`,
+  `calendar_display_path`, `ics_path`) — so an import replays it verbatim and a
+  field the model gains needs no exporter change. One calendar per source — a
+  mailbox with several is one job per calendar.
 - **It is a projection, not a backup of the mailbox item.** Attachments
   (`hasAttachments`), extended properties and per-attendee proposed times are
   recorded as flags, not carried: calendar attachments are the event's, not the

@@ -276,6 +276,42 @@ column instead of an id that no principal carries. Constructing a `MigrationItem
 with `author_id=`/`editor_id=` now raises `TypeError` — pass
 `author=Principal(..., user_id=…)` instead.
 
+**Migration (calendar)**
+
+- **The calendar's spelling, its document and its record are three modules.**
+  `calendar_profile` holds the ten tables that decide which iCalendar token a Graph
+  word becomes (`showAs` → `TRANSP`/`STATUS`, `sensitivity` → `CLASS`, `importance` →
+  `PRIORITY`, attendee type → `ROLE`, response → `PARTSTAT`, weekday/index/frequency →
+  `BYDAY`/`BYMONTH`, body content type → `X-ALT-DESC`/`DESCRIPTION`), plus the two
+  partial ones whose absence *is* the token — a busy event carries no `TRANSP`, an
+  accepted attendee no `STATUS` — and `COMPARED`, the ordered table that decides what a
+  verification digest sees and which options gate each field. `calendar_codec` writes the
+  document: escaping, folding at 75 octets, the `DTSTART`/`DTEND` pair, `RRULE`,
+  `VALARM`, `X-ALT-DESC`. `calendar_models` derives the four import artefacts. A Graph
+  enum that gains a member is now a row in a table, and a test fails if a row names a
+  member the generated enum does not declare or if a table meant to be complete misses
+  one — the two failures that used to be silent (a token for a word nothing sends, a
+  value that renders as nothing). The exported bytes are unchanged: a golden test pins
+  the document byte for byte.
+- **A calendar sidecar is the event as the model serializes it**: `Event.to_json()` plus
+  the three keys no model can know (`calendar_path`, `calendar_display_path`,
+  `ics_path`), the same shape the contacts sidecar took. So nothing lists a field: a
+  column the model declares is exported, replayed and verified with no function edited,
+  and the keys are Graph's own (`id`, `iCalUId`, `isAllDay`, `showAs`,
+  `attendees[].status.response`, `onlineMeeting.joinUrl`) rather than a snake_case copy —
+  which also means a tree exported by a pre-release build is refused with a message
+  saying so, instead of importing as a wall of empty fields. `CalendarEventRecord` is
+  gone: it existed to *re-spell* the model into `show_as`/`is_all_day`/`graph_id`, so
+  with the sidecar being the model's own JSON it was a third representation with nothing
+  left to do. A sidecar is now read by functions over `(envelope, options)` —
+  `event_ics`, `event_create_payload`, `event_dest_path`, `event_dedup_key`,
+  `event_digest`, `event_dropped_attendees`, `event_transaction_id`, `event_key` — which
+  is what the adapters call and what callers outside this package already import.
+  `ContactRecord` stays: unlike the calendar record it never re-spelled anything (its
+  payload has been the model's JSON since `fa2977db9`), so it is a payload plus its
+  derived artefacts rather than a second vocabulary. The digest is unchanged
+  (`4a8cc8de…`): the canonical form compares the same values, read from Graph's keys.
+
 **Migration (contacts)**
 
 - **A contact's sidecar record is the contact as Graph spells it**: `Contact.to_json()`

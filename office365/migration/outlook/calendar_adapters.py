@@ -76,8 +76,8 @@ from office365.migration.outlook.calendar_models import (
     CalendarImportOptions,
     event_create_payload,
     event_dedup_key,
-    event_dest_path,
     event_digest,
+    event_dropped_attendees,
     event_envelope,
     event_ics,
     event_key,
@@ -150,17 +150,17 @@ class CalendarSource(DataSource):
         return self._options.include_recurring_instances
 
     def _item(self, event, path: str, display: str) -> MigrationItem:
-        dest = event_dest_path(event, path)
+        envelope = event_envelope(event, path, self._options.extra_properties, display)
         return MigrationItem(
-            source_path=dest,
-            dest_path=dest,
+            source_path=envelope["ics_path"],
+            dest_path=envelope["ics_path"],
             # An event has no byte size until its ``.ics`` is rendered; ``read()`` fills it.
             size_bytes=0,
             item_type="event",
             modified=iso_or_none(event.last_modified_datetime),
             created=iso_or_none(event.created_datetime),
-            source_id=event_key(event),
-            metadata=event_envelope(event, path, self._options.extra_properties, display),
+            source_id=event_key(envelope),
+            metadata=envelope,
         )
 
     def _handle(self, item: MigrationItem):
@@ -234,9 +234,9 @@ class IcsTreeSource(DataSource):
             dest_path=dest,
             size_bytes=path.stat().st_size,
             item_type="event",
-            modified=envelope.get("modified"),
-            created=envelope.get("created") or envelope.get("modified"),
-            source_id=envelope.get("graph_id") or envelope.get("ical_uid"),
+            modified=envelope.get("lastModifiedDateTime"),
+            created=envelope.get("createdDateTime") or envelope.get("lastModifiedDateTime"),
+            source_id=event_key(envelope),
             metadata=envelope,
         )
 
@@ -273,8 +273,8 @@ class CalendarTarget(DataTarget):
     """Recreates exported events in a Graph calendar.
 
     The source of truth is the sidecar, not the ``.ics``: Graph's request body is
-    posted verbatim (:func:`event_create_payload`), because the typed helpers mangle
-    the time zone and drop the ``transactionId``.
+    posted verbatim (:func:`event_create_payload`), because the typed helpers
+    mangle the time zone and drop the ``transactionId``.
     """
 
     fidelity_dimensions = CALENDAR_IMPORT_DIMENSIONS
@@ -328,9 +328,8 @@ class CalendarTarget(DataTarget):
         """
         if item.item_type != "event":
             raise ValueError(f"a calendar imports events, not {item.item_type!r} ({item.dest_path})")
-        envelope = item.metadata or {}
         try:
-            body = event_create_payload(envelope, self._options)
+            body = event_create_payload(item.metadata or {}, self._options)
         except ValueError as e:
             raise ValueError(f"{item.dest_path}: {e}") from None
         collection = self._calendar.events
@@ -344,9 +343,9 @@ class CalendarTarget(DataTarget):
                 raise
             self._present[item.dest_path] = adopted
             return
-        self._attendees_dropped += _dropped_attendees(envelope, self._options)
+        self._attendees_dropped += event_dropped_attendees(item.metadata or {}, self._options)
         self._present[item.dest_path] = event
-        key = event_dedup_key(envelope)
+        key = event_dedup_key(item.metadata or {})
         self._target_index().setdefault(key, []).append(event)
         self._claimed[key] = self._claimed.get(key, 0) + 1
 
@@ -378,7 +377,7 @@ class CalendarTarget(DataTarget):
         if zone:
             read.before_execute(_prefer_zone(zone))
         self._calendar.context.execute_query()
-        return event_digest(event_envelope(read, ""), self._options)
+        return event_digest(event_envelope(read), self._options)
 
     def commit(self, options: Any = None) -> None:  # noqa: ARG002 — runner hook signature
         """Report once what the run deliberately did not restore."""
@@ -396,7 +395,7 @@ class CalendarTarget(DataTarget):
         if self._index is None:
             index: dict[tuple[str, str | None, str | None], list[Any]] = {}
             for event in self._calendar.events.select(_EXISTING_COLUMNS).get_all().execute_query():
-                # The key is a sidecar shape, so hand it the wire form of the start
+                # The key is read off the envelope, so hand it the wire form of the start
                 # (a fetched event carries a typed ``DateTimeTimeZone``).
                 key = event_dedup_key(
                     {"subject": event.subject, "start": event.start.to_json() if event.start else None}
@@ -426,13 +425,6 @@ def _prefer_zone(zone: str):
         prefer_outlook_timezone(request, zone)
 
     return handler
-
-
-def _dropped_attendees(envelope: dict[str, Any], options: CalendarImportOptions) -> int:
-    """How many attendee entries the import left out."""
-    if options.restore_attendees:
-        return 0
-    return sum(1 for item in envelope.get("attendees") or [] if isinstance(item, dict) and item.get("address"))
 
 
 __all__ = ["CalendarSource", "CalendarTarget", "IcsExportTarget", "IcsTreeSource"]

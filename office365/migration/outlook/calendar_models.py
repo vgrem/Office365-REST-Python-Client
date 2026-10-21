@@ -1,35 +1,42 @@
-"""Calendar model — the export projection, the ICS writer, and the import replay.
+"""Calendar records — one event's sidecar, and the artefacts a migration builds from it.
 
-An exported event is two files: an ``.ics`` (the portable artefact — Outlook,
-Google Calendar and Thunderbird all open it) and a JSON sidecar carrying what
-iCalendar cannot express faithfully (Graph ids, the recurrence object Graph
-normalises, the online-meeting provider, sensitivity/importance). The sidecar is
-the import contract; the ``.ics`` is regenerated from it, so an export is
-reproducible: the same event always produces the same bytes.
+An exported event is two files: an ``.ics`` (the portable artefact — Outlook, Google
+Calendar and Thunderbird all open it) and a JSON sidecar carrying what iCalendar cannot
+express faithfully (Graph ids, the recurrence object Graph normalises, the online-meeting
+provider, sensitivity/importance). The sidecar is the import contract; the ``.ics`` is
+regenerated from it, so an export is reproducible: the same event always produces the
+same bytes.
 
-Unlike mail, this file is *built* rather than fetched, so a byte checksum is a
-valid verification of an export: there is no server re-serialization in the
-middle. An *import* is the other way round — Exchange re-serializes what it
-accepts — so it is verified by a digest of the event's restorable fields
+The sidecar **is the event as the model serializes it** — ``event.to_json()`` plus the
+three things no model can know (the calendar it came from, the path it is written to,
+and that calendar's display path). So nothing here lists a field: a column the model
+declares is exported, replayed and verified with no function edited, and the keys are
+Graph's own spellings (``isAllDay``, ``showAs``, ``iCalUId``) because that is what the
+model answers and what an import posts back.
+
+Spelling lives in two tables, not here: which iCalendar token a Graph value becomes is
+:mod:`office365.migration.outlook.calendar_profile`, and the document itself is written
+by :mod:`office365.migration.outlook.calendar_codec`.
+
+Unlike mail, this file is *built* rather than fetched, so a byte checksum is a valid
+verification of an export: there is no server re-serialization in the middle. An
+*import* is the other way round — Exchange re-serializes what it accepts and assigns the
+meeting metadata — so it is verified by a digest of the event's restorable fields
 (:func:`event_digest`).
 """
 
 from __future__ import annotations
 
 import hashlib
-import html
 import json
-import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Any, Mapping
 
-from office365.communications.onlinemeetings.online_meeting_info import OnlineMeetingInfo
+from office365.migration.outlook.calendar_codec import MAX_LINE_OCTETS, encode
+from office365.migration.outlook.calendar_profile import COMPARED, wall_clock
 from office365.migration.outlook.models import mail_slug
 from office365.outlook.calendar.events.event import Event
-from office365.outlook.mail.item_body import ItemBody
-from office365.outlook.mail.location import Location
-from office365.runtime.converters.scalars import iso_or_none, parse_datetime
 from office365.runtime.converters.value import serialize_value
 
 #: Graph event properties an export reads: every column the model declares.
@@ -44,69 +51,15 @@ EVENT_COLUMNS = Event.select_all()
 #: too would duplicate every recurring meeting — the default skips them.
 STANDALONE_EVENT_TYPES = ("singleInstance", "seriesMaster")
 
-#: Graph ``showAs`` → iCalendar ``TRANSP``: only a free event is transparent.
-_TRANSP = {"free": "TRANSPARENT"}
+#: The keys an envelope holds that no model does: where the event came from, where its
+#: document is written, and the same for a reader who should not have to parse a path.
+PROVENANCE = ("calendar_path", "calendar_display_path", "ics_path")
+assert not set(PROVENANCE) & frozenset(EVENT_COLUMNS), "a provenance key collides with a column the model declares"
 
-#: Graph ``showAs`` → iCalendar ``STATUS``; only a tentative event carries one.
-_STATUS = {"tentative": "TENTATIVE"}
-
-#: Graph ``sensitivity`` → iCalendar ``CLASS``.
-_CLASS = {
-    "normal": "PUBLIC",
-    "personal": "PRIVATE",
-    "private": "PRIVATE",
-    "confidential": "CONFIDENTIAL",
-}
-
-#: Graph ``importance`` → iCalendar ``PRIORITY`` (1 highest, 5 normal, 9 lowest).
-_PRIORITY = {"high": "1", "normal": "5", "low": "9"}
-
-#: Graph attendee ``type`` → iCalendar ``ROLE``.
-_ROLE = {"required": "REQ-PARTICIPANT", "optional": "OPT-PARTICIPANT", "resource": "NON-PARTICIPANT"}
-
-#: Graph attendee ``status.response`` → iCalendar ``PARTSTAT``.
-_PARTSTAT = {
-    "none": "NEEDS-ACTION",
-    "organizer": "ACCEPTED",
-    "tentativelyAccepted": "TENTATIVE",
-    "accepted": "ACCEPTED",
-    "declined": "DECLINED",
-    "notResponded": "NEEDS-ACTION",
-}
-
-#: Graph ``dayOfWeek`` → RFC 5545 weekday abbreviation.
-_DAY_CODES = {
-    "sunday": "SU",
-    "monday": "MO",
-    "tuesday": "TU",
-    "wednesday": "WE",
-    "thursday": "TH",
-    "friday": "FR",
-    "saturday": "SA",
-}
-
-#: Graph ``pattern.index`` → RFC 5545 ``BYDAY`` ordinal prefix.
-_INDEX_CODES = {"first": "1", "second": "2", "third": "3", "fourth": "4", "last": "-1"}
-
-#: Graph ``pattern.type`` → the RFC 5545 ``FREQ`` that pattern expresses.
-_FREQUENCY = {
-    "daily": "DAILY",
-    "weekly": "WEEKLY",
-    "absoluteMonthly": "MONTHLY",
-    "relativeMonthly": "MONTHLY",
-    "absoluteYearly": "YEARLY",
-    "relativeYearly": "YEARLY",
-}
-
-#: RFC 5545 §3.1 caps a content line at 75 octets; a continuation starts with a space.
-MAX_LINE_OCTETS = 75
-
-#: Markup whose text is not content, and comments — dropped before a body is reduced
-#: to text. Exchange wraps every body it accepts in its own ``<html><head>…<style>…``.
-_MARKUP_BLOCK = re.compile(r"<(head|style|script)\b.*?</\1\s*>", re.IGNORECASE | re.DOTALL)
-_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
-_TAG = re.compile(r"<[^>]+>")
-_SPACE = re.compile(r"\s+")
+#: Keys a sidecar written before the envelope became the model's own JSON carries. Their
+#: presence means the tree was exported by a version that spelled its own vocabulary
+#: (``graph_id``/``is_all_day``), and reading it as Graph's would silently find nothing.
+LEGACY_KEYS = ("graph_id", "is_all_day", "show_as", "ical_uid")
 
 
 @dataclass
@@ -126,325 +79,6 @@ class CalendarExportOptions:
     include_cancelled: bool = False
     #: Extra Graph event properties to record in the sidecar (camelCase names).
     extra_properties: list[str] = field(default_factory=list)
-
-
-def event_key(event) -> str:
-    """The identity an export is keyed by: the Graph event id.
-
-    Deliberately not ``iCalUId``: Exchange assigns one to a *meeting* but not to a
-    plain appointment (measured — an event created through the API comes back with
-    ``iCalUId: null`` even on a later read), so keying on it would let a re-run see
-    the same event under a new identity and write a second copy. The Graph id is
-    stable for the event's life in its calendar. ``iCalUId`` is still what other
-    calendar clients match on, so it rides in the sidecar and becomes the ``.ics``
-    ``UID`` when present.
-    """
-    return str(event.id or event.ical_uid or "")
-
-
-def event_dest_path(event, calendar_path: str) -> str:
-    """The export path for an event: ``<calendar>/<date>_<slug>_<id digest>.ics``.
-
-    Deterministic for a given event, so a re-run finds the file it wrote. The date
-    is the event's start date — a calendar sorted by filename reads
-    chronologically — and the digest of :func:`event_key` keeps same-titled events
-    on the same day apart.
-    """
-    start = _started(event)
-    stamp = start.strftime("%Y-%m-%d") if start else ""
-    digest = hashlib.sha1(event_key(event).encode("utf-8")).hexdigest()[:8]
-    stem = "_".join(part for part in (stamp, mail_slug(event.subject), digest) if part)
-    name = f"{stem}.ics"
-    return f"{calendar_path}/{name}" if calendar_path else name
-
-
-def _started(event) -> datetime | None:
-    """The event's start as a naive wall-clock datetime (its own zone), if set."""
-    return event.start.as_datetime() if event.start else None
-
-
-def _parse_graph_datetime(value: Any) -> datetime | None:
-    """A Graph date-time literal as a *naive wall clock*, or ``None``.
-
-    The parsing itself is the library's (``parse_datetime`` normalises any
-    fractional-second width — Graph sends seven digits and ``%f`` reads six). What is
-    decided here is this module's own semantics: values are compared and formatted as
-    wall clocks (the zone travels separately in ``timeZone``), so an offset is dropped,
-    and a date-only literal — which a recurrence ``endDate`` is — is not a moment.
-    """
-    text = str(value or "").strip()
-    if "T" not in text:
-        return None
-    parsed = parse_datetime(text)
-    return parsed.replace(tzinfo=None) if parsed else None
-
-
-def event_kind(event) -> str | None:
-    """The wire name of an event's ``type``: ``singleInstance``, ``seriesMaster``, …
-
-    The getter answers with the generated enum, whose members carry the CSDL ordinals
-    (``EventType.singleInstance.value == "0"``) rather than what the service speaks;
-    ``serialize_value`` is the library's answer to that — the member *name*.
-    """
-    return serialize_value(event.type_)
-
-
-def _address(recipient: Any) -> dict[str, str | None]:
-    """An event's organizer/attendee as ``{"name", "address"}``."""
-    return {"name": recipient.emailAddress.name, "address": recipient.emailAddress.address}
-
-
-def event_envelope(
-    event,
-    calendar_path: str,
-    extra_properties: list[str] | None = None,
-    display_path: str | None = None,
-) -> dict[str, Any]:
-    """The sidecar record for an event: everything an import replays.
-
-    All values are JSON-safe. ``start``/``end`` keep Graph's pair of wall-clock
-    ``date_time`` and ``time_zone`` (the zone name is passed back verbatim on
-    import, so no IANA/Windows conversion is needed); ``recurrence`` is Graph's
-    own object, not an ``RRULE`` — the ICS writer renders an ``RRULE`` from it, but
-    the import replays the object it can round-trip exactly.
-    """
-    # A nested value can be *null* on the wire, which the getter's default does not
-    # cover (the key exists, so it answers ``None``); read it as the empty instance.
-    body = event.body or ItemBody()
-    location = event.location or Location()
-    online = event.online_meeting or OnlineMeetingInfo()
-    locations = [item.displayName for item in (event.locations or [])]
-    envelope: dict[str, Any] = {
-        "graph_id": event.id,
-        "ical_uid": event.ical_uid,
-        "calendar_path": calendar_path,
-        "calendar_display_path": display_path or calendar_path,
-        "subject": event.subject,
-        "body": {"content_type": serialize_value(body.contentType), "content": body.content},
-        # ``to_json()`` is the library's serializer: the sidecar keeps Graph's own
-        # ``{dateTime, timeZone}`` pair, which is what an import posts back verbatim.
-        "start": event.start.to_json(),
-        "end": event.end.to_json(),
-        "is_all_day": bool(event.is_all_day),
-        "is_cancelled": bool(event.is_cancelled),
-        "show_as": serialize_value(event.show_as),
-        "sensitivity": serialize_value(event.sensitivity),
-        "importance": serialize_value(event.importance),
-        "location": location.displayName,
-        "locations": [name for name in locations if name],
-        "organizer": _address(event.organizer),
-        "attendees": [
-            {**_address(attendee), "type": attendee.type, "response": _response(attendee)}
-            for attendee in (event.attendees or [])
-        ],
-        "categories": list(event.categories or []),
-        "is_reminder_on": bool(event.is_reminder_on),
-        "reminder_minutes": event.reminder_minutes_before_start,
-        "created": iso_or_none(event.created_datetime),
-        "modified": iso_or_none(event.last_modified_datetime),
-        "type": event_kind(event),
-        "series_master_id": event.series_master_id,
-        # Graph's own object, flattened through ``to_json()``: the raw property is a
-        # typed ``PatternedRecurrence``, and the sidecar is JSON — ``default=str``
-        # would have written its ``repr``, which no import can read back.
-        "recurrence": event.recurrence.to_json() if event.recurrence else None,
-        "is_online_meeting": bool(event.is_online_meeting),
-        "online_meeting_provider": serialize_value(event.online_meeting_provider),
-        "join_url": online.joinUrl,
-        "has_attachments": bool(event.has_attachments),
-        "web_link": event.web_link,
-        "ics_path": event_dest_path(event, calendar_path),
-    }
-    for name in extra_properties or []:
-        envelope[name] = event.get_property(name)
-    return envelope
-
-
-def _response(attendee: Any) -> str | None:
-    """An attendee's response state (``status.response``), as Graph spells it."""
-    return attendee.status.response if attendee.status else None
-
-
-def _escape(text: Any) -> str:
-    """Escape an iCalendar TEXT value (RFC 5545 §3.3.11)."""
-    if text is None:
-        return ""
-    value = str(text)
-    value = value.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,")
-    return value.replace("\r\n", "\\n").replace("\n", "\\n").replace("\r", "\\n")
-
-
-def _fold(line: str) -> str:
-    """Fold a content line at 75 octets, continuing with a leading space (RFC 5545 §3.1)."""
-    encoded = line.encode("utf-8")
-    if len(encoded) <= MAX_LINE_OCTETS:
-        return line
-    limit = MAX_LINE_OCTETS - 1  # the continuation's leading space is part of its octets
-    chunks, current, size = [], [], 0
-    for char in line:
-        width = len(char.encode("utf-8"))
-        if size + width > limit:
-            chunks.append("".join(current))
-            current, size = [char], width
-        else:
-            current.append(char)
-            size += width
-    chunks.append("".join(current))
-    return "\r\n ".join(chunks)
-
-
-def _datetime_line(name: str, value: dict[str, Any], is_all_day: bool) -> str | None:
-    """A ``DTSTART``/``DTEND`` line: a date for an all-day event, else zoned or UTC."""
-    moment = _parse_graph_datetime(value.get("dateTime"))
-    if moment is None:
-        return None
-    if is_all_day:
-        return f"{name};VALUE=DATE:{moment.strftime('%Y%m%d')}"
-    zone = (value.get("timeZone") or "UTC").strip()
-    if zone.upper() == "UTC":
-        return f"{name}:{moment.strftime('%Y%m%dT%H%M%S')}Z"
-    return f"{name};TZID={zone}:{moment.strftime('%Y%m%dT%H%M%S')}"
-
-
-def _day_codes(days: list[Any] | None) -> str:
-    """``["monday", "wednesday"]`` -> ``MO,WE`` (in the week order Graph returned)."""
-    return ",".join(_DAY_CODES[day] for day in (days or []) if day in _DAY_CODES)
-
-
-def _rrule(recurrence: Any) -> str | None:
-    """Render Graph's recurrence object as an RFC 5545 ``RRULE`` value.
-
-    Returns ``None`` for a shape this writer does not express (or when there is no
-    recurrence); the sidecar keeps the object either way, so a lost ``RRULE`` costs
-    a calendar's interop, never the import.
-    """
-    pattern = (recurrence or {}).get("pattern") or {}
-    window = (recurrence or {}).get("range") or {}
-    frequency = _FREQUENCY.get(str(pattern.get("type") or ""))
-    if not frequency:
-        return None
-    parts = [f"FREQ={frequency}"]
-    interval = pattern.get("interval")
-    if isinstance(interval, int) and interval > 1:
-        parts.append(f"INTERVAL={interval}")
-    if frequency == "WEEKLY" and _day_codes(pattern.get("daysOfWeek")):
-        parts.append(f"BYDAY={_day_codes(pattern.get('daysOfWeek'))}")
-    elif frequency == "MONTHLY":
-        if pattern.get("dayOfMonth"):
-            parts.append(f"BYMONTHDAY={pattern['dayOfMonth']}")
-        elif _day_codes(pattern.get("daysOfWeek")):
-            index = _INDEX_CODES.get(str(pattern.get("index") or ""))
-            codes = _day_codes(pattern.get("daysOfWeek")).split(",")
-            parts.append(f"BYDAY={','.join((index or '') + code for code in codes)}")
-    elif frequency == "YEARLY":
-        if pattern.get("month"):
-            parts.append(f"BYMONTH={pattern['month']}")
-        if pattern.get("dayOfMonth"):
-            parts.append(f"BYMONTHDAY={pattern['dayOfMonth']}")
-        elif _day_codes(pattern.get("daysOfWeek")):
-            index = _INDEX_CODES.get(str(pattern.get("index") or ""))
-            codes = _day_codes(pattern.get("daysOfWeek")).split(",")
-            parts.append(f"BYDAY={','.join((index or '') + code for code in codes)}")
-    occurrences = window.get("numberOfOccurrences")
-    if window.get("type") == "numbered" and isinstance(occurrences, int) and occurrences > 0:
-        parts.append(f"COUNT={occurrences}")
-    elif window.get("type") == "endDate":
-        until = _parse_graph_datetime(window.get("endDate"))
-        if until is not None:
-            parts.append(f"UNTIL={until.strftime('%Y%m%dT%H%M%S')}Z")
-    return ";".join(parts)
-
-
-def _attendee_line(attendee: dict[str, Any]) -> str | None:
-    """One ``ATTENDEE`` line, skipping an attendee without an address."""
-    address = attendee.get("address")
-    if not address:
-        return None
-    parameters = []
-    if attendee.get("name"):
-        parameters.append(f'CN="{attendee["name"]}"')
-    role = _ROLE.get(str(attendee.get("type") or "required"))
-    if role:
-        parameters.append(f"ROLE={role}")
-    status = _PARTSTAT.get(str(attendee.get("response") or "none"))
-    if status:
-        parameters.append(f"PARTSTAT={status}")
-    parameters.append("RSVP=TRUE")
-    return f"ATTENDEE;{';'.join(parameters)}:mailto:{address}"
-
-
-def event_ics(envelope: dict[str, Any]) -> bytes:
-    """Render a sidecar record as an ``.ics`` document (CRLF, folded, UTF-8).
-
-    The output depends only on the record — ``DTSTAMP`` is the event's own
-    last-modified time, never the export's — so re-exporting an unchanged event
-    produces identical bytes and a byte checksum verifies the tree.
-    """
-    is_all_day = bool(envelope.get("is_all_day"))
-    lines = [
-        "BEGIN:VCALENDAR",
-        "VERSION:2.0",
-        "PRODID:-//office365-rest-python-client//migration//EN",
-        "CALSCALE:GREGORIAN",
-        "METHOD:PUBLISH",
-        "BEGIN:VEVENT",
-    ]
-    uid = envelope.get("ical_uid") or envelope.get("graph_id") or ""
-    lines.append(f"UID:{_escape(uid)}")
-    stamp = _parse_graph_datetime(envelope.get("modified")) or _parse_graph_datetime(
-        (envelope.get("start") or {}).get("dateTime")
-    )
-    if stamp is not None:
-        lines.append(f"DTSTAMP:{stamp.strftime('%Y%m%dT%H%M%S')}Z")
-    for name, key in (("DTSTART", "start"), ("DTEND", "end")):
-        line = _datetime_line(name, envelope.get(key) or {}, is_all_day)
-        if line:
-            lines.append(line)
-    lines.append(f"SUMMARY:{_escape(envelope.get('subject'))}")
-    location = envelope.get("location")
-    if location:
-        lines.append(f"LOCATION:{_escape(location)}")
-    body = envelope.get("body") or {}
-    content = body.get("content")
-    if content:
-        if body.get("content_type") == "html":
-            # iCalendar's DESCRIPTION is TEXT; HTML rides in the standard X-ALT-DESC.
-            lines.append(f"X-ALT-DESC;FMTTYPE=text/html:{_escape(content)}")
-        else:
-            lines.append(f"DESCRIPTION:{_escape(content)}")
-    categories = envelope.get("categories") or []
-    if categories:
-        lines.append(f"CATEGORIES:{','.join(_escape(item) for item in categories)}")
-    mapping = (
-        ("CLASS", _CLASS.get(str(envelope.get("sensitivity") or ""))),
-        ("PRIORITY", _PRIORITY.get(str(envelope.get("importance") or ""))),
-        ("STATUS", _STATUS.get(str(envelope.get("show_as") or ""))),
-        ("TRANSP", _TRANSP.get(str(envelope.get("show_as") or ""))),
-    )
-    lines.extend(f"{name}:{value}" for name, value in mapping if value)
-    organizer = envelope.get("organizer") or {}
-    if organizer.get("address"):
-        name = f'CN="{organizer["name"]}"' if organizer.get("name") else ""
-        lines.append(f"ORGANIZER{';' + name if name else ''}:mailto:{organizer['address']}")
-    lines.extend(line for line in (_attendee_line(item) for item in envelope.get("attendees") or []) if line)
-    rule = _rrule(envelope.get("recurrence"))
-    if rule:
-        lines.append(f"RRULE:{rule}")
-    if envelope.get("join_url"):
-        lines.append(f"X-MICROSOFT-SKYPETEAMSMEETINGURL:{_escape(envelope['join_url'])}")
-    minutes = envelope.get("reminder_minutes")
-    if envelope.get("is_reminder_on") and isinstance(minutes, int) and minutes > 0:
-        lines.extend(
-            [
-                "BEGIN:VALARM",
-                "ACTION:DISPLAY",
-                f"TRIGGER:-PT{minutes}M",
-                f"DESCRIPTION:{_escape(envelope.get('subject') or 'Reminder')}",
-                "END:VALARM",
-            ]
-        )
-    lines.extend(["END:VEVENT", "END:VCALENDAR", ""])
-    return "\r\n".join(_fold(line) for line in lines).encode("utf-8")
 
 
 @dataclass
@@ -470,183 +104,242 @@ class CalendarImportOptions:
     use_transaction_ids: bool = True
 
 
-def event_dedup_key(envelope: dict[str, Any]) -> tuple[str, str | None, str | None]:
+def event_key(envelope: Mapping[str, Any]) -> str:
+    """The identity an export is keyed by: the Graph event id.
+
+    Deliberately not ``iCalUId``: Exchange assigns one to a *meeting* but not to a
+    plain appointment (measured — an event created through the API comes back with
+    ``iCalUId: null`` even on a later read), so keying on it would let a re-run see
+    the same event under a new identity and write a second copy. The Graph id is
+    stable for the event's life in its calendar. ``iCalUId`` is still what other
+    calendar clients match on, so it rides in the sidecar and becomes the ``.ics``
+    ``UID`` when present.
+    """
+    return str(envelope.get("id") or envelope.get("iCalUId") or "")
+
+
+def event_kind(event) -> str | None:
+    """The wire name of an event's ``type``: ``singleInstance``, ``seriesMaster``, …
+
+    The getter answers with the generated enum, whose members carry the CSDL ordinals
+    (``EventType.singleInstance.value == "0"``) rather than what the service speaks;
+    ``serialize_value`` is the library's answer to that — the member *name*.
+    """
+    return serialize_value(event.type_)
+
+
+def _dest_path(stamp: datetime | None, subject: Any, key: str, calendar_path: str) -> str:
+    """``<calendar>/<date>_<slug>_<id digest>.ics``, from the three things that decide it.
+
+    Deterministic for a given event, so a re-run finds the file it wrote. The date is
+    the event's start date — a calendar sorted by filename reads chronologically — and
+    the digest of the key keeps same-titled events on the same day apart.
+    """
+    date = stamp.strftime("%Y-%m-%d") if stamp else ""
+    digest = hashlib.sha1(key.encode("utf-8")).hexdigest()[:8]
+    stem = "_".join(part for part in (date, mail_slug(subject), digest) if part)
+    name = f"{stem}.ics"
+    return f"{calendar_path}/{name}" if calendar_path else name
+
+
+def event_dest_path(event, calendar_path: str) -> str:
+    """The export path for a loaded event — see :func:`_dest_path` for the shape."""
+    started = event.start.as_datetime() if event.start else None
+    return _dest_path(started, event.subject, str(event.id or event.ical_uid or ""), calendar_path)
+
+
+def event_envelope(
+    event,
+    calendar_path: str = "",
+    extra_properties: list[str] | None = None,
+    display_path: str | None = None,
+) -> dict[str, Any]:
+    """The sidecar for an event read from the service: the model's own JSON, plus provenance.
+
+    ``to_json()`` is the library's serializer, so the sidecar keeps Graph's shape
+    (``start``/``end`` as a wall clock and zone name, ``recurrence`` as Graph's object)
+    rather than a second spelling this package would have to keep in step — and an
+    import posts it back verbatim, which is what makes the round trip exact.
+    """
+    envelope = event.to_json()
+    envelope["calendar_path"] = calendar_path
+    envelope["calendar_display_path"] = display_path or calendar_path
+    envelope["ics_path"] = event_dest_path(event, calendar_path)
+    for name in extra_properties or []:
+        envelope[name] = serialize_value(event.get_property(name))
+    return envelope
+
+
+def _model_spelling(envelope: Mapping[str, Any]) -> None:
+    """Refuse a sidecar written before the envelope was the model's own JSON."""
+    if any(name in envelope for name in LEGACY_KEYS):
+        raise ValueError(
+            "this sidecar spells its own keys (``graph_id``, ``is_all_day``) and was written by an older"
+            " exporter: re-export the calendar and import that tree"
+        )
+
+
+def event_ics(envelope: Mapping[str, Any]) -> bytes:
+    """The event as an ``.ics`` document (see the codec's :func:`encode`)."""
+    _model_spelling(envelope)
+    return encode(envelope)
+
+
+def _moment(value: Mapping[str, Any] | None) -> dict[str, str]:
+    """A Graph ``{dateTime, timeZone}`` pair as the payload's own shape."""
+    pair = value or {}
+    return {"dateTime": str(pair.get("dateTime")), "timeZone": str(pair.get("timeZone") or "UTC")}
+
+
+def _attendees(envelope: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """The attendee list Graph accepts: the people, without the responses it assigns."""
+    payloads: list[dict[str, Any]] = []
+    for attendee in envelope.get("attendees") or []:
+        person = attendee.get("emailAddress") or {}
+        if not person.get("address"):
+            continue
+        email = {"address": person["address"]}
+        if person.get("name"):
+            email["name"] = person["name"]
+        payloads.append({"emailAddress": email, "type": attendee.get("type") or "required"})
+    return payloads
+
+
+def event_create_payload(envelope: Mapping[str, Any], options: CalendarImportOptions | None = None) -> dict[str, Any]:
+    """The Graph ``POST /events`` body for an envelope.
+
+    Graph's own spelling, because the target posts it verbatim: sending the typed
+    ``DateTimeTimeZone`` helper instead loses the zone (it comes back ``UTC``) and the
+    ``transactionId``, and ``EventCollection.add()`` rejects a dict for ``start``
+    outright (both measured).
+
+    The field list is deliberately an allow-list of what a live round trip proved
+    Exchange accepts — not "everything the model declares" — because a column Exchange
+    assigns itself (``iCalUId``, the organizer, attendee responses, ``created``/
+    ``modified``, ``type``) is either rejected or overwritten, and an extra property
+    recorded in the sidecar is there to survive the export, not to be replayed.
+    """
+    options = options or CalendarImportOptions()
+    _model_spelling(envelope)
+    start, end = envelope.get("start") or {}, envelope.get("end") or {}
+    if not start.get("dateTime") or not end.get("dateTime"):
+        raise ValueError("the sidecar has no start/end dateTime: an event cannot be created without a time range")
+    body: dict[str, Any] = {"subject": envelope.get("subject") or "", "start": _moment(start), "end": _moment(end)}
+    content = envelope.get("body") or {}
+    if content.get("content"):
+        # Graph accepts the content type case-insensitively, but "HTML"/"Text" is what
+        # this exporter has always sent and what the live round trips were proven with.
+        is_html = str(content.get("contentType") or "").lower() == "html"
+        body["body"] = {"contentType": "HTML" if is_html else "Text", "content": content["content"]}
+    if envelope.get("isAllDay"):
+        body["isAllDay"] = True
+    if (envelope.get("location") or {}).get("displayName"):
+        body["location"] = dict(envelope["location"])
+    locations = [item for item in envelope.get("locations") or [] if (item or {}).get("displayName")]
+    if locations:
+        body["locations"] = [dict(item) for item in locations]
+    if options.restore_attendees:
+        attendees = _attendees(envelope)
+        if attendees:
+            body["attendees"] = attendees
+    if options.restore_categories:
+        categories = [name for name in envelope.get("categories") or [] if name]
+        if categories:
+            body["categories"] = categories
+    for name in ("showAs", "sensitivity", "importance"):
+        if envelope.get(name):
+            body[name] = envelope[name]
+    if "isReminderOn" in envelope:
+        body["isReminderOn"] = bool(envelope.get("isReminderOn"))
+        minutes = envelope.get("reminderMinutesBeforeStart")
+        if body["isReminderOn"] and isinstance(minutes, int) and minutes > 0:
+            body["reminderMinutesBeforeStart"] = minutes
+    recurrence = envelope.get("recurrence")
+    if isinstance(recurrence, str):
+        raise ValueError(
+            f"the sidecar records the recurrence as text ({recurrence[:60]!r}): it was written by a version of"
+            " the exporter that serialised Graph's typed object with ``repr``, so the series cannot be"
+            " replayed — re-export the calendar and import that tree"
+        )
+    if isinstance(recurrence, dict) and recurrence:
+        body["recurrence"] = recurrence
+    if options.use_transaction_ids:
+        body["transactionId"] = event_transaction_id(envelope)
+    return body
+
+
+def event_canonical(envelope: Mapping[str, Any], options: CalendarImportOptions | None = None) -> dict[str, Any]:
+    """The restored fields in comparable form, one profile row per field.
+
+    A field the import declines to restore (``restore_attendees``,
+    ``restore_categories``) leaves the canonical form, which is why the source and the
+    target of one job must share the options object.
+    """
+    options = options or CalendarImportOptions()
+    return {rule.key: rule.normalise(envelope) for rule in COMPARED if not rule.gate or getattr(options, rule.gate)}
+
+
+def event_digest(envelope: Mapping[str, Any], options: CalendarImportOptions | None = None) -> str:
+    """A digest of the fields an import restores, for verifying that it did.
+
+    Not the ``.ics`` bytes: the other side of an import is Exchange, which re-serializes
+    the body and assigns the meeting metadata, so the comparable artefact is the *event*.
+    Which fields take part — and what each is normalised to — is
+    :data:`calendar_profile.COMPARED`, so a field the sidecar gains is a row there rather
+    than a line in this function.
+    """
+    _model_spelling(envelope)
+    canonical = json.dumps(event_canonical(envelope, options), sort_keys=True, default=str)
+    return hashlib.md5(canonical.encode("utf-8")).hexdigest()
+
+
+def event_dropped_attendees(envelope: Mapping[str, Any], options: CalendarImportOptions | None = None) -> int:
+    """How many attendee entries the import leaves out, and so does not invite.
+
+    Creating an event with attendees makes Exchange mail every one of them (measured),
+    which is why replaying the list is opt-in; the count is what the run reports so the
+    omission is a number rather than a silence.
+    """
+    options = options or CalendarImportOptions()
+    if options.restore_attendees:
+        return 0
+    return sum(1 for item in envelope.get("attendees") or [] if (item.get("emailAddress") or {}).get("address"))
+
+
+def event_dedup_key(envelope: Mapping[str, Any]) -> tuple[str, str | None, str | None]:
     """The key a target matches an existing event on: subject and start.
 
     A created event comes back with ``iCalUId: null`` and a fresh Graph id, so neither
     of the source's identities survives the import — subject plus wall clock (and the
     zone it is in) is what is left to recognise a re-run's own work by.
     """
-    wall, zone = _wall(envelope.get("start"))
+    wall, zone = wall_clock(envelope.get("start"))
     return (str(envelope.get("subject") or ""), wall, zone)
 
 
-def event_transaction_id(envelope: dict[str, Any]) -> str:
+def event_transaction_id(envelope: Mapping[str, Any]) -> str:
     """A deterministic ``transactionId`` for an exported event."""
-    key = str(envelope.get("graph_id") or envelope.get("ical_uid") or envelope.get("ics_path") or "")
+    key = event_key(envelope) or str(envelope.get("ics_path") or "")
     return "mig-" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:32]
-
-
-def event_create_payload(
-    envelope: dict[str, Any],
-    options: CalendarImportOptions | None = None,
-) -> dict[str, Any]:
-    """The Graph ``POST /events`` body for a sidecar record.
-
-    Returns Graph's own spelling, so the target can post it verbatim: sending the
-    typed ``DateTimeTimeZone`` helper instead loses the zone (it comes back ``UTC``)
-    and the ``transactionId``, and ``EventCollection.add()`` rejects a dict for
-    ``start`` outright (both measured).
-
-    ``start``/``end`` are the pair of wall clock and *Windows* zone name the export
-    recorded, passed back unchanged — Exchange accepts its own names, so no
-    IANA conversion is needed. Anything Exchange assigns itself (``iCalUId``, the
-    organizer, attendee responses, ``created``/``modified``) is not sent.
-    """
-    options = options or CalendarImportOptions()
-    start = envelope.get("start") or {}
-    end = envelope.get("end") or {}
-    if not start.get("dateTime") or not end.get("dateTime"):
-        raise ValueError("the sidecar record has no start/end dateTime: an event cannot be created without a time range")
-    payload: dict[str, Any] = {
-        "subject": envelope.get("subject") or "",
-        "start": {"dateTime": start["dateTime"], "timeZone": start.get("timeZone") or "UTC"},
-        "end": {"dateTime": end["dateTime"], "timeZone": end.get("timeZone") or "UTC"},
-    }
-    body = envelope.get("body") or {}
-    if body.get("content"):
-        # Graph spells the content type as an enum; the sidecar keeps the wire name.
-        is_html = str(body.get("content_type") or "").lower() == "html"
-        payload["body"] = {"contentType": "HTML" if is_html else "Text", "content": body["content"]}
-    if envelope.get("is_all_day"):
-        payload["isAllDay"] = True
-    if envelope.get("location"):
-        payload["location"] = {"displayName": envelope["location"]}
-    locations = [name for name in envelope.get("locations") or [] if name]
-    if locations:
-        payload["locations"] = [{"displayName": name} for name in locations]
-    attendees = _attendee_payloads(envelope)
-    if attendees and options.restore_attendees:
-        payload["attendees"] = attendees
-    categories = [name for name in envelope.get("categories") or [] if name]
-    if categories and options.restore_categories:
-        payload["categories"] = categories
-    for name, key in (
-        ("showAs", "show_as"),
-        ("sensitivity", "sensitivity"),
-        ("importance", "importance"),
-    ):
-        if envelope.get(key):
-            payload[name] = envelope[key]
-    if "is_reminder_on" in envelope:
-        payload["isReminderOn"] = bool(envelope.get("is_reminder_on"))
-        minutes = envelope.get("reminder_minutes")
-        if payload["isReminderOn"] and isinstance(minutes, int) and minutes > 0:
-            payload["reminderMinutesBeforeStart"] = minutes
-    recurrence = envelope.get("recurrence")
-    if isinstance(recurrence, str):
-        raise ValueError(
-            f"the sidecar records the recurrence as text ({recurrence[:60]!r}): it was written by a version of the"
-            " exporter that serialised Graph's typed object with ``repr``, so the series cannot be replayed —"
-            " re-export the calendar and import that tree"
-        )
-    if isinstance(recurrence, dict) and recurrence:
-        payload["recurrence"] = recurrence
-    if options.use_transaction_ids:
-        payload["transactionId"] = event_transaction_id(envelope)
-    return payload
-
-
-def event_digest(envelope: dict[str, Any], options: CalendarImportOptions | None = None) -> str:
-    """A digest of the fields an import restores, for verifying that it did.
-
-    Not the ``.ics`` bytes: the other side of an import is Exchange, which
-    re-serializes the body and assigns the meeting metadata, so the comparable
-    artefact is the *event*. Two things are therefore outside the digest — everything
-    the service owns (``iCalUId``, the organizer, attendee responses, created and
-    modified times) and the body's markup (see :func:`_body_text`). Attendees and
-    categories count only when ``options`` says the import restores them, which is
-    why the source and the target of one job must share the options object.
-    """
-    options = options or CalendarImportOptions()
-    canonical: dict[str, Any] = {
-        "subject": envelope.get("subject") or "",
-        "start": _wall(envelope.get("start")),
-        "end": _wall(envelope.get("end")),
-        "all_day": bool(envelope.get("is_all_day")),
-        "location": envelope.get("location") or "",
-        "locations": sorted(name for name in envelope.get("locations") or [] if name),
-        "show_as": envelope.get("show_as"),
-        "sensitivity": envelope.get("sensitivity"),
-        "importance": envelope.get("importance"),
-        "reminder": (bool(envelope.get("is_reminder_on")), envelope.get("reminder_minutes") or 0),
-        "recurrence": envelope.get("recurrence"),
-        "body": _body_text(envelope.get("body")),
-    }
-    if options.restore_attendees:
-        canonical["attendees"] = sorted(
-            (str(item.get("address") or "").lower(), str(item.get("type") or "required"))
-            for item in _attendee_payloads(envelope)
-        )
-    if options.restore_categories:
-        canonical["categories"] = sorted(str(name) for name in envelope.get("categories") or [])
-    serialized = json.dumps(canonical, sort_keys=True, default=str)
-    return hashlib.md5(serialized.encode("utf-8")).hexdigest()
-
-
-def _attendee_payloads(envelope: dict[str, Any]) -> list[dict[str, Any]]:
-    """The attendee list Graph accepts, from the addresses the sidecar recorded."""
-    payloads: list[dict[str, Any]] = []
-    for attendee in envelope.get("attendees") or []:
-        address = attendee.get("address")
-        if not address:
-            continue
-        item: dict[str, Any] = {"emailAddress": {"address": address}, "type": attendee.get("type") or "required"}
-        if attendee.get("name"):
-            item["emailAddress"]["name"] = attendee["name"]
-        payloads.append(item)
-    return payloads
-
-
-def _wall(value: Any) -> tuple[str | None, str | None]:
-    """A Graph ``{dateTime, timeZone}`` pair as a comparable ``(wall clock, zone)``.
-
-    Graph varies the fractional-second width between what is sent and what comes
-    back, so the fraction is dropped rather than compared.
-    """
-    moment = value or {}
-    parsed = _parse_graph_datetime(moment.get("dateTime"))
-    zone = moment.get("timeZone")
-    return (parsed.strftime("%Y-%m-%dT%H:%M:%S") if parsed else None, str(zone) if zone else None)
-
-
-def _body_text(body: Any) -> str:
-    """A body reduced to its text, for comparison only.
-
-    Exchange re-serializes every body it accepts: a plain-text body comes back wrapped
-    in HTML, and an HTML body gains a ``<head>`` with a generated ``<style>`` block.
-    The markup is therefore not comparable — the text is.
-    """
-    content = (body or {}).get("content")
-    if not content:
-        return ""
-    text = _COMMENT.sub("", str(content))
-    text = _MARKUP_BLOCK.sub("", text)
-    text = _TAG.sub(" ", text)
-    return _SPACE.sub(" ", html.unescape(text)).strip()
 
 
 __all__ = [
     "EVENT_COLUMNS",
+    "LEGACY_KEYS",
+    "MAX_LINE_OCTETS",
+    "PROVENANCE",
     "STANDALONE_EVENT_TYPES",
     "CalendarExportOptions",
     "CalendarImportOptions",
+    "event_canonical",
     "event_create_payload",
     "event_dedup_key",
     "event_dest_path",
     "event_digest",
+    "event_dropped_attendees",
     "event_envelope",
     "event_ics",
     "event_key",
+    "event_kind",
     "event_transaction_id",
 ]
