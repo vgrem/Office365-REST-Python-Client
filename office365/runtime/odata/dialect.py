@@ -21,6 +21,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any, Mapping, Optional
 
 from office365.runtime.odata.v3.metadata_level import ODataV3MetadataLevel
+from office365.runtime.odata.v4.metadata_level import ODataV4MetadataLevel
 
 
 @dataclass(frozen=True)
@@ -66,6 +67,12 @@ class JsonDialect:
     paginates_by_offset: bool = False
     """``True`` honours ``$skip``; ``False`` paginates by server-supplied link only."""
 
+    control_information: bool = True
+    """``True`` writes control information at all; ``False`` is the level that omits it."""
+
+    media_type_parameter: str = "odata"
+    """Name of the media-type parameter that carries the level (``odata.metadata`` for V4)."""
+
     def dropped(self, name: str, value: Any) -> bool:
         """Whether ``name``/``value`` is control information the entity never stores."""
         if name in self.control_aliases:
@@ -81,8 +88,14 @@ class JsonDialect:
         return self.control_aliases.get(name)
 
 
-V4 = JsonDialect(control_aliases={"@odata.etag": "__etag", "@odata.type": "__odata_type"})
+V4 = JsonDialect(
+    control_aliases={"@odata.etag": "__etag", "@odata.type": "__odata_type"},
+    media_type_parameter="odata.metadata",
+)
 """Microsoft Graph / OData V4 JSON."""
+
+V4_NO_METADATA = replace(V4, control_information=False)
+"""V4 JSON at ``odata.metadata=none``: the same spelling, with nothing to spell."""
 
 V3_VERBOSE = JsonDialect(
     container="d",
@@ -101,16 +114,21 @@ V3_VERBOSE = JsonDialect(
 """SharePoint REST JSON Light at ``odata=verbose``."""
 
 V3_MINIMAL = replace(V3_VERBOSE, collection="value")
-"""SharePoint REST JSON Light at ``odata=minimalmetadata``/``nometadata``: the
-collection key shortens to ``value``; nothing else about the spelling changes."""
+"""SharePoint REST JSON Light at ``odata=minimalmetadata``: the collection key
+shortens to ``value``; nothing else about the spelling changes."""
 
-_V3_BY_LEVEL: Mapping[Any, JsonDialect] = {
+V3_NO_METADATA = replace(V3_MINIMAL, control_information=False)
+"""SharePoint REST JSON Light at ``odata=nometadata``: the minimal spelling of a
+payload that carries no control information."""
+
+BY_LEVEL: Mapping[Any, JsonDialect] = {
     ODataV3MetadataLevel.Verbose: V3_VERBOSE,
     ODataV3MetadataLevel.MinimalMetadata: V3_MINIMAL,
-    ODataV3MetadataLevel.NoMetadata: V3_MINIMAL,
+    ODataV3MetadataLevel.NoMetadata: V3_NO_METADATA,
+    ODataV4MetadataLevel.Minimal: V4,
+    ODataV4MetadataLevel.Full: V4,
+    ODataV4MetadataLevel.NoMetadata: V4_NO_METADATA,
 }
-
-
-def dialect_for_level(metadata_level: Any) -> JsonDialect:
-    """The JSON Light dialect a SharePoint metadata level selects."""
-    return _V3_BY_LEVEL.get(metadata_level, V3_VERBOSE)
+"""Every metadata level either dialect family can be asked for, and the row it
+selects. A level is a row, not a verbosity dial: ``odata=nometadata`` is not
+"verbose with less", it is a payload with no control information to write."""

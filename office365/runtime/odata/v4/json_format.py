@@ -1,10 +1,14 @@
-from office365.runtime.odata.dialect import V4, JsonDialect
+from __future__ import annotations
+
+from office365.runtime.odata.dialect import V4_NO_METADATA
 from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.odata.v4.metadata_level import ODataV4MetadataLevel
 
 
 class V4JsonFormat(JsonProfile):
     """JSON format (V4)"""
+
+    _default_dialect = V4_NO_METADATA
 
     def __init__(self, metadata_level: str = ODataV4MetadataLevel.Minimal):
         super().__init__(metadata_level)
@@ -14,17 +18,5 @@ class V4JsonFormat(JsonProfile):
         self.streaming = False
 
     @property
-    def dialect(self) -> JsonDialect:
-        return V4
-
-    @property
-    def media_type(self) -> str:
-        return (
-            f"application/json;odata.metadata={self.metadata_level};"
-            f"odata.streaming={self.streaming};"
-            f"IEEE754Compatible={self.IEEE754Compatible}"
-        )
-
-    @property
-    def include_control_information(self) -> bool:
-        return self.metadata_level in {ODataV4MetadataLevel.Minimal, ODataV4MetadataLevel.Full}
+    def _media_type_options(self) -> str:
+        return f";odata.streaming={self.streaming};IEEE754Compatible={self.IEEE754Compatible}"

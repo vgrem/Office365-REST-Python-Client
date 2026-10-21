@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Generic, Iterator, TypeVar, cast
+from typing import Any, Generic, Iterator, Optional, TypeVar, cast
 
 from typing_extensions import Self
 
@@ -213,14 +213,17 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
         return self
 
     @property
-    def entity_type_name(self) -> str:
+    def entity_type_name(self) -> Optional[str]:
         """Gets the OData type name for this collection.
 
         Returns:
-            str: The collection type name (e.g., "Collection(Edm.String)")
+            The collection type name (e.g. "Collection(Edm.String)"), or ``None``
+            when no element type was declared: a collection built without one has
+            no name to declare, and a marker naming a type nobody declared is
+            worse than no marker at all.
         """
         from office365.runtime.odata.type import ODataType
 
         if self._item_type is None:
-            return "Collection(Edm.Unknown)"
+            return None
         return f"Collection({ODataType.resolve_type_name(self._item_type)})"

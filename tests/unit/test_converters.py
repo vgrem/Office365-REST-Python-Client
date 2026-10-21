@@ -27,6 +27,7 @@ from office365.runtime.converters.records import iter_records
 from office365.runtime.converters.scalars import iso_z, parse_datetime, parse_int
 from office365.runtime.converters.value import coerce_value, declared_type, serialize_value
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
+from office365.runtime.odata.v3.metadata_level import ODataV3MetadataLevel
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.types.collections import StringCollection
 from office365.search.hits.container import SearchHitsContainer
@@ -433,3 +434,18 @@ class TestSiteDesignMetadataDefaults(unittest.TestCase):
         design.set_property("SiteScriptIds", [])
         assert isinstance(design.SiteScriptIds, ClientValueCollection)
         assert len(design.SiteScriptIds) == 0
+
+    def test_a_collection_without_an_element_type_declares_nothing(self):
+        # Measured: SharePoint resolves a `__metadata` marker by name and rejects the
+        # ones it cannot (`A type named '...Wrong' could not be resolved by the model`)
+        # while accepting a collection parameter with no marker at all. So an untyped
+        # collection keeps the dialect's envelope and drops the type it cannot name.
+        fmt = JsonLightFormat()
+        result = fmt.wrap(ClientValueCollection(None, ["a"]), ["a"])
+        self.assertEqual(result, {"results": ["a"]})
+
+    def test_a_level_without_control_information_keeps_the_envelope(self):
+        # `odata=nometadata` removes annotations, not the collection wrapper: the
+        # service spells a collection `value` at that level too.
+        fmt = JsonLightFormat(ODataV3MetadataLevel.NoMetadata)
+        self.assertEqual(fmt.wrap(ClientValueCollection(str, ["a"]), ["a"]), {"value": ["a"]})

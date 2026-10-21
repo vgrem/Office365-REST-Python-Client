@@ -14,23 +14,30 @@ dialect is a new table row, not a new branch.
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Iterator, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Iterator, Optional, Tuple, Union
 
 from office365.runtime.converters.value import serialize_value
-from office365.runtime.odata.dialect import JsonDialect
+from office365.runtime.odata.dialect import BY_LEVEL, JsonDialect
 
 if TYPE_CHECKING:
     from office365.runtime.odata.v3.metadata_level import ODataV3MetadataLevel
     from office365.runtime.odata.v4.metadata_level import ODataV4MetadataLevel
 
 
-class JsonProfile(ABC):
-    """Abstract base class defining the OData JSON profile specification.
+class JsonProfile:
+    """An OData JSON profile: one dialect, selected by a metadata level.
 
-    This class serves as a contract for concrete OData JSON implementations,
-    ensuring they provide the required dialect and metadata handling.
+    A profile is a level, not a subclass. Everything a level changes — the
+    spelling of the payload, whether control information is written at all, and
+    the media type that asks for it — is a row of
+    :data:`~office365.runtime.odata.dialect.BY_LEVEL`, so the subclasses only
+    name the level family they belong to and their fallback row. That is why
+    :meth:`dialect` and :meth:`include_control_information` cannot disagree: an
+    unrecognised level falls back to one row and both answers come from it.
     """
+
+    _default_dialect: ClassVar[JsonDialect]
+    """The row a level this family does not know falls back to."""
 
     def __init__(self, metadata_level: Optional[Union[ODataV3MetadataLevel, ODataV4MetadataLevel, str]] = None):
         """
@@ -44,17 +51,22 @@ class JsonProfile(ABC):
         self.metadata_level = metadata_level
 
     @property
-    @abstractmethod
     def dialect(self) -> JsonDialect:
         """The dialect this profile speaks."""
+        return BY_LEVEL.get(self.metadata_level, self._default_dialect)
 
     @property
-    @abstractmethod
     def media_type(self) -> str:
         """str: Gets the official media type for this profile (e.g., 'application/json')"""
+        level = getattr(self.metadata_level, "value", self.metadata_level)
+        return f"application/json;{self.dialect.media_type_parameter}={level}{self._media_type_options}"
 
     @property
-    @abstractmethod
+    def _media_type_options(self) -> str:
+        """Extra media-type parameters this family appends after the level."""
+        return ""
+
+    @property
     def include_control_information(self) -> bool:
         """
         bool: Determines whether control information should be included in payload
@@ -62,6 +74,7 @@ class JsonProfile(ABC):
         Control information includes annotations and other OData-specific metadata
         that guides client behavior but isn't part of the actual entity data.
         """
+        return self.dialect.control_information
 
     @property
     def metadata_type(self) -> str:
@@ -103,18 +116,23 @@ class JsonProfile(ABC):
             The payload, with control information added when the dialect and the
             metadata level ask for it
         """
-        name = getattr(obj, "entity_type_name", None)
-        if name is None or not self.include_control_information:
-            return payload
-        marker = self.dialect.type_marker
+        # A type is declared only when the value could name one, and written only
+        # when the level carries control information; the envelope below is the
+        # dialect's spelling of a collection either way.
+        name: Optional[str] = getattr(obj, "entity_type_name", None)
+        if not self.include_control_information:
+            name = None
         if isinstance(payload, list):
-            # JSON Light names a collection payload and declares its element
-            # type; an unwrapped dialect sends the bare array, so nothing to add.
+            # JSON Light names a collection payload; an unwrapped dialect sends
+            # the bare array, so there is no envelope to spell.
             if self.dialect.container is None:
                 return payload
-            return {self.dialect.collection: payload, marker: {"type": name}}
-        if payload:
-            payload[marker] = {"type": name} if self.dialect.type_wrapped else "#" + name
+            wrapped: dict[str, Any] = {self.dialect.collection: payload}
+            if name is not None:
+                wrapped[self.dialect.type_marker] = {"type": name}
+            return wrapped
+        if payload and name is not None:
+            payload[self.dialect.type_marker] = {"type": name} if self.dialect.type_wrapped else "#" + name
         return payload
 
     def build_payload(self, source: Any) -> Any:
