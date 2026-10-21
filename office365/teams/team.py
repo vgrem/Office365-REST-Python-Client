@@ -319,12 +319,12 @@ class Team(Entity):
         description: str | None = None,
         classification: str | None = None,
     ) -> Team:
-        """Clone a team and wait for provisioning (deferred).
+        """Clone a team and wait for provisioning, in one ``execute_query()``.
 
-        Chains the async clone, the ``teamsAsyncOperation`` poll, and a full
-        ``GET`` of the cloned team through ``after_execute`` hooks — one
-        ``execute_query()`` returns the provisioned cloned :class:`Team` with its
-        properties loaded.
+        Chains the async clone, the ``teamsAsyncOperation`` poll (which blocks
+        inside the hook until the operation settles), and a full ``GET`` of the
+        cloned team through ``after_execute`` hooks — one ``execute_query()``
+        returns the provisioned cloned :class:`Team` with its properties loaded.
 
         Args:
             mail_nickname: The mail nickname for the cloned team.

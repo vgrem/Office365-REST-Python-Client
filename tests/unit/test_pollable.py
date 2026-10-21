@@ -280,6 +280,61 @@ class _StubWait:
         self.cancelled = True
 
 
+def test_teams_poll_for_status_blocks_until_succeeded():
+    """The sync twin polls to completion itself instead of queueing a callback chain."""
+    client = GraphClient()
+    client.pending_request().beforeExecute.clear()
+    client.pending_request().transport = ScriptedTransport(
+        [
+            _lro(404, {"error": {"code": "NotFound", "message": "not created yet"}}),
+            _lro(200, {"status": "inProgress"}),
+            _lro(200, {"status": "succeeded", "targetResourceId": "t1"}),
+        ]
+    )
+    operation = client.teams["teamid"].operations["opid"]
+    seen: list[str] = []
+
+    result = operation.poll_for_status(
+        polling_interval=0, timeout_sec=30, success_callback=lambda _op: seen.append("success")
+    )
+
+    assert result is operation
+    assert seen == ["success"]
+    assert operation.target_resource_id == "t1"
+    assert client.pending_request().transport.calls == 3  # noqa: PLR2004 - 404 gap, then two polls
+
+
+def test_teams_poll_for_status_waits_for_a_named_status():
+    """``status_type`` narrows what "finished" means; a failed status ends it too."""
+    client = GraphClient()
+    client.pending_request().beforeExecute.clear()
+    client.pending_request().transport = ScriptedTransport(
+        [_lro(200, {"status": "inProgress"}), _lro(200, {"status": "failed"})]
+    )
+    operation = client.teams["teamid"].operations["opid"]
+    seen: list[str] = []
+    operation.poll_for_status(
+        TeamsAsyncOperationStatus.inProgress,
+        polling_interval=0,
+        timeout_sec=30,
+        success_callback=lambda _op: seen.append("success"),
+    )
+    assert seen == ["success"], "the first poll already reported the named status"
+
+    client.pending_request().transport = ScriptedTransport(
+        [_lro(200, {"status": "inProgress"}), _lro(200, {"status": "failed"})]
+    )
+    seen.clear()
+    operation.poll_for_status(
+        TeamsAsyncOperationStatus.succeeded,
+        polling_interval=0,
+        timeout_sec=30,
+        success_callback=lambda _op: seen.append("success"),
+        failure_callback=lambda _op: seen.append("failure"),
+    )
+    assert seen == ["failure"]
+
+
 # -- Teams async polling ----------------------------------------------------
 
 

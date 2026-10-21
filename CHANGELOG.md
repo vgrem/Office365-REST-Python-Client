@@ -255,6 +255,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   caller can stream the polls (`percentage_complete` per snapshot), cancel the wait,
   or monitor several jobs concurrently in one event loop. A sync `status_fn` given
   to an async wait is bridged with `asyncio.to_thread` (the read is a blocking GET).
+- `TeamsAsyncOperation.poll_for_status()` accepts any status as the thing it waits
+  for (`status_type`, default `succeeded`) and now ends on a status that says the
+  named one will never arrive (`failed`) as well as on the deadline — so it fires
+  exactly one callback instead of continuing to poll a job that already failed.
+  Both pollers are the shared wait, so `poll_for_status` also gained a real
+  `cancel()` and the stream.
 
 ### Changed
 
@@ -360,6 +366,13 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   rather than raised — a monitor says what happened; the caller decides.
 - `PollableOperation.wait()`'s `sleep` argument now defaults to `None` (the
   interruptible pause) rather than `time.sleep`, so a `cancel()` can wake it.
+- `TeamsAsyncOperation.poll_for_status()` polls to completion itself (through the
+  shared wait) instead of queueing a chain of `after_execute` callbacks for the
+  caller's `execute_query()` to drive. The outcome is unchanged — the callback fires
+  once, a failure reports rather than raises, and `create_and_wait()` /
+  `clone_and_wait()` still work in one `execute_query()` — but the loop no longer
+  blocks a real `time.sleep` inside a query handler, and it counts its deadline on
+  the clock.
 
 ### Fixed
 

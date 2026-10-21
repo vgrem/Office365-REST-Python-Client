@@ -1,27 +1,17 @@
 from __future__ import annotations
 
-import asyncio
-import time
 from collections.abc import Callable
 from datetime import datetime
 
 from typing_extensions import Self
 
 from office365.entity import Entity
-from office365.runtime.client_request_exception import ClientRequestException
-from office365.runtime.pollable import (
-    PollableOperation,
-    is_transient_poll_error,
-    next_poll_delay,
-    normalize_status,
-    reload_operation_async,
-)
+from office365.runtime.operation import OperationTimeoutError
+from office365.runtime.pollable import PollableOperation, normalize_status
 from office365.runtime.types.odata_property import odata
 from office365.teams.operations.async_status import TeamsAsyncOperationStatus
 from office365.teams.operations.error import OperationError
 from office365.teams.operations.type import TeamsAsyncOperationType
-
-_NOT_FOUND_STATUS = 404
 
 
 def wait_for_operation(
@@ -31,11 +21,12 @@ def wait_for_operation(
     timeout_sec: int = 180,
     interval: int = 15,
 ) -> None:
-    """Schedule polling of an async operation until ``succeeded`` (deferred).
+    """Poll an async operation until ``succeeded``, blocking the calling thread.
 
-    Queues the operation status GETs via ``after_execute``; the caller's
-    ``execute_query()`` drives them. Raises when the operation fails or times
-    out.
+    The status GETs run here rather than through the caller's queue, so this works
+    both on its own and from inside an ``after_execute`` hook (where the one-shot
+    convenience methods call it to chain submit → poll → reload). Raises when the
+    operation fails or times out.
 
     Args:
         operation: The async operation to poll.
@@ -115,7 +106,15 @@ class TeamsAsyncOperation(PollableOperation, Entity):
         success_callback: Callable[[TeamsAsyncOperation], None] | None = None,
         failure_callback: Callable[[TeamsAsyncOperation], None] | None = None,
     ) -> Self:
-        """Poll to check for completion of an async Teams operation.
+        """Poll to check for completion of an async Teams operation (blocking).
+
+        One poll re-reads the operation through the shared wait
+        (`office365.runtime.operation.Operation`), so a transient ``404`` — the
+        operation's location can be briefly unavailable right after the ``202``
+        ("No workflow found with supplied ID") — is a polling gap, the deadline is
+        measured on the clock, and the pause honours ``Retry-After``. Exactly one
+        callback fires: success when the operation reached ``status_type``,
+        otherwise failure (a failed status *or* the deadline).
 
         Args:
             status_type: The status to wait for (default succeeded)
@@ -124,46 +123,18 @@ class TeamsAsyncOperation(PollableOperation, Entity):
             success_callback: Called on success with the populated operation
             failure_callback: Called on timeout or failed status
         """
-        deadline = time.time() + timeout_sec
-
-        def _not_found(exc: Exception) -> bool:
-            # The operation's location can be briefly unavailable right after the
-            # 202 (e.g. "No workflow found with supplied ID") — treat it as a
-            # polling gap, not a permanent failure.
-            return getattr(getattr(exc, "response", None), "status_code", None) == _NOT_FOUND_STATUS
-
-        def _fail() -> None:
-            if callable(failure_callback):
-                failure_callback(self)
-
-        def _poll() -> None:
-            qry = self.get()
-
-            def _on_error(exc: Exception) -> None:
-                if _not_found(exc) and time.time() < deadline:
-                    time.sleep(polling_interval)
-                    _poll()
-                else:
-                    _fail()
-
-            qry.after_execute(_verify_status, execute_first=True).on_error(_on_error)
-
-        def _verify_status(return_type: TeamsAsyncOperation):
-            if return_type.status == status_type:
-                if callable(success_callback):
-                    success_callback(return_type)
-                return
-            if return_type.status == TeamsAsyncOperationStatus.failed:
-                if callable(failure_callback):
-                    failure_callback(return_type)
-                return
-            if time.time() >= deadline:
-                _fail()
-                return
-            time.sleep(polling_interval)
-            _poll()
-
-        _poll()
+        wait = self._operation(
+            target_status=normalize_status(status_type),
+            interval=float(polling_interval),
+            timeout=float(timeout_sec),
+        )
+        try:
+            # A failed status is *reported* to the callback, not raised: callers
+            # such as ``wait_for_operation`` decide what failure means.
+            wait.wait(raise_on_failure=False)
+        except OperationTimeoutError:
+            pass
+        self._settle(status_type, success_callback, failure_callback)
         return self
 
     async def poll_for_status_async(
@@ -176,10 +147,10 @@ class TeamsAsyncOperation(PollableOperation, Entity):
     ) -> Self:
         """Async twin of :meth:`poll_for_status`, driven by ``await`` (no blocking).
 
-        Performs the status ``GET`` and the delay between polls on the event
-        loop, honoring ``Retry-After`` and treating a transient ``404`` as a
-        polling gap. Callbacks receive the populated operation, exactly like the
-        synchronous version.
+        Performs the status ``GET`` and the delay between polls on the event loop,
+        honoring ``Retry-After`` and treating a transient ``404`` as a polling gap.
+        Callbacks receive the populated operation, exactly like the synchronous
+        version.
 
         Args:
             status_type: The status to wait for (default ``succeeded``).
@@ -189,36 +160,30 @@ class TeamsAsyncOperation(PollableOperation, Entity):
             success_callback: Called on success with the populated operation.
             failure_callback: Called on timeout or failed status.
         """
-        target = normalize_status(status_type)
-        failed = normalize_status(TeamsAsyncOperationStatus.failed)
-        deadline = time.monotonic() + timeout_sec
+        wait = self._operation(
+            target_status=normalize_status(status_type),
+            interval=float(polling_interval),
+            timeout=float(timeout_sec),
+        )
+        try:
+            await wait.wait_async(raise_on_failure=False)
+        except OperationTimeoutError:
+            pass
+        self._settle(status_type, success_callback, failure_callback)
+        return self
 
-        def _fail() -> None:
-            if callable(failure_callback):
-                failure_callback(self)
-
-        while True:
-            try:
-                response = await reload_operation_async(self)
-            except ClientRequestException as ex:
-                if is_transient_poll_error(ex) and time.monotonic() < deadline:
-                    await asyncio.sleep(next_poll_delay(ex.response, polling_interval))
-                    continue
-                _fail()
-                return self
-            current = normalize_status(self.operation_status)
-            if current == target:
-                if callable(success_callback):
-                    success_callback(self)
-                return self
-            if current == failed:
-                if callable(failure_callback):
-                    failure_callback(self)
-                return self
-            if time.monotonic() >= deadline:
-                _fail()
-                return self
-            await asyncio.sleep(next_poll_delay(response, polling_interval))
+    def _settle(
+        self,
+        status_type: TeamsAsyncOperationStatus,
+        success_callback: Callable[[TeamsAsyncOperation], None] | None,
+        failure_callback: Callable[[TeamsAsyncOperation], None] | None,
+    ) -> None:
+        """Fire exactly one terminal callback: success if the target was reached."""
+        if normalize_status(self.operation_status) == normalize_status(status_type):
+            if callable(success_callback):
+                success_callback(self)
+        elif callable(failure_callback):
+            failure_callback(self)
 
     @odata(name="attemptsCount")
     @property

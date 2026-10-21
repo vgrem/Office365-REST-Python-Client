@@ -62,3 +62,33 @@ def test_create_with_owners_adds_conversation_members():
             "user@odata.bind": "https://graph.microsoft.com/v1.0/users('ada@contoso.com')",
         }
     ]
+
+
+_CREATED = {
+    "http_status": 202,
+    "headers": {
+        "Content-Location": "https://graph.microsoft.com/v1.0/teams('abc')",
+        "Location": "https://graph.microsoft.com/v1.0/teams/abc/operations/op1",
+    },
+    "body": {},
+}
+_OPERATION_SUCCEEDED = {"http_status": 200, "body": {"status": "succeeded", "targetResourceId": "abc"}}
+_TEAM = {"http_status": 200, "body": {"id": "abc", "displayName": "Team A"}}
+
+
+def test_create_and_wait_polls_inside_the_after_execute_hook():
+    """The poll blocks inside the hook, then the queued reload runs on the outer loop.
+
+    ``create_and_wait`` is one ``execute_query()``: submit, poll the operation, then
+    reload the created team. The poll is a blocking wait, so it must not disturb the
+    queue the outer loop is draining — the reload it queues is executed afterwards.
+    """
+    transport = _RecordingTransport([_CREATED, _OPERATION_SUCCEEDED, _TEAM])
+    client = _client(transport)
+
+    team = client.teams.create_and_wait("Team A").execute_query()
+
+    assert team.id == "abc"
+    assert team.display_name == "Team A"
+    assert transport.calls == 3  # noqa: PLR2004 - create, poll, reload
+    assert transport.requests[1].url.endswith("/teams/abc/operations/op1")

@@ -147,12 +147,26 @@ class _EntityWait(Operation[Any]):
 
     A transient ``404`` is turned into a retry marker here rather than raised, so
     the engine stays free of exception policy: a step answers what it saw.
+
+    ``target_status`` narrows what "finished" means. By default the wait ends at any
+    terminal status — succeeded, failed, cancelled, partial. A caller waiting for a
+    *named* status (Teams' ``poll_for_status(status_type=...)``) ends at that status,
+    or at one that says it will never arrive.
     """
 
-    def __init__(self, entity: "ClientObject", **options: Any) -> None:
+    def __init__(self, entity: "ClientObject", *, target_status: str | None = None, **options: Any) -> None:
         options.setdefault("transient_statuses", TRANSIENT_POLL_STATUSES)
         super().__init__(**options)
         self._entity = entity
+        self._target = normalize_status(target_status)
+
+    def _done(self, status: OperationStatus) -> bool:
+        """Whether this attempt ends the wait — by reaching the target, or failing to."""
+        if self._target is None:
+            return super()._done(status)
+        if normalize_status(status.status) == self._target:
+            return True
+        return status.is_failure or status.is_cancelled
 
     def _step(self) -> OperationStatus:
         try:
@@ -345,16 +359,18 @@ class PollableOperation:
     def _operation(
         self,
         *,
-        timeout: float | None,
-        interval: float | None,
-        on_progress: Callable[[OperationStatus], None] | None,
-        clock: Callable[[], float],
+        timeout: float | None = None,
+        interval: float | None = None,
+        on_progress: Callable[[OperationStatus], None] | None = None,
+        clock: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] | None = None,
         async_sleep: Callable[[float], Any] | None = None,
+        target_status: str | None = None,
     ) -> "_EntityWait":
         """Build the wait for this entity, remembering it so :meth:`cancel` can reach it."""
         operation = _EntityWait(
             cast("ClientObject", self),
+            target_status=target_status,
             interval=self.operation_polling_interval if interval is None else interval,
             timeout=self.operation_polling_timeout if timeout is None else timeout,
             on_progress=on_progress,

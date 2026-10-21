@@ -170,11 +170,12 @@ class TeamCollection(EntityCollection[Team]):
         template: str = "standard",
         owners: list[str] | None = None,
     ) -> Team:
-        """Create a team and wait for provisioning (deferred).
+        """Create a team and wait for provisioning, in one ``execute_query()``.
 
-        Chains the async creation, the ``teamsAsyncOperation`` poll, and a full
-        team ``GET`` through ``after_execute`` hooks — one ``execute_query()``
-        returns a provisioned :class:`Team` with its properties loaded.
+        Chains the async creation, the ``teamsAsyncOperation`` poll (which blocks
+        inside the hook until the operation settles), and a full team ``GET``
+        through ``after_execute`` hooks — one ``execute_query()`` returns a
+        provisioned :class:`Team` with its properties loaded.
 
         Args:
             display_name (str): The name of the team.

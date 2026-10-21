@@ -27,7 +27,8 @@ transport-agnostic poller (`office365.runtime.lro`):
    `wait()` / `wait_async()` poll to completion and hand back the new item.
 2. **Operation entities** — `TeamsAsyncOperation`, `WorkbookOperation`, and rich
    long-running operations are entities you `get()` and poll, generically with
-   `wait()` / `wait_async()` (and `poll_for_status()` on `TeamsAsyncOperation`).
+   `wait()` / `wait_async()` (and `poll_for_status()` on `TeamsAsyncOperation`,
+   which waits for a named status rather than any terminal one).
 3. **The raw poller** — `OperationPoller`, for anything else, with pluggable
    URL resolution, `Retry-After` pacing, progress callbacks and continuation
    tokens.
@@ -128,9 +129,14 @@ cloned = target_team.clone_and_wait(
 ).execute_query()
 ```
 
-`poll_for_status()` treats a transient `404`/`429`/`503` as "not ready yet" and
-keeps polling; a `succeeded`/`failed` status ends it. `wait()` uses
-`next_poll_delay()` (honoring `Retry-After`).
+`poll_for_status()` is the same wait with a `status_type` argument: it ends at the
+status you named (default `succeeded`) or at one that says it will never arrive
+(`failed`), and fires exactly one callback — success, or failure for a failed status
+*or* the deadline. It polls to completion itself rather than queueing a chain of
+callbacks, so it works both on its own and from inside an `after_execute` hook,
+which is how `create_and_wait()` / `clone_and_wait()` chain submit → poll → reload
+in a single `execute_query()`. A transient `404`/`429`/`503` is "not ready yet"; the
+deadline is read from the clock and the pause honours `Retry-After`.
 
 - [Clone a team asynchronously](products/patterns/lro/wait_team_clone_async.md)
 - [Wait for a team clone (synchronous)](products/teams/administration/clone.md)
