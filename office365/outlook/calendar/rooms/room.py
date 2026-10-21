@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
+from office365.booking.type import BookingType
 from office365.outlook.calendar.place import Place
+from office365.outlook.place_feature_enablement import PlaceFeatureEnablement
 from office365.runtime.types.odata_property import odata
-
-if TYPE_CHECKING:
-    from office365.booking.type import BookingType
-    from office365.outlook.place_feature_enablement import PlaceFeatureEnablement
 
 
 class Room(Place):
@@ -32,8 +30,6 @@ class Room(Place):
     @property
     def booking_type(self) -> BookingType:
         """Gets the bookingType property"""
-        from office365.booking.type import BookingType
-
         return self.properties.get("bookingType", BookingType.unknown)
 
     @odata(name="capacity")
@@ -76,8 +72,6 @@ class Room(Place):
     @property
     def teams_enabled_state(self) -> PlaceFeatureEnablement:
         """Gets the teamsEnabledState property"""
-        from office365.outlook.place_feature_enablement import PlaceFeatureEnablement
-
         return self.properties.get("teamsEnabledState", PlaceFeatureEnablement.unknown)
 
     @odata(name="videoDeviceName")

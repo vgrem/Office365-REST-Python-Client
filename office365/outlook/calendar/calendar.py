@@ -170,7 +170,7 @@ class Calendar(Entity):
 
     @odata(name="owner")
     @property
-    def owner(self):
+    def owner(self) -> EmailAddress:
         """If set, this represents the user who created or added the calendar.
         For a calendar that the user created or added, the owner property is set to the user. For a calendar shared
         with the user, the owner property is set to the person who shared that calendar with the user.

@@ -11,13 +11,19 @@ are expected to be fully marked.
 
 from __future__ import annotations
 
+import importlib
 import pathlib
+import pkgutil
 import shutil
 
 import pytest
 import scripts.mark_odata as codemod
+from office365.communications.onlinemeetings.online_meeting_info import OnlineMeetingInfo
+from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.events.event import Event
 from office365.outlook.mail.messages.message import Message
+from office365.runtime.client_object import ClientObject
+from office365.runtime.converters.value import declared_type
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Packages whose getters are expected to be fully declared today.
@@ -76,6 +82,36 @@ def test_no_served_module_has_an_undeclared_wire_name_left():
     for root in _SERVED:
         for path in sorted((_REPO_ROOT / root).rglob("*.py")):
             assert codemod.plan_module(path, catalog) == [], f"{path} still needs declarations"
+
+
+def test_no_served_module_has_a_column_without_a_declared_type():
+    # A $select answers only the columns it names, so a column whose type does not
+    # resolve hydrates a bare dict where the model promises a value object.
+    untyped = []
+    for root in _SERVED:
+        package = root.replace("/", ".")
+        for info in pkgutil.walk_packages([str(_REPO_ROOT / root)], prefix=f"{package}."):
+            module = importlib.import_module(info.name)
+            for cls in _entity_types(module):
+                for name in cls.select_all():
+                    if declared_type(cls, name) is None:
+                        untyped.append(f"{cls.__module__}.{cls.__name__}.{name}")
+    assert untyped == []
+
+
+def _entity_types(module):
+    for member in vars(module).values():
+        if isinstance(member, type) and issubclass(member, ClientObject) and member.__module__ == module.__name__:
+            yield member
+
+
+def test_a_nested_column_declares_the_type_its_getter_returns():
+    # These getters construct the type at runtime but used to leave the return
+    # annotation off, so a declared column resolved to None.
+    assert declared_type(Event, "start") is DateTimeTimeZone
+    assert declared_type(Event, "end") is DateTimeTimeZone
+    assert declared_type(Event, "onlineMeeting") is OnlineMeetingInfo
+    assert declared_type(Event, "attendees") is not None
 
 
 def test_the_codemod_finishes_a_marker_that_names_a_navigation_property(tmp_path):

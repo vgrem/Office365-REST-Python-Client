@@ -140,13 +140,18 @@ def _resolve_declared_type(cls: type, name: str) -> Any:
         target = member.fget if isinstance(member, property) else member
         try:
             declared = get_type_hints(target).get("return")
-        except Exception:
+        except NameError:
+            # A TYPE_CHECKING-only annotation: the getter constructs the type at
+            # runtime, but the name is not resolvable here.
+            declared = None
+        except TypeError:
+            # ``attr`` is not a function (a class constant sharing the wire name).
             declared = None
         if declared is not None:
             return _unwrap_type(declared)
     try:
         declared = get_type_hints(cls).get(name)
-    except Exception:
+    except NameError:
         declared = None
     return _unwrap_type(declared) if declared is not None else None
 

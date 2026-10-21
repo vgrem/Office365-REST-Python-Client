@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from office365.entity import Entity
+from office365.outlook.check_in_method import CheckInMethod
 from office365.runtime.types.odata_property import odata
-
-if TYPE_CHECKING:
-    from office365.outlook.check_in_method import CheckInMethod
 
 
 class CheckInClaim(Entity):
@@ -21,8 +19,6 @@ class CheckInClaim(Entity):
     @property
     def check_in_method(self) -> CheckInMethod:
         """Gets the checkInMethod property"""
-        from office365.outlook.check_in_method import CheckInMethod
-
         return self.properties.get("checkInMethod", CheckInMethod.unspecified)
 
     @odata(name="createdDateTime")

@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.outlook.mail.item_body import ItemBody
+from office365.outlook.mail.recipient import Recipient
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
@@ -16,9 +18,7 @@ if TYPE_CHECKING:
     )
     from office365.directory.extensions.extension import Extension
     from office365.outlook.mail.attachments.attachment import Attachment
-    from office365.outlook.mail.item_body import ItemBody
     from office365.outlook.mail.post import Post
-    from office365.outlook.mail.recipient import Recipient
 
 
 class Post(Entity):
@@ -40,8 +40,6 @@ class Post(Entity):
     @property
     def body(self) -> ItemBody:
         """Gets the body property"""
-        from office365.outlook.mail.item_body import ItemBody
-
         return self.properties.get("body", ItemBody())
 
     @odata(name="conversationThreadId")
@@ -54,8 +52,6 @@ class Post(Entity):
     @property
     def from_(self) -> Recipient:
         """Gets the from property"""
-        from office365.outlook.mail.recipient import Recipient
-
         return self.properties.get("from", Recipient())
 
     @odata(name="hasAttachments")
@@ -68,16 +64,12 @@ class Post(Entity):
     @property
     def new_participants(self) -> ClientValueCollection[Recipient]:
         """Gets the newParticipants property"""
-        from office365.outlook.mail.recipient import Recipient
-
         return self.properties.get("newParticipants", ClientValueCollection[Recipient](Recipient))
 
     @odata(name="sender")
     @property
     def sender(self) -> Recipient:
         """Gets the sender property"""
-        from office365.outlook.mail.recipient import Recipient
-
         return self.properties.get("sender", Recipient())
 
     @odata(name="attachments", navigation=True)

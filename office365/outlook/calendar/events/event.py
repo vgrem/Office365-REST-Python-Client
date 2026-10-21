@@ -5,6 +5,9 @@ from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Self
 
+from office365.communications.onlinemeetings.online_meeting_info import (
+    OnlineMeetingInfo,
+)
 from office365.communications.onlinemeetings.provider_type import (
     OnlineMeetingProviderType,
 )
@@ -39,9 +42,6 @@ from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
-    from office365.communications.onlinemeetings.online_meeting_info import (
-        OnlineMeetingInfo,
-    )
     from office365.outlook.calendar.events.event import Event
 
 
@@ -249,7 +249,7 @@ class Event(OutlookItem):
 
     @odata(name="start")
     @property
-    def start(self):
+    def start(self) -> DateTimeTimeZone:
         """The date, time, and time zone that the event starts. By default, the start time is in UTC."""
         return self.properties.get("start", DateTimeTimeZone())
 
@@ -264,7 +264,7 @@ class Event(OutlookItem):
 
     @odata(name="end")
     @property
-    def end(self):
+    def end(self) -> DateTimeTimeZone:
         """The date, time, and time zone that the event starts. By default, the start time is in UTC."""
         return self.properties.get("end", DateTimeTimeZone())
 
@@ -305,7 +305,7 @@ class Event(OutlookItem):
 
     @odata(name="body")
     @property
-    def body(self):
+    def body(self) -> ItemBody:
         """The body of the message associated with the event. It can be in HTML or text format."""
         return self.properties.get("body", ItemBody())
 
@@ -357,7 +357,7 @@ class Event(OutlookItem):
 
     @odata(name="location")
     @property
-    def location(self):
+    def location(self) -> Location:
         """The location of the event."""
         return self.properties.get("location", Location())
 
@@ -404,7 +404,7 @@ class Event(OutlookItem):
 
     @odata(name="attendees")
     @property
-    def attendees(self):
+    def attendees(self) -> ClientValueCollection[Attendee]:
         """The collection of attendees for the event."""
         return self.properties.setdefault("attendees", ClientValueCollection(Attendee))
 
@@ -516,10 +516,6 @@ class Event(OutlookItem):
     @property
     def online_meeting(self) -> OnlineMeetingInfo:
         """Gets the onlineMeeting property"""
-        from office365.communications.onlinemeetings.online_meeting_info import (
-            OnlineMeetingInfo,
-        )
-
         return self.properties.get("onlineMeeting", OnlineMeetingInfo())
 
     @odata(name="exceptionOccurrences", navigation=True)

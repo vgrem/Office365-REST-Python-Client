@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
+from office365.booking.place_mode import PlaceMode
 from office365.outlook.calendar.place import Place
 from office365.runtime.types.odata_property import odata
-
-if TYPE_CHECKING:
-    from office365.booking.place_mode import PlaceMode
 
 
 class Workspace(Place):
@@ -34,8 +32,6 @@ class Workspace(Place):
     @property
     def mode(self) -> PlaceMode:
         """Gets the mode property"""
-        from office365.booking.place_mode import PlaceMode
-
         return self.properties.get("mode", PlaceMode())
 
     @odata(name="nickname")

@@ -32,6 +32,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ones that do. Declaring an enum-typed property makes a read answer with the
   generated enum member instead of the raw string; `CalendarSource` compares `type`
   through the member name, so calendar exports are unaffected.
+- Every column a served module declares now resolves a declared type: `declared_type(Event, "start")`
+  answers `DateTimeTimeZone` where it answered `None`. Twelve getters that construct a value
+  object carried either no return annotation (`Event.start`/`end`/`body`/`location`/`attendees`,
+  `Calendar.owner`, `Place.address`) or one naming a type imported only under `TYPE_CHECKING`
+  (`Event.onlineMeeting`, `Room.bookingType`/`teamsEnabledState`, `Workspace.mode`,
+  `EventMessage` dates/location/type, `Post`, `Person`, `ProfileCardProperty`,
+  `CheckInClaim`); both left hydration reading a bare dict where the model promises a value
+  object. `converters.value` now distinguishes an unresolvable annotation from a resolution
+  failure instead of swallowing every exception, and a test fails if any `$select` column of a
+  served package stops declaring its type.
 
 **Migration (identity)**
 

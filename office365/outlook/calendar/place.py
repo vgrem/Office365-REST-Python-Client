@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
+from office365.outlook.geo_coordinates import OutlookGeoCoordinates
 from office365.outlook.mail.physical_address import PhysicalAddress
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.collections import StringCollection
@@ -11,7 +12,6 @@ from office365.runtime.types.odata_property import odata
 
 if TYPE_CHECKING:
     from office365.outlook.calendar.check_in_claim import CheckInClaim
-    from office365.outlook.geo_coordinates import OutlookGeoCoordinates
 
 
 class Place(Entity):
@@ -26,7 +26,7 @@ class Place(Entity):
 
     @odata(name="address")
     @property
-    def address(self):
+    def address(self) -> PhysicalAddress:
         """The street address of the place."""
         return self.properties.get("address", PhysicalAddress())
 
@@ -40,8 +40,6 @@ class Place(Entity):
     @property
     def geo_coordinates(self) -> OutlookGeoCoordinates:
         """Gets the geoCoordinates property"""
-        from office365.outlook.geo_coordinates import OutlookGeoCoordinates
-
         return self.properties.get("geoCoordinates", OutlookGeoCoordinates())
 
     @odata(name="isWheelChairAccessible")

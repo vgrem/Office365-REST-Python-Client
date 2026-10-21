@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
+from office365.communications.meetings.messagetype import MeetingMessageType
+from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
+from office365.outlook.mail.location import Location
+from office365.outlook.mail.messages.eventtype import EventType
 from office365.outlook.mail.messages.message import Message
 from office365.outlook.mail.patterned_recurrence import PatternedRecurrence
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.types.odata_property import odata
-
-if TYPE_CHECKING:
-    from office365.communications.meetings.messagetype import MeetingMessageType
-    from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
-    from office365.outlook.mail.location import Location
-    from office365.outlook.mail.messages.eventtype import EventType
 
 
 class EventMessage(Message):
@@ -37,8 +35,6 @@ class EventMessage(Message):
     @property
     def end_date_time(self) -> DateTimeTimeZone:
         """Gets the endDateTime property"""
-        from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
-
         return self.properties.get("endDateTime", DateTimeTimeZone())
 
     @odata(name="isAllDay")
@@ -63,16 +59,12 @@ class EventMessage(Message):
     @property
     def location(self) -> Location:
         """Gets the location property"""
-        from office365.outlook.mail.location import Location
-
         return self.properties.get("location", Location())
 
     @odata(name="meetingMessageType")
     @property
     def meeting_message_type(self) -> MeetingMessageType:
         """Gets the meetingMessageType property"""
-        from office365.communications.meetings.messagetype import MeetingMessageType
-
         return self.properties.get("meetingMessageType", MeetingMessageType.none)
 
     @odata(name="recurrence")
@@ -87,16 +79,12 @@ class EventMessage(Message):
     @property
     def start_date_time(self) -> DateTimeTimeZone:
         """Gets the startDateTime property"""
-        from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
-
         return self.properties.get("startDateTime", DateTimeTimeZone())
 
     @odata(name="type")
     @property
     def type(self) -> EventType:
         """Gets the type property"""
-        from office365.outlook.mail.messages.eventtype import EventType
-
         return self.properties.get("type", EventType.singleInstance)
 
     @property

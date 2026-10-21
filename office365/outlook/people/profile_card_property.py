@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
+from office365.directory.profile_card_annotation import ProfileCardAnnotation
 from office365.entity import Entity
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.runtime.types.odata_property import odata
-
-if TYPE_CHECKING:
-    from office365.directory.profile_card_annotation import ProfileCardAnnotation
 
 
 class ProfileCardProperty(Entity):
@@ -27,8 +25,6 @@ class ProfileCardProperty(Entity):
     @property
     def annotations(self) -> ClientValueCollection[ProfileCardAnnotation]:
         """Gets the annotations property"""
-        from office365.directory.profile_card_annotation import ProfileCardAnnotation
-
         return self.properties.get("annotations", ClientValueCollection[ProfileCardAnnotation](ProfileCardAnnotation))
 
     @odata(name="directoryPropertyName")
