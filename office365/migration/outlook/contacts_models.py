@@ -52,15 +52,13 @@ from office365.outlook.contacts.contact import Contact
 #: indistinguishable from a contact that has no value for it.
 CONTACT_COLUMNS = Contact.select_all()
 
-#: What Exchange assigns to a contact, so an import must not replay it.
-_SERVER_ASSIGNED = frozenset(
-    {"id", "changeKey", "parentFolderId", "primaryEmailAddress", "createdDateTime", "lastModifiedDateTime"}
-)
-#: The sidecar's remaining vocabulary needs no list of its own: a field is a contact field
-#: if the model declares it, which is why this is the projection minus that set — a column
-#: the model gains is exported, replayed and verified without a function here changing, and
-#: the export's own bookkeeping is excluded for the same reason: not being declared.
-_RESTORED = frozenset(CONTACT_COLUMNS) - _SERVER_ASSIGNED
+#: What an import may replay: everything the model declares that the service does not own.
+#: The ownership is the model's own statement (``@odata(readonly=True)``: the id, the folder
+#: the contact was read from, the address Exchange derived, the audit stamps), so the
+#: replay set is a projection of the same declarations the export selects — a column the
+#: model gains is exported, replayed and verified without a function here changing, and the
+#: export's own bookkeeping is excluded for the same reason: not being declared.
+_RESTORED = frozenset(CONTACT_COLUMNS) - Contact._readonly_names
 
 #: The keys this module adds to the model's payload — the only vocabulary it owns.
 _FOLDER_KEY = "folder_path"

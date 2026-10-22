@@ -55,6 +55,12 @@ class ClientObject:
     _limit_meta: dict[str, Tuple[LimitDecl, ...]] = {}
     _class_limit_decls: Tuple[LimitDecl, ...] = ()
 
+    #: The two projections of ``_odata_meta`` a payload needs, kept as facts about the
+    #: class rather than rebuilt per instance: a caller that wants to know what a type
+    #: will send asks ``Contact._readonly_names``.
+    _readonly_names: ClassVar[frozenset[str]] = frozenset()
+    _persistable_names: ClassVar[frozenset[str]] = frozenset()
+
     #: The OData name this class declares (``"microsoft.graph.Event"``), emitted by the
     #: generator. A class-level fact, so name resolution reads it without building an
     #: instance; see :func:`office365.runtime.odata.edm.edm_type_name`.
@@ -70,6 +76,8 @@ class ClientObject:
                 m.attr = attr_name
                 meta[m.name] = m
         cls._odata_meta = meta
+        cls._readonly_names = frozenset(name for name, m in meta.items() if m.readonly)
+        cls._persistable_names = frozenset(name for name, m in meta.items() if m.persist)
         cls._limit_meta = collect_limit_meta(cls)
         cls._class_limit_decls = collect_class_limits(cls)
 
@@ -168,16 +176,6 @@ class ClientObject:
         self._changes.clear()
         self._query_options = QueryOptions()
         return self
-
-    @property
-    def _persistable_names(self) -> set[str]:
-        """Names of properties marked ``@odata(persist=True)``."""
-        return {name for name, m in type(self)._odata_meta.items() if m.persist}
-
-    @property
-    def _readonly_names(self) -> set[str]:
-        """Names of properties marked ``@odata(readonly=True)``."""
-        return {name for name, m in type(self)._odata_meta.items() if m.readonly}
 
     @classmethod
     def declared_limits(cls) -> Tuple[Limit, ...]:

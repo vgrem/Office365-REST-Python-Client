@@ -23,8 +23,10 @@ import scripts.mark_odata as codemod
 from office365.communications.onlinemeetings.online_meeting_info import OnlineMeetingInfo
 from office365.directory.identity_set import IdentitySet
 from office365.directory.permissions.identity import Identity
+from office365.entity import Entity
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.events.event import Event
+from office365.outlook.contacts.contact import Contact
 from office365.outlook.mail.messages.message import Message
 from office365.planner.assignment import PlannerAssignment
 from office365.runtime.client_object import ClientObject
@@ -184,6 +186,22 @@ def test_declaring_a_nested_field_is_opt_in():
     assert declared["assignedBy"].name == "assignedBy"
     assert "orderHint" not in declared  # undeclared fields keep their own name
     assert field_declarations(IdentitySet) == {}  # 2,887 nested types are untouched
+
+
+def test_the_two_payload_projections_are_answered_by_the_class():
+    """Who owns a value is a fact about the type, so a module asks the type.
+
+    ``_readonly_names`` is the projection a request path filters with, and the one a
+    replay set is derived from (``contacts_models``). Rebuilt per instance it is a
+    fact nobody outside the instance can read; built once per class it is the same
+    answer for every instance and for the class itself.
+    """
+    assert Event._readonly_names == frozenset(name for name, meta in Event._odata_meta.items() if meta.readonly)
+    assert Event(None)._readonly_names is Event._readonly_names
+    assert ClientObject._readonly_names == frozenset()  # a type that declares nothing
+    assert "id" in Entity._readonly_names  # inherited by every entity
+    assert "id" in Contact._readonly_names
+    assert Contact._persistable_names == frozenset()
 
 
 def test_the_decorator_carrier_attaches_the_same_metadata():

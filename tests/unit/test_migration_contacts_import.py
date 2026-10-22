@@ -24,6 +24,8 @@ from office365.migration.outlook import (
     ContactTarget,
     VcfTreeSource,
 )
+from office365.migration.outlook.contacts_models import _RESTORED, CONTACT_COLUMNS
+from office365.outlook.contacts.contact import Contact
 from tests._scripted_transport import MethodRoutingTransport
 
 
@@ -295,9 +297,42 @@ def test_payload_carries_the_contact_fields_an_import_restores():
         "postalCode": "62701",
         "countryOrRegion": "USA",
     }
-    # Server-owned: sending them back is at best ignored.
-    for owned in ("id", "createdDateTime", "lastModifiedDateTime", "changeKey", "parentFolderId"):
+    # Server-owned: sending them back is at best ignored. This is a reading of the model's
+    # own statement (``@odata(readonly=True)``), not a second copy of it.
+    for owned in (
+        "id",
+        "createdDateTime",
+        "lastModifiedDateTime",
+        "changeKey",
+        "parentFolderId",
+        "primaryEmailAddress",
+    ):
         assert owned not in payload, owned
+        assert owned in Contact._readonly_names, owned
+
+
+def test_the_replay_set_is_the_model_s_projection_of_what_the_service_does_not_own():
+    """The replay set is derived, not kept beside the model.
+
+    A partition rather than a list: the columns the model marks readonly and the columns an
+    import replays add up to every column the export selects, with no overlap — so a column
+    the model gains is exported, replayed and verified without this module changing, and a
+    column the model marks readonly cannot quietly stay in the replay set.
+    """
+    owned = Contact._readonly_names & frozenset(CONTACT_COLUMNS)
+
+    assert owned == frozenset(
+        {
+            "id",
+            "changeKey",
+            "createdDateTime",
+            "lastModifiedDateTime",
+            "parentFolderId",
+            "primaryEmailAddress",
+        }
+    )
+    assert owned | _RESTORED == frozenset(CONTACT_COLUMNS), "a column is neither replayed nor owned"
+    assert not owned & _RESTORED, "a column is both replayed and owned"
 
 
 def test_payload_posts_an_email_entry_as_the_sidecar_holds_it():

@@ -241,7 +241,7 @@ class Contact(OutlookItem):
         """Gets the otherAddress property"""
         return self.properties.get("otherAddress", PhysicalAddress())
 
-    @odata(name="parentFolderId")
+    @odata(name="parentFolderId", readonly=True)
     @property
     def parent_folder_id(self) -> Optional[str]:
         """Gets the parentFolderId property"""
@@ -253,7 +253,7 @@ class Contact(OutlookItem):
         """Gets the personalNotes property"""
         return self.properties.get("personalNotes", None)
 
-    @odata(name="primaryEmailAddress")
+    @odata(name="primaryEmailAddress", readonly=True)
     @property
     def primary_email_address(self) -> EmailAddress:
         """Gets the primaryEmailAddress property"""

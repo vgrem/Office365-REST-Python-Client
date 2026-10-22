@@ -7,13 +7,14 @@ from office365.runtime.types.odata_property import odata
 
 
 class OutlookItem(Entity):
+    @odata(name="changeKey", readonly=True)
     @property
     def change_key(self) -> Optional[str]:
         """
         Identifies the version of the item. Every time the item is changed, changeKey changes as well.
         This allows Exchange to apply changes to the correct version of the object.
         """
-        return self.properties.get("ChangeKey", None)
+        return self.properties.get("changeKey", None)
 
     @odata(name="categories")
     @property
