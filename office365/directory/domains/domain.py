@@ -43,6 +43,17 @@ class Domain(Entity):
         self.context.add_query(qry)
         return return_type
 
+    @odata(name="id")
+    @property
+    def id(self) -> Optional[str]:
+        """The domain name, which the caller supplies when adding the domain.
+
+        Every other entity's ``id`` is assigned by the service, so ``Entity`` declares it
+        ``readonly`` and a request body never carries it; a domain is the exception, and
+        this declaration is the only place that says so.
+        """
+        return self.properties.get("id", None)
+
     @odata(name="supportedServices")
     @property
     def supported_services(self) -> StringCollection:

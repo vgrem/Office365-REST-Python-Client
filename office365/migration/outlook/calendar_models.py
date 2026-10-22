@@ -31,13 +31,14 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Mapping
+from typing import Any, Dict, Mapping, cast
 
 from office365.migration.outlook.calendar_codec import MAX_LINE_OCTETS, encode
 from office365.migration.outlook.calendar_profile import COMPARED, wall_clock
 from office365.migration.outlook.models import mail_slug
 from office365.outlook.calendar.events.event import Event
 from office365.runtime.converters.value import serialize_value
+from office365.runtime.odata.v4.json_format import V4JsonFormat
 
 #: Graph event properties an export reads: every column the model declares.
 #: Derived rather than listed, so a $select cannot disagree with the getters that
@@ -185,84 +186,58 @@ def event_ics(envelope: Mapping[str, Any]) -> bytes:
     return encode(envelope)
 
 
-def _moment(value: Mapping[str, Any] | None) -> dict[str, str]:
-    """A Graph ``{dateTime, timeZone}`` pair as the payload's own shape."""
-    pair = value or {}
-    return {"dateTime": str(pair.get("dateTime")), "timeZone": str(pair.get("timeZone") or "UTC")}
-
-
-def _attendees(envelope: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """The attendee list Graph accepts: the people, without the responses it assigns."""
-    payloads: list[dict[str, Any]] = []
-    for attendee in envelope.get("attendees") or []:
-        person = attendee.get("emailAddress") or {}
-        if not person.get("address"):
-            continue
-        email = {"address": person["address"]}
-        if person.get("name"):
-            email["name"] = person["name"]
-        payloads.append({"emailAddress": email, "type": attendee.get("type") or "required"})
-    return payloads
-
-
 def event_create_payload(envelope: Mapping[str, Any], options: CalendarImportOptions | None = None) -> dict[str, Any]:
     """The Graph ``POST /events`` body for an envelope.
 
-    Graph's own spelling, because the target posts it verbatim: sending the typed
-    ``DateTimeTimeZone`` helper instead loses the zone (it comes back ``UTC``) and the
-    ``transactionId``, and ``EventCollection.add()`` rejects a dict for ``start``
-    outright (both measured).
-
-    The field list is deliberately an allow-list of what a live round trip proved
-    Exchange accepts — not "everything the model declares" — because a column Exchange
-    assigns itself (``iCalUId``, the organizer, attendee responses, ``created``/
-    ``modified``, ``type``) is either rejected or overwritten, and an extra property
-    recorded in the sidecar is there to survive the export, not to be replayed.
+    The model reads its own sidecar and spells the body: ``hydrate`` fills an ``Event``
+    from the envelope (coercing each value to its declared type), and ``to_json`` with a
+    profile emits it as a request payload, dropping what the service owns
+    (``@odata(readonly=True)``: the id, the organizer, the attendee responses, the audit
+    stamps) and the ``extra_properties`` an export records only to survive a round trip.
+    What is left is exactly what an import may restore; the options then decide how much
+    of it to send. Nothing here spells a Graph field.
     """
     options = options or CalendarImportOptions()
     _model_spelling(envelope)
-    start, end = envelope.get("start") or {}, envelope.get("end") or {}
+
+    # A draft has no context: nothing is queried through it, it is only spelled back out.
+    draft = Event(None)  # type: ignore[arg-type]
+    V4JsonFormat().hydrate(draft, envelope, persist_changes=True)
+    spelled = cast(Dict[str, Any], draft.to_json(V4JsonFormat("none")))
+    body: dict[str, Any] = {
+        name: value
+        for name, value in spelled.items()
+        # The model's own vocabulary, and only what it can actually say: an undeclared key
+        # is provenance an export records for its ledger, and a null/empty value is the
+        # absence of a statement, not a request to clear a field.
+        if name in Event._odata_meta and value not in (None, {}, [])
+    }
+    start, end = body.get("start") or {}, body.get("end") or {}
     if not start.get("dateTime") or not end.get("dateTime"):
         raise ValueError("the sidecar has no start/end dateTime: an event cannot be created without a time range")
-    body: dict[str, Any] = {"subject": envelope.get("subject") or "", "start": _moment(start), "end": _moment(end)}
-    content = envelope.get("body") or {}
-    if content.get("content"):
-        # Graph accepts the content type case-insensitively, but "HTML"/"Text" is what
-        # this exporter has always sent and what the live round trips were proven with.
-        is_html = str(content.get("contentType") or "").lower() == "html"
-        body["body"] = {"contentType": "HTML" if is_html else "Text", "content": content["content"]}
-    if envelope.get("isAllDay"):
-        body["isAllDay"] = True
-    if (envelope.get("location") or {}).get("displayName"):
-        body["location"] = dict(envelope["location"])
-    locations = [item for item in envelope.get("locations") or [] if (item or {}).get("displayName")]
-    if locations:
-        body["locations"] = [dict(item) for item in locations]
-    if options.restore_attendees:
-        attendees = _attendees(envelope)
-        if attendees:
-            body["attendees"] = attendees
-    if options.restore_categories:
-        categories = [name for name in envelope.get("categories") or [] if name]
-        if categories:
-            body["categories"] = categories
-    for name in ("showAs", "sensitivity", "importance"):
-        if envelope.get(name):
-            body[name] = envelope[name]
-    if "isReminderOn" in envelope:
-        body["isReminderOn"] = bool(envelope.get("isReminderOn"))
-        minutes = envelope.get("reminderMinutesBeforeStart")
-        if body["isReminderOn"] and isinstance(minutes, int) and minutes > 0:
-            body["reminderMinutesBeforeStart"] = minutes
-    recurrence = envelope.get("recurrence")
-    if isinstance(recurrence, str):
+    if isinstance(body.get("recurrence"), str):
         raise ValueError(
-            f"the sidecar records the recurrence as text ({recurrence[:60]!r}): it was written by a version of"
-            " the exporter that serialised Graph's typed object with ``repr``, so the series cannot be"
+            f"the sidecar records the recurrence as text ({body['recurrence'][:60]!r}): it was written by a version"
+            " of the exporter that serialised Graph's typed object with ``repr``, so the series cannot be"
             " replayed — re-export the calendar and import that tree"
         )
-    if isinstance(recurrence, dict) and recurrence:
-        body["recurrence"] = recurrence
+
+    content = body.get("body")
+    if not (content and content.get("content")):
+        body.pop("body", None)
+    else:
+        # Graph is case-insensitive here (measured); ``HTML``/``Text`` is what an import has
+        # always sent, so the model's ``html`` is re-cased rather than the wire moving silently.
+        content["contentType"] = "HTML" if str(content.get("contentType")).lower() == "html" else "Text"
+    if not options.restore_attendees:
+        body.pop("attendees", None)
+    else:
+        # ``status`` is the attendee's own reply, which Exchange assigns: an import sends the
+        # people, not the answers. Dropped here until a live create probe says otherwise.
+        for attendee in body["attendees"]:
+            attendee.pop("status", None)
+    if not options.restore_categories:
+        body.pop("categories", None)
     if options.use_transaction_ids:
         body["transactionId"] = event_transaction_id(envelope)
     return body

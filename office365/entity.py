@@ -139,7 +139,7 @@ class Entity(ClientObject):
             self._entity_type_name = "microsoft.graph." + name[0].lower() + name[1:]
         return self._entity_type_name
 
-    @odata(name="id")
+    @odata(name="id", readonly=True)
     @property
     def id(self) -> str | None:
         """Gets the unique identifier of the entity.

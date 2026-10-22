@@ -16,6 +16,7 @@ class ODataPropertyMeta:
     name: str
     attr: str = ""
     persist: bool = False
+    readonly: bool = False
     navigation: bool = False
     filterable: bool = False
     nullable: bool = True
@@ -30,6 +31,10 @@ def odata(name: str, **attrs: bool | str):
     Args:
         name: The JSON key name in the Graph API response.
         **attrs: Optional attributes (persist, navigation, nullable, ...).
+
+    ``readonly=True`` marks a property the service assigns (its id, its audit
+    stamps, the organizer it resolved, the response it recorded): a response
+    carries it, a request must not.
 
     ``navigation=True`` marks a CSDL ``NavigationProperty``: it is reached with
     ``$expand`` and cannot appear in ``$select``.

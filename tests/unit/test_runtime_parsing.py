@@ -15,6 +15,7 @@ from office365.directory.objects.collection import DirectoryObjectCollection
 from office365.directory.objects.object import DirectoryObject
 from office365.directory.serviceprincipals.service_principal import ServicePrincipal
 from office365.directory.users.user import User
+from office365.entity import Entity
 from office365.graph_client import GraphClient
 from office365.intune.devices.device import Device
 from office365.onedrive.driveitems.driveItem import DriveItem
@@ -34,6 +35,7 @@ from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 from office365.runtime.types.collections import StringCollection
+from office365.runtime.types.odata_property import odata
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.exceptions import SPQueryThrottledException
 from requests import Response
@@ -609,3 +611,34 @@ class TestBuildPayload(unittest.TestCase):
             payload["SortList"]["__metadata"],
             {"type": "Collection(SP.Search.Query.Sort)"},
         )
+
+
+class _Drafted(Entity):
+    """A model with a service-owned column and a caller-owned one."""
+
+    @odata(name="subject")
+    @property
+    def subject(self) -> str | None:
+        return self.properties.get("subject", None)
+
+    @odata(name="iCalUId", readonly=True)
+    @property
+    def i_cal_uid(self) -> str | None:
+        return self.properties.get("iCalUId", None)
+
+
+class TestAPropertyTheServiceOwns(unittest.TestCase):
+    def test_it_is_read_from_a_response_and_never_written_back(self):
+        """A response carries the id the service assigned; a request must not claim it."""
+        target = _Drafted(None)  # type: ignore[arg-type]
+        V4JsonFormat().hydrate(target, {"subject": "Q1", "iCalUId": "0400"}, persist_changes=True)
+
+        self.assertEqual({"subject": "Q1"}, target.to_json(V4JsonFormat("none")))
+        self.assertEqual({"subject": "Q1", "iCalUId": "0400"}, target.to_json())
+
+    def test_a_response_is_not_a_draft_and_marks_nothing(self):
+        target = _Drafted(None)  # type: ignore[arg-type]
+        V4JsonFormat().hydrate(target, {"subject": "Q1"})
+
+        self.assertEqual({}, target.to_json(V4JsonFormat("none")))
+        self.assertEqual({"subject": "Q1"}, target.to_json())

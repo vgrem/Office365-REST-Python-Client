@@ -152,7 +152,7 @@ class Event(OutlookItem):
         self.context.add_query(qry)
         return self
 
-    @odata(name="allowNewTimeProposals")
+    @odata(name="allowNewTimeProposals", readonly=True)
     @property
     def allow_new_time_proposals(self) -> Optional[bool]:
         """
@@ -161,7 +161,7 @@ class Event(OutlookItem):
         """
         return self.properties.get("allowNewTimeProposals", None)
 
-    @odata(name="hasAttachments")
+    @odata(name="hasAttachments", readonly=True)
     @property
     def has_attachments(self) -> Optional[bool]:
         """Set to true if the event has attachments."""
@@ -176,7 +176,7 @@ class Event(OutlookItem):
         """
         return self.properties.get("hideAttendees", None)
 
-    @odata(name="iCalUId")
+    @odata(name="iCalUId", readonly=True)
     @property
     def ical_uid(self) -> Optional[str]:
         """
@@ -200,7 +200,7 @@ class Event(OutlookItem):
         """
         return self.properties.get("isAllDay", None)
 
-    @odata(name="isCancelled")
+    @odata(name="isCancelled", readonly=True)
     @property
     def is_cancelled(self) -> Optional[bool]:
         """
@@ -208,7 +208,7 @@ class Event(OutlookItem):
         """
         return self.properties.get("isCancelled", None)
 
-    @odata(name="isDraft")
+    @odata(name="isDraft", readonly=True)
     @property
     def is_draft(self) -> Optional[bool]:
         """
@@ -229,7 +229,7 @@ class Event(OutlookItem):
         """
         return self.properties.get("isOnlineMeeting", None)
 
-    @odata(name="isOrganizer")
+    @odata(name="isOrganizer", readonly=True)
     @property
     def is_organizer(self) -> Optional[bool]:
         """
@@ -277,7 +277,7 @@ class Event(OutlookItem):
         """
         self.set_property("end", DateTimeTimeZone.parse(value))
 
-    @odata(name="singleValueExtendedProperties", navigation=True)
+    @odata(name="singleValueExtendedProperties", navigation=True, readonly=True)
     @property
     def single_value_extended_properties(self) -> EntityCollection[SingleValueLegacyExtendedProperty]:
         """The collection of single-value extended properties defined for the event."""
@@ -290,7 +290,7 @@ class Event(OutlookItem):
             ),
         )
 
-    @odata(name="multiValueExtendedProperties", navigation=True)
+    @odata(name="multiValueExtendedProperties", navigation=True, readonly=True)
     @property
     def multi_value_extended_properties(self) -> EntityCollection[MultiValueLegacyExtendedProperty]:
         """The collection of multi-value extended properties defined for the event."""
@@ -314,7 +314,7 @@ class Event(OutlookItem):
         """Sets The body of the message associated with the event. It can be in HTML or text format."""
         self.set_property("body", ItemBody(value, BodyType.html))
 
-    @odata(name="bodyPreview")
+    @odata(name="bodyPreview", readonly=True)
     @property
     def body_preview(self) -> Optional[str]:
         """The preview of the message associated with the event. It is in text format."""
@@ -332,13 +332,13 @@ class Event(OutlookItem):
         """Default is true, which represents the organizer would like an invitee to send a response to the event."""
         return self.properties.get("responseRequested", None)
 
-    @odata(name="responseStatus")
+    @odata(name="responseStatus", readonly=True)
     @property
     def response_status(self) -> Optional[str]:
         """Indicates the type of response sent in response to an event message."""
         return self.properties.get("responseStatus", ResponseStatus())
 
-    @odata(name="seriesMasterId")
+    @odata(name="seriesMasterId", readonly=True)
     @property
     def series_master_id(self) -> Optional[str]:
         """The ID for the recurring series master item, if this event is part of a recurring series."""
@@ -373,7 +373,7 @@ class Event(OutlookItem):
         """
         return self.properties.get("transactionId", None)
 
-    @odata(name="type")
+    @odata(name="type", readonly=True)
     @property
     def type(self) -> Optional[str]:
         """
@@ -381,7 +381,7 @@ class Event(OutlookItem):
         """
         return self.properties.get("type", None)
 
-    @odata(name="webLink")
+    @odata(name="webLink", readonly=True)
     @property
     def web_link(self) -> Optional[str]:
         """
@@ -394,7 +394,7 @@ class Event(OutlookItem):
         """
         return self.properties.get("webLink", None)
 
-    @odata(name="calendar", navigation=True)
+    @odata(name="calendar", navigation=True, readonly=True)
     @property
     def calendar(self):
         """The calendar that contains the event. Navigation property. Read-only."""
@@ -408,7 +408,7 @@ class Event(OutlookItem):
         """The collection of attendees for the event."""
         return self.properties.setdefault("attendees", ClientValueCollection(Attendee))
 
-    @odata(name="attachments", navigation=True)
+    @odata(name="attachments", navigation=True, readonly=True)
     @property
     def attachments(self):
         """The collection of fileAttachment and itemAttachment attachments for the event."""
@@ -416,7 +416,7 @@ class Event(OutlookItem):
             "attachments", AttachmentCollection(self.context, ResourcePath("attachments", self.resource_path))
         )
 
-    @odata(name="extensions", navigation=True)
+    @odata(name="extensions", navigation=True, readonly=True)
     @property
     def extensions(self) -> EntityCollection[Extension]:
         """The collection of open extensions defined for the event. Nullable."""
@@ -424,7 +424,7 @@ class Event(OutlookItem):
             "extensions", EntityCollection(self.context, Extension, ResourcePath("extensions", self.resource_path))
         )
 
-    @odata(name="instances", navigation=True)
+    @odata(name="instances", navigation=True, readonly=True)
     @property
     def instances(self):
         """The occurrences of a recurring series, if the event is a series master. This property includes occurrences
@@ -436,7 +436,7 @@ class Event(OutlookItem):
             "instances", EventCollection(self.context, ResourcePath("instances", self.resource_path))
         )
 
-    @odata(name="cancelledOccurrences")
+    @odata(name="cancelledOccurrences", readonly=True)
     @property
     def cancelled_occurrences(self) -> StringCollection:
         """Gets the cancelledOccurrences property"""
@@ -454,31 +454,31 @@ class Event(OutlookItem):
         """Gets the onlineMeetingProvider property"""
         return self.properties.get("onlineMeetingProvider", OnlineMeetingProviderType.unknown)
 
-    @odata(name="onlineMeetingUrl")
+    @odata(name="onlineMeetingUrl", readonly=True)
     @property
     def online_meeting_url(self) -> Optional[str]:
         """Gets the onlineMeetingUrl property"""
         return self.properties.get("onlineMeetingUrl", None)
 
-    @odata(name="organizer")
+    @odata(name="organizer", readonly=True)
     @property
     def organizer(self) -> Recipient:
         """Gets the organizer property"""
         return self.properties.get("organizer", Recipient())
 
-    @odata(name="originalEndTimeZone")
+    @odata(name="originalEndTimeZone", readonly=True)
     @property
     def original_end_time_zone(self) -> Optional[str]:
         """Gets the originalEndTimeZone property"""
         return self.properties.get("originalEndTimeZone", None)
 
-    @odata(name="originalStart")
+    @odata(name="originalStart", readonly=True)
     @property
     def original_start(self) -> datetime:
         """Gets the originalStart property"""
         return self.properties.get("originalStart", datetime.min)
 
-    @odata(name="originalStartTimeZone")
+    @odata(name="originalStartTimeZone", readonly=True)
     @property
     def original_start_time_zone(self) -> Optional[str]:
         """Gets the originalStartTimeZone property"""
@@ -502,7 +502,7 @@ class Event(OutlookItem):
         """Gets the showAs property"""
         return self.properties.get("showAs", FreeBusyStatus.unknown)
 
-    @odata(name="type")
+    @odata(name="type", readonly=True)
     @property
     def type_(self) -> EventType:
         """Gets the type property"""
@@ -512,13 +512,13 @@ class Event(OutlookItem):
     def entity_type_name(self) -> str:
         return "microsoft.graph.Event"
 
-    @odata(name="onlineMeeting")
+    @odata(name="onlineMeeting", readonly=True)
     @property
     def online_meeting(self) -> OnlineMeetingInfo:
         """Gets the onlineMeeting property"""
         return self.properties.get("onlineMeeting", OnlineMeetingInfo())
 
-    @odata(name="exceptionOccurrences", navigation=True)
+    @odata(name="exceptionOccurrences", navigation=True, readonly=True)
     @property
     def exception_occurrences(self) -> EntityCollection[Event]:
         """Gets the exceptionOccurrences property"""

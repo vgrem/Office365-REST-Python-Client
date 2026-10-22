@@ -174,6 +174,11 @@ class ClientObject:
         """Names of properties marked ``@odata(persist=True)``."""
         return {name for name, m in type(self)._odata_meta.items() if m.persist}
 
+    @property
+    def _readonly_names(self) -> set[str]:
+        """Names of properties marked ``@odata(readonly=True)``."""
+        return {name for name, m in type(self)._odata_meta.items() if m.readonly}
+
     @classmethod
     def declared_limits(cls) -> Tuple[Limit, ...]:
         """The limits declared on this class and its methods/properties (``@limit``)."""
@@ -612,8 +617,12 @@ class ClientObject:
         if json_format is None:
             json = {k: self.get_property(k) for k in self._properties}
         else:
-            persistable = self._persistable_names
-            json = {k: self.get_property(k) for k in self._properties if k in self._changes or k in persistable}
+            persistable, readonly = self._persistable_names, self._readonly_names
+            json = {
+                k: self.get_property(k)
+                for k in self._properties
+                if (k in self._changes or k in persistable) and k not in readonly
+            }
         # ``__``-prefixed keys are this client's own bookkeeping, ingested from a
         # response (``__etag`` for ``If-Match``, ``__odata_type``, ``__deferred``):
         # they describe the response, never the entity, so no payload carries them.

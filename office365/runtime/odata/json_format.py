@@ -157,7 +157,7 @@ class JsonProfile:
             return [self.build_payload(item) for item in source]
         return serialize_value(source, self)
 
-    def hydrate(self, target: Any, payload: Any, wrapper: Optional[str] = None) -> None:
+    def hydrate(self, target: Any, payload: Any, wrapper: Optional[str] = None, persist_changes: bool = False) -> None:
         """Ingest ``payload`` into ``target`` through this dialect.
 
         Args:
@@ -165,11 +165,14 @@ class JsonProfile:
             payload: The decoded JSON body
             wrapper: Name of a service operation/function wrapper key, if the
                 dialect wraps its result (JSON Light does, OData V4 does not)
+            persist_changes: Mark what was read as a change, for a payload that is
+                read in order to be written elsewhere (a draft): a response is
+                ingested as-is, a draft is ingested as intent
         """
         if not payload or not isinstance(payload, (dict, list)):
             return
         for name, value in self.iter_payload(payload, wrapper):
-            target.set_property(str(name), value, False)
+            target.set_property(str(name), value, persist_changes)
 
     def iter_payload(self, payload: Any, wrapper: Optional[str] = None) -> Iterator[Tuple[Union[str, int], Any]]:
         """Yield ``(property name, value)`` pairs from a decoded JSON body.
