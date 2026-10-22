@@ -15,6 +15,7 @@ import importlib
 import pathlib
 import pkgutil
 import shutil
+from dataclasses import dataclass, field
 
 import pytest
 import scripts.mark_odata as codemod
@@ -23,7 +24,9 @@ from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.events.event import Event
 from office365.outlook.mail.messages.message import Message
 from office365.runtime.client_object import ClientObject
+from office365.runtime.client_value import ClientValue
 from office365.runtime.converters.value import declared_type
+from office365.runtime.types.odata_property import _ODATA_MARKER, ODataPropertyMeta, odata
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Packages whose getters are expected to be fully declared today.
@@ -138,6 +141,32 @@ def test_the_codemod_finishes_a_marker_that_names_a_navigation_property(tmp_path
     assert '@odata(name="singleValueExtendedProperties", navigation=True)' in target.read_text(encoding="utf-8")
     # Idempotent: a finished marker is not touched again.
     assert codemod.mark_module(target, codemod.load_catalog()) == 0
+
+
+def test_one_declaration_serves_a_property_and_a_dataclass_field():
+    # A ClientValue is a dataclass, so it has fields where a ClientObject has
+    # properties. The fact is the same one -- the JSON key, and who owns the value --
+    # so the declaration is the same: callable for a property, a Mapping for a field.
+    declaration = odata(name="assignedDateTime", readonly=True)
+    assert declaration[_ODATA_MARKER].name == "assignedDateTime"
+    assert declaration[_ODATA_MARKER].readonly is True
+
+    @dataclass
+    class Draft(ClientValue):
+        assigned_date_time: str | None = field(default=None, metadata=odata(name="assignedDateTime"))
+
+    declared = Draft.__dataclass_fields__["assigned_date_time"].metadata[_ODATA_MARKER]
+    assert isinstance(declared, ODataPropertyMeta)
+    assert declared.name == "assignedDateTime"
+
+
+def test_the_decorator_carrier_attaches_the_same_metadata():
+    # 892 getters are declared this way; the Mapping form must not have changed it.
+    class Thing:
+        @odata(name="iCalUId", readonly=True)
+        def ical_uid(self): ...
+
+    assert getattr(Thing.ical_uid, _ODATA_MARKER) == ODataPropertyMeta(name="iCalUId", readonly=True)
 
 
 def test_the_codemod_leaves_a_marked_module_alone(tmp_path):
