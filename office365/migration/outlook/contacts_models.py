@@ -58,7 +58,7 @@ CONTACT_COLUMNS = Contact.select_all()
 #: replay set is a projection of the same declarations the export selects — a column the
 #: model gains is exported, replayed and verified without a function here changing, and the
 #: export's own bookkeeping is excluded for the same reason: not being declared.
-_RESTORED = frozenset(CONTACT_COLUMNS) - Contact._readonly_names
+_RESTORED = frozenset(CONTACT_COLUMNS) - Contact._schema.readonly
 
 #: The keys this module adds to the model's payload — the only vocabulary it owns.
 _FOLDER_KEY = "folder_path"

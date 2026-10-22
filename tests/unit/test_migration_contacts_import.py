@@ -308,7 +308,7 @@ def test_payload_carries_the_contact_fields_an_import_restores():
         "primaryEmailAddress",
     ):
         assert owned not in payload, owned
-        assert owned in Contact._readonly_names, owned
+        assert owned in Contact._schema.readonly, owned
 
 
 def test_the_replay_set_is_the_model_s_projection_of_what_the_service_does_not_own():
@@ -319,7 +319,7 @@ def test_the_replay_set_is_the_model_s_projection_of_what_the_service_does_not_o
     the model gains is exported, replayed and verified without this module changing, and a
     column the model marks readonly cannot quietly stay in the replay set.
     """
-    owned = Contact._readonly_names & frozenset(CONTACT_COLUMNS)
+    owned = Contact._schema.readonly & frozenset(CONTACT_COLUMNS)
 
     assert owned == frozenset(
         {

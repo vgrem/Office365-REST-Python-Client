@@ -17,6 +17,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, get_args, get_origin, get_type_hints
 
 from office365.runtime.converters.scalars import parse_bool, parse_datetime, parse_enum, try_float, try_int
+from office365.runtime.schema import EMPTY
 
 if TYPE_CHECKING:
     from office365.runtime.odata.json_format import JsonProfile
@@ -117,7 +118,7 @@ def declared_type(cls: type, name: str) -> Any:
 
 
 def _resolve_declared_type(cls: type, name: str) -> Any:
-    meta = getattr(cls, "_odata_meta", {}).get(name)
+    meta = getattr(cls, "_schema", EMPTY).properties.get(name)
     if meta is not None:
         attrs = (meta.attr,)
     else:

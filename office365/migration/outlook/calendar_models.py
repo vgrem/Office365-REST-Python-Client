@@ -210,7 +210,7 @@ def event_create_payload(envelope: Mapping[str, Any], options: CalendarImportOpt
         # The model's own vocabulary, and only what it can actually say: an undeclared key
         # is provenance an export records for its ledger, and a null/empty value is the
         # absence of a statement, not a request to clear a field.
-        if name in Event._odata_meta and value not in (None, {}, [])
+        if name in Event._schema.properties and value not in (None, {}, [])
     }
     start, end = body.get("start") or {}, body.get("end") or {}
     if not start.get("dateTime") or not end.get("dateTime"):

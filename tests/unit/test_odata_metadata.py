@@ -43,15 +43,15 @@ _SERVED = ("office365/outlook",)
 def test_the_wire_name_of_ical_uid_survives_where_a_naming_inverse_would_fail():
     # to_snake_case("iCalUId") is i_cal_u_id while the getter is ical_uid, so only
     # the declaration can answer; the attribute tells the stack where to read it.
-    assert Event._odata_meta["iCalUId"].attr == "ical_uid"
+    assert Event._schema.properties["iCalUId"].attr == "ical_uid"
 
 
 def test_navigation_properties_are_declared_as_such():
     # $select cannot name a navigation property, so it must be distinguishable.
-    assert Event._odata_meta["calendar"].navigation is True
-    assert Event._odata_meta["attachments"].navigation is True
-    assert Event._odata_meta["singleValueExtendedProperties"].navigation is True
-    assert Event._odata_meta["iCalUId"].navigation is False
+    assert Event._schema.properties["calendar"].navigation is True
+    assert Event._schema.properties["attachments"].navigation is True
+    assert Event._schema.properties["singleValueExtendedProperties"].navigation is True
+    assert Event._schema.properties["iCalUId"].navigation is False
 
 
 def test_select_all_is_the_projection_the_declarations_describe():
@@ -188,20 +188,55 @@ def test_declaring_a_nested_field_is_opt_in():
     assert field_declarations(IdentitySet) == {}  # 2,887 nested types are untouched
 
 
-def test_the_two_payload_projections_are_answered_by_the_class():
-    """Who owns a value is a fact about the type, so a module asks the type.
+def test_a_type_s_declarations_are_one_object_built_once():
+    """Every projection a payload needs is an attribute of one class fact.
 
-    ``_readonly_names`` is the projection a request path filters with, and the one a
-    replay set is derived from (``contacts_models``). Rebuilt per instance it is a
-    fact nobody outside the instance can read; built once per class it is the same
-    answer for every instance and for the class itself.
+    The projections are derived, so they cannot disagree with the declarations they
+    come from, and they are built when the class is created, so a module can ask the
+    type without an instance (``contacts_models`` derives a replay set from
+    ``Contact._schema.readonly``).
     """
-    assert Event._readonly_names == frozenset(name for name, meta in Event._odata_meta.items() if meta.readonly)
-    assert Event(None)._readonly_names is Event._readonly_names
-    assert ClientObject._readonly_names == frozenset()  # a type that declares nothing
-    assert "id" in Entity._readonly_names  # inherited by every entity
-    assert "id" in Contact._readonly_names
-    assert Contact._persistable_names == frozenset()
+    schema = Event._schema
+
+    assert Event._schema is schema  # built once per class, not rebuilt per ask
+    assert Event(None)._schema is schema  # and one answer for instances too
+    assert schema.readonly == frozenset(name for name, meta in schema.properties.items() if meta.readonly)
+    assert schema.columns == tuple(name for name, meta in schema.properties.items() if not meta.navigation)
+    assert schema.navigations == tuple(name for name, meta in schema.properties.items() if meta.navigation)
+    assert schema.by_attr["ical_uid"] == "iCalUId"  # a rename only the declaration knows
+    assert "id" in Entity._schema.readonly  # inherited by every entity
+    assert "id" in Contact._schema.readonly
+    assert Contact._schema.persistable == frozenset()
+    assert ClientObject._schema.properties == {}  # a type that declares nothing
+
+
+def test_a_class_fact_is_not_a_mutable_bag():
+    """A declaration set is a fact about the type; a consumer must not be able to edit it.
+
+    The dict this replaces was reachable and writable from anywhere — a ``$select``
+    built from it could be changed at runtime by a caller that forgot it was shared.
+    """
+    with pytest.raises(TypeError):
+        Event._schema.properties["invented"] = None
+    with pytest.raises(AttributeError):  # dataclasses.FrozenInstanceError
+        Event._schema.readonly = frozenset()
+
+
+def test_a_subclass_answers_with_its_own_declarations():
+    """Inherited declarations are copied, never shared, so declaring cannot leak upward."""
+
+    class Probe(Event):
+        @odata(name="probeFlag", readonly=True)
+        @property
+        def probe_flag(self) -> bool:
+            return False
+
+    assert Probe._schema is not Event._schema
+    assert Probe._schema.properties["probeFlag"].attr == "probe_flag"
+    assert Probe._schema.by_attr["probe_flag"] == "probeFlag"
+    assert "probeFlag" not in Event._schema.properties  # the base class is untouched
+    assert "probeFlag" in Probe.select_all()
+    assert Event._schema.readonly < Probe._schema.readonly
 
 
 def test_the_decorator_carrier_attaches_the_same_metadata():

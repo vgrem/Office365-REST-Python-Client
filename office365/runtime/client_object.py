@@ -30,7 +30,7 @@ from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.retry import DEFAULT_RETRY_EXCEPTIONS
-from office365.runtime.types.odata_property import _ODATA_MARKER, ODataPropertyMeta
+from office365.runtime.schema import EMPTY, TypeSchema
 
 if TYPE_CHECKING:
     from office365.runtime.client_object_collection import ClientObjectCollection
@@ -51,15 +51,13 @@ def _swallow_object_not_found(error: ClientRequestException) -> None:
 class ClientObject:
     """Base client object which defines named properties and relationships of an entity."""
 
-    _odata_meta: dict[str, ODataPropertyMeta] = {}
+    #: Everything this type declares: its properties, the projections a request and a
+    #: ``$select`` are built from, and its OData name. Built in ``__init_subclass__``, so
+    #: ``Contact._schema.readonly`` answers a question about a type without an instance.
+    _schema: ClassVar[TypeSchema] = EMPTY
+
     _limit_meta: dict[str, Tuple[LimitDecl, ...]] = {}
     _class_limit_decls: Tuple[LimitDecl, ...] = ()
-
-    #: The two projections of ``_odata_meta`` a payload needs, kept as facts about the
-    #: class rather than rebuilt per instance: a caller that wants to know what a type
-    #: will send asks ``Contact._readonly_names``.
-    _readonly_names: ClassVar[frozenset[str]] = frozenset()
-    _persistable_names: ClassVar[frozenset[str]] = frozenset()
 
     #: The OData name this class declares (``"microsoft.graph.Event"``), emitted by the
     #: generator. A class-level fact, so name resolution reads it without building an
@@ -68,16 +66,7 @@ class ClientObject:
 
     def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
-        meta: dict[str, ODataPropertyMeta] = dict(getattr(cls, "_odata_meta", {}))
-        for attr_name, attr in cls.__dict__.items():
-            target = attr.fget if isinstance(attr, property) else attr
-            m: ODataPropertyMeta | None = getattr(target, _ODATA_MARKER, None)
-            if m is not None:
-                m.attr = attr_name
-                meta[m.name] = m
-        cls._odata_meta = meta
-        cls._readonly_names = frozenset(name for name, m in meta.items() if m.readonly)
-        cls._persistable_names = frozenset(name for name, m in meta.items() if m.persist)
+        cls._schema = TypeSchema.build(cls)
         cls._limit_meta = collect_limit_meta(cls)
         cls._class_limit_decls = collect_class_limits(cls)
 
@@ -90,12 +79,12 @@ class ClientObject:
         names come from the same declarations the getters read, so a projection
         built here cannot spell a column differently from the code that consumes it.
         """
-        return list(dict.fromkeys(name for name, m in cls._odata_meta.items() if not m.navigation))
+        return list(cls._schema.columns)
 
     @classmethod
     def expandable(cls) -> List[str]:
         """The declared navigation properties of this type: what ``$expand`` can reach."""
-        return list(dict.fromkeys(name for name, m in cls._odata_meta.items() if m.navigation))
+        return list(cls._schema.navigations)
 
     @classmethod
     def wire_name(cls, attr: str) -> str:
@@ -106,11 +95,11 @@ class ClientObject:
                 declared attributes so a typo fails here rather than as ``None``
                 further down the read path.
         """
-        for name, m in cls._odata_meta.items():
-            if m.attr == attr:
-                return name
-        declared = sorted(m.attr for m in cls._odata_meta.values() if m.attr)
-        raise AttributeError(f"{cls.__name__}.{attr} is not a declared property; declared: {', '.join(declared)}")
+        name = cls._schema.by_attr.get(attr)
+        if name is not None:
+            return name
+        declared = ", ".join(sorted(cls._schema.by_attr))
+        raise AttributeError(f"{cls.__name__}.{attr} is not a declared property; declared: {declared}")
 
     def __init__(
         self,
@@ -127,7 +116,7 @@ class ClientObject:
             parent_collection: The collection that contains this object
         """
         self._properties: dict[str, Any] = {}
-        self._changes: set[str] = {name for name, m in type(self)._odata_meta.items() if m.persist}
+        self._changes: set[str] = set(type(self)._schema.persistable)
         self._query_options = QueryOptions()
         self._parent_collection = parent_collection
         self._context = context
@@ -171,7 +160,7 @@ class ClientObject:
         again on subsequent updates (``persist=True`` means "always include"),
         while explicitly changed, non-persistable props are dropped.
         """
-        persistable = self._persistable_names
+        persistable = self._schema.persistable
         self._properties = {k: v for k, v in self._properties.items() if k not in self._changes or k in persistable}
         self._changes.clear()
         self._query_options = QueryOptions()
@@ -459,7 +448,7 @@ class ClientObject:
             The property value or default value
         """
         if default_value is None:
-            meta = type(self)._odata_meta.get(name)
+            meta = type(self)._schema.properties.get(name)
             if meta is not None:
                 return getattr(self, meta.attr)
             normalized_name = name[0].lower() + name[1:]
@@ -617,7 +606,7 @@ class ClientObject:
         if profile is None:
             json = {k: self.get_property(k) for k in self._properties}
         else:
-            persistable, readonly = self._persistable_names, self._readonly_names
+            persistable, readonly = self._schema.persistable, self._schema.readonly
             json = {
                 k: self.get_property(k)
                 for k in self._properties
