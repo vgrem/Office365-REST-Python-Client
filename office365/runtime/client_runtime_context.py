@@ -5,7 +5,7 @@ import threading
 from abc import ABC, abstractmethod
 from collections import deque
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Callable, Iterator, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Iterator, List, Optional, Tuple, Type
 
 from requests import Response
 from typing_extensions import Self
@@ -15,10 +15,11 @@ from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.limits import Limit, LimitDecl, collect_class_limits, collect_limit_meta
+from office365.runtime.limits import Limit
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
 from office365.runtime.retry import DEFAULT_RETRY_EXCEPTIONS
+from office365.runtime.schema import EMPTY, TypeSchema
 from office365.runtime.transport.offload import run_offloaded
 
 if TYPE_CHECKING:
@@ -33,13 +34,12 @@ class ClientRuntimeContext(ABC):
     Provides core functionality for executing queries and managing request lifecycle.
     """
 
-    _limit_meta: dict[str, Tuple[LimitDecl, ...]] = {}
-    _class_limit_decls: Tuple[LimitDecl, ...] = ()
+    #: A context declares no properties, but it declares limits like any other type.
+    _schema: ClassVar[TypeSchema] = EMPTY
 
     def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
-        cls._limit_meta = collect_limit_meta(cls)
-        cls._class_limit_decls = collect_class_limits(cls)
+        cls._schema = TypeSchema.build(cls)
 
     def __init__(self) -> None:
         self._queries: deque[ClientQuery] = deque()
@@ -106,9 +106,7 @@ class ClientRuntimeContext(ABC):
     @classmethod
     def declared_limits(cls) -> Tuple[Limit, ...]:
         """The limits declared on this class and its methods/properties (``@limit``)."""
-        class_limits = tuple(decl.limit for decl in cls._class_limit_decls)
-        member_limits = tuple(decl.limit for decls in cls._limit_meta.values() for decl in decls)
-        return (*class_limits, *member_limits)
+        return cls._schema.declared_limits()
 
     @property
     def service_root_url(self) -> str:

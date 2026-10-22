@@ -4,7 +4,7 @@ A :class:`Limit` describes one service limit — a static threshold *or* a rate
 quota — with its value, kind, unit, scope and docs. Limits are declared on the
 model with the :func:`limit` decorator (mirroring ``@odata`` / ``@require_permission``):
 the declaration is stamped on the callable, appended to its docstring, and
-collected into ``ClientObject._limit_meta``. ``arg=`` also *enforces* a numeric
+collected into the model's ``_schema``. ``arg=`` also *enforces* a numeric
 argument (warn by default, ``raise`` or ``clamp``).
 
 The helpers :func:`exceeds` / :func:`warn_if_exceeds` / :func:`ensure_within`
@@ -220,7 +220,7 @@ def limit(
 
     Metadata-only by default (like ``@odata`` / ``@require_permission``): the
     declared :class:`Limit` values are stamped on the target and appended to its
-    docstring, then collected into ``_limit_meta`` / ``_class_limit_decls``.
+    docstring, then collected into the model's schema.
     Pass ``arg`` to also enforce that argument against the (single) limit — warn
     by default, ``on_exceed="raise"`` to raise, or ``clamp=True`` to lower it
     (methods only).
@@ -253,10 +253,13 @@ def limit(
         if isinstance(func, type):
             if arg is not None:
                 raise ValueError("arg= cannot be used on a class")
+            from office365.runtime.schema import TypeSchema
+
             _stamp(func, decls)
-            # ``__init_subclass__`` ran before this decorator (members already
-            # collected); merge the class-level declaration so subclasses inherit.
-            func._class_limit_decls = collect_class_limits(func)
+            # ``__init_subclass__`` ran before this decorator, so the schema was built
+            # without this declaration. Rebuild it — idempotent, the getters still carry
+            # their own markers — rather than patch one field of a frozen object.
+            func._schema = TypeSchema.build(func)
             register_catalog(func)
             return func
         if isinstance(func, property):
@@ -314,11 +317,14 @@ def bounded(
 def collect_limit_meta(cls: type) -> dict[str, Tuple[LimitDecl, ...]]:
     """Collect ``@limit`` declarations from a class's methods/properties.
 
-    Called from ``__init_subclass__`` (``ClientObject`` / ``ClientRuntimeContext``)
-    so a class carries its own limits — keyed by attribute/method name, inheriting
-    the base class's entries.
+    Called from :meth:`TypeSchema.build` so a class carries its own limits — keyed by
+    attribute/method name, inheriting the base class's entries.
     """
-    meta: dict[str, Tuple[LimitDecl, ...]] = dict(getattr(cls, "_limit_meta", {}))
+    # The base class's declarations are inherited through its schema. Naming the
+    # attribute rather than importing ``TypeSchema`` keeps this module free of a cycle:
+    # ``schema`` imports the limit types, so the dependency can only run one way.
+    inherited_schema = getattr(cls, "_schema", None)
+    meta: dict[str, Tuple[LimitDecl, ...]] = dict(getattr(inherited_schema, "member_limits", {}))
     for attr_name, attr in cls.__dict__.items():
         target = attr.fget if isinstance(attr, property) else attr
         decls = getattr(target, _LIMIT_MARKER, None)
@@ -381,7 +387,7 @@ def collect_class_limits(cls: type) -> Tuple[LimitDecl, ...]:
     Accumulates up the hierarchy: the base class's declarations plus the class's
     own (a subclass is subject to both).
     """
-    inherited = getattr(cls, "_class_limit_decls", ())
+    inherited = getattr(getattr(cls, "_schema", None), "class_limits", ())
     own = cls.__dict__.get(_LIMIT_MARKER)
     if own is None:
         return inherited
@@ -393,11 +399,11 @@ def limits_of(target: Any) -> Tuple[LimitDecl, ...]:
 
     Args:
         target: A callable (reads ``__limit_decls__``), a ``property``, or a
-            class (reads ``_limit_meta``).
+            class (reads the ``member_limits`` of its schema).
     """
     if isinstance(target, type):
-        meta = getattr(target, "_limit_meta", {})
-        return tuple(decl for decls in meta.values() for decl in decls)
+        member_limits = getattr(getattr(target, "_schema", None), "member_limits", {})
+        return tuple(decl for decls in member_limits.values() for decl in decls)
     if isinstance(target, property):
         target = target.fget
     return tuple(getattr(target, _LIMIT_MARKER, ()))

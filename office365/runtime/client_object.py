@@ -25,7 +25,7 @@ from office365.runtime.converters.value import (
 )
 from office365.runtime.exceptions import ObjectNotFoundException
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.limits import Limit, LimitDecl, collect_class_limits, collect_limit_meta
+from office365.runtime.limits import Limit
 from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.paths.resource_path import ResourcePath
@@ -56,9 +56,6 @@ class ClientObject:
     #: ``Contact._schema.readonly`` answers a question about a type without an instance.
     _schema: ClassVar[TypeSchema] = EMPTY
 
-    _limit_meta: dict[str, Tuple[LimitDecl, ...]] = {}
-    _class_limit_decls: Tuple[LimitDecl, ...] = ()
-
     #: The OData name this class declares (``"microsoft.graph.Event"``), emitted by the
     #: generator. A class-level fact, so name resolution reads it without building an
     #: instance; see :func:`office365.runtime.odata.edm.edm_type_name`.
@@ -67,8 +64,6 @@ class ClientObject:
     def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
         cls._schema = TypeSchema.build(cls)
-        cls._limit_meta = collect_limit_meta(cls)
-        cls._class_limit_decls = collect_class_limits(cls)
 
     @classmethod
     def select_all(cls) -> List[str]:
@@ -169,9 +164,7 @@ class ClientObject:
     @classmethod
     def declared_limits(cls) -> Tuple[Limit, ...]:
         """The limits declared on this class and its methods/properties (``@limit``)."""
-        class_limits = tuple(decl.limit for decl in cls._class_limit_decls)
-        member_limits = tuple(decl.limit for decls in cls._limit_meta.values() for decl in decls)
-        return (*class_limits, *member_limits)
+        return cls._schema.declared_limits()
 
     def execute_query(self) -> Self:
         """

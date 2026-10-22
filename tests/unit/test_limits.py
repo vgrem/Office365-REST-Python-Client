@@ -154,6 +154,40 @@ def test_limit_decorator_raise_and_clamp():
     assert clamped(page_size=6000) == Limits.LIST_VIEW.value
 
 
+def test_limits_are_one_of_the_things_a_type_declares():
+    """A class's limits and its slots are the same kind of fact, so they live together.
+
+    ``limits_of()``, ``declared_limits()`` and the inheritance a subclass needs all
+    read the one object the class built, and a context declares limits through the
+    same field a model declares properties through.
+    """
+
+    @limit(Limits.LIST_VIEW)
+    class _Tier(ClientObject):
+        @limit(Limits.FILE_UPLOAD)
+        @property
+        def upload(self):
+            return None
+
+        @limit(Limits.BATCH_ITEMS, arg="page_size")
+        def get_items(self, page_size=None):
+            return page_size
+
+    class _Child(_Tier):
+        pass
+
+    assert [decl.limit for decl in _Tier._schema.class_limits] == [Limits.LIST_VIEW]
+    assert set(_Tier._schema.member_limits) == {"upload", "get_items"}
+    assert _Tier.declared_limits() == (Limits.LIST_VIEW, Limits.FILE_UPLOAD, Limits.BATCH_ITEMS)
+    assert [decl.limit for decl in limits_of(_Tier)] == [Limits.FILE_UPLOAD, Limits.BATCH_ITEMS]
+    assert _Child._schema.class_limits == _Tier._schema.class_limits  # inherited, not shared map
+    assert _Child._schema is not _Tier._schema
+    assert Limits.LIST_VIEW in _Child.declared_limits()
+    # A context declares no properties, and still declares limits.
+    assert ClientContext._schema.properties == {}
+    assert Limits.BATCH_ITEMS in ClientContext.declared_limits()
+
+
 def test_limit_decorator_on_property_and_class_meta():
     class _Entity(ClientObject):
         @limit(Limits.FILE_UPLOAD)
@@ -165,8 +199,8 @@ def test_limit_decorator_on_property_and_class_meta():
         def get_items(self, page_size=None):
             return page_size
 
-    assert "upload" in _Entity._limit_meta
-    assert "get_items" in _Entity._limit_meta
+    assert "upload" in _Entity._schema.member_limits
+    assert "get_items" in _Entity._schema.member_limits
     assert Limits.FILE_UPLOAD in _Entity.declared_limits()
     assert Limits.LIST_VIEW in _Entity.declared_limits()
 

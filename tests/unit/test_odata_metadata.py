@@ -33,6 +33,7 @@ from office365.runtime.client_object import ClientObject
 from office365.runtime.client_value import ClientValue
 from office365.runtime.converters.value import declared_type
 from office365.runtime.odata.v4.json_format import V4JsonFormat
+from office365.runtime.schema import TypeSchema
 from office365.runtime.types.odata_property import _ODATA_MARKER, ODataPropertyMeta, field_declarations, odata
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -208,6 +209,17 @@ def test_a_type_s_declarations_are_one_object_built_once():
     assert "id" in Contact._schema.readonly
     assert Contact._schema.persistable == frozenset()
     assert ClientObject._schema.properties == {}  # a type that declares nothing
+
+
+def test_the_schema_is_a_function_of_the_declarations():
+    """Rebuilding a type's fact from its declarations yields the same fact.
+
+    The ``@limit``-on-a-class decorator runs *after* ``__init_subclass__``, so it rebuilds
+    the schema instead of patching one field of a frozen object; that is only safe because
+    the build is idempotent.
+    """
+    assert TypeSchema.build(Event) == Event._schema
+    assert TypeSchema.build(ClientObject) == ClientObject._schema
 
 
 def test_a_class_fact_is_not_a_mutable_bag():
