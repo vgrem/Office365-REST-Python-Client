@@ -6,7 +6,7 @@ from typing import Any, ClassVar, Dict, Iterator, List, Optional, Tuple
 from typing_extensions import Self
 
 from office365.runtime.converters.value import coerce_value, declared_type, serialize_value
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.types.odata_property import field_declarations
 
 
@@ -71,11 +71,12 @@ class ClientValue:
         for n, v in vars(self).items():
             yield n, v
 
-    def to_json(self, json_format: Optional[ODataJsonFormat] = None) -> Dict[str, Any] | List[Any]:
+    def to_json(self, profile: Optional[JsonProfile] = None) -> Dict[str, Any] | List[Any]:
         """Serializes the ClientValue to JSON format.
 
         Args:
-            json_format: Optional OData JSON formatting options
+            profile: The profile that spells the payload. ``None`` keeps the value as the
+                model holds it, including the fields a request would leave out.
 
         Returns:
             Dictionary (or list, for collection values) representing the
@@ -105,10 +106,10 @@ class ClientValue:
             meta = by_attr.get(attr)
             if attr.startswith("__") or not _is_valid_value(value):
                 continue
-            if meta is not None and meta.readonly and json_format is not None:
+            if meta is not None and meta.readonly and profile is not None:
                 continue
-            result[meta.name if meta is not None else attr] = serialize_value(value, json_format)
-        return result if json_format is None else json_format.wrap(self, result)
+            result[meta.name if meta is not None else attr] = serialize_value(value, profile)
+        return result if profile is None else profile.wrap(self, result)
 
     @property
     def entity_type_name(self) -> Optional[str]:

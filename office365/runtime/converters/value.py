@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, get_args, g
 from office365.runtime.converters.scalars import parse_bool, parse_datetime, parse_enum, try_float, try_int
 
 if TYPE_CHECKING:
-    from office365.runtime.odata.json_format import ODataJsonFormat
+    from office365.runtime.odata.json_format import JsonProfile
 
 _UNSET = object()
 _NoneType = type(None)
@@ -34,7 +34,7 @@ _SCALAR_CONVERTERS = {
 _declared_cache: Dict[Tuple[type, str], Any] = {}
 
 
-def _serialize_enum(value: Enum, json_format: Optional[ODataJsonFormat]) -> Any:
+def _serialize_enum(value: Enum, profile: Optional[JsonProfile]) -> Any:
     """Serialize an enum member for the active OData dialect.
 
     OData V3 (SharePoint) enums travel as their numeric value
@@ -48,7 +48,7 @@ def _serialize_enum(value: Enum, json_format: Optional[ODataJsonFormat]) -> Any:
     (``TaskStatus.completed = "2"``), which is not a wire value — Graph
     rejects it, so a digit-only string falls back to the member name too.
     """
-    if json_format is not None and not json_format.dialect.enum_by_name and isinstance(value.value, int):
+    if profile is not None and not profile.dialect.enum_by_name and isinstance(value.value, int):
         return value.value
     if isinstance(value.value, str):
         return value.name if value.value.isdigit() else value.value
@@ -56,7 +56,7 @@ def _serialize_enum(value: Enum, json_format: Optional[ODataJsonFormat]) -> Any:
 
 
 def serialize_value(  # noqa: PLR0911 - one return per stored-value kind
-    value: Any, json_format: Optional[ODataJsonFormat] = None
+    value: Any, profile: Optional[JsonProfile] = None
 ) -> Any:
     """Convert a stored value to its JSON representation.
 
@@ -71,7 +71,7 @@ def serialize_value(  # noqa: PLR0911 - one return per stored-value kind
     subclass ``dict``/``list`` and still need its own serialization.
     """
     if isinstance(value, Enum):
-        return _serialize_enum(value, json_format)
+        return _serialize_enum(value, profile)
     if isinstance(value, uuid.UUID):
         return str(value)
     if isinstance(value, bytes):
@@ -79,11 +79,11 @@ def serialize_value(  # noqa: PLR0911 - one return per stored-value kind
     if isinstance(value, (datetime, date)):
         return value.isoformat()
     if hasattr(value, "to_json"):
-        return value.to_json(json_format)
+        return value.to_json(profile)
     if isinstance(value, dict):
-        return {k: serialize_value(item, json_format) for k, item in value.items()}
+        return {k: serialize_value(item, profile) for k, item in value.items()}
     if isinstance(value, (list, tuple)):
-        return [serialize_value(item, json_format) for item in value]
+        return [serialize_value(item, profile) for item in value]
     return value
 
 

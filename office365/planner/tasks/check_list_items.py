@@ -8,7 +8,7 @@ from typing_extensions import Self
 from office365.planner.tasks.check_list_item import PlannerChecklistItem
 from office365.runtime.client_value import ClientValue
 from office365.runtime.converters.value import coerce_value, serialize_value
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 
 
 class PlannerChecklistItems(ClientValue):
@@ -47,6 +47,6 @@ class PlannerChecklistItems(ClientValue):
         self.set_property(item_id, None)
         return self
 
-    def to_json(self, json_format: Optional[ODataJsonFormat] = None) -> Dict[str, Any]:
+    def to_json(self, profile: Optional[JsonProfile] = None) -> Dict[str, Any]:
         """Serializes the checklist, preserving ``null`` entries used to remove items."""
-        return {k: (None if v is None else serialize_value(v, json_format)) for k, v in self}
+        return {k: (None if v is None else serialize_value(v, profile)) for k, v in self}

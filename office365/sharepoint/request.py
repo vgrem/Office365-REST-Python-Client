@@ -16,7 +16,7 @@ from office365.runtime.client_request import ASYNC_AUTHENTICATED_FLAG
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.http.url import get_absolute_url
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.odata.request import ODataRequest
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.queries.client_query import ClientQuery
@@ -45,7 +45,7 @@ class SharePointRequest(ODataRequest):
         allow_ntlm: bool = False,
         browser_mode: bool = False,
         authority: Optional[str] = None,
-        json_format: Optional[ODataJsonFormat] = None,
+        profile: Optional[JsonProfile] = None,
     ):
         """
         Initialize SharePoint request client
@@ -56,10 +56,10 @@ class SharePointRequest(ODataRequest):
             allow_ntlm: Whether NTLM authentication is enabled (default: False)
             browser_mode: Enable browser authentication (default: False)
             authority: Override the MSAL authority URL (e.g. https://<tenant>.ciamlogin.com)
-            json_format: Response JSON format (default: V3 JsonLightFormat; pass a V4
+            profile: Response JSON profile (default: V3 JsonLightFormat; pass a V4
               format for the ``_api/v2.1`` OData V4 endpoints)
         """
-        super().__init__(base_url, json_format or JsonLightFormat())
+        super().__init__(base_url, profile or JsonLightFormat())
         self._auth_context = AuthenticationContext(
             url=base_url,
             environment=environment,

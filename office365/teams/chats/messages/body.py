@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 
 
 @dataclass
@@ -19,7 +19,7 @@ class ChatMessageBody(ClientValue):
     content: str | None = None
     contentType: str | None = None
 
-    def to_json(self, json_format: ODataJsonFormat | None = None) -> dict[str, Any]:
+    def to_json(self, profile: JsonProfile | None = None) -> dict[str, Any]:
         result: dict[str, Any] = {}
         if self.content is not None:
             result["content"] = self.content

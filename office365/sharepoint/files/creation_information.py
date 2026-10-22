@@ -22,7 +22,7 @@ class FileCreationInformation(ClientValue):
     Url: str | None = None
     XorHash: str | None = None
 
-    def to_json(self, json_format=None):
+    def to_json(self, profile=None):
         return {"overwrite": self.Overwrite, "url": self.Url}
 
     @property

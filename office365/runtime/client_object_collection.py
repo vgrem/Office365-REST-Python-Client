@@ -21,7 +21,7 @@ from office365.runtime.client_object import ClientObject, ClientObjectT
 from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.http.prefer import add_prefer
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.operations import Progress
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.query_capabilities import (
@@ -315,7 +315,7 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
         """Get an item by its index position."""
         return self._data[index]
 
-    def to_json(self, json_format: Optional[ODataJsonFormat] = None) -> list[dict[str, Any]]:
+    def to_json(self, profile: Optional[JsonProfile] = None) -> list[dict[str, Any]]:
         """
         Serialize the collection to OData JSON format.
 
@@ -324,12 +324,13 @@ class ClientObjectCollection(ClientObject, Generic[ClientObjectT]):
         :meth:`to_csv` instead.
 
         Args:
-            json_format: Serialization options
+            profile: The profile each item is spelled with; ``None`` keeps every item as
+                the model holds it.
 
         Returns:
             JSON-serializable list of item dictionaries
         """
-        return [cast(Dict[str, Any], item.to_json(json_format)) for item in self._data]
+        return [cast(Dict[str, Any], item.to_json(profile)) for item in self._data]
 
     def _ensure_query_option(self, option: str) -> bool:
         """Whether ``option`` may be applied to this collection's endpoint.

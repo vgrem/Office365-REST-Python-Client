@@ -26,7 +26,7 @@ from office365.runtime.converters.value import (
 from office365.runtime.exceptions import ObjectNotFoundException
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.limits import Limit, LimitDecl, collect_class_limits, collect_limit_meta
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.retry import DEFAULT_RETRY_EXCEPTIONS
@@ -602,17 +602,19 @@ class ClientObject:
         """
         return self._parent_collection
 
-    def to_json(self, json_format: Optional[ODataJsonFormat] = None) -> Dict[str, Any] | List[Any]:
+    def to_json(self, profile: Optional[JsonProfile] = None) -> Dict[str, Any] | List[Any]:
         """
         Serializes the client object to a JSON-compatible dictionary.
 
         Args:
-            json_format: The OData JSON format settings
+            profile: The profile that spells the payload. ``None`` keeps the object as the
+                model holds it — a response or a sidecar — so nothing the service owns is
+                dropped and nothing is wrapped.
 
         Returns:
             Dictionary (or list, for collections) representing the serialized object
         """
-        if json_format is None:
+        if profile is None:
             json = {k: self.get_property(k) for k in self._properties}
         else:
             persistable, readonly = self._persistable_names, self._readonly_names
@@ -625,6 +627,6 @@ class ClientObject:
         # response (``__etag`` for ``If-Match``, ``__odata_type``, ``__deferred``):
         # they describe the response, never the entity, so no payload carries them.
         # A dialect's control marker (``__metadata``) is added *after* this filter.
-        json = {k: serialize_value(v, json_format) for k, v in json.items() if not k.startswith("__")}
+        json = {k: serialize_value(v, profile) for k, v in json.items() if not k.startswith("__")}
 
-        return json if json_format is None else json_format.wrap(self, json)
+        return json if profile is None else profile.wrap(self, json)

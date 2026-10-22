@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.sharepoint.client_context import ClientContext
@@ -20,11 +20,11 @@ class TaxonomyService(ClientContext):
         super().__init__(context.base_url)
         self._pending_request = SharePointRequest(
             base_url=self._base_url,
-            json_format=self.json_format,
+            profile=self.profile,
         ).reuse(context.pending_request())
 
     @property
-    def json_format(self) -> ODataJsonFormat:
+    def profile(self) -> JsonProfile:
         """The term store service speaks OData V4."""
         return V4JsonFormat()
 

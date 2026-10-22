@@ -31,7 +31,7 @@ _BATCH_OVERHEAD = 1024  # multipart/JSON envelope allowance per batch
 _PART_OVERHEAD = 256  # per-sub-request header/boundary allowance
 
 
-def estimate_query_bytes(query: "ClientQuery", json_format: Optional["JsonProfile"] = None) -> int:
+def estimate_query_bytes(query: "ClientQuery", profile: Optional["JsonProfile"] = None) -> int:
     """Estimate the wire size of a batched sub-request without building a request.
 
     Builds the URL from the query's resource path and serializes its payload
@@ -41,7 +41,7 @@ def estimate_query_bytes(query: "ClientQuery", json_format: Optional["JsonProfil
 
     Args:
         query: The sub-query to measure
-        json_format: The profile the batch request carries; ``None`` measures
+        profile: The profile the batch request carries; ``None`` measures
             the payload with no dialect-specific spelling.
     """
     url = getattr(query, "url", "") or ""
@@ -55,10 +55,10 @@ def estimate_query_bytes(query: "ClientQuery", json_format: Optional["JsonProfil
             size += len(payload.encode("utf-8"))
         else:
             try:
-                if json_format is None:
+                if profile is None:
                     body = json.dumps(payload, separators=(",", ":"), default=str)
                 else:
-                    body = json.dumps(json_format.build_payload(payload), separators=(",", ":"), default=str)
+                    body = json.dumps(profile.build_payload(payload), separators=(",", ":"), default=str)
             except Exception:
                 body = str(payload)
             size += len(body.encode("utf-8"))
@@ -73,7 +73,7 @@ def partition_by_limits(
     queries: Sequence,
     max_items: Optional[int],
     max_bytes: Optional[int],
-    json_format: Optional["JsonProfile"] = None,
+    profile: Optional["JsonProfile"] = None,
 ) -> list[list]:
     """Split queries into batches respecting item and byte caps (order preserved).
 
@@ -84,7 +84,7 @@ def partition_by_limits(
         queries: The sub-queries to split, in submission order
         max_items: Maximum queries per batch
         max_bytes: Maximum estimated payload size per batch
-        json_format: The profile the batch request carries, for the byte estimate
+        profile: The profile the batch request carries, for the byte estimate
     """
     batches: list[list] = []
     current: list = []
@@ -93,7 +93,7 @@ def partition_by_limits(
         if max_items is not None and len(current) >= max_items:
             batches.append(current)
             current, current_bytes = [], _BATCH_OVERHEAD
-        item_bytes = estimate_query_bytes(query, json_format)
+        item_bytes = estimate_query_bytes(query, profile)
         if max_bytes is not None and current and current_bytes + item_bytes > max_bytes:
             batches.append(current)
             current, current_bytes = [], _BATCH_OVERHEAD

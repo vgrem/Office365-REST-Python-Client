@@ -32,8 +32,8 @@ class ListItemFormUpdateValue(ClientValue):
         else:
             return f"{self.FieldName} update succeeded"
 
-    def to_json(self, json_format=None):
-        json = cast(Dict, super().to_json(json_format))
+    def to_json(self, profile=None):
+        json = cast(Dict, super().to_json(profile))
         if isinstance(self.FieldValue, FieldLookupValue):
             json["FieldValue"] = "[{" + f"'Key':'{self.FieldValue.LookupValue}'" + "}]"
         elif isinstance(self.FieldValue, datetime):

@@ -5,7 +5,7 @@ from typing import Dict, cast
 
 from office365.runtime.client_value import ClientValue
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.types.collections import StringCollection
 from office365.search.aggregation_option import AggregationOption
 from office365.search.collapse_property import CollapseProperty
@@ -37,8 +37,8 @@ class SearchRequest(ClientValue):
     contentSources: StringCollection = field(default_factory=StringCollection)
     sharePointOneDriveOptions: SharePointOneDriveOptions = field(default_factory=SharePointOneDriveOptions)
 
-    def to_json(self, json_format: ODataJsonFormat | None = None) -> Dict:
-        json_value = cast(Dict, super().to_json(json_format))
+    def to_json(self, profile: JsonProfile | None = None) -> Dict:
+        json_value = cast(Dict, super().to_json(profile))
         json_value["from"] = json_value.pop("page_from", None)
         return json_value
 

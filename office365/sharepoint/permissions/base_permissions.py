@@ -67,7 +67,7 @@ class BasePermissions(ClientValue):
         self.High = 0
         self.Low = 0
 
-    def to_json(self, json_format=None):
+    def to_json(self, profile=None):
         return {"Low": str(self.Low), "High": str(self.High)}
 
     def set_property(self, k: str | int, v: Any, persist_changes: bool = True) -> Self:

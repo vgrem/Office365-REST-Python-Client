@@ -20,10 +20,10 @@ class AadUserConversationMember(ConversationMember):
 
         return self.properties.get("user", User(self.context, ResourcePath("user", self.resource_path)))
 
-    def to_json(self, json_format=None):
+    def to_json(self, profile=None):
         return {
             "@odata.type": "#" + self.entity_type_name,
-            "roles": self.roles.to_json(json_format),
+            "roles": self.roles.to_json(profile),
             "user@odata.bind": f"{self.context.users.resource_url}/{self.user_id}",
         }
 

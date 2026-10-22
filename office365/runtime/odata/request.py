@@ -11,7 +11,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value import ClientValue
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.create_entity import CreateEntityQuery
 from office365.runtime.queries.delete_entity import DeleteEntityQuery
@@ -27,7 +27,7 @@ class ODataRequest(ClientRequest):
     def __init__(
         self,
         base_url: str,
-        json_format: ODataJsonFormat,
+        profile: JsonProfile,
         transport: "BaseTransport | None" = None,
     ) -> None:
         """
@@ -35,13 +35,13 @@ class ODataRequest(ClientRequest):
 
         Args:
             base_url: The service base URL.
-            json_format: The JSON format handler for OData serialization/deserialization
+            profile: The profile that spells the payloads and reads the responses
             transport: Optional shared transport (e.g. one pooled ``Session`` for
                 parallel batch requests); defaults to a new ``RequestsTransport``.
         """
         super().__init__(transport=transport)
         self._base_url = base_url
-        self._default_json_format = json_format
+        self._default_json_format = profile
         self.beforeExecute += self._ensure_http_headers
 
     @property
@@ -106,7 +106,7 @@ class ODataRequest(ClientRequest):
         self,
         target: Union[ClientValue, ClientResult, ClientObject],
         payload: Any,
-        json_format: Optional[ODataJsonFormat] = None,
+        profile: Optional[JsonProfile] = None,
         wrapper: Optional[str] = None,
     ) -> None:
         """
@@ -115,10 +115,10 @@ class ODataRequest(ClientRequest):
         Args:
             target: The target object to map data to
             payload: The decoded JSON response body
-            json_format: Optional profile override
+            profile: Optional profile override for this response
             wrapper: Key the payload is wrapped under, if the dialect wraps it
         """
-        (json_format or self.json_format).hydrate(target, payload, wrapper)
+        (profile or self.json_format).hydrate(target, payload, wrapper)
 
     def _build_payload(self, query: ClientQuery) -> Union[Dict[str, Any], List[Any], str, bytes]:
         """

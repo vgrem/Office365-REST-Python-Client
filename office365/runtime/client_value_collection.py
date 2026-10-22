@@ -11,7 +11,7 @@ from office365.runtime.client_value import ClientValue
 from office365.runtime.converters.scalars import parse_enum
 from office365.runtime.converters.value import serialize_value
 from office365.runtime.odata.edm import collection_type_name
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.odata.json_format import JsonProfile
 
 ValueT = TypeVar("ValueT")
 
@@ -140,13 +140,13 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
 
         return describe_collection(self._data, self._display_name(), max_items=max_items, max_column_width=None)
 
-    def to_json(self, json_format: ODataJsonFormat | None = None) -> list[Any] | dict[str, Any]:
+    def to_json(self, profile: JsonProfile | None = None) -> list[Any] | dict[str, Any]:
         """Serializes the collection to OData JSON format.
 
         Args:
-            json_format: Controls serialization behavior:
-                - None: Returns simple array
-                - JsonProfile: Returns metadata-enriched structure
+            profile: The profile that spells the payload:
+                - None: the items as the model holds them, bare array
+                - JsonProfile: the same items under the profile's envelope
 
         Returns:
             list or dict: Serialized data
@@ -158,10 +158,10 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
                 "__metadata": {"type": "Collection(Edm.String)"}
             }
         """
-        items = [serialize_value(v, json_format) for v in self]
-        if json_format is None:
+        items = [serialize_value(v, profile) for v in self]
+        if profile is None:
             return items
-        return json_format.wrap(self, items)
+        return profile.wrap(self, items)
 
     def create_typed_value(self, initial_value: ValueT | None = None) -> ValueT:
         """Creates a new item of the collection's type.

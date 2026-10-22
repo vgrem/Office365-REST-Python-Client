@@ -20,8 +20,8 @@ class SubscriptionInformation(ClientValue):
     resourceData: Optional[str] = None
     scenarios: StringCollection = field(default_factory=StringCollection)
 
-    def to_json(self, json_format=None):
-        json = cast(Dict, super().to_json(json_format))
+    def to_json(self, profile=None):
+        json = cast(Dict, super().to_json(profile))
         json["expirationDateTime"] = iso_z(self.expirationDateTime)
         return json
 
