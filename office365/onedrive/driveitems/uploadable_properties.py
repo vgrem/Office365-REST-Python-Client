@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, cast
 
 from office365.onedrive.driveitems.source import DriveItemSource
 from office365.onedrive.files.system_info import FileSystemInfo
 from office365.onedrive.media_source import MediaSource
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.types.odata_property import odata
 
 
 @dataclass
@@ -18,20 +17,17 @@ class DriveItemUploadableProperties(ClientValue):
     name: str | None = None
     description: str | None = None
     _fileSize: int | None = None
-    driveItemSource: DriveItemSource = field(default_factory=DriveItemSource)
+    # Service-filled sources: read from a driveItem, never sent with one.
+    driveItemSource: DriveItemSource = field(
+        default_factory=DriveItemSource, metadata=odata(name="driveItemSource", readonly=True)
+    )
     fileSize: int | None = None
-    mediaSource: MediaSource = field(default_factory=MediaSource)
+    mediaSource: MediaSource = field(default_factory=MediaSource, metadata=odata(name="mediaSource", readonly=True))
 
     @property
     def file_size(self):
         """Provides an expected file size to perform a quota check prior to upload. Only on OneDrive Personal."""
         return self._fileSize
-
-    def to_json(self, json_format: Optional[ODataJsonFormat] = None) -> Dict[str, Any]:
-        payload = cast(Dict[str, Any], super().to_json(json_format))
-        payload.pop("driveItemSource", None)
-        payload.pop("mediaSource", None)
-        return payload
 
     @property
     def entity_type_name(self) -> str:

@@ -16,17 +16,22 @@ import pathlib
 import pkgutil
 import shutil
 from dataclasses import dataclass, field
+from datetime import datetime
 
 import pytest
 import scripts.mark_odata as codemod
 from office365.communications.onlinemeetings.online_meeting_info import OnlineMeetingInfo
+from office365.directory.identity_set import IdentitySet
+from office365.directory.permissions.identity import Identity
 from office365.outlook.calendar.dateTimeTimeZone import DateTimeTimeZone
 from office365.outlook.calendar.events.event import Event
 from office365.outlook.mail.messages.message import Message
+from office365.planner.assignment import PlannerAssignment
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_value import ClientValue
 from office365.runtime.converters.value import declared_type
-from office365.runtime.types.odata_property import _ODATA_MARKER, ODataPropertyMeta, odata
+from office365.runtime.odata.v4.json_format import V4JsonFormat
+from office365.runtime.types.odata_property import _ODATA_MARKER, ODataPropertyMeta, field_declarations, odata
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Packages whose getters are expected to be fully declared today.
@@ -158,6 +163,27 @@ def test_one_declaration_serves_a_property_and_a_dataclass_field():
     declared = Draft.__dataclass_fields__["assigned_date_time"].metadata[_ODATA_MARKER]
     assert isinstance(declared, ODataPropertyMeta)
     assert declared.name == "assignedDateTime"
+
+
+def test_a_nested_field_declares_who_owns_its_value():
+    # Planner's to_json overrides existed to pop the two fields Graph fills in and
+    # rejects on write. The declaration says it once, and both profiles follow it:
+    # a response carries what the service said, a request cannot claim it.
+    assignment = PlannerAssignment(
+        assignedBy=IdentitySet(user=Identity(displayName="Ann", id="1")),
+        assignedDateTime=datetime(2026, 3, 9, 9, 0),
+        orderHint=" !",
+    )
+    assert set(assignment.to_json()) == {"assignedBy", "assignedDateTime", "orderHint"}
+    assert assignment.to_json(V4JsonFormat("none")) == {"orderHint": " !"}
+
+
+def test_declaring_a_nested_field_is_opt_in():
+    declared = field_declarations(PlannerAssignment)
+    assert declared["assignedBy"].readonly is True
+    assert declared["assignedBy"].name == "assignedBy"
+    assert "orderHint" not in declared  # undeclared fields keep their own name
+    assert field_declarations(IdentitySet) == {}  # 2,887 nested types are untouched
 
 
 def test_the_decorator_carrier_attaches_the_same_metadata():

@@ -7,6 +7,7 @@ from typing_extensions import Self
 
 from office365.runtime.converters.value import coerce_value, declared_type, serialize_value
 from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.types.odata_property import field_declarations
 
 
 def _render(self: "ClientValue") -> str:
@@ -96,7 +97,17 @@ class ClientValue:
             return True
 
         # ``__``-prefixed names are response bookkeeping, not fields of the value.
-        result = {k: serialize_value(v, json_format) for k, v in self if _is_valid_value(v) and not k.startswith("__")}
+        # A declared field may also rename itself and declare who owns its value; a
+        # read-only field is what a response carries and a request must not.
+        by_attr = field_declarations(type(self))
+        result: Dict[str, Any] = {}
+        for attr, value in self:
+            meta = by_attr.get(attr)
+            if attr.startswith("__") or not _is_valid_value(value):
+                continue
+            if meta is not None and meta.readonly and json_format is not None:
+                continue
+            result[meta.name if meta is not None else attr] = serialize_value(value, json_format)
         return result if json_format is None else json_format.wrap(self, result)
 
     @property

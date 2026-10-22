@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, Optional, cast
 
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.runtime.client_value import ClientValue
-from office365.runtime.odata.json_format import ODataJsonFormat
+from office365.runtime.types.odata_property import odata
 
 
 @dataclass
@@ -22,23 +21,17 @@ class PlannerChecklistItem(ClientValue):
 
     isChecked: bool | None = None
 
-    lastModifiedBy: IdentitySet = field(default_factory=IdentitySet)
+    # Graph fills these two in and rejects them on write.
+    lastModifiedBy: IdentitySet = field(
+        default_factory=IdentitySet, metadata=odata(name="lastModifiedBy", readonly=True)
+    )
 
-    lastModifiedDateTime: datetime | None = None
+    lastModifiedDateTime: datetime | None = field(
+        default=None, metadata=odata(name="lastModifiedDateTime", readonly=True)
+    )
 
     orderHint: str | None = None
 
     @property
     def entity_type_name(self) -> str:
         return "microsoft.graph.PlannerChecklistItem"
-
-    def to_json(self, json_format: Optional[ODataJsonFormat] = None) -> Dict[str, Any]:
-        """Serializes the checklist item.
-
-        ``lastModifiedBy`` and ``lastModifiedDateTime`` are server-managed;
-        Graph rejects them on write, so they are omitted.
-        """
-        json = cast("Dict[str, Any]", super().to_json(json_format))
-        json.pop("lastModifiedBy", None)
-        json.pop("lastModifiedDateTime", None)
-        return json
