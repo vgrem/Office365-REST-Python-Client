@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Any, ClassVar, Dict, Iterator, List, Optional, Tuple
 
 from typing_extensions import Self
 
@@ -23,6 +23,8 @@ class ClientValue:
     """
 
     _is_client_value: bool = True
+    #: The OData name this value declares (``"microsoft.graph.DateTimeTimeZone"``).
+    _odata_type_name: ClassVar[Optional[str]] = None
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
@@ -99,9 +101,9 @@ class ClientValue:
 
     @property
     def entity_type_name(self) -> Optional[str]:
-        """The server-side type name for client value.
+        """The server-side type name for this client value.
 
         Returns:
-            Defaults to the class name
+            The declared OData type name, or ``None`` when the value declares none.
         """
-        return None
+        return self._odata_type_name

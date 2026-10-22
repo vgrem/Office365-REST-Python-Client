@@ -11,7 +11,7 @@ from typing import Dict, Optional
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
-from generator.odata.type_system import is_collection_name, normalize_class_name, strip_collection
+from generator.odata.type_system import TypeRef, normalize_class_name
 
 #: CSDL annotation term that declares alternate keys on an entity type.
 _ALTERNATE_KEYS_TERM = "Org.OData.Core.V1.AlternateKeys"
@@ -67,8 +67,9 @@ class CsdlDocument:
         """
         if not type_name:
             return type_name
-        if is_collection_name(type_name):
-            return f"Collection({self.qualified_type_name(strip_collection(type_name))})"
+        ref = TypeRef.parse(type_name)
+        if ref.is_collection:
+            return TypeRef(self.qualified_type_name(ref.name), is_collection=True).text
         namespace, sep, class_name = type_name.rpartition(".")
         if not sep or namespace == "Edm":
             return type_name

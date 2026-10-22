@@ -5,7 +5,7 @@ import inspect
 from typing import TYPE_CHECKING, ClassVar
 
 from generator.builders.references import ParameterType
-from generator.odata.type_system import strip_collection
+from generator.odata.type_system import TypeRef
 
 if TYPE_CHECKING:
     from generator.builders.property import PropertyBuilder
@@ -175,7 +175,7 @@ class TypeReferenceCollector:
         in this run could not be resolved from its short name alone.
         """
         if "[" in type_name and type_name.endswith("]"):
-            self._add_python_type(type_name.split("[", 1)[1][:-1], strip_collection(odata_name))
+            self._add_python_type(type_name.split("[", 1)[1][:-1], TypeRef.parse(odata_name).name)
         base_name = type_name.split("[", maxsplit=1)[0]
         self.add(base_name)
         if base_name in self.KNOWN or base_name in self.OPTIONAL_TYPES:

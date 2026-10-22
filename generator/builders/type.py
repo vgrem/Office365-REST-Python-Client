@@ -200,7 +200,7 @@ class TypeBuilder(ast.NodeTransformer):
             if not self._is_resolvable(prop_schema.TypeName):
                 continue
             self._properties.append(PropertyBuilder(prop_schema, resolver=self._resolver))
-            self._properties[-1].cyclic = prop_schema.type_ref.text in self._cyclic_types
+            self._properties[-1].cyclic = prop_schema.type_ref.name in self._cyclic_types
             self._properties[-1].field_alias = self._field_alias
             seen_props.add(member_key)
 
@@ -235,9 +235,9 @@ class TypeBuilder(ast.NodeTransformer):
         """
         if not type_name:
             return True
-        ref = TypeRef.of(type_name)
+        ref = TypeRef.parse(type_name)
         if ref.is_collection:
-            return self._is_resolvable(ref.text)
+            return self._is_resolvable(ref.name)
         if ref.is_primitive:
             return True
         module = self._resolver.module_for(type_name)
@@ -523,7 +523,7 @@ class TypeBuilder(ast.NodeTransformer):
         """
         default: ast.expr = prop.build_default_value()
         make_optional = False
-        type_name = prop.type_ref.text
+        type_name = prop.type_ref.name
         if prop.is_collection_type:
             if type_name in self._context.entity_types:
                 # A collection of entities needs a context; a ClientValue has none.
@@ -676,8 +676,36 @@ class TypeBuilder(ast.NodeTransformer):
             returns=ast.Name(id="str", ctx=ast.Load()),
         )
 
+    @staticmethod
+    def _build_type_name_attribute(full_name: str) -> ast.Assign:
+        """Build the class-level name fact the runtime reads: ``_odata_type_name``.
+
+        ``entity_type_name`` is an instance property, so a caller holding only the
+        class cannot read the name without building an instance — and a
+        ``ClientObject`` cannot be built without a context. Declaring the name once,
+        at class level, keeps name resolution a lookup instead of an instantiation.
+        """
+        return ast.Assign(
+            targets=[ast.Name(id="_odata_type_name", ctx=ast.Store())],
+            value=ast.Constant(value=full_name),
+        )
+
+    @staticmethod
+    def _has_type_name_attribute(class_node: ast.ClassDef) -> bool:
+        """Whether the class already declares ``_odata_type_name``."""
+        for stmt in class_node.body:
+            if isinstance(stmt, ast.Assign):
+                targets = stmt.targets
+            elif isinstance(stmt, ast.AnnAssign):
+                targets = [stmt.target]
+            else:
+                continue
+            if any(isinstance(t, ast.Name) and t.id == "_odata_type_name" for t in targets):
+                return True
+        return False
+
     def _ensure_entity_type_name(self, class_node: ast.ClassDef):
-        """Ensure the class has an entity_type_name property that returns the correct type name"""
+        """Ensure the class declares its OData name, at class level and as a property"""
 
         if self._schema.BaseTypeFullName not in [
             "ComplexType",
@@ -691,11 +719,19 @@ class TypeBuilder(ast.NodeTransformer):
         if len(parts) <= MIN_NAME_PARTS:
             return
 
+        index = self._type_name_property_index(class_node)
         if not self._entity_type_name_exists:
             entity_type_name_method = self._build_type_name_property(self._schema.FullName)
-            class_node.body.insert(self._type_name_property_index(class_node), entity_type_name_method)
+            class_node.body.insert(index, entity_type_name_method)
             self._added_members.append(entity_type_name_method)
             self._changes.append("entity_type_name property")
+            index += 1
+
+        if not self._has_type_name_attribute(class_node):
+            type_name_attribute = self._build_type_name_attribute(self._schema.FullName)
+            class_node.body.insert(index, type_name_attribute)
+            self._added_members.append(type_name_attribute)
+            self._changes.append("_odata_type_name attribute")
 
     @staticmethod
     def _type_name_property_index(class_node: ast.ClassDef) -> int:

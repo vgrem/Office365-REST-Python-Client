@@ -157,6 +157,8 @@ def test_graph_generates_all_kinds_and_methods(tmp_path: Path) -> None:
     enum = _source(tmp_path, "widget_kind.py")
 
     assert "class Widget(Entity):" in entity
+    # The name is a class fact, so resolving it never has to build the entity.
+    assert '_odata_type_name = "microsoft.graph.Widget"' in entity
     assert "def reset" in entity  # bound Action -> generated method
     # A navigation property is declared as such: $expand reaches it, $select cannot.
     assert '@odata(name="widgets", navigation=True)' in entity

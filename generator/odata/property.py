@@ -24,4 +24,4 @@ class PropertyInformation:
     @cached_property
     def type_ref(self) -> TypeRef:
         """The parsed type reference (parsed once, then cached)."""
-        return TypeRef.of(self.TypeName)
+        return TypeRef.parse(self.TypeName)

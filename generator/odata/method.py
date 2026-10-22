@@ -36,4 +36,4 @@ class MethodInformation:
     @cached_property
     def return_type_ref(self) -> TypeRef:
         """The parsed return-type reference (parsed once, then cached)."""
-        return TypeRef.of(self.ReturnTypeFullName)
+        return TypeRef.parse(self.ReturnTypeFullName)

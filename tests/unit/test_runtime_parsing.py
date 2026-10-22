@@ -605,4 +605,7 @@ class TestBuildPayload(unittest.TestCase):
             payload["SortList"]["results"],
             [{"name": "Modified", "__metadata": {"type": "SP.Search.Query.Sort"}}],
         )
-        self.assertIn("__metadata", payload["SortList"])
+        self.assertEqual(
+            payload["SortList"]["__metadata"],
+            {"type": "Collection(SP.Search.Query.Sort)"},
+        )

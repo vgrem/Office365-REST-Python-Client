@@ -24,7 +24,7 @@ def find_cyclic_types(model, in_scope: set[str]) -> set[str]:
         for prop in schema.Properties.values():
             if not prop.TypeName:
                 continue
-            item = prop.type_ref.text
+            item = prop.type_ref.name
             if item in in_scope and item != name:
                 targets.add(item)
         edges[name] = targets

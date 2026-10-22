@@ -4,7 +4,7 @@ import builtins
 import keyword
 import re
 
-from generator.odata.type_system import is_collection_name, primitive_type_for, strip_collection
+from generator.odata.type_system import TypeRef
 
 #: Product/compound names kept as one word when snake-cased (``SharePoint`` -> ``sharepoint``).
 #: ``DateTime`` is *not* here: the library convention is ``created_date_time``.
@@ -73,11 +73,12 @@ def python_name(type_name: str | None, is_object_type: bool = False) -> str:
     """
     if type_name is None:
         return ""
-    primitive = primitive_type_for(type_name)
+    ref = TypeRef.parse(type_name)
+    primitive = ref.python_type
     if primitive is not None:
         return primitive.__name__
-    if is_collection_name(type_name):
-        child = item_name(strip_collection(type_name), is_object_type)
+    if ref.is_collection:
+        child = python_name(ref.name, is_object_type)
         return f"EntityCollection[{child}]" if is_object_type else f"ClientValueCollection[{child}]"
     if type_name.startswith("Edm."):
         raise ValueError(f"Unmapped OData primitive '{type_name}'; add it to PRIMITIVE_PY_TYPES.")
@@ -89,4 +90,4 @@ def python_name(type_name: str | None, is_object_type: bool = False) -> str:
 
 def item_name(type_name: str | None, is_object_type: bool = False) -> str:
     """Format the item type of a collection (or the type itself) as a Python name."""
-    return python_name(strip_collection(type_name), is_object_type)
+    return python_name(TypeRef.parse(type_name).name, is_object_type)

@@ -12,7 +12,7 @@ from generator.builders.collector import TypeReferenceCollector
 from generator.builders.member import MemberBuilder
 from generator.builders.property import PropertyBuilder
 from generator.odata.type_information import TypeInformation
-from generator.odata.type_system import is_primitive_name
+from generator.odata.type_system import TypeRef
 
 
 class TemplateContext:
@@ -100,7 +100,7 @@ class TemplateContext:
                         default_value = f"{prop_type_name}.{members[0].name}"
                 elif resolved is datetime.datetime:
                     default_value = "datetime.min"
-                elif not is_primitive_name(builder.schema.TypeName):
+                elif not TypeRef.parse(builder.schema.TypeName).is_primitive:
                     default_value = f"{prop_type_name}()"
 
         body_lines = [f'    """{docstring}"""']

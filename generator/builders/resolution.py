@@ -15,7 +15,7 @@ from typing import Optional, Sequence, Tuple, Type
 from generator.builders.naming import python_name
 from generator.builders.references import ReturnType
 from generator.builders.symbol_index import SymbolIndex
-from generator.odata.type_system import normalize_type_name, strip_collection
+from generator.odata.type_system import TypeRef
 
 
 class TypeRegistry:
@@ -32,7 +32,7 @@ class TypeRegistry:
         """Resolve an OData type name (``SP.Directory.User``) to its Python class."""
         if not type_name:
             return None
-        short = python_name(strip_collection(type_name))
+        short = python_name(TypeRef.parse(type_name).name)
         module_name = self._index.resolve_module(type_name)
         if module_name is not None:
             cls = _class_from_module(module_name, short)
@@ -44,7 +44,7 @@ class TypeRegistry:
         """The module defining the referenced class, resolved statically."""
         if not type_name:
             return None
-        key = normalize_type_name(type_name) or type_name
+        key = TypeRef.parse(type_name).normalized or type_name
         planned = self._type_modules.get(key)
         if planned is not None:
             return planned

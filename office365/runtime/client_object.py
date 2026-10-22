@@ -5,6 +5,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Dict,
     List,
     Optional,
@@ -53,6 +54,11 @@ class ClientObject:
     _odata_meta: dict[str, ODataPropertyMeta] = {}
     _limit_meta: dict[str, Tuple[LimitDecl, ...]] = {}
     _class_limit_decls: Tuple[LimitDecl, ...] = ()
+
+    #: The OData name this class declares (``"microsoft.graph.Event"``), emitted by the
+    #: generator. A class-level fact, so name resolution reads it without building an
+    #: instance; see :func:`office365.runtime.odata.edm.edm_type_name`.
+    _odata_type_name: ClassVar[Optional[str]] = None
 
     def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
@@ -514,8 +520,10 @@ class ClientObject:
         Gets the server type name for this entity.
 
         Returns:
-            The entity type name
+            The declared OData type name, or the class name when none is declared.
         """
+        if self._odata_type_name is not None:
+            return self._odata_type_name
         if self._entity_type_name is None:
             self._entity_type_name = type(self).__name__
         return self._entity_type_name

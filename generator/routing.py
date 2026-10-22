@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from typing import Iterable, Optional
 
 from generator.builders.naming import python_name, to_snake_case
-from generator.odata.type_system import strip_collection
+from generator.odata.type_system import TypeRef
 
 
 def _module_segment(segment: str) -> str:
@@ -318,7 +318,7 @@ def infer_placements(model, type_filter, registry, router: Router, rounds: int =
     short = {name.rsplit(".", 1)[-1]: name for name in in_scope}
 
     def target(type_name: str | None) -> Optional[str]:
-        base = strip_collection(type_name)
+        base = TypeRef.parse(type_name).name
         if not base:
             return None
         return short.get(base) or short.get(base.rsplit(".", 1)[-1])

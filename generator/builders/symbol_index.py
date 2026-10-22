@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 from generator.builders.naming import to_snake_case
-from generator.odata.type_system import normalize_type_name
+from generator.odata.type_system import TypeRef
 
 
 class SymbolIndex:
@@ -57,7 +57,7 @@ class SymbolIndex:
         """
         if not type_name:
             return None
-        key = normalize_type_name(type_name) or type_name
+        key = TypeRef.parse(type_name).normalized or type_name
         short = key.rsplit(".", 1)[-1]
         by_odata = self._resolve_by_odata_name(key, short)
         by_name = self._resolve_by_class_name(key, short, strict=strict, kind=kind)
@@ -130,7 +130,7 @@ class SymbolIndex:
         module = self.resolve_module(type_name)
         if module is None:
             return set()
-        class_name = (normalize_type_name(type_name) or type_name).rsplit(".", 1)[-1]
+        class_name = (TypeRef.parse(type_name).normalized or type_name).rsplit(".", 1)[-1]
         return self._members_of(module, class_name)
 
     def _members_of(self, module: str, class_name: str) -> set[str]:
@@ -171,7 +171,7 @@ class SymbolIndex:
                 bucket.append(module_path)
             odata_name = odata_name or (f"{self._namespace}.{node.name}" if self._namespace else "")
             if odata_name:
-                key = normalize_type_name(odata_name) or odata_name
+                key = TypeRef.parse(odata_name).normalized or odata_name
                 self._by_odata.setdefault(key, []).append((node.name, module_path))
                 self._odata_of[(module_path, node.name)] = key
             kind = self._class_kind(node)

@@ -4,14 +4,13 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional
 from xml.etree.ElementTree import Element
 
-from office365.runtime.odata.type import ODataType
-
 from generator.odata.csdl import CsdlDocument
 from generator.odata.member import MemberInformation
 from generator.odata.method import MethodInformation
 from generator.odata.model import ODataModel
 from generator.odata.property import PropertyInformation
 from generator.odata.type_information import TypeInformation
+from generator.odata.type_system import TypeRef, normalize_class_name
 
 _BASE_TYPES = ("ComplexType", "EntityType", "EnumType")
 
@@ -70,9 +69,10 @@ class ODataReader(ABC):
         item entity and ``None`` is returned.
         """
         raw_type = parameter.get("Type")
-        if raw_type is None or ODataType.is_collection_name(raw_type):
+        ref = TypeRef.parse(raw_type)
+        if ref.name is None or ref.is_collection:
             return None
-        return ODataType.normalize_type_name(raw_type)
+        return ref.normalized
 
     @staticmethod
     def _new_navigation(node: Element) -> PropertyInformation:
@@ -91,7 +91,7 @@ class ODataReader(ABC):
         type_name = type_node.get("Name")
         if type_name is None:
             raise ValueError("Type node missing 'Name' attribute")
-        type_schema.FullName = f"{schema_node.attrib['Namespace']}.{ODataType.normalize_class_name(type_name)}"
+        type_schema.FullName = f"{schema_node.attrib['Namespace']}.{normalize_class_name(type_name)}"
         type_schema.BaseTypeFullName = base_type
         type_schema.BaseTypeName = self._qualified_type_name(type_node.get("BaseType"))
         type_schema.IsValueObject = base_type == "EntityType"

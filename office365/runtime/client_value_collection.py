@@ -10,6 +10,7 @@ from typing_extensions import Self
 from office365.runtime.client_value import ClientValue
 from office365.runtime.converters.scalars import parse_enum
 from office365.runtime.converters.value import serialize_value
+from office365.runtime.odata.edm import collection_type_name
 from office365.runtime.odata.json_format import ODataJsonFormat
 
 ValueT = TypeVar("ValueT")
@@ -222,8 +223,6 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
             no name to declare, and a marker naming a type nobody declared is
             worse than no marker at all.
         """
-        from office365.runtime.odata.type import ODataType
-
         if self._item_type is None:
             return None
-        return f"Collection({ODataType.resolve_type_name(self._item_type)})"
+        return collection_type_name(self._item_type)

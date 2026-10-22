@@ -16,12 +16,7 @@ from typing import TYPE_CHECKING, Optional
 from office365.runtime.client_value import ClientValue
 
 from generator.builders.naming import item_name, python_name
-from generator.odata.type_system import (
-    is_collection_name,
-    is_primitive_name,
-    primitive_type_for,
-    strip_collection,
-)
+from generator.odata.type_system import TypeRef
 
 if TYPE_CHECKING:
     from generator.builders.resolution import TypeRegistry
@@ -72,6 +67,7 @@ class ReturnType:
 
     def __init__(self, type_name: str | None, registry: Optional["TypeRegistry"] = None) -> None:
         self._name = type_name or ""
+        self._ref = TypeRef.parse(type_name)
         self._registry = registry
         self.kind = self._classify()
 
@@ -113,20 +109,19 @@ class ReturnType:
         return f"EntityCollection({context}, {item_name(name)})"
 
     def _classify(self) -> TypeKind:
-        name = self._name
-        if not name:
+        if not self._name:
             return TypeKind.VOID
-        if is_collection_name(name):
-            return self._classify_collection(name)
-        if is_primitive_name(name):
+        if self._ref.is_collection:
+            return self._classify_collection()
+        if self._ref.is_primitive:
             return TypeKind.PRIMITIVE
-        if self._is_client_value(name):
+        if self._is_client_value(self._ref.name):
             return TypeKind.CLIENT_VALUE
         return TypeKind.ENTITY
 
-    def _classify_collection(self, name: str) -> TypeKind:
-        item_type = strip_collection(name)
-        if is_primitive_name(name) or is_primitive_name(item_type):
+    def _classify_collection(self) -> TypeKind:
+        item_type = self._ref.name
+        if self._ref.is_primitive:
             return TypeKind.PRIMITIVE_COLLECTION
         if self._is_client_value(item_type):
             return TypeKind.CLIENT_VALUE_COLLECTION
@@ -141,7 +136,8 @@ class ReturnType:
     @staticmethod
     def _collection_name(type_name: str) -> str:
         """Python annotation for a collection whose item type is primitive."""
-        mapped = primitive_type_for(type_name) if is_primitive_name(type_name) else None
+        ref = TypeRef.parse(type_name)
+        mapped = ref.python_type if ref.is_primitive else None
         if mapped is None:
             return python_name(type_name)
         item_types = getattr(mapped, "__args__", None)
@@ -152,15 +148,15 @@ class ReturnType:
     @staticmethod
     def _collection_default(type_name: str) -> str:
         """Python default expression for a collection whose item type is primitive."""
-        if is_primitive_name(type_name):
-            mapped = primitive_type_for(type_name)
+        ref = TypeRef.parse(type_name)
+        if ref.is_primitive:
+            mapped = ref.python_type
             assert mapped is not None
             item_types = getattr(mapped, "__args__", None)
             if item_types:
                 return f"ClientValueCollection({item_types[0].__name__})"
             return f"{mapped.__name__}()"
-        item_type = strip_collection(type_name)
-        primitive = primitive_type_for(item_type)
+        primitive = ref.element.python_type
         if primitive is not None:
             return f"ClientValueCollection({primitive.__name__})"
         return f"{python_name(type_name)}()"
@@ -168,7 +164,7 @@ class ReturnType:
 
 def _primitive_default(type_name: str | None) -> str:
     """Default expression for a primitive OData type (``Edm.Int32`` -> ``int()``)."""
-    return _PRIMITIVE_DEFAULTS.get(primitive_type_for(type_name), "None")
+    return _PRIMITIVE_DEFAULTS.get(TypeRef.parse(type_name).python_type, "None")
 
 
 class ParameterType:
@@ -181,15 +177,13 @@ class ParameterType:
 
     def __init__(self, type_name: str | None) -> None:
         self._type_name = type_name
-        self._item_type = strip_collection(type_name)
+        self._ref = TypeRef.parse(type_name)
         self._python_item = self._resolve_python_item()
 
     def _resolve_python_item(self) -> Optional[type]:
-        if self._type_name is None or not is_collection_name(self._type_name):
+        if not self._ref.is_collection or not self._ref.element.is_primitive:
             return None
-        if not is_primitive_name(self._item_type):
-            return None
-        return primitive_type_for(self._item_type)
+        return self._ref.element.python_type
 
     @property
     def is_primitive_collection(self) -> bool:
