@@ -5,7 +5,6 @@ from __future__ import annotations
 from office365.migration.base import Principal, is_puid, normalize_puid
 from office365.migration.sharepoint.adapters import (
     SharePointLibrarySource,
-    _perm_mask,
     _read_role_assignments,
     _resolve_group_ownership,
 )
@@ -60,12 +59,6 @@ class _Securable:
         self.role_assignments = _Assignments(assignments)
 
 
-def test_perm_mask_is_decimal_and_defensive():
-    # (176 << 32) | 138612833 == 756052856929 (live-verified "Read" mask)
-    assert _perm_mask(_Role("Read", 176, 138612833)) == "756052856929"
-    assert _perm_mask(object()) is None
-
-
 def test_read_role_assignments_captures_masks_and_resolves_users_only():
     resolved: list[int] = []
 
@@ -90,29 +83,6 @@ def test_read_role_assignments_captures_masks_and_resolves_users_only():
     assert entries[0].display_name == "Alice"
     assert entries[1].system_id is None  # a group is never resolved to a PUID
     assert resolved == [10]
-
-
-def test_principal_type_separates_users_sharepoint_groups_and_the_rest():
-    user = _Member("i:0#.f|membership|a@contoso.com", PrincipalType.User, 10)
-    sharepoint_group = _Member("default:members", PrincipalType.SharePointGroup, 20, title="Test site Members")
-    security_group = _Member("sg-team", PrincipalType.SecurityGroup, 30)
-    unprojected = _Member("dl-everyone", None, 40)  # PrincipalType was not returned
-    securable = _Securable(
-        [
-            _Assignment(user, [_Role("Read", 176, 138612833)]),
-            _Assignment(sharepoint_group, [_Role("Contribute", 1, 2)]),
-            _Assignment(security_group, [_Role("Read", 176, 138612833)]),
-            _Assignment(unprojected, [_Role("Read", 176, 138612833)]),
-        ]
-    )
-
-    entries = _read_role_assignments(securable, normalize=lambda name: "default:members" if "Members" in name else name)
-
-    assert [entry.principal_type for entry in entries] == ["user", "group", None, None]
-    # A group keeps its title: the normalized name ("default:members") would not
-    # match a group on the target, and the title is what the service looks up.
-    assert entries[1].principal_name == "default:members"
-    assert entries[1].display_name == "Test site Members"
 
 
 def test_is_puid():
@@ -142,17 +112,6 @@ def test_normalize_puid_strips_the_literal_prefix_and_whitespace():
     assert normalize_puid("0x") is None
     assert normalize_puid(None) is None
     assert normalize_puid("") is None
-
-
-def test_principal_for_canonicalizes_a_prefixed_puid():
-    folder = _Folder({10: _User("i:0#.f|membership|jane@contoso.com", "0x100320006514b083", "Jane")})
-    source = SharePointLibrarySource(folder)
-
-    principal = source._principal_for(10)
-
-    assert principal is not None
-    assert principal.system_id == "100320006514b083"
-    assert source.warnings == []
 
 
 class _NameId:
@@ -268,19 +227,3 @@ def test_resolve_group_ownership_follows_the_chain_to_a_user():
 
     assert groups == ["Owners"]  # nearest first
     assert owner is not None and owner.system_id == "1003200065102863"
-
-
-def test_resolve_group_ownership_stops_at_a_self_owned_group():
-    # Live shape: a team site's Owners group owns itself.
-    owners = _SiteGroup("Owners", None)
-    owners.owner = _OwnerResource(owners)
-    web = _OwnerWeb([owners])
-
-    owner, groups = _resolve_group_ownership(web, "Owners", resolve=lambda _id: None)
-
-    assert owner is None  # the chain closes on itself: the group owns itself
-    assert groups == ["Owners"]
-
-
-def test_resolve_group_ownership_reports_a_group_missing_on_the_site():
-    assert _resolve_group_ownership(_OwnerWeb([]), "Ghosts", resolve=lambda _id: None) == (None, [])

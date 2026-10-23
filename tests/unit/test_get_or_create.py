@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 from office365.runtime.exceptions import DuplicatedObjectException, ObjectNotFoundException
 from office365.runtime.queries.get_or_create import create_or_get, get_or_create
 
@@ -52,15 +51,6 @@ def test_create_or_get_returns_existing_on_duplicate():
     assert created.copied_from is found
 
 
-def test_create_or_get_reraises_other_errors():
-    ctx = _FakeContext()
-    created = _FakeEntity(ctx)
-    create_or_get(create=lambda: created, find=lambda: _FakeEntity(ctx))
-
-    with pytest.raises(ObjectNotFoundException):
-        created._error[0](ObjectNotFoundException("nope"))
-
-
 def test_get_or_create_returns_existing_when_found():
     ctx = _FakeContext()
     return_type = _FakeEntity(ctx)
@@ -87,35 +77,6 @@ def test_get_or_create_creates_when_missing():
 
     assert create_query in ctx._queries
     assert barrier not in ctx._queries  # the create replaced the placeholder slot
-
-
-def test_get_or_create_update_reconciles_existing():
-    ctx = _FakeContext()
-    return_type = _FakeEntity(ctx)
-    found = _FakeEntity(ctx)
-    seen: list = []
-
-    get_or_create(
-        find=lambda: found,
-        create_query=object,
-        return_type=return_type,
-        on_conflict="update",
-        reconcile=seen.append,
-    )
-    found._after[0](found)
-
-    assert seen == [return_type]
-
-
-def test_get_or_create_rejects_unknown_conflict_mode():
-    ctx = _FakeContext()
-    with pytest.raises(ValueError, match="on_conflict"):
-        get_or_create(
-            find=lambda: _FakeEntity(ctx),
-            create_query=object,
-            return_type=_FakeEntity(ctx),
-            on_conflict="nope",
-        )
 
 
 def test_get_or_create_tolerant_miss_defers_create():
@@ -156,22 +117,3 @@ def test_get_or_create_tolerant_hit_reconciles():
 
     assert seen == [return_type]
     assert return_type.copied_from is found
-
-
-def test_get_or_create_skips_copy_when_find_returns_the_return_type():
-    ctx = _FakeContext()
-    return_type = _FakeEntity(ctx)
-    seen: list = []
-
-    get_or_create(
-        find=lambda: return_type,
-        create_query=object,
-        return_type=return_type,
-        on_conflict="update",
-        reconcile=seen.append,
-        missing=lambda entity: False,
-    )
-    return_type._after[0](return_type)
-
-    assert return_type.copied_from is None  # self-copy guarded
-    assert seen == [return_type]

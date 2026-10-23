@@ -9,9 +9,7 @@ web that inherits its navigation only flips the target's ``use_shared`` flag.
 
 from __future__ import annotations
 
-import pytest
 from office365.migration.sharepoint.navigation import (
-    NavNode,
     apply_navigation,
     capture_navigation,
     verify_navigation,
@@ -126,19 +124,6 @@ def test_apply_creates_missing_nodes_with_rewritten_links():
     assert target.executed == 1
 
 
-def test_apply_is_idempotent_when_the_node_already_exists():
-    source, target = _source_web(), _target_web(with_wiki=True)
-
-    apply_navigation(source, target, [])
-
-    wiki = [n for n in target.navigation.quick_launch.execute_query() if n.title == "Wiki"]
-    assert len(wiki) == 1
-    assert wiki[0].url == "/sites/team_out/Pages/Wiki.aspx"  # left alone
-    # an existing node's children are still reconciled
-    assert [c.title for c in wiki[0].children.execute_query()] == ["Sub"]
-    assert target.executed == 1
-
-
 def test_apply_only_flips_use_shared_for_an_inheriting_source():
     source = _Web("https://t/sites/in", _Navigation(use_shared=True, quick_launch=[_Node("X", "/sites/in/x")]))
     target = _target_web()
@@ -171,46 +156,3 @@ def test_verify_skips_dynamic_nodes_and_reports_inheritance_difference():
 
     assert any("use_shared" in i for i in issues)
     assert not any("'Recent'" in i for i in issues)
-
-
-def test_apply_warns_when_a_source_node_is_hidden():
-    source = _Web(
-        "https://t/sites/in",
-        _Navigation(quick_launch=[_Node("Secret", "/sites/in/secret.aspx", is_visible=False)]),
-    )
-    target = _Web("https://t/sites/out", _Navigation())
-
-    warnings: list[str] = []
-    apply_navigation(source, target, warnings)
-
-    assert any("Secret" in w and "hidden" in w for w in warnings)
-    assert [n.title for n in target.navigation.quick_launch.execute_query()] == ["Secret"]
-
-
-def test_nav_node_defaults():
-    node = NavNode(title="X", url="/x")
-
-    assert node.is_external is False
-    assert node.is_visible is True
-    assert node.children == []
-
-
-@pytest.mark.parametrize(
-    "url, expected",
-    [
-        (
-            "https://mediadev8.sharepoint.com/sites/team_in/Pages/x.aspx",
-            "https://mediadev8.sharepoint.com/sites/team_out/Pages/x.aspx",
-        ),
-        ("/sites/team_in/Lists/Depts/AllItems.aspx", "/sites/team_out/Lists/Depts/AllItems.aspx"),
-        ("/sites/team_in2/x.aspx", "/sites/team_in2/x.aspx"),
-        ("https://intranet.example.com/portal", "https://intranet.example.com/portal"),
-    ],
-)
-def test_rewrite_url_handles_absolute_relative_and_external(url, expected):
-    from office365.migration.sharepoint.navigation import _rewrite_url
-
-    source = "https://mediadev8.sharepoint.com/sites/team_in"
-    target = "https://mediadev8.sharepoint.com/sites/team_out"
-
-    assert _rewrite_url(url, source, target) == expected

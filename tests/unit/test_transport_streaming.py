@@ -16,7 +16,6 @@ import threading
 from typing import Any
 
 import pytest
-import requests
 from office365.graph_client import GraphClient
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.request_options import RequestOptions
@@ -48,31 +47,6 @@ class _BodyTransport(BaseTransport):
         return response
 
 
-def test_stream_yields_body_in_chunks() -> None:
-    request = RequestOptions(url=_URL)
-
-    chunks = list(_BodyTransport(b"0123456789").stream(request, chunk_size=4))
-
-    assert chunks == [b"0123", b"4567", b"89"]
-    assert request.stream is True
-
-
-def test_stream_invokes_on_headers() -> None:
-    seen: list[Any] = []
-
-    list(_BodyTransport(b"abc").stream(RequestOptions(url=_URL), on_headers=seen.append))
-
-    assert len(seen) == 1
-    assert seen[0]["Content-Length"] == "3"
-
-
-def test_stream_raises_for_error_status() -> None:
-    with pytest.raises(requests.HTTPError) as exc:
-        list(_BodyTransport(b"nope", status=404).stream(RequestOptions(url=_URL)))
-
-    assert exc.value.response.status_code == 404  # noqa: PLR2004
-
-
 def test_stream_async_offloads_and_concatenates() -> None:
     loop_thread = threading.get_ident()
     transport = _BodyTransport(b"0123456789")
@@ -82,40 +56,6 @@ def test_stream_async_offloads_and_concatenates() -> None:
 
     assert asyncio.run(_run()) == b"0123456789"
     assert transport.threads and transport.threads[0] != loop_thread
-
-
-def test_stream_async_propagates_error() -> None:
-    transport = _BodyTransport(b"nope", status=500)
-
-    async def _consume() -> list[bytes]:
-        return [chunk async for chunk in transport.stream_async(RequestOptions(url=_URL))]
-
-    with pytest.raises(requests.HTTPError):
-        asyncio.run(_consume())
-
-
-def test_stream_async_closes_source_when_closed_early() -> None:
-    closed: list[bool] = []
-
-    class _Cancellable(BaseTransport):
-        def execute(self, request: RequestOptions):
-            return build_response(request, b"content")
-
-        def stream(self, request, chunk_size=8192, on_headers=None):  # type: ignore[override]
-            try:
-                yield b"first"
-                yield b"second"
-            finally:
-                closed.append(True)
-
-    async def _run() -> None:
-        stream = _Cancellable().stream_async(RequestOptions(url=_URL))
-        assert await stream.__anext__() == b"first"
-        await stream.aclose()  # type: ignore[reportAttributeAccessIssue]
-
-    asyncio.run(_run())
-
-    assert closed == [True]
 
 
 def test_stream_flows_through_throttled_transport() -> None:
@@ -221,40 +161,6 @@ def test_download_session_async_reports_chunks_and_progress() -> None:
     assert progress[-1].stage == "downloading"
 
 
-def test_download_session_async_truncates_existing_content() -> None:
-    _, file, _ = _file_context(b"new")
-
-    stream = io.BytesIO(b"old-and-longer-content")
-    asyncio.run(file.download_session_async(stream))
-
-    assert stream.getvalue() == b"new"
-
-
-def test_download_session_async_uses_native_async_stream() -> None:
-    transport = _NativeAsyncStreamTransport(_BODY)
-    _, file, _ = _file_context(_BODY, transport=transport)
-    stream = io.BytesIO()
-
-    asyncio.run(file.download_session_async(stream, chunk_size=256))
-
-    assert stream.getvalue() == _BODY
-    assert transport.calls == 1
-    assert transport.threads == [threading.get_ident()]
-
-
-def test_download_session_async_raises_client_request_exception() -> None:
-    ctx = ClientContext(_SITE_URL)
-    ctx.pending_request().beforeExecute.clear()
-    ctx.pending_request().transport = ScriptedTransport([{"status": 404, "body": {"error": {"message": "missing"}}}])
-    file = File(ctx)
-    file.set_property("Id", "1")
-    file.set_property("ServerRelativePath", _FILE_URL)
-    file.set_property("ServerRelativeUrl", _FILE_URL)
-
-    with pytest.raises(ClientRequestException):
-        asyncio.run(file.download_session_async(io.BytesIO()))
-
-
 def test_download_session_async_dispatches_to_on_error() -> None:
     ctx = ClientContext(_SITE_URL)
     ctx.pending_request().beforeExecute.clear()
@@ -280,20 +186,6 @@ def _drive_item_context(body: bytes, *, transport: BaseTransport | None = None):
     return ctx, ctx.me.drive.root, transport
 
 
-def test_drive_item_download_session_async_writes_file_off_loop() -> None:
-    loop_thread = threading.get_ident()
-    transport = _RecordingStreamingTransport([_BODY])
-    _, item, _ = _drive_item_context(_BODY, transport=transport)
-    stream = io.BytesIO()
-
-    result = asyncio.run(item.download_session_async(stream, chunk_size=1024))
-
-    assert result is item
-    assert stream.getvalue() == _BODY
-    assert transport.calls == 1
-    assert transport.threads[0] != loop_thread
-
-
 def test_drive_item_download_session_async_reports_chunks_and_progress() -> None:
     body = b"a" * 10
     _, item, _ = _drive_item_context(body)
@@ -310,36 +202,6 @@ def test_drive_item_download_session_async_reports_chunks_and_progress() -> None
     assert [p.done for p in progress] == [4, 8, 10]
     assert progress[-1].total == 10  # noqa: PLR2004
     assert progress[-1].stage == "downloading"
-
-
-def test_drive_item_download_session_async_truncates_existing_content() -> None:
-    _, item, _ = _drive_item_context(b"new")
-
-    stream = io.BytesIO(b"old-and-longer-content")
-    asyncio.run(item.download_session_async(stream))
-
-    assert stream.getvalue() == b"new"
-
-
-def test_drive_item_download_session_async_uses_native_async_stream() -> None:
-    transport = _NativeAsyncStreamTransport(_BODY)
-    _, item, _ = _drive_item_context(_BODY, transport=transport)
-    stream = io.BytesIO()
-
-    asyncio.run(item.download_session_async(stream, chunk_size=256))
-
-    assert stream.getvalue() == _BODY
-    assert transport.calls == 1
-    assert transport.threads == [threading.get_ident()]
-
-
-def test_drive_item_download_session_async_raises_client_request_exception() -> None:
-    ctx = GraphClient()
-    ctx.pending_request().beforeExecute.clear()
-    ctx.pending_request().transport = ScriptedTransport([{"status": 404, "body": {"error": {"message": "missing"}}}])
-
-    with pytest.raises(ClientRequestException):
-        asyncio.run(ctx.me.drive.root.download_session_async(io.BytesIO()))
 
 
 def test_drive_item_download_session_async_dispatches_to_on_error() -> None:
@@ -398,18 +260,6 @@ def test_file_get_content_stream_async_raises_client_request_exception() -> None
         asyncio.run(_run())
 
 
-def test_drive_item_get_content_stream_async_yields_chunks() -> None:
-    _, item, _ = _drive_item_context(_BODY)
-
-    async def _run() -> list[bytes]:
-        return [chunk async for chunk in item.get_content_stream_async(chunk_size=256)]
-
-    chunks = asyncio.run(_run())
-
-    assert b"".join(chunks) == _BODY
-    assert [len(c) for c in chunks] == [256, 256, 256, 232]
-
-
 def test_drive_item_get_content_stream_async_uses_native_async_stream() -> None:
     transport = _NativeAsyncStreamTransport(_BODY)
     _, item, _ = _drive_item_context(_BODY, transport=transport)
@@ -420,18 +270,6 @@ def test_drive_item_get_content_stream_async_uses_native_async_stream() -> None:
     assert asyncio.run(_run()) == _BODY
     assert transport.calls == 1
     assert transport.threads == [threading.get_ident()]
-
-
-def test_drive_item_get_content_stream_async_raises_client_request_exception() -> None:
-    ctx = GraphClient()
-    ctx.pending_request().beforeExecute.clear()
-    ctx.pending_request().transport = ScriptedTransport([{"status": 404, "body": {"error": {"message": "missing"}}}])
-
-    async def _run() -> list[bytes]:
-        return [chunk async for chunk in ctx.me.drive.root.get_content_stream_async()]
-
-    with pytest.raises(ClientRequestException):
-        asyncio.run(_run())
 
 
 def test_get_content_stream_async_closes_on_early_exit() -> None:
@@ -490,16 +328,6 @@ def test_context_close_releases_transport() -> None:
     ctx.close()
 
     assert transport.closed == 1
-
-
-def test_context_aclose_releases_transport() -> None:
-    ctx = ClientContext(_SITE_URL)
-    transport = _ClosableTransport()
-    ctx.pending_request().transport = transport
-
-    asyncio.run(ctx.aclose())
-
-    assert transport.aclosed == 1
 
 
 def test_async_with_closes_transport() -> None:

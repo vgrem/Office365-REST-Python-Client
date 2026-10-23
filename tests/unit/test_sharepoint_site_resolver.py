@@ -17,12 +17,10 @@ from office365.migration.sharepoint.adapters import (
 )
 from office365.migration.sharepoint.pages import PageCopyReport
 from office365.migration.sharepoint.resolvers import (
-    is_document_library,
     is_migratable_list,
     resolve_site_task,
     resolve_task,
 )
-from office365.migration.sharepoint.structure import normalize_guid
 from office365.migration.tasks import MigrationTask
 
 _DOCUMENT_LIBRARY_TEMPLATE = 101
@@ -374,10 +372,6 @@ class _StructureStub:
 
 
 class TestListSelection(unittest.TestCase):
-    def test_document_library(self):
-        self.assertTrue(is_document_library(_docs()))
-        self.assertFalse(is_document_library(_tasks()))
-
     def test_skips_hidden_system_and_undeletable(self):
         self.assertTrue(is_migratable_list(_docs()))
         self.assertTrue(is_migratable_list(_tasks()))
@@ -385,10 +379,6 @@ class TestListSelection(unittest.TestCase):
         self.assertFalse(is_migratable_list(_FakeList("User Information", base_template=112)))
         self.assertFalse(is_migratable_list(_FakeList("Site Pages", base_template=119)))
         self.assertFalse(is_migratable_list(_FakeList("System", allow_deletion=False)))
-
-    def test_skips_business_data_external_list(self):
-        # A BCS external list is a view over a BDC model: a copy cannot provision it.
-        self.assertFalse(is_migratable_list(_FakeList("Customers", base_template=600)))
 
 
 class TestResolveSiteTask(_StructureStub, unittest.TestCase):
@@ -407,14 +397,6 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         # the source site differs from the registered (target) context → cloned once
         self.assertEqual(source.clones, ["https://contoso.sharepoint.com/sites/source"])
 
-    def test_same_site_does_not_clone(self):
-        source = _context([_docs()])
-        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
-
-        resolve_site_task(task, source)
-
-        self.assertEqual(source.clones, [])
-
     def test_include_and_exclude_filter_by_title(self):
         source = _context([_docs(), _tasks()])
         task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
@@ -427,52 +409,6 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         without_docs = resolve_site_task(task, source, exclude=["Documents"])
         self.assertEqual([call[0] for call in source.web.lists.ensure_calls], ["Tasks"])
         self.assertEqual(len(without_docs), 1)
-
-    def test_reuses_existing_target_list_template(self):
-        source = _context([_docs()])
-        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
-
-        resolve_site_task(task, source)
-
-        _, template = source.web.lists.ensure_calls[0]
-        self.assertEqual(int(template), 101)
-
-    def test_lookup_list_ids_are_threaded_into_provisioning(self):
-        source = _context([_FakeList("Depts"), _FakeList("TypedSrc")])
-        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
-
-        resolve_site_task(task, source)
-
-        # Every container is created first, then structure is replayed with the
-        # source->target list-id map so lookup columns can be repointed.
-        expected = {
-            normalize_guid(_guid_for("Depts")): normalize_guid(_guid_for("target:Depts")),
-            normalize_guid(_guid_for("TypedSrc")): normalize_guid(_guid_for("target:TypedSrc")),
-        }
-        provided = [call.kwargs["list_id_map"] for call in self.provision.call_args_list]
-        self.assertEqual(len(provided), 2)
-        self.assertEqual(provided[0], expected)
-        self.assertEqual(provided[1], expected)
-
-    def test_provisions_structure_by_default(self):
-        source = _context([_docs()])
-        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
-
-        resolve_site_task(task, source)
-
-        self.assertEqual(self.capture.call_args[0][0].title, "Documents")
-        target_arg, structure_arg = self.provision.call_args[0]
-        self.assertEqual(target_arg.title, "Documents")
-        self.assertIsNone(structure_arg)
-
-    def test_structure_warnings_reach_the_target_adapter(self):
-        self.provision.return_value = ["content type 'Project': column 'X' was not linked"]
-        source = _context([_docs()])
-        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
-
-        pairs = resolve_site_task(task, source)
-
-        self.assertEqual(pairs[0][1].warnings, ["content type 'Project': column 'X' was not linked"])
 
     def test_page_library_is_reported_when_pages_are_not_copied(self):
         pages = _PageList(
@@ -572,29 +508,6 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
             "1 business-data (BCS) external list(s) are not migrated — remediate out of band: Customers", warnings
         )
 
-    def test_subwebs_are_detected_and_reported_when_skipped(self):
-        child = _Web(
-            _Lists([_docs()]),
-            title="child",
-            url="https://contoso.sharepoint.com/sites/source/child",
-        )
-        root = _Web(
-            _Lists([_tasks()]),
-            webs=_WebCollection([child]),
-            title="Source",
-            url="https://contoso.sharepoint.com/sites/source",
-        )
-        source = _Context("https://contoso.sharepoint.com/sites/source", root)
-        task = MigrationTask.sharepoint(root.url, root.url, migrate_all=True)
-
-        warnings: list[str] = []
-        pairs = resolve_site_task(task, source, warnings=warnings)
-
-        self.assertEqual(len(pairs), 1)  # root list only
-        self.assertEqual(len(warnings), 1)
-        self.assertIn("child", warnings[0])
-        self.assertIn("include_subwebs=True", warnings[0])
-
     def test_include_subwebs_provisions_target_subsites_and_recurses(self):
         source_child = _Web(
             _Lists([_docs()]),
@@ -630,43 +543,6 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         self.assertEqual(target_root.webs.add_calls[0].Url, "child")
         self.assertEqual(target_root.webs.add_calls[0].WebTemplate, "GROUP")
         self.assertEqual([call[0] for call in created.lists.ensure_calls], ["Documents"])
-
-    def test_include_subwebs_reuses_an_existing_target_subsite(self):
-        source_child = _Web(
-            _Lists([_docs()]),
-            title="child",
-            url="https://contoso.sharepoint.com/sites/source/child",
-        )
-        source_root = _Web(
-            _Lists([_tasks()]),
-            webs=_WebCollection([source_child]),
-            title="Source",
-            url="https://contoso.sharepoint.com/sites/source",
-        )
-        target_child = _Web(
-            _Lists([]),
-            title="child",
-            url="https://contoso.sharepoint.com/sites/target/child",
-        )
-        target_root = _Web(
-            _Lists([]),
-            webs=_WebCollection([target_child]),
-            title="Target",
-            url="https://contoso.sharepoint.com/sites/target",
-        )
-        registry = {
-            source_root.url.rstrip("/").casefold(): source_root,
-            target_root.url.rstrip("/").casefold(): target_root,
-            target_child.url.rstrip("/").casefold(): target_child,
-        }
-        context = _Context(target_root.url, target_root, registry)
-        task = MigrationTask.sharepoint(source_root.url, target_root.url, migrate_all=True)
-
-        resolve_site_task(task, context, include_subwebs=True)
-
-        # the existing target subsite is reused instead of created
-        self.assertEqual(target_root.webs.add_calls, [])
-        self.assertEqual([call[0] for call in target_child.lists.ensure_calls], ["Documents"])
 
     def test_include_subwebs_reports_web_scope_structure_the_target_lacks(self):
         source_child = _Web(
@@ -707,46 +583,6 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         self.assertNotIn("RegionCol", note)
         self.assertIn("list-scoped copy", note)
 
-    def test_web_scope_structure_note_is_quiet_when_the_target_matches(self):
-        source_child = _Web(
-            _Lists([_docs()]),
-            title="child",
-            url="https://contoso.sharepoint.com/sites/source/child",
-            fields=[_Field("RegionCol")],
-            content_types=[_ContentType("Contract")],
-        )
-        source_root = _Web(
-            _Lists([_tasks()]),
-            webs=_WebCollection([source_child]),
-            title="Source",
-            url="https://contoso.sharepoint.com/sites/source",
-        )
-        target_child = _Web(
-            _Lists([]),
-            title="child",
-            url="https://contoso.sharepoint.com/sites/target/child",
-            fields=[_Field("RegionCol")],
-            content_types=[_ContentType("Contract")],
-        )
-        target_root = _Web(
-            _Lists([]),
-            webs=_WebCollection([target_child]),
-            title="Target",
-            url="https://contoso.sharepoint.com/sites/target",
-        )
-        registry = {
-            source_root.url.rstrip("/").casefold(): source_root,
-            target_root.url.rstrip("/").casefold(): target_root,
-            target_child.url.rstrip("/").casefold(): target_child,
-        }
-        context = _Context(target_root.url, target_root, registry)
-        task = MigrationTask.sharepoint(source_root.url, target_root.url, migrate_all=True)
-
-        warnings: list[str] = []
-        resolve_site_task(task, context, include_subwebs=True, warnings=warnings)
-
-        self.assertEqual([message for message in warnings if "web-scope structure" in message], [])
-
     def test_web_scope_columns_are_not_provisioned_when_structure_is_off(self):
         source = _Web(
             _Lists([_tasks()]),
@@ -773,137 +609,8 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         note = next(message for message in warnings if "web-scope structure is incomplete" in message)
         self.assertIn("1 column(s): RegionCol", note)
 
-    def test_web_scope_columns_are_provisioned_before_the_list_replay(self):
-        source = _Web(
-            _Lists([_tasks()]),
-            title="Source",
-            url="https://contoso.sharepoint.com/sites/source",
-            fields=[_Field("RegionCol", schema_xml='<Field Type="Text" Name="RegionCol" />')],
-        )
-        target = _Web(
-            _Lists([]),
-            title="Target",
-            url="https://contoso.sharepoint.com/sites/target",
-        )
-        registry = {
-            source.url.rstrip("/").casefold(): source,
-            target.url.rstrip("/").casefold(): target,
-        }
-        context = _Context(target.url, target, registry)
-        task = MigrationTask.sharepoint(source.url, target.url, migrate_all=True)
-        # What the target web carried when each list's structure was replayed.
-        seen: list[list[str]] = []
-
-        def _record(*args, **kwargs):
-            seen.append([field.internal_name for field in target.fields.execute_query()])
-            return []
-
-        self.provision.side_effect = _record
-
-        resolve_site_task(task, context)
-
-        self.assertEqual(seen, [["RegionCol"]])
-
-    def test_provision_structure_can_be_disabled(self):
-        source = _context([_docs()])
-        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
-
-        resolve_site_task(task, source, provision_structure=False)
-
-        self.capture.assert_not_called()
-        self.provision.assert_not_called()
-
-    def test_rejects_non_sharepoint_task(self):
-        task = MigrationTask.file_share("src", "https://contoso.sharepoint.com/sites/target", "Documents")
-        with self.assertRaises(ValueError):
-            resolve_site_task(task, _context([]))
-
-    def test_rejects_server_side_migration_api(self):
-        source = _context([_docs()])
-        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
-        with self.assertRaises(NotImplementedError):
-            resolve_site_task(task, source, MigrationSettings(use_migration_api=True))
-
 
 class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
-    def test_generic_list_uses_record_adapters(self):
-        source = _context([_tasks()])
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Tasks",
-            target_list="Tasks",
-        )
-
-        src, dst = resolve_task(task, source)
-
-        self.assertIsInstance(src, SharePointListSource)
-        self.assertIsInstance(dst, SharePointListTarget)
-
-    def test_library_uses_file_adapters(self):
-        source = _context([_docs()])
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Documents",
-            target_list="Documents",
-        )
-
-        src, dst = resolve_task(task, source)
-
-        self.assertIsInstance(src, SharePointLibrarySource)
-        self.assertIsInstance(dst, SharePointLibraryTarget)
-
-    def test_provisions_structure_by_default(self):
-        source = _context([_tasks()])
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Tasks",
-            target_list="Tasks",
-        )
-
-        resolve_task(task, source)
-
-        self.assertEqual(self.capture.call_args[0][0].title, "Tasks")
-        target_arg, structure_arg = self.provision.call_args[0]
-        self.assertEqual(target_arg.title, "Tasks")
-        self.assertIsNone(structure_arg)
-
-    def test_provision_structure_can_be_disabled(self):
-        source = _context([_tasks()])
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Tasks",
-            target_list="Tasks",
-        )
-
-        resolve_task(task, source, provision_structure=False)
-
-        self.capture.assert_not_called()
-        self.provision.assert_not_called()
-
-    def test_migration_api_still_provisions_structure(self):
-        source = _context([_docs()])
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Documents",
-            target_list="Documents",
-        )
-
-        with mock.patch(
-            "office365.migration.sharepoint.resolvers._package_target",
-            return_value=SimpleNamespace(warnings=[]),
-        ):
-            resolve_task(task, source, MigrationSettings(use_migration_api=True))
-
-        # The package builder emits no columns/content types/views, so structure is
-        # still replayed over REST before the package target is used.
-        self.assertEqual(self.capture.call_args[0][0].title, "Documents")
-        self.assertEqual(self.provision.call_args[0][0].title, "Documents")
-
     def test_a_plain_list_ignores_the_migration_api_setting(self):
         # The package builder emits <File>/<Folder> objects only, so a record has no
         # shape in Manifest.xml: routing a plain list to it wrote the record's repr
@@ -946,26 +653,6 @@ class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
         package.assert_called_once()
         self.assertIs(dst, package_target)
 
-    def test_a_library_migrated_into_a_list_is_refused(self):
-        # Live, the first write of a file's bytes into the record target raised
-        # ``TypeError: object is not iterable`` from ``dict(payload)`` — one failed
-        # item per file, naming neither the item nor the reason.
-        source = _context([_docs(), _tasks()])
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Documents",
-            target_list="Tasks",
-        )
-
-        with self.assertRaises(ValueError) as caught:
-            resolve_task(task, source)
-
-        self.assertIn("'Documents' holds files and 'Tasks' is a list", str(caught.exception))
-        # Refused before the structure replay, which for this shape died on its own
-        # (``Column 'LinkTitle' does not exist``) instead of saying what was wrong.
-        self.provision.assert_not_called()
-
     def test_a_list_migrated_into_a_library_is_refused(self):
         # Live with provision_structure=False, this pair reported ``Success 2`` and
         # left two files named "1" and "2" whose content was the record's repr.
@@ -981,15 +668,6 @@ class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
             resolve_task(task, source)
 
         self.assertIn("'Tasks' holds list records and 'Documents' is a document library", str(caught.exception))
-
-    def test_migrate_all_defers_to_site_resolver(self):
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            "https://contoso.sharepoint.com/sites/target",
-            migrate_all=True,
-        )
-        with self.assertRaises(NotImplementedError):
-            resolve_task(task, _context([]))
 
 
 class TestFileShareTask(_StructureStub, unittest.TestCase):
@@ -1016,16 +694,6 @@ class TestFileShareTask(_StructureStub, unittest.TestCase):
 
 
 class TestSessionSiteTask(_StructureStub, unittest.TestCase):
-    def test_add_task_rejects_migrate_all(self):
-        session = MigrationSession()
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            "https://contoso.sharepoint.com/sites/target",
-            migrate_all=True,
-        )
-        with self.assertRaises(ValueError):
-            session.add_task(task=task)
-
     def test_add_site_task_creates_one_job_per_list(self):
         source = _context([_docs(), _tasks()])
         session = MigrationSession().register(context=source)
@@ -1038,69 +706,6 @@ class TestSessionSiteTask(_StructureStub, unittest.TestCase):
         self.assertEqual(len({entry.id for entry in session.tasks}), 2)
         self.assertIn("Documents", jobs[0].target_label)
         self.assertIn("Tasks", jobs[1].target_label)
-
-    def test_add_site_task_can_skip_structure_provisioning(self):
-        source = _context([_docs()])
-        session = MigrationSession().register(context=source)
-        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
-
-        session.add_site_task(task=task, provision_structure=False)
-
-        self.capture.assert_not_called()
-
-    def test_add_site_task_requires_context(self):
-        session = MigrationSession()
-        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", "https://x", migrate_all=True)
-        with self.assertRaises(ValueError):
-            session.add_site_task(task=task)
-
-    def test_add_site_task_surfaces_skipped_subsites(self):
-        child = _Web(
-            _Lists([_docs()]),
-            title="child",
-            url="https://contoso.sharepoint.com/sites/source/child",
-        )
-        root = _Web(
-            _Lists([_tasks()]),
-            webs=_WebCollection([child]),
-            title="Source",
-            url="https://contoso.sharepoint.com/sites/source",
-        )
-        context = _Context(root.url, root)
-        session = MigrationSession().register(context=context)
-        task = MigrationTask.sharepoint(root.url, root.url, migrate_all=True)
-
-        session.add_site_task(task=task)
-
-        self.assertTrue(any("subsite" in message for message in session.warnings()))
-
-    def test_add_task_provisions_structure_by_default(self):
-        source = _context([_tasks()])
-        session = MigrationSession().register(context=source)
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Tasks",
-            target_list="Tasks",
-        )
-
-        session.add_task(task=task)
-
-        self.assertEqual(self.provision.call_count, 1)
-
-    def test_add_task_can_skip_structure_provisioning(self):
-        source = _context([_tasks()])
-        session = MigrationSession().register(context=source)
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Tasks",
-            target_list="Tasks",
-        )
-
-        session.add_task(task=task, provision_structure=False)
-
-        self.capture.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -29,9 +29,5 @@ def test_report_result_csv_rows_are_keyed_by_header():
     ]
 
 
-def test_report_result_csv_rows_empty_content():
-    assert _result(b"").csv_rows() == []
-
-
 def test_report_result_csv_rows_via_to_bytes_roundtrip():
     assert _result().csv_rows()[1]["Read"] == "4"

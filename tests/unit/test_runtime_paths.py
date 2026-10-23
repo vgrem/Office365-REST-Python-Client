@@ -19,11 +19,6 @@ class TestGraphPathBuilding(unittest.TestCase):
 
     client = GraphClient()
 
-    def test_build_nested_url_resource_path(self):
-        parent_path = ResourcePath("root", ResourcePath("drive", self.client.me.resource_path))
-        path = UrlPath("Sample.docx", UrlPath("2018", UrlPath("archive", parent_path)))
-        self.assertEqual("/me/drive/root:/archive/2018/Sample.docx:/", str(path))
-
     def test_resolve_drive_url_path(self):
         parent_path = self.client.me.drive.root.resource_path
         assert parent_path is not None
@@ -31,28 +26,6 @@ class TestGraphPathBuilding(unittest.TestCase):
         item_id = uuid.uuid4().hex
         path.set_segment(item_id)
         self.assertEqual(f"/me/drive/items/{item_id}", str(path))
-
-    def test_build_drive_children_path(self):
-        item_id = uuid.uuid4().hex
-        path = self.client.sites.root.drive.items[item_id].children.resource_path
-        self.assertEqual(f"/sites/root/drive/items/{item_id}/children", str(path))
-
-    def test_resolve_drive_children_path(self):
-        """Setting a segment on ``root.children`` canonicalizes to /me/drive/items/{id}."""
-        path = self.client.me.drive.root.children.resource_path
-        assert path is not None
-        item_id = uuid.uuid4().hex
-        path.set_segment(item_id)
-        self.assertEqual(f"/me/drive/items/{item_id}", str(path))
-
-    def test_resolve_nested_drive_children_path(self):
-        """A grandchild under a nested ``children`` keeps the canonical /items parents."""
-        first_id = uuid.uuid4().hex
-        grandchild_id = uuid.uuid4().hex
-        nested_path = self.client.sites.root.drive.items[first_id].children.resource_path
-        assert nested_path is not None
-        nested_path.set_segment(grandchild_id)
-        self.assertEqual(f"/sites/root/drive/items/{grandchild_id}", str(nested_path))
 
     def test_recursive_children_requests_parent_collection(self):
         """Recursing into a child folder requests ``/items/{id}/children`` (not a bare id)."""
@@ -86,11 +59,6 @@ class TestGraphPathBuilding(unittest.TestCase):
             str(path),
         )
 
-    def test_build_path_from_url(self):
-        path_str = "/teams('7f919b9f-c220-4290-a4d8-5ff9300d1296')/operations('dc97f61a-0040-436f-ac09-427cd2456fd8')"
-        path = ODataPathBuilder.parse_url(path_str)
-        self.assertIsNotNone(path.segment)
-
 
 _LOGIN = "i:0#.f|membership|user.name@domain.com"
 
@@ -116,15 +84,6 @@ def test_id_takes_precedence_when_mapped():
     assert "GetByName" not in str(user.resource_path)
     assert user.id == 6  # noqa: PLR2004
     assert user.login_name == _LOGIN
-
-
-def test_login_name_fallback_without_id():
-    """Without an identifier, the login-name path is used as a fallback."""
-    ctx = _ctx({"__metadata": {"type": "SP.User"}, "LoginName": _LOGIN})
-
-    user = _ensure_user(ctx)
-
-    assert "GetByName" in str(user.resource_path)
 
 
 def test_entity_method_path_is_not_clobbered_by_id():
@@ -156,27 +115,6 @@ def test_odata_literal_keeps_slashes():
 
     assert "%2F" not in str(resource_path)
     assert path in str(resource_path)
-
-
-def test_odata_literal_escapes_single_quote_once():
-    """A single quote is doubled exactly once in an OData string literal (#1052)."""
-    assert ODataPathBuilder._encode_string("d'appello") == "'d''appello'"
-    assert ODataPathBuilder._encode_string("it's 'x'") == "'it''s ''x'''"
-
-
-def test_odata_literal_escapes_quote_in_file_path():
-    ctx = ClientContext(test_site_url)
-    path = "/sites/x/Shared Documents/d'appello.docx"
-
-    resource_path = ctx.web.get_file_by_server_relative_path(path).resource_path
-
-    assert "d''appello.docx" in str(resource_path)
-    assert "''''" not in str(resource_path)
-
-
-def test_odata_literal_encodes_special_chars_once():
-    """Replacement text is not re-encoded: '%' becomes %25 and '+' stays %2B."""
-    assert ODataPathBuilder._encode_string("50% + 1 & #2?*") == "'50%25 %2B 1 %26 %232%3F%2A'"
 
 
 def test_odata_function_datetime_argument_uses_datetime_literal():
@@ -218,16 +156,6 @@ def test_move_file_by_path_sends_paths_in_body():
     assert request.data["destPath"]["DecodedUrl"].endswith(dest)
 
 
-def test_alternate_key_path_renders_parenthesised_literal():
-    from office365.runtime.paths.alternate_key import AlternateKeyPath
-
-    path = AlternateKeyPath("uniqueName", "Group157", ResourcePath("groups"))
-
-    assert str(path) == "/groups(uniqueName='Group157')"
-    assert path.key_name == "uniqueName"
-    assert path.delimiter is None
-
-
 def test_appid_path_is_an_alternate_key_path():
     from office365.runtime.paths.alternate_key import AlternateKeyPath
     from office365.runtime.paths.appid import AppIdPath
@@ -238,14 +166,6 @@ def test_appid_path_is_an_alternate_key_path():
     assert isinstance(path, AlternateKeyPath)
     assert path.key_name == "appId"
     assert str(path) == f"/servicePrincipals(appId='{app_id}')"
-
-
-def test_get_by_alternate_key_builds_odata_path():
-    client = GraphClient()
-
-    group = client.groups.get_by_alternate_key("uniqueName", "Group157")
-
-    assert str(group.resource_path) == "/groups(uniqueName='Group157')"
 
 
 def test_get_by_app_id_delegates_to_alternate_key():

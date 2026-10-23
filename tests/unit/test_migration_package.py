@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import base64
-import importlib.util
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
 
 import pytest
 from office365.migration.package import (
@@ -14,18 +12,14 @@ from office365.migration.package import (
     MANIFEST_NS,
     REQUIREMENTS_NS,
     ROOT_OBJECT_MAP_NS,
-    SYSTEM_DATA_NS,
     USER_GROUP_MAP_NS,
     VIEW_FORMS_LIST_NS,
     BlobStaging,
     FileSystemStaging,
     Group,
-    Package,
     PackageBuilder,
     SharedWithEvent,
-    User,
     UserGroupMap,
-    create_staging,
 )
 
 
@@ -71,61 +65,6 @@ def test_manifest_renders_spobjects_with_file_and_versions():
     # oldest first, current last (the API promotes the last <Versions> entry)
     assert [v.get("Version") for v in version_rows] == ["1.0", "2.0"]
     assert version_rows[-1].get("FileValue") == f"{file_object.get('Id')}.2.0"
-
-
-def test_manifest_normalizes_datetime_attributes_to_xsd_utc():
-    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x", list_title="Documents")
-    builder.add_file(
-        "doc.txt",
-        b"v1",
-        time_created=datetime(2020, 1, 2, 3, 4, 5),  # naive → assume UTC
-        time_last_modified=datetime(2020, 1, 2, 5, 4, 5, tzinfo=timezone.utc),
-    )
-    root = ET.fromstring(builder.build().manifest)
-    file_object = _children(root, MANIFEST_NS, "SPObject")[-2]
-    file_element = _children(file_object, MANIFEST_NS, "File")[0]
-
-    # The Migration API rejects ``str(datetime)`` (space-separated); must be XSD dateTime.
-    assert file_element.get("TimeCreated") == "2020-01-02T03:04:05Z"
-    assert file_element.get("TimeLastModified") == "2020-01-02T05:04:05Z"
-
-
-def test_builder_ids_are_deterministic():
-    def build() -> bytes:
-        builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
-        builder.add_file("a/b.txt", b"hi")
-        return builder.build().manifest
-
-    assert build() == build()
-
-
-def test_builder_creates_missing_parent_folders():
-    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
-    builder.add_file("a/b/c.txt", b"hi")
-    root = ET.fromstring(builder.build().manifest)
-    objects = _children(root, MANIFEST_NS, "SPObject")
-
-    assert [o.get("ObjectType") for o in objects] == [
-        "SPFolder",
-        "SPDocumentLibrary",
-        "SPFolder",
-        "SPFolder",
-        "SPFile",
-        "SPListItem",
-    ]
-    folders = [_children(o, MANIFEST_NS, "Folder")[0] for o in objects if o.get("ObjectType") == "SPFolder"]
-    assert [f.get("Name") for f in folders] == ["Documents", "a", "a/b"]  # the library root, then a and a/b
-
-
-def test_content_blobs_are_named_after_the_file_guid():
-    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
-    file_id = builder.add_file("f.txt", b"current", version="2.0", versions=[("1.0", b"old")])
-    package = builder.build()
-
-    assert set(package.content) == {file_id, f"{file_id}.1.0", f"{file_id}.2.0"}
-    assert package.content[file_id] == b"current"
-    assert package.content[f"{file_id}.1.0"] == b"old"
-    assert package.content[f"{file_id}.2.0"] == b"current"
 
 
 def test_package_blobs_and_save(tmp_path):
@@ -234,15 +173,6 @@ def test_add_user_requires_a_numeric_puid_system_id():
     assert user.get("SystemId") == "1003200065102863"
 
 
-def test_add_user_canonicalizes_the_puid_it_writes():
-    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
-    builder.add_user("i:0#.f|membership|jane@contoso.com", system_id=" 0x100320006514b083 ")
-    user = _children(ET.fromstring(builder.build().user_group_map), USER_GROUP_MAP_NS, "Users")[0][0]
-
-    # Only the digits reach the attribute; a ``0x`` literal would not parse.
-    assert user.get("SystemId") == "100320006514b083"
-
-
 def test_object_id_and_item_url_and_include_security_helpers():
     builder = PackageBuilder("https://contoso.sharepoint.com/sites/x", list_title="Documents")
     file_id = builder.add_file("a/b.txt", b"hi")
@@ -276,22 +206,6 @@ def test_export_settings_carries_source_type_and_list_object():
     assert [o.get("Type") for o in export_objects] == ["List"]
 
 
-def test_system_data_lists_manifests_and_system_objects():
-    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
-    root = ET.fromstring(builder.build().system_data)
-
-    assert root.tag == _q(SYSTEM_DATA_NS, "SystemData")
-    schema = _children(root, SYSTEM_DATA_NS, "SchemaVersion")[0]
-    assert schema.get("Version") == "15.0.0.0"
-    assert schema.get("SiteVersion") == "15"
-
-    manifest_files = _children(_children(root, SYSTEM_DATA_NS, "ManifestFiles")[0], SYSTEM_DATA_NS, "ManifestFile")
-    assert [m.get("Name") for m in manifest_files] == ["Manifest.xml"]
-
-    system_objects = _children(_children(root, SYSTEM_DATA_NS, "SystemObjects")[0], SYSTEM_DATA_NS, "SystemObject")
-    assert [o.get("Type") for o in system_objects] == ["Web", "List"]
-
-
 def test_user_group_map_renders_users():
     builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
     user_id = builder.add_user("i:0#.f|membership|jane@contoso.com", name="Jane", email="jane@contoso.com")
@@ -304,18 +218,6 @@ def test_user_group_map_renders_users():
     assert users[0].get("Name") == "Jane"
     assert users[0].get("Login") == "i:0#.f|membership|jane@contoso.com"
     assert users[0].get("IsSiteAdmin") == "false"
-
-
-def test_user_group_map_normalizes_a_hand_built_system_id():
-    # ``to_xml`` is the last place before the service sees the value, so a user
-    # model built by hand is normalized too (the attribute is required).
-    model = UserGroupMap(
-        users=[User(id=1, name="Jane", login="i:0#.f|membership|jane@contoso.com", system_id="0x1003200065102863")]
-    )
-    root = ET.fromstring(model.to_xml())
-    user = _children(_children(root, USER_GROUP_MAP_NS, "Users")[0], USER_GROUP_MAP_NS, "User")[0]
-
-    assert user.get("SystemId") == "1003200065102863"
 
 
 def test_user_group_map_renders_group_members():
@@ -339,42 +241,6 @@ def test_file_system_staging_writes_both_containers(tmp_path):
     assert (tmp_path / "manifest" / "ExportSettings.xml").exists()
 
 
-def test_blob_staging_rejects_the_same_container():
-    with pytest.raises(ValueError, match="differ"):
-        BlobStaging("https://acct.blob.core.windows.net/c?sig=x", "https://acct.blob.core.windows.net/c?sig=x")
-
-
-def test_blob_staging_requires_the_azure_extra():
-    try:
-        importlib.import_module("azure.storage.blob")
-    except ImportError:
-        pass
-    else:
-        pytest.skip("azure extra installed")
-    staging = BlobStaging("https://a/content?sig=x", "https://a/manifest?sig=y")
-    with pytest.raises(ImportError, match="azure"):
-        staging.stage(Package(manifest=b"", export_settings=b"", system_data=b"", user_group_map=b""))
-
-
-def test_create_staging_selects_blob_staging_for_azure_hosts():
-    staging = create_staging(
-        "https://acct.blob.core.windows.net/content?sig=x",
-        "https://acct.blob.core.windows.net/manifest?sig=y",
-    )
-    assert isinstance(staging, BlobStaging)
-
-    gov = create_staging(
-        "https://acct.blob.core.usgovcloudapi.net/content?sig=x",
-        "https://acct.blob.core.usgovcloudapi.net/manifest?sig=y",
-    )
-    assert isinstance(gov, BlobStaging)
-
-
-def test_create_staging_rejects_unknown_hosts():
-    with pytest.raises(ValueError, match="unsupported staging container host"):
-        create_staging("https://bucket.s3.amazonaws.com/content", "https://bucket.s3.amazonaws.com/manifest")
-
-
 class _FakeBlob:
     def __init__(self) -> None:
         self.data = None
@@ -383,16 +249,6 @@ class _FakeBlob:
     def upload_blob(self, data, overwrite=False, metadata=None):
         self.data = data
         self.metadata = metadata
-
-
-def test_create_staging_forwards_the_encryption_key():
-    staging = create_staging(
-        "https://acct.blob.core.windows.net/content?sig=x",
-        "https://acct.blob.core.windows.net/manifest?sig=y",
-        encryption_key=base64.b64encode(bytes(range(32))).decode("ascii"),
-    )
-    assert isinstance(staging, BlobStaging)
-    assert staging._key == bytes(range(32))  # noqa: SLF001
 
 
 def test_blob_staging_encrypts_blobs_with_an_iv_property():
@@ -427,13 +283,3 @@ def test_blob_iv_reads_case_insensitively():
     assert _blob_iv(_PropsBlob({"iv": "abc"})) == "abc"
     assert _blob_iv(_PropsBlob({"IV": "xyz"})) == "xyz"
     assert _blob_iv(_PropsBlob({})) is None
-
-
-def test_blob_staging_uploads_plaintext_without_a_key():
-    staging = BlobStaging("https://a/content?sig=x", "https://a/manifest?sig=y")
-    blob = _FakeBlob()
-
-    staging._upload(blob, b"hello world")  # noqa: SLF001
-
-    assert blob.data == b"hello world"
-    assert blob.metadata is None

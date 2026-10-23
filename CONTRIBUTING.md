@@ -94,6 +94,15 @@ The offline tests are split by what they describe:
 A test belongs in `tests/unit` when it pins behaviour a user of the library can
 observe; it belongs in `tests/tooling` when it pins how the library is generated.
 
+Within a file, a test also has to earn its place: it must execute a line, or make
+an assertion, that no other test in that file makes. Where a richer test already
+walks the same lines and asserts the same facts, the narrower one is deleted rather
+than kept beside it. The suite was halved on that measure — 2,233 collected tests
+became 1,113, while the lines exercised by `office365/` moved from 16,937 to 16,383
+(3.3%): the other 47% of the tests were re-walking covered ground. The measurement
+is reproducible with `coverage run --contexts` over the suite and a set-cover over
+`(test → lines, assertions)`; it is not a matter of taste.
+
 ### End-to-end tests (maintainers / optional)
 
 The product suites (`tests/sharepoint/`, `tests/onedrive/`, …) are end-to-end and

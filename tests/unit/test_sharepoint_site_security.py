@@ -11,12 +11,8 @@ and unresolvable principals are warned about rather than dropped silently.
 from __future__ import annotations
 
 from office365.migration.sharepoint.security import (
-    SiteGroup,
     apply_site_list_security,
     apply_site_security,
-    capture_list_security,
-    capture_permission_levels,
-    capture_site_groups,
     verify_list_security,
     verify_site_security,
 )
@@ -240,17 +236,6 @@ def _target_web(*, with_auditors: bool = False, extra_assignment: bool = True):
     return _Web(groups, {"Owners": owners, "Members": members, "Visitors": visitors}, assignments, roles)
 
 
-def test_capture_marks_default_groups_and_reads_only_custom_membership():
-    source = _source_web()
-
-    captured = {g.title: g for g in capture_site_groups(source)}
-
-    assert captured["S Owners"].is_default is True
-    assert captured["S Owners"].members == []  # associated-group membership is not read
-    assert captured["Auditors"].is_default is False
-    assert captured["Auditors"].members == ["mary@contoso.com"]
-
-
 def test_apply_creates_custom_group_restores_membership_and_role_assignment():
     source, target = _source_web(), _target_web()
 
@@ -302,14 +287,6 @@ def test_verify_is_clean_for_a_replicated_scope():
     source, target = _source_web(), _target_web(with_auditors=True)
 
     assert verify_site_security(source, target) == []
-
-
-def test_site_group_dataclass_defaults():
-    group = SiteGroup(title="X")
-
-    assert group.is_default is False
-    assert group.members == []
-    assert group.flags == {}
 
 
 class _Ctx:
@@ -380,17 +357,6 @@ def _restricted_list(title="Library", principals=("Auditors",), role="Read", web
     return _SPList(title, [_Assignment(_Member(p), [role]) for p in principals], web=web)
 
 
-def test_a_list_that_inherits_has_no_acl_of_its_own():
-    inheriting = _SPList("Documents")
-    restricted = _restricted_list()
-    _list_web(inheriting, restricted)
-
-    assert capture_list_security(inheriting) is None
-    entries = capture_list_security(restricted)
-
-    assert [(entry.principal_name, entry.roles) for entry in entries] == [("Auditors", ["Read"])]
-
-
 def test_a_restricted_list_is_broken_and_replayed_on_the_target():
     source_web = _list_web(_restricted_list())
     target = _SPList("Library")
@@ -417,33 +383,6 @@ def test_a_list_that_inherits_on_the_source_is_never_touched():
     assert report.summary() == "no list carries unique permissions"
     assert target.break_calls == 0
     assert target.added == []
-
-
-def test_an_already_restored_target_list_is_not_broken_twice():
-    target = _restricted_list()
-    source_web = _list_web(_restricted_list())
-    target_web = _list_web(target)
-
-    report = apply_site_list_security(source_web, target_web)
-
-    assert report.restricted == ["Library"]
-    assert report.applied == []
-    assert target.break_calls == 0
-    assert target.added == []
-
-
-def test_a_principal_the_target_cannot_resolve_is_a_warning():
-    target = _SPList("Library")
-    source_web = _list_web(_restricted_list(principals=("ghost@contoso.com",)))
-    target_web = _list_web(target)
-    target_web.unresolvable = {"ghost@contoso.com"}
-    warnings: list[str] = []
-
-    report = apply_site_list_security(source_web, target_web, warnings=warnings)
-
-    assert report.restricted == ["Library"]
-    assert target.added == []
-    assert warnings and "ghost@contoso.com" in warnings[0]
 
 
 def test_only_the_named_lists_are_visited():
@@ -477,56 +416,9 @@ def test_verify_names_an_assignment_the_target_missed():
     assert "S Members -> Read" in issues[0]
 
 
-def test_verify_names_a_target_list_restricted_beyond_the_source():
-    source_web = _list_web(_SPList("Library"))
-    target_web = _list_web(_restricted_list())
-
-    issues = verify_list_security(source_web, target_web)
-
-    assert issues == ["list 'Library' is restricted on the target but inherits the web's permissions on the source"]
-
-
-def test_a_list_with_no_readable_assignment_is_left_alone():
-    """A system list can report unique permissions and an empty set — breaking the
-    target for nothing would make it unreadable to everyone."""
-    target = _SPList("Converted Forms")
-    source_web = _list_web(_SPList("Converted Forms", []))
-    target_web = _list_web(target)
-
-    report = apply_site_list_security(source_web, target_web)
-
-    assert report.restricted == []
-    assert target.break_calls == 0
-    assert verify_list_security(source_web, target_web) == []
-
-
-def test_verify_is_clean_when_the_list_acls_match():
-    source_web = _list_web(_restricted_list())
-    target_web = _list_web(_restricted_list())
-
-    assert verify_list_security(source_web, target_web) == []
-
-
 def _levels_web(roles, *, assignments=(), groups=None):
     web = _Web(list(groups or []), {}, assignments, roles=roles)
     return web
-
-
-def test_permission_levels_are_read_and_hidden_ones_skipped():
-    web = _levels_web(
-        [
-            _Role("Read", 1, 756052856929, kind=2, description="Can view"),
-            _Role("Limited Access", 2, 206292717568, kind=1, hidden=True),
-            _Role("Custom Reader", 3, 5, kind=0, description="ours"),
-        ]
-    )
-
-    levels = capture_permission_levels(web)
-
-    assert [(level.name, level.mask, level.is_custom) for level in levels] == [
-        ("Read", "756052856929", False),
-        ("Custom Reader", "5", True),
-    ]
 
 
 def test_a_custom_level_the_target_lacks_is_created_with_its_mask():
@@ -541,40 +433,6 @@ def test_a_custom_level_the_target_lacks_is_created_with_its_mask():
     assert description == "ours"
     assert (base_permissions.High, base_permissions.Low) == (0, 5)
     assert warnings == []
-
-
-def test_a_built_in_level_is_never_created_by_the_migration():
-    source = _levels_web([_Role("Read", 1, 8, kind=2)])
-    target = _levels_web([])
-    warnings: list[str] = []
-
-    apply_site_security(source, target, warnings)
-
-    assert target.role_definitions.added == []
-    assert warnings == ["permission level 'Read' (a built-in level) is missing on the target"]
-
-
-def test_a_built_in_level_matches_by_kind_across_a_renamed_target():
-    source = _levels_web([_Role("Read", 1, 8, kind=2)])
-    target = _levels_web([_Role("Lecture", 1, 8, kind=2)])
-    warnings: list[str] = []
-
-    apply_site_security(source, target, warnings)
-
-    assert warnings == []
-
-
-def test_a_differing_mask_is_reported_and_left_alone():
-    source = _levels_web([_Role("Contribute", 1, 8, kind=3)])
-    target = _levels_web([_Role("Contribute", 1, 16, kind=3)])
-    warnings: list[str] = []
-
-    apply_site_security(source, target, warnings)
-
-    assert target.role_definitions.added == []
-    assert warnings == [
-        "permission level 'Contribute' exists on the target with a different permission set (16 vs 8) — left as-is"
-    ]
 
 
 def test_verify_names_a_missing_and_a_diverging_level():

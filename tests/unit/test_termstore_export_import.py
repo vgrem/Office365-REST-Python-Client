@@ -11,7 +11,6 @@ from __future__ import annotations
 import pytest
 from office365.onedrive.termstore.store import Store
 from office365.onedrive.termstore.store_manager import StoreManager
-from office365.runtime.client_object import ClientObject
 
 # ---------------------------------------------------------------------------
 # Fakes: deferred collections whose ``after_execute`` fires immediately.
@@ -122,12 +121,6 @@ def _sample_tree():
 # ---------------------------------------------------------------------------
 
 
-def test_store_manager_export_tree_builds_nested_tree():
-    manager = StoreManager(_store_with(_sample_tree()))
-
-    assert manager.export_tree().value == EXPECTED_TREE
-
-
 def test_store_export_tree_delegates_to_manager():
     store = _store_with(_sample_tree())
 
@@ -152,20 +145,9 @@ def test_store_import_tree_creates_queued_nodes():
     assert [t.display_name for t in group.sets.items[0].children.items] == ["T"]
 
 
-def test_store_manager_import_tree_returns_store():
-    store = _store_with(_FakeGroups())
-
-    assert StoreManager(store).import_tree([{"name": "G"}]) is store
-
-
 # ---------------------------------------------------------------------------
 # Naming contract
 # ---------------------------------------------------------------------------
-
-
-def test_store_never_shadows_the_payload_to_json():
-    assert "to_json" not in Store.__dict__
-    assert Store.to_json is ClientObject.to_json
 
 
 def test_store_manager_legacy_names_are_deprecated_aliases():

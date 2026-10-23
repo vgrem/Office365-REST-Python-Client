@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from office365.migration.base import ItemStatus, MigrationItem
-from office365.migration.delta import DeltaReport, MovedItem, compute_delta
+from office365.migration.delta import MovedItem, compute_delta
 from office365.migration.job import MigrationJob
 
 
@@ -64,18 +64,6 @@ def test_unchanged_plan_is_an_empty_delta():
     assert report.summary() == "delta vs 1 planned item(s): 0 new, 0 gone, 0 moved, 0 changed"
 
 
-def test_detects_added_and_missing():
-    previous = [_item("a.txt"), _item("folder/", item_type="folder")]
-    current = [_item("a.txt"), _item("b.txt")]
-
-    report = compute_delta(previous, current)
-
-    assert report.added == ["b.txt"]
-    assert report.missing == ["folder/"]
-    assert report.moved == []
-    assert report.is_stale
-
-
 def test_identity_turns_a_missing_path_into_a_move():
     previous = [_item("a.txt", source_id="uid-1")]
     current = [_item("renamed/a.txt", source_id="uid-1")]
@@ -87,49 +75,6 @@ def test_identity_turns_a_missing_path_into_a_move():
     assert [move.label for move in report.moved] == ["a.txt -> renamed/a.txt"]
     assert report.moved[0].source_id == "uid-1"
     assert report.is_stale
-
-
-def test_identity_wins_over_a_reused_path():
-    # The identity reappeared at another path while a *different* source item now
-    # occupies the old one: the previously planned item moved (the path alone would
-    # read as unchanged).
-    previous = [_item("a.txt", source_id="uid-1")]
-    current = [_item("a.txt", source_id="uid-2"), _item("b.txt", source_id="uid-1")]
-
-    report = compute_delta(previous, current)
-
-    assert report.missing == []
-    assert [move.label for move in report.moved] == ["a.txt -> b.txt"]
-    assert report.added == []
-
-
-def test_items_without_identity_are_reported_as_gone():
-    # A folder carries no source identity, so a rename cannot be told from a
-    # delete: it is named as gone (the honest reading) rather than guessed at.
-    previous = [_item("Docs/", item_type="folder"), _item("Docs/a.txt", source_id="uid-1")]
-    current = [_item("Shared/", item_type="folder"), _item("Shared/a.txt", source_id="uid-1")]
-
-    report = compute_delta(previous, current)
-
-    assert report.missing == ["Docs/"]
-    assert report.added == ["Shared/"]
-    assert [move.label for move in report.moved] == ["Docs/a.txt -> Shared/a.txt"]
-
-
-def test_changed_content_is_reported_not_stale():
-    previous = [_item("a.txt", modified="2024-05-01T10:00:00Z")]
-    current = [_item("a.txt", modified="2024-06-01T10:00:00Z")]
-
-    report = compute_delta(previous, current)
-
-    assert report.changed == ["a.txt"]
-    assert not report.is_stale
-
-
-def test_missing_timestamps_are_not_treated_as_changes():
-    report = compute_delta([_item("a.txt")], [_item("a.txt", modified="2024-06-01T10:00:00Z")])
-
-    assert report.changed == []
 
 
 def test_notes_truncate_and_explain():
@@ -144,13 +89,6 @@ def test_notes_truncate_and_explain():
     assert "and 2 more" in notes[0]
 
 
-def test_unreadable_baseline_is_reported():
-    report = compute_delta(None, [_item("a.txt")], note="the previous plan could not be read (boom)")
-
-    assert report.baseline is None
-    assert report.notes() == ["delta unavailable: the previous plan could not be read (boom)"]
-
-
 def test_report_serializes_to_a_json_safe_dict():
     report = compute_delta([_item("a.txt", source_id="uid-1")], [_item("b.txt", source_id="uid-1")])
 
@@ -163,14 +101,6 @@ def test_report_serializes_to_a_json_safe_dict():
         "changed": [],
     }
     assert MovedItem("uid-1", "a.txt", "b.txt").label == "a.txt -> b.txt"
-
-
-def test_thin_report_defaults_are_empty():
-    report = DeltaReport()
-
-    assert report.is_empty
-    assert not report.has_baseline
-    assert report.notes() == []
 
 
 def test_plan_diffs_against_the_plan_a_previous_run_persisted(tmp_path):

@@ -6,18 +6,6 @@ import pytest
 from office365 import limits
 from office365.communications.callrecords.call_record import CallRecord  # noqa: F401 — registers quotas
 from office365.directory.objects.object import DirectoryObject  # noqa: F401 — registers quotas
-from office365.sharepoint.thresholds import Limits
-
-
-def test_sharepoint_catalog_registered():
-    assert limits.catalog("sharepoint") == list(Limits.catalog())
-    assert any(limit.name == "list view threshold" for limit in limits.catalog("sharepoint"))
-
-
-def test_model_quotas_registered_by_decorator():
-    names = {limit.name for limit in limits.catalog("model")}
-    assert "identity" in names  # DirectoryObject
-    assert "call records" in names  # CallRecord
 
 
 def test_catalog_aggregates_and_dedupes():

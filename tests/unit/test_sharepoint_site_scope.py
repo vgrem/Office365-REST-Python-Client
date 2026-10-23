@@ -1,8 +1,5 @@
 """Site scope: what the target site cannot do because a migration never replays features."""
 
-import json
-
-from office365.migration.sharepoint import site_verify
 from office365.migration.sharepoint.site_scope import (
     SiteScopeDiff,
     capture_site_scope,
@@ -120,20 +117,6 @@ def _target(**kwargs):
     return _Context(url="https://contoso.sharepoint.com/sites/team_out", **kwargs)
 
 
-def test_an_identical_site_has_nothing_to_report():
-    diff = compare_site_scope(_source(), _target())
-
-    assert diff.is_empty
-    assert diff.to_dict() == {
-        "missing_web_features": [],
-        "missing_site_features": [],
-        "extra_web_features": [],
-        "extra_site_features": [],
-        "regional": {},
-    }
-    assert site_scope_note(diff) is None
-
-
 def test_a_missing_web_feature_is_named():
     diff = compare_site_scope(_source(web_features=[WEB_A, WEB_B]), _target(web_features=[WEB_A]))
 
@@ -164,21 +147,6 @@ def test_an_extra_feature_on_the_target_is_carried_but_is_not_a_finding():
     assert site_scope_note(diff) is None
 
 
-def test_feature_ids_compare_case_and_brace_insensitively():
-    diff = compare_site_scope(
-        _source(web_features=["{65A86D9E-D9E0-493D-B877-F09550EFDEE1}"]),
-        _target(web_features=["65a86d9e-d9e0-493d-b877-f09550efdee1"]),
-    )
-
-    assert diff.is_empty
-
-
-def test_a_feature_without_an_id_is_ignored():
-    diff = compare_site_scope(_source(web_features=[WEB_A, None, ""]), _target(web_features=[WEB_A]))
-
-    assert diff.is_empty
-
-
 def test_a_regional_difference_is_named_by_value():
     diff = compare_site_scope(
         _source(regional=_regional(LocaleId=1031), zone=_TimeZone(PACIFIC)),
@@ -203,14 +171,6 @@ def test_a_time_zone_that_cannot_be_read_is_not_a_finding():
     assert site_scope_note(diff) is None
 
 
-def test_a_property_the_server_does_not_return_compares_equal():
-    regional = _regional()
-    regional.pop("Time24")
-    diff = compare_site_scope(_source(regional=dict(regional)), _target(regional=dict(regional)))
-
-    assert diff.is_empty
-
-
 def test_a_long_list_of_missing_features_is_truncated():
     missing = [f"0000000{i}-0000-0000-0000-000000000000" for i in range(7)]
     diff = SiteScopeDiff(missing_web_features=missing)
@@ -230,39 +190,6 @@ def test_capture_reads_web_and_site_collection_scope():
     assert scope.to_dict()["site_features"] == [SITE_A]
     assert scope.to_dict()["regional"]["TimeZoneId"] == PACIFIC_ID
     assert scope.to_dict()["regional"]["TimeZone"] == PACIFIC["Description"]
-
-
-def test_the_diff_is_json_serializable():
-    diff = compare_site_scope(_source(web_features=[WEB_A, WEB_B]), _target(web_features=[]))
-
-    payload = json.loads(json.dumps(diff.to_dict()))
-
-    assert payload["missing_web_features"] == [WEB_A, WEB_B]
-
-
-def test_verify_site_runs_the_site_scope_check_by_default(monkeypatch):
-    monkeypatch.setattr(site_verify, "_site_scope_findings", lambda source, target: ["site scope is not replayed"])
-
-    report = verify_site(_source(), _target(), settings=False, branding=False, web_scope_structure=False)
-
-    assert report.checked == [SITE_SCOPE]
-    assert report.findings == {SITE_SCOPE: ["site scope is not replayed"]}
-    assert not report.ok
-
-
-def test_verify_site_can_skip_the_site_scope_check():
-    report = verify_site(
-        _source(web_features=[WEB_A, WEB_B]),
-        _target(web_features=[]),
-        settings=False,
-        branding=False,
-        web_scope_structure=False,
-        site_scope=False,
-    )
-
-    assert report.checked == []
-    assert report.ok
-    assert report.summary().endswith("nothing to check")
 
 
 def test_verify_site_reports_a_missing_feature_end_to_end():

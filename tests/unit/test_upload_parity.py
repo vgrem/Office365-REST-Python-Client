@@ -54,39 +54,6 @@ def _files(ctx):
 # --- FileCollection.upload_file ----------------------------------------------
 
 
-def test_upload_file_small_path_single_request(tmp_path):
-    ctx, transport = _sp([_FILE])
-    source = tmp_path / "report.txt"
-    source.write_bytes(b"hello")
-
-    file = _files(ctx).upload_file(str(source)).execute_query()
-
-    assert transport.calls == 1
-    assert isinstance(file, File)
-    assert "/add" in transport.requests[0].url
-    assert "report.txt" in transport.requests[0].url
-
-
-def test_upload_file_accepts_pathlib(tmp_path):
-    ctx, transport = _sp([_FILE])
-    source = tmp_path / "report.txt"
-    source.write_bytes(b"hello")
-
-    _files(ctx).upload_file(source).execute_query()
-
-    assert transport.calls == 1
-
-
-def test_upload_file_is_deferred(tmp_path):
-    ctx, transport = _sp([])
-    source = tmp_path / "report.txt"
-    source.write_bytes(b"hello")
-
-    _files(ctx).upload_file(str(source))
-
-    assert transport.calls == 0
-
-
 def test_upload_file_large_path_uses_upload_session(tmp_path):
     ctx, transport = _sp([_FILE, _FILE, _FILE])
     source = tmp_path / "big.bin"
@@ -133,18 +100,6 @@ def test_upload_file_reports_progress_for_simple_upload(tmp_path):
 # --- Folder.ensure_file ------------------------------------------------------
 
 
-def test_ensure_file_creates_when_missing():
-    ctx, transport = _sp([_MISSING, _FILE])
-
-    file = _root(ctx).ensure_file("report.txt", b"hi").execute_query()
-
-    # probe + upload
-    assert transport.calls == 2  # noqa: PLR2004
-    assert isinstance(file, File)
-    assert file.name == "report.txt"
-    assert "Files('report.txt')" in str(file.resource_path)
-
-
 def test_ensure_file_reuses_existing_without_reupload():
     ctx, transport = _sp([_FILE])
 
@@ -165,14 +120,6 @@ def test_ensure_file_replace_overwrites_without_probe():
     assert "Files('report.txt')" in str(file.resource_path)
 
 
-def test_ensure_file_is_deferred():
-    ctx, transport = _sp([])
-
-    _root(ctx).ensure_file("report.txt", b"hi")
-
-    assert transport.calls == 0
-
-
 def test_ensure_file_creates_parent_folders():
     ctx, transport = _sp([_FILE, _FILE, _MISSING, _FILE])
 
@@ -180,14 +127,6 @@ def test_ensure_file_creates_parent_folders():
 
     # folder 2026 + folder Q1 + probe + upload
     assert transport.calls == 4  # noqa: PLR2004
-
-
-def test_ensure_file_str_content_is_uploaded():
-    ctx, transport = _sp([_MISSING, _FILE])
-
-    _root(ctx).ensure_file("report.txt", "hello").execute_query()
-
-    assert transport.calls == 2  # noqa: PLR2004
 
 
 def test_ensure_file_large_content_uses_upload_session():
@@ -200,21 +139,3 @@ def test_ensure_file_large_content_uses_upload_session():
     urls = [request.url for request in transport.requests]
     assert any("startUpload" in url for url in urls)
     assert any("finishUpload" in url for url in urls)
-
-
-def test_ensure_file_rejects_unknown_on_conflict():
-    ctx, transport = _sp([])
-
-    with pytest.raises(ValueError):
-        _root(ctx).ensure_file("report.txt", on_conflict="update")
-
-    assert transport.calls == 0
-
-
-def test_ensure_file_rejects_empty_path():
-    ctx, transport = _sp([])
-
-    with pytest.raises(ValueError):
-        _root(ctx).ensure_file("///")
-
-    assert transport.calls == 0

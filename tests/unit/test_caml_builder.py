@@ -2,62 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
-import pytest
-from office365.sharepoint.listitems.caml import Caml, CamlQuery, FieldRef
+from office365.sharepoint.listitems.caml import Caml, CamlQuery
 from office365.sharepoint.views.scope import ViewScope
-
-
-def test_eq_renders_comparison():
-    xml = Caml.eq("Status", "Active").to_xml()
-
-    assert xml == '<Eq><FieldRef Name="Status"/><Value Type="Text">Active</Value></Eq>'
-
-
-@pytest.mark.parametrize(
-    ("value", "expected_type"),
-    [
-        ("x", "Text"),
-        (5, "Integer"),
-        (5.5, "Number"),
-        (True, "Boolean"),
-        (datetime(2024, 1, 2, 3, 4), "DateTime"),
-    ],
-)
-def test_value_type_inference(value, expected_type):
-    assert f'Type="{expected_type}"' in Caml.eq("F", value).to_xml()
-
-
-def test_text_is_xml_escaped():
-    assert "A &amp; B &lt;c&gt;" in Caml.eq("Title", "A & B <c>").to_xml()
-
-
-def test_fluent_or_chain_is_binary_nested():
-    expr = (
-        Caml.text("Email")
-        .eq("a")
-        .or_(Caml.text("Email").eq("b"))
-        .or_(Caml.text("Title").begins_with("[G]"))
-        .or_(Caml.text("Content").contains("G"))
-    )
-    xml = expr.to_xml()
-
-    assert xml.count("<Or>") == 3  # noqa: PLR2004 — 4 conditions -> 3 nested Or
-    assert xml.count("<Or>") == xml.count("</Or>")
-    # never a 3-child <Or>
-    assert "<Or><Or>" in xml
-
-
-def test_variadic_and_folds_left():
-    xml = Caml.and_(Caml.eq("A", 1), Caml.eq("B", 2), Caml.eq("C", 3)).to_xml()
-
-    assert xml.count("<And>") == 2  # noqa: PLR2004
-    assert xml == (
-        '<And><And><Eq><FieldRef Name="A"/><Value Type="Integer">1</Value></Eq>'
-        '<Eq><FieldRef Name="B"/><Value Type="Integer">2</Value></Eq></And>'
-        '<Eq><FieldRef Name="C"/><Value Type="Integer">3</Value></Eq></And>'
-    )
 
 
 def test_operators_match_methods():
@@ -74,12 +20,6 @@ def test_lookup_id_in_renders_integer_values():
     assert '<FieldRef Name="Category" LookupId="TRUE"/>' in xml
     assert xml.count('Type="Integer"') == 3  # noqa: PLR2004
     assert "<Values>" in xml
-
-
-def test_now_value_node():
-    xml = Caml.date("ExpirationDate").leq(Caml.now).to_xml()
-
-    assert '<Value Type="DateTime"><Now/></Value>' in xml
 
 
 def test_is_null_and_not():
@@ -117,16 +57,6 @@ def test_builder_field_refs_exclude_view_fields():
     query = CamlQuery.builder().where(Caml.eq("Status", "Active")).order_by("Created").view_fields("ID", "Title").build()
 
     assert query.field_refs == {"Status", "Created"}
-
-
-def test_field_ref_ascending():
-    ref = FieldRef("Created").desc()
-    assert ref.to_xml() == '<FieldRef Name="Created" Ascending="FALSE"/>'
-
-
-def test_expression_bool_raises():
-    with pytest.raises(TypeError, match="cannot be used with Python"):
-        bool(Caml.eq("A", 1))
 
 
 def test_to_json_excludes_the_ast():

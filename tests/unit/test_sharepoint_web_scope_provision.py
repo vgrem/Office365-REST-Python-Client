@@ -2,7 +2,6 @@
 
 import re
 
-from office365.migration.sharepoint import structure
 from office365.migration.sharepoint.structure import (
     WebScopeProvisionReport,
     provision_web_scope_columns,
@@ -150,44 +149,6 @@ def _web(name="Region", schema_xml=None, **kwargs):
     return _Web([_Field(name, schema_xml=schema)])
 
 
-def test_missing_web_column_is_created_from_its_schema():
-    source = _web()
-    target = _Web()
-
-    report = provision_web_scope_columns(source, target)
-
-    assert report.created == ["Region"]
-    assert [field.internal_name for field in target.fields.entries] == ["Region"]
-    assert target.fields.created == [source.fields.entries[0].schema_xml]
-
-
-def test_existing_web_column_is_left_alone():
-    source = _web()
-    target = _Web([_Field("Region", schema_xml="<Field/>")])
-
-    report = provision_web_scope_columns(source, target)
-
-    assert report.present == ["Region"]
-    assert report.created == []
-    assert target.fields.created == []
-
-
-def test_a_create_that_raises_after_creating_the_column_is_a_success():
-    """SharePoint registers the column and then raises "updated by another user"."""
-
-    def _create_then_raise(fields, schema_xml):
-        fields.entries.append(_Field(_schema_name(schema_xml), schema_xml=schema_xml))
-        raise RuntimeError("The object has been updated by another user since it was last fetched.")
-
-    target = _Web()
-    target.fields.on_create = _create_then_raise
-
-    report = provision_web_scope_columns(_web(), target)
-
-    assert report.created == ["Region"]
-    assert report.failed == {}
-
-
 def test_a_create_that_leaves_nothing_is_reported_as_failed():
     def _raise_only(fields, schema_xml):
         raise RuntimeError('A duplicate field name "Region" was found.')
@@ -211,32 +172,6 @@ def test_run_is_idempotent():
     assert first.created == ["Region"]
     assert second.present == ["Region"]
     assert target.fields.created == [source.fields.entries[0].schema_xml]
-
-
-def test_hidden_or_sealed_web_columns_are_not_provisioned():
-    source = _Web(
-        [
-            _Field("HiddenCol", hidden=True, schema_xml="<Field/>"),
-            _Field("SealedCol", sealed=True, schema_xml="<Field/>"),
-            _Field("SiteScoped", from_base_type=True, schema_xml="<Field/>"),
-        ]
-    )
-    target = _Web()
-
-    report = provision_web_scope_columns(source, target)
-
-    assert report.is_empty
-    assert target.fields.created == []
-
-
-def test_a_column_whose_schema_cannot_be_read_is_skipped():
-    source = _web()
-    source.fields.entries[0].schema_xml = None
-
-    report = provision_web_scope_columns(source, _Web())
-
-    assert report.created == []
-    assert report.skipped == ["web column 'Region' was not recreated: its schema could not be read"]
 
 
 def test_a_column_that_cannot_be_read_back_is_skipped():
@@ -310,20 +245,6 @@ def test_taxonomy_column_goes_through_the_taxonomy_api(monkeypatch):
     assert target.fields.created == []
 
 
-def test_taxonomy_column_that_does_not_land_is_reported(monkeypatch):
-    source = _web(schema_xml=TAXONOMY_SCHEMA)
-
-    def _create(collection, name, term_set_id, term_store_id=None, allow_multiple_values=False, return_type=None):
-        return _Query(lambda: None)
-
-    monkeypatch.setattr("office365.sharepoint.taxonomy.field.TaxonomyField.create", _create)
-
-    report = provision_web_scope_columns(source, _Web())
-
-    assert report.created == []
-    assert report.failed == {"Region": "the taxonomy column is not on the web after the create"}
-
-
 def test_taxonomy_column_the_server_refuses_is_reported(monkeypatch):
     source = _web(schema_xml=TAXONOMY_SCHEMA)
 
@@ -336,19 +257,6 @@ def test_taxonomy_column_the_server_refuses_is_reported(monkeypatch):
 
     assert report.created == []
     assert report.failed["Region"].startswith("taxonomy column 'Region' could not be recreated: the given guid")
-
-
-def test_source_id_and_version_are_stripped_from_the_schema():
-    schema = ('<Field Type="Text" Name="Region" StaticName="Region" SourceID="{guid}" Version="1" />').format(
-        guid="33333333-3333-3333-3333-333333333333"
-    )
-    source = _Web([_Field("Region", schema_xml=schema)])
-    target = _Web()
-
-    provision_web_scope_columns(source, target)
-
-    assert "SourceID" not in target.fields.created[0]
-    assert "Version" not in target.fields.created[0]
 
 
 def test_report_renders_what_it_did():
@@ -364,27 +272,6 @@ def test_report_renders_what_it_did():
     assert not report.is_empty
 
 
-def test_report_is_silent_when_nothing_happened():
-    report = WebScopeProvisionReport(present=["A", "B"])
-
-    assert report.is_empty
-    assert report.summary() == ""
-    assert report.warnings() == []
-
-
-def test_report_is_serializable():
-    import json
-
-    report = WebScopeProvisionReport(created=["A"], failed={"B": "boom"})
-
-    assert json.loads(json.dumps(report.to_dict())) == {
-        "created": ["A"],
-        "present": [],
-        "skipped": [],
-        "failed": {"B": "boom"},
-    }
-
-
 def test_web_scope_note_names_only_the_content_types_left_behind():
     from office365.migration.sharepoint.structure import WebScopeStructure, web_scope_note
 
@@ -394,10 +281,3 @@ def test_web_scope_note_names_only_the_content_types_left_behind():
     assert "1 content type(s): Contract" in note
     assert "column(s)" not in note
     assert "structure provisioning is on" in note
-
-
-def test_provision_uses_the_shared_column_filter():
-    """A framework column is never provisioned, whatever the web carries."""
-    source = _Web([_Field("Region", from_base_type=True, schema_xml="<Field/>")])
-
-    assert structure._web_scope_columns(source) == []

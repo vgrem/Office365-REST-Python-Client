@@ -21,24 +21,12 @@ def test_build_maps_differing_ids_by_name():
     assert mapping.entries == {"0x0100SOURCE": "0x0100TARGET"}
 
 
-def test_build_ignores_unmatched_and_missing_names():
-    source = [_ContentType("Item", "0x01"), _ContentType(None, "0x02"), _ContentType("Missing", "0x03")]
-    target = [_ContentType("Item", "0x01"), _ContentType("Other", "0x04")]
-
-    assert ContentTypeMap.build(source, target).entries == {}
-
-
 def test_resolve_passes_through_unmapped_identifiers():
     mapping = ContentTypeMap({"0x0100SOURCE": "0x0100TARGET"})
 
     assert mapping.resolve("0x0100SOURCE") == "0x0100TARGET"
     assert mapping.resolve("0x01") == "0x01"
     assert mapping.resolve(None) is None
-
-
-def test_empty_map_is_falsy():
-    assert not ContentTypeMap()
-    assert ContentTypeMap({"a": "b"})
 
 
 def test_to_dict_round_trips():

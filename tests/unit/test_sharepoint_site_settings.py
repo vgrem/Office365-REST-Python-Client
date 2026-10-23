@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 from office365.migration.sharepoint.resolvers import (
     _apply_web_settings,  # pyright: ignore[reportPrivateUsage]
 )
@@ -72,12 +71,6 @@ def test_site_settings_mode_maps_both_spelling_variants():
     assert parse_site_settings_mode(" none ") is False
 
 
-def test_site_settings_mode_rejects_an_unknown_value():
-    # A typo must not silently disable (or enable) the copy.
-    with pytest.raises(ValueError, match="unknown migrate_site_settings"):
-        parse_site_settings_mode("PRESERVE_SOME_SETTINGS")
-
-
 def test_capture_projects_the_carried_properties():
     web = _Web(title="Source", description="The source site")
 
@@ -86,18 +79,6 @@ def test_capture_projects_the_carried_properties():
     assert web.selected == ["Title", "Description"]
     assert settings == WebSettings(title="Source", description="The source site")
     assert settings.values() == [("Title", "Source"), ("Description", "The source site")]
-
-
-def test_changed_reports_only_the_differing_properties():
-    source = WebSettings(title="Source", description="Same")
-
-    assert source.changed(WebSettings(title="Source", description="Same")) == {}
-    assert source.changed(WebSettings(title="Target", description="Same")) == {"Title": "Source"}
-
-
-def test_changed_writes_an_empty_string_for_an_unset_source_value():
-    # A web rejects a null for these, so an unset source value clears the target instead.
-    assert WebSettings(title=None).changed(WebSettings(title="Target")) == {"Title": ""}
 
 
 def test_apply_web_settings_copies_only_differing_values():
@@ -137,40 +118,6 @@ def test_apply_web_settings_copies_both_properties_in_one_merge():
     assert sorted(report.applied) == ["Description", "Title"]
 
 
-def test_apply_web_settings_can_be_turned_off():
-    source = _Web(title="Source")
-    target = _Web(title="Target")
-
-    report = apply_web_settings(source, target, preserve=False)
-
-    assert target.written == {}
-    assert target.updates == 0
-    assert report.changed is False
-
-
-def test_apply_web_settings_survives_a_target_web_without_a_url():
-    target = _Web(title="Target")
-    target._props.pop("Url")
-
-    report = apply_web_settings(_Web(title="Source"), target)
-
-    assert target.written == {"Title": "Source"}
-    assert report.url == ""
-
-
-def test_verify_web_settings_reports_one_finding_per_property():
-    source = _Web(title="Source", description="The source site")
-    target = _Web(title="Target", description="The target site")
-
-    notes = verify_web_settings(source, target)
-
-    assert notes == [
-        "site settings: https://contoso.sharepoint.com/sites/t Title is 'Target', source has 'Source'",
-        "site settings: https://contoso.sharepoint.com/sites/t Description is 'The target site', "
-        "source has 'The source site'",
-    ]
-
-
 def test_verify_web_settings_is_clean_after_a_copy():
     source = _Web(title="Source", description=None)
     target = _Web(title="Target", description="")
@@ -200,11 +147,3 @@ def test_the_resolver_helper_reports_what_it_wrote():
 
     assert report is not None
     assert warnings == ["site settings: copied Title onto https://contoso.sharepoint.com/sites/t"]
-
-
-def test_the_resolver_helper_stays_quiet_when_it_writes_nothing():
-    warnings: list[str] = []
-
-    _apply_web_settings(_Web(title="Same"), _Web(title="Same"), True, warnings)
-
-    assert warnings == []

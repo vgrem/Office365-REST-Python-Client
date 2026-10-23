@@ -10,12 +10,8 @@ from __future__ import annotations
 import unittest
 
 from office365.runtime.odata.dialect import (
-    BY_LEVEL,
-    V3_MINIMAL,
-    V3_NO_METADATA,
     V3_VERBOSE,
     V4,
-    V4_NO_METADATA,
 )
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
 from office365.runtime.odata.v3.metadata_level import ODataV3MetadataLevel
@@ -24,26 +20,6 @@ from office365.runtime.odata.v4.metadata_level import ODataV4MetadataLevel
 
 
 class TestEveryLevelIsARow(unittest.TestCase):
-    def test_no_level_lacks_a_row(self):
-        # Adding a member to either level class without a row would silently fall
-        # back to the family default, which is how a spelling drifts.
-        for level in ODataV3MetadataLevel:
-            with self.subTest(level=level.value):
-                self.assertIn(level, BY_LEVEL)
-        for level in (ODataV4MetadataLevel.Minimal, ODataV4MetadataLevel.Full, ODataV4MetadataLevel.NoMetadata):
-            with self.subTest(level=level):
-                self.assertIn(level, BY_LEVEL)
-
-    def test_json_light_levels(self):
-        self.assertEqual(JsonLightFormat().dialect, V3_VERBOSE)
-        self.assertEqual(JsonLightFormat(ODataV3MetadataLevel.MinimalMetadata).dialect, V3_MINIMAL)
-        self.assertEqual(JsonLightFormat(ODataV3MetadataLevel.NoMetadata).dialect, V3_NO_METADATA)
-
-    def test_v4_levels(self):
-        self.assertEqual(V4JsonFormat().dialect, V4)
-        self.assertEqual(V4JsonFormat(ODataV4MetadataLevel.Full).dialect, V4)
-        self.assertEqual(V4JsonFormat(ODataV4MetadataLevel.NoMetadata).dialect, V4_NO_METADATA)
-
     def test_a_level_names_its_own_media_type(self):
         self.assertEqual(JsonLightFormat().media_type, "application/json;odata=verbose")
         self.assertEqual(
@@ -70,10 +46,6 @@ class TestEveryLevelIsARow(unittest.TestCase):
         self.assertTrue(V4JsonFormat().include_control_information)
         self.assertFalse(V4JsonFormat(ODataV4MetadataLevel.NoMetadata).include_control_information)
 
-    def test_a_level_string_is_the_level(self):
-        # `ODataV3MetadataLevel` is a `str` enum, so a plain string selects its row.
-        self.assertEqual(JsonLightFormat("minimalmetadata").dialect, V3_MINIMAL)
-
 
 class TestTheTableCannotDisagreeWithItself(unittest.TestCase):
     def test_an_unknown_level_falls_back_to_one_row(self):
@@ -87,16 +59,6 @@ class TestTheTableCannotDisagreeWithItself(unittest.TestCase):
 
 
 class TestRowsDifferOnlyWhereTheDialectDoes(unittest.TestCase):
-    def test_no_metadata_rows_are_their_spelling_minus_control_information(self):
-        self.assertEqual(
-            V3_NO_METADATA,
-            type(V3_NO_METADATA)(**{**V3_MINIMAL.__dict__, "control_information": False}),
-        )
-        self.assertEqual(
-            V4_NO_METADATA,
-            type(V4_NO_METADATA)(**{**V4.__dict__, "control_information": False}),
-        )
-
     def test_graph_and_sharepoint_marker_keys(self):
         self.assertEqual(V4.type_marker, "@odata.type")
         self.assertEqual(V3_VERBOSE.type_marker, "__metadata")

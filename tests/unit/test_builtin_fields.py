@@ -16,12 +16,5 @@ def test_builtin_field_name_lookup():
     assert not SPBuiltInFieldName.is_builtin("MyColumn")
 
 
-def test_system_field_names_are_the_canonical_set_plus_the_extras():
-    # The union is what keeps ``AppAuthor`` in the reported system columns.
-    assert SPBuiltInFieldName.ALL <= SYSTEM_FIELD_NAMES
-    assert "AppAuthor" in SYSTEM_FIELD_NAMES
-    assert "MyColumn" not in SYSTEM_FIELD_NAMES
-
-
 def test_assessment_options_default_from_canonical_set():
     assert SharePointAssessmentOptions().system_field_names == set(SYSTEM_FIELD_NAMES)

@@ -17,12 +17,10 @@ from office365.graph_client import GraphClient
 from office365.migration import MigrationJob
 from office365.migration.outlook import (
     MANIFEST_NAME,
-    ContactExportOptions,
     ContactSource,
     VcfExportTarget,
 )
-from office365.migration.outlook.contacts_models import CONTACT_COLUMNS, ContactRecord
-from office365.outlook.contacts.contact import Contact
+from office365.migration.outlook.contacts_models import ContactRecord
 from tests._scripted_transport import MethodRoutingTransport
 
 _FOLDER = {"id": "f1", "displayName": "Contacts"}
@@ -154,24 +152,6 @@ def test_source_enumerates_one_item_per_contact_and_subfolder():
     assert all(item.item_type == "contact" for item in items)
 
 
-def test_source_can_leave_the_subfolders_out():
-    transport = _transport()
-    items = ContactSource(_folder(_client(transport)), ContactExportOptions(include_subfolders=False)).list_items()
-
-    assert [item.dest_path for item in items] == [
-        f"Contacts/Alice-Example_{_digest('c1')}.vcf",
-        f"Contacts/Bob-Example_{_digest('c2')}.vcf",
-    ]
-
-
-def test_source_names_the_root_from_the_options():
-    transport = _transport()
-    items = ContactSource(_folder(_client(transport)), ContactExportOptions(root_name="mbox")).list_items()
-
-    assert items[0].dest_path == f"mbox/Alice-Example_{_digest('c1')}.vcf"
-    assert items[2].dest_path == f"mbox/Vendors/Vendor-Ltd_{_digest('c3')}.vcf"
-
-
 def test_source_records_the_envelope_an_import_replays():
     item = _source().list_items()[0]
     envelope = item.metadata
@@ -206,52 +186,11 @@ def test_source_records_the_envelope_an_import_replays():
     assert item.modified == "2021-02-03T04:05:06+00:00"
 
 
-def test_the_sidecar_names_only_columns_the_model_declares():
-    """The sidecar is the model's payload, so its vocabulary is the declaration's."""
-    envelope = _source().list_items()[0].metadata
-    bookkeeping = {"folder_path", "folder_display_path", "vcf_path"}
-
-    assert set(envelope) - bookkeeping <= set(CONTACT_COLUMNS)
-    assert "displayName" in envelope  # the wire spelling, not the attribute name
-
-
-def test_source_translates_a_child_folder_display_path():
-    item = _source().list_items()[2]
-
-    assert item.metadata["folder_path"] == "Contacts/Vendors"
-    assert item.metadata["folder_display_path"] == "Contacts/Vendors"
-
-
-def test_source_envelope_is_json_safe():
-    """Nothing may be rescued by ``default=str``: a nested wrapper would poison the sidecar."""
-    for item in _source().list_items():
-        json.dumps(item.metadata)
-
-
 def test_source_checksum_is_the_vcard_bytes_this_product_renders():
     source = _source()
     item = source.list_items()[0]
 
     assert source.checksum(item) == hashlib.md5(ContactRecord.from_json(item.metadata).vcard()).hexdigest()
-
-
-def test_the_projection_asks_for_the_fields_the_envelope_records():
-    assert "birthday" in CONTACT_COLUMNS
-    assert "businessAddress" in CONTACT_COLUMNS
-    assert "emailAddresses" in CONTACT_COLUMNS
-    # ``hasPhoto`` is deliberately absent: the endpoint does not answer it (measured).
-    assert "hasPhoto" not in CONTACT_COLUMNS
-
-
-def test_the_export_projection_is_the_model_projection():
-    """``CONTACT_COLUMNS`` is derived from the model, not kept beside it.
-
-    A hand-kept list drifts from the getters that consume it, and a ``$select`` that
-    omits a column is indistinguishable from a contact that has no value for it —
-    which is how the calendar projection silently lost ``isCancelled``.
-    """
-    assert CONTACT_COLUMNS == Contact.select_all()
-    assert not set(CONTACT_COLUMNS) & set(Contact.expandable())
 
 
 # -- the vCard document --------------------------------------------------------
@@ -282,14 +221,6 @@ def test_vcard_carries_the_phones_addresses_and_birthday():
     assert "ADR;TYPE=OTHER:;;;Kyiv;;;" in data
     assert "BDAY:1953-05-01" in data
     assert "REV:20210203040506Z" in data
-
-
-def test_vcard_escapes_the_text_values():
-    data = _source().read(_source().list_items()[0]).decode("utf-8")
-
-    # Newlines become ``\n``; a comma inside a category is escaped, the separator is not.
-    assert "NOTE:Line one\\nLine two\\; with comma\\, and semicolon" in data
-    assert "CATEGORIES:Finance,Board\\, quarterly" in data
 
 
 def test_vcard_lines_are_folded_at_75_octets_and_use_crlf():

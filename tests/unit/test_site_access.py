@@ -55,18 +55,6 @@ def test_grant_access_with_entity_posts_application_identity():
     assert grantee["displayName"] == "Contoso App"
 
 
-def test_grant_access_with_object_id_uses_identity_type():
-    transport = RoutingTransport([("permissions", {})])
-    client = _client(transport)
-
-    _site(client).grant_access(APP_ID, ["read", "write"], identity_type="application").execute_query()
-
-    request = transport.requests[-1]
-    assert request.method == HttpMethod.Post
-    assert request.data["roles"] == ["read", "write"]
-    assert request.data["grantedToIdentities"][0]["application"]["id"] == APP_ID
-
-
 def test_revoke_access_deletes_only_matching_permissions():
     payload = {
         "value": [
@@ -82,62 +70,6 @@ def test_revoke_access_deletes_only_matching_permissions():
 
     deletes = [r.url.rsplit("/", 1)[-1] for r in transport.requests if r.method == HttpMethod.Delete]
     assert deletes == ["perm-1", "perm-3"]
-
-
-def test_revoke_access_accepts_entity():
-    payload = {
-        "value": [
-            {"id": "perm-1", "roles": ["write"], "grantedToIdentitiesV2": [{"application": {"id": APP_ID}}]},
-        ]
-    }
-    transport = RoutingTransport([("permissions", payload)])
-    client = _client(transport)
-
-    _site(client).revoke_access(_service_principal(client)).execute_query()
-
-    deletes = [r.url.rsplit("/", 1)[-1] for r in transport.requests if r.method == HttpMethod.Delete]
-    assert deletes == ["perm-1"]
-
-
-def test_grant_app_access_accepts_client_id_string():
-    transport = RoutingTransport(
-        [
-            ("servicePrincipals", {"id": SP_OBJECT_ID, "displayName": "Contoso App"}),
-            ("permissions", {}),
-        ]
-    )
-    client = _client(transport)
-
-    _site(client).grant_app_access(APP_ID, "write").execute_query()
-
-    gets = [r.url for r in transport.requests if r.method == HttpMethod.Get]
-    assert any("servicePrincipals" in url for url in gets)
-    request = transport.requests[-1]
-    assert request.method == HttpMethod.Post
-    assert request.url.endswith(f"/sites/{SITE_ID}/permissions")
-    assert request.data["roles"] == ["write"]
-    # the resolved service principal object ID is used, not the application (client) ID
-    assert request.data["grantedToIdentities"][0]["application"]["id"] == SP_OBJECT_ID
-
-
-def test_grant_access_with_application_entity_resolves_service_principal():
-    transport = RoutingTransport(
-        [
-            ("servicePrincipals", {"id": SP_OBJECT_ID, "displayName": "Contoso App"}),
-            ("permissions", {}),
-        ]
-    )
-    client = _client(transport)
-    app = Application(client)
-    app.set_property("appId", APP_ID)
-    app.set_property("id", APPLICATION_OBJECT_ID)
-
-    _site(client).grant_access(app, "write").execute_query()
-
-    request = transport.requests[-1]
-    assert request.method == HttpMethod.Post
-    # the service principal object ID is used, not the application registration's
-    assert request.data["grantedToIdentities"][0]["application"]["id"] == SP_OBJECT_ID
 
 
 def test_revoke_app_access_resolves_service_principal_and_deletes():

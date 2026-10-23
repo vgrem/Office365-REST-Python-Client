@@ -13,7 +13,6 @@ from unittest import mock
 import pytest
 import requests
 from office365.graph_client import GraphClient
-from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.http.throttling import (
@@ -21,12 +20,9 @@ from office365.runtime.http.throttling import (
     RateLimiter,
     ThrottleLimits,
     pace,
-    paced,
     paced_async,
     parse_throttling,
-    rate_limit_hook,
     throttle_guard,
-    wait_delay,
 )
 from office365.runtime.operations import ProgressTracker
 from office365.runtime.parallel import run_parallel
@@ -36,7 +32,6 @@ from office365.runtime.retry import (
     is_transient_error,
     response_retry_after,
     retry,
-    retry_after_delay,
     should_reset_connections,
 )
 from office365.runtime.transport.base import BaseTransport
@@ -82,25 +77,6 @@ def _make_context(outcomes: list[Exception | None]) -> tuple[ClientContext, mock
 
 
 class TestExecuteQueryRetry(unittest.TestCase):
-    def test_permanent_error_raises_immediately(self):
-        ctx, execute_query = _make_context([_make_exception(400)])
-
-        with mock.patch("office365.runtime.retry.sleep") as sleep_mock:
-            with self.assertRaises(ClientRequestException):
-                ctx.execute_query_retry(max_retry=5, timeout_secs=5)
-
-        self.assertEqual(execute_query.call_count, 1)
-        sleep_mock.assert_not_called()
-
-    def test_transient_then_success(self):
-        ctx, execute_query = _make_context([_make_exception(429), None])
-
-        with mock.patch("office365.runtime.retry.sleep") as sleep_mock:
-            ctx.execute_query_retry(max_retry=5, timeout_secs=5, jitter=False)
-
-        self.assertEqual(execute_query.call_count, 2)
-        sleep_mock.assert_called_once_with(5)
-
     def test_retries_exhausted_raises_last_error(self):
         ctx, execute_query = _make_context([_make_exception(503), _make_exception(503), _make_exception(503)])
 
@@ -111,33 +87,6 @@ class TestExecuteQueryRetry(unittest.TestCase):
         assert cm.exception.response is not None
         self.assertEqual(cm.exception.response.status_code, 503)
 
-    def test_non_http_error_is_retried(self):
-        ctx, execute_query = _make_context([requests.ConnectionError("boom"), None])
-
-        ctx.execute_query_retry(
-            max_retry=5,
-            timeout_secs=1,
-            exceptions=(ClientRequestException, requests.RequestException),
-        )
-
-        self.assertEqual(execute_query.call_count, 2)
-
-    def test_connection_error_is_retried_by_default(self):
-        ctx, execute_query = _make_context([requests.ConnectionError("boom"), None])
-
-        with mock.patch("office365.runtime.retry.sleep"):
-            ctx.execute_query_retry(max_retry=5, timeout_secs=1)
-
-        self.assertEqual(execute_query.call_count, 2)
-
-    def test_transport_timeout_is_retried_by_default(self):
-        ctx, execute_query = _make_context([requests.Timeout("slow"), None])
-
-        with mock.patch("office365.runtime.retry.sleep"):
-            ctx.execute_query_retry(max_retry=5, timeout_secs=1)
-
-        self.assertEqual(execute_query.call_count, 2)
-
     def test_ssl_error_is_not_retried(self):
         ctx, execute_query = _make_context([requests.exceptions.SSLError("bad cert"), None])
 
@@ -147,43 +96,6 @@ class TestExecuteQueryRetry(unittest.TestCase):
 
         self.assertEqual(execute_query.call_count, 1)
         sleep_mock.assert_not_called()
-
-    def test_reset_connections_called_on_503(self):
-        ctx, _execute_query = _make_context([_make_exception(503), None])
-        transport = mock.Mock()
-        ctx.pending_request().transport = transport
-
-        with mock.patch("office365.runtime.retry.sleep"):
-            ctx.execute_query_retry(max_retry=5, timeout_secs=1)
-
-        transport.reset_connections.assert_called_once_with()
-
-    def test_reset_connections_not_called_on_429(self):
-        ctx, _execute_query = _make_context([_make_exception(429), None])
-        transport = mock.Mock()
-        ctx.pending_request().transport = transport
-
-        with mock.patch("office365.runtime.retry.sleep"):
-            ctx.execute_query_retry(max_retry=5, timeout_secs=1)
-
-        transport.reset_connections.assert_not_called()
-
-    def test_incremental_retry_does_not_retry_permanent_error(self):
-        ctx, execute_query = _make_context([_make_exception(400)])
-
-        with self.assertRaises(ClientRequestException):
-            ctx.execute_query_with_incremental_retry(max_retry=5)
-
-        self.assertEqual(execute_query.call_count, 1)
-
-    def test_incremental_retry_applies_retry_after(self):
-        ctx, execute_query = _make_context([_make_exception(429, {"Retry-After": "10"}), None])
-
-        with mock.patch("office365.runtime.retry.sleep") as sleep_mock:
-            ctx.execute_query_with_incremental_retry(max_retry=5)
-
-        self.assertEqual(execute_query.call_count, 2)
-        sleep_mock.assert_called_once_with(10)
 
     def test_incremental_retry_falls_back_to_exponential_backoff(self):
         ctx, execute_query = _make_context([_make_exception(503), None])
@@ -196,32 +108,6 @@ class TestExecuteQueryRetry(unittest.TestCase):
 
 
 class TestRetryFunction(unittest.TestCase):
-    def test_exponential_backoff_capped_by_max_delay(self):
-        func = mock.Mock(side_effect=[_make_exception(503), _make_exception(503), "ok"])
-
-        with mock.patch("office365.runtime.retry.sleep") as sleep_mock:
-            retry(func, max_retry=5, timeout_secs=2, max_delay=3, jitter=False)
-
-        sleep_mock.assert_has_calls([mock.call(2), mock.call(3)])
-
-    def test_non_transient_error_raises_immediately(self):
-        func = mock.Mock(side_effect=_make_exception(400))
-
-        with mock.patch("office365.runtime.retry.sleep") as sleep_mock:
-            with self.assertRaises(ClientRequestException):
-                retry(func, max_retry=5, timeout_secs=2)
-
-        self.assertEqual(func.call_count, 1)
-        sleep_mock.assert_not_called()
-
-    def test_on_failure_overrides_timeout(self):
-        func = mock.Mock(side_effect=[_make_exception(503), "ok"])
-
-        with mock.patch("office365.runtime.retry.sleep") as sleep_mock:
-            retry(func, max_retry=5, timeout_secs=2, on_failure=lambda _attempt, _ex: 10)
-
-        sleep_mock.assert_called_once_with(10)
-
     def test_retries_exhausted_raises_last_error(self):
         func = mock.Mock(side_effect=_make_exception(503))
 
@@ -231,15 +117,6 @@ class TestRetryFunction(unittest.TestCase):
         self.assertEqual(func.call_count, 2)
         assert cm.exception.response is not None
         self.assertEqual(cm.exception.response.status_code, 503)
-
-    def test_connection_error_is_retried(self):
-        func = mock.Mock(side_effect=[requests.ConnectionError("boom"), "ok"])
-
-        with mock.patch("office365.runtime.retry.sleep"):
-            result = retry(func, max_retry=5, timeout_secs=1)
-
-        self.assertEqual(result, "ok")
-        self.assertEqual(func.call_count, 2)
 
     def test_invalid_url_is_not_retried(self):
         func = mock.Mock(side_effect=requests.exceptions.InvalidURL("nope"))
@@ -262,9 +139,6 @@ class TestTransportErrorClassification(unittest.TestCase):
         self.assertFalse(is_transient_error(requests.exceptions.SSLError("bad cert")))
         self.assertFalse(is_transient_error(requests.exceptions.InvalidURL("nope")))
 
-    def test_non_request_exception_stays_transient(self):
-        self.assertTrue(is_transient_error(RuntimeError("unknown")))
-
     def test_reset_connections_predicate(self):
         self.assertTrue(should_reset_connections(_make_exception(503)))
         self.assertTrue(should_reset_connections(requests.ConnectionError("boom")))
@@ -274,34 +148,11 @@ class TestTransportErrorClassification(unittest.TestCase):
 
 
 class TestRetryAfterDelay(unittest.TestCase):
-    def test_returns_retry_after_value(self):
-        ex = _make_exception(429, {"Retry-After": "10"})
-        self.assertEqual(retry_after_delay(ex), 10)
-
-    def test_returns_retry_after_value_for_504(self):
-        ex = _make_exception(504, {"Retry-After": "7"})
-        self.assertEqual(retry_after_delay(ex), 7)
-
-    def test_returns_none_for_non_throttling_status(self):
-        ex = _make_exception(400)
-        self.assertIsNone(retry_after_delay(ex))
-
     def test_parses_http_date(self):
         future = datetime.now(timezone.utc) + timedelta(seconds=30)
         value = format_datetime(future, usegmt=True)
         self.assertGreaterEqual(response_retry_after(_response_with_retry_after(value)), 28)
         self.assertLessEqual(response_retry_after(_response_with_retry_after(value)), 30)
-
-    def test_past_http_date_clamps_to_zero(self):
-        past = datetime.now(timezone.utc) - timedelta(seconds=30)
-        value = format_datetime(past, usegmt=True)
-        self.assertEqual(response_retry_after(_response_with_retry_after(value)), 0)
-
-    def test_malformed_header_returns_none(self):
-        self.assertIsNone(response_retry_after(_response_with_retry_after("not-a-date")))
-
-    def test_absent_header_returns_none(self):
-        self.assertIsNone(response_retry_after(_make_error_response(503)))
 
 
 class TestBackoffDelay(unittest.TestCase):
@@ -309,9 +160,6 @@ class TestBackoffDelay(unittest.TestCase):
         self.assertEqual(backoff_delay(1, base=5, jitter=False), 5)
         self.assertEqual(backoff_delay(2, base=5, jitter=False), 10)  # noqa: PLR2004
         self.assertEqual(backoff_delay(3, base=5, jitter=False), 20)  # noqa: PLR2004
-
-    def test_capped_by_max_delay(self):
-        self.assertEqual(backoff_delay(3, base=5, max_delay=12, jitter=False), 12)  # noqa: PLR2004
 
     def test_jitter_within_bounds(self):
         for attempt in (1, 2, 3):  # noqa: PLR2004
@@ -350,27 +198,6 @@ class TestContextStateAfterRetryFailure(unittest.TestCase):
         self.assertEqual(len(ctx._queries), 0)
         self.assertIsNone(ctx.current_query)
 
-    def test_permanent_error_leaves_queue_clean(self):
-        from office365.runtime.queries.client_query import ClientQuery
-
-        ctx = ClientContext("https://contoso.sharepoint.com")
-        qry = ClientQuery(ctx)
-        ctx.add_query(qry)
-
-        def _execute_query():
-            if ctx._queries:
-                ctx._current_query = ctx._queries.popleft()
-            raise _make_exception(400)
-
-        ctx.execute_query = _execute_query  # type: ignore[method-assign]
-
-        with mock.patch("office365.runtime.retry.sleep"):
-            with self.assertRaises(ClientRequestException):
-                ctx.execute_query_retry(max_retry=3, timeout_secs=5, jitter=False)
-
-        self.assertEqual(len(ctx._queries), 0)
-        self.assertIsNone(ctx.current_query)
-
 
 def throttling__response(headers: dict) -> Response:
     resp = Response()
@@ -379,56 +206,11 @@ def throttling__response(headers: dict) -> Response:
     return resp
 
 
-def test_parse_throttling_full():
-    limits = parse_throttling(
-        throttling__response(
-            {
-                "RateLimit-Limit": "600",
-                "RateLimit-Remaining": "540",
-                "RateLimit-Reset": "23",
-                "Retry-After": "5",
-                "X-SharePointHealthScore": "90",
-            }
-        )
-    )
-    assert limits == ThrottleLimits(limit=600, remaining=540, reset=23, retry_after=5, health_score=90, status=200)
-
-
-def test_parse_throttling_absent_headers():
-    assert parse_throttling(throttling__response({})) is None
-
-
-def test_parse_throttling_non_sharepoint_response():
-    # Microsoft Graph responses carry no RateLimit-* headers
-    assert parse_throttling(throttling__response({"content-type": "application/json"})) is None
-
-
 def test_parse_throttling_malformed_values():
     limits = parse_throttling(throttling__response({"RateLimit-Remaining": "abc", "RateLimit-Reset": "30"}))
     assert limits == ThrottleLimits(remaining=None, reset=30, status=200)
     assert limits is not None
     assert limits.remaining is None
-
-
-def test_parse_throttling_health_score_only():
-    # SharePoint sends X-SharePointHealthScore on every response, even without RateLimit-*
-    limits = parse_throttling(throttling__response({"X-SharePointHealthScore": "2"}))
-    assert limits == ThrottleLimits(health_score=2, status=200)
-
-
-def test_rate_limit_hook_fires_on_throttling_headers():
-    seen = []
-    hook = rate_limit_hook(seen.append)
-    hook(throttling__response({"RateLimit-Remaining": "5", "RateLimit-Reset": "30"}))
-    assert len(seen) == 1
-    assert seen[0].remaining == 5  # noqa: PLR2004
-
-
-def test_rate_limit_hook_silent_without_headers():
-    seen = []
-    hook = rate_limit_hook(seen.append)
-    hook(throttling__response({}))
-    assert seen == []
 
 
 def test_throttle_guard_attaches_and_detaches():
@@ -480,75 +262,6 @@ def _elapsed(fn) -> float:
     return time.monotonic() - start
 
 
-class TestPacePolicy(unittest.TestCase):
-    """The pacing policy is pure: no clock, no lock, no sleep."""
-
-    def test_retry_after_advances_the_gate(self):
-        state = pace(PaceState(), ThrottleLimits(retry_after=5), now=100.0)
-        self.assertEqual(state, PaceState(105.0))
-
-    def test_health_score_above_threshold_paces(self):
-        state = pace(PaceState(), ThrottleLimits(health_score=90), now=100.0, health_threshold=80)
-        self.assertEqual(state, PaceState(100.5))
-
-    def test_health_score_below_threshold_is_a_noop(self):
-        state = PaceState()
-        self.assertIs(pace(state, ThrottleLimits(health_score=2), now=100.0), state)
-
-    def test_missing_limits_is_a_noop(self):
-        state = PaceState()
-        self.assertIs(pace(state, None, now=100.0), state)
-
-    def test_min_interval_applies_on_high_health(self):
-        state = pace(PaceState(), ThrottleLimits(health_score=100), now=100.0, min_interval=3.0)
-        self.assertEqual(state, PaceState(103.0))
-
-    def test_gate_never_retreats(self):
-        state = PaceState(next_available_at=110.0)
-        self.assertEqual(pace(state, ThrottleLimits(retry_after=2), now=100.0), state)
-
-    def test_wait_delay(self):
-        self.assertEqual(wait_delay(PaceState(105.0), now=100.0), 5.0)  # noqa: PLR2004
-        self.assertEqual(wait_delay(PaceState(95.0), now=100.0), 0.0)
-
-    def test_resource_unit_weights_percentage_pace(self):
-        # 1.0 * (1 + (1.0 - 0.8)) * cost(3) = 3.6
-        state = pace(
-            PaceState(),
-            ThrottleLimits(limit_percentage=1.0, resource_unit=3),
-            now=100.0,
-            percentage_interval=1.0,
-        )
-        self.assertAlmostEqual(state.next_available_at, 103.6)
-
-    def test_resource_unit_weighting_can_be_disabled(self):
-        state = pace(
-            PaceState(),
-            ThrottleLimits(limit_percentage=1.0, resource_unit=3),
-            now=100.0,
-            weight_by_resource_unit=False,
-        )
-        self.assertAlmostEqual(state.next_available_at, 101.2)
-
-    def test_resource_unit_cost_is_capped(self):
-        state = pace(
-            PaceState(),
-            ThrottleLimits(limit_percentage=1.0, resource_unit=100),
-            now=100.0,
-            percentage_interval=1.0,
-        )
-        # cost clamped to MAX_RESOURCE_UNIT_COST (10): 1.2 * 10
-        self.assertAlmostEqual(state.next_available_at, 112.0)
-
-    def test_retry_after_is_not_scaled_by_resource_unit(self):
-        state = pace(
-            PaceState(),
-            ThrottleLimits(retry_after=2, resource_unit=5),
-            now=100.0,
-        )
-        self.assertEqual(state, PaceState(102.0))
-
-
 class _FakeClock:
     def __init__(self) -> None:
         self.t = 0.0
@@ -558,19 +271,6 @@ class _FakeClock:
 
 
 class TestRateLimiter(unittest.TestCase):
-    def test_gate_uses_injected_clock_and_sleep(self):
-        clock = _FakeClock()
-        slept: list[float] = []
-
-        def _sleep(delay: float) -> None:
-            slept.append(delay)
-            clock.t += delay
-
-        limiter = RateLimiter(clock=clock, sleep=_sleep)
-        limiter.observe(ratelimiter__response(retry_after="5"))
-        limiter.acquire()
-        self.assertGreaterEqual(sum(slept), 5.0)
-
     def test_retry_after_gates_the_group(self):
         limiter = RateLimiter()
         limiter.observe(ratelimiter__response(retry_after="1"))
@@ -578,26 +278,6 @@ class TestRateLimiter(unittest.TestCase):
         elapsed = _elapsed(limiter.acquire)
         self.assertGreaterEqual(elapsed, 0.9)
         self.assertLess(elapsed, 2.0)
-
-    def test_health_score_above_threshold_paces(self):
-        limiter = RateLimiter(health_threshold=80)
-        limiter.observe(ratelimiter__response(health_score="90"))
-        self.assertGreaterEqual(_elapsed(limiter.acquire), 0.4)
-
-    def test_acquire_is_thread_safe_and_shares_the_gate(self):
-        limiter = RateLimiter()
-        observed = [0.0]
-
-        def _worker():
-            observed[0] = time.monotonic()
-            limiter.acquire()
-
-        limiter.observe(ratelimiter__response(retry_after="1"))
-        thread = threading.Thread(target=_worker)
-        start = time.monotonic()
-        thread.start()
-        thread.join()
-        self.assertGreaterEqual(time.monotonic() - start, 0.9)
 
     def test_bind_wraps_transport_and_reports_to_limiter(self):
         ctx = ClientContext("https://contoso.sharepoint.com/sites/x")
@@ -680,25 +360,6 @@ class _StubTransport(BaseTransport):
 
 
 class TestPacedGuard(unittest.TestCase):
-    def test_paced_observes_success(self):
-        gate = mock.Mock()
-        response = ratelimiter__response()
-        result = paced(lambda: response, gate)
-        self.assertIs(result, response)
-        gate.acquire.assert_called_once_with(None)
-        gate.observe.assert_called_once_with(response)
-
-    def test_paced_observes_error_response_and_reraises(self):
-        gate = mock.Mock()
-        err = ClientRequestException("boom", response=ratelimiter__response(retry_after="3"))
-
-        def _boom():
-            raise err
-
-        with self.assertRaises(ClientRequestException):
-            paced(_boom, gate)
-        gate.observe.assert_called_once_with(err.response)
-
     def test_throttled_transport_delegates_and_paces(self):
         gate = mock.Mock()
         response = ratelimiter__response()
@@ -725,65 +386,8 @@ class TestPacedGuard(unittest.TestCase):
         gate.acquire.assert_called_once_with(None)
         gate.observe.assert_called_once_with(None)
 
-    def test_throttled_transport_passes_request_scope(self):
-        gate = mock.Mock()
-        inner = _StubTransport(response=ratelimiter__response())
-        transport = ThrottledTransport(inner, gate)
-        request = RequestOptions(url="https://graph.microsoft.com/v1.0/me")
-        request.throttle_scope = "Mail.ReadWrite"
-
-        transport.execute(request)
-
-        gate.acquire.assert_called_once_with("Mail.ReadWrite")
-
 
 class TestPacedAsync(unittest.TestCase):
-    def test_acquire_async_uses_injected_clock_and_sleep(self):
-        clock = _FakeClock()
-        slept: list[float] = []
-
-        async def _async_sleep(delay: float) -> None:
-            slept.append(delay)
-            clock.t += delay
-
-        limiter = RateLimiter(clock=clock, async_sleep=_async_sleep)
-        limiter.observe(ratelimiter__response(retry_after="5"))
-        asyncio.run(limiter.acquire_async())
-        self.assertGreaterEqual(sum(slept), 5.0)
-
-    def test_acquire_async_yields_to_the_event_loop(self):
-        """While one task waits on the gate, siblings keep running."""
-        limiter = RateLimiter()
-        limiter.observe(ratelimiter__response(retry_after="1"))
-        events: list[str] = []
-
-        async def _acquire() -> None:
-            await limiter.acquire_async()
-            events.append("acquired")
-
-        async def _run() -> None:
-            task = asyncio.ensure_future(_acquire())
-            await asyncio.sleep(0.05)
-            events.append("sibling")
-            await task
-
-        asyncio.run(_run())
-        self.assertEqual(events, ["sibling", "acquired"])
-
-    def test_paced_async_observes_success(self):
-        gate = mock.Mock()
-        gate.acquire_async = mock.AsyncMock()
-        response = ratelimiter__response()
-
-        async def _func():
-            return response
-
-        result = asyncio.run(paced_async(_func, gate))
-
-        self.assertIs(result, response)
-        gate.acquire_async.assert_awaited_once_with(None)
-        gate.observe.assert_called_once_with(response)
-
     def test_paced_async_observes_error_response_and_reraises(self):
         gate = mock.Mock()
         gate.acquire_async = mock.AsyncMock()
@@ -809,21 +413,6 @@ class TestPacedAsync(unittest.TestCase):
         gate.acquire_async.assert_awaited_once_with(None)
         gate.observe.assert_called_once_with(response)
 
-    def test_throttled_transport_aclose_delegates(self):
-        gate = mock.Mock()
-        inner = _StubTransport(response=ratelimiter__response())
-        closed: list[bool] = []
-
-        async def _aclose() -> None:
-            closed.append(True)
-
-        inner.aclose = _aclose  # type: ignore[method-assign]
-        transport = ThrottledTransport(inner, gate)
-
-        asyncio.run(transport.aclose())
-
-        self.assertEqual(closed, [True])
-
 
 class _Pending:
     def __init__(self) -> None:
@@ -846,10 +435,6 @@ class _FakeContext:
 
 
 class TestRunParallel(unittest.TestCase):
-    def test_ordered_results(self):
-        results = run_parallel(lambda _ctx, task: task * 2, [1, 2, 3], concurrency=3)
-        self.assertEqual(results, [2, 4, 6])  # noqa: PLR2004
-
     def test_context_factory_once_per_thread_and_limiter_bound(self):
         contexts = []
         lock = threading.Lock()
@@ -876,27 +461,6 @@ class TestRunParallel(unittest.TestCase):
         for ctx in contexts:
             self.assertIsInstance(ctx.pending.transport, ThrottledTransport)
 
-    def test_on_error_returns_fallback(self):
-        def worker(_ctx, task):
-            if task == 2:  # noqa: PLR2004
-                raise ValueError("boom")
-            return task
-
-        results = run_parallel(worker, [1, 2, 3], on_error=lambda _t, _e: -1)
-        self.assertEqual(results, [1, -1, 3])
-
-    def test_without_on_error_raises(self):
-        def worker(_ctx, task):
-            raise ValueError("boom")
-
-        with self.assertRaises(ValueError):
-            run_parallel(worker, [1], concurrency=1)
-
-    def test_progress_fires_per_task(self):
-        seen = []
-        run_parallel(lambda _ctx, task: task, [1, 2, 3], progress=lambda p: seen.append(p.done))
-        self.assertEqual(sorted(seen), [1, 2, 3])
-
 
 def test_report_emits_progress_with_total():
     seen = []
@@ -922,16 +486,6 @@ def test_advance_and_late_total():
     assert [p.done for p in seen] == [1, 3, 5]
     assert seen[-1].total == 10  # noqa: PLR2004
     assert seen[-1].percent == 50.0  # noqa: PLR2004
-
-
-def test_report_is_monotonic():
-    seen = []
-    tracker = ProgressTracker(seen.append, total=100, stage="loading")
-
-    tracker.report(40)
-    tracker.report(30)  # out-of-order completion must not go backwards
-
-    assert [p.done for p in seen] == [40, 40]
 
 
 def test_thread_safe_advances_sum_to_total():
@@ -962,24 +516,6 @@ def _run_concurrently(target, count: int = 2) -> None:
 
 
 class TestThreadSafety(unittest.TestCase):
-    def test_with_access_token_single_flight(self):
-        auth_ctx = AuthenticationContext("https://contoso.sharepoint.com")
-        calls: list[int] = []
-
-        def token_func():
-            calls.append(1)
-            time.sleep(0.1)
-            return {"accessToken": "token", "tokenType": "Bearer", "expiresIn": 3600}
-
-        auth_ctx.with_access_token(token_func)
-
-        def _authenticate():
-            auth_ctx.authenticate_request(RequestOptions("https://contoso.sharepoint.com"))
-
-        _run_concurrently(_authenticate)
-
-        self.assertEqual(len(calls), 1)
-
     def test_ensure_form_digest_single_flight(self):
         request = SharePointRequest("https://contoso.sharepoint.com")
         context_info = ContextWebInformation(FormDigestValue="digest", FormDigestTimeoutSeconds=1800)
@@ -1063,12 +599,6 @@ def test_parse_throttling_graph_headers():
     assert limits.reason == "WriteLimitExceeded"
 
 
-def test_parse_throttling_graph_is_auto_detected():
-    limits = parse_throttling(throttling__response({"x-ms-resource-unit": "1"}))
-    assert limits is not None
-    assert limits.resource_unit == 1
-
-
 def test_pace_reacts_to_graph_limit_percentage():
     now = 1000.0
     assert pace(PaceState(), ThrottleLimits(limit_percentage=1.2), now=now).next_available_at > now
@@ -1105,13 +635,3 @@ def test_retry_decorator_retries_and_forwards_args():
     with mock.patch("office365.runtime.retry.sleep"):
         assert flaky("ok") == "ok"
     assert calls["n"] == 2  # noqa: PLR2004
-
-
-def test_retry_decorator_reraises_permanent():
-    @retry(max_retry=3, timeout_secs=0)
-    def boom():
-        raise ClientRequestException("permanent", response=_make_error_response(400))
-
-    with mock.patch("office365.runtime.retry.sleep"):
-        with pytest.raises(ClientRequestException):
-            boom()

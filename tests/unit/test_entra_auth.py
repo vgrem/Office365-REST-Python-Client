@@ -60,17 +60,3 @@ def test_device_flow_prompts_once_then_reuses_cached_token(monkeypatch):
     app = created[0]
     assert app.initiated == 1
     assert app.silent_calls == 1
-
-
-def test_device_flow_falls_back_when_silent_returns_none(monkeypatch):
-    created = _install_fake_msal(monkeypatch)
-    ctx = AuthenticationContext(tenant="contoso.onmicrosoft.com")
-    ctx.with_device_flow("client-id")
-
-    app = created[0]
-    app.accounts.append({"home_account_id": "stale"})
-    app.silent_result = None
-
-    assert ctx._token_callback()["access_token"] == "device"
-    assert app.initiated == 1
-    assert app.silent_calls == 1

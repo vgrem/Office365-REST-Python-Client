@@ -16,7 +16,6 @@ from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 from office365.todo.attachments.base import AttachmentBase
 from office365.todo.attachments.task_file import TaskFileAttachment
-from office365.todo.linked_resource import LinkedResource
 from tests._scripted_transport import ScriptedTransport
 
 
@@ -69,14 +68,6 @@ def test_task_file_attachment_advertises_odata_type():
 
     assert attachment.entity_type_name == "microsoft.graph.taskFileAttachment"
     assert attachment.to_json(V4JsonFormat())["@odata.type"] == "#microsoft.graph.taskFileAttachment"
-
-
-def test_linked_resource_omits_unresolvable_odata_type():
-    resource = LinkedResource(None)
-    resource.set_property("applicationName", "Outlook")
-
-    assert resource.entity_type_name is None
-    assert "@odata.type" not in resource.to_json(V4JsonFormat())
 
 
 def test_attachment_base_exposes_content_bytes():

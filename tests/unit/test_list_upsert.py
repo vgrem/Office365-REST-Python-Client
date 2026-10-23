@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 from office365.runtime.converters.upsert import keyed_queue, record_key
 
 
@@ -75,30 +74,3 @@ def test_keyed_queue_upserts_existing():
     assert (queued, skipped) == (2, 0)
     assert len(target.created) == 1  # the new row
     assert target.updated[0][0] == 7  # noqa: PLR2004 — the existing row id
-
-
-def test_keyed_queue_dedupes_within_run():
-    target = _FakeTarget()
-    records = [{"Name_": "AAPL", "date": "d1"}, {"Name_": "AAPL", "date": "d1"}]
-
-    queued, skipped = _queue(target, records, {})
-
-    assert (queued, skipped) == (1, 1)
-    assert len(target.created) == 1
-
-
-def test_keyed_queue_dry_run_plans_without_writing():
-    target = _FakeTarget()
-    records = [{"Name_": "AAPL", "date": "d1"}, {"Name_": "AAPL", "date": "d2"}]
-    existing = {record_key(records[0], ["Name_", "date"]): 1}
-
-    queued, skipped = _queue(target, records, existing, dry_run=True)
-
-    assert (queued, skipped) == (1, 1)
-    assert target.created == []
-    assert target.updated == []
-
-
-def test_keyed_queue_rejects_unknown_conflict_mode():
-    with pytest.raises(ValueError, match="on_conflict"):
-        _queue(_FakeTarget(), [{"Name_": "AAPL", "date": "d1"}], {}, on_conflict="nope")

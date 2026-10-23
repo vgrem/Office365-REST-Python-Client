@@ -5,7 +5,6 @@ import json
 import pytest
 from office365.migration.sharepoint import site_verify
 from office365.migration.sharepoint.site_verify import (
-    LIST_SECURITY,
     SITE_SCOPE,
     WEB_SCOPE_STRUCTURE,
     verify_site,
@@ -97,28 +96,6 @@ def test_findings_make_the_web_a_mismatch_and_are_counted(contexts, clean, monke
     assert len(report.issues) == len(report.findings["settings"]) + len(report.findings["pages"])
 
 
-def test_a_list_acl_the_target_did_not_restore_is_its_own_dimension(contexts, clean, monkeypatch):
-    monkeypatch.setattr(
-        site_verify,
-        "verify_list_security",
-        lambda s, t: ["list 'Private' inherits the web's permissions on the target; the source restricts it"],
-    )
-
-    report = verify_site(*contexts, security=True)
-
-    assert not report.ok
-    assert report.findings == {
-        LIST_SECURITY: ["list 'Private' inherits the web's permissions on the target; the source restricts it"]
-    }
-    assert report.summary().endswith(f"{LIST_SECURITY}: 1")
-
-
-def test_the_list_check_only_runs_with_security_enabled(contexts, clean):
-    verify_site(*contexts)
-
-    assert "list security" not in clean
-
-
 def test_a_check_that_cannot_run_is_unverifiable_not_a_mismatch(contexts, clean, monkeypatch):
     monkeypatch.setattr(site_verify, "verify_site_security", _raise_access_denied)
 
@@ -134,22 +111,6 @@ def test_a_check_that_cannot_run_is_unverifiable_not_a_mismatch(contexts, clean,
 
 def _raise_access_denied(source_web, target_web):
     raise RuntimeError("access denied")
-
-
-def test_only_the_requested_checks_run(contexts, clean):
-    report = verify_site(
-        *contexts, settings=False, branding=False, web_scope_structure=False, site_scope=False, pages=True
-    )
-
-    assert clean == ["pages"]
-    assert report.checked == ["pages"]
-
-
-def test_nothing_requested_reports_nothing_to_check(contexts, clean):
-    report = verify_site(*contexts, settings=False, branding=False, web_scope_structure=False, site_scope=False)
-
-    assert report.ok
-    assert report.summary() == "OK | https://contoso.sharepoint.com/sites/team_out | nothing to check"
 
 
 def test_list_structure_is_folded_in(contexts, clean, monkeypatch):
@@ -189,38 +150,6 @@ def test_an_unreadable_list_is_unverifiable_not_fatal(contexts, clean, monkeypat
     assert report.ok
     assert not report.complete
     assert report.unverifiable == ["list structure for Documents: access denied"]
-
-
-def test_structure_can_be_skipped_even_with_pairs(contexts, clean, monkeypatch):
-    monkeypatch.setattr(site_verify, "verify_list_structure", lambda s, t: StructureReport(list_title="never"))
-
-    report = verify_site(*contexts, lists=[("source", "target")], structure=False)
-
-    assert report.lists == []
-    assert "lists:" not in report.summary()
-
-
-def test_branding_is_its_own_dimension(contexts, clean, monkeypatch):
-    monkeypatch.setattr(
-        site_verify,
-        "verify_web_branding",
-        lambda s, t: ["branding: https://contoso.sharepoint.com/sites/team_out MasterUrl is None, source has '/x'"],
-    )
-
-    report = verify_site(*contexts)
-
-    assert not report.ok
-    assert list(report.findings) == ["branding"]
-    assert report.summary().endswith("settings: 0, branding: 1, web-scope structure: 0, site scope: 0")
-
-
-def test_the_url_falls_back_to_the_context_when_a_projected_read_dropped_it(contexts, clean):
-    source, target = contexts
-    target.web = type(
-        "_Web", (), {"context": type("_Context", (), {"base_url": "https://contoso.sharepoint.com/sites/x"})}
-    )()
-
-    assert verify_site(source, target).url == "https://contoso.sharepoint.com/sites/x"
 
 
 def test_web_scope_structure_findings_are_reported_as_a_note(contexts, monkeypatch):

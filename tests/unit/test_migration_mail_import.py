@@ -17,10 +17,9 @@ from email.policy import SMTP
 from pathlib import Path
 from typing import Any
 
-import pytest
 from office365.graph_client import GraphClient
 from office365.migration import MigrationJob
-from office365.migration.outlook import EmlTreeSource, MailboxTarget, MailImportOptions, mime_digest
+from office365.migration.outlook import EmlTreeSource, MailboxTarget, mime_digest
 from tests._scripted_transport import MethodRoutingTransport
 
 _INBOX_ID = "inbox"
@@ -209,22 +208,6 @@ def test_source_digests_what_the_message_says(tmp_path: Path):
     assert source.checksum(item) == mime_digest(payload)
 
 
-def test_source_accepts_a_bare_eml_tree_without_sidecars(tmp_path: Path):
-    path = tmp_path / "bare" / "Inbox" / "m1.eml"
-    path.parent.mkdir(parents=True)
-    path.write_bytes(_eml())
-
-    items = EmlTreeSource(tmp_path / "bare").list_items()
-
-    assert [item.dest_path for item in items] == ["Inbox/m1.eml"]
-    assert items[0].metadata is None
-
-
-def test_source_rejects_a_missing_tree(tmp_path: Path):
-    with pytest.raises(FileNotFoundError, match="not a directory"):
-        EmlTreeSource(tmp_path / "absent").list_items()
-
-
 def test_import_delivers_base64_mime_and_creates_the_folder_chain(tmp_path: Path):
     mailbox = _Mailbox()
     client = _client(mailbox)
@@ -239,19 +222,6 @@ def test_import_delivers_base64_mime_and_creates_the_folder_chain(tmp_path: Path
     # Graph only accepts the import as base64 text, and only with this content type.
     folder_id, raw, content_type = mailbox.posted[0]
     assert (folder_id, base64.b64encode(raw), content_type) == (_ARCHIVE_ID, base64.b64encode(payload), "text/plain")
-
-
-def test_import_replays_categories_and_read_state(tmp_path: Path):
-    mailbox = _Mailbox()
-    client = _client(mailbox)
-    job = MigrationJob(EmlTreeSource(_tree(tmp_path)), MailboxTarget(_inbox(client)))
-
-    job.plan()
-    job.run()
-
-    assert len(mailbox.patched) == 1  # one PATCH carries both flags
-    _, properties = mailbox.patched[0]
-    assert {key: properties[key] for key in ("isRead", "categories")} == {"isRead": False, "categories": ["Finance"]}
 
 
 def test_flag_replay_patches_only_the_flags_not_the_imported_message(tmp_path: Path):
@@ -279,21 +249,6 @@ def test_flag_replay_patches_only_the_flags_not_the_imported_message(tmp_path: P
     assert {key: properties[key] for key in ("isRead", "categories")} == {"isRead": False, "categories": ["Finance"]}
     for echoed in ("attachments", "toRecipients", "body", "subject"):
         assert echoed not in properties, echoed
-
-
-def test_import_does_not_patch_a_message_that_already_matches(tmp_path: Path):
-    mailbox = _Mailbox()
-    client = _client(mailbox)
-    root = _tree(tmp_path)
-    sidecar = root / "Inbox/m1.json"
-    envelope = json.loads(sidecar.read_text(encoding="utf-8"))
-    sidecar.write_text(json.dumps({**envelope, "is_read": True, "categories": []}), encoding="utf-8")
-    job = MigrationJob(EmlTreeSource(root), MailboxTarget(_inbox(client)))
-
-    job.plan()
-    job.run()
-
-    assert mailbox.patched == []
 
 
 def test_import_skips_a_message_it_already_delivered(tmp_path: Path):
@@ -339,30 +294,6 @@ def test_import_reports_a_message_whose_body_was_altered(tmp_path: Path):
     report = job.verify()
 
     assert report.mismatches == ["content mismatch: Inbox/m1.eml"]
-
-
-def test_import_restores_the_folder_name_from_the_display_path(tmp_path: Path):
-    mailbox = _Mailbox()
-    client = _client(mailbox)
-    root = _tree(tmp_path, {"Inbox/All-Mail/m1.eml": _eml()}, {"Inbox/All-Mail/m1.eml": "Inbox/All Mail"})
-    job = MigrationJob(EmlTreeSource(root), MailboxTarget(_inbox(client)))
-
-    job.plan()
-    job.run()
-
-    assert mailbox.folders == [(_INBOX_ID, "All Mail")]
-
-
-def test_import_root_name_prefixes_every_folder(tmp_path: Path):
-    mailbox = _Mailbox()
-    client = _client(mailbox)
-    target = MailboxTarget(_inbox(client), MailImportOptions(root_name="Imported"))
-    job = MigrationJob(EmlTreeSource(_tree(tmp_path, {"Inbox/Archive/m2.eml": _eml()})), target)
-
-    job.plan()
-    job.run()
-
-    assert mailbox.folders == [(_INBOX_ID, "Imported"), ("f-1", "Archive")]
 
 
 def test_import_refuses_a_message_over_the_mime_limit(tmp_path: Path):

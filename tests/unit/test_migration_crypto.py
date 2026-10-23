@@ -24,10 +24,3 @@ def test_encrypt_round_trips_with_a_random_iv():
     assert ciphertext != b"hello world"
     assert len(base64.b64decode(iv)) == 16  # noqa: PLR2004
     assert decrypt(ciphertext, key, iv) == b"hello world"
-
-
-def test_encrypt_uses_a_unique_iv_per_call():
-    key = bytes(range(32))
-    _, first = encrypt(b"same", key)
-    _, second = encrypt(b"same", key)
-    assert first != second

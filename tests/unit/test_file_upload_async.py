@@ -9,7 +9,6 @@ synchronous twin.
 from __future__ import annotations
 
 import asyncio
-import threading
 
 import pytest
 from office365.runtime.client_request_exception import ClientRequestException
@@ -43,35 +42,6 @@ _ROUTES = [
 ]
 
 
-class _RecordingStream:
-    """File-like wrapper recording the thread each ``read`` runs on."""
-
-    def __init__(self, handle) -> None:
-        self._handle = handle
-        self.reads: list[int] = []
-
-    def read(self, size=-1):
-        self.reads.append(threading.get_ident())
-        return self._handle.read(size)
-
-    def tell(self):
-        return self._handle.tell()
-
-    def seek(self, offset, whence=0):
-        return self._handle.seek(offset, whence)
-
-    @property
-    def name(self):
-        return self._handle.name
-
-    @property
-    def closed(self):
-        return self._handle.closed
-
-    def close(self):
-        self._handle.close()
-
-
 def test_create_upload_session_async_uploads_chunks(tmp_path) -> None:
     source = tmp_path / "big.bin"
     source.write_bytes(b"abcdefghij")  # 10 bytes
@@ -97,32 +67,6 @@ def test_create_upload_session_async_uploads_chunks(tmp_path) -> None:
     assert [p.done for p in seen] == [0, 4, 8, 10]
     assert seen[-1].total == 10  # noqa: PLR2004
     assert seen[-1].stage == "uploading"
-
-
-def test_create_upload_session_async_small_file_uses_simple_add(tmp_path) -> None:
-    source = tmp_path / "small.bin"
-    source.write_bytes(b"abcd")  # exactly one chunk -> simple upload
-    ctx, transport = _context([("/add", {"d": {"__metadata": {"type": "SP.File"}, "Name": "small.bin"}})])
-    col = _collection(ctx)
-
-    asyncio.run(col.create_upload_session_async(str(source), chunk_size=4))
-
-    assert sum(1 for url in transport.calls if "/add(" in url) == 1
-    assert not any("Upload" in url for url in transport.calls)
-
-
-def test_create_upload_session_async_reads_off_the_loop(tmp_path) -> None:
-    source = tmp_path / "big.bin"
-    source.write_bytes(b"abcdefghij")
-    ctx, _ = _context(list(_ROUTES))
-    col = _collection(ctx)
-    loop_thread = threading.get_ident()
-    stream = _RecordingStream(source.open("rb"))
-
-    asyncio.run(col.create_upload_session_async(stream, chunk_size=4, file_name="big.bin"))
-
-    assert stream.reads
-    assert all(thread != loop_thread for thread in stream.reads)
 
 
 def test_create_upload_session_async_propagates_failure(tmp_path) -> None:

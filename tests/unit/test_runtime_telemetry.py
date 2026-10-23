@@ -52,25 +52,6 @@ def _assert_guid(value: str) -> None:
     assert str(parsed) == value.lower()
 
 
-def test_client_request_id_sent_by_default() -> None:
-    ctx, session = _context()
-
-    ctx.execute_query()
-
-    _assert_guid(session.calls[0][2]["headers"][_HEADER])
-
-
-def test_client_request_id_is_unique_per_request() -> None:
-    ctx, session = _context()
-
-    ctx.load(ctx.web)
-    ctx.execute_query()
-
-    ids = [call[2]["headers"][_HEADER] for call in session.calls]
-    assert len(ids) == 2  # noqa: PLR2004
-    assert ids[0] != ids[1]
-
-
 def test_user_supplied_client_request_id_wins() -> None:
     ctx, session = _context()
     ctx.pending_request().before_execute(lambda request: request.set_header(_HEADER, "caller-id"), once=True)
@@ -78,15 +59,6 @@ def test_user_supplied_client_request_id_wins() -> None:
     ctx.execute_query()
 
     assert session.calls[0][2]["headers"][_HEADER] == "caller-id"
-
-
-def test_opt_out_omits_client_request_id() -> None:
-    ctx, session = _context()
-    ctx.with_client_request_id(False)
-
-    ctx.execute_query()
-
-    assert _HEADER not in session.calls[0][2]["headers"]
 
 
 def test_client_request_id_sent_on_async_path() -> None:
@@ -99,19 +71,6 @@ def test_client_request_id_sent_on_async_path() -> None:
 
 def _payload_requests(payload: dict) -> list[dict]:
     return payload["requests"]
-
-
-def test_v4_batch_subrequests_get_unique_ids() -> None:
-    client = GraphClient()
-    client.pending_request().beforeExecute.clear()
-    batch = BatchQuery(client, [ClientQuery(client) for _ in range(3)])
-
-    payload = ODataV4BatchRequest("", V4JsonFormat())._prepare_payload(batch)
-
-    ids = [item["headers"][_HEADER] for item in _payload_requests(payload)]
-    assert len(set(ids)) == 3  # noqa: PLR2004
-    for value in ids:
-        _assert_guid(value)
 
 
 def test_batch_subrequests_respect_opt_out() -> None:

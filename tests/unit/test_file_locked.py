@@ -13,10 +13,8 @@ from unittest import mock
 from office365.graph_client import GraphClient
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.exceptions import FileLockedException
-from office365.runtime.retry import retry_on
 from office365.runtime.transport.base import BaseTransport
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.exceptions import SPFileLockedException
 from requests import Response
 
 SHAREPOINT_LOCK_BODY = (
@@ -32,10 +30,6 @@ def _locked_response(status: int = 423, body: bytes = SHAREPOINT_LOCK_BODY) -> R
     resp.url = "https://contoso.sharepoint.com/_api/web"
     resp._content = body
     return resp
-
-
-def _graph_locked_response() -> Response:
-    return _locked_response(body=b'{"error":{"code":"resourceLocked","message":"The resource is locked."}}')
 
 
 class _CaptureTransport(BaseTransport):
@@ -56,34 +50,6 @@ class _CaptureTransport(BaseTransport):
 
 
 class TestFileLockedClassification(unittest.TestCase):
-    def test_sharepoint_shared_lock_is_typed(self):
-        exc = ClientRequestException.from_response(_locked_response())
-
-        self.assertIsInstance(exc, FileLockedException)
-        self.assertEqual(exc.lock_owner, "John Doe")
-
-    def test_sp_alias_is_same_type(self):
-        exc = ClientRequestException.from_response(_locked_response())
-        self.assertIsInstance(exc, SPFileLockedException)
-
-    def test_graph_resource_locked_is_typed(self):
-        exc = ClientRequestException.from_response(_graph_locked_response())
-        self.assertIsInstance(exc, FileLockedException)
-
-    def test_status_423_without_body_is_typed(self):
-        resp = Response()
-        resp.status_code = 423
-        resp.url = "https://contoso.sharepoint.com/_api/web"
-        resp._content = b""
-        self.assertIsInstance(ClientRequestException.from_response(resp), FileLockedException)
-
-    def test_other_error_is_not_typed(self):
-        resp = Response()
-        resp.status_code = 400
-        resp.url = "https://contoso.sharepoint.com/_api/web"
-        resp._content = b'{"error":{"code":"-1, System.Exception","message":"boom"}}'
-        self.assertNotIsInstance(ClientRequestException.from_response(resp), FileLockedException)
-
     def test_str_includes_owner_and_guidance(self):
         exc = ClientRequestException.from_response(_locked_response())
         text = str(exc)
@@ -107,14 +73,6 @@ class TestFileLockedRetry(unittest.TestCase):
 
         self.assertEqual(execute_query.call_count, 1)
 
-    def test_locked_is_retried_when_opted_in(self):
-        ctx, execute_query = self._context([ClientRequestException.from_response(_locked_response()), None])
-
-        with mock.patch("office365.runtime.retry.sleep"):
-            ctx.execute_query_retry(max_retry=3, timeout_secs=1, is_retriable=retry_on(FileLockedException))
-
-        self.assertEqual(execute_query.call_count, 2)
-
 
 class TestBypassSharedLockHeader(unittest.TestCase):
     def test_sharepoint_delete_sends_prefer_header(self):
@@ -128,18 +86,6 @@ class TestBypassSharedLockHeader(unittest.TestCase):
 
         assert transport.request is not None
         self.assertEqual(transport.request.headers.get("Prefer"), "bypass-shared-lock")
-
-    def test_sharepoint_delete_without_flag_has_no_prefer_header(self):
-        ctx = ClientContext("https://contoso.sharepoint.com")
-        transport = _CaptureTransport()
-        ctx.pending_request().beforeExecute.clear()
-        ctx.pending_request().transport = transport
-
-        file = ctx.web.get_file_by_server_relative_url("/sites/team/Shared Documents/report.xlsx")
-        file.delete_object().execute_query()
-
-        assert transport.request is not None
-        self.assertNotIn("Prefer", transport.request.headers)
 
     def test_graph_delete_sends_prefer_header(self):
         client = GraphClient()

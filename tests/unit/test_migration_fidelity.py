@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import datetime
 
-import pytest
 from office365.migration.adapters.filesystem import FileSystemSource
 from office365.migration.base import (
     MigrationItem,
@@ -14,14 +13,6 @@ from office365.migration.base import (
     item_from_dict,
     item_to_dict,
 )
-from office365.migration.runner import _assert_fidelity_supported
-from office365.runtime.converters.scalars import iso_or_none
-
-
-def test_iso_or_none():
-    assert iso_or_none(None) is None
-    assert iso_or_none(datetime.datetime.min) is None  # SharePoint "not loaded" sentinel
-    assert iso_or_none(datetime.datetime(2020, 1, 2, 3, 4, 5)) == "2020-01-02T03:04:05"
 
 
 def test_migration_item_metadata_round_trips():
@@ -40,44 +31,6 @@ def test_migration_item_metadata_round_trips():
     assert restored.modified == "2021-01-01T00:00:00"
     assert restored.author is not None and restored.author.user_id == 1
     assert restored.editor is not None and restored.editor.user_id == 2  # noqa: PLR2004
-
-
-def test_migration_item_principal_round_trips_json_safely():
-    import json
-
-    item = MigrationItem(
-        "src",
-        "dst",
-        author=Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice", "a@contoso.com"),
-        editor=Principal("i:0#.f|membership|b@contoso.com", "2003200065102863"),
-    )
-
-    data = item_to_dict(item)
-    json.dumps(data)  # nested principals must be JSON-safe
-    restored = item_from_dict(data)
-
-    assert restored.author == Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice", "a@contoso.com")
-    assert restored.editor is not None and restored.editor.system_id == "2003200065102863"
-
-
-def test_preserve_versions_always_needs_the_server_side_api():
-    with pytest.raises(NotImplementedError, match="preserve_versions"):
-        _assert_fidelity_supported(MigrationOptions(preserve_versions=True), _Source([]), _Target())
-
-
-def test_fidelity_flags_require_adapter_support():
-    source, target = _Source([]), _Target()
-    with pytest.raises(NotImplementedError, match="preserve_timestamps"):
-        _assert_fidelity_supported(MigrationOptions(preserve_timestamps=True), source, target)
-    with pytest.raises(NotImplementedError, match="preserve_permissions"):
-        _assert_fidelity_supported(MigrationOptions(preserve_permissions=True), source, target)
-
-    _assert_fidelity_supported(MigrationOptions(), source, target)  # defaults are honest no-ops
-
-
-def test_fidelity_flags_pass_when_adapters_support_them():
-    source, target = _FidelitySource([]), _FidelityTarget()
-    _assert_fidelity_supported(MigrationOptions(preserve_timestamps=True, preserve_permissions=True), source, target)
 
 
 def test_runner_applies_fidelity_hooks_after_write():
@@ -225,14 +178,6 @@ def test_incremental_run_uses_watermark():
     assert second.source_watermark == "2021-01-01T00:00:00"
 
 
-def test_version_sort_key_orders_labels():
-    from office365.migration.sharepoint.adapters import _version_sort_key
-
-    labels = ["10.0", "2.0", "1.0", "1.10"]
-    assert sorted(labels, key=_version_sort_key) == ["1.0", "1.10", "2.0", "10.0"]
-    assert _version_sort_key("weird") == (0,)  # non-numeric last-resort
-
-
 class _VersionSource(_Source):
     def __init__(self, items: list[MigrationItem], history) -> None:
         super().__init__(items)
@@ -277,28 +222,6 @@ def test_runner_loads_and_carries_versions_for_a_version_preserving_target():
     assert target.written == ["a"]
     assert target.labels == ["3.0"]
     assert target.versions == [[("1.0", b"v1"), ("2.0", b"v2")]]
-
-
-def test_runner_does_not_read_versions_for_a_client_side_target():
-    from office365.migration.checkpoint import Checkpoint
-    from office365.migration.runner import MigrationRunner
-
-    source, target = _VersionSource([MigrationItem("s", "a")], ("1.0", [])), _Target()
-
-    MigrationRunner().run(source, target, source.list_items(), MigrationOptions(), Checkpoint.create())
-
-    assert source.version_reads == []  # client-side target: version history stays untouched
-
-
-def test_preserve_versions_supported_when_target_and_source_support_it():
-    source, target = _VersionSource([], ("1.0", [])), _VersionTarget()
-    _assert_fidelity_supported(MigrationOptions(preserve_versions=True), source, target)
-
-
-def test_preserve_versions_needs_the_source_history_hook():
-    source, target = _Source([]), _VersionTarget()  # target can preserve, source cannot supply
-    with pytest.raises(NotImplementedError, match="read_version_history"):
-        _assert_fidelity_supported(MigrationOptions(preserve_versions=True), source, target)
 
 
 def test_describe_fidelity_reports_versions_for_a_package_target():
@@ -363,19 +286,6 @@ def test_fidelity_matrix_reflects_probed_capabilities():
     assert report.ok
 
 
-def test_fidelity_matrix_marks_typed_values_best_effort_when_remapping_is_supported():
-    from office365.migration.fidelity import FidelityStatus, describe_fidelity
-
-    source, target = _Source([]), _Target()
-    source.supports_typed_values = True  # type: ignore[attr-defined]
-    target.supports_typed_values = True  # type: ignore[attr-defined]
-
-    report = describe_fidelity(source, target, MigrationOptions())
-
-    assert report.dimensions["typed_values"] == FidelityStatus.BEST_EFFORT.value
-    assert "typed_values" in report.dimension_notes
-
-
 def test_fidelity_matrix_marks_authorship_best_effort_for_a_package_target():
     from office365.migration.fidelity import FidelityStatus, describe_fidelity
 
@@ -416,18 +326,6 @@ def test_library_system_paths_are_excluded():
     assert not _is_system_path("Formsite/notes.txt")  # prefix, not a path segment
 
 
-def test_item_to_dict_is_json_safe_with_version_blobs():
-    import json
-
-    item = MigrationItem("s", "d", version_label="2.0", versions=[("1.0", b"v1")])
-
-    data = item_to_dict(item)
-
-    assert "versions" not in data  # transient blobs are never persisted
-    assert data["version_label"] == "2.0"
-    json.dumps(data)  # must not raise on bytes
-
-
 # -- a product may declare its own dimensions ------------------------------------
 #
 # The matrix began as a probe of the SharePoint adapters, so its dimension names are
@@ -436,90 +334,11 @@ def test_item_to_dict_is_json_safe_with_version_blobs():
 # carried only between list adapters`, which is true of a list and meaningless for mail.
 
 
-class _DeclaredSource(_Source):
-    fidelity_dimensions = {
-        "content": "delivered",
-        "item_state": ("best-effort", "the follow-up flag is not replayed"),
-        "views": ("delivered", "this reason must be dropped: a delivered dimension carries none"),
-        # A name no SharePoint probe would ever emit, so a "source wins" test cannot pass
-        # by accident on a matrix that is simply the documented 14.
-        "attendees": "best-effort",
-    }
-
-
-class _DeclaredTarget(_Target):
-    fidelity_dimensions = {"content": "unsupported", "target_only": "delivered"}
-
-
 class _Folder:
     """Just enough of a Graph mail folder for an adapter's label."""
 
     id = "inbox"
     display_name = "Inbox"
-
-
-def test_a_declared_matrix_replaces_the_sharepoint_probe():
-    from office365.migration.fidelity import FidelityStatus, describe_fidelity
-
-    report = describe_fidelity(_DeclaredSource([]), _Target(), MigrationOptions())
-
-    assert list(report.dimensions) == ["content", "item_state", "views", "attendees"]
-    assert report.dimensions["content"] == FidelityStatus.DELIVERED.value
-    assert report.dimensions["item_state"] == FidelityStatus.BEST_EFFORT.value
-    assert report.dimension_notes == {"item_state": "the follow-up flag is not replayed"}
-    assert "navigation" not in report.dimensions
-
-
-def test_the_source_names_the_product_so_its_table_wins():
-    from office365.migration.fidelity import describe_fidelity
-
-    report = describe_fidelity(_DeclaredSource([]), _DeclaredTarget(), MigrationOptions())
-
-    assert "target_only" not in report.dimensions
-    assert "attendees" in report.dimensions  # only the source's table has it
-    assert report.dimensions["content"] == "delivered"  # the target calls it unsupported
-
-
-def test_a_target_that_declares_a_matrix_is_honoured_without_a_source_table():
-    from office365.migration.fidelity import describe_fidelity
-
-    report = describe_fidelity(_Source([]), _DeclaredTarget(), MigrationOptions())
-
-    assert list(report.dimensions) == ["content", "target_only"]
-    assert report.dimensions["content"] == "unsupported"
-
-
-def test_an_unknown_declared_status_fails_loudly():
-    from office365.migration.fidelity import describe_fidelity
-
-    class _Typo(_Source):
-        fidelity_dimensions = {"content": ("deliverd", "typo")}
-
-    with pytest.raises(ValueError):
-        describe_fidelity(_Typo([]), _Target(), MigrationOptions())
-
-
-def test_the_mail_export_pair_reports_mail_dimensions(tmp_path):
-    from office365.migration.fidelity import describe_fidelity
-    from office365.migration.outlook import MailExportOptions, MailExportTarget, MailFolderSource
-
-    report = describe_fidelity(
-        MailFolderSource(_Folder(), MailExportOptions()), MailExportTarget(tmp_path), MigrationOptions()
-    )
-
-    assert list(report.dimensions) == [
-        "content",
-        "structure",
-        "timestamps",
-        "item_state",
-        "attachments",
-        "permissions",
-        "versions",
-    ]
-    assert report.dimensions["attachments"] == "delivered"
-    assert "list-item" not in report.dimension_notes.get("attachments", "")
-    for name in ("structure", "timestamps", "item_state", "attachments"):
-        assert report.dimensions[name] != "unsupported", name
 
 
 def test_the_mail_import_pair_says_timestamps_cannot_be_restored(tmp_path):

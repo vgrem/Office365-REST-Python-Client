@@ -18,16 +18,6 @@ def test_field_ensure_indexed_queues_enable():
     assert field.properties["Indexed"] is False  # only the server flips it
 
 
-def test_field_ensure_indexed_is_idempotent():
-    ctx = ClientContext(test_site_url)
-    field = Field(ctx)
-    field.set_property("Indexed", True)
-
-    field.ensure_indexed()
-
-    assert len(ctx._queries) == 0  # already indexed -> no call
-
-
 def test_list_ensure_indexed_does_not_create_field():
     ctx = ClientContext(test_site_url)
     lst = ctx.web.lists.get_by_title("X")

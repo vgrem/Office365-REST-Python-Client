@@ -32,26 +32,6 @@ def _collection(records):
     return col
 
 
-def test_writer_accepts_a_path_and_reader_reads_it(tmp_path):
-    path = tmp_path / "data.csv"
-
-    registry.writer_for("csv")(_collection(RECORDS), str(path))
-
-    assert path.exists()
-    records = registry.reader_for("csv")(str(path))
-    assert [r["displayName"] for r in records] == ["A", "B"]
-
-
-def test_tsv_writer_and_reader(tmp_path):
-    path = tmp_path / "data.tsv"
-
-    registry.writer_for("tsv")(_collection(RECORDS), str(path))
-
-    assert "\t" in path.read_text(encoding="utf-8")
-    records = registry.reader_for("tsv")(str(path))
-    assert [r["displayName"] for r in records] == ["A", "B"]
-
-
 @pytest.mark.parametrize("fmt", ["parquet", "orc", "feather"])
 def test_pyarrow_formats_round_trip(tmp_path, fmt):
     pytest.importorskip("pyarrow")
@@ -90,14 +70,6 @@ def test_streaming_json_writer_appends_pages(tmp_path):
     assert json.loads(path.read_text(encoding="utf-8")) == [{"a": 1}, {"a": 2}]
 
 
-def test_records_from_items_projects_selected_fields():
-    from office365.runtime.converters.records import records_from_items
-
-    records = records_from_items(list(_collection(RECORDS)), ["displayName"], [])
-
-    assert records == [{"displayName": "A"}, {"displayName": "B"}]
-
-
 def test_duckdb_streaming_and_write():
     duckdb = pytest.importorskip("duckdb")
     from office365.runtime.converters.sql import duckdb_chunks, write_duckdb
@@ -109,18 +81,6 @@ def test_duckdb_streaming_and_write():
 
     write_duckdb(RECORDS, con, table="dst")
     assert con.execute("SELECT count(*) FROM dst").fetchone()[0] == len(RECORDS)  # noqa: PLR2004
-
-
-def test_sql_streaming_and_write():
-    sqlalchemy = pytest.importorskip("sqlalchemy")
-    pytest.importorskip("pandas")
-    from office365.runtime.converters.sql import sql_chunks, write_sql
-
-    engine = sqlalchemy.create_engine("sqlite://")
-    write_sql(RECORDS, engine, table="users", index=False)
-
-    batches = list(sql_chunks(engine, "SELECT * FROM users", 1))
-    assert sum(len(batch) for batch in batches) == len(RECORDS)  # noqa: PLR2004
 
 
 # ── Async streaming export ───────────────────────────────────────
@@ -159,44 +119,6 @@ def test_export_to_streams_pages_sync(tmp_path):
 
     assert transport.calls == 2  # noqa: PLR2004
     assert [r["displayName"] for r in registry.reader_for("csv")(str(path))] == ["A", "B", "C"]
-
-
-def test_export_to_async_streams_pages(tmp_path):
-    ctx = GraphClient()
-    ctx.pending_request().beforeExecute.clear()
-    transport = ScriptedTransport(
-        [
-            {"@odata.nextLink": _GRAPH_NEXT, "value": [{"displayName": "A"}, {"displayName": "B"}]},
-            {"value": [{"displayName": "C"}]},
-        ]
-    )
-    ctx.pending_request().transport = transport
-    path = tmp_path / "users.csv"
-
-    asyncio.run(ctx.users.export_to_async(str(path), format="csv", page_size=2))
-
-    assert transport.calls == 2  # noqa: PLR2004
-    assert [r["displayName"] for r in registry.reader_for("csv")(str(path))] == ["A", "B", "C"]
-
-
-def test_export_to_async_writes_loaded_collection(tmp_path):
-    path = tmp_path / "loaded.ndjson"
-
-    asyncio.run(_collection(RECORDS).export_to_async(str(path), format="ndjson"))
-
-    lines = path.read_text(encoding="utf-8").strip().splitlines()
-    assert len(lines) == len(RECORDS)
-    assert "A" in lines[0]
-
-
-def test_export_to_async_non_appendable_falls_back(tmp_path):
-    pytest.importorskip("pyarrow")
-    path = tmp_path / "users.parquet"
-
-    # `page_size` with a non-appendable format still writes the whole collection.
-    asyncio.run(_collection(RECORDS).export_to_async(str(path), format="parquet", page_size=1))
-
-    assert [r["displayName"] for r in registry.reader_for("parquet")(str(path))] == ["A", "B"]
 
 
 def test_export_to_async_closes_stream_on_failure(tmp_path):

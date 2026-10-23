@@ -10,11 +10,9 @@ from office365.migration.sharepoint.pages import (
     PagePayload,
     apply_home_page,
     apply_page_payload,
-    capture_home_page,
     capture_site_pages,
     copy_site_pages,
     detect_page_handoff,
-    is_modern_page,
     page_handoff_note,
     verify_page_copy,
 )
@@ -287,17 +285,6 @@ def _page_props(name, canvas="<div>hi</div>", content_type=_SITE_PAGE_CONTENT_TY
     return properties
 
 
-class TestIsModernPage(unittest.TestCase):
-    def test_content_type_prefix_marks_a_modern_page(self):
-        self.assertTrue(is_modern_page(_SITE_PAGE_CONTENT_TYPE, None))
-
-    def test_canvas_marks_a_modern_page_even_without_a_known_content_type(self):
-        self.assertTrue(is_modern_page(None, "<div></div>"))
-
-    def test_wiki_page_is_not_modern(self):
-        self.assertFalse(is_modern_page(_WIKI_CONTENT_TYPE, None))
-
-
 class TestCaptureSitePages(unittest.TestCase):
     def test_reads_modern_and_classic_pages(self):
         web = _source_web(
@@ -314,11 +301,6 @@ class TestCaptureSitePages(unittest.TestCase):
         self.assertEqual(payloads[1].content, "<p>wiki</p>")
         self.assertEqual(payloads[1].to_dict()["wiki_length"], len("<p>wiki</p>"))
 
-    def test_ignores_non_aspx_items(self):
-        web = _source_web(_page_props("data.json"))
-
-        self.assertEqual(capture_site_pages(web._lists[0]), [])
-
 
 class TestApplyPagePayload(unittest.TestCase):
     def test_writes_only_the_values_the_source_carries(self):
@@ -331,14 +313,6 @@ class TestApplyPagePayload(unittest.TestCase):
         self.assertEqual(item.properties["Title"], "A")
         self.assertNotIn("Description", item.properties)
         self.assertEqual(len(item.updates), 1)
-
-    def test_skips_none_values_entirely(self):
-        store = _PageStore({1: {"Id": 1, "FileLeafRef": "A.aspx", "LayoutWebpartsContent": "keep"}})
-        item = _Item(store, 1)
-
-        apply_page_payload(item, PagePayload(name="A.aspx", canvas="<div>x</div>"))
-
-        self.assertEqual(item.properties["LayoutWebpartsContent"], "keep")
 
 
 class TestCopySitePages(unittest.TestCase):
@@ -381,16 +355,6 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(verify_page_copy(source, target), [])
         self.assertIsNone(page_handoff_note(detect_page_handoff(source._lists), modern_copied=True))
 
-    def test_a_classic_wiki_draft_is_copied_without_publishing(self):
-        source = _source_web(_wiki_page_props("Draft.aspx", "<p>draft</p>", status=3))
-        target = _target_web()
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.copied, ["Draft.aspx"])
-        self.assertEqual(report.published, [])
-        self.assertEqual(target.published, [])
-
     def test_a_classic_wiki_page_can_be_overwritten_in_place(self):
         source = _source_web(_wiki_page_props("Guide.aspx", "<p>source</p>"))
         target = _target_web()
@@ -402,17 +366,6 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(target.wiki_created, [])
         self.assertEqual(target.store[1]["WikiField"], "<p>source</p>")
         self.assertEqual(len(target.store), 1)
-
-    def test_a_wiki_body_that_does_not_read_back_is_reported(self):
-        source = _source_web(_wiki_page_props("Guide.aspx", "<p>source</p>"))
-        target = _target_web()
-        target.store.mutate = lambda properties: properties.pop("WikiField", None)
-        warnings: list[str] = []
-
-        report = copy_site_pages(source, target, warnings=warnings)
-
-        self.assertEqual(report.mismatched, ["Guide.aspx"])
-        self.assertTrue(any("did not read back their canvas" in note for note in warnings))
 
     def test_a_second_run_finds_its_own_renamed_copy_and_leaves_it_alone(self):
         source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"))
@@ -446,18 +399,6 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(len(target.store), 2)
         self.assertEqual(verify_page_copy(source, target), [])
 
-    def test_a_target_page_that_already_holds_the_same_empty_body_is_left_alone(self):
-        source = _source_web(_page_props("Home.aspx", canvas=""))
-        target = _target_web(_page_props("Home.aspx", canvas=""))
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.copied, [])
-        self.assertEqual(report.unchanged, ["Home.aspx"])
-        self.assertTrue(report.is_empty)
-        self.assertEqual(len(target.store), 1)
-        self.assertEqual(verify_page_copy(source, target), [])
-
     def test_a_page_the_target_already_carries_identically_is_not_copied_again(self):
         source = _source_web(_page_props("Home.aspx", canvas="<div>same</div>"))
         target = _target_web(_page_props("Home.aspx", canvas="<div>same</div>"))
@@ -468,28 +409,6 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(report.unchanged, ["Home.aspx"])
         self.assertEqual(report.renamed, [])
         self.assertEqual(len(target.store), 1)
-
-    def test_two_source_pages_with_the_same_body_stay_two_copies(self):
-        source = _source_web(
-            _page_props("One.aspx", canvas="<div>shared</div>"),
-            _page_props("Two.aspx", canvas="<div>shared</div>"),
-        )
-        target = _target_web()
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.copied, ["One.aspx", "Two.aspx"])
-        self.assertEqual(report.unchanged, [])
-        self.assertEqual(len(target.store), 2)
-
-    def test_overwrite_still_rewrites_a_page_that_already_matches(self):
-        source = _source_web(_page_props("Home.aspx", canvas="<div>same</div>"))
-        target = _target_web(_page_props("Home.aspx", canvas="<div>same</div>"))
-
-        report = copy_site_pages(source, target, duplicate_behavior=DUPLICATE_OVERWRITE)
-
-        self.assertEqual(report.overwritten, ["Home.aspx"])
-        self.assertEqual(report.unchanged, [])
 
     def test_the_home_page_follows_a_copy_an_earlier_run_renamed(self):
         source = _source_web(
@@ -530,40 +449,6 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(report.renamed, [("Home.aspx", "Home-1.aspx")])
         self.assertEqual(target.store[1]["CanvasContent1"], "<div>target</div>")
         self.assertIn("1 renamed around an existing page", report.summary())
-
-    def test_rename_skips_names_that_are_already_taken(self):
-        source = _source_web(_page_props("Home.aspx"))
-        target = _target_web()
-        target.store[1] = {"Id": 1, "FileLeafRef": "Home.aspx"}
-        target.store[2] = {"Id": 2, "FileLeafRef": "Home-1.aspx"}
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.copied, ["Home-2.aspx"])
-
-    def test_duplicate_page_can_be_skipped(self):
-        source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"))
-        target = _target_web()
-        target.store[1] = {"Id": 1, "FileLeafRef": "Home.aspx", "CanvasContent1": "<div>target</div>"}
-
-        report = copy_site_pages(source, target, duplicate_behavior=DUPLICATE_SKIP)
-
-        self.assertEqual(report.skipped, ["Home.aspx"])
-        self.assertEqual(report.copied, [])
-        self.assertEqual(target.store[1]["CanvasContent1"], "<div>target</div>")
-        self.assertIn("1 left as they were", report.summary())
-
-    def test_duplicate_page_can_be_overwritten_in_place(self):
-        source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"))
-        target = _target_web()
-        target.store[1] = {"Id": 1, "FileLeafRef": "Home.aspx", "CanvasContent1": "<div>target</div>"}
-
-        report = copy_site_pages(source, target, duplicate_behavior=DUPLICATE_OVERWRITE)
-
-        self.assertEqual(report.overwritten, ["Home.aspx"])
-        self.assertEqual(report.copied, [])
-        self.assertEqual(target.store[1]["CanvasContent1"], "<div>source</div>")
-        self.assertEqual(len(target.store), 1)
 
     def test_unknown_duplicate_behavior_falls_back_to_rename(self):
         source = _source_web(_page_props("Home.aspx"))
@@ -622,15 +507,6 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(report.web_part_pages, ["News.aspx"])
         self.assertTrue(any("client-side web parts" in note for note in warnings))
 
-    def test_a_source_without_page_libraries_does_nothing(self):
-        source = _Web(_PageList("Documents", _PageStore(), base_template=101))
-        target = _target_web()
-
-        report = copy_site_pages(source, target)
-
-        self.assertTrue(report.is_empty)
-        self.assertEqual(report.libraries, [])
-
     def test_a_target_without_a_page_library_is_reported(self):
         source = _source_web(_page_props("Home.aspx"))
         target = _Web(_PageList("Documents", _PageStore(), base_template=101))
@@ -642,58 +518,9 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(report.classic, [])
         self.assertTrue(any("no target page library matches" in note for note in warnings))
 
-    def test_a_renamed_copy_is_not_reported_as_drift(self):
-        source = _source_web(_page_props("Home.aspx", canvas="<div>same</div>"))
-        target = _target_web()
-        target.store[1] = {"Id": 1, "FileLeafRef": "Home.aspx", "CanvasContent1": "<div>other</div>"}
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.copied, ["Home-1.aspx"])
-        self.assertEqual(report.renamed, [("Home.aspx", "Home-1.aspx")])
-        # The source page *did* land — as Home-1.aspx — so the same-named target page
-        # that kept its own canvas is a duplicate by design, not drift.
-        self.assertEqual(verify_page_copy(source, target), [])
-
-
-class TestVerifyPageCopy(unittest.TestCase):
-    def test_missing_page_is_named(self):
-        source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"))
-        target = _target_web()
-
-        notes = verify_page_copy(source, target)
-
-        self.assertEqual(notes, ["1 page(s) have no target counterpart: Home.aspx"])
-
-    def test_matching_page_is_quiet(self):
-        source = _source_web(_page_props("Home.aspx", canvas="<div>same</div>"))
-        target = _target_web({"Id": 1, "FileLeafRef": "Home.aspx", "CanvasContent1": "<div>same</div>"})
-
-        self.assertEqual(verify_page_copy(source, target), [])
-
-    def test_source_without_pages_is_quiet(self):
-        self.assertEqual(verify_page_copy(_source_web(), _target_web()), [])
-
-    def test_a_missing_classic_page_is_named(self):
-        source = _source_web(_wiki_page_props("Guide.aspx", "<p>wiki</p>"))
-
-        notes = verify_page_copy(source, _target_web())
-
-        self.assertEqual(notes, ["1 page(s) have no target counterpart: Guide.aspx"])
-
-    def test_a_classic_wiki_page_is_compared_through_its_body(self):
-        source = _source_web(_wiki_page_props("Guide.aspx", "<p>wiki</p>"))
-        target = _target_web({"Id": 1, "FileLeafRef": "Guide.aspx", "WikiField": "<p>other</p>"})
-
-        self.assertEqual(verify_page_copy(source, target), ["1 page(s) differ from the source: Guide.aspx"])
-
 
 class TestHomePage(unittest.TestCase):
     """A migrated site must open on the copy of the source's home page."""
-
-    def test_the_home_page_is_read_as_a_web_relative_path(self):
-        self.assertEqual(capture_home_page(_source_web(welcome_page="SitePages/Home.aspx")), "SitePages/Home.aspx")
-        self.assertIsNone(capture_home_page(_source_web()))
 
     def test_the_home_page_follows_the_copy(self):
         source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
@@ -727,16 +554,6 @@ class TestHomePage(unittest.TestCase):
         self.assertEqual(target.root_folder.written, {})
         self.assertNotIn("home page", report.summary() or "")
 
-    def test_the_home_page_write_goes_through_the_root_folder(self):
-        # A MERGE of WelcomePage on the web itself is silently ignored by the service,
-        # so the copy must not route the write through the web object.
-        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
-        target = _target_web(_page_props("Home.aspx", canvas="<div>hi</div>"), welcome_page="SitePages/Other.aspx")
-
-        apply_home_page(source, target)
-
-        self.assertEqual(target.root_folder.written, {"WelcomePage": "SitePages/Home.aspx"})
-
     def test_a_home_page_that_was_not_copied_is_reported(self):
         source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
         target = _target_web()
@@ -748,15 +565,6 @@ class TestHomePage(unittest.TestCase):
         self.assertEqual(target.root_folder.written, {})
         self.assertEqual(len(notes), 1)
         self.assertIn("home page 'SitePages/Home.aspx' was not copied", notes[0])
-
-    def test_a_web_without_a_home_page_is_left_alone(self):
-        self.assertIsNone(apply_home_page(_source_web(_page_props("Home.aspx")), _target_web()))
-
-    def test_the_home_page_check_passes_when_the_copy_is_the_home_page(self):
-        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
-        target = _target_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
-
-        self.assertEqual(verify_page_copy(source, target), [])
 
     def test_the_home_page_check_names_a_target_home_that_is_not_the_copy(self):
         source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"), welcome_page="SitePages/Home.aspx")

@@ -70,37 +70,6 @@ def test_update_all_is_deferred_and_queues_one_update_per_item():
     assert col[2].properties["Title"] == "Archived"
 
 
-def test_update_all_where_narrows_client_side():
-    ctx, _ = _sp([])
-    col = _loaded(ctx, "Bulk one", "Keep", "Bulk two")
-
-    col.update_all(where=lambda i: i.properties["Title"].startswith("Bulk"), Title="Archived")
-
-    assert _pending(ctx) == 2  # noqa: PLR2004
-    assert col[0].properties["Title"] == "Archived"
-    assert col[1].properties["Title"] == "Keep"
-    assert col[2].properties["Title"] == "Archived"
-
-
-def test_update_all_supports_callable_values():
-    ctx, _ = _sp([])
-    col = _loaded(ctx, "A", "B")
-
-    col.update_all(Title=lambda i: f"{i.properties['Title']}!")
-
-    assert col[0].properties["Title"] == "A!"
-    assert col[1].properties["Title"] == "B!"
-
-
-def test_update_all_on_empty_collection_queues_nothing():
-    ctx, transport = _sp([])
-
-    _loaded(ctx).update_all(Status="x")
-
-    assert transport.calls == 0
-    assert _pending(ctx) == 0
-
-
 def test_update_all_executes_queued_updates():
     ctx, transport = _sp([{"d": {}}, {"d": {}}])
     col = _loaded(ctx, "A", "B")
@@ -113,17 +82,6 @@ def test_update_all_executes_queued_updates():
 # --- delete_all --------------------------------------------------------------
 
 
-def test_delete_all_queues_one_delete_per_item_and_removes_them():
-    ctx, transport = _sp([])
-    col = _loaded(ctx, "A", "B", "C")
-
-    col.delete_all()
-
-    assert transport.calls == 0
-    assert _pending(ctx) == 3  # noqa: PLR2004
-    assert len(col) == 0  # queuing a delete detaches the item from the collection
-
-
 def test_delete_all_where_narrows_client_side():
     ctx, _ = _sp([])
     col = _loaded(ctx, "stale", "keep", "stale")
@@ -132,15 +90,6 @@ def test_delete_all_where_narrows_client_side():
 
     assert _pending(ctx) == 2  # noqa: PLR2004
     assert [i.properties["Title"] for i in col] == ["keep"]
-
-
-def test_delete_all_executes_queued_deletes():
-    ctx, transport = _sp([{"d": {}}, {"d": {}}])
-    col = _loaded(ctx, "A", "B")
-
-    col.delete_all().execute_query()
-
-    assert transport.calls == 2  # noqa: PLR2004
 
 
 def test_delete_all_ignore_missing_is_idempotent():

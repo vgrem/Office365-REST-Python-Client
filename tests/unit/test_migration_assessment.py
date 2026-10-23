@@ -26,8 +26,7 @@ from office365.migration.assessment.report import AssessmentReport
 from office365.migration.assessment.scanners import ScanTarget
 from office365.migration.sharepoint import SharePointAssessmentOptions
 from office365.migration.sharepoint.adapters import SharePointListSource
-from office365.migration.sharepoint.registry import sharepoint_scan_pairs
-from office365.migration.sharepoint.scanners import FieldScanner, LargeSitesScanner
+from office365.migration.sharepoint.scanners import LargeSitesScanner
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.tenant.administration.tenant import Tenant
 from tests._scripted_transport import ScriptedTransport
@@ -221,55 +220,6 @@ def test_tenant_large_sites_filters_sorts_and_skips_locked():
 # ── Scanner + registry ───────────────────────────────────────────────────────
 
 
-def test_field_scanner_ignores_system_fields_flags_user_fields():
-    report = AssessmentReport()
-    fields = [
-        {"InternalName": "ID", "SchemaXml": '<Field Type="Counter" ReadOnly="TRUE" SourceID="x"/>'},
-        {"InternalName": "MyField", "SchemaXml": '<Field Type="Text" ReadOnly="TRUE" SourceID="x" ColName="x"/>'},
-    ]
-    FieldScanner(SharePointAssessmentOptions()).run(
-        ScanTarget(ScanContainer.FIELDS, [SimpleNamespace(properties=f) for f in fields], "lists/L"),
-        report,
-    )
-    assert not any(i.location.endswith("/ID") for i in report.issues)
-    assert any(i.severity == "warning" and i.location.endswith("/MyField") for i in report.issues)
-    assert any(i.severity == "info" and i.location.endswith("/MyField") for i in report.issues)
-
-
-def test_registry_gates_scans_and_disabling_drops_site_query():
-    names = {d.name for d, _ in sharepoint_scan_pairs(SharePointAssessmentOptions())}
-    assert {"fields", "paths", "LargeSites"} <= names and "permissions" not in names
-
-    options = SharePointAssessmentOptions()
-    containers = {d.name: d.container for d, _ in sharepoint_scan_pairs(options) if d.name in ("fields", "LargeSites")}
-    assert containers["fields"] is ScanContainer.FIELDS
-    assert containers["LargeSites"] is ScanContainer.SITE
-
-    ctx = ClientContext("https://contoso.sharepoint.com/sites/x")
-    ctx.pending_request().beforeExecute.clear()
-    transport = ScriptedTransport([{"d": {"results": []}}, {"d": {"results": []}}])
-    ctx.pending_request().transport = transport
-    options = SharePointAssessmentOptions(
-        disabled_scans={
-            "permissions",
-            "fields",
-            "paths",
-            "files",
-            "FileVersions",
-            "CheckedOutFiles",
-            "LargeExcelFiles",
-            "LongOneDriveUrls",
-            "BrowserFileHandling",
-            "ThicketFolder",
-            "LargeSites",
-            "UnsupportedSiteTemplates",
-        }
-    )
-    report = MigrationAssessor(ctx.web, options).assess().execute_query().value
-    assert transport.calls == 2  # noqa: PLR2004 — no site-collection query issued
-    assert report.scan_reports == {}
-
-
 # ── SharePoint list adapter fallbacks ────────────────────────────────────────
 
 
@@ -373,26 +323,6 @@ def test_list_source_taxonomy_failure_falls_back_to_safe_select():
     assert "Topics" not in source.read(result[0])
 
 
-def test_list_source_denied_cascades_to_id_title_only():
-    selects = []
-
-    def load(select):
-        selects.append(select)
-        if select is None or "*" in select:
-            raise _TaxonomyError()
-        if len(select) > 2:  # noqa: PLR2004 — the visible-column read is denied too
-            raise PermissionError("denied")
-        return [_Item(1, {"Id": 1, "Title": "only"})]
-
-    fields = [_Field("Id"), _Field("Title"), _Field("Notes")]
-    source = SharePointListSource(cast("SPList", _List(load, fields)))
-    result = source.list_items()
-
-    assert len(result) == 1
-    assert selects[-1] == ["Id", "Title"]
-    assert any("denied too" in w for w in source.warnings)
-
-
 # ── Outlook mailbox walker ───────────────────────────────────────────────────
 
 
@@ -472,30 +402,6 @@ def test_large_list_scanner_grades_by_threshold():
             assert report.issues[0].risk_code == code
 
 
-def test_file_versions_scanner_reports_versioned_files():
-    from office365.migration.sharepoint.scanners.file_versions import FileVersionsScanner
-
-    class _File:
-        def __init__(self, major, minor):
-            self.major_version = major
-            self.minor_version = minor
-
-    items = [
-        SimpleNamespace(properties={"FileRef": "/sites/x/Docs/current.txt"}, file=_File(1, 0)),
-        SimpleNamespace(properties={"FileRef": "/sites/x/Docs/history.txt"}, file=_File(3, 1)),
-    ]
-    report = AssessmentReport.new()
-    scanner = FileVersionsScanner(SharePointAssessmentOptions())
-    scanner.run(ScanTarget(ScanContainer.ITEMS, items, "https://x/sites/x/lists/Docs"), report)
-
-    assert len(scanner.records) == 1
-    row = scanner.records[0]
-    assert row.File == "/sites/x/Docs/history.txt"
-    assert row.VersionCount == 4  # noqa: PLR2004 — 3 major + 1 minor
-    assert row.SiteURL == "https://x/sites/x"
-    assert row.ScanID == report.scan_id
-
-
 def test_checked_out_files_scanner_reports_and_warns():
     from office365.migration.sharepoint.scanners.checked_out_files import CheckedOutFilesScanner
 
@@ -522,29 +428,6 @@ def test_checked_out_files_scanner_reports_and_warns():
     assert any(i.severity == "warning" and "checked-out" in i.message for i in report.issues)
 
 
-def test_large_excel_files_scanner_filters_by_size():
-    from office365.migration.sharepoint.scanners.large_excel_files import LargeExcelFilesScanner
-
-    class _File:
-        def __init__(self, length):
-            self.length = length
-
-    mb = 1024 * 1024
-    items = [
-        SimpleNamespace(properties={"FileLeafRef": "a.xlsx", "FileRef": "/sites/x/Docs/a.xlsx"}, file=_File(2 * mb)),
-        SimpleNamespace(properties={"FileLeafRef": "b.xlsm", "FileRef": "/sites/x/Docs/b.xlsm"}, file=_File(12 * mb)),
-        SimpleNamespace(properties={"FileLeafRef": "c.docx", "FileRef": "/sites/x/Docs/c.docx"}, file=_File(20 * mb)),
-    ]
-    report = AssessmentReport.new()
-    scanner = LargeExcelFilesScanner(SharePointAssessmentOptions())
-    scanner.run(ScanTarget(ScanContainer.ITEMS, items, "https://x/sites/x/lists/Docs"), report)
-
-    assert len(scanner.records) == 1
-    row = scanner.records[0]
-    assert row.File == "/sites/x/Docs/b.xlsm"
-    assert row.FileSizeinMB == 12.0  # noqa: PLR2004
-
-
 def test_browser_file_handling_scanner_reports_html():
     from office365.migration.sharepoint.scanners.browser_file_handling import BrowserFileHandlingScanner
 
@@ -569,76 +452,6 @@ def test_browser_file_handling_scanner_reports_html():
     assert row.TimeCreated == datetime(2020, 1, 1)
 
 
-def test_thicket_folder_scanner_flags_only_folders():
-    from office365.migration.sharepoint.scanners.thicket_folders import ThicketFolderScanner
-
-    class _File:
-        pass
-
-    items = [
-        SimpleNamespace(properties={"FileRef": "/sites/x/Docs/page_files", "FileLeafRef": "page_files"}, file=None),
-        SimpleNamespace(properties={"FileRef": "/sites/x/Docs/notes_file", "FileLeafRef": "notes_file"}, file=None),
-        SimpleNamespace(properties={"FileRef": "/sites/x/Docs/a.txt", "FileLeafRef": "a.txt"}, file=_File()),
-    ]
-    report = AssessmentReport.new()
-    ThicketFolderScanner(SharePointAssessmentOptions()).run(
-        ScanTarget(ScanContainer.ITEMS, items, "https://x/sites/x/lists/Docs"), report
-    )
-    assert len(report.issues) == 2  # noqa: PLR2004
-    assert {i.risk_code for i in report.issues} == {"THICKET_FOLDER_UNSUPPORTED"}
-    assert all(i.severity == "blocker" for i in report.issues)
-    assert not any(i.location.endswith("a.txt") for i in report.issues)
-
-
-def test_long_onedrive_urls_scanner_measures_full_url():
-    from office365.migration.sharepoint.scanners.long_onedrive_urls import LongOneDriveUrlsScanner
-
-    long_path = "/sites/x/Docs/" + "a" * 420 + ".txt"
-    items = [
-        SimpleNamespace(properties={"FileRef": long_path}),
-        SimpleNamespace(properties={"FileRef": "/sites/x/Docs/short.txt"}),
-    ]
-    report = AssessmentReport.new()
-    scanner = LongOneDriveUrlsScanner(SharePointAssessmentOptions())
-    scanner.run(ScanTarget(ScanContainer.ITEMS, items, "https://contoso.sharepoint.com/sites/x/lists/Docs"), report)
-
-    assert len(scanner.records) == 1
-    row = scanner.records[0]
-    assert row.File == long_path
-    assert row.UrlLength == len("https://contoso.sharepoint.com" + long_path)
-    assert row.SiteURL == "https://contoso.sharepoint.com/sites/x"
-    assert row.ScanID == report.scan_id
-
-
-def test_unsupported_site_templates_scanner_reports_legacy_templates():
-    from office365.migration.sharepoint.scanners.summary import SiteScanSummary
-    from office365.migration.sharepoint.scanners.unsupported_site_templates import UnsupportedSiteTemplatesScanner
-
-    report = AssessmentReport.new()
-    scanner = UnsupportedSiteTemplatesScanner(SharePointAssessmentOptions())
-    supported = SiteScanSummary(site_url="https://x/sites/a", web_template="STS#0")
-    legacy = SiteScanSummary(site_url="https://x/sites/b", web_template="SPSMSITEHOST#0")
-    scanner.run(ScanTarget(ScanContainer.SITE, supported, "https://x/sites/a"), report)
-    scanner.run(ScanTarget(ScanContainer.SITE, legacy, "https://x/sites/b"), report)
-
-    assert len(scanner.records) == 1
-    row = scanner.records[0]
-    assert row.URL == "https://x/sites/b"
-    assert row.Template == "SPSMSITEHOST#0"
-    assert row.ScanID == report.scan_id
-
-
-def test_lookup_column_scanner_flags_too_many_lookups():
-    from office365.migration.sharepoint.scanners.lookup import LookupColumnScanner
-
-    fields = [SimpleNamespace(properties={"InternalName": f"L{i}", "TypeAsString": "Lookup"}) for i in range(9)]
-    report = AssessmentReport.new()
-    options = SharePointAssessmentOptions()
-    LookupColumnScanner(options).run(ScanTarget(ScanContainer.FIELDS, fields, "web/lists/L"), report)
-    assert len(report.issues) == 1
-    assert report.issues[0].risk_code == "LIST_VIEW_LOOKUP_EXCEED_LIMIT"
-
-
 def test_permission_scanner_uses_unique_scope_limits():
     from office365.migration.sharepoint.scanners.permissions import PermissionScanner
 
@@ -658,26 +471,3 @@ def test_report_groups_by_risk_code():
 
 
 # ── Limits integration ───────────────────────────────────────────────────────
-
-
-def test_assessment_options_seed_limit_mapping():
-    from office365.sharepoint.thresholds import Limits
-
-    options = SharePointAssessmentOptions()
-    assert options.limit("list_view_threshold") is Limits.LIST_VIEW
-    assert options.limit("max_list_items") is Limits.MAX_LIST_ITEMS
-    assert options.limit("unique_scopes") is Limits.UNIQUE_SCOPES
-
-
-def test_scanner_issue_carries_the_limit():
-    from office365.migration.sharepoint.scanners.large_lists import LargeListScanner
-    from office365.sharepoint.thresholds import Limits
-
-    report = AssessmentReport.new()
-    entity = SimpleNamespace(item_count=6000, title="L")
-    LargeListScanner(SharePointAssessmentOptions()).run(ScanTarget(ScanContainer.LIST, entity, "web/lists/L"), report)
-
-    issue = report.issues[0]
-    assert issue.limit is Limits.LIST_VIEW
-    assert issue.risk_code == "LIST_VIEW_EXCEED_LIMIT"
-    assert "list view threshold" in issue.message

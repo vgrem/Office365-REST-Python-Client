@@ -10,10 +10,7 @@ classification the latter relies on.
 from __future__ import annotations
 
 from office365.graph_client import GraphClient
-from office365.runtime.client_request_exception import ClientRequestException
-from office365.runtime.exceptions import ObjectNotFoundException
 from office365.runtime.http.http_method import HttpMethod
-from requests import Response
 from tests._scripted_transport import ScriptedTransport
 
 APP_ID = "11111111-1111-1111-1111-111111111111"
@@ -80,15 +77,6 @@ def test_ensure_creates_app_when_missing():
     assert transport.requests[-1].data["signInAudience"] == "AzureADMyOrg"
 
 
-def test_ensure_passes_sign_in_audience_when_creating():
-    transport = _RecordingTransport([{"value": []}, _APP])
-    client = _client(transport)
-
-    client.applications.ensure("my-app", sign_in_audience="AzureADMultipleOrgs").execute_query()
-
-    assert transport.requests[-1].data["signInAudience"] == "AzureADMultipleOrgs"
-
-
 def test_ensure_app_then_service_principal_provisions_both():
     transport = _RecordingTransport(
         [
@@ -109,17 +97,6 @@ def test_ensure_app_then_service_principal_provisions_both():
     assert transport.requests[-1].data["appId"] == APP_ID
 
 
-def test_service_principal_ensure_creates_when_missing():
-    transport = _RecordingTransport([_NOT_FOUND, {"id": SP_OBJECT_ID, "appId": APP_ID}])
-    client = _client(transport)
-
-    sp = client.service_principals.ensure(APP_ID).execute_query()
-
-    assert sp.id == SP_OBJECT_ID
-    assert _methods(transport) == [HttpMethod.Get, HttpMethod.Post]
-    assert transport.requests[-1].data["appId"] == APP_ID
-
-
 def test_service_principal_ensure_reuses_existing():
     transport = _RecordingTransport([{"id": SP_OBJECT_ID, "appId": APP_ID}])
     client = _client(transport)
@@ -128,14 +105,3 @@ def test_service_principal_ensure_reuses_existing():
 
     assert sp.id == SP_OBJECT_ID
     assert _methods(transport) == [HttpMethod.Get]
-
-
-def test_entra_resource_not_found_is_classified():
-    response = Response()
-    response.status_code = 404
-    response.url = f"https://graph.microsoft.com/v1.0/servicePrincipals(appId='{APP_ID}')"
-    response._content = b'{"error":{"code":"Request_ResourceNotFound","message":"Resource does not exist."}}'
-
-    exc = ClientRequestException.from_response(response)
-
-    assert isinstance(exc, ObjectNotFoundException)

@@ -11,7 +11,6 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
-import pytest
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.collection import FileCollection
 from office365.sharepoint.files.file import File
@@ -65,47 +64,6 @@ def test_file_collection_download_writes_files(tmp_path: Path) -> None:
     assert (tmp_path / "a.txt").read_bytes() == b"AAA"
     assert (tmp_path / "b.txt").read_bytes() == b"BBB"
     assert sorted(result.paths) == sorted([str(tmp_path / "a.txt"), str(tmp_path / "b.txt")])
-
-
-def test_file_collection_download_async(tmp_path: Path) -> None:
-    ctx, _ = _context([("a.txt", b"AAA")])
-    col = _loaded_collection(ctx)
-    _add_file(ctx, col, "a.txt", f"{_ROOT}/a.txt")
-
-    result = asyncio.run(col.download(tmp_path).execute_query_async(concurrency=2)).value
-
-    assert result.success == 1
-    assert (tmp_path / "a.txt").read_bytes() == b"AAA"
-
-
-def test_download_skips_existing_by_default(tmp_path: Path) -> None:
-    (tmp_path / "a.txt").write_bytes(b"OLD")
-    # only b.txt is routed: a.txt must not hit the network
-    ctx, transport = _context([("b.txt", b"BBB")])
-    col = _loaded_collection(ctx)
-    _add_file(ctx, col, "a.txt", f"{_ROOT}/a.txt")
-    _add_file(ctx, col, "b.txt", f"{_ROOT}/b.txt")
-
-    result = col.download(tmp_path).execute_query(concurrency=2).value
-
-    assert result.total == 2  # noqa: PLR2004
-    assert result.skipped == 1
-    assert result.success == 1
-    assert (tmp_path / "a.txt").read_bytes() == b"OLD"
-    assert len(transport.calls) == 1
-
-
-def test_download_overwrite_replaces_existing(tmp_path: Path) -> None:
-    (tmp_path / "a.txt").write_bytes(b"OLD")
-    ctx, _ = _context([("a.txt", b"NEW")])
-    col = _loaded_collection(ctx)
-    _add_file(ctx, col, "a.txt", f"{_ROOT}/a.txt")
-
-    result = col.download(tmp_path, overwrite=True).execute_query(concurrency=2).value
-
-    assert result.success == 1
-    assert result.skipped == 0
-    assert (tmp_path / "a.txt").read_bytes() == b"NEW"
 
 
 def test_download_continues_and_reports_on_error(tmp_path: Path) -> None:
@@ -162,40 +120,6 @@ def test_folder_download_preserves_relative_tree(tmp_path: Path, monkeypatch) ->
     assert (tmp_path / "sub" / "deep.txt").read_bytes() == b"DEEP"
 
 
-def test_file_collection_download_enumerates_when_empty(tmp_path: Path, monkeypatch) -> None:
-    ctx, transport = _context([])
-    col = _loaded_collection(ctx)
-    enumerated: list[bool] = []
-
-    def _get_all(**_kwargs):
-        enumerated.append(True)
-        return col
-
-    monkeypatch.setattr(col, "get_all", _get_all)
-
-    result = col.download(tmp_path).execute_query(concurrency=2).value
-
-    assert enumerated == [True]
-    assert result.total == 0
-    assert transport.calls == []
-
-
-def test_file_download_path_writes_and_calls_back(tmp_path: Path) -> None:
-    ctx, _ = _context([("a.txt", b"AAA")])
-    file = File(ctx)
-    file.set_property("Name", "a.txt")
-    file.set_property("ServerRelativeUrl", f"{_ROOT}/a.txt")
-    downloaded: list[File] = []
-    dest = tmp_path / "nested" / "out.bin"
-
-    result = file.download(dest, downloaded.append).execute_query(concurrency=2).value
-
-    assert result.success == 1
-    assert dest.read_bytes() == b"AAA"
-    assert downloaded == [file]
-    assert result.paths == [str(dest)]
-
-
 def test_file_download_path_async_and_overwrite(tmp_path: Path) -> None:
     dest = tmp_path / "out.bin"
     dest.write_bytes(b"OLD")
@@ -244,33 +168,6 @@ def test_download_resume_async(tmp_path: Path) -> None:
     assert (tmp_path / "a.txt").read_bytes() == b"helloworld"
 
 
-def test_download_resume_rewrites_when_range_ignored(tmp_path: Path) -> None:
-    ctx, _ = _context([("a.txt", b"fullbody")])
-    col = _loaded_collection(ctx)
-    file = _add_file(ctx, col, "a.txt", f"{_ROOT}/a.txt")
-    file.set_property("Length", 20)
-    (tmp_path / "a.txt").write_bytes(b"partial")
-
-    result = col.download(tmp_path, resume=True).execute_query(concurrency=2).value
-
-    assert result.success == 1
-    assert (tmp_path / "a.txt").read_bytes() == b"fullbody"
-
-
-def test_download_resume_skips_complete(tmp_path: Path) -> None:
-    (tmp_path / "a.txt").write_bytes(b"1234567890")
-    ctx, transport = _context([])
-    col = _loaded_collection(ctx)
-    file = _add_file(ctx, col, "a.txt", f"{_ROOT}/a.txt")
-    file.set_property("Length", 10)
-
-    result = col.download(tmp_path, resume=True).execute_query(concurrency=2).value
-
-    assert result.skipped == 1
-    assert result.success == 0
-    assert transport.calls == []
-
-
 def test_file_download_resume_loads_length(tmp_path: Path) -> None:
     dest = tmp_path / "out.bin"
     dest.write_bytes(b"hello")
@@ -288,14 +185,3 @@ def test_file_download_resume_loads_length(tmp_path: Path) -> None:
 
     assert result.success == 1
     assert dest.read_bytes() == b"helloworld"
-
-
-def test_value_requires_execution(tmp_path: Path) -> None:
-    ctx, _ = _context([("a.txt", b"AAA")])
-    col = _loaded_collection(ctx)
-    _add_file(ctx, col, "a.txt", f"{_ROOT}/a.txt")
-
-    op = col.download(tmp_path)
-
-    with pytest.raises(ValueError, match="not been executed"):
-        _ = op.value

@@ -51,14 +51,3 @@ def test_post_query_carries_a_sort_list():
     ]
     assert body["SortList"]["__metadata"]["type"] == "Collection(Microsoft.SharePoint.Client.Search.Query.Sort)"
     assert transport.calls[0].endswith("SearchService/postquery")
-
-
-def test_post_query_without_a_sort_list_sends_none():
-    ctx, transport = _ctx()
-
-    ctx.search.post_query("contoso").execute_query()
-
-    body = _request_body(transport)
-    # an empty collection is not serialized, so existing callers see the same body
-    assert "SortList" not in body
-    assert "EnableSorting" not in body

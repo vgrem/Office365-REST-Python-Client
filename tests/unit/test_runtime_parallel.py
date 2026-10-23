@@ -72,18 +72,6 @@ def _queue(client: GraphClient, sink: list, index: int) -> None:
     result.after_execute(lambda _r, i=index: sink.append(i))
 
 
-def test_run_parallel_reports_progress_per_completion():
-    from office365.runtime.parallel import run_parallel
-
-    seen = []
-    results = run_parallel(lambda _ctx, task: task * 2, [1, 2, 3], concurrency=3, progress=seen.append)
-
-    assert results == [2, 4, 6]
-    assert [p.done for p in seen] == [1, 2, 3]
-    assert all(p.total == 3 for p in seen)  # noqa: PLR2004
-    assert sorted(p.items[0] for p in seen) == [2, 4, 6]
-
-
 def test_run_parallel_on_error_collects_and_keeps_going():
     from office365.runtime.parallel import run_parallel
 
@@ -97,20 +85,6 @@ def test_run_parallel_on_error_collects_and_keeps_going():
 
     assert results == [1, None, 3]
     assert len(seen) == 3  # noqa: PLR2004
-
-
-def test_execute_query_parallel_overlaps_and_fires_callbacks_in_order():
-    transport = _ConcurrencyTransport()
-    client = _client(transport)
-    sink: list = []
-    for index in range(4):
-        _queue(client, sink, index)
-
-    client.execute_query_parallel(concurrency=4)
-
-    assert transport.max_active > 1  # requests overlapped
-    assert sink == [0, 1, 2, 3]  # after_execute callbacks fired, in submission order
-    assert not client.has_pending_request
 
 
 def test_execute_query_parallel_retries_transient_failure():

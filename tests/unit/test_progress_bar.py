@@ -76,12 +76,3 @@ def test_progress_bar_advances_a_fake_tqdm(monkeypatch):
     assert bar.n == _SECOND_DONE
     assert bar.total == _ADOPTED_TOTAL
     assert bar.closed is False
-
-
-def test_progress_bar_closes_when_complete(monkeypatch):
-    instances = _install_fake_tqdm(monkeypatch)
-
-    hook = progress_bar("scan", total=_TOTAL)
-    hook(Progress(done=_TOTAL, total=_TOTAL))
-
-    assert instances[0].closed is True

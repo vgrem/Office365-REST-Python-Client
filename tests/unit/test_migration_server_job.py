@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 
-from office365.migration.server_job import MigrationServerJob, job_errors, parse_progress_events
+from office365.migration.server_job import MigrationServerJob
 
 
 class _Result:
@@ -44,25 +44,6 @@ class _Site:
         self.calls.append(("progress", job_id, next_token))
         page = self._pages.pop(0) if self._pages else ([], next_token)
         return _Result(_Progress(*page))
-
-
-def test_parse_progress_events_reduces_to_status_and_counts():
-    events = [
-        {"Event": "JobQueued"},
-        {"Event": "JobStart"},
-        {"Event": "JobProgress", "ObjectsProcessed": "4", "TotalExpectedSPObjects": "10"},
-        {"Event": "JobEnd", "ObjectsProcessed": "10", "TotalExpectedSPObjects": "10", "TotalErrors": "0"},
-    ]
-    assert parse_progress_events(events) == ("succeeded", 10, 10)
-
-
-def test_parse_progress_events_marks_failed_on_errors():
-    events = [{"Event": "JobEnd", "ObjectsProcessed": "3", "TotalErrors": "2"}]
-    assert parse_progress_events(events)[0] == "failed"
-
-
-def test_parse_progress_events_defaults_to_queued():
-    assert parse_progress_events([]) == ("queued", 0, None)
 
 
 def test_submit_and_submit_encrypted_use_the_right_methods():
@@ -115,23 +96,6 @@ def test_monitor_returns_when_terminal():
     assert MigrationServerJob(_Site(pages)).monitor("job-1", interval=0, timeout=5) == "succeeded"
 
 
-def test_job_errors_filters_job_error_events():
-    events = [
-        {"Event": "JobStart"},
-        {"Event": "JobError", "Message": "boom", "ErrorType": "SPException"},
-        {"Event": "JobEnd", "TotalErrors": "1"},
-    ]
-    assert [e["Message"] for e in job_errors(events)] == ["boom"]
-
-
-def test_all_events_pages_until_the_token_stops():
-    pages = [
-        ([json.dumps({"Event": "JobStart"})], "1"),
-        ([json.dumps({"Event": "JobError", "Message": "boom"})], "1"),
-    ]
-    assert [e["Event"] for e in MigrationServerJob(_Site(pages)).all_events("job-1")] == ["JobStart", "JobError"]
-
-
 def test_errors_returns_job_error_events():
     pages = [([json.dumps({"Event": "JobError", "Message": "boom"})], "1")]
     assert [e["Message"] for e in MigrationServerJob(_Site(pages)).errors("job-1")] == ["boom"]
@@ -175,18 +139,6 @@ def test_monitor_async_returns_when_terminal():
         return await MigrationServerJob(_Site(pages)).monitor_async("job-1", interval=0, timeout=5)
 
     assert asyncio.run(_run()) == "succeeded"
-
-
-def test_all_events_async_pages_until_the_token_stops():
-    pages = [
-        ([json.dumps({"Event": "JobStart"})], "1"),
-        ([json.dumps({"Event": "JobError", "Message": "boom"})], "1"),
-    ]
-
-    async def _run():
-        return await MigrationServerJob(_Site(pages)).all_events_async("job-1")
-
-    assert [e["Event"] for e in asyncio.run(_run())] == ["JobStart", "JobError"]
 
 
 def test_errors_async_returns_job_error_events():

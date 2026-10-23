@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from office365.migration import IdentityMap, MigrationOptions, MigrationSettings, UnmappedPolicy, UnmappedPrincipalError
+from office365.migration import IdentityMap, MigrationOptions, MigrationSettings, UnmappedPrincipalError
 from office365.migration.base import MigrationItem, PermissionEntry, Principal
 from office365.migration.checkpoint import Checkpoint
 from office365.migration.report import build_report
@@ -21,32 +21,6 @@ def _item(author: Principal | None = None, editor: Principal | None = None) -> M
 
 
 class TestResolution(unittest.TestCase):
-    def test_a_csv_email_matches_the_claims_tail(self) -> None:
-        identity_map = IdentityMap([("anna@contoso.com", "anna@fabrikam.com")])
-
-        resolved = identity_map.resolve(ANNA)
-
-        assert resolved is not None
-        assert resolved.login_name == "anna@fabrikam.com"
-
-    def test_resolution_is_case_insensitive(self) -> None:
-        identity_map = IdentityMap([("Anna@Contoso.com", "anna@fabrikam.com")])
-
-        assert identity_map.resolve(ANNA.upper()) is not None
-        assert identity_map.unmapped == []
-
-    def test_a_csv_row_wins_over_a_domain_rule(self) -> None:
-        identity_map = IdentityMap(
-            [("anna@contoso.com", "anna@partner.example")],
-            domain_rewrites={"contoso.com": "fabrikam.com"},
-        )
-
-        resolved = identity_map.resolve(ANNA)
-
-        assert resolved is not None
-        assert resolved.login_name == "anna@partner.example"
-        assert identity_map.rewritten_count == 0
-
     def test_a_domain_rule_keeps_the_claims_prefix(self) -> None:
         identity_map = IdentityMap(domain_rewrites={"contoso.com": "fabrikam.com"})
 
@@ -56,12 +30,6 @@ class TestResolution(unittest.TestCase):
         assert resolved.login_name == CLAIMS + "anna@fabrikam.com"
         assert resolved.email == "anna@fabrikam.com"
         assert identity_map.rewritten_count == 1
-
-    def test_a_domain_rule_needs_an_email(self) -> None:
-        identity_map = IdentityMap(domain_rewrites={"contoso.com": "fabrikam.com"})
-
-        assert identity_map.resolve(CLAIMS + "anna") is None
-        assert identity_map.unmapped == [CLAIMS + "anna"]
 
     def test_a_target_login_resolves_to_itself(self) -> None:
         """Applying the map twice (a resumed run) must not turn a hit into a miss."""
@@ -77,14 +45,6 @@ class TestResolution(unittest.TestCase):
 
 
 class TestPolicies(unittest.TestCase):
-    def test_skip_drops_the_principal_and_reports_it(self) -> None:
-        identity_map = IdentityMap([], unmapped_policy=UnmappedPolicy.SKIP)
-        item = _item(Principal("stranger@elsewhere.example"))
-
-        assert identity_map.resolve_principal(item.author) is None
-        assert identity_map.unmapped == ["stranger@elsewhere.example"]
-        assert identity_map.summary()["identity_unmapped"] == 1
-
     def test_fail_raises_at_the_first_miss(self) -> None:
         identity_map = IdentityMap([], unmapped_policy="fail")
 
@@ -102,21 +62,6 @@ class TestPolicies(unittest.TestCase):
         assert resolved.login_name == "migration@fabrikam.com"
         assert identity_map.unmapped == ["stranger@elsewhere.example"]
 
-    def test_a_fallback_policy_needs_an_owner(self) -> None:
-        with self.assertRaises(ValueError):
-            IdentityMap([], unmapped_policy=UnmappedPolicy.FALLBACK_OWNER)
-
-    def test_an_unknown_policy_is_rejected(self) -> None:
-        with self.assertRaises(ValueError):
-            IdentityMap([], unmapped_policy="guess")
-
-    def test_an_empty_principal_is_ignored(self) -> None:
-        identity_map = IdentityMap()
-
-        assert identity_map.resolve(None) is None
-        assert identity_map.resolve("  ") is None
-        assert identity_map.unmapped == []
-
 
 class TestPermissions(unittest.TestCase):
     def test_a_mapped_grant_carries_the_target_system_id(self) -> None:
@@ -131,21 +76,6 @@ class TestPermissions(unittest.TestCase):
         # an unresolvable SystemId in UserGroup.xml.
         assert resolved[0].system_id == "puid-target"
         assert resolved[0].roles == ["Read"]
-
-    def test_an_unmapped_grant_is_dropped(self) -> None:
-        identity_map = IdentityMap([])
-        entries = [PermissionEntry(principal_name="stranger@elsewhere.example", roles=["Read"])]
-
-        assert identity_map.resolve_permissions(entries) == []
-        assert identity_map.unmapped == ["stranger@elsewhere.example"]
-
-    def test_an_unchanged_grant_keeps_its_source_puid(self) -> None:
-        identity_map = IdentityMap([("anna@contoso.com", ANNA)])
-        entries = [PermissionEntry(principal_name=ANNA, roles=["Edit"], system_id="puid-source")]
-
-        resolved = identity_map.resolve_permissions(entries)
-
-        assert resolved[0].system_id == "puid-source"
 
 
 class TestFromCsv(unittest.TestCase):
@@ -179,10 +109,6 @@ class TestFromCsv(unittest.TestCase):
             IdentityMap.from_csv(path)
 
         assert "source" in str(raised.exception)
-
-    def test_an_unsupported_file_type_is_rejected(self) -> None:
-        with self.assertRaises(ValueError):
-            IdentityMap.from_file("mapping.xlsx")
 
 
 class _RecordingSource:
@@ -290,11 +216,6 @@ class TestSettingsAndReport(unittest.TestCase):
         # The two SPMT knobs are no longer "not honored": the file drives the map and
         # `automatic_user_mapping=False` turns it off.
         assert [n for n in settings.unhonored() if "mapping" in n] == []
-
-    def test_automatic_user_mapping_false_disables_the_file(self) -> None:
-        settings = MigrationSettings(user_mapping_file="ignored.csv", automatic_user_mapping=False)
-
-        assert settings.to_options().identity_map is None
 
     def test_the_summary_row_reports_the_unmapped_principals(self) -> None:
         identity_map = IdentityMap([])

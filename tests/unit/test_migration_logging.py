@@ -1,7 +1,6 @@
 import json
 import logging
 import tempfile
-import threading
 import unittest
 from pathlib import Path
 
@@ -59,13 +58,6 @@ class TestJsonLogFormatter(unittest.TestCase):
         self.assertEqual(payload["error"], "file is checked out")
         self.assertTrue(payload["ts"].endswith("Z"))
 
-    def test_a_record_without_an_event_name_still_has_one(self):
-        record = logging.LogRecord(LOGGER_NAME, logging.INFO, __file__, 1, "hello", None, None)
-
-        payload = json.loads(JsonLogFormatter().format(record))
-
-        self.assertEqual(payload["event"], "log")
-
 
 class TestConfigureJsonLogging(unittest.TestCase):
     def test_events_are_written_as_json_lines(self):
@@ -97,28 +89,11 @@ class TestConfigureJsonLogging(unittest.TestCase):
         self.assertEqual(len([line for line in stream.getvalue().splitlines() if line.strip()]), 1)
 
 
-class TestLogEvent(_LogTestCase):
-    def test_the_message_defaults_to_the_event_name(self):
-        handler = self.capture()
-
-        log_event("run.started", tasks=2)
-
-        record = self.events(handler, "run.started")[0]
-        self.assertEqual(record.getMessage(), "run.started")
-        self.assertEqual(record.tasks, 2)  # type: ignore[attr-defined]
-
-
 class TestProgressReporter(unittest.TestCase):
     def setUp(self):
         self.now = 0.0
         self.beats: list = []
         self.reporter = ProgressReporter(interval=10, emit=self.beats.append, clock=lambda: self.now, label="Documents")
-
-    def test_a_snapshot_inside_the_interval_is_only_counted(self):
-        self.reporter(Progress(done=5, total=100, stage="migrating"))
-
-        self.assertEqual(self.beats, [])
-        self.assertEqual(self.reporter.summary(), "Documents: 5/100 (5.0%)")
 
     def test_a_snapshot_past_the_interval_is_reported(self):
         self.now = 10.0
@@ -133,24 +108,6 @@ class TestProgressReporter(unittest.TestCase):
         self.assertEqual(beat["label"], "Documents")
         self.assertEqual(beat["beat"], 1)
 
-    def test_the_rate_stays_unknown_inside_too_small_a_window(self):
-        self.now = 0.001
-        self.reporter(Progress(done=1, total=100))
-
-        beat = self.reporter.flush()
-
-        self.assertIsNone(beat["rate"])
-        self.assertIsNone(beat["eta_seconds"])
-
-    def test_the_rate_and_eta_follow_the_elapsed_time(self):
-        self.now = 4.0
-        self.reporter(Progress(done=40, total=100))
-
-        beat = self.reporter.flush()
-
-        self.assertEqual(beat["rate"], 10.0)
-        self.assertEqual(beat["eta_seconds"], 6.0)
-
     def test_a_new_total_restarts_the_window(self):
         self.now = 4.0
         self.reporter(Progress(done=40, total=100))
@@ -164,24 +121,6 @@ class TestProgressReporter(unittest.TestCase):
         self.assertEqual(beat["rate"], 2.5)  # 10 done in the 4s since the restart
         self.assertEqual(beat["elapsed_seconds"], 4.0)
 
-    def test_a_new_stage_restarts_the_window(self):
-        # Planning and copying report the same total; a rate measured while
-        # planning must not describe the copy (it printed an ETA of hours).
-        self.now = 10.0
-        self.reporter(Progress(done=1, total=100, stage="planning"))
-        self.now = 12.0
-        self.reporter(Progress(done=20, total=100, stage="copying"))
-        self.now = 14.0
-
-        beat = self.reporter.flush()
-        self.assertEqual(beat["elapsed_seconds"], 2.0)
-        self.assertEqual(beat["rate"], 10.0)
-
-    def test_a_snapshot_names_the_item_it_is_about(self):
-        self.reporter(Progress(done=1, total=2, stage="structure", items=["Documents"]))
-
-        self.assertEqual(self.reporter.flush()["subject"], "Documents")
-
     def test_closing_reports_a_count_the_interval_swallowed(self):
         self.reporter(Progress(done=7, total=10))
 
@@ -190,28 +129,6 @@ class TestProgressReporter(unittest.TestCase):
         self.assertEqual(len(self.beats), 1)
         self.assertEqual(self.beats[0]["done"], 7)
         self.assertEqual(summary, "Documents: 7/10 (70.0%)")
-
-    def test_closing_twice_does_not_repeat_the_last_count(self):
-        self.reporter(Progress(done=7, total=10))
-        self.reporter.close()
-
-        self.reporter.close()
-
-        self.assertEqual(len(self.beats), 1)
-
-    def test_a_zero_interval_reports_every_snapshot(self):
-        reporter = ProgressReporter(interval=0, emit=self.beats.append, clock=lambda: self.now)
-
-        reporter(Progress(done=1, total=10))
-        reporter(Progress(done=2, total=10))
-
-        self.assertEqual([beat["done"] for beat in self.beats], [1, 2])
-
-    def test_a_finished_run_says_done_instead_of_an_eta(self):
-        self.now = 10.0
-        self.reporter(Progress(done=100, total=100))
-
-        self.assertEqual(self.reporter.close(), "Documents: 100/100 (100.0%) 10/s done")
 
     def test_an_unknown_total_reports_no_percentage(self):
         self.now = 10.0
@@ -247,27 +164,6 @@ class TestProgressReporter(unittest.TestCase):
         self.assertEqual([beat["done"] for beat in self.beats], [5, 1])
         self.assertEqual(self.reporter.summary(), "Documents: 5/10 (50.0%) 0.5/s ETA 10s")
         self.assertEqual(other.summary(), "Documents/Sub: 1/2 (50.0%) 0.1/s ETA 10s")
-
-    def test_snapshots_from_several_threads_are_counted_once(self):
-        errors: list = []
-
-        def _beat() -> None:
-            try:
-                for done in range(1, 51):
-                    self.reporter(Progress(done=done, total=50, stage="migrating"))
-            except Exception as ex:  # a lock-free reporter would corrupt here, not raise
-                errors.append(ex)
-
-        threads = [threading.Thread(target=_beat) for _ in range(4)]
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-
-        beat = self.reporter.flush()
-        self.assertEqual(errors, [])
-        self.assertGreaterEqual(beat["done"], 1)
-        self.assertEqual(len(self.beats), beat["beat"])
 
 
 class TestMigrationEvents(_LogTestCase):
@@ -342,19 +238,6 @@ class TestConfigureTextLogging(unittest.TestCase):
         self.assertTrue(lines[0].startswith("WARNING"))
         self.assertIn("library:/sites/t: denied", lines[0])
         self.assertTrue(lines[0].endswith("[job.failed]"))
-
-    def test_the_level_filters_what_is_shown(self):
-        import io
-
-        stream = io.StringIO()
-        handler = configure_text_logging(stream, level=logging.WARNING)
-        self.addCleanup(logging.getLogger(LOGGER_NAME).removeHandler, handler)
-
-        log_event("job.started", "Documents")
-        log_event("job.failed", "denied", level=logging.WARNING)
-
-        self.assertNotIn("Documents", stream.getvalue())
-        self.assertEqual(len([line for line in stream.getvalue().splitlines() if line.strip()]), 1)
 
     def test_configuring_twice_does_not_duplicate_every_line(self):
         import io

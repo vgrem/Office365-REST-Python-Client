@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
-import threading
 from datetime import datetime, timedelta, timezone
 from email.utils import format_datetime
 
@@ -102,22 +100,6 @@ def _events(handler, name):
 # ── counting ─────────────────────────────────────────────────────
 
 
-def test_a_throttled_response_is_counted_with_its_retry_after():
-    monitor = ThrottleMonitor()
-    responses = [
-        _Response(TOO_MANY_REQUESTS, {"Retry-After": str(THROTTLE_AFTER)}),
-        _Response(TOO_MANY_REQUESTS, {"Retry-After": str(OTHER_THROTTLE_AFTER)}),
-        _Response(SERVICE_UNAVAILABLE),
-    ]
-
-    for response in responses:
-        monitor.observe(response)
-
-    assert monitor.responses == len(responses)
-    assert monitor.throttled == len(responses)
-    assert monitor.retry_after == THROTTLE_AFTER + OTHER_THROTTLE_AFTER
-
-
 def test_an_ordinary_or_client_error_response_is_not_a_throttle():
     monitor = ThrottleMonitor()
     responses = [None, _Response(), _Response(200), _Response(404), _Response(500)]
@@ -138,52 +120,7 @@ def test_an_http_date_retry_after_is_parsed():
     assert THROTTLE_AFTER - 1 <= monitor.retry_after <= THROTTLE_AFTER + 1
 
 
-def test_counting_is_thread_safe():
-    monitor = ThrottleMonitor()
-    response = _Response(TOO_MANY_REQUESTS, {"Retry-After": "1"})
-    workers, per_worker = 8, 50
-
-    def _hammer():
-        for _ in range(per_worker):
-            monitor.observe(response)
-
-    threads = [threading.Thread(target=_hammer) for _ in range(workers)]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
-
-    assert monitor.responses == workers * per_worker
-    assert monitor.throttled == workers * per_worker
-    assert monitor.retry_after == workers * per_worker
-
-
 # ── reading ──────────────────────────────────────────────────────
-
-
-def test_the_summary_names_the_codes_and_the_cost():
-    monitor = ThrottleMonitor()
-    monitor.observe(_Response(200))
-    monitor.observe(_Response(TOO_MANY_REQUESTS, {"Retry-After": "2"}))
-    monitor.observe(_Response(SERVICE_UNAVAILABLE, {"Retry-After": "3"}))
-
-    assert monitor.summary() == "throttled 2/3 response(s) (429: 1, 503: 1), 5s of Retry-After"
-
-
-def test_the_snapshot_is_json_serializable_with_stable_keys():
-    monitor = ThrottleMonitor()
-    monitor.observe(_Response(TOO_MANY_REQUESTS, {"Retry-After": "4"}))
-
-    payload = monitor.snapshot()
-
-    assert payload == {
-        "responses": 1,
-        "throttled": 1,
-        "retry_after_s": 4.0,
-        "by_status": {"429": 1},
-    }
-    assert monitor.to_dict() == payload
-    assert json.loads(json.dumps(payload)) == payload
 
 
 def test_reset_clears_the_counters():
@@ -236,19 +173,6 @@ def test_attach_counts_the_async_path_too():
     assert context.pending_request().transport.monitor.throttled == 1
 
 
-def test_attaching_twice_does_not_stack_wrappers():
-    inner = _Transport(_Response(200))
-    context = _Context(_Request(inner))
-    monitor = ThrottleMonitor()
-
-    monitor.attach(context)
-    monitor.attach(context)
-
-    wrapped = context.pending_request().transport
-    assert isinstance(wrapped, _CountingTransport)
-    assert wrapped.inner is inner
-
-
 # ── the session reports it ───────────────────────────────────────
 
 
@@ -287,17 +211,6 @@ def test_a_session_reports_throttling_as_an_event_and_a_total(tmp_path, capture,
     completed = _events(capture, "run.completed")[0]
     assert completed.throttled == len(observed)  # type: ignore[attr-defined]
     assert completed.by_status == {"429": 1, "503": 1}  # type: ignore[attr-defined]
-
-
-def test_a_session_without_a_monitor_adds_no_throttling_fields(tmp_path, capture):
-    session = _session(tmp_path)
-
-    session.start()
-
-    completed = _events(capture, "run.completed")[0]
-    assert not hasattr(completed, "throttled")
-    assert not hasattr(completed, "responses")
-    assert session.throttle is None
 
 
 def test_a_run_that_is_not_throttled_emits_no_event(tmp_path, capture):

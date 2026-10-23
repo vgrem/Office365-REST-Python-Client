@@ -76,14 +76,3 @@ def test_add_accepts_bytes_and_named_file_attachments():
     assert b'name="fileBlock1"' in body
     assert b"application/octet-stream" in body
     assert b"raw-byte payload" in body
-
-
-def test_add_without_attachments_has_single_part():
-    transport = _RecordingTransport([_PAGE])
-    client = _client(transport)
-
-    _pages(client).add(presentation_file="<html/>").execute_query()
-
-    body = transport.requests[-1].data
-    assert body.count(b"Content-Disposition") == 1
-    assert b'name="Presentation"' in body

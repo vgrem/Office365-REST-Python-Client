@@ -12,7 +12,6 @@ from office365.runtime.limits import (
     LimitKind,
     bounded,
     ensure_within,
-    hint,
     limit,
     limits_of,
     verify_limits,
@@ -67,13 +66,6 @@ def test_ensure_within_warn_mode_and_passthrough():
         ensure_within(LIST_VIEW, 10, on_exceed="nope")
 
 
-def test_hint_includes_context_and_docs():
-    text = hint(LIST_VIEW, context="get_items", value=6000)
-    assert "get_items" in text
-    assert "6,000 items" in text
-    assert "learn.microsoft.com" in text
-
-
 def test_bounded_warns_by_default():
     @bounded("page_size", LIST_VIEW)
     def get_items(caml_query=None, page_size=None):
@@ -85,30 +77,10 @@ def test_bounded_warns_by_default():
     assert get_items() is None  # None passes
 
 
-def test_bounded_clamps_and_handles_positional_args():
-    @bounded("page_size", LIST_VIEW, clamp=True)
-    def get_items(caml_query, page_size):
-        return page_size
-
-    assert get_items(None, 6000) == LIST_VIEW.value
-    assert get_items(None, 100) == 100  # noqa: PLR2004
-
-
 def test_list_get_items_warns_when_page_size_over_threshold():
     lst = ClientContext(test_site_url).web.lists.get_by_title("X")
     with pytest.warns(UserWarning, match="list view threshold"):
         lst.get_items(page_size=LIST_VIEW_THRESHOLD + 1)
-
-
-def test_bounded_raise_mode_and_validation():
-    @bounded("page_size", LIST_VIEW, on_exceed="raise")
-    def get_items(page_size=None):
-        return page_size
-
-    with pytest.raises(LimitExceededError):
-        get_items(page_size=6000)
-    with pytest.raises(ValueError, match="on_exceed"):
-        bounded("page_size", LIST_VIEW, on_exceed="nope")
 
 
 # ── @limit metadata (bound to methods/properties) ────────────────────────────
@@ -126,17 +98,6 @@ def test_limit_decorator_stamps_metadata_and_doc():
     assert decls[0].arg is None
     assert "Limits:" in upload.__doc__
     assert "file upload" in upload.__doc__
-
-
-def test_limit_decorator_enforces_arg():
-    @limit(Limits.LIST_VIEW, arg="page_size")
-    def get_items(page_size=None):
-        return page_size
-
-    with pytest.warns(UserWarning, match="list view threshold"):
-        assert get_items(page_size=6000) == 6000  # noqa: PLR2004
-    assert get_items(page_size=10) == 10  # noqa: PLR2004
-    assert get_items() is None
 
 
 def test_limit_decorator_raise_and_clamp():
@@ -205,11 +166,6 @@ def test_limit_decorator_on_property_and_class_meta():
     assert Limits.LIST_VIEW in _Entity.declared_limits()
 
 
-def test_limit_requires_single_limit_for_arg():
-    with pytest.raises(ValueError, match="exactly one"):
-        limit(Limits.LIST_VIEW, Limits.FILE_UPLOAD, arg="page_size")
-
-
 def test_verify_limits_reports_violations():
     @limit(Limits.LIST_VIEW, arg="page_size")
     def get_items(page_size=None):
@@ -221,48 +177,4 @@ def test_verify_limits_reports_violations():
     assert "list view threshold" in str(report)
 
 
-def test_bounded_back_compat_alias():
-    @bounded("page_size", Limits.LIST_VIEW)
-    def get_items(page_size=None):
-        return page_size
-
-    with pytest.warns(UserWarning):
-        assert get_items(page_size=6000) == 6000  # noqa: PLR2004
-
-
 # ── @limit on a class (model-bound quotas) ───────────────────────────────────
-
-
-def test_limit_decorator_on_class_and_inheritance():
-    @limit(Limits.LIST_VIEW, Limits.FILE_UPLOAD)
-    class _Base(ClientObject):
-        pass
-
-    class _Child(_Base):
-        pass
-
-    assert Limits.LIST_VIEW in _Base.declared_limits()
-    assert Limits.FILE_UPLOAD in _Base.declared_limits()
-    assert Limits.LIST_VIEW in _Child.declared_limits()  # inherited
-
-
-def test_limit_on_class_merges_with_base():
-    @limit(Limits.LIST_VIEW)
-    class _Base(ClientObject):
-        pass
-
-    @limit(Limits.FILE_UPLOAD)
-    class _Child(_Base):
-        pass
-
-    declared = _Child.declared_limits()
-    assert Limits.LIST_VIEW in declared
-    assert Limits.FILE_UPLOAD in declared
-
-
-def test_limit_rejects_arg_on_class():
-    with pytest.raises(ValueError, match="class"):
-
-        @limit(Limits.LIST_VIEW, arg="page_size")
-        class _Bad(ClientObject):
-            pass

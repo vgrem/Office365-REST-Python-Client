@@ -9,7 +9,6 @@ when the certificate is already attached and PATCH the app otherwise.
 from __future__ import annotations
 
 import base64
-import hashlib
 import ssl
 
 from office365.directory.applications.application import (
@@ -58,12 +57,6 @@ def test_certificate_der_accepts_pem_bytes_and_path(tmp_path):
     assert _certificate_der(cert_path) == DER
 
 
-def test_certificate_thumbprint_is_upper_case_hex():
-    expected = hashlib.sha1(DER).hexdigest().upper()
-    assert Application.certificate_thumbprint(DER) == expected  # type: ignore[arg-type]
-    assert Application.certificate_thumbprint(ssl.DER_cert_to_PEM_cert(DER)) == expected
-
-
 def test_ensure_certificate_skips_update_when_already_attached():
     thumbprint = Application.certificate_thumbprint(DER)  # type: ignore[arg-type]
     transport = RoutingTransport(
@@ -92,20 +85,6 @@ def test_ensure_certificate_attaches_when_missing():
 
     updates = [r for r in transport.requests if r.method == HttpMethod.Patch]
     assert len(updates) == 1
-    credentials = updates[0].data["keyCredentials"]
-    added = next(c for c in credentials if c.get("displayName") == "CN=test-cert")
-    assert added["key"] == base64.b64encode(DER).decode("utf-8")
-
-
-def test_add_certificate_normalises_pem_before_upload():
-    transport = RoutingTransport([("applications", {})])
-    client = _client(transport)
-
-    _app(client).add_certificate(ssl.DER_cert_to_PEM_cert(DER), "test-cert").execute_query()
-
-    updates = [r for r in transport.requests if r.method == HttpMethod.Patch]
-    assert len(updates) == 1
-    # base64(DER), not base64(PEM): Entra expects the DER certificate in keyCredentials.key
     credentials = updates[0].data["keyCredentials"]
     added = next(c for c in credentials if c.get("displayName") == "CN=test-cert")
     assert added["key"] == base64.b64encode(DER).decode("utf-8")

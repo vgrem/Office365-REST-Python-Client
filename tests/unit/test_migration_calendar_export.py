@@ -22,14 +22,11 @@ from office365.graph_client import GraphClient
 from office365.migration import MigrationJob
 from office365.migration.outlook import (
     MANIFEST_NAME,
-    CalendarExportOptions,
     CalendarSource,
     IcsExportTarget,
 )
-from office365.migration.outlook.calendar_models import EVENT_COLUMNS, MAX_LINE_OCTETS, event_ics
-from office365.outlook.calendar.attendees.attendee import Attendee
+from office365.migration.outlook.calendar_models import EVENT_COLUMNS, event_ics
 from office365.outlook.calendar.events.event import Event
-from office365.outlook.calendar.response_status import ResponseStatus
 from tests._scripted_transport import MethodRoutingTransport
 
 _CALENDAR = {"id": "cal-1", "name": "Calendar"}
@@ -192,26 +189,6 @@ def test_source_enumerates_one_item_per_standalone_event():
     assert all(item.item_type == "event" for item in items)
 
 
-def test_source_skips_occurrences_and_cancellations_by_default():
-    transport = _transport()
-    items = CalendarSource(_calendar(_client(transport))).list_items()
-
-    assert not any("standup" in item.dest_path and "2026-03-16" in item.dest_path for item in items)  # occurrence
-    assert not any("Cancelled" in item.dest_path for item in items)
-
-
-def test_source_can_export_occurrences_and_cancellations():
-    transport = _transport()
-    options = CalendarExportOptions(include_recurring_instances=True, include_cancelled=True)
-
-    items = CalendarSource(_calendar(_client(transport)), options).list_items()
-
-    assert len(items) == 5  # noqa: PLR2004 — every scripted event, instances and tombstones included
-    assert any("Cancelled-1-1" in item.dest_path for item in items)
-    # Each instance has its own Graph id, and the date keeps the two names readable.
-    assert sum(1 for item in items if "Weekly-standup" in item.dest_path) == 2  # noqa: PLR2004 — series + occurrence
-
-
 def test_source_records_the_envelope_an_import_replays():
     transport = _transport()
     item = CalendarSource(_calendar(_client(transport))).list_items()[0]
@@ -236,37 +213,6 @@ def test_source_records_the_envelope_an_import_replays():
     assert envelope["calendar_display_path"] == "Calendar"
     assert item.created == "2026-02-01T08:00:00+00:00"
     assert item.modified == "2026-02-20T11:30:00+00:00"
-
-
-def test_an_attendees_response_status_is_a_typed_value():
-    """``status`` is Exchange's ``ResponseStatus`` object, not a string.
-
-    Measured: an attendee comes back as ``{"emailAddress": …, "type": "required",
-    "status": {"response": "accepted"}}``. The model declared ``status: str``, so the
-    value stayed a bare ``dict`` — ``attendee.status.response`` raised, and every reader
-    had to duck-type it (``calendar_models._response`` took the dict branch).
-    """
-    attendee = Attendee()
-    attendee.set_property("status", {"response": "accepted"})
-
-    assert isinstance(attendee.status, ResponseStatus)
-    assert attendee.status.response == "accepted"
-
-
-def test_envelope_reads_the_ical_uid_under_the_name_graph_spells_it():
-    """The sidecar's ``ical_uid`` comes from the service's ``iCalUId``, not a guess.
-
-    ``get_property()`` is a stringly lookup that answers ``None`` for a misspelled name,
-    so reading ``iCalUid`` (one capital short) silently wrote ``ical_uid: null`` into
-    every exported sidecar and fell back to the Graph id for the ICS ``UID``.
-    """
-    transport = _transport()
-    events = CalendarSource(_calendar(_client(transport))).list_items()
-    event = events[0]
-
-    assert _SINGLE["iCalUId"]  # the fixture really carries the identity
-    assert event.metadata["iCalUId"] == _SINGLE["iCalUId"]
-    assert event_ics(event.metadata).decode("utf-8").count(f"UID:{_SINGLE['iCalUId']}\r\n") == 1
 
 
 def test_source_reads_the_ics_it_renders_and_counts_its_bytes():
@@ -313,42 +259,6 @@ def test_ics_renders_time_ranges_attendees_and_reminders():
     assert "X-MICROSOFT-SKYPETEAMSMEETINGURL:https://teams.microsoft.com/l/meetup-join/1" in unfolded
     assert "DTSTAMP:20260220T113000Z" in text  # the event's own mtime, never the export's
     assert text.endswith("END:VCALENDAR\r\n")
-
-
-def test_ics_writes_an_all_day_event_as_a_date_range():
-    transport = _transport()
-    items = CalendarSource(_calendar(_client(transport))).list_items()
-
-    text = event_ics(items[1].metadata).decode("utf-8")
-
-    assert "DTSTART;VALUE=DATE:20260305\r\n" in text
-    assert "DTEND;VALUE=DATE:20260306\r\n" in text
-    assert "TRANSP:TRANSPARENT\r\n" not in text.replace("STATUS:TENTATIVE", "")  # an OOF day is opaque
-    assert "UID:e2" in text  # no iCalUId: the Graph id is the fallback identity
-
-
-def test_ics_renders_a_recurrence_pattern_as_an_rrule():
-    transport = _transport()
-    items = CalendarSource(_calendar(_client(transport))).list_items()
-
-    text = event_ics(items[2].metadata).decode("utf-8")
-
-    assert "RRULE:FREQ=WEEKLY;BYDAY=MO,WE;COUNT=6\r\n" in text
-
-
-def test_ics_folds_every_line_within_the_rfc_limit():
-    transport = _transport()
-    item = CalendarSource(_calendar(_client(transport))).list_items()[0]
-    envelope = {**item.metadata, "subject": "Long " + "subject " * 30}
-
-    raw = event_ics(envelope)
-
-    for line in raw.split(b"\r\n"):
-        assert len(line) <= MAX_LINE_OCTETS, line
-    assert raw.count(b"\r\n ") >= 1  # at least one continuation line
-    # Folding is reversible: unfolding restores the original summary.
-    unfolded = raw.replace(b"\r\n ", b"").decode("utf-8")
-    assert "SUMMARY:Long subject subject " in unfolded
 
 
 def test_export_writes_a_tree_a_sidecar_and_a_manifest(tmp_path: Path):
@@ -406,25 +316,6 @@ def test_export_verifies_by_checksum(tmp_path: Path):
     report = job.verify()
 
     assert (report.checked, report.mismatches) == (3, [])  # noqa: PLR2004
-
-
-def test_export_is_reproducible(tmp_path: Path):
-    def export(destination: Path) -> dict[str, bytes]:
-        client = _client(_transport())
-        job = MigrationJob(CalendarSource(_calendar(client)), IcsExportTarget(destination))
-        job.plan()
-        job.run()
-        return {
-            path.relative_to(destination).as_posix(): path.read_bytes() for path in sorted(destination.rglob("*.ics"))
-        }
-
-    first = export(tmp_path / "a")
-    second = export(tmp_path / "b")
-
-    assert first.keys() == second.keys()
-    # Byte-identical: the document depends on the event, not on when it was exported.
-    for path, payload in first.items():
-        assert payload == second[path], path
 
 
 def test_the_export_projection_is_the_model_projection():

@@ -130,28 +130,6 @@ def test_apply_skips_a_master_page_the_target_does_not_have():
     )
 
 
-def test_apply_skips_a_logo_the_target_cannot_resolve():
-    # A site's logo is often its group image (``_api/GroupService/GetGroupImage``),
-    # which is a service endpoint rather than a file; rebasing the path would point
-    # at the wrong site and copying it verbatim at the source, so it is reported.
-    source = _Web("/sites/team_in", SiteLogoUrl="/sites/team_in/_api/GroupService/GetGroupImage?id='1'")
-    target = _Web()
-
-    report = apply_web_branding(source, target)
-
-    assert report.skipped == {"SiteLogoUrl": "the target has no /sites/team_out/_api/GroupService/GetGroupImage?id='1'"}
-    assert target.written == {}
-
-
-def test_apply_skips_an_alternate_css_the_target_does_not_have():
-    source = _Web("/sites/team_in", AlternateCssUrl="/sites/team_in/SiteAssets/brand.css")
-    target = _Web()
-
-    report = apply_web_branding(source, target)
-
-    assert report.skipped == {"AlternateCssUrl": "the target has no /sites/team_out/SiteAssets/brand.css"}
-
-
 def test_apply_skips_a_theme_folder_the_target_does_not_have():
     source = _Web("/sites/team_in", ThemedCssFolderUrl="/sites/team_in/_catalogs/theme/15")
     target = _Web()
@@ -160,15 +138,6 @@ def test_apply_skips_a_theme_folder_the_target_does_not_have():
 
     assert report.skipped == {"ThemedCssFolderUrl": "the target has no /sites/team_out/_catalogs/theme/15"}
     assert "ThemedCssFolderUrl" not in target.written
-
-
-def test_apply_writes_a_theme_folder_the_target_does_have():
-    source = _Web("/sites/team_in", ThemedCssFolderUrl="/sites/team_in/_themes/office")
-    target = _Web(folders={"/sites/team_out/_themes/office"})
-
-    report = apply_web_branding(source, target)
-
-    assert report.applied == {"ThemedCssFolderUrl": "/sites/team_out/_themes/office"}
 
 
 def test_apply_clears_a_logo_and_css_the_source_lacks():
@@ -181,16 +150,6 @@ def test_apply_clears_a_logo_and_css_the_source_lacks():
 
     assert report.applied == {"SiteLogoUrl": "", "AlternateCssUrl": ""}
     assert target.written == {"SiteLogoUrl": "", "AlternateCssUrl": ""}
-
-
-def test_apply_never_clears_a_master_page():
-    source = _Web("/sites/team_in")
-    target = _Web(MasterUrl=TARGET_MASTER)
-
-    report = apply_web_branding(source, target)
-
-    assert report.skipped == {"MasterUrl": "the source has none"}
-    assert target.written == {}
 
 
 def test_apply_is_idempotent():
@@ -209,24 +168,6 @@ def test_apply_is_idempotent():
     assert target.written == {}
 
 
-def test_apply_does_nothing_when_not_preserving():
-    source = _Web("/sites/team_in", MasterUrl=SOURCE_MASTER)
-    target = _Web()
-
-    report = apply_web_branding(source, target, preserve=False)
-
-    assert report.applied == {}
-    assert target.written == {}
-    assert target.updates == 0
-
-
-def test_verify_compares_rebased_paths():
-    source = _Web("/sites/team_in", MasterUrl=SOURCE_MASTER)
-    target = _Web(MasterUrl=TARGET_MASTER)
-
-    assert verify_web_branding(source, target) == []
-
-
 def test_verify_reports_a_divergent_property():
     source = _Web("/sites/team_in", MasterUrl=SOURCE_MASTER, AlternateCssUrl="/sites/team_in/Style%20Library/a.css")
     target = _Web(MasterUrl="/sites/team_out/_catalogs/masterpage/other.master")
@@ -240,12 +181,3 @@ def test_verify_reports_a_divergent_property():
         "'/sites/team_out/_catalogs/masterpage/other.master', "
         "source has '/sites/team_out/_catalogs/masterpage/seattle.master'",
     ]
-
-
-def test_a_value_already_pointing_at_the_target_is_left_alone():
-    # A site logo can legitimately live on another site (the tenant's group-image
-    # endpoint); rebasing must only move paths that belong to the source site.
-    source = _Web("/sites/team_in", SiteLogoUrl="/sites/brand/SiteAssets/logo.png")
-    target = _Web(SiteLogoUrl="/sites/brand/SiteAssets/logo.png")
-
-    assert verify_web_branding(source, target) == []

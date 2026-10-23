@@ -32,15 +32,6 @@ def test_unpaged_collection_warns_once_at_threshold():
     assert len([w for w in caught if issubclass(w.category, UserWarning)]) == 1
 
 
-def test_unpaged_collection_below_threshold_does_not_warn():
-    col = _collection()
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        for _ in range(2):
-            col.add_child(Field(col.context))
-    assert not [w for w in caught if issubclass(w.category, UserWarning)]
-
-
 def test_paged_collection_does_not_warn():
     col = _collection().paged(1)
     with warnings.catch_warnings(record=True) as caught:
@@ -48,16 +39,6 @@ def test_paged_collection_does_not_warn():
         for _ in range(5):
             col.add_child(Field(col.context))
     assert not [w for w in caught if issubclass(w.category, UserWarning)]
-
-
-def test_index_candidates_excludes_id_and_sorts():
-    query = CamlQuery.builder().where(Caml.text("date").eq("2020-01-01")).order_by("ID").build()
-    assert query.index_candidates == ["date"]
-
-
-def test_index_candidates_from_raw_view_xml():
-    query = CamlQuery.parse("<Where><Eq><FieldRef Name='Status'/><Value Type='Text'>x</Value></Eq></Where>")
-    assert query.index_candidates == ["Status"]
 
 
 def test_list_index_candidates_delegates():
@@ -90,24 +71,6 @@ def test_check_query_raises_for_non_indexed_column():
         assert "date" in str(exc)
     else:
         raise AssertionError("expected SPQueryThrottledException")
-
-
-def test_check_query_allows_indexed_column():
-    ctx, _ = _context(
-        [
-            {"d": {"ItemCount": 6000}},
-            {"d": {"results": [{"InternalName": "date", "Title": "date", "Indexed": True}]}},
-        ]
-    )
-    lst = ctx.web.lists.get_by_title("X")
-    lst.check_query(CamlQuery.builder().order_by("date").build())
-
-
-def test_check_query_skips_small_list():
-    ctx, transport = _context([])
-    lst = ctx.web.lists.get_by_title("X")
-    lst.check_query(CamlQuery.builder().order_by("date").build(), item_count=100)
-    assert transport.calls == 0
 
 
 def test_get_items_check_runs_preflight():

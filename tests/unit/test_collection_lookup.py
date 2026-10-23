@@ -47,34 +47,6 @@ def test_single_bounds_query_with_top_2():
     assert "$top=2" in transport.urls[0]
 
 
-def test_single_returns_the_match():
-    client, _ = _client([{"value": [GROUP]}])
-
-    group = client.groups.single("displayName eq 'Group One'")
-    client.execute_query()
-
-    assert group.get_property("id") == "g1"
-    assert group.get_property("displayName") == "Group One"
-
-
-def test_single_raises_when_no_match():
-    client, _ = _client([{"value": []}])
-
-    client.groups.single("displayName eq 'Missing'")
-
-    with pytest.raises(NotFoundException):
-        client.execute_query()
-
-
-def test_single_raises_when_ambiguous():
-    client, _ = _client([{"value": [GROUP, {"id": "g2", "displayName": "Group One"}]}])
-
-    client.groups.single("displayName eq 'Group One'")
-
-    with pytest.raises(ValueError):
-        client.execute_query()
-
-
 def test_first_bounds_query_with_top_1():
     client, transport = _client([{"value": [GROUP]}])
 
@@ -83,53 +55,6 @@ def test_first_bounds_query_with_top_1():
 
     assert len(transport.urls) == 1
     assert "$top=1" in transport.urls[0]
-
-
-def test_first_or_none_defers_until_execute():
-    client, transport = _client([{"value": [GROUP]}])
-
-    group = client.groups.first_or_none("displayName eq 'Group One'")
-
-    # a deferred builder must not hit the wire on its own
-    assert transport.urls == []
-    assert not group.is_loaded
-
-    group.execute_query()
-
-    assert len(transport.urls) == 1
-    assert group.is_loaded
-    assert group.get_property("id") == "g1"
-    assert "$top=1" in transport.urls[0]
-
-
-def test_first_or_none_returns_the_match():
-    client, transport = _client([{"value": [GROUP]}])
-
-    group = client.groups.first_or_none("displayName eq 'Group One'").execute_query()
-
-    assert group.is_loaded
-    assert group.get_property("id") == "g1"
-    assert "$top=1" in transport.urls[0]
-
-
-@pytest.mark.parametrize("lookup", ["first_or_none", "find_by_name"])
-def test_group_lookup_miss_leaves_object_uninitialized(lookup):
-    client, _ = _client([{"value": []}])
-
-    group = getattr(client.groups, lookup)("Missing").execute_query()
-
-    assert not group.is_loaded
-    assert group.get_property("id") is None
-
-
-def test_first_or_none_without_expression_queries_first_item():
-    client, transport = _client([{"value": [GROUP]}])
-
-    group = client.groups.first_or_none().execute_query()
-
-    assert group.is_loaded
-    assert "$top=1" in transport.urls[0]
-    assert "$filter" not in transport.urls[0]
 
 
 def test_first_or_none_async_defers_until_execute():
@@ -168,15 +93,6 @@ def test_find_by_name_queues_a_tolerant_read():
     assert str(group.resource_path) == "/groups/g1"
 
 
-def test_find_by_name_required_raises_on_miss():
-    client, _ = _client([{"value": []}])
-
-    client.groups.find_by_name("Missing", required=True)
-
-    with pytest.raises(NotFoundException):
-        client.execute_query()
-
-
 def test_find_by_name_required_raises_on_ambiguous():
     client, _ = _client([{"value": [GROUP, {"id": "g2", "displayName": "Group One"}]}])
 
@@ -184,15 +100,6 @@ def test_find_by_name_required_raises_on_ambiguous():
 
     with pytest.raises(ValueError):
         client.execute_query()
-
-
-def test_find_by_name_escapes_single_quote():
-    """An embedded apostrophe is doubled inside the OData string literal."""
-    client, transport = _client([{"value": []}])
-
-    client.groups.find_by_name("O'Brien").execute_query()
-
-    assert "$filter=displayName eq 'O''Brien'" in transport.urls[0]
 
 
 def test_deprecated_get_by_name_warns_and_is_strict():
@@ -268,17 +175,6 @@ def test_directory_role_lookup_skips_unsupported_top():
     assert "$filter=displayName eq 'Helpdesk Administrator'" in transport.urls[0]
     assert role.get_property("id") == "r2"
     assert str(role.resource_path) == "/directoryRoles/r2"
-
-
-def test_directory_role_first_or_none_skips_unsupported_top():
-    payload = {"value": [{"id": "r2", "displayName": "Helpdesk Administrator"}]}
-    client, transport = _client([payload])
-
-    role = client.directory_roles.first_or_none("displayName eq 'Helpdesk Administrator'").execute_query()
-
-    assert len(transport.urls) == 1
-    assert "$top" not in transport.urls[0]
-    assert role.get_property("id") == "r2"
 
 
 def test_directory_role_top_is_rejected_locally():

@@ -12,7 +12,6 @@ import io
 
 import pytest
 from office365.runtime.converters.dataframe import dataframe_from_bytes, dataframe_to_bytes
-from office365.sharepoint.files.file import File
 from office365.sharepoint.folders.folder import Folder
 from office365.sharepoint.lists.list import List
 
@@ -37,34 +36,6 @@ def test_write_dataframe_csv_writes_utf8_sig_bytes():
     assert isinstance(content, bytes)
     assert content.startswith(b"\xef\xbb\xbf")  # utf-8-sig BOM for Excel
     assert b"a" in content and b"1" in content
-
-
-def test_write_dataframe_xlsx_serializes_workbook():
-    pytest.importorskip("openpyxl")
-    folder = _CaptureFolder()
-
-    folder.write_dataframe("data.xlsx", pd.DataFrame({"a": [1]}), format="xlsx")
-
-    _, content = folder.captured
-    assert content.startswith(b"PK")  # xlsx is a zip archive
-
-
-class _CaptureFile(File):
-    def __init__(self) -> None:
-        self.saved = None
-
-    def save_binary_stream(self, stream):
-        self.saved = stream
-        return self
-
-
-def test_file_write_dataframe_serializes_csv_content():
-    file = _CaptureFile()
-
-    file.write_dataframe(pd.DataFrame({"a": [1, 2]}))
-
-    assert file.saved.startswith(b"\xef\xbb\xbf")
-    assert b"1" in file.saved
 
 
 def test_dataframe_bytes_round_trip_csv():

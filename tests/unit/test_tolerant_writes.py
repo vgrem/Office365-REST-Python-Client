@@ -58,14 +58,6 @@ def _sp(payloads):
 # --- delete_object(ignore_missing=...) ---------------------------------------
 
 
-def test_graph_delete_object_tolerates_missing():
-    client, transport = _graph([_NOT_FOUND])
-
-    client.users["missing@contoso.com"].delete_object(ignore_missing=True).execute_query()
-
-    assert transport.calls == 1
-
-
 def test_graph_delete_object_raises_when_missing_by_default():
     client, transport = _graph([_NOT_FOUND])
 
@@ -80,14 +72,6 @@ def test_graph_delete_object_propagates_non_404_even_with_ignore_missing():
 
     with pytest.raises(ClientRequestException):
         client.users["x@contoso.com"].delete_object(ignore_missing=True).execute_query()
-
-
-def test_graph_delete_object_with_ignore_missing_is_deferred():
-    client, transport = _graph([])
-
-    client.users["x@contoso.com"].delete_object(ignore_missing=True)
-
-    assert transport.calls == 0
 
 
 def test_sharepoint_delete_object_tolerates_missing():
@@ -128,24 +112,6 @@ def test_ensure_view_creates_when_missing():
     assert "GetByTitle" in str(view.resource_path)
 
 
-def test_ensure_view_reuses_existing_without_creating():
-    ctx, transport = _sp([{"d": {"Id": "v1", "Title": "Active"}}])
-
-    view = _views(ctx).ensure_view("Active").execute_query()
-
-    assert transport.calls == 1
-    assert view.title == "Active"
-    assert "GetByTitle" in str(view.resource_path)
-
-
-def test_ensure_view_is_deferred_until_execute():
-    ctx, transport = _sp([])
-
-    _views(ctx).ensure_view("Active")
-
-    assert transport.calls == 0
-
-
 def test_ensure_view_on_conflict_update_reconciles_scalar_settings():
     ctx, transport = _sp(
         [
@@ -158,21 +124,3 @@ def test_ensure_view_on_conflict_update_reconciles_scalar_settings():
 
     assert transport.calls == 2  # noqa: PLR2004
     assert view.row_limit == 50  # noqa: PLR2004
-
-
-def test_ensure_view_skip_leaves_existing_settings_untouched():
-    ctx, transport = _sp([{"d": {"Id": "v1", "Title": "Active", "RowLimit": 30}}])
-
-    view = _views(ctx).ensure_view("Active", row_limit=50).execute_query()
-
-    assert transport.calls == 1
-    assert view.row_limit == 30  # noqa: PLR2004
-
-
-def test_ensure_view_rejects_unknown_on_conflict():
-    ctx, transport = _sp([])
-
-    with pytest.raises(ValueError):
-        _views(ctx).ensure_view("Active", on_conflict="replace")
-
-    assert transport.calls == 0

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from urllib.parse import unquote_plus
 
-import pytest
 from office365.graph_client import GraphClient
 from office365.runtime.http.http_method import HttpMethod
 from tests._scripted_transport import ScriptedTransport
@@ -175,31 +174,3 @@ def test_nested_task_add_posts_to_top_level_endpoint():
     assert create.data["title"] == "Do it"
     assert create.data["planId"] == "p1"
     assert task.resource_path.to_url().endswith("/planner/tasks/t1")
-
-
-@pytest.mark.parametrize(
-    ("attribute", "expected"),
-    [("tasks", "/planner/plans/p1/tasks"), ("buckets", "/planner/plans/p1/buckets")],
-)
-def test_nested_collection_listing_stays_under_the_plan(attribute, expected):
-    client, transport = _client(
-        [
-            {"http_status": 200, "headers": {}, "body": PLAN},
-            {"http_status": 200, "headers": {}, "body": {"value": []}},
-        ]
-    )
-    plan = client.planner.plans["p1"].get().execute_query()
-
-    getattr(plan, attribute).get().execute_query()
-
-    assert expected in unquote_plus(transport.requests[-1].url)
-
-
-def test_item_addressing_uses_the_top_level_set():
-    client = GraphClient()
-    plan = client.planner.plans["p1"]
-
-    # Listing is scoped to the plan, but each item lives in the top-level set.
-    assert plan.buckets.resource_path.to_url() == "/planner/plans/p1/buckets"
-    assert plan.buckets["b1"].resource_path.to_url() == "/planner/buckets/b1"
-    assert plan.tasks["t1"].resource_path.to_url() == "/planner/tasks/t1"

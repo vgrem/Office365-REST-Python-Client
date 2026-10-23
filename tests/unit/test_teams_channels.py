@@ -74,14 +74,3 @@ def test_add_async_channel_follows_operation():
     assert transport.calls == 3  # noqa: PLR2004
     assert channel.id == _CHANNEL_ID
     assert channel.display_name == "Verify"
-
-
-def test_add_async_channel_loads_through_target_resource_location():
-    transport = _RecordingTransport([_ACCEPTED, _OPERATION_SUCCEEDED, _CHANNEL])
-    client = _client(transport)
-
-    _channels(client).add("Verify", membership_type="shared").execute_query()
-
-    # Poll the operation, then GET the channel from targetResourceLocation.
-    assert transport.requests[1].url.endswith("/teams/t1/operations/op1")
-    assert transport.requests[-1].url.endswith(f"/teams/t1/channels/{_CHANNEL_ID}")

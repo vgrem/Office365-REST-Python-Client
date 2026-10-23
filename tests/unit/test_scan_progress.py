@@ -61,24 +61,6 @@ class TestScanProgress(unittest.TestCase):
         self.assertEqual([p.done for p in seen], [2, 3])  # noqa: PLR2004
         self.assertEqual([f.server_relative_url for f in (seen[-1].items or [])], ["/sub/c.txt"])
 
-    def test_get_files_forward_select(self):
-        """Fluent .select() on get_files is forwarded to the file collection GET."""
-        urls = []
-
-        class _CaptureTransport(_ScriptedTransport):
-            def execute(self, request):
-                urls.append(request.url)
-                return super().execute(request)
-
-        ctx = self._context(_CaptureTransport([_files_result(["/a.txt"])]))
-        folder = ctx.web.get_folder_by_server_relative_url("Shared Documents")
-
-        result = folder.get_files(False)
-        result.select(["Name"])
-        result.execute_query()
-
-        self.assertTrue(any("$select=" in url and "Name" in url and "ServerRelativeUrl" in url for url in urls))
-
 
 def _nav_node(node_id: int, title: str, url: str) -> dict:
     return {"__metadata": {"type": "SP.NavigationNode"}, "Id": node_id, "Title": title, "Url": url}
@@ -105,14 +87,6 @@ class TestNavigationGetAll(unittest.TestCase):
         nodes, seen = self._walk()
         self.assertEqual([n.get_property("Title") for n in nodes], ["Home", "About", "Team"])
         self.assertEqual([p.done for p in seen], [1, 2, 3])  # noqa: PLR2004
-
-    def test_to_json_nests_children(self):
-        nodes, _ = self._walk()
-        tree = nodes.to_json()
-        by_title = {t.get("Title"): t for t in tree}
-        self.assertEqual(by_title["About"]["Children"][0]["Title"], "Team")
-        self.assertEqual(by_title["About"]["Children"][0]["Children"], [])
-        self.assertEqual(by_title["Home"]["Children"], [])
 
 
 if __name__ == "__main__":

@@ -59,21 +59,6 @@ class TestFilePathQuoting(unittest.TestCase):
         self.assertIn("getFileByServerRelativePath", transport.url)
         self.assertIn("macdonald%27%27s", transport.url)
 
-    def test_read_with_plain_path_unchanged(self):
-        ctx, transport = self._context()
-        result = File.open_binary(ctx, "/sites/x/Shared Documents/report.pdf")
-
-        self.assertEqual(result.content, b"payload")
-        self.assertIn("report.pdf", transport.url)
-        self.assertNotIn("%27%27", transport.url)
-
-    def test_write_escapes_apostrophe(self):
-        ctx, transport = self._context()
-        result = File.save_binary(ctx, "/sites/x/macdonald's file.txt", b"content")
-
-        self.assertEqual(result.status_code, 200)
-        self.assertIn("macdonald%27%27s", transport.url)
-
     def test_odata_call_syntax_stays_literal(self):
         """#978: only the path value is encoded — the call, parens and $value stay literal."""
         ctx, transport = self._context()
@@ -133,18 +118,6 @@ def test_stream_size_rejects_unseekable_source():
 def _reference(url: str) -> str:
     b64 = base64.b64encode(url.encode("utf-8")).decode("ascii").rstrip("=")
     return "u!" + b64.replace("/", "_").replace("+", "-")
-
-
-def test_ascii_url_token_unchanged():
-    url = "https://contoso.sharepoint.com/sites/team/shared%20doc.xlsx"
-    assert _url_to_shared_token(url) == _reference(url)
-    assert not _url_to_shared_token(url).endswith("=")
-
-
-def test_non_ascii_url_token_uses_utf8():
-    url = "https://contoso.sharepoint.com/sites/プロジェクト/資料.docx"
-    assert _url_to_shared_token(url) == _reference(url)
-    assert not _url_to_shared_token(url).endswith("=")
 
 
 def test_all_base64_padding_is_removed():

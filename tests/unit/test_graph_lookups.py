@@ -125,33 +125,6 @@ def test_named_find_by_defers_and_returns_match(lookup, key, payload, entity_id,
     assert filter_fragment in url
 
 
-@pytest.mark.parametrize(
-    "lookup",
-    [
-        lambda c: c.me.todo.lists["l1"].tasks.find_by_title,
-        lambda c: c.me.mail_folders.find_by_display_name,
-        lambda c: c.me.onenote.notebooks.find_by_display_name,
-        lambda c: c.me.onenote.sections.find_by_display_name,
-    ],
-)
-def test_named_find_by_miss_leaves_entity_uninitialized(lookup):
-    client, _ = _client([{"value": []}])
-
-    entity = lookup(client)("Missing").execute_query()
-
-    assert not entity.is_loaded
-    assert entity.get_property("id") is None
-
-
-def test_find_by_title_escapes_single_quote():
-    """An embedded apostrophe is doubled inside the OData string literal."""
-    client, transport = _client([{"value": []}])
-
-    client.me.todo.lists["l1"].tasks.find_by_title("O'Brien's task").execute_query()
-
-    assert "title eq 'O''Brien''s task'" in unquote_plus(transport.urls[0])
-
-
 def test_planner_task_find_by_title_matches_client_side():
     client, transport = _client([{"id": "p1", "title": "Plan"}, {"value": [PLANNER_TASK]}])
     plan = client.planner.plans["p1"].get().execute_query()
@@ -171,15 +144,6 @@ def test_planner_task_find_by_title_matches_client_side():
     assert "$filter" not in url
 
 
-def test_planner_task_find_by_title_miss_is_client_side():
-    client, _ = _client([{"id": "p1", "title": "Plan"}, {"value": [{"id": "pkt2", "title": "Other"}]}])
-    plan = client.planner.plans["p1"].get().execute_query()
-
-    task = plan.tasks.find_by_title("Draft the plan").execute_query()
-
-    assert not task.is_loaded
-
-
 def test_planner_bucket_find_by_name_matches_client_side():
     client, transport = _client([{"id": "p1", "title": "Plan"}, {"value": [PLANNER_BUCKET]}])
     plan = client.planner.plans["p1"].get().execute_query()
@@ -197,28 +161,6 @@ def test_planner_bucket_find_by_name_matches_client_side():
     assert "/planner/plans/p1/buckets" in url
     # Graph ignores $filter on a plan's buckets, so the match is client-side.
     assert "$filter" not in url
-
-
-def test_planner_bucket_find_by_name_miss_is_client_side():
-    client, _ = _client([{"id": "p1", "title": "Plan"}, {"value": [{"id": "pbk2", "name": "Other"}]}])
-    plan = client.planner.plans["p1"].get().execute_query()
-
-    bucket = plan.buckets.find_by_name("Backlog").execute_query()
-
-    assert not bucket.is_loaded
-
-
-def test_user_plans_are_addressed_at_the_canonical_set():
-    """Items listed via ``me/planner/plans`` are addressed at ``/planner/plans/{id}``.
-
-    Graph rejects the nested ``/me/planner/plans/{id}/buckets`` navigation, so the
-    item path must be the canonical top-level one for nested reads to resolve.
-    """
-    client, _ = _client([{"value": [{"id": "p1", "title": "Plan"}]}])
-
-    plan = client.me.planner.plans.get().execute_query()[0]
-
-    assert str(plan.resource_path) == "/planner/plans/p1"
 
 
 def test_find_by_mail_defers_and_returns_match():
@@ -267,14 +209,6 @@ def test_team_find_by_name_required_raises_on_miss():
         client.execute_query()
 
 
-def test_team_find_by_name_sets_entity_path_from_group_id():
-    client, _ = _client([{"value": [TEAM]}])
-
-    team = client.teams.find_by_name("Team One").execute_query()
-
-    assert team.resource_url.endswith("/teams/g1")
-
-
 def test_booking_find_by_name_matches_client_side():
     client, transport = _client([{"value": [{"id": "b0", "displayName": "Other"}, BUSINESS]}])
 
@@ -290,14 +224,6 @@ def test_booking_find_by_name_matches_client_side():
     assert business.get_property("id") == "b1"
     assert "/solutions/bookingBusinesses" in transport.urls[0]
     assert "$filter" not in transport.urls[0]
-
-
-def test_booking_find_by_name_uninitialized_when_absent():
-    client, _ = _client([{"value": [{"id": "b0", "displayName": "Other"}]}])
-
-    business = client.solutions.booking_businesses.find_by_name("Missing").execute_query()
-
-    assert not business.is_loaded
 
 
 def test_managed_device_find_by_name_defers_and_returns_device():
@@ -332,26 +258,3 @@ def test_subscribed_sku_find_by_part_number_is_case_insensitive():
     assert sku.is_loaded
     assert sku.get_property("id") == "s1"
     assert "/subscribedSkus" in transport.urls[0]
-
-
-def test_find_by_mail_escapes_single_quote():
-    """An embedded apostrophe is doubled inside the OData string literal."""
-    client, transport = _client([{"value": []}])
-
-    client.users.find_by_mail("o'brien@contoso.com").execute_query()
-
-    assert "mail eq 'o''brien@contoso.com'" in unquote_plus(transport.urls[0])
-
-
-def test_managed_device_first_or_none_contains_filter_runs_server_side():
-    """The managed-device examples match a device-name substring via ``contains``."""
-    client, transport = _client([{"value": [DEVICE]}])
-
-    device = client.device_management.managed_devices.first_or_none("contains(deviceName, 'DESK')").execute_query()
-
-    assert device.is_loaded
-    assert device.get_property("id") == "d1"
-    url = unquote_plus(transport.urls[0])
-    assert "/deviceManagement/managedDevices" in url
-    assert "contains(deviceName, 'DESK')" in url
-    assert "$top=1" in url

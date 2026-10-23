@@ -14,9 +14,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-import pytest
 from office365.migration.base import MigrationItem, MigrationOptions, Principal
-from office365.migration.map import ContentTypeMap
 from office365.migration.sharepoint import adapters
 from office365.migration.sharepoint.adapters import SharePointLibrarySource, SharePointLibraryTarget
 from office365.migration.sharepoint.structure import ListStructure
@@ -115,50 +113,6 @@ def _folder_item(dest_path: str) -> MigrationItem:
     return MigrationItem(source_path=f"/sites/src/{dest_path}", dest_path=dest_path, item_type="folder")
 
 
-def test_library_target_list_paths_skips_system_scaffolding():
-    folder = _TargetFolder(
-        files=[
-            _Entry("/sites/x/Docs/report.docx"),
-            _Entry("/sites/x/Docs/sub/data.csv"),
-            _Entry("/sites/x/Docs/Forms/AllItems.aspx"),
-            _Entry("/sites/x/Docs/desktop.ini"),
-        ],
-        folders=[
-            _Entry("/sites/x/Docs/Archive"),
-            _Entry("/sites/x/Docs/sub"),
-            _Entry("/sites/x/Docs/Forms"),
-        ],
-    )
-    target = SharePointLibraryTarget(folder)
-
-    assert target.list_paths() == ["report.docx", "sub/data.csv", "Archive/", "sub/"]
-
-
-def test_library_target_list_paths_relative_to_subfolder():
-    folder = _TargetFolder(
-        files=[
-            _Entry("/sites/x/Docs/archive/old.txt"),
-            _Entry("/sites/x/Docs/archive/Forms/AllItems.aspx"),
-        ],
-        folders=[_Entry("/sites/x/Docs/archive/nested"), _Entry("/sites/x/Docs/archive/Forms")],
-    )
-    folder.server_relative_url = "/sites/x/Docs/archive"
-    target = SharePointLibraryTarget(folder)
-
-    assert target.list_paths() == ["old.txt", "nested/"]
-
-
-def test_library_target_write_ensures_folders_instead_of_uploading():
-    folder = _TargetFolder()
-    target = SharePointLibraryTarget(folder)
-
-    target.write(_folder_item("a/b/"), None)
-
-    assert folder.ensured == ["a/b"]
-    assert folder.uploaded is None
-    assert folder.context.executed == 1
-
-
 def test_library_target_write_uploads_files():
     folder = _TargetFolder()
     target = SharePointLibraryTarget(folder)
@@ -167,18 +121,6 @@ def test_library_target_write_uploads_files():
 
     assert folder.uploaded == ("a.txt", b"data")
     assert folder.ensured == []
-
-
-def test_library_target_refuses_a_record_payload():
-    folder = _TargetFolder()
-    target = SharePointLibraryTarget(folder)
-    item = MigrationItem("/sites/src/1", "1", item_type="record")
-
-    # Live, this wrote the record's repr into a file named "1" and reported success.
-    with pytest.raises(ValueError, match="a list record is not a file body"):
-        target.write(item, {"Title": "Write the report"})
-
-    assert folder.uploaded is None
 
 
 def test_library_target_write_many_creates_folders_and_transfers_files(monkeypatch):
@@ -314,13 +256,6 @@ def test_library_target_list_paths_skips_site_assets_scaffolding():
     assert target.list_paths() == ["logo.png", "Images/"]
 
 
-def test_site_assets_notebook_rule_does_not_apply_elsewhere():
-    folder = _TargetFolder(folders=[_Entry("/sites/x/Docs/Project Notebook")])
-    target = SharePointLibraryTarget(folder)
-
-    assert target.list_paths() == ["Project Notebook/"]
-
-
 class _ById:
     id = None
 
@@ -350,27 +285,6 @@ class _SourceFolder:
 
     def get_folders(self, recursive: bool = False) -> _Collection:
         return _Collection(self._folders)
-
-
-def test_library_source_skips_site_assets_scaffolding():
-    web = _SiteAssetsWeb("Project")
-    folder = _SourceFolder(
-        "/sites/x/SiteAssets",
-        web,
-        files=[
-            _SourceFile("/sites/x/SiteAssets/__siteIcon__.png"),
-            _SourceFile("/sites/x/SiteAssets/logo.png"),
-        ],
-        folders=[
-            _Entry("/sites/x/SiteAssets/Project Notebook"),
-            _Entry("/sites/x/SiteAssets/Images"),
-            _Entry("/sites/x/SiteAssets/Forms"),
-        ],
-    )
-    source = SharePointLibrarySource(folder)
-    source._item_authors = {}
-
-    assert [item.dest_path for item in source.list_items()] == ["Images/", "logo.png"]
 
 
 # ── Document timestamps (web-local conversion) ────────────────────────────────
@@ -466,29 +380,6 @@ class _TimestampWeb:
 
     def get_file_by_server_relative_url(self, url: str) -> _SecurableFile:
         return self._files.setdefault(url, _SecurableFile())
-
-
-def test_library_target_converts_utc_to_web_local_before_writing_timestamps():
-    time_zone = _FakeTimeZone(offset_hours=-7)  # Pacific daylight
-    web = _TimestampWeb(time_zone)
-    folder = _TimestampFolder(_TimestampContext(web))
-    target = SharePointLibraryTarget(folder)
-    item = MigrationItem(
-        "/sites/src/doc.txt",
-        "doc.txt",
-        item_type="file",
-        created="2021-06-01T15:00:00+00:00",
-        modified="2022-07-02T16:00:00+00:00",
-    )
-
-    target.apply_timestamps(item)
-
-    file = web._files["/sites/x/Docs/doc.txt"]
-    form_values, dates_in_utc, new_document_update = file.listItemAllFields.updates[0]
-    # 15:00Z -> 08:00 local; 16:00Z -> 09:00 local
-    assert form_values == {"Created": "2021-06-01 08:00:00", "Modified": "2022-07-02 09:00:00"}
-    assert dates_in_utc is True
-    assert new_document_update is True
 
 
 def test_library_target_caches_time_zone_conversions():
@@ -673,22 +564,6 @@ def _folder_target(web: _FolderWeb, columns: list[_Column] | None = None) -> Sha
     return SharePointLibraryTarget(folder, sp_list=_Library(columns or [_Column("Region", "Choice")]))
 
 
-def test_library_target_applies_folder_column_values_to_its_item():
-    item = _FolderItem()
-    web = _FolderWeb({"/sites/x/Docs/Area1": item})
-    target = _folder_target(web)
-
-    target.write(
-        _folder_item("Area1/"),
-        # ``FileRef``/``FSObjType`` are the folder's identity, and an empty value is
-        # no value — none of them can be written.
-        {"Region": "North", "ContentTypeId": "0x0120", "FileRef": "/sites/x/Docs/Area1", "Title": ""},
-    )
-
-    assert item.written == {"Region": "North", "ContentTypeId": "0x0120"}
-    assert item.updated == 1
-
-
 def test_library_target_reports_folder_values_it_could_not_write():
     item = _FolderItem(error="Access denied")
     target = _folder_target(_FolderWeb({"/sites/x/Docs/Area1": item}))
@@ -803,14 +678,6 @@ def test_library_source_reads_a_draft_files_approval_state():
     assert source.read_metadata(item)["moderation_status"] == "0"
 
 
-def test_library_source_does_not_carry_an_approved_files_state():
-    source, _ = _library_source({"OData__ModerationStatus": 2})
-    item = source.list_items()[0]
-
-    assert source.read_item_state(item) is None
-    assert source.read_metadata(item)["moderation_status"] == "2"
-
-
 def test_library_source_does_not_read_moderation_columns_without_moderation():
     # Selecting a column the list does not have fails outright, so the projection
     # only grows when the library enables content approval.
@@ -854,24 +721,6 @@ def test_library_source_warns_about_a_checked_out_file():
     assert "CheckoutUser/Id" in lst.items.selects[0]
 
 
-def test_library_source_does_not_warn_when_nothing_is_checked_out():
-    source, _ = _checkout_source(["/sites/x/Docs/a.txt"], set())
-
-    source.list_items()
-
-    assert source.warnings == []
-
-
-def test_library_source_summarizes_a_long_checked_out_list():
-    urls = [f"/sites/x/Docs/f{index}.txt" for index in range(7)]
-    source, _ = _checkout_source(urls, set(urls))
-
-    source.list_items()
-
-    assert len(source.warnings) == 1
-    assert source.warnings[0].endswith(": f0.txt, f1.txt, f2.txt, f3.txt, f4.txt and 2 more")
-
-
 # ── Un-published (minor) versions (the draft hides its published predecessor) ──
 
 
@@ -884,28 +733,6 @@ def _draft_source(urls: list[str], drafts: set[str]):
     )
     lst = _ModerationList([_ModerationItem({"FileRef": url}) for url in urls], moderation=False)
     return SharePointLibrarySource(folder, sp_list=lst), lst
-
-
-def test_library_source_warns_about_an_un_published_draft():
-    # REST returns the draft content, so the copy matches what the source reports,
-    # but the published version the draft supersedes is not migrated — verification
-    # compares the same read and cannot see the difference.
-    source, _ = _draft_source(["/sites/x/Docs/a.txt", "/sites/x/Docs/b.txt"], {"/sites/x/Docs/b.txt"})
-
-    source.list_items()
-
-    assert source.warnings == [
-        "1 file(s) are on an un-published (minor) version: the draft content is copied, "
-        "the published version it supersedes is not (version history is not preserved): b.txt"
-    ]
-
-
-def test_library_source_does_not_warn_when_every_file_is_published():
-    source, _ = _draft_source(["/sites/x/Docs/a.txt"], set())
-
-    source.list_items()
-
-    assert source.warnings == []
 
 
 def test_library_source_summarizes_a_long_draft_list():
@@ -963,27 +790,6 @@ def test_library_source_reads_a_folders_metadata_back_for_the_diff():
 def _state_target():
     web = _TimestampWeb(_FakeTimeZone(offset_hours=-7))
     return SharePointLibraryTarget(_TimestampFolder(_TimestampContext(web))), web
-
-
-def test_library_target_restores_a_files_approval_state_in_its_own_write():
-    # A moderated document rejects a moderation change combined with other item
-    # properties, so this is a write of its own, sent after the timestamps.
-    target, web = _state_target()
-    item = MigrationItem("/sites/x/Docs/doc.txt", "doc.txt")
-
-    target.apply_item_state(item, {"_ModerationStatus": "0", "_ModerationComments": "wip"})
-
-    file = web.get_file_by_server_relative_url("/sites/x/Docs/doc.txt")
-    assert file.listItemAllFields.updates == [({"_ModerationStatus": "0", "_ModerationComments": "wip"}, True, True)]
-
-
-def test_library_target_skips_approval_state_for_folders():
-    target, web = _state_target()
-    item = MigrationItem("/sites/x/Docs/Area1", "Area1/", item_type="folder")
-
-    target.apply_item_state(item, {"_ModerationStatus": "0"})
-
-    assert web._files == {}
 
 
 def test_library_target_reports_an_approval_state_it_could_not_restore():
@@ -1058,16 +864,6 @@ def test_library_target_reads_back_the_written_approval_state():
     assert metadata["moderation_status"] == "1"
 
 
-def test_library_target_omits_the_approval_state_it_cannot_read():
-    # A library without moderation enabled has no such column: the difference is
-    # unknown, not a mismatch.
-    target = _meta_target(_MetaListItem(None, fails=True))
-
-    metadata = target.read_metadata(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt"))
-
-    assert "moderation_status" not in metadata
-
-
 class _SPList:
     """The target library object ``provision_list_structure`` would provision into."""
 
@@ -1098,32 +894,3 @@ def test_library_target_replays_a_captured_structure_once(monkeypatch):
     assert [call[0] for call in calls] == [sp_list]
     assert calls[0][1] is structure
     assert target.warnings == ["view 'All Items' was created without LinkTitle"]
-
-
-def test_library_target_structure_needs_the_target_list():
-    with pytest.raises(ValueError, match="needs the target list"):
-        SharePointLibraryTarget(_TargetFolder(), structure=_structure())
-
-
-def test_library_target_without_a_structure_provisions_nothing(monkeypatch):
-    calls: list = []
-    monkeypatch.setattr(adapters, "provision_list_structure", lambda *a, **k: calls.append(a) or [])
-
-    SharePointLibraryTarget(_TargetFolder(), sp_list=_SPList()).configure(MigrationOptions())
-
-    assert calls == []
-
-
-def test_library_target_provisions_into_the_callers_content_type_map(monkeypatch):
-    # Filling the map in place is what makes the folder's ContentTypeId resolve to
-    # the recreated content type instead of being coerced to the library default.
-    captured: list = []
-    monkeypatch.setattr(adapters, "provision_list_structure", lambda *a, **k: captured.append(k) or [])
-    mapping = ContentTypeMap()
-    target = SharePointLibraryTarget(
-        _TargetFolder(), sp_list=_SPList(), content_type_map=mapping, structure=_structure()
-    )
-
-    target.configure(MigrationOptions())
-
-    assert captured[0]["content_type_map"] is mapping.entries

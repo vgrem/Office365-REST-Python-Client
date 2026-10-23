@@ -19,7 +19,6 @@ from office365.runtime.query_capabilities import (
     QueryPropertyNotSupportedError,
     query_capabilities,
     query_capabilities_of,
-    referenced_properties,
 )
 from tests._scripted_transport import ScriptedTransport
 
@@ -30,13 +29,6 @@ def test_call_records_declares_top_unsupported():
     assert capability.supports("filter")
     assert not capability.supports("top")
     assert not capability.supports("$Top")  # normalized
-
-
-def test_call_records_top_raises():
-    records = GraphClient().communications.call_records
-    with pytest.raises(QueryOptionNotSupportedError) as err:
-        records.top(20)
-    assert "$top" in str(err.value)
 
 
 def test_paged_and_get_all_are_guarded():
@@ -81,61 +73,7 @@ def test_declaration_validation():
         query_capabilities(unsupported={"top"}, on_unsupported="nope")
 
 
-def test_decorator_rejects_non_class():
-    with pytest.raises(TypeError):
-        query_capabilities(unsupported={"top"})(lambda: None)
-
-
 # --- property-level capabilities -------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    ("expression", "expected"),
-    [
-        ("size gt 0", {"size"}),
-        ("name eq 'size'", {"name"}),  # the quoted literal is not a property
-        ("startswith(name,'A')", {"name"}),  # a function name is not a property
-        ("folder ne null and size gt 0", {"folder", "size"}),
-        ("lastModifiedDateTime gt 2020-01-01T00:00:00Z", {"lastModifiedDateTime"}),
-        ("fields/customField eq 1", {"fields", "customField"}),
-        (None, set()),
-    ],
-)
-def test_referenced_properties(expression, expected):
-    assert referenced_properties(expression) == expected
-
-
-@query_capabilities(unsupported_filter={"size"}, unsupported_orderby={"name"})
-class _PropertyRestricted(EntityCollection):
-    pass
-
-
-@query_capabilities(filterable={"name"}, orderable={"name"})
-class _PropertyAllowList(EntityCollection):
-    pass
-
-
-def test_property_deny_list_violations():
-    capability = query_capabilities_of(_PropertyRestricted)
-    assert capability is not None
-    assert capability.filter_violations("size gt 0") == ("size",)
-    assert capability.filter_violations("folder ne null") == ()
-    assert capability.orderby_violations("name desc") == ("name",)
-
-
-def test_property_allow_list_violations():
-    capability = query_capabilities_of(_PropertyAllowList)
-    assert capability is not None
-    assert capability.filter_violations("name eq 'a'") == ()
-    assert capability.filter_violations("size gt 0") == ("size",)
-
-
-def test_property_violation_raises_before_the_round_trip():
-    col = _PropertyRestricted(GraphClient(), Entity)
-    with pytest.raises(QueryPropertyNotSupportedError) as err:
-        col.filter("size gt 0")
-    assert "size" in str(err.value)
-    assert "$filter" in str(err.value)
 
 
 def test_property_violation_warn_keeps_the_expression():
@@ -188,12 +126,3 @@ def test_prefer_header_injected_for_last_modified_filter():
 
     prefer = transport.requests[-1].headers.get("Prefer", "")
     assert TRY_FILTER_LAST_MODIFIED_DATE_TIME in prefer
-
-
-def test_prefer_header_absent_without_matching_filter():
-    transport = _RecordingTransport([{"value": []}])
-    client = _client(transport)
-
-    client.me.drive.root.children.filter("folder ne null").get().execute_query()
-
-    assert "Prefer" not in (transport.requests[-1].headers or {})

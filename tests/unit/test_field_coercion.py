@@ -7,31 +7,11 @@ from datetime import datetime
 from office365.sharepoint.fields.coercion import coerce_field_value
 from office365.sharepoint.fields.geolocation_value import FieldGeolocationValue
 from office365.sharepoint.fields.lookup_value import FieldLookupValue
-from office365.sharepoint.fields.multi_choice_value import FieldMultiChoiceValue
 from office365.sharepoint.fields.multi_lookup_value import FieldMultiLookupValue
 from office365.sharepoint.fields.multi_user_value import FieldMultiUserValue
 from office365.sharepoint.fields.type import FieldType
 from office365.sharepoint.fields.url_value import FieldUrlValue
 from office365.sharepoint.fields.user_value import FieldUserValue
-
-
-def test_multi_choice_splits_separator_string_and_list():
-    from_string = coerce_field_value(FieldType.MultiChoice, "In Progress; Completed")
-    from_list = coerce_field_value(FieldType.MultiChoice, ["In Progress", "Completed"])
-
-    assert isinstance(from_string, FieldMultiChoiceValue)
-    assert list(from_string) == ["In Progress", "Completed"]
-    assert list(from_list) == ["In Progress", "Completed"]
-
-
-def test_lookup_single_and_multi():
-    single = coerce_field_value(FieldType.Lookup, 42)
-    multi = coerce_field_value(FieldType.Lookup, [1, 2])
-
-    assert isinstance(single, FieldLookupValue)
-    assert single.LookupId == 42  # noqa: PLR2004
-    assert isinstance(multi, FieldMultiLookupValue)
-    assert [item.LookupId for item in multi] == [1, 2]
 
 
 def test_user_from_email_id_and_list():
@@ -72,12 +52,6 @@ def test_scalar_coercions():
     assert coerce_field_value(FieldType.DateTime, "2024-01-02") == datetime(2024, 1, 2)
 
 
-def test_none_and_unknown_pass_through():
-    assert coerce_field_value(FieldType.Number, None) is None
-    assert coerce_field_value(None, "as-is") == "as-is"
-    assert coerce_field_value(FieldType.Text, "text") == "text"
-
-
 def test_listitem_persists_multi_user_and_lookup_ids():
     from office365.sharepoint.client_context import ClientContext
     from office365.sharepoint.listitems.listitem import ListItem
@@ -93,9 +67,3 @@ def test_listitem_persists_multi_user_and_lookup_ids():
     assert list(item.properties["MultiDeptId"]) == [2, 3]
     assert item.to_json()["MultiOwnerId"] == [12, 7]
     assert item.to_json()["MultiDeptId"] == [2, 3]
-
-
-def test_already_typed_value_passes_through():
-    typed = FieldLookupValue(LookupId=5)
-
-    assert coerce_field_value(FieldType.Lookup, typed) is typed

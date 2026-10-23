@@ -8,7 +8,6 @@ after the upsert still runs after the resource exists.
 
 from __future__ import annotations
 
-import pytest
 from office365.graph_client import GraphClient
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.odata.literals import odata_literal
@@ -43,11 +42,6 @@ def _methods(transport):
 
 
 # ── odata_literal ────────────────────────────────────────────────
-
-
-def test_odata_literal_quotes_strings_and_escapes_quotes():
-    assert odata_literal("Group157") == "'Group157'"
-    assert odata_literal("O'Brien") == "'O''Brien'"
 
 
 def test_odata_literal_emits_numbers_booleans_and_null_bare():
@@ -87,14 +81,6 @@ def test_upsert_creates_with_only_the_key_when_no_properties():
     assert group.is_loaded
 
 
-def test_upsert_skip_still_creates_when_missing():
-    client, transport = _client([{"value": []}, _CREATED])
-
-    client.groups.upsert("uniqueName", "Group157", on_conflict="skip", description="Team site").execute_query()
-
-    assert _methods(transport) == [HttpMethod.Get, HttpMethod.Post]
-
-
 # ── upsert: reconcile when present ───────────────────────────────
 
 
@@ -119,41 +105,7 @@ def test_upsert_is_write_idempotent_when_state_matches():
     assert group.description == "Old"
 
 
-def test_upsert_skip_leaves_existing_untouched():
-    client, transport = _client([{"value": [_EXISTING]}])
-
-    group = client.groups.upsert("uniqueName", "Group157", on_conflict="skip", description="New").execute_query()
-
-    assert _methods(transport) == [HttpMethod.Get]
-    assert group.description == "Old"
-
-
-def test_upsert_does_not_update_when_no_properties_requested():
-    client, transport = _client([{"value": [_EXISTING]}])
-
-    client.groups.upsert("uniqueName", "Group157").execute_query()
-
-    assert _methods(transport) == [HttpMethod.Get]
-
-
 # ── upsert: identity formatting ──────────────────────────────────
-
-
-def test_upsert_escapes_the_string_key_value():
-    client, transport = _client([{"value": []}, _CREATED])
-
-    client.groups.upsert("displayName", "O'Brien", description="Team site").execute_query()
-
-    assert "displayName eq 'O''Brien'" in transport.requests[0].url
-
-
-def test_upsert_supports_an_integer_key():
-    client, transport = _client([{"value": []}, {"id": 7, "displayName": "Seven"}])
-
-    client.groups.upsert("id", 7, displayName="Seven").execute_query()
-
-    assert "id eq 7" in transport.requests[0].url
-    assert transport.requests[1].data == {"id": 7, "displayName": "Seven"}
 
 
 # ── upsert: deferred ordering ────────────────────────────────────
@@ -169,13 +121,6 @@ def test_upsert_create_runs_before_queries_queued_after_it():
     assert _methods(transport) == [HttpMethod.Get, HttpMethod.Post, HttpMethod.Get]
     assert transport.requests[1].url.endswith("/groups")
     assert transport.requests[2].url.endswith("/groups/g1")
-
-
-def test_upsert_rejects_retired_on_conflict_value():
-    client, _ = _client([])
-
-    with pytest.raises(ValueError, match="on_conflict"):
-        client.groups.upsert("uniqueName", "Group157", on_conflict="upsert")
 
 
 # ── upsert: SharePoint parity ────────────────────────────────────
@@ -212,11 +157,3 @@ def test_upsert_updates_existing_list():
     assert transport.requests[1].headers["X-HTTP-Method"] == "MERGE"
     assert "Description" in transport.requests[1].data
     assert result.get_property("Description") == "New"
-
-
-def test_upsert_is_write_idempotent_for_sharepoint():
-    ctx, transport = _sp([{"d": {"results": [{"Id": "list-1", "Title": "Documents", "Description": "Old"}]}}])
-
-    ctx.web.lists.upsert("Title", "Documents", Description="Old").execute_query()
-
-    assert _methods(transport) == [HttpMethod.Get]

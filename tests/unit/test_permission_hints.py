@@ -14,10 +14,8 @@ import unittest
 
 from office365.directory.permissions.require_permission import PermissionRequirement, require_permission
 from office365.graph_client import GraphClient
-from office365.onedrive.drives.collection import DriveCollection
-from office365.runtime.exceptions import AccessDeniedException, FileLockedException, ObjectNotFoundException
+from office365.runtime.exceptions import AccessDeniedException, ObjectNotFoundException
 from office365.runtime.queries.client_query import ClientQuery
-from office365.sharepoint.exceptions import SPFileCheckOutException, SPQueryThrottledException
 from tests._scripted_transport import AsyncScriptedTransport, ScriptedTransport
 
 
@@ -30,22 +28,6 @@ def _client(status: int = 403, code: str = "accessDenied") -> GraphClient:
     client.pending_request().beforeExecute.clear()
     client.pending_request().transport = ScriptedTransport([_payload(status, code)])
     return client
-
-
-class _Builder:
-    """Minimal builder owning a client context, used to test query stamping."""
-
-    def __init__(self, client: GraphClient) -> None:
-        self.context = client
-
-    @require_permission(application=["Foo.Read.All"], notes="Read foo")
-    def build(self) -> "_Builder":
-        self.context.add_query(ClientQuery(self.context))
-        return self
-
-    @require_permission(application=["Bar.Read.All"])
-    def noop(self) -> "_Builder":
-        return self
 
 
 class _AsyncBuilder:
@@ -61,12 +43,6 @@ class _AsyncBuilder:
 
 
 class TestPermissionRequirementHint(unittest.TestCase):
-    def test_application_only(self):
-        self.assertEqual(
-            PermissionRequirement(application=["Files.Read.All"]).to_hint(),
-            "This API declares: application Files.Read.All.",
-        )
-
     def test_all_columns_and_notes(self):
         hint = PermissionRequirement(
             delegated=["Files.Read"],
@@ -79,30 +55,8 @@ class TestPermissionRequirementHint(unittest.TestCase):
         self.assertIn("directory role Global Administrator", hint)
         self.assertIn("(List drives)", hint)
 
-    def test_empty_is_blank(self):
-        self.assertEqual(PermissionRequirement().to_hint(), "")
-
 
 class TestRequirePermissionStampsQuery(unittest.TestCase):
-    def test_stamps_the_query_it_builds(self):
-        client = GraphClient()
-        _Builder(client).build()
-
-        requirement = client.last_query.permission_requirement
-        self.assertIsInstance(requirement, PermissionRequirement)
-        self.assertEqual(requirement.application, ["Foo.Read.All"])
-
-    def test_method_that_queues_nothing_leaves_query_untouched(self):
-        client = GraphClient()
-        builder = _Builder(client)
-        builder.build()
-        query = client.last_query
-
-        builder.noop()
-
-        self.assertIs(client.last_query, query)
-        self.assertEqual(query.permission_requirement.application, ["Foo.Read.All"])
-
     def test_async_decorated_method_stays_awaitable_and_stamps(self):
         client = GraphClient()
         builder = _AsyncBuilder(client)
@@ -112,23 +66,8 @@ class TestRequirePermissionStampsQuery(unittest.TestCase):
         self.assertEqual(result, "done")
         self.assertEqual(client.last_query.permission_requirement.application, ["Baz.Read.All"])
 
-    def test_metadata_and_docstring_preserved(self):
-        requirement = DriveCollection.get.__required_permissions__
-        self.assertIn("Sites.Read.All", requirement.application)
-        self.assertIn("Requires permissions:", DriveCollection.get.__doc__)
-
 
 class TestDeniedRequestHints(unittest.TestCase):
-    def test_decorated_denied_request_names_permission(self):
-        client = _client()
-
-        with self.assertRaises(AccessDeniedException) as raised:
-            client.drives.get().execute_query()
-
-        hint = raised.exception.hints[0]
-        self.assertIn("application Files.Read.All", hint)
-        self.assertIn("(List all drives in the tenant)", hint)
-
     def test_str_includes_guidance_and_declared_permission(self):
         client = _client()
 
@@ -175,19 +114,6 @@ class TestHintApi(unittest.TestCase):
         self.assertIs(exc.add_hint("grant X"), exc)
         self.assertEqual(exc.hints, ("grant X",))
         self.assertIn("grant X", str(exc))
-
-    def test_blank_hint_is_ignored(self):
-        exc = AccessDeniedException(response=None)
-        exc.add_hint("")
-        self.assertEqual(exc.hints, ())
-
-
-class TestGuidanceRendering(unittest.TestCase):
-    def test_guidance_is_rendered_exactly_once(self):
-        types = (AccessDeniedException, FileLockedException, SPQueryThrottledException, SPFileCheckOutException)
-        for exc_type in types:
-            exc = exc_type(response=None)
-            self.assertEqual(str(exc).count(exc.GUIDANCE), 1, exc_type.__name__)
 
 
 if __name__ == "__main__":

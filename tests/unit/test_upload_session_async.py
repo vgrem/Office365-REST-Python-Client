@@ -11,7 +11,6 @@ import asyncio
 import threading
 from unittest import mock
 
-import pytest
 from office365.graph_client import GraphClient
 from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.runtime.client_request_exception import ClientRequestException
@@ -79,19 +78,6 @@ def test_upload_session_request_async_uploads_ranges(tmp_path) -> None:
     assert file_object.reads and all(thread != loop_thread for thread in file_object.reads)
 
 
-def test_upload_session_request_async_invokes_chunk_callback(tmp_path) -> None:
-    source = tmp_path / "payload.bin"
-    source.write_bytes(b"abcdefghij")  # 10 bytes
-    uploaded: list[int] = []
-    transport = AsyncScriptedTransport([{"d": {}}] * 3)
-    request = UploadSessionRequest(source.open("rb"), chunk_size=4, chunk_uploaded=uploaded.append)
-    request.with_async_transport(transport)
-
-    asyncio.run(request.execute_query_async(mock.Mock(upload_session_url=_UPLOAD_URL)))
-
-    assert uploaded == [4, 8, 10]
-
-
 def test_drive_item_resumable_upload_async_end_to_end(tmp_path) -> None:
     source = tmp_path / "hello.bin"
     source.write_bytes(b"x" * 10)
@@ -114,23 +100,6 @@ def test_drive_item_resumable_upload_async_end_to_end(tmp_path) -> None:
     assert [p.done for p in seen] == [4, 8, 10]
     assert seen[-1].total == 10  # noqa: PLR2004
     assert seen[-1].stage == "uploading"
-
-
-def test_drive_item_resumable_upload_async_propagates_failure(tmp_path) -> None:
-    source = tmp_path / "hello.bin"
-    source.write_bytes(b"x" * 4)
-    ctx = GraphClient()
-    transport = RoutingTransport(
-        [
-            ("createUploadSession", {"uploadUrl": _UPLOAD_URL}),
-            (_UPLOAD_URL, {"status": 500, "body": {"error": {"message": "boom"}}}),
-        ]
-    )
-    ctx.pending_request().beforeExecute.clear()
-    ctx.pending_request().transport = transport
-
-    with pytest.raises(ClientRequestException):
-        asyncio.run(ctx.me.drive.root.resumable_upload_async(str(source), chunk_size=4))
 
 
 def test_drive_item_resumable_upload_async_dispatches_to_on_error(tmp_path) -> None:

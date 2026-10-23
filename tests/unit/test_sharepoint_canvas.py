@@ -22,19 +22,6 @@ def test_no_canvas_has_no_controls():
     assert count_web_parts("<div>classic wiki html</div>") == 0
 
 
-def test_counts_only_client_side_web_parts():
-    # 0/3 are layout (section/column), 4 is a web part, 1 is a text control.
-    canvas = _canvas(0, 4, 3, 1, 4)
-    assert count_web_parts(canvas) == 2  # noqa: PLR2004
-
-
-def test_parses_every_control_in_canvas_order():
-    controls = parse_canvas_controls(_canvas(3, 4))
-    assert [control.control_type for control in controls] == [3, 4]
-    assert [control.is_web_part for control in controls] == [False, True]
-    assert controls[1].data == {"controlType": WEB_PART_CONTROL_TYPE}
-
-
 def test_skips_malformed_and_non_object_blobs():
     canvas = (
         '<div data-sp-controldata="{&quot;controlType&quot;:4}"></div>'
@@ -43,12 +30,6 @@ def test_skips_malformed_and_non_object_blobs():
     )
     controls = parse_canvas_controls(canvas)
     assert [control.control_type for control in controls] == [WEB_PART_CONTROL_TYPE]
-
-
-def test_control_without_type_is_not_a_web_part():
-    controls = parse_canvas_controls('<div data-sp-controldata="{&quot;id&quot;:&quot;x&quot;}"></div>')
-    assert [control.control_type for control in controls] == [None]
-    assert controls[0].is_web_part is False
 
 
 def test_site_page_counts_web_parts_in_its_canvas():

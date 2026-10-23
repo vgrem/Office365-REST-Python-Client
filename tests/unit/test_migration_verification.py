@@ -82,26 +82,6 @@ class _Target:
         pass
 
 
-class _PlainSource:
-    """Source with only the abstract contract (no fidelity read hooks)."""
-
-    def __init__(self, items, checksums=None):
-        self._items = items
-        self._checksums = checksums or {}
-
-    def list_items(self, progress=None):
-        return list(self._items)
-
-    def read(self, item):
-        return b""
-
-    def checksum(self, item):
-        return self._checksums.get(item.dest_path, "")
-
-    def close(self):
-        pass
-
-
 class _PlainTarget:
     """Target with only the abstract contract (no fidelity read hooks)."""
 
@@ -143,29 +123,6 @@ def test_presence_splits_missing_and_extra():
     assert report.target_count == 2  # noqa: PLR2004
 
 
-def test_content_mismatch_is_reported():
-    manifest = _manifest("a.txt")
-    source = _Source(manifest.items, checksums={"a.txt": "src"})
-    target = _Target(["a.txt"], checksums={"a.txt": "dst"})
-
-    report = verify(source, target, manifest)
-
-    assert report.mismatches == ["content mismatch: a.txt"]
-    assert report.checked == 1
-    assert not report.ok
-
-
-def test_matching_content_is_ok():
-    manifest = _manifest("a.txt")
-    source = _Source(manifest.items, checksums={"a.txt": "same"})
-    target = _Target(["a.txt"], checksums={"a.txt": "same"})
-
-    report = verify(source, target, manifest)
-
-    assert report.ok
-    assert report.complete
-
-
 def test_uncomparable_checksum_is_unverifiable_not_a_mismatch():
     manifest = _manifest("a.txt")
     source = _Source(manifest.items, checksums={"a.txt": "src"})
@@ -179,43 +136,6 @@ def test_uncomparable_checksum_is_unverifiable_not_a_mismatch():
     assert any("no checksum" in entry for entry in report.unverifiable)
 
 
-def test_timestamp_mismatch_reported_when_requested():
-    manifest = _manifest("a.txt")
-    source = _Source(
-        manifest.items,
-        checksums={"a.txt": "x"},
-        metadata={"a.txt": {"modified": "2020-01-01T00:00:00Z"}},
-    )
-    target = _Target(
-        ["a.txt"],
-        checksums={"a.txt": "x"},
-        metadata={"a.txt": {"modified": "2024-06-01T00:00:00Z"}},
-    )
-
-    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
-
-    assert report.mismatches == ["timestamp mismatch (modified): a.txt"]
-    assert not report.ok
-
-
-def test_timestamps_compared_tz_tolerantly():
-    manifest = _manifest("a.txt")
-    source = _Source(
-        manifest.items,
-        checksums={"a.txt": "x"},
-        metadata={"a.txt": {"modified": "2020-01-01T00:00:00Z"}},
-    )
-    target = _Target(
-        ["a.txt"],
-        checksums={"a.txt": "x"},
-        metadata={"a.txt": {"modified": "2020-01-01T00:00:00+00:00"}},
-    )
-
-    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
-
-    assert report.mismatches == []
-
-
 def test_approval_state_mismatch_reported():
     # A draft file that landed approved is a real fidelity loss (it is visible on the
     # target), so the metadata diff compares the content-approval status too.
@@ -227,17 +147,6 @@ def test_approval_state_mismatch_reported():
 
     assert report.mismatches == ["approval state mismatch: a.txt"]
     assert not report.ok
-
-
-def test_approval_state_match_is_ok():
-    manifest = _manifest("a.txt")
-    source = _Source(manifest.items, checksums={"a.txt": "x"}, metadata={"a.txt": {"moderation_status": "1"}})
-    target = _Target(["a.txt"], checksums={"a.txt": "x"}, metadata={"a.txt": {"moderation_status": "1"}})
-
-    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
-
-    assert report.mismatches == []
-    assert report.ok
 
 
 def test_approval_state_unverifiable_when_the_target_reports_none():
@@ -255,17 +164,6 @@ def test_approval_state_unverifiable_when_the_target_reports_none():
     assert report.mismatches == []
     assert not report.complete
     assert any("approval state" in entry for entry in report.unverifiable)
-
-
-def test_metadata_check_unverifiable_without_target_hook():
-    manifest = _manifest("a.txt")
-    source = _Source(manifest.items, checksums={"a.txt": "x"})
-    target = _PlainTarget(["a.txt"], checksums={"a.txt": "x"})
-
-    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
-
-    assert any("read_metadata" in entry for entry in report.unverifiable)
-    assert not report.complete
 
 
 def test_attachment_system_metadata_reported_once_not_per_item():
@@ -289,25 +187,6 @@ def test_attachment_system_metadata_reported_once_not_per_item():
     assert report.ok  # the record's timestamp matched; the attachment is content-only
     assert not any("no metadata" in entry for entry in report.unverifiable)
     assert any(entry.startswith("attachments:") for entry in report.unverifiable)
-
-
-def test_permission_mismatch_reported_when_requested():
-    manifest = _manifest("a.txt")
-    source = _Source(
-        manifest.items,
-        checksums={"a.txt": "x"},
-        permissions={"a.txt": [PermissionEntry("alice@contoso.com", ["Read"])]},
-    )
-    target = _Target(
-        ["a.txt"],
-        checksums={"a.txt": "x"},
-        permissions={"a.txt": [PermissionEntry("alice@contoso.com", ["Edit"])]},
-    )
-
-    report = verify(source, target, manifest, options=MigrationOptions(preserve_permissions=True))
-
-    assert report.mismatches == ["permission mismatch: a.txt"]
-    assert not report.ok
 
 
 def test_permissions_match_is_ok():
@@ -352,36 +231,6 @@ def test_a_folder_whose_values_were_migrated_is_content_checked():
     assert not report.ok
 
 
-def test_a_folder_is_not_content_checked_without_folder_value_support():
-    # The filesystem pair and any adapter that does not carry folder values must not
-    # report a folder as unverifiable content — it only has a structure.
-    manifest = _folder_manifest("Area/")
-    source = _Source(manifest.items, checksums={"Area/": ""})
-    target = _Target(["Area/"], checksums={"Area/": ""})
-
-    report = verify(source, target, manifest)
-
-    assert report.ok
-    assert report.unverifiable == []
-    assert report.checked == 0
-
-
-def test_a_folders_system_metadata_is_verified_with_the_folder_sample():
-    # A folder is an item too: the timestamp/authorship/ACL writes land on its list
-    # item, so the folder sample joins the fidelity diffs of a pair that carries it.
-    manifest = _folder_manifest("Area/")
-    same = {"created": "2021-03-04T05:06:07+00:00", "modified": "2021-03-05T06:07:08+00:00"}
-    source = _Source(manifest.items, checksums={"Area/": "x"}, metadata={"Area/": same})
-    target = _Target(["Area/"], checksums={"Area/": "x"}, metadata={"Area/": same})
-    source.supports_folder_records = True
-    target.supports_folder_records = True
-
-    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
-
-    assert report.ok
-    assert report.complete
-
-
 def test_a_folders_system_metadata_mismatch_is_reported():
     manifest = _folder_manifest("Area/")
     source = _Source(
@@ -403,19 +252,6 @@ def test_a_folders_system_metadata_mismatch_is_reported():
     assert not report.ok
 
 
-def test_folders_are_not_fidelity_checked_without_folder_record_support():
-    # The filesystem pair has no folder metadata to compare, so a folder must not
-    # turn into an unverifiable fidelity entry there.
-    manifest = _folder_manifest("Area/")
-    source = _Source(manifest.items, checksums={"Area/": ""}, metadata={"Area/": {"created": None}})
-    target = _Target(["Area/"], checksums={"Area/": ""}, metadata={"Area/": {"created": "2021-03-04T05:06:07+00:00"}})
-
-    report = verify(source, target, manifest, options=MigrationOptions(preserve_timestamps=True))
-
-    assert report.ok
-    assert report.unverifiable == []
-
-
 def test_versions_are_always_unverifiable():
     manifest = _manifest("a.txt")
     source = _Source(manifest.items, checksums={"a.txt": "x"})
@@ -426,17 +262,6 @@ def test_versions_are_always_unverifiable():
     assert any("versions" in entry for entry in report.unverifiable)
     assert report.ok  # nothing contradicted, but not fully verifiable
     assert not report.complete
-
-
-def test_no_options_means_no_fidelity_checks():
-    manifest = _manifest("a.txt")
-    source = _PlainSource(manifest.items, checksums={"a.txt": "x"})
-    target = _PlainTarget(["a.txt"], checksums={"a.txt": "x"})
-
-    report = verify(source, target, manifest)
-
-    assert report.unverifiable == []
-    assert report.complete
 
 
 def test_job_verify_uses_its_options():

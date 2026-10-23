@@ -83,16 +83,6 @@ def test_office_reserialization_is_a_caveat_not_a_mismatch():
     assert any("Office" in entry for entry in report.unverifiable)
 
 
-def test_office_real_difference_is_still_a_mismatch():
-    source = _office_bytes({"xl/workbook.xml": b"book", "docProps/core.xml": b"v1"})
-    target = _office_bytes({"xl/workbook.xml": b"corrupt", "docProps/core.xml": b"v2"})
-
-    report = _run(source, target)
-
-    assert report.mismatches == ["content mismatch: report.xlsx"]
-    assert not report.ok
-
-
 def test_non_office_mismatch_has_no_fallback():
     report = _run(b"hello", b"hellp", dest_path="notes.txt")
 
@@ -101,25 +91,5 @@ def test_non_office_mismatch_has_no_fallback():
 
 def test_office_named_garbage_is_a_mismatch():
     report = _run(b"not-a-zip", b"also-not-a-zip")
-
-    assert report.mismatches == ["content mismatch: report.xlsx"]
-
-
-def test_office_fallback_requires_read_on_both_sides():
-    item = MigrationItem(source_path="/src/report.xlsx", dest_path="report.xlsx")
-    manifest = Manifest([item])
-
-    class _NoRead:
-        def list_items(self, progress=None):
-            return [item]
-
-        def checksum(self, item):
-            return "src-sum"
-
-        def close(self):
-            pass
-
-    target = _Target([item], {"report.xlsx": b"x"}, {"report.xlsx": "tgt-sum"})
-    report = verify(_NoRead(), target, manifest)
 
     assert report.mismatches == ["content mismatch: report.xlsx"]

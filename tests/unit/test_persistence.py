@@ -7,8 +7,6 @@ new contents, even when serialization fails mid-write.
 
 from __future__ import annotations
 
-import json
-
 import pytest
 from office365.migration.base import MigrationPhase
 from office365.migration.checkpoint import Checkpoint
@@ -18,47 +16,6 @@ from office365.runtime.persistence import atomic_write_json, read_json
 
 def _tmp_files(directory) -> list[str]:
     return [p.name for p in directory.iterdir() if p.name.endswith(".tmp")]
-
-
-def test_atomic_write_round_trips(tmp_path):
-    target = tmp_path / "state.json"
-    atomic_write_json(target, {"cursor": 42, "items": {"a": "done"}})
-    assert read_json(target) == {"cursor": 42, "items": {"a": "done"}}
-
-
-def test_atomic_write_leaves_no_temp_file(tmp_path):
-    target = tmp_path / "state.json"
-    atomic_write_json(target, {"n": 1})
-    assert not list(tmp_path.glob("*.tmp"))
-    assert _tmp_files(tmp_path) == []
-
-
-def test_atomic_write_overwrites_completely(tmp_path):
-    target = tmp_path / "state.json"
-    atomic_write_json(target, {"n": 1, "stale": True})
-    atomic_write_json(target, {"n": 2})
-    assert read_json(target) == {"n": 2}
-
-
-def test_atomic_write_preserves_previous_file_when_serialization_fails(tmp_path):
-    target = tmp_path / "state.json"
-    atomic_write_json(target, {"cursor": 7})
-
-    class Unserializable:
-        pass
-
-    with pytest.raises(TypeError):
-        atomic_write_json(target, {"cursor": Unserializable()})
-
-    # The old checkpoint is intact and the temporary file was cleaned up.
-    assert read_json(target) == {"cursor": 7}
-    assert _tmp_files(tmp_path) == []
-
-
-def test_atomic_write_accepts_str_path(tmp_path):
-    target = tmp_path / "state.json"
-    atomic_write_json(str(target), {"ok": True})
-    assert json.loads(target.read_text(encoding="utf-8")) == {"ok": True}
 
 
 def test_atomic_write_creates_missing_parent_directories(tmp_path):

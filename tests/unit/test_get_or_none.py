@@ -50,25 +50,6 @@ def test_get_or_none_defers_until_execute():
     assert team.get_property("id") == "t1"
 
 
-def test_get_or_none_leaves_object_uninitialized_on_404():
-    client, _ = _client([_NOT_FOUND])
-
-    team = client.teams["missing-team"].get_or_none().execute_query()
-
-    assert not team.is_loaded
-    assert team.get_property("id") is None
-
-
-def test_get_or_none_returns_object_when_found():
-    client, _ = _client([{"id": "t1", "displayName": "Team One"}])
-
-    team = client.teams["t1"].get_or_none().execute_query()
-
-    assert team.is_loaded
-    assert team.get_property("id") == "t1"
-    assert team.get_property("displayName") == "Team One"
-
-
 def test_get_or_none_propagates_non_404_errors():
     client, _ = _client([_FORBIDDEN])
 
@@ -101,17 +82,3 @@ def test_get_or_none_async_defers_and_tolerates_404():
 
     assert not team.is_loaded
     assert transport.calls == 1
-
-
-def test_get_or_none_async_returns_object_when_found():
-    client, _ = _async_client([{"id": "t1", "displayName": "Team One"}])
-
-    async def _run():
-        team = client.teams["t1"].get_or_none()
-        await team.execute_query_async()
-        return team
-
-    team = asyncio.run(_run())
-
-    assert team.is_loaded
-    assert team.get_property("id") == "t1"

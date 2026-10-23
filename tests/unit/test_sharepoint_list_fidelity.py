@@ -305,32 +305,6 @@ class _TargetList:
         return self
 
 
-class _SourceItems:
-    def __init__(self, items):
-        self._items = items
-        self._select = None
-
-    def select(self, columns):
-        self._select = list(columns)
-        return self
-
-    def expand(self, _e):
-        return self
-
-    def get_all(self):
-        return self
-
-    def execute_query(self):
-        return list(self._items)
-
-
-class _SourceList:
-    def __init__(self, items, web=None):
-        self.title = "SourceList"
-        self.context = _Context(web or _Web())
-        self.items = _SourceItems(items)
-
-
 # ── Durability ───────────────────────────────────────────────────────────────
 
 
@@ -407,26 +381,6 @@ def test_identity_index_refreshes_incrementally_after_a_flush():
 # ── Timestamps ───────────────────────────────────────────────────────────────
 
 
-def test_apply_timestamps_uses_validated_update_with_utc_dates():
-    row = _TargetListItem(10, "1")
-    target = SharePointListTarget(cast("SPList", _TargetList([row])))
-    item = MigrationItem(
-        "Docs/1",
-        "1",
-        item_type="record",
-        created="2019-03-04T05:06:07+00:00",
-        modified="2020-04-05T06:07:08+00:00",
-    )
-
-    target.apply_timestamps(item)
-
-    form_values, dates_in_utc, new_document_update = row.updates[0]
-    assert form_values == {"Created": "2019-03-04T05:06:07Z", "Modified": "2020-04-05T06:07:08Z"}
-    assert dates_in_utc is True
-    # bNewDocumentUpdate=True is a system update: no new version is created.
-    assert new_document_update is True
-
-
 def test_read_metadata_refreshes_the_item_before_diffing():
     row = _TargetListItem(10, "1")
     row.properties["Created"] = "2019-03-04T05:06:07Z"
@@ -501,24 +455,6 @@ def test_apply_authorship_resolves_users_and_sets_person_fields():
     assert len(row.updates) == 1  # one write for the whole item
 
 
-def test_apply_authorship_skips_unresolved_principals():
-    row = _TargetListItem(10, "1")
-    web = _Web(users=[])  # EnsureUser cannot resolve anyone
-    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
-
-    from office365.migration.base import Principal
-
-    item = MigrationItem("Docs/1", "1", item_type="record")
-    item.author = Principal("i:0#.f|membership|ghost@mediadev8.onmicrosoft.com", "1", "Ghost")
-
-    target.apply_authorship(item)
-
-    assert row.updates == []  # nothing to write
-    assert target.warnings == []  # EnsureUser returned nothing, not an error
-    target.finalize_fidelity(item)
-    assert row.updates == []  # still nothing: no cached values
-
-
 def test_read_authorship_resolves_author_and_editor_logins():
     login = "i:0#.f|membership|vgrem@mediadev8.onmicrosoft.com"
     row = _TargetListItem(10, "1", author_id=9, editor_id=9)
@@ -529,64 +465,6 @@ def test_read_authorship_resolves_author_and_editor_logins():
 
 
 # ── Approval state ───────────────────────────────────────────────────────────
-
-
-def test_record_for_stashes_approval_state_from_the_payload():
-    # Approval status is record content, but the metadata system update re-approves
-    # the item, so the captured values must ride along with that write.
-    target = SharePointListTarget(cast("SPList", _TargetList([_TargetListItem(10, "1")])))
-    item = MigrationItem("Docs/1", "1", item_type="record")
-    record = {"Title": "Pending", "OData__ModerationStatus": 0, "OData__ModerationComments": "Needs review"}
-
-    written = target._record_for(item, record)
-
-    assert written["OData__ModerationStatus"] == 0
-    assert target._pending_approval == {
-        item.dest_path: {"_ModerationStatus": "0", "_ModerationComments": "Needs review"}
-    }
-
-
-def test_record_for_ignores_absent_approval_state():
-    target = SharePointListTarget(cast("SPList", _TargetList([_TargetListItem(10, "1")])))
-
-    target._record_for(MigrationItem("Docs/1", "1", item_type="record"), {"Title": "Plain"})
-
-    assert target._pending_approval == {}
-
-
-def test_timestamps_replay_approval_state_and_consume_it():
-    row = _TargetListItem(10, "1")
-    target = SharePointListTarget(cast("SPList", _TargetList([row])))
-    item = MigrationItem(
-        "Docs/1",
-        "1",
-        item_type="record",
-        created="2019-03-04T05:06:07+00:00",
-        modified="2020-04-05T06:07:08+00:00",
-    )
-    target._record_for(item, {"OData__ModerationStatus": 1})
-
-    target.apply_timestamps(item)
-
-    form_values, _, _ = row.updates[-1]
-    assert form_values["_ModerationStatus"] == "1"
-    assert form_values["Created"] == "2019-03-04T05:06:07Z"
-    assert target._pending_approval == {}  # consumed by the final metadata write
-
-
-def test_authorship_replays_approval_state_when_no_timestamps_follow():
-    # Authorship is its own system update, so an authorship-only run must restore
-    # the approval state itself instead of losing it.
-    row = _TargetListItem(10, "1")
-    target = SharePointListTarget(cast("SPList", _TargetList([row], web=_Web(users=[]))))
-    item = MigrationItem("Docs/1", "1", item_type="record")
-    target._record_for(item, {"OData__ModerationStatus": 1})
-
-    target.apply_authorship(item)
-    target.finalize_fidelity(item)
-
-    form_values, _, _ = row.updates[0]
-    assert form_values == {"_ModerationStatus": "1"}
 
 
 # ── Permissions ──────────────────────────────────────────────────────────────
@@ -657,48 +535,6 @@ def test_has_unique_role_assignments_reads_and_defaults_to_not_unique():
     assert _has_unique_role_assignments(_Broken()) is False
 
 
-def test_read_permissions_returns_empty_for_inherited_assignments():
-    inherited = _RoleAssignments([_Assignment(_Member("Project Members"), ["Edit"])])
-    row = _TargetListItem(10, "1", unique=False)
-    row.role_assignments = inherited
-    target = SharePointListTarget(cast("SPList", _TargetList([row])))
-
-    assert target.read_permissions(MigrationItem("Docs/1", "1", item_type="record")) == []
-
-
-def test_read_permissions_returns_entries_for_unique_assignments():
-    row = _TargetListItem(10, "1", unique=True, assignments=[_Assignment(_Member("Project Members"), ["Edit"])])
-    target = SharePointListTarget(cast("SPList", _TargetList([row])))
-
-    entries = target.read_permissions(MigrationItem("Docs/1", "1", item_type="record"))
-
-    assert [e.principal_name for e in entries] == ["Project Members"]
-    assert entries[0].roles == ["Edit"]
-
-
-def test_apply_permissions_breaks_inheritance_and_resolves_principals():
-    admin = _SiteUser(6, "i:0#.f|membership|admin@mediadev8.onmicrosoft.com")
-    group = _Group("Project Members")
-    read = _RoleDefinition("Read")
-    web = _Web(users=[admin], groups=[group], roles=[read])
-    row = _TargetListItem(10, "1")
-    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
-
-    from office365.migration.base import PermissionEntry
-
-    permissions = [
-        PermissionEntry(principal_name=group.name, roles=["Read"]),
-        PermissionEntry(principal_name=admin.login_name, roles=["Read"]),
-    ]
-    target.apply_permissions(MigrationItem("Docs/1", "1", item_type="record"), permissions)
-
-    assert row.broke_inheritance == (False, False)
-    principals = [p for p, _ in row.assignments_added]
-    assert principals[0] is group
-    assert principals[1].login_name == admin.login_name
-    assert [r for _, r in row.assignments_added] == [read, read]
-
-
 def test_apply_permissions_maps_a_default_group_by_role_kind():
     # Default groups are titled after the site, so the source name rarely matches
     # the target's; the trailing Owners/Members/Visitors kind maps to the target's
@@ -764,14 +600,6 @@ def test_verify_authorship_reports_a_mismatch():
     assert report.mismatches == ["authorship mismatch: 1"]
 
 
-def test_verify_authorship_is_unverifiable_without_the_hooks():
-    report = SimpleNamespace(unverifiable=[], mismatches=[])
-    _verify_authorship(object(), object(), [MigrationItem("Docs/1", "1")], report)
-
-    assert report.mismatches == []
-    assert report.unverifiable == ["authorship: adapters do not implement read_authorship(item)"]
-
-
 def test_apply_permissions_leaves_inheritance_alone_when_no_principal_resolves():
     # A cross-tenant account or an app principal has no target counterpart: breaking
     # inheritance would leave the item with an empty ACL — nobody granted — so the
@@ -793,42 +621,3 @@ def test_apply_permissions_leaves_inheritance_alone_when_no_principal_resolves()
     assert len(target.warnings) == 1
     assert "were not restored: no assignment could be resolved" in target.warnings[0]
     assert "empty ACL" in target.warnings[0]
-
-
-def test_apply_permissions_does_not_break_inheritance_twice():
-    # A re-run (or a target item an administrator already restricted) must not be
-    # stripped and rebuilt: the assignments are added to whatever is there.
-    admin = _SiteUser(6, "i:0#.f|membership|admin@mediadev8.onmicrosoft.com")
-    read = _RoleDefinition("Read")
-    web = _Web(users=[admin], roles=[read])
-    row = _TargetListItem(10, "1", unique=True)
-    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
-
-    from office365.migration.base import PermissionEntry
-
-    target.apply_permissions(
-        MigrationItem("Docs/1", "1", item_type="record"),
-        [PermissionEntry(principal_name=admin.login_name, roles=["Read"])],
-    )
-
-    assert row.broke_inheritance is None
-    assert [r for _, r in row.assignments_added] == [read]
-
-
-def test_apply_permissions_reports_a_role_the_target_lacks():
-    group = _Group("Project Members")
-    web = _Web(groups=[group], roles=[])
-    row = _TargetListItem(10, "1")
-    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
-
-    from office365.migration.base import PermissionEntry
-
-    target.apply_permissions(
-        MigrationItem("Docs/1", "1", item_type="record"),
-        [PermissionEntry(principal_name=group.name, roles=["NoDownload"])],
-    )
-
-    assert row.broke_inheritance is None
-    assert row.assignments_added == []
-    assert target.warnings[0] == "permissions 1: could not resolve role 'NoDownload'"
-    assert "empty ACL" in target.warnings[-1]

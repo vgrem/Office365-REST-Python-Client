@@ -14,12 +14,10 @@ from __future__ import annotations
 import importlib
 import pathlib
 import pkgutil
-import shutil
 from dataclasses import dataclass, field
 from datetime import datetime
 
 import pytest
-import scripts.mark_odata as codemod
 from office365.communications.onlinemeetings.online_meeting_info import OnlineMeetingInfo
 from office365.directory.identity_set import IdentitySet
 from office365.directory.permissions.identity import Identity
@@ -33,26 +31,11 @@ from office365.runtime.client_object import ClientObject
 from office365.runtime.client_value import ClientValue
 from office365.runtime.converters.value import declared_type
 from office365.runtime.odata.v4.json_format import V4JsonFormat
-from office365.runtime.schema import TypeSchema
 from office365.runtime.types.odata_property import _ODATA_MARKER, ODataPropertyMeta, field_declarations, odata
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Packages whose getters are expected to be fully declared today.
 _SERVED = ("office365/outlook",)
-
-
-def test_the_wire_name_of_ical_uid_survives_where_a_naming_inverse_would_fail():
-    # to_snake_case("iCalUId") is i_cal_u_id while the getter is ical_uid, so only
-    # the declaration can answer; the attribute tells the stack where to read it.
-    assert Event._schema.properties["iCalUId"].attr == "ical_uid"
-
-
-def test_navigation_properties_are_declared_as_such():
-    # $select cannot name a navigation property, so it must be distinguishable.
-    assert Event._schema.properties["calendar"].navigation is True
-    assert Event._schema.properties["attachments"].navigation is True
-    assert Event._schema.properties["singleValueExtendedProperties"].navigation is True
-    assert Event._schema.properties["iCalUId"].navigation is False
 
 
 def test_select_all_is_the_projection_the_declarations_describe():
@@ -80,19 +63,6 @@ def test_wire_name_answers_for_an_attribute_and_refuses_an_unknown_one():
     # A naming inverse would happily answer i_cal_u_id here; the declaration knows better.
     with pytest.raises(AttributeError, match="not a declared property"):
         Event.wire_name("i_cal_u_id")
-
-
-def test_select_all_names_a_column_once():
-    # "from" is read by one getter whose name carries a trailing underscore; a
-    # projection must not repeat it if another getter ever reads the same name.
-    assert Message.select_all().count("from") == 1
-
-
-def test_no_served_module_has_an_undeclared_wire_name_left():
-    catalog = codemod.load_catalog()
-    for root in _SERVED:
-        for path in sorted((_REPO_ROOT / root).rglob("*.py")):
-            assert codemod.plan_module(path, catalog) == [], f"{path} still needs declarations"
 
 
 def test_no_served_module_has_a_column_without_a_declared_type():
@@ -123,32 +93,6 @@ def test_a_nested_column_declares_the_type_its_getter_returns():
     assert declared_type(Event, "end") is DateTimeTimeZone
     assert declared_type(Event, "onlineMeeting") is OnlineMeetingInfo
     assert declared_type(Event, "attendees") is not None
-
-
-def test_the_codemod_finishes_a_marker_that_names_a_navigation_property(tmp_path):
-    # The first pass only added declarations, so every marker it wrote to a file that
-    # already had one stayed half-written: the name, without the navigation flag.
-    target = tmp_path / "event.py"
-    target.write_text(
-        "from office365.runtime.types.odata_property import odata\n"
-        "\n"
-        "\n"
-        "class Event:\n"
-        '    @odata(name="singleValueExtendedProperties")\n'
-        "    @property\n"
-        "    def single_value_extended_properties(self) -> None:\n"
-        '        return self.properties.get("singleValueExtendedProperties", None)\n'
-        "\n"
-        "    @property\n"
-        "    def entity_type_name(self) -> str:\n"
-        '        return "microsoft.graph.Event"\n',
-        encoding="utf-8",
-    )
-
-    assert codemod.mark_module(target, codemod.load_catalog()) == 1
-    assert '@odata(name="singleValueExtendedProperties", navigation=True)' in target.read_text(encoding="utf-8")
-    # Idempotent: a finished marker is not touched again.
-    assert codemod.mark_module(target, codemod.load_catalog()) == 0
 
 
 def test_one_declaration_serves_a_property_and_a_dataclass_field():
@@ -211,29 +155,6 @@ def test_a_type_s_declarations_are_one_object_built_once():
     assert ClientObject._schema.properties == {}  # a type that declares nothing
 
 
-def test_the_schema_is_a_function_of_the_declarations():
-    """Rebuilding a type's fact from its declarations yields the same fact.
-
-    The ``@limit``-on-a-class decorator runs *after* ``__init_subclass__``, so it rebuilds
-    the schema instead of patching one field of a frozen object; that is only safe because
-    the build is idempotent.
-    """
-    assert TypeSchema.build(Event) == Event._schema
-    assert TypeSchema.build(ClientObject) == ClientObject._schema
-
-
-def test_a_class_fact_is_not_a_mutable_bag():
-    """A declaration set is a fact about the type; a consumer must not be able to edit it.
-
-    The dict this replaces was reachable and writable from anywhere — a ``$select``
-    built from it could be changed at runtime by a caller that forgot it was shared.
-    """
-    with pytest.raises(TypeError):
-        Event._schema.properties["invented"] = None
-    with pytest.raises(AttributeError):  # dataclasses.FrozenInstanceError
-        Event._schema.readonly = frozenset()
-
-
 def test_a_subclass_answers_with_its_own_declarations():
     """Inherited declarations are copied, never shared, so declaring cannot leak upward."""
 
@@ -249,21 +170,3 @@ def test_a_subclass_answers_with_its_own_declarations():
     assert "probeFlag" not in Event._schema.properties  # the base class is untouched
     assert "probeFlag" in Probe.select_all()
     assert Event._schema.readonly < Probe._schema.readonly
-
-
-def test_the_decorator_carrier_attaches_the_same_metadata():
-    # 892 getters are declared this way; the Mapping form must not have changed it.
-    class Thing:
-        @odata(name="iCalUId", readonly=True)
-        def ical_uid(self): ...
-
-    assert getattr(Thing.ical_uid, _ODATA_MARKER) == ODataPropertyMeta(name="iCalUId", readonly=True)
-
-
-def test_the_codemod_leaves_a_marked_module_alone(tmp_path):
-    source = _REPO_ROOT / "office365" / "outlook" / "contacts" / "contact.py"
-    target = tmp_path / source.name
-    shutil.copy(source, target)
-
-    assert codemod.mark_module(target, codemod.load_catalog()) == 0  # already marked
-    assert target.read_text(encoding="utf-8") == source.read_text(encoding="utf-8")

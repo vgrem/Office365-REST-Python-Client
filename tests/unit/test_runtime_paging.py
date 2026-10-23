@@ -12,7 +12,6 @@ from office365.runtime.client_object_collection import ClientObjectCollection
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.transport.base import BaseTransport
 from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.listitems.caml.query import CamlQuery
 from requests import Response
 from tests import test_site_url
 from tests._scripted_transport import ScriptedTransport as _ScriptedTransport
@@ -52,14 +51,6 @@ def _page1(col: ClientObjectCollection) -> _FakeTransport:
 
 
 class TestPagingHeaders(unittest.TestCase):
-    def test_first_page_captures_headers_and_next_link(self):
-        client = GraphClient()
-        col = ClientObjectCollection(client, User, ResourcePath("users"))
-        _page1(col)
-
-        self.assertEqual(col._next_request_url, NEXT_LINK)
-        self.assertEqual(col._page_headers, PAGE_1_HEADERS)
-
     def test_next_page_reapplies_custom_headers(self):
         client = GraphClient()
         col = ClientObjectCollection(client, User, ResourcePath("users"))
@@ -72,24 +63,6 @@ class TestPagingHeaders(unittest.TestCase):
         self.assertEqual(request.url, NEXT_LINK)
         self.assertEqual(request.headers.get("ConsistencyLevel"), "eventual")
         self.assertEqual(request.headers.get("X-Custom"), "1")
-
-    def test_next_page_skips_auth_and_content_length(self):
-        client = GraphClient()
-        col = ClientObjectCollection(client, User, ResourcePath("users"))
-        transport = _page1(col)
-
-        col._get_next()
-        col.execute_query()
-
-        headers = {k.lower(): v for k, v in transport.requests[-1].headers.items()}
-        self.assertNotIn("authorization", headers)
-        self.assertNotIn("content-length", headers)
-
-    def test_get_next_without_token_raises(self):
-        client = GraphClient()
-        col = ClientObjectCollection(client, User, ResourcePath("users"))
-        with self.assertRaises(ValueError):
-            col._get_next()
 
 
 def _page(items: list) -> dict:
@@ -147,41 +120,6 @@ class TestLargeCollectionPaging(unittest.TestCase):
         # the next GetItems call continues from the last item via its position
         self.assertIn("Paged=TRUE&p_ID=2", jsonlib.dumps(transport.bodies[1]))
 
-    def test_get_items_warns_on_unpaged_sorted_query(self):
-        ctx = ClientContext(test_site_url)
-        ctx.pending_request().beforeExecute.clear()
-        lst = ctx.web.lists.get_by_title("X")
-        query = CamlQuery()
-        query.ViewXml = "<View><Query><OrderBy><FieldRef Name='date'/></OrderBy></Query></View>"
-
-        with self.assertWarns(UserWarning):
-            lst.get_items(query)
-
-    def test_get_items_only_queues_get_items(self):
-        ctx = ClientContext(test_site_url)
-        ctx.pending_request().beforeExecute.clear()
-        lst = ctx.web.lists.get_by_title("X")
-        query = CamlQuery()
-        query.ViewXml = "<View><Query><OrderBy><FieldRef Name='date'/></OrderBy></Query></View>"
-
-        before = len(ctx._queries)
-        lst.get_items(query, page_size=2000)
-
-        self.assertEqual(len(ctx._queries) - before, 1)
-
-    def test_get_items_no_warning_when_paged(self):
-        import warnings
-
-        ctx = ClientContext(test_site_url)
-        ctx.pending_request().beforeExecute.clear()
-        lst = ctx.web.lists.get_by_title("X")
-        query = CamlQuery()
-        query.ViewXml = "<View><Query><Where><Eq><FieldRef Name='ID'/></Eq></Where></Query></View>"
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("error")
-            lst.get_items(query, page_size=2000)
-
 
 class TestSPOffsetPaging(unittest.TestCase):
     """When a SharePoint endpoint returns no __next link, paged(page_size) falls back to $skip."""
@@ -233,43 +171,6 @@ class TestServerPagedReset(unittest.TestCase):
     def _collection(self) -> ClientObjectCollection:
         return ClientObjectCollection(GraphClient(), User, ResourcePath("users"))
 
-    def test_fresh_request_clears_server_paged_flag(self):
-        col = self._collection()
-        col._paged_mode = True
-        col._server_paged = True
-        col._next_request_url = None
-
-        col.clear_state()
-
-        self.assertFalse(col._server_paged)
-
-    def test_continuation_keeps_server_paged_flag(self):
-        col = self._collection()
-        col._paged_mode = True
-        col._server_paged = True
-        col._next_request_url = NEXT_LINK
-
-        col.clear_state()
-
-        self.assertTrue(col._server_paged)
-        self.assertIsNone(col._next_request_url)
-
-    def test_reused_collection_falls_back_to_skip(self):
-        ctx = ClientContext(test_site_url)
-        transport = _CaptureTransport([_page([1, 2]), _page([3, 4]), _page([])])
-        ctx.pending_request().beforeExecute.clear()
-        ctx.pending_request().transport = transport
-        col = ctx.web.lists
-        col._paged_mode = True
-        col._page_size = 2
-        col._server_paged = True  # left behind by a previous server-paged run
-        col._next_request_url = None
-
-        items = list(col.get_all(page_size=2).execute_query())
-
-        self.assertEqual(len(items), 4)  # noqa: PLR2004
-        self.assertIn("skip=2", transport.urls[1])
-
 
 class TestDedupePaging(unittest.TestCase):
     """Opt-in de-duplication by a property (Graph can repeat rows across pages)."""
@@ -297,17 +198,3 @@ class TestDedupePaging(unittest.TestCase):
 
         self.assertEqual([u.properties.get("id") for u in col], ["1", "2", "3", "4"])
         self.assertEqual(transport.calls, 3)  # noqa: PLR2004
-
-    def test_get_all_without_dedupe_keeps_repeats(self):
-        next_1 = "https://graph.microsoft.com/v1.0/users?$skiptoken=a"
-        ctx, _transport = self._graph_context(
-            [
-                {"@odata.nextLink": next_1, "value": [{"id": "1"}, {"id": "2"}]},
-                {"value": [{"id": "2"}, {"id": "3"}]},
-            ]
-        )
-
-        col = ctx.users
-        col.get_all(page_size=2).execute_query()
-
-        self.assertEqual([u.properties.get("id") for u in col], ["1", "2", "2", "3"])

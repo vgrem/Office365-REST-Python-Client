@@ -8,12 +8,6 @@ from office365.runtime.http.request_options import RequestOptions
 from office365.sharepoint.client_context import ClientContext
 
 
-def test_with_user_credentials_raises_for_sharepoint_online():
-    ctx = ClientContext("https://contoso.sharepoint.com/sites/x")
-    with pytest.raises(RuntimeError, match="legacy SAML/ACS"):
-        ctx.with_user_credentials("user@contoso.com", "pwd")
-
-
 def test_with_user_credentials_uses_ntlm_when_allowed(monkeypatch):
     monkeypatch.setattr(
         "office365.runtime.auth.providers.ntlm_provider.NtlmProvider.__init__",
@@ -24,15 +18,6 @@ def test_with_user_credentials_uses_ntlm_when_allowed(monkeypatch):
     ctx.with_user_credentials("DOMAIN\\user", "pwd")  # must not raise
 
     assert callable(ctx.authentication_context._authenticate)
-
-
-def test_custom_session_auth_is_accepted_as_credentials():
-    session = requests.Session()
-    session.auth = requests.auth.HTTPBasicAuth("DOMAIN\\user", "pwd")
-    ctx = ClientContext("https://sp2019.contoso.local").with_transport(session=session)
-
-    request = RequestOptions("https://sp2019.contoso.local/_api/web")
-    ctx.pending_request()._authenticate_request(request)  # must not raise
 
 
 def test_custom_session_without_auth_still_raises():

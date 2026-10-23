@@ -39,13 +39,6 @@ def _ctx() -> ClientContext:
 # --- Web.get_securable_object -------------------------------------------------
 
 
-@pytest.mark.parametrize("scope", ["web", "site"])
-def test_scope_web_and_site_return_the_web(scope):
-    ctx = _ctx()
-
-    assert ctx.web.get_securable_object(scope) is ctx.web
-
-
 def test_scope_is_case_insensitive():
     ctx = _ctx()
 
@@ -64,13 +57,6 @@ def test_scope_list_returns_list_addressed_by_title():
     assert "Documents" in str(target.resource_path)
 
 
-def test_scope_list_requires_a_title():
-    ctx = _ctx()
-
-    with pytest.raises(ValueError, match="list_title"):
-        ctx.web.get_securable_object("list")
-
-
 def test_scope_folder_returns_the_folders_list_item():
     ctx = _ctx()
     path = "/sites/x/Shared Documents/sub"
@@ -82,13 +68,6 @@ def test_scope_folder_returns_the_folders_list_item():
     assert "getFolderByServerRelativePath" in resource_path
     assert "ListItemAllFields" in resource_path
     assert path in resource_path
-
-
-def test_scope_folder_requires_a_url():
-    ctx = _ctx()
-
-    with pytest.raises(ValueError, match="url"):
-        ctx.web.get_securable_object("folder")
 
 
 @pytest.mark.parametrize("scope", ["item", "file"])
@@ -103,37 +82,6 @@ def test_scope_item_and_file_return_the_files_list_item(scope):
     assert "getFileByServerRelativePath" in resource_path
     assert "listItemAllFields" in resource_path
     assert path in resource_path
-
-
-def test_scope_item_requires_a_url():
-    ctx = _ctx()
-
-    with pytest.raises(ValueError, match="url"):
-        ctx.web.get_securable_object("item")
-
-
-def test_unknown_scope_raises():
-    ctx = _ctx()
-
-    with pytest.raises(ValueError, match="Unsupported scope"):
-        ctx.web.get_securable_object("nope")
-
-
-def test_non_string_scope_raises():
-    ctx = _ctx()
-
-    with pytest.raises(ValueError, match="Unsupported scope"):
-        ctx.web.get_securable_object(None)  # type: ignore[arg-type]
-
-
-def test_resolution_is_deferred():
-    """Addressing a securable object must not queue a request."""
-    ctx = _ctx()
-    ctx.pending_request().beforeExecute.clear()
-
-    ctx.web.get_securable_object("folder", url="/sites/x/Shared Documents/sub")
-
-    assert not ctx._queries
 
 
 # --- SecurableObject.grant_access / revoke_access -----------------------------

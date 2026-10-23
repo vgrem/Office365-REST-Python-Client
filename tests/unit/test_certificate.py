@@ -8,7 +8,6 @@ authentication.
 
 from __future__ import annotations
 
-import hashlib
 import ssl
 
 import pytest
@@ -22,11 +21,6 @@ from office365.runtime.auth.certificate import (
 # certificate is needed to exercise the normalisation/thumbprint logic.
 DER = bytes.fromhex("3082010a0282010100deadbeefcafe1234")
 PEM = ssl.DER_cert_to_PEM_cert(DER)
-
-
-def test_build_client_credential_uses_thumbprint_when_given():
-    credential = build_client_credential(thumbprint="AABBCCDD", private_key="KEY")
-    assert credential == {"private_key": "KEY", "thumbprint": "AABBCCDD"}
 
 
 def test_build_client_credential_derives_thumbprint_from_public_certificate():
@@ -43,16 +37,6 @@ def test_build_client_credential_derives_thumbprint_from_path(tmp_path):
     assert credential["thumbprint"] == certificate_thumbprint(DER)
 
 
-def test_build_client_credential_requires_thumbprint_or_certificate():
-    with pytest.raises(ValueError):
-        build_client_credential(private_key="KEY")
-
-
-def test_build_client_credential_includes_passphrase():
-    credential = build_client_credential(thumbprint="AABB", private_key="KEY", passphrase="secret")
-    assert credential["passphrase"] == "secret"
-
-
 def test_build_client_credential_sni_passes_public_certificate():
     pytest.importorskip("cryptography")
     credential = build_client_credential(private_key="KEY", public_certificate=PEM, use_sni=True)
@@ -63,10 +47,6 @@ def test_build_client_credential_sni_passes_public_certificate():
 def test_certificate_pem_round_trips_der_and_pem():
     assert certificate_pem(DER) == PEM
     assert certificate_pem(PEM) == PEM
-
-
-def test_certificate_thumbprint_is_upper_case_hex():
-    assert certificate_thumbprint(DER) == hashlib.sha1(DER).hexdigest().upper()
 
 
 def test_entra_with_certificate_derives_thumbprint(monkeypatch):

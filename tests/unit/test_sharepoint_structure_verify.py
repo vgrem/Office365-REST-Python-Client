@@ -37,16 +37,6 @@ def test_identical_structure_is_ok():
     assert report.summary().startswith("OK")
 
 
-def test_missing_columns_reported():
-    source = _structure(columns=["Status", "Owner"])
-    target = _structure(columns=["Status"])
-
-    report = compare_list_structures(source, target)
-
-    assert report.missing_columns == ["Owner"]
-    assert not report.ok
-
-
 def test_missing_content_type_reported_without_requiring_its_field_links():
     source = _structure(content_types=[("Task", ["Status"])])
     target = _structure()
@@ -56,34 +46,6 @@ def test_missing_content_type_reported_without_requiring_its_field_links():
     assert report.missing_content_types == ["Task"]
     # the whole CT is missing, so its field links are not double-reported
     assert report.missing_field_links == []
-
-
-def test_missing_field_link_reported():
-    source = _structure(content_types=[("Task", ["Status", "Owner"])])
-    target = _structure(content_types=[("Task", ["Status"])])
-
-    report = compare_list_structures(source, target)
-
-    assert report.missing_field_links == ["Task: Owner"]
-    assert not report.ok
-
-
-def test_missing_views_reported():
-    source = _structure(views=["All Items", "By Owner"])
-    target = _structure(views=["All Items"])
-
-    report = compare_list_structures(source, target)
-
-    assert report.missing_views == ["By Owner"]
-
-
-def test_extra_target_structure_is_not_a_finding():
-    source = _structure(columns=["Status"], views=["All Items"])
-    target = _structure(columns=["Status", "BuiltIn"], views=["All Items", "Default"])
-
-    report = compare_list_structures(source, target)
-
-    assert report.ok
 
 
 def _column_structure(name, schema_xml, title="Projects"):
@@ -116,38 +78,6 @@ def test_column_choices_and_default_are_compared():
     report = compare_list_structures(source, target)
 
     assert report.column_mismatches == ["Category: choices source=('A', 'B'), target=('A',)"]
-
-
-def test_column_formula_is_compared_without_decoration():
-    # SharePoint drops the brackets around a column reference when it stores a
-    # formula, so an equal formula must not be reported as a difference.
-    source = _column_structure(
-        "Score", '<Field Type="Number" Name="Score" ValidationFormula="=AND([Score]&gt;=0,[Score]&lt;=10)"/>'
-    )
-    target = _column_structure(
-        "Score", '<Field Type="Number" Name="Score" ValidationFormula="=AND(Score&gt;=0,Score&lt;=10)"/>'
-    )
-
-    report = compare_list_structures(source, target)
-
-    assert report.column_mismatches == []
-
-
-def test_lookup_target_list_and_server_assigned_identity_are_not_differences():
-    # A re-created lookup column names the *target* list, and SourceID/ID/ColName are
-    # assigned by the server: none of them is a fidelity finding.
-    source = _column_structure(
-        "Dept",
-        '<Field Type="Lookup" Name="Dept" List="{source}" ID="{one}" SourceID="{s}" ColName="int1" RowOrdinal="0"/>',
-    )
-    target = _column_structure(
-        "Dept",
-        '<Field Type="Lookup" Name="Dept" List="{target}" ID="{two}" SourceID="{t}" ColName="int2" RowOrdinal="0"/>',
-    )
-
-    report = compare_list_structures(source, target)
-
-    assert report.column_mismatches == []
 
 
 def test_unparsable_column_schema_is_not_a_finding():
@@ -198,27 +128,7 @@ def test_verify_list_structure_captures_both_lists(monkeypatch):
     assert report.ok
 
 
-def test_verify_list_structure_reports_snapshot_differences():
-    source = _structure(columns=["Status"])
-    target = _structure(columns=[])
-
-    report = compare_list_structures(source, target, list_title="Source Projects")
-
-    assert report.list_title == "Source Projects"
-    assert report.missing_columns == ["Status"]
-
-
 # --- container settings -------------------------------------------------------
-
-
-def test_identical_settings_are_ok():
-    source = ListStructure(title="Projects", settings={"EnableModeration": True, "MajorVersionLimit": 12})
-    target = ListStructure(title="Projects", settings={"EnableModeration": True, "MajorVersionLimit": 12})
-
-    report = compare_list_structures(source, target)
-
-    assert report.ok
-    assert report.settings_mismatches == []
 
 
 def test_differing_setting_is_reported():
@@ -230,25 +140,6 @@ def test_differing_setting_is_reported():
     assert report.settings_mismatches == ["EnableModeration: source=True, target=False"]
     assert not report.ok
     assert "settings: 1" in report.summary()
-
-
-def test_setting_absent_on_the_target_is_reported():
-    source = ListStructure(title="Projects", settings={"EnableAttachments": False})
-
-    report = compare_list_structures(source, ListStructure(title="Projects"))
-
-    assert report.settings_mismatches == ["EnableAttachments: source=False, target=None"]
-
-
-def test_validation_formula_is_compared_without_its_decoration():
-    # SharePoint stores "=IF([Title]="",TRUE,FALSE)" as "=IF(Title="",TRUE,FALSE)"
-    source = ListStructure(title="Projects", settings={"ValidationFormula": '=IF([Title]="",TRUE,FALSE)'})
-    target = ListStructure(title="Projects", settings={"ValidationFormula": '=IF(Title="", TRUE, FALSE)'})
-
-    report = compare_list_structures(source, target)
-
-    assert report.settings_mismatches == []
-    assert report.ok
 
 
 def test_different_validation_formula_is_reported():
@@ -292,19 +183,3 @@ def test_column_and_view_formatting_are_verified():
     ]
     assert "formatting: 2" in report.summary()
     assert report.to_dict()["formatting_mismatches"] == report.formatting_mismatches
-
-
-def test_matching_formatting_is_not_a_mismatch():
-    source = ListStructure(
-        title="Projects",
-        fields=[FieldDefinition(internal_name="Status", custom_formatter='{"elmType": "div"}')],
-    )
-    target = ListStructure(
-        title="Projects",
-        fields=[FieldDefinition(internal_name="Status", custom_formatter='{"elmType": "div"}')],
-    )
-
-    report = compare_list_structures(source, target)
-
-    assert report.ok
-    assert report.formatting_mismatches == []

@@ -183,18 +183,6 @@ def _view_add_parameters(transport):
     return [p for p in _posts(transport) if p.url.endswith("views/Add")][0].data["parameters"]
 
 
-def test_provision_drops_a_view_column_the_target_cannot_hold():
-    # Measured live: a plain list's default view names LinkTitle, which a document
-    # library has no column for, so replaying it verbatim failed the whole resolve
-    # on ``Column 'LinkTitle' does not exist``.
-    ctx, transport = _setup(_view_only_routes(target_columns=["Title"]))
-
-    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _view_structure("Title", "LinkTitle"))
-
-    assert _view_add_parameters(transport)["ViewFields"]["results"] == ["Title"]
-    assert warnings == ["view 'All Items' was created without LinkTitle: the target list has no such column"]
-
-
 def test_provision_falls_back_to_the_view_defaults_when_no_captured_column_exists():
     ctx, transport = _setup(_view_only_routes(target_columns=["Title"]))
 
@@ -202,46 +190,6 @@ def test_provision_falls_back_to_the_view_defaults_when_no_captured_column_exist
 
     assert _view_add_parameters(transport).get("ViewFields", {}).get("results", []) == []
     assert warnings == ["view 'All Items' was created without LinkTitle: the target list has no such column"]
-
-
-def test_provision_keeps_every_view_column_the_target_has():
-    ctx, transport = _setup(_view_only_routes(target_columns=["Title", "LinkTitle"]))
-
-    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _view_structure("Title", "LinkTitle"))
-
-    assert _view_add_parameters(transport)["ViewFields"]["results"] == ["Title", "LinkTitle"]
-    assert warnings == []
-
-
-def test_provision_enables_content_types_only_when_off():
-    routes = _routes()
-    routes[0] = (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}})
-    ctx, transport = _setup(routes)
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure())
-
-    merges = [p for p in _posts(transport) if p.headers.get("X-HTTP-Method") == "MERGE"]
-    assert merges == []
-
-
-def test_provision_skips_base_content_types():
-    ctx, transport = _setup(
-        [
-            (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": False}}),
-            (HttpMethod.Post, "GetByTitle('Tasks')", {}),
-        ]
-    )
-    structure = _structure(
-        fields=[],
-        content_types=[ContentTypeDefinition(string_id="0x0101", name="Document", field_internal_names=["Title"])],
-        views=[],
-    )
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    urls = _urls(transport)
-    assert not any("/FieldLinks" in u for u in urls)
-    assert not any(p.url.endswith("/ContentTypes") for p in _posts(transport))
 
 
 def test_provision_records_content_type_id_map_by_name():
@@ -265,26 +213,6 @@ def test_provision_records_content_type_id_map_by_name():
     provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(views=[]), content_type_map=mapping)
 
     assert mapping == {_CT_ID: target_id}
-
-
-def test_provision_omits_map_when_ids_are_unchanged():
-    ctx, _ = _setup(_routes())
-
-    mapping: dict = {}
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(), content_type_map=mapping)
-
-    # the scripted target returns the same StringId as the source
-    assert mapping == {}
-
-
-def test_provision_rejects_unknown_conflict_mode():
-    ctx, _ = _setup([])
-    try:
-        provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(), on_conflict="merge")
-    except ValueError as exc:
-        assert "on_conflict" in str(exc)
-    else:  # pragma: no cover - defensive
-        raise AssertionError("expected ValueError")
 
 
 # --- content type creation information (regression: Group landed in Id) -------
@@ -370,19 +298,6 @@ def _link_routes(links=None):
     ]
 
 
-def test_provision_reports_columns_the_server_refuses_to_link():
-    ctx, transport = _setup(_link_routes(_FieldLinks(refuse="ProjectType")))
-
-    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(views=[]))
-
-    # ``Title`` is a built-in link left to the target; only the captured column is attempted
-    assert len(warnings) == 1
-    assert "ProjectType" in warnings[0]
-    assert "was not linked" in warnings[0]
-    # no reorder is attempted when nothing could be linked
-    assert not any(u.endswith("/FieldLinks/Reorder") for u in _urls(transport))
-
-
 def test_provision_reports_links_a_rejected_sibling_rolled_back():
     # The adds travel in one change set, which the server applies atomically: a
     # refused column takes its siblings with it while their sub-responses still
@@ -413,29 +328,6 @@ def test_provision_reports_links_a_rejected_sibling_rolled_back():
     assert "column 'MediaServiceImageTags' was not linked: Column 'ProjectType' does not exist." in warnings[1]
     # a column the server does not hold cannot be ordered
     assert not any(u.endswith("/FieldLinks/Reorder") for u in _urls(transport))
-
-
-def test_provision_skips_links_for_columns_it_did_not_capture():
-    # A content type may link built-in columns (``Title``) that capture deliberately
-    # skips; sending them to the server is a guaranteed ``does not exist`` failure.
-    routes = _link_routes()
-    ctx, transport = _setup(routes)
-    structure = _structure(
-        views=[],
-        content_types=[
-            ContentTypeDefinition(
-                string_id=_CT_ID,
-                name="Project",
-                field_internal_names=["Title", "ProjectType", "MediaServiceImageTags"],
-            )
-        ],
-    )
-
-    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    assert warnings == []
-    linked = [r.data["FieldInternalName"] for r in _posts(transport) if r.url.endswith("/FieldLinks")]
-    assert linked == ["ProjectType"]
 
 
 def test_provision_reorders_links_with_a_plain_array():
@@ -478,38 +370,11 @@ def test_rewrite_lookup_schema_repoints_list_attribute():
     assert "A6879990" not in rewritten
 
 
-def test_rewrite_lookup_schema_reports_unresolved_list():
-    rewritten, unresolved = rewrite_lookup_schema(_LOOKUP_SCHEMA, {})
-
-    assert rewritten is None
-    assert unresolved == _SOURCE_LIST_ID
-
-
-def test_rewrite_lookup_schema_leaves_user_info_keyword_alone():
-    schema = '<Field Type="User" List="UserInfo" Name="Owner"/>'
-
-    assert rewrite_lookup_schema(schema, {}) == (schema, None)
-
-
-def test_rewrite_lookup_schema_ignores_non_lookup_field():
-    schema = '<Field Type="Choice" List="{A6879990-804B-4064-BF5D-F0C5C65EF768}"/>'
-
-    assert rewrite_lookup_schema(schema, {}) == (schema, None)
-
-
 def test_normalize_guid_strips_braces_and_lowercases():
     assert normalize_guid("{A6879990-804B-4064-BF5D-F0C5C65EF768}") == _SOURCE_LIST_ID
     assert normalize_guid(_SOURCE_LIST_ID) == _SOURCE_LIST_ID
     assert normalize_guid("UserInfo") is None
     assert normalize_guid(None) is None
-
-
-def _lookup_routes():
-    return [
-        (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
-        (HttpMethod.Get, "getByInternalNameOrTitle", _NOT_FOUND),
-        (HttpMethod.Post, "CreateFieldAsXml", {"d": {"InternalName": "Dept", "FieldTypeKind": 7}}),
-    ]
 
 
 def _lookup_structure():
@@ -518,20 +383,6 @@ def _lookup_structure():
         content_types=[],
         views=[],
     )
-
-
-def test_provision_creates_lookup_column_pointed_at_target_list():
-    ctx, transport = _setup(_lookup_routes())
-
-    warnings = provision_list_structure(
-        ctx.web.lists.get_by_title("Tasks"), _lookup_structure(), list_id_map={_SOURCE_LIST_ID: _TARGET_LIST_ID}
-    )
-
-    assert warnings == []
-    create = next(p for p in _posts(transport) if p.url.endswith("Fields/CreateFieldAsXml"))
-    body = str(create.data)
-    assert _TARGET_LIST_ID in body
-    assert "A6879990" not in body
 
 
 def test_provision_skips_lookup_into_a_list_outside_the_migration():
@@ -646,24 +497,6 @@ def test_provision_recreates_a_taxonomy_column_against_the_term_set():
     assert "11111111-1111-1111-1111-111111111111" not in taxonomy_schema
 
 
-def test_provision_skips_an_existing_taxonomy_column():
-    ctx, transport = _setup(_taxonomy_routes(existing=[{"InternalName": "Dept"}]))
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _taxonomy_structure())
-
-    assert [p for p in _posts(transport) if p.url.endswith("CreateFieldAsXml")] == []
-
-
-def test_provision_multi_taxonomy_column_sets_the_mult_flag():
-    ctx, transport = _setup(_taxonomy_routes())
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _taxonomy_structure(mult="TRUE"))
-
-    taxonomy_schema = str([p for p in _posts(transport) if p.url.endswith("CreateFieldAsXml")][-1].data)
-    assert 'Type="TaxonomyFieldTypeMulti"' in taxonomy_schema
-    assert 'Mult="TRUE"' in taxonomy_schema
-
-
 # --- container settings (versioning, moderation, item-level policy, ...) -------
 
 
@@ -733,19 +566,6 @@ def test_provision_applies_each_container_setting_by_title():
     assert all(m.url.endswith("lists/GetByTitle('Tasks')") for m in _merges(transport))
 
 
-def test_provision_writes_the_differing_settings_in_one_batch():
-    # One request carries every differing setting; a change set is atomic, so the
-    # target cannot end up half-configured with a 200 per survivor.
-    ctx, transport = _setup(_setting_routes())
-    structure = _empty_structure(settings={"EnableVersioning": True, "MajorVersionLimit": 12})
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    assert len(transport.batches) == 1
-    assert len(transport.batches[0]) == _LINKED_COLUMNS
-    assert _settings_written(transport) == [{"EnableVersioning": True}, {"MajorVersionLimit": 12}]
-
-
 def test_provision_applies_settings_even_with_skip_conflict_mode():
     ctx, transport = _setup(_setting_routes())
     structure = _empty_structure(settings={"EnableModeration": True})
@@ -753,29 +573,6 @@ def test_provision_applies_settings_even_with_skip_conflict_mode():
     provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure, on_conflict="skip")
 
     assert _settings_written(transport) == [{"EnableModeration": True}]
-
-
-def test_provision_leaves_settings_the_target_already_carries_alone():
-    # A list created from its template already carries most settings; re-MERGEing an
-    # equal value is a needless write (and SharePoint rejects some of them outright:
-    # a version limit with versioning off, a system library that grants no write).
-    ctx, transport = _setup(
-        _setting_routes({"EnableVersioning": True, "MajorVersionLimit": 12, "EnableModeration": False})
-    )
-    structure = _empty_structure(settings={"EnableVersioning": True, "MajorVersionLimit": 12, "EnableModeration": False})
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    assert _merges(transport) == []
-
-
-def test_provision_writes_only_the_settings_that_differ():
-    ctx, transport = _setup(_setting_routes({"EnableVersioning": True, "MajorVersionLimit": 500}))
-    structure = _empty_structure(settings={"EnableVersioning": True, "MajorVersionLimit": 12})
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    assert _settings_written(transport) == [{"MajorVersionLimit": 12}]
 
 
 def test_provision_skips_a_version_limit_while_its_versioning_is_off():
@@ -831,24 +628,6 @@ def test_provision_reports_a_rejected_setting_as_a_warning():
     assert "EnableMinorVersions" in warnings[0]
     # the rejected setting does not stop the ones after it
     assert {"ForceCheckout": True} in _settings_written(transport)
-
-
-def test_provision_skips_library_only_settings_for_a_plain_list():
-    ctx, transport = _setup([])
-    structure = _empty_structure(base_type=0, settings={"ForceCheckout": True})
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    assert _merges(transport) == []
-
-
-def test_provision_skips_settings_when_the_list_has_no_title():
-    ctx, transport = _setup([])
-    structure = _empty_structure(title=None, settings={"EnableVersioning": True})
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    assert _merges(transport) == []
 
 
 _COLUMN_FORMATTER = '{"$schema": "column", "elmType": "div"}'

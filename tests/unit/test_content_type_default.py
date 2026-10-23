@@ -3,18 +3,10 @@
 from __future__ import annotations
 
 import pytest
-from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.contenttypes.content_type import ContentType, _content_type_order_ids
 from office365.sharepoint.contenttypes.content_type_id import ContentTypeId
 from tests import test_site_url
-
-
-def test_order_ids_from_typed_collection():
-    order = ClientValueCollection(ContentTypeId)
-    order.add(ContentTypeId(StringValue="0x01"))
-    order.add(ContentTypeId(StringValue="0x02"))
-    assert _content_type_order_ids(order) == ["0x01", "0x02"]
 
 
 def test_order_ids_from_flattened_value():
@@ -24,11 +16,6 @@ def test_order_ids_from_flattened_value():
     order.set_property(0, {"StringValue": "0x02"})
     order.set_property(1, {"StringValue": "0x01"})
     assert _content_type_order_ids(order) == ["0x02", "0x01"]
-
-
-def test_order_ids_empty_when_unset():
-    assert _content_type_order_ids(None) == []
-    assert _content_type_order_ids(ContentTypeId()) == []
 
 
 def test_set_default_requires_list_scope():

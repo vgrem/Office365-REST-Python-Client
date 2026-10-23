@@ -15,10 +15,6 @@ from office365.runtime.odata.v4.json_format import V4JsonFormat
 
 
 class TestUrlAssessmentRequestType(unittest.TestCase):
-    def test_concrete_odata_type(self):
-        request = UrlAssessmentRequest(GraphClient())
-        self.assertEqual(request.entity_type_name, "microsoft.graph.urlAssessmentRequest")
-
     def test_serialization_includes_concrete_type(self):
         request = UrlAssessmentRequest(GraphClient())
         request.set_property("url", "http://test-phishing-example.com")

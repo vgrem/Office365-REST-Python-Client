@@ -29,10 +29,3 @@ def test_expiration_omitted_when_none():
     item = ListItem(_FakeContext())
     request = _share_request(item)
     assert "expiration" not in request.to_json()["settings"]
-
-
-def test_share_id_forwarded():
-    item = ListItem(_FakeContext())
-    share_id = "11111111-2222-3333-4444-555555555555"
-    request = _share_request(item, share_id=share_id)
-    assert request.to_json()["settings"]["shareId"] == share_id

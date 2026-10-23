@@ -16,8 +16,6 @@ from typing import Any
 import pytest
 from office365.graph_client import GraphClient
 from office365.reports.report_export import (
-    ReportExportResult,
-    _filename_from_headers,
     download_report,
     download_report_async,
 )
@@ -54,30 +52,6 @@ def _download_payload(body: bytes = _CSV, filename: str = "report.csv") -> dict[
     )
 
 
-def test_filename_from_headers():
-    assert _filename_from_headers({"Content-Disposition": 'attachment; filename="a.csv"'}) == "a.csv"
-    assert _filename_from_headers({"Content-Disposition": "attachment; filename=b.csv"}) == "b.csv"
-    assert _filename_from_headers({}) is None
-
-
-def test_download_report_to_path(tmp_path):
-    client = _graph_client([_download_payload()])
-    target = tmp_path / "email_detail.csv"
-    result = download_report(client.reports, "getEmailActivityUserDetail", target, period="D7")
-    assert isinstance(result, ReportExportResult)
-    assert result.bytes_written == len(_CSV)
-    assert result.file_name == "report.csv"
-    assert target.read_bytes() == _CSV
-
-
-def test_download_report_to_stream():
-    client = _graph_client([_download_payload()])
-    buffer = io.BytesIO()
-    result = download_report(client.reports, "getX", buffer)
-    assert result.bytes_written == len(_CSV)
-    assert buffer.getvalue() == _CSV
-
-
 def test_download_report_reports_progress():
     client = _graph_client([_download_payload()])
     seen = []
@@ -86,13 +60,6 @@ def test_download_report_reports_progress():
     assert seen[-1].done == len(_CSV)
     assert seen[-1].total == len(_CSV)
     assert seen[-1].stage == "downloading"
-
-
-def test_download_report_truncates_existing_stream():
-    client = _graph_client([_download_payload()])
-    buffer = io.BytesIO(b"stale content that must be replaced")
-    download_report(client.reports, "getX", buffer)
-    assert buffer.getvalue() == _CSV
 
 
 def test_download_report_raises_on_error():

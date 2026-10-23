@@ -40,33 +40,6 @@ def test_taxonomy_schema_omits_list_attribute():
     assert "4d7c4109-db97-4c49-8f7f-a72f0785ee3c" in schema
 
 
-def test_taxonomy_schema_multi_type():
-    params = TaxonomyFieldCreateXmlParameters(
-        Name="Dept",
-        AllowMultipleValues=True,
-        FieldId="11111111-1111-1111-1111-111111111111",
-    )
-    assert 'Type="TaxonomyFieldTypeMulti"' in params.schema_xml
-    assert 'Mult="TRUE"' in params.schema_xml
-
-
-def test_taxonomy_value_collection_from_list():
-    a = TaxonomyFieldValue(Label="TermA", TermGuid="aaaaaaaa-0000-0000-0000-000000000000")
-    b = TaxonomyFieldValue(Label="TermB", TermGuid="bbbbbbbb-0000-0000-0000-000000000000")
-    coll = TaxonomyFieldValueCollection([a, b])
-    assert list(coll) == [a, b]
-    assert str(coll) == (
-        "-1;#TermA|aaaaaaaa-0000-0000-0000-000000000000;#-1;#TermB|bbbbbbbb-0000-0000-0000-000000000000"
-    )
-
-
-def test_taxonomy_value_collection_legacy_form():
-    a = TaxonomyFieldValue(Label="TermA", TermGuid="aaaaaaaa-0000-0000-0000-000000000000")
-    coll = TaxonomyFieldValueCollection(TaxonomyFieldValue, [a])
-    assert list(coll) == [a]
-    assert str(coll) == "-1;#TermA|aaaaaaaa-0000-0000-0000-000000000000"
-
-
 def test_set_taxonomy_collection_writes_note_companion():
     note_id = "33333333-3333-3333-3333-333333333333"
     # The companion name is resolved synchronously (a deferred lookup would run

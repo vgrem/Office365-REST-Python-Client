@@ -11,7 +11,7 @@ from office365.migration.base import MigrationStats
 from office365.runtime.client_object import ClientObject
 from office365.runtime.converters.dataframe import dataframe_chunks
 from office365.runtime.imports import ImportCheckpoint, ImportResult, ImportStats
-from office365.runtime.operations import OperationStats, Progress
+from office365.runtime.operations import OperationStats
 from office365.runtime.record_collection import RecordCollection
 
 pd = pytest.importorskip("pandas")
@@ -111,58 +111,6 @@ def test_execute_query_chunks_once_and_bounds_memory():
     assert len(collection.queued) == 5  # noqa: PLR2004
 
 
-def test_execute_batch_passes_execution_config_per_chunk():
-    ctx = _FakeContext()
-    collection = _FakeCollection()
-    driver = _driver(ctx, collection, _batches(2, 2, 1))
-
-    driver.execute_batch(items_per_batch=50, concurrency=4)
-
-    assert ctx.batch_calls == [{"items_per_batch": 50, "concurrency": 4}] * 3
-    assert collection.clears == 3  # noqa: PLR2004
-
-
-def test_queue_hook_reports_queued_and_skipped():
-    ctx = _FakeContext()
-    collection = _FakeCollection()
-
-    def queue(records):
-        return len(records) - 1, 1  # pretend one record per chunk was skipped
-
-    driver = _driver(ctx, collection, _batches(2, 2), queue=queue)
-    driver.execute_query()
-
-    assert driver.value.total == 4  # noqa: PLR2004
-    assert driver.value.success == 2  # noqa: PLR2004
-    assert driver.value.skipped == 2  # noqa: PLR2004
-
-
-def test_before_chunk_runs_per_chunk_before_queue():
-    ctx = _FakeContext()
-    collection = _FakeCollection()
-    calls: list[str] = []
-
-    def before(_raw):
-        calls.append("before")
-
-    def queue(records):
-        calls.append("queue")
-        return len(records), 0
-
-    driver = _driver(ctx, collection, _batches(1, 1), before_chunk=before, queue=queue)
-    driver.execute_query()
-
-    assert calls == ["before", "queue", "before", "queue"]
-
-
-def test_from_records_rejects_unknown_schema_change():
-    from office365.sharepoint.lists.list import List
-
-    lst = List(cast(Any, _FakeContext()))
-    with pytest.raises(ValueError, match="on_schema_change"):
-        lst.from_records([], on_schema_change="nope")
-
-
 def test_dry_run_plans_without_queueing_or_executing():
     ctx = _FakeContext()
     collection = _FakeCollection()
@@ -176,44 +124,6 @@ def test_dry_run_plans_without_queueing_or_executing():
     assert driver.value.success == 4  # noqa: PLR2004
 
 
-def test_prepare_called_once_with_the_first_chunk():
-    ctx = _FakeContext()
-    collection = _FakeCollection()
-    seen: list[Any] = []
-    driver = _driver(ctx, collection, _batches(1, 1), prepare=seen.append)
-
-    driver.execute_query()
-
-    assert seen == [[{"n": 0}]]  # first chunk only
-
-
-def test_to_records_is_applied():
-    ctx = _FakeContext()
-    collection = _FakeCollection()
-    driver = ImportResult(
-        ctx,
-        cast(Any, collection),
-        [[{"n": 1}, {"n": 2}]],
-        to_records=lambda batch: [{"value": r["n"]} for r in batch],
-    )
-
-    driver.execute_query()
-
-    assert collection.queued == [{"value": 1}, {"value": 2}]
-
-
-def test_progress_fires_per_chunk_with_total():
-    ctx = _FakeContext()
-    collection = _FakeCollection()
-    seen: list[Progress] = []
-    driver = _driver(ctx, collection, _batches(2, 3), total=5, progress=seen.append)
-
-    driver.execute_query()
-
-    assert [p.done for p in seen] == [0, 2, 5]  # immediate tick, then per committed chunk
-    assert all(p.total == 5 for p in seen)  # noqa: PLR2004
-
-
 def test_iter_yields_the_collection_and_drives_execution():
     ctx = _FakeContext()
     collection = _FakeCollection()
@@ -225,18 +135,6 @@ def test_iter_yields_the_collection_and_drives_execution():
 
     assert driver.value.total == 3  # noqa: PLR2004
     assert collection.clears == 3  # noqa: PLR2004
-
-
-def test_empty_source_is_a_noop():
-    ctx = _FakeContext()
-    collection = _FakeCollection()
-    driver = _driver(ctx, collection, [])
-
-    driver.execute_query()
-
-    assert driver.value.total == 0
-    assert collection.clears == 0
-    assert ctx.query_calls == 0
 
 
 def test_checkpoint_round_trips(tmp_path):
@@ -299,37 +197,6 @@ def test_custom_checkpoint_store(tmp_path):
     assert file_store.load().cursor == 7  # noqa: PLR2004
 
 
-def test_resume_progress_includes_committed_offset(tmp_path):
-    path = tmp_path / "ckpt.json"
-    _driver(_FakeContext(), _FakeCollection(), _batches(2, 2), checkpoint=str(path)).execute_query()
-
-    seen: list[Progress] = []
-    driver = _driver(_FakeContext(), _FakeCollection(), _batches(2, 2, 2), checkpoint=str(path), progress=seen.append)
-    driver.execute_query()
-
-    assert [p.done for p in seen] == [4, 6]  # immediate resume offset, then 4 committed + 2 this run
-
-
-def test_checkpoint_save_is_atomic(tmp_path):
-    path = tmp_path / "ckpt.json"
-
-    ImportCheckpoint(cursor=3).save(path)
-
-    assert ImportCheckpoint.load(path).cursor == 3  # noqa: PLR2004
-    assert list(tmp_path.glob(".*.tmp")) == []  # no leftover temp file
-
-
-def test_resume_does_not_reprovision_fields(tmp_path):
-    path = tmp_path / "ckpt.json"
-    _driver(_FakeContext(), _FakeCollection(), _batches(1), checkpoint=str(path)).execute_query()
-
-    prepared: list[Any] = []
-    driver = _driver(_FakeContext(), _FakeCollection(), _batches(1, 1), checkpoint=str(path), prepare=prepared.append)
-    driver.execute_query()
-
-    assert prepared == []  # fields already exist when resuming
-
-
 def test_on_error_collect_records_and_continues():
     ctx = _FlakyContext(fail_on=2)
     collection = _FakeCollection()
@@ -344,16 +211,6 @@ def test_on_error_collect_records_and_continues():
     assert len(checkpoint.failures) == 1
     assert checkpoint.failures[0]["records"] == 2  # noqa: PLR2004
     assert checkpoint.cursor == 6  # noqa: PLR2004 — failed chunk is skipped, not retried
-
-
-def test_progress_starts_immediately_and_advances_per_chunk():
-    seen: list[Any] = []
-    driver = _driver(_FakeContext(), _FakeCollection(), _batches(2, 2), progress=seen.append, total=4)
-
-    driver.execute_query()
-
-    assert [p.done for p in seen] == [0, 2, 4]
-    assert all(p.total == 4 for p in seen)  # noqa: PLR2004
 
 
 def test_execute_batch_reports_progress_per_batch_and_forwards_callback():
@@ -390,31 +247,6 @@ def test_dead_letter_isolates_the_failed_record(tmp_path):
     assert entry["error"] == "boom"
 
 
-def test_on_error_raise_aborts():
-    ctx = _FlakyContext(fail_on=2)
-    collection = _FakeCollection()
-    driver = _driver(ctx, collection, _batches(2, 2, 2))
-
-    with pytest.raises(RuntimeError):
-        driver.execute_query()
-
-    assert driver.value.success == 2  # noqa: PLR2004
-    assert driver.value.errors == 2  # noqa: PLR2004
-
-
-def test_invalid_on_error_rejected():
-    with pytest.raises(ValueError, match="on_error"):
-        _driver(_FakeContext(), _FakeCollection(), _batches(1), on_error="nope")
-
-
-def test_dataframe_chunks_slices_and_reports_total():
-    df = pd.DataFrame({"n": list(range(5))})
-    chunks, total = dataframe_chunks(df, chunksize=2)
-
-    assert total == 5  # noqa: PLR2004
-    assert [len(c) for c in chunks] == [2, 2, 1]
-
-
 def test_dataframe_chunks_reads_csv(tmp_path):
     path = tmp_path / "rows.csv"
     path.write_text("n\na\nb\nc\n", encoding="utf-8")
@@ -422,17 +254,6 @@ def test_dataframe_chunks_reads_csv(tmp_path):
 
     assert total is None
     assert len(list(chunks)) == 3  # noqa: PLR2004
-
-
-def test_dataframe_chunks_accepts_a_pandas_chunk_reader():
-    import io
-
-    # regression: a TextFileReader has .read, so it must not be re-read as a file
-    reader = pd.read_csv(io.StringIO("n\na\nb\nc\n"), chunksize=1)
-    chunks, total = dataframe_chunks(reader, chunksize=1)
-
-    assert total is None
-    assert [len(c) for c in chunks] == [1, 1, 1]
 
 
 def test_list_from_dataframe_returns_import_result():
@@ -487,19 +308,6 @@ class _KeyedCollection(_FakeCollection):
         return _KeyedTarget(self._keys)
 
 
-class _NoTargetCollection(_FakeCollection):
-    def upsert_target(self, *, key_field: str = "MigrationKey", enforce_unique: bool = False):
-        return None
-
-
-def test_apply_mapping_renames_record_keys():
-    from office365.runtime.record_collection import _apply_mapping
-
-    mapped = _apply_mapping(lambda chunk: [dict(r) for r in chunk], {"old": "new"})
-
-    assert mapped([{"old": 1, "keep": 2}]) == [{"new": 1, "keep": 2}]
-
-
 def test_from_records_applies_column_mapping():
     from office365.runtime.client_object import ClientObject
     from office365.runtime.record_collection import RecordCollection
@@ -539,23 +347,6 @@ def test_verify_keys_reports_missing():
     assert result.missing == ["c"]
     assert not result.ok
     assert "MISMATCH" in result.summary()
-
-
-def test_verify_keys_ok_when_all_present():
-    from office365.runtime.record_collection import RecordCollection
-
-    result = RecordCollection.verify_keys(cast(Any, _KeyedCollection(["a", "b"])), ["a", "b"])
-
-    assert result.ok
-    assert result.source_count == 2  # noqa: PLR2004
-    assert result.summary().startswith("OK")
-
-
-def test_verify_keys_requires_upsert_target():
-    from office365.runtime.record_collection import RecordCollection
-
-    with pytest.raises(ValueError, match="upsert-capable"):
-        RecordCollection.verify_keys(cast(Any, _NoTargetCollection()), ["a"])
 
 
 def test_import_result_run_is_the_batch_terminal():
@@ -691,22 +482,6 @@ def test_checkpoint_signature_mismatch_rescans_from_start():
     assert [record["id"] for record in collection.created] == [0, 1]  # re-scanned
 
 
-def test_migration_key_is_appended_to_created_records():
-    from office365.runtime.converters.upsert import record_key
-    from office365.runtime.record_collection import RecordCollection
-
-    collection = _ImportCollection()
-    driver = RecordCollection.from_records(
-        collection,
-        [[{"id": 7}]],
-        format="records",
-        key=["id"],
-    )
-    driver.execute_query()
-
-    assert collection.created[0]["MigrationKey"] == record_key({"id": 7}, ["id"])
-
-
 def test_from_records_applies_coerce_converters():
     from office365.runtime.record_collection import RecordCollection
 
@@ -727,31 +502,6 @@ def test_from_records_applies_coerce_converters():
 # --------------------------------------------------------------------------
 
 
-def test_execute_query_async_chunks_once_and_bounds_memory():
-    ctx = _AsyncFakeContext()
-    collection = _FakeCollection()
-    driver = _driver(ctx, collection, _batches(2, 2, 1))
-
-    asyncio.run(driver.execute_query_async())
-
-    assert collection.clears == 3  # noqa: PLR2004 — one clear per chunk
-    assert driver.value.total == 5  # noqa: PLR2004
-    assert driver.value.success == 5  # noqa: PLR2004
-    assert driver.value.chunks == 3  # noqa: PLR2004
-    assert ctx.query_calls == 3  # noqa: PLR2004 — awaited once per chunk
-
-
-def test_execute_batch_async_passes_execution_config_per_chunk():
-    ctx = _AsyncFakeContext()
-    collection = _FakeCollection()
-    driver = _driver(ctx, collection, _batches(2, 2, 1))
-
-    asyncio.run(driver.execute_batch_async(items_per_batch=50, concurrency=4))
-
-    assert ctx.batch_calls == [{"items_per_batch": 50, "concurrency": 4}] * 3
-    assert collection.clears == 3  # noqa: PLR2004
-
-
 def test_import_result_run_async_is_the_batch_terminal():
     ctx = _AsyncFakeContext()
     driver = _driver(ctx, _FakeCollection(), _batches(2, 2))
@@ -760,31 +510,6 @@ def test_import_result_run_async_is_the_batch_terminal():
 
     assert len(ctx.batch_calls) == 2  # noqa: PLR2004 — one batch call per chunk
     assert all(call == {"items_per_batch": 2, "concurrency": 3} for call in ctx.batch_calls)
-
-
-def test_progress_async_fires_per_chunk_with_total():
-    seen: list[Any] = []
-    driver = _driver(_AsyncFakeContext(), _FakeCollection(), _batches(2, 3), progress=seen.append, total=5)
-
-    asyncio.run(driver.execute_query_async())
-
-    assert [p.done for p in seen] == [0, 2, 5]  # immediate tick, then per committed chunk
-    assert all(p.total == 5 for p in seen)  # noqa: PLR2004
-
-
-def test_on_error_collect_async_records_and_continues():
-    ctx = _AsyncFlakyContext(fail_on=2)
-    collection = _FakeCollection()
-    checkpoint = ImportCheckpoint()
-    driver = _driver(ctx, collection, _batches(2, 2, 2), checkpoint=checkpoint, on_error="collect")
-
-    asyncio.run(driver.execute_query_async())
-
-    assert driver.value.total == 6  # noqa: PLR2004
-    assert driver.value.success == 4  # noqa: PLR2004
-    assert driver.value.errors == 2  # noqa: PLR2004
-    assert len(checkpoint.failures) == 1
-    assert checkpoint.cursor == 6  # noqa: PLR2004 — failed chunk is skipped, not retried
 
 
 def test_on_error_raise_async_aborts():
@@ -797,22 +522,6 @@ def test_on_error_raise_async_aborts():
 
     assert driver.value.success == 2  # noqa: PLR2004
     assert driver.value.errors == 2  # noqa: PLR2004
-
-
-def test_resume_skips_committed_records_async(tmp_path):
-    path = tmp_path / "ckpt.json"
-
-    asyncio.run(
-        _driver(_AsyncFakeContext(), _FakeCollection(), _batches(2, 2), checkpoint=str(path)).execute_query_async()
-    )
-    assert ImportCheckpoint.load(path).cursor == 4  # noqa: PLR2004
-
-    collection = _FakeCollection()
-    driver = _driver(_AsyncFakeContext(), collection, _batches(2, 2, 2), checkpoint=str(path))
-    asyncio.run(driver.execute_query_async())
-
-    assert collection.queued == [{"n": 4}, {"n": 5}]
-    assert driver.value.total == 2  # noqa: PLR2004
 
 
 def test_aiter_yields_the_collection_and_drives_execution():

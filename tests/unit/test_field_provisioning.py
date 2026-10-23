@@ -68,31 +68,6 @@ def test_ensure_fields_accepts_rich_specs_deferred():
     assert "getByTitle('Budget')" in urls
 
 
-def test_ensure_fields_accepts_names_and_mapping():
-    ctx, transport = _sp([])
-    lst = ctx.web.lists.get_by_title("Tasks")
-
-    by_name = lst.ensure_fields(["A", "B"])
-    by_type = lst.ensure_fields({"C": FieldType.Number})
-
-    assert transport.calls == 0
-    assert len(by_name) == 2  # noqa: PLR2004
-    assert len(by_type) == 1
-    assert all(isinstance(field, Field) for field in by_name + by_type)
-
-
-def test_ensure_field_accepts_field_creation_information():
-    ctx, transport = _sp([])
-
-    field = ctx.web.lists.get_by_title("Tasks").ensure_field(
-        FieldCreationInformation(Title="Stage", FieldTypeKind=FieldType.Choice, Choices=["A"])
-    )
-
-    assert isinstance(field, Field)
-    assert transport.calls == 0
-    assert "getByTitle('Stage')" in field.resource_url
-
-
 # --- rich reconcile on conflict ----------------------------------------------
 
 
@@ -119,21 +94,6 @@ def test_ensure_reconciles_choices_on_conflict_update():
     assert transport.requests[-1].method == HttpMethod.Post
     assert transport.requests[-1].headers.get("X-HTTP-Method") == "MERGE"
     assert transport.requests[-1].url.endswith("Fields/getByTitle('Status')")
-
-
-def test_ensure_skip_keeps_existing_rich_settings():
-    ctx, transport = _sp([_existing(Title="Status", FieldTypeKind=6, Choices={"results": ["A", "B"]})])
-
-    field = (
-        ctx.web.lists.get_by_title("Tasks")
-        .fields.ensure(
-            FieldCreationInformation(Title="Status", FieldTypeKind=FieldType.Choice, Choices=["A", "C"]),
-        )
-        .execute_query()
-    )
-
-    assert transport.calls == 1
-    assert list(field.choices) == ["A", "B"]
 
 
 def test_ensure_reconciles_formula_for_calculated():
@@ -168,22 +128,6 @@ def test_ensure_turns_on_required():
     assert field.properties.get("Required") is True
 
 
-def test_ensure_never_relaxes_required_by_default():
-    ctx, transport = _sp([_existing(Title="Owner", FieldTypeKind=2, Required=True)])
-
-    field = (
-        ctx.web.lists.get_by_title("Tasks")
-        .fields.ensure(
-            FieldCreationInformation(Title="Owner", FieldTypeKind=FieldType.Text),
-            on_conflict="update",
-        )
-        .execute_query()
-    )
-
-    assert transport.calls == 1  # nothing changed -> no update queued
-    assert field.properties.get("Required") is True
-
-
 def test_ensure_reconciles_type_and_description():
     ctx, transport = _sp([_existing(Title="Notes", FieldTypeKind=2, Description="old"), {}])
 
@@ -199,17 +143,6 @@ def test_ensure_reconciles_type_and_description():
     assert transport.calls == 2  # noqa: PLR2004
     assert field.field_type_kind == FieldType.Note
     assert field.properties.get("Description") == "new"
-
-
-def test_ensure_update_is_a_noop_when_already_reconciled():
-    ctx, transport = _sp([_existing(Title="Status", FieldTypeKind=6, Choices={"results": ["A", "B"]})])
-
-    ctx.web.lists.get_by_title("Tasks").fields.ensure(
-        FieldCreationInformation(Title="Status", FieldTypeKind=FieldType.Choice, Choices=["A", "B"]),
-        on_conflict="update",
-    ).execute_query()
-
-    assert transport.calls == 1
 
 
 # --- create path -------------------------------------------------------------
@@ -263,15 +196,6 @@ def test_ensure_xml_creates_when_missing():
     assert field.internal_name == "ProjectType"
 
 
-def test_ensure_xml_keeps_existing_column():
-    ctx, transport = _sp([_existing(Title="Project Type", InternalName="ProjectType", FieldTypeKind=6)])
-
-    field = ctx.web.lists.get_by_title("Tasks").fields.ensure_xml(_SCHEMA, "ProjectType").execute_query()
-
-    assert transport.calls == 1  # looked up only, nothing created
-    assert field.internal_name == "ProjectType"
-
-
 # --- schema copy -------------------------------------------------------------
 
 
@@ -290,8 +214,3 @@ def test_schema_xml_for_copy_strips_origin_specific_attributes():
     assert "Version" not in xml
     assert 'ID="{id}"' in xml
     assert 'Name="X"' in xml
-
-
-def test_schema_xml_for_copy_returns_none_when_unloaded():
-    ctx, _ = _sp([])
-    assert Field(ctx).schema_xml_for_copy() is None

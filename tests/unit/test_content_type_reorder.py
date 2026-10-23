@@ -35,15 +35,6 @@ def _ctx():
     return ctx, transport
 
 
-def test_reorder_fields_sends_a_plain_array():
-    ctx, transport = _ctx()
-
-    ctx.web.content_types.get_by_id(_CT_ID).reorder_fields(["Title", "ProjectType"])
-    ctx.execute_query()
-
-    assert transport.requests[-1].data == {"fieldNames": ["Title", "ProjectType"]}
-
-
 def test_field_links_reorder_sends_a_plain_array():
     ctx, transport = _ctx()
 

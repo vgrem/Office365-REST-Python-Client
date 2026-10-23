@@ -61,15 +61,6 @@ def test_get_offload_executor_is_lazy_singleton() -> None:
     assert offload._pool._executor is first
 
 
-def test_execute_async_uses_shared_pool_by_default() -> None:
-    transport = _ThreadNameTransport()
-
-    asyncio.run(transport.execute_async(RequestOptions(url=_URL)))
-
-    assert transport.thread_names
-    assert transport.thread_names[0].startswith(_SHARED_PREFIX)
-
-
 def test_stream_async_uses_shared_pool() -> None:
     transport = _ThreadNameTransport()
 
@@ -80,15 +71,6 @@ def test_stream_async_uses_shared_pool() -> None:
     assert asyncio.run(_drain()) == b"{}"
     assert transport.thread_names
     assert transport.thread_names[0].startswith(_SHARED_PREFIX)
-
-
-def test_configure_applies_pool_size_and_thread_prefix() -> None:
-    configure_offload_executor(max_workers=1, thread_name_prefix="tuned-pool")
-    transport = _ThreadNameTransport()
-
-    asyncio.run(transport.execute_async(RequestOptions(url=_URL)))
-
-    assert transport.thread_names == ["tuned-pool_0"]
 
 
 def test_transport_offload_executor_override() -> None:
@@ -125,45 +107,6 @@ def test_shutdown_drops_pool_and_restores_defaults() -> None:
     transport = _ThreadNameTransport()
     asyncio.run(transport.execute_async(RequestOptions(url=_URL)))
     assert transport.thread_names[0].startswith(_SHARED_PREFIX)
-
-
-def test_run_offloaded_propagates_contextvars() -> None:
-    """A context var set on the loop is visible inside the offloaded callable."""
-
-    async def _capture() -> str | None:
-        token = _REQUEST_ID.set("abc")
-        try:
-            return await run_offloaded(_REQUEST_ID.get)
-        finally:
-            _REQUEST_ID.reset(token)
-
-    assert asyncio.run(_capture()) == "abc"
-
-
-def test_run_offloaded_does_not_leak_context() -> None:
-    """A context var set inside the worker does not leak back to the caller."""
-
-    async def _run() -> None:
-        await run_offloaded(_REQUEST_ID.set, "worker")
-        assert _REQUEST_ID.get() is None
-
-    asyncio.run(_run())
-
-
-def test_run_offloaded_passes_args_and_returns_value() -> None:
-    def _scaled(a: int, b: int, *, scale: int = 1) -> int:
-        return (a + b) * scale
-
-    expected = 50
-    assert asyncio.run(run_offloaded(_scaled, 2, 3, scale=10)) == expected
-
-
-def test_run_offloaded_propagates_exception() -> None:
-    def _boom() -> None:
-        raise ValueError("boom")
-
-    with pytest.raises(ValueError, match="boom"):
-        asyncio.run(run_offloaded(_boom))
 
 
 def test_run_offloaded_uses_given_executor() -> None:

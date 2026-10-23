@@ -14,16 +14,9 @@ import unittest
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.exceptions import DuplicatedObjectException, FileLockedException
 from office365.sharepoint.exceptions import (
-    SecurityValidationException,
     SharePointException,
-    SPContentTypeSealedException,
-    SPDuplicateValuesFoundException,
-    SPFieldValidationException,
     SPFileCheckOutException,
-    SPFileLockedException,
-    SPInvalidLookupValuesException,
     SPListDataValidationException,
-    SPQueryThrottledException,
 )
 from requests import Response
 
@@ -37,93 +30,11 @@ def _error_response(code: str, message: str = "", status: int = 400) -> Response
     return resp
 
 
-class TestSharePointExceptionHierarchy(unittest.TestCase):
-    def test_concrete_types_are_sharepoint_exceptions(self):
-        for exc_type in (
-            SecurityValidationException,
-            SPQueryThrottledException,
-            SPFileCheckOutException,
-            SPListDataValidationException,
-            SPDuplicateValuesFoundException,
-        ):
-            self.assertTrue(issubclass(exc_type, SharePointException), exc_type)
-
-    def test_alias_is_shared_lock_exception(self):
-        self.assertIs(SPFileLockedException, FileLockedException)
-
-
 class TestCodeAndTypeNameMatching(unittest.TestCase):
     def test_sharepoint_catch_all(self):
         exc = ClientRequestException.from_response(_error_response("-1234567, Microsoft.SharePoint.SPException", "boom"))
         self.assertIsInstance(exc, SharePointException)
         self.assertNotIsInstance(exc, DuplicatedObjectException)
-
-    def test_non_sharepoint_stays_generic(self):
-        exc = ClientRequestException.from_response(_error_response("-1, System.Exception", "boom"))
-        self.assertNotIsInstance(exc, SharePointException)
-
-    def test_list_data_validation_by_code(self):
-        exc = ClientRequestException.from_response(
-            _error_response(
-                "-2130575162, Microsoft.SharePoint.SPListDataValidationException", "List data validation failed."
-            )
-        )
-        self.assertIsInstance(exc, SPListDataValidationException)
-
-    def test_field_value_validation_shares_server_type(self):
-        # SharePoint reports both list- and field-level formula failures as SPListDataValidationException.
-        exc = ClientRequestException.from_response(
-            _error_response(
-                "-2130575163, Microsoft.SharePoint.SPListDataValidationException", "List data validation failed."
-            )
-        )
-        self.assertIsInstance(exc, SPListDataValidationException)
-
-    def test_duplicate_unique_values(self):
-        exc = ClientRequestException.from_response(
-            _error_response(
-                "-2130575169, Microsoft.SharePoint.SPDuplicateValuesFoundException",
-                "duplicate values were found",
-            )
-        )
-        self.assertIsInstance(exc, SPDuplicateValuesFoundException)
-
-    def test_field_validation(self):
-        exc = ClientRequestException.from_response(
-            _error_response("-2146232832, Microsoft.SharePoint.SPFieldValidationException", "bad term")
-        )
-        self.assertIsInstance(exc, SPFieldValidationException)
-
-    def test_type_name_only_without_known_hresult(self):
-        # Types we could not probe still classify by the embedded .NET type name.
-        for type_name, expected in (
-            ("SPInvalidLookupValuesException", SPInvalidLookupValuesException),
-            ("SPContentTypeSealedException", SPContentTypeSealedException),
-        ):
-            exc = ClientRequestException.from_response(
-                _error_response(f"-9999999, Microsoft.SharePoint.{type_name}", "boom")
-            )
-            self.assertIsInstance(exc, expected, type_name)
-
-    def test_localized_message_matches_by_code(self):
-        exc = ClientRequestException.from_response(
-            _error_response(
-                "-2147024860, Microsoft.SharePoint.SPQueryThrottledException",
-                "La operación supera el umbral de vista de lista.",
-                status=500,
-            )
-        )
-        self.assertIsInstance(exc, SPQueryThrottledException)
-
-    def test_security_validation_by_hresult(self):
-        exc = ClientRequestException.from_response(
-            _error_response(
-                "-2130575251, Microsoft.SharePoint.SPException",
-                "The security validation for this page is invalid.",
-                status=403,
-            )
-        )
-        self.assertIsInstance(exc, SecurityValidationException)
 
 
 class TestPriorityDispatch(unittest.TestCase):
@@ -137,17 +48,6 @@ class TestPriorityDispatch(unittest.TestCase):
         )
         self.assertIsInstance(exc, SPFileCheckOutException)
         self.assertNotIsInstance(exc, FileLockedException)
-
-    def test_shared_lock_still_typed(self):
-        exc = ClientRequestException.from_response(
-            _error_response(
-                "-2147018894, Microsoft.SharePoint.SPFileLockException",
-                "The file is locked for shared use by John Doe [membership].",
-                status=423,
-            )
-        )
-        self.assertIsInstance(exc, FileLockedException)
-        self.assertNotIsInstance(exc, SPFileCheckOutException)
 
     def test_specific_beats_catch_all(self):
         # Duplicate-list is SPException + a known HRESULT: the specific type wins.

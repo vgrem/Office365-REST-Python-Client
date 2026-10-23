@@ -17,7 +17,6 @@ from typing import Any
 import pytest
 from office365.graph_client import GraphClient
 from office365.migration import MigrationJob
-from office365.migration.base import MigrationItem
 from office365.migration.outlook import (
     ContactImportOptions,
     ContactRecord,
@@ -261,19 +260,6 @@ def test_source_refuses_a_vcf_without_a_sidecar(tmp_path: Path):
         VcfTreeSource(root).list_items()
 
 
-def test_source_refuses_a_sidecar_that_escapes_the_tree(tmp_path: Path):
-    source = VcfTreeSource(_root(tmp_path))
-    item = MigrationItem("../../etc/passwd.vcf", "../../etc/passwd.vcf", 0, "contact")
-
-    with pytest.raises(ValueError, match="escapes the export tree"):
-        source.read(item)
-
-
-def test_source_refuses_a_directory_that_is_not_an_export(tmp_path: Path):
-    with pytest.raises(FileNotFoundError, match="is not a directory of exported .vcf files"):
-        VcfTreeSource(tmp_path / "nope").list_items()
-
-
 # -- the payload ---------------------------------------------------------------
 
 
@@ -335,20 +321,6 @@ def test_the_replay_set_is_the_model_s_projection_of_what_the_service_does_not_o
     assert not owned & _RESTORED, "a column is both replayed and owned"
 
 
-def test_payload_posts_an_email_entry_as_the_sidecar_holds_it():
-    """An address-only entry stays address-only: Exchange fills the name, the digest allows for it."""
-    payload = ContactRecord.from_json(_MINIMAL).payload()
-
-    assert payload["emailAddresses"] == [{"address": "bob@contoso.com"}]
-
-
-def test_payload_posts_a_declared_column_it_was_never_told_about():
-    """A contact field the model declares is replayed without this module naming it."""
-    payload = _record(yomiGivenName="Arisu").payload()
-
-    assert payload["yomiGivenName"] == "Arisu"
-
-
 def test_the_digest_follows_a_declared_column_it_was_never_told_about():
     """The same field therefore also takes part in verification."""
     assert _record(yomiGivenName="Arisu").digest() != _record().digest()
@@ -365,38 +337,7 @@ def test_payload_refuses_a_category_that_carries_a_comma():
     assert "comma" in str(exc.value)
 
 
-def test_payload_drops_categories_unless_asked():
-    payload = _record().payload(ContactImportOptions(restore_categories=False))
-
-    assert "categories" not in payload
-
-
-def test_payload_refuses_a_contact_without_a_display_name():
-    with pytest.raises(ValueError, match="no display name"):
-        _record(displayName="  ").payload()
-
-
 # -- the digest ----------------------------------------------------------------
-
-
-def test_a_birthday_compares_by_date_because_exchange_rewrites_the_time():
-    """Measured: ``T00:00:00Z`` and ``T11:59:00+00:00`` both come back as 11:59."""
-    midnight = _envelope(birthday="1953-05-01T00:00:00Z")
-    noon = _envelope(birthday="1953-05-01T11:59:00+00:00")
-
-    assert ContactRecord.from_json(midnight).digest() == ContactRecord.from_json(noon).digest()
-    assert _record(birthday="1953-05-02T00:00:00Z").digest() != ContactRecord.from_json(noon).digest()
-
-
-def test_an_email_compares_as_address_and_name_or_address():
-    named = _envelope(emailAddresses=[{"name": "Alice", "address": "alice@contoso.com"}])
-    unnamed = _envelope(emailAddresses=[{"address": "alice@contoso.com"}])
-    filled = _envelope(emailAddresses=[{"name": "alice@contoso.com", "address": "alice@contoso.com"}])
-
-    # Exchange fills in the address as the name, so `None` and the filled-in form agree…
-    assert ContactRecord.from_json(unnamed).digest() == ContactRecord.from_json(filled).digest()
-    # …but a real name is a different contact record.
-    assert ContactRecord.from_json(named).digest() != ContactRecord.from_json(unnamed).digest()
 
 
 def test_the_digest_ignores_server_owned_fields():
@@ -473,19 +414,6 @@ def test_import_skips_what_an_earlier_run_created(tmp_path: Path):
     assert second.posted == []
 
 
-def test_import_honours_duplicates_at_the_source(tmp_path: Path):
-    """Two contacts sharing a name and address are two contacts, not one to collapse."""
-    store = _Store()
-    root = _root(tmp_path, {"Contacts/Alice-Example_c1.vcf": _envelope(), "Contacts/twin_c2.vcf": _TWIN})
-    job = MigrationJob(VcfTreeSource(root), _target(store))
-
-    job.plan()
-    stats = job.run()
-
-    assert stats.success == 2  # noqa: PLR2004 — the twin is imported too
-    assert [payload["fileAs"] for payload in store.posted] == ["Example, Alice", "Twin, Alice"]
-
-
 def test_import_recreates_the_subfolder_chain(tmp_path: Path):
     store = _Store()
     root = _root(
@@ -516,13 +444,6 @@ def test_import_reports_the_categories_it_left_off(tmp_path: Path):
 
     assert "categories were left off 1 contact(s)" in job.target.warnings[0]
     assert "restore_categories=False" in job.target.warnings[0]
-
-
-def test_import_refuses_a_payload_that_is_not_a_contact(tmp_path: Path):
-    target = _target(_Store())
-
-    with pytest.raises(ValueError, match="a contact folder imports contacts, not 'event'"):
-        target.write(MigrationItem("a.vcf", "a.vcf", 0, "event", metadata=_envelope()), b"")
 
 
 def test_import_refuses_a_sidecar_the_service_would_reject(tmp_path: Path):

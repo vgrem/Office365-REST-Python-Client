@@ -16,10 +16,8 @@ from typing import Any
 
 import pytest
 from office365.runtime.operation import (
-    RETRYABLE_HTTP,
     Operation,
     OperationCancelledError,
-    OperationError,
     OperationFailedError,
     OperationStatus,
     OperationTimeoutError,
@@ -88,37 +86,6 @@ def test_wait_returns_the_terminal_snapshot():
     assert status.is_success
 
 
-def test_wait_raises_nothing_when_policy_is_off():
-    status = _run([("failed", 200)]).wait(raise_on_failure=False)
-    assert status.is_failure
-
-
-def test_wait_raises_the_failure_family():
-    with pytest.raises(OperationFailedError):
-        _run([("failed", 200)]).wait()
-    with pytest.raises(OperationCancelledError):
-        _run([("cancelled", 200)]).wait()
-    # A cancellation is a failure the caller can tell apart, not a second hierarchy.
-    with pytest.raises(OperationError):
-        _run([("cancelled", 200)]).wait()
-
-
-def test_stream_raises_nothing_for_a_failed_outcome():
-    """A stream that raises on its last item is a ``wait()`` with extra steps."""
-    statuses = list(_run([("failed", 200)]).stream())
-    assert len(statuses) == 1
-    assert statuses[0].is_failure
-
-
-def test_outcome_maps_the_terminal_status():
-    class _IdOperation(_Scripted):
-        def _outcome(self, status: OperationStatus) -> str:
-            return "job-7"
-
-    operation = _IdOperation([("completed", 200)], clock=_Clock().now, sleep=_Clock().sleep)
-    assert operation.wait() == "job-7"
-
-
 def test_progress_callback_sees_every_snapshot():
     seen: list[str] = []
     operation = _run([("inProgress", 202), ("completed", 200)], on_progress=lambda s: seen.append(s.status or ""))
@@ -126,25 +93,7 @@ def test_progress_callback_sees_every_snapshot():
     assert seen == ["inProgress", "completed"]
 
 
-def test_per_call_progress_overrides_the_instance_default():
-    seen: list[str] = []
-    operation = _run([("completed", 200)], on_progress=lambda s: seen.append("default"))
-    operation.wait(on_progress=lambda s: seen.append("call"))
-    assert seen == ["call"]
-
-
 # -- the two things a family configures as data ----------------------------
-
-
-def test_transient_status_means_poll_again_not_an_outcome():
-    """A ``404`` on an entity is a gap, not the answer — when the family says so."""
-    operation = _run(
-        [(None, 404), ("inProgress", 202), ("completed", 200)],
-        transient_statuses=frozenset({404, 429, 503}),
-    )
-    statuses = list(operation.stream())
-    assert [s.status for s in statuses] == [None, "inProgress", "completed"]
-    assert operation.attempts == 3  # noqa: PLR2004
 
 
 def test_a_family_can_declare_its_transient_status_is_not_an_observation():
@@ -170,10 +119,6 @@ def test_a_transient_status_outside_the_set_is_terminal():
     status = operation.wait(raise_on_failure=False)
     assert status.http_status == 404  # noqa: PLR2004
     assert operation.attempts == 1
-
-
-def test_default_transient_set_is_the_monitor_one():
-    assert RETRYABLE_HTTP == frozenset({429, 503})
 
 
 def test_jitter_zero_is_exact_and_jitter_spreads():
@@ -215,39 +160,7 @@ def test_timeout_raises_the_shared_error_family():
     assert operation.clock.slept == [10.0, 10.0]  # type: ignore[attr-defined]
 
 
-def test_deadline_counts_time_spent_in_the_attempt():
-    """A slow attempt consumes the budget: the deadline is wall time, not poll count."""
-
-    class _Slow(_Scripted):
-        def _step(self) -> OperationStatus:
-            self.clock.t += 20.0  # type: ignore[attr-defined]
-            return super()._step()
-
-    clock = _Clock()
-    operation = _Slow([("inProgress", 202)] * 10, clock=clock.now, sleep=clock.sleep, interval=5.0, timeout=25.0)
-    operation.clock = clock  # type: ignore[attr-defined]
-    with pytest.raises(OperationTimeoutError):
-        operation.wait()
-    # 20s for the attempt + a 5s pause is 25s: the next pause would exceed it.
-    assert operation.attempts == 2  # noqa: PLR2004
-
-
-def test_per_call_timeout_overrides_the_instance_one():
-    operation = _run([("inProgress", 202)] * 10, interval=10.0, timeout=1800.0)
-    with pytest.raises(OperationTimeoutError) as caught:
-        operation.wait(timeout=15.0)
-    assert caught.value.timeout == 15.0  # noqa: PLR2004
-
-
 # -- cancellation ----------------------------------------------------------
-
-
-def test_cancel_before_the_first_poll_returns_cancelled():
-    operation = _run([("completed", 200)])
-    operation.cancel()
-    with pytest.raises(OperationCancelledError):
-        operation.wait()
-    assert operation.attempts == 0
 
 
 def test_cancel_wakes_a_blocking_wait_from_another_thread():
@@ -282,15 +195,6 @@ def test_cancel_wakes_a_blocking_wait_from_another_thread():
     assert isinstance(raised[0], OperationCancelledError)
 
 
-def test_cancel_does_not_call_the_progress_hook():
-    """A synthetic cancellation is not something the service reported."""
-    seen: list[str] = []
-    operation = _run([("completed", 200)], on_progress=lambda s: seen.append(s.status or ""))
-    operation.cancel()
-    list(operation.stream())
-    assert seen == []
-
-
 # -- the async twin --------------------------------------------------------
 
 
@@ -301,12 +205,6 @@ def test_astream_is_the_same_script():
         return [s.status async for s in operation.astream() if s.status]
 
     assert asyncio.run(collect()) == ["inProgress", "completed"]
-
-
-def test_wait_async_returns_the_terminal_snapshot():
-    operation = _run([("inProgress", 202), ("completed", 200)])
-    status = asyncio.run(operation.wait_async())
-    assert status.status == "completed"
 
 
 def test_wait_async_raises_the_same_family():

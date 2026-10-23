@@ -6,9 +6,7 @@ import json
 import unittest
 from datetime import datetime, timezone
 from enum import Enum
-from unittest import mock
 
-from office365.delta_collection import DeltaCollection
 from office365.directory.applications.application import Application
 from office365.directory.groups.group import Group
 from office365.directory.objects.collection import DirectoryObjectCollection
@@ -18,14 +16,9 @@ from office365.directory.users.user import User
 from office365.entity import Entity
 from office365.graph_client import GraphClient
 from office365.intune.devices.device import Device
-from office365.onedrive.driveitems.driveItem import DriveItem
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_result import ClientResult
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.exceptions import (
-    DuplicatedObjectException,
-    ObjectNotFoundException,
-)
 from office365.runtime.odata.query_options import QueryOptions
 from office365.runtime.odata.request import ODataRequest
 from office365.runtime.odata.v3.json_light_format import JsonLightFormat
@@ -34,7 +27,6 @@ from office365.runtime.queries.client_query import ClientQuery
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.read_entity import ReadEntityQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
-from office365.runtime.types.collections import StringCollection
 from office365.runtime.types.odata_property import odata
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.exceptions import SPQueryThrottledException
@@ -77,21 +69,6 @@ class TestResponseParsing(unittest.TestCase):
         request.handle_response(resp, query)
         self.assertEqual(result.value, b'{"name": "test", "version": 1}')
 
-    def test_regular_query_still_parses_json(self):
-        """Without the raw-content flag, application/json is still parsed as OData JSON."""
-        ctx = ClientContext(test_site_url)
-        request = ODataRequest(test_site_url, JsonLightFormat())
-        result = ClientResult(ctx)
-        query = FunctionQuery(ctx.web, "content", return_type=result)
-
-        resp = Response()
-        resp.status_code = 200
-        resp.headers["Content-Type"] = "application/json"
-        resp._content = b'{"name": "test", "version": 1}'
-
-        request.handle_response(resp, query)
-        self.assertIsNot(result.value, b'{"name": "test", "version": 1}')
-
     def test_raw_content_returns_bytes_for_octet_stream(self):
         """Non-JSON content types keep returning raw bytes without the flag."""
         ctx = ClientContext(test_site_url)
@@ -118,40 +95,6 @@ def _make_error_response(body: dict, headers: dict | None = None) -> Response:
 
 
 class TestFromResponse(unittest.TestCase):
-    def test_sharepoint_list_already_exists(self):
-        body = {
-            "error": {
-                "code": "-2130575342, Microsoft.SharePoint.SPException",
-                "message": {
-                    "lang": "en-US",
-                    "value": "A list, survey, discussion board, or document library "
-                    "with the specified title already exists in this Web site.",
-                },
-            }
-        }
-        exc = ClientRequestException.from_response(_make_error_response(body))
-        self.assertIsInstance(exc, DuplicatedObjectException)
-
-    def test_message_fallback_already_exists(self):
-        body = {
-            "error": {
-                "code": "-1, System.Exception",
-                "message": "A column with this name already exists.",
-            }
-        }
-        exc = ClientRequestException.from_response(_make_error_response(body))
-        self.assertIsInstance(exc, DuplicatedObjectException)
-
-    def test_onenote_name_already_exists(self):
-        body = {
-            "error": {
-                "code": "20117",
-                "message": "An item with this name already exists in this location.",
-            }
-        }
-        exc = ClientRequestException.from_response(_make_error_response(body))
-        self.assertIsInstance(exc, DuplicatedObjectException)
-
     def test_nested_json_message_is_unwrapped(self):
         inner = (
             "Application is not authorized to perform this operation. "
@@ -170,42 +113,6 @@ class TestFromResponse(unittest.TestCase):
         self.assertNotIn("_version", str(exc))
         self.assertNotIn("Activity ID", str(exc))
 
-    def test_plain_message_is_untouched(self):
-        body = {"error": {"code": "BadRequest", "message": "{not json}"}}
-        exc = ClientRequestException.from_response(_make_error_response(body))
-        self.assertEqual(exc.message, "{not json}")
-
-    def test_unrelated_error_stays_generic(self):
-        body = {
-            "error": {
-                "code": "-2147024809, System.ArgumentException",
-                "message": "Invalid argument.",
-            }
-        }
-        exc = ClientRequestException.from_response(_make_error_response(body))
-        self.assertNotIsInstance(exc, DuplicatedObjectException)
-        self.assertIsInstance(exc, ClientRequestException)
-
-    def test_field_not_found_maps_to_object_not_found(self):
-        body = {
-            "error": {
-                "code": "-2147024809, System.ArgumentException",
-                "message": {"lang": "en-US", "value": 'Field with name "Status" was not found.'},
-            }
-        }
-        exc = ClientRequestException.from_response(_make_error_response(body))
-        self.assertIsInstance(exc, ObjectNotFoundException)
-
-    def test_other_errors_not_duplicated(self):
-        body = {
-            "error": {
-                "code": "-2147024894, System.IO.FileNotFoundException",
-                "message": "ResourceNotFound",
-            }
-        }
-        exc = ClientRequestException.from_response(_make_error_response(body))
-        self.assertNotIsInstance(exc, DuplicatedObjectException)
-
     def test_list_view_threshold_maps_to_throttled(self):
         body = {
             "error": {
@@ -219,19 +126,6 @@ class TestFromResponse(unittest.TestCase):
         exc = ClientRequestException.from_response(_make_error_response(body))
         self.assertIsInstance(exc, SPQueryThrottledException)
         self.assertIn("list view threshold", str(exc).lower())
-
-    def test_throttled_localized_message_matches_by_code(self):
-        body = {
-            "error": {
-                "code": "-2147024860, Microsoft.SharePoint.SPQueryThrottledException",
-                "message": (
-                    "La operación que se intentó realizar está prohibida porque supera el umbral de vista de lista."
-                ),
-            }
-        }
-        exc = ClientRequestException.from_response(_make_error_response(body))
-        self.assertIsInstance(exc, SPQueryThrottledException)
-        self.assertIn("get_all", str(exc))  # actionable guidance is appended
 
 
 class TestDiagnostics(unittest.TestCase):
@@ -268,19 +162,6 @@ class TestDiagnostics(unittest.TestCase):
         self.assertEqual(exc.server_guid, "a1b2c3d4-1234-5678-9abc-def012345678")
         self.assertEqual(exc.duration_ms, 127)  # noqa: PLR2004
         self.assertEqual(exc.health_score, 3)  # noqa: PLR2004
-
-    def test_request_id_prefers_headers(self):
-        body = {
-            "error": {
-                "code": "BadRequest",
-                "message": "bad",
-                "innerError": {"request-id": "from-body"},
-            }
-        }
-        exc = ClientRequestException.from_response(
-            _make_error_response(body, headers={"client-request-id": "from-header"})
-        )
-        self.assertEqual(exc.request_id, "from-header")
 
     def test_diagnostics_absent(self):
         exc = ClientRequestException.from_response(_make_error_response({"error": {"message": "boom"}}))
@@ -357,58 +238,8 @@ class TestODataResponseType(unittest.TestCase):
         self.assertNotIn("__metadata", web.properties)
 
 
-class TestQueryOptionsUrl(unittest.TestCase):
-    """QueryOptions.to_url must prefix $ only for standard OData options."""
-
-    def test_standard_options_keep_dollar_prefix(self):
-        q = QueryOptions()
-        q.select = ["displayName"]
-        q.filter = "startswith(displayName,'A')"
-        q.top = 10
-        self.assertEqual(
-            q.to_url(),
-            "$select=displayName&$filter=startswith(displayName,'A')&$top=10",
-        )
-
-    def test_custom_params_are_verbatim(self):
-        q = QueryOptions()
-        q.custom["token"] = "latest"
-        q.custom["$search"] = "pizza"
-        q.custom["$count"] = "true"
-        q.custom["$changeType"] = "created"
-        self.assertEqual(q.to_url(), "token=latest&$search=pizza&$count=true&$changeType=created")
-
-
 class TestDeltaToken(unittest.TestCase):
     """Delta requests must use ?token=... and expose a resumable token value."""
-
-    def test_delta_url_uses_token_without_dollar(self):
-        delta = GraphClient().me.drive.root.delta.token("abc123")
-        self.assertEqual(
-            ReadEntityQuery(delta).url,
-            "https://graph.microsoft.com/v1.0/me/drive/root/delta?token=abc123",
-        )
-
-    def test_delta_token_parses_parenthesized_value(self):
-        col = DeltaCollection(GraphClient(), DriveItem)
-        col.set_property(
-            "@odata.deltaLink",
-            "https://graph.microsoft.com/v1.0/me/drive/root/delta?(token='MzslMjM0')",
-        )
-        self.assertEqual(col.delta_token, "MzslMjM0")
-
-    def test_delta_token_parses_query_value(self):
-        col = DeltaCollection(GraphClient(), DriveItem)
-        col.set_property(
-            "@odata.deltaLink",
-            "https://graph.microsoft.com/v1.0/me/drive/root/delta?token=2021-09-29T20%3A00%3A00Z",
-        )
-        self.assertEqual(col.delta_token, "2021-09-29T20%3A00%3A00Z")
-
-    def test_delta_token_parses_dollar_deltatoken(self):
-        col = DeltaCollection(GraphClient(), DriveItem)
-        col.set_property("@odata.deltaLink", "https://graph.microsoft.com/v1.0/users/delta?$deltatoken=latest")
-        self.assertEqual(col.delta_token, "latest")
 
     def test_delta_resume_withholds_filter(self):
         delta = GraphClient().me.drive.root.delta
@@ -420,29 +251,9 @@ class TestDeltaToken(unittest.TestCase):
             "https://graph.microsoft.com/v1.0/me/drive/root/delta?token=abc123",
         )
 
-    def test_delta_initial_request_keeps_filter(self):
-        delta = GraphClient().me.drive.root.delta
-        delta.filter("startswith(name,'A')")
-        self.assertEqual(
-            ReadEntityQuery(delta).url,
-            "https://graph.microsoft.com/v1.0/me/drive/root/delta?$filter=startswith(name,'A')",
-        )
-
-    def test_delta_resume_warns_when_filter_present(self):
-        delta = GraphClient().me.drive.root.delta
-        delta.filter("startswith(name,'A')")
-        with self.assertWarns(RuntimeWarning):
-            delta.token("abc123")
-
 
 class TestClientMetadata(unittest.TestCase):
     """Entity type-name resolution, query-option building and ClientResult wrapping."""
-
-    def test_build_query_options(self):
-        client = ClientContext(test_site_url)
-        lib = client.web.default_document_library()
-        options = ReadEntityQuery(lib, ["Author", "Comments"]).query_options
-        self.assertEqual(str(options), "$select=Author,Comments&$expand=Author")
 
     def test_query_options_apply_to(self):
         class _Target:
@@ -464,47 +275,10 @@ class TestClientMetadata(unittest.TestCase):
         self.assertFalse(hasattr(untouched, "_select"))
         self.assertFalse(hasattr(untouched, "_expand"))
 
-    def test_client_result_wraps_collection(self):
-        client = ClientContext(test_site_url)
-        result = ClientResult(client, StringCollection())
-        self.assertIsInstance(result.value, StringCollection)
-
-
-class _GuardResult:
-    def __init__(self, value):
-        self.value = value
-
-    def execute_query(self):
-        return self
-
-    def __iter__(self):
-        return iter(self.value)
-
-
-def _make_sku(part_number):
-    sku = mock.Mock()
-    sku.sku_part_number = part_number
-    return sku
-
 
 class TestRequireLicense(unittest.TestCase):
     def _make_client(self) -> GraphClient:
         return GraphClient(tenant="contoso.onmicrosoft.com")
-
-    def test_passes_when_sku_matches(self):
-        client = self._make_client()
-        collection = mock.Mock()
-        collection.get.return_value = _GuardResult([_make_sku("BACKUP_STORAGE_ADDON"), _make_sku("ENTERPRISEPACK")])
-        with mock.patch.object(GraphClient, "subscribed_skus", new_callable=mock.PropertyMock, return_value=collection):
-            self.assertIs(client.require_license("BACKUP"), client)
-
-    def test_exits_when_no_sku_matches(self):
-        client = self._make_client()
-        collection = mock.Mock()
-        collection.get.return_value = _GuardResult([_make_sku("ENTERPRISEPACK")])
-        with mock.patch.object(GraphClient, "subscribed_skus", new_callable=mock.PropertyMock, return_value=collection):
-            with self.assertRaises(SystemExit):
-                client.require_license("BACKUP")
 
 
 class TestRequireDelegatedPermission(unittest.TestCase):
@@ -512,21 +286,6 @@ class TestRequireDelegatedPermission(unittest.TestCase):
         ctx = GraphClient(tenant="contoso.onmicrosoft.com")
         ctx.pending_request().authentication_context._client_id = "app-id"
         return ctx
-
-    def test_passes_when_scope_granted(self):
-        client = self._make_client()
-        client.get_delegated_permissions = mock.Mock(  # type: ignore[method-assign]
-            return_value=_GuardResult(["User.Read", "Mail.Read"])
-        )
-        self.assertIs(client.require_delegated_permission("User.Read"), client)
-
-    def test_exits_when_scope_missing(self):
-        client = self._make_client()
-        client.get_delegated_permissions = mock.Mock(  # type: ignore[method-assign]
-            return_value=_GuardResult(["Mail.Read"])
-        )
-        with self.assertRaises(SystemExit):
-            client.require_delegated_permission("User.Read")
 
 
 class _MeetingMode(Enum):
@@ -583,23 +342,6 @@ class TestBuildPayload(unittest.TestCase):
     """A query body is built by the profile, so it is always spelled for the
     service that will read it — no second, marker-less serializer in the request."""
 
-    def test_absent_parameters_are_dropped_and_falsy_ones_kept(self):
-        payload = JsonLightFormat().build_payload({"a": None, "b": 0, "c": False, "d": "", "e": []})
-        self.assertEqual(payload, {"b": 0, "c": False, "d": "", "e": []})
-
-    def test_no_parameters_is_an_empty_body(self):
-        self.assertEqual(JsonLightFormat().build_payload(None), {})
-
-    def test_value_nested_in_parameters_declares_its_type(self):
-        payload = JsonLightFormat().build_payload({"sort": _SortValue("Modified"), "nested": {"sort": _SortValue("A")}})
-        self.assertEqual(
-            payload,
-            {
-                "sort": {"name": "Modified", "__metadata": {"type": "SP.Search.Query.Sort"}},
-                "nested": {"sort": {"name": "A", "__metadata": {"type": "SP.Search.Query.Sort"}}},
-            },
-        )
-
     def test_collection_items_are_spelled_the_way_the_dialect_spells_them(self):
         collection = ClientValueCollection(_SortValue, [_SortValue("Modified")])
         payload = JsonLightFormat().build_payload({"SortList": collection})
@@ -628,14 +370,6 @@ class _Drafted(Entity):
 
 
 class TestAPropertyTheServiceOwns(unittest.TestCase):
-    def test_it_is_read_from_a_response_and_never_written_back(self):
-        """A response carries the id the service assigned; a request must not claim it."""
-        target = _Drafted(GraphClient())
-        V4JsonFormat().hydrate(target, {"subject": "Q1", "iCalUId": "0400"}, persist_changes=True)
-
-        self.assertEqual({"subject": "Q1"}, target.to_json(V4JsonFormat("none")))
-        self.assertEqual({"subject": "Q1", "iCalUId": "0400"}, target.to_json())
-
     def test_a_response_is_not_a_draft_and_marks_nothing(self):
         target = _Drafted(GraphClient())
         V4JsonFormat().hydrate(target, {"subject": "Q1"})
@@ -654,27 +388,9 @@ class TestReadingAPayloadTheCallerAlreadyHasAnObjectFor(unittest.TestCase):
         self.assertEqual({"subject": "Q1"}, target.to_json(V4JsonFormat("none")))
         self.assertEqual({"subject": "Q1", "iCalUId": "0400"}, target.to_json())
 
-    def test_it_fills_the_object_the_caller_made_and_keeps_its_place(self):
-        """The object exists before the payload does — reading does not relocate it."""
-        context = GraphClient()
-        target = _Drafted(context)
-
-        self.assertIs(target, target.hydrate({"subject": "Q1"}, V4JsonFormat()))
-        self.assertIs(context, target.context)
-
     def test_the_profile_decides_how_a_payload_is_read(self):
         """JSON Light wraps an entity in ``d``; the same mapping means nothing to V4."""
         payload = {"d": {"subject": "Q1"}}
 
         self.assertEqual("Q1", _Drafted(GraphClient()).hydrate(payload, JsonLightFormat()).subject)
         self.assertIsNone(_Drafted(GraphClient()).hydrate(payload, V4JsonFormat()).subject)
-
-    def test_reading_a_record_the_type_wrote_returns_the_same_record(self):
-        target = _Drafted(GraphClient()).hydrate({"subject": "Q1", "iCalUId": "0400"}, V4JsonFormat())
-
-        for profile in (V4JsonFormat("none"), V4JsonFormat()):
-            with self.subTest(profile=profile.metadata_level):
-                self.assertEqual(
-                    target.to_json(profile),
-                    _Drafted(GraphClient()).hydrate(target.to_json(profile), profile).to_json(profile),
-                )

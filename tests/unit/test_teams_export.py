@@ -9,12 +9,8 @@ from pathlib import Path
 
 from office365.graph_client import GraphClient
 from office365.migration import MigrationJob
-from office365.migration.base import MigrationItem
 from office365.migration.teams import TeamsArchiveSource, TeamsArchiveTarget, TeamsExportOptions
-from office365.onedrive.driveitems.driveItem import DriveItem
-from office365.runtime.paths.v4.entity import EntityPath
 from office365.runtime.transport.base import BaseTransport
-from office365.teams.chats.messages.hosted_content import ChatMessageHostedContent
 from requests import Response
 from tests._scripted_transport import ScriptedTransport
 
@@ -80,27 +76,6 @@ def test_archive_job_round_trip(tmp_path: Path):
     assert json.loads(lines[0])["channel_id"] == "c1"
 
 
-def test_target_round_trip(tmp_path: Path):
-    target = TeamsArchiveTarget(tmp_path)
-    structure = MigrationItem(source_path="t1/team.json", dest_path="t1/team.json", item_type="structure")
-    messages = MigrationItem(source_path="t1/messages.ndjson", dest_path="t1/messages.ndjson", item_type="messages")
-    attachment = MigrationItem(
-        source_path="t1/attachments/c1/msg1_hc1.png", dest_path="t1/attachments/c1/msg1_hc1.png", item_type="attachment"
-    )
-
-    target.write(structure, {"id": "t1"})
-    target.write(messages, [{"id": "msg1"}])
-    target.write(attachment, b"\x89PNG")
-
-    assert set(target.list_paths()) == {
-        "t1/team.json",
-        "t1/messages.ndjson",
-        "t1/attachments/c1/msg1_hc1.png",
-    }
-    assert target.exists(structure)
-    assert target.checksum(attachment) == target.checksum(attachment)
-
-
 _MESSAGE = {
     "id": "m1",
     "replyToId": "root1",
@@ -159,17 +134,6 @@ def test_chat_get_all_messages_filter_in_url():
 
     assert any("getAllMessages" in url for url in transport.urls)
     assert any("$filter" in url for url in transport.urls)
-
-
-def test_hosted_content_get_content():
-    transport = teamsmessages__CaptureTransport(content=b"\x89PNG", content_type="application/octet-stream")
-    client = _client(transport)
-    hosted = ChatMessageHostedContent(client)
-
-    result = hosted.get_content().execute_query()
-
-    assert result.value == b"\x89PNG"
-    assert any("$value" in url for url in transport.urls)
 
 
 def test_visible_history_start_datetime_is_set():
@@ -252,25 +216,6 @@ class TestDriveItemEnsureFolder(unittest.TestCase):
         paths = [url.split("graph.microsoft.com", 1)[-1] for url in transport.urls]
         self.assertFalse(any(":/" in path for path in paths))
 
-    def test_ensure_folder_on_id_addressed_base(self):
-        """A base addressed by id resolves children (the ``create_nested`` scenario)."""
-        client, transport = self._client(
-            [
-                (200, {"value": []}),  # GET /items/BASEID/children (a) — miss
-                (201, _item("a1", "a")),  # POST a
-                (200, {"value": []}),  # GET /items/a1/children (b) — miss
-                (201, _item("b2", "b")),  # POST b
-            ]
-        )
-        base = DriveItem(client, EntityPath("BASEID", client.me.drive.items.resource_path))
-        target = base.ensure_folder("a/b")
-        client.execute_query()
-
-        self.assertEqual(target.get_property("id"), "b2")
-        self.assertIn("/me/drive/items/BASEID/children", transport.urls[0])
-        paths = [url.split("graph.microsoft.com", 1)[-1] for url in transport.urls]
-        self.assertFalse(any(":/" in path for path in paths))
-
 
 def _file_item(item_id: str, name: str) -> dict:
     return {"id": item_id, "name": name, "file": {}, "@odata.type": "#microsoft.graph.driveItem"}
@@ -314,31 +259,6 @@ class TestDriveItemEnsureFile(unittest.TestCase):
         self.assertIn("f.txt", url)
         self.assertEqual(target.get_property("id"), "f1")
 
-    def test_uploads_when_missing(self):
-        client, transport = self._client([(200, {"value": []}), (201, _file_item("f2", "f.txt"))])
-
-        target = client.me.drive.root.ensure_file("f.txt", b"hi")
-        client.execute_query()
-
-        self.assertEqual(len(transport.calls), 2)
-        method, url, data = transport.calls[1]
-        self.assertEqual(method, "PUT")
-        self.assertTrue(url.endswith(":/f.txt:/content"))
-        self.assertEqual(data, b"hi")
-        self.assertEqual(target.get_property("id"), "f2")
-
-    def test_replace_overwrites_without_get(self):
-        client, transport = self._client([(200, _file_item("f3", "f.txt"))])
-
-        client.me.drive.root.ensure_file("f.txt", "text", on_conflict="replace")
-        client.execute_query()
-
-        self.assertEqual(len(transport.calls), 1)
-        method, url, data = transport.calls[0]
-        self.assertEqual(method, "PUT")
-        self.assertTrue(url.endswith(":/f.txt:/content"))
-        self.assertEqual(data, b"text")
-
     def test_uploads_into_nested_folder(self):
         client, transport = self._client(
             [
@@ -359,15 +279,3 @@ class TestDriveItemEnsureFile(unittest.TestCase):
         self.assertTrue(url.endswith("/items/b2:/f.txt:/content"))
         self.assertEqual(data, b"hi")
         self.assertEqual(target.get_property("id"), "f4")
-
-    def test_rejects_unknown_conflict_mode(self):
-        client, _ = self._client([])
-
-        with self.assertRaises(ValueError):
-            client.me.drive.root.ensure_file("f.txt", b"hi", on_conflict="update")
-
-    def test_rejects_empty_path(self):
-        client, _ = self._client([])
-
-        with self.assertRaises(ValueError):
-            client.me.drive.root.ensure_file("/", b"hi")

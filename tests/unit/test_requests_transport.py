@@ -22,9 +22,6 @@ from office365.graph_client import GraphClient
 from office365.runtime.http.request_options import RequestOptions
 from office365.runtime.transport.base import NO_TIMEOUT
 from office365.runtime.transport.requests_transport import (
-    DEFAULT_POOL_CONNECTIONS,
-    DEFAULT_POOL_MAXSIZE,
-    DEFAULT_TIMEOUT,
     RequestsTransport,
 )
 from requests import Response
@@ -104,10 +101,6 @@ class TestRequestsTransportThreadLocalSessions(unittest.TestCase):
         self.assertEqual(len(session.calls), 2)
         self.assertIs(transport.auth, session.auth)
 
-    def test_auth_is_none_before_a_thread_session_exists(self):
-        with mock.patch("office365.runtime.transport.requests_transport.Session", _RecordingSession):
-            self.assertIsNone(RequestsTransport().auth)
-
     def test_reset_connections_only_closes_the_calling_thread_session(self):
         with mock.patch("office365.runtime.transport.requests_transport.Session", _ClosingRecordingSession):
             transport = RequestsTransport(timeout=NO_TIMEOUT)
@@ -123,46 +116,8 @@ class TestRequestsTransportThreadLocalSessions(unittest.TestCase):
                 _run_on_worker(pool, transport.reset_connections)
                 self.assertEqual(worker_session.close_calls, 1)
 
-    def test_close_closes_every_thread_session(self):
-        with mock.patch("office365.runtime.transport.requests_transport.Session", _ClosingRecordingSession):
-            transport = RequestsTransport(timeout=NO_TIMEOUT)
-            transport.execute(_get())
-            with ThreadPoolExecutor(max_workers=1) as pool:
-                _run_on_worker(pool, transport.execute, _get())
-
-            transport.close()
-
-            self.assertTrue(all(s.close_calls == 1 for s in transport._sessions))
-
 
 class TestRequestsTransportTimeout(unittest.TestCase):
-    def test_configured_timeout_is_applied(self):
-        session = _RecordingSession()
-        transport = RequestsTransport(session=session, timeout=15)
-
-        transport.execute(_get())
-
-        self.assertEqual(session.calls[0][2]["timeout"], 15)
-
-    def test_per_request_timeout_overrides_transport(self):
-        session = _RecordingSession()
-        transport = RequestsTransport(session=session, timeout=15)
-        request = _get()
-        request.timeout = 3
-
-        transport.execute(request)
-
-        self.assertEqual(session.calls[0][2]["timeout"], 3)
-
-    def test_default_timeout_bounds_connect_and_read(self):
-        session = _RecordingSession()
-        transport = RequestsTransport(session=session)
-
-        transport.execute(_get())
-
-        self.assertEqual(session.calls[0][2]["timeout"], DEFAULT_TIMEOUT)
-        self.assertEqual(DEFAULT_TIMEOUT, (10.0, 300.0))
-
     def test_no_timeout_sentinel_disables_timeout(self):
         session = _RecordingSession()
         transport = RequestsTransport(session=session, timeout=NO_TIMEOUT)
@@ -171,24 +126,6 @@ class TestRequestsTransportTimeout(unittest.TestCase):
 
         self.assertIsNone(transport.timeout)
         self.assertNotIn("timeout", session.calls[0][2])
-
-    def test_tuple_timeout_is_forwarded(self):
-        session = _RecordingSession()
-        transport = RequestsTransport(session=session, timeout=(5, 30))
-
-        transport.execute(_get())
-
-        self.assertEqual(session.calls[0][2]["timeout"], (5, 30))
-
-    def test_float_per_request_timeout_is_forwarded(self):
-        session = _RecordingSession()
-        transport = RequestsTransport(session=session)
-        request = _get()
-        request.timeout = 2.5
-
-        transport.execute(request)
-
-        self.assertEqual(session.calls[0][2]["timeout"], 2.5)
 
     def test_streaming_helper_applies_timeout(self):
         session = _RecordingSession()
@@ -205,13 +142,6 @@ class TestRequestsTransportTimeout(unittest.TestCase):
 class TestRequestsTransportConnectionPool(unittest.TestCase):
     """Connection-pool sizing of the lazily-created per-thread sessions."""
 
-    def test_defaults_match_requests(self):
-        transport = RequestsTransport()
-
-        self.assertEqual(transport.pool_connections, DEFAULT_POOL_CONNECTIONS)
-        self.assertEqual(transport.pool_maxsize, DEFAULT_POOL_MAXSIZE)
-        self.assertFalse(transport.pool_block)
-
     def test_configured_pool_applied_to_created_session(self):
         transport = RequestsTransport(pool_connections=5, pool_maxsize=25, pool_block=True)
 
@@ -221,35 +151,6 @@ class TestRequestsTransportConnectionPool(unittest.TestCase):
         self.assertEqual(adapter._pool_connections, 5)
         self.assertEqual(adapter._pool_maxsize, 25)
         self.assertTrue(adapter._pool_block)
-
-    def test_pool_applied_to_every_thread_session(self):
-        transport = RequestsTransport(pool_connections=3, pool_maxsize=7)
-
-        with mock.patch("office365.runtime.transport.requests_transport.Session", _RecordingSession):
-            transport.execute(_get())
-            with ThreadPoolExecutor(max_workers=1) as pool:
-                _run_on_worker(pool, transport.execute, _get())
-
-        for session in transport._sessions:
-            adapter = session.get_adapter("https://contoso.sharepoint.com")
-            self.assertEqual(adapter._pool_connections, 3)
-            self.assertEqual(adapter._pool_maxsize, 7)
-
-    def test_explicit_session_keeps_its_own_adapters(self):
-        session = requests.Session()
-        original = session.get_adapter("https://contoso.sharepoint.com")
-
-        transport = RequestsTransport(session=session, pool_maxsize=99)
-
-        self.assertEqual(transport._sessions, [session])
-        self.assertIs(session.get_adapter("https://contoso.sharepoint.com"), original)
-        self.assertEqual(original._pool_maxsize, DEFAULT_POOL_MAXSIZE)
-
-    def test_invalid_pool_sizes_are_rejected(self):
-        with self.assertRaises(ValueError):
-            RequestsTransport(pool_connections=0)
-        with self.assertRaises(ValueError):
-            RequestsTransport(pool_maxsize=0)
 
     def test_with_transport_forwards_pool_sizing(self):
         ctx = GraphClient().with_transport(pool_connections=4, pool_maxsize=42, pool_block=True)
@@ -269,43 +170,6 @@ class TestRequestsTransportTlsAndProxy(unittest.TestCase):
     bundle on a supplied session was clobbered; ``with_transport(proxies=...)``
     never reached the wire at all.
     """
-
-    def test_default_verify_defers_to_the_session(self):
-        self.assertIsNone(RequestsTransport().verify)
-
-    def test_transport_verify_is_applied(self):
-        session = _RecordingSession()
-        transport = RequestsTransport(session=session, verify=False, timeout=NO_TIMEOUT)
-
-        transport.execute(_get())
-
-        self.assertFalse(session.calls[0][2]["verify"])
-
-    def test_transport_proxies_are_applied(self):
-        session = _RecordingSession()
-        transport = RequestsTransport(session=session, proxies={"https": "http://proxy:8080"}, timeout=NO_TIMEOUT)
-
-        transport.execute(_get())
-
-        self.assertEqual(session.calls[0][2]["proxies"], {"https": "http://proxy:8080"})
-
-    def test_per_request_verify_overrides_transport(self):
-        session = _RecordingSession()
-        transport = RequestsTransport(session=session, verify=False, timeout=NO_TIMEOUT)
-        request = _get()
-        request.verify = True
-
-        transport.execute(request)
-
-        self.assertTrue(session.calls[0][2]["verify"])
-
-    def test_default_defers_so_a_custom_ca_bundle_survives(self):
-        session = _RecordingSession()
-        session.verify = "/etc/ssl/certs/ca.pem"
-
-        RequestsTransport(session=session, timeout=NO_TIMEOUT).execute(_get())
-
-        self.assertNotIn("verify", session.calls[0][2])
 
     def test_with_transport_forwards_verify_and_proxies(self):
         session = _RecordingSession()

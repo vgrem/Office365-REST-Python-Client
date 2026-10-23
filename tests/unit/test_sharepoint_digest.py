@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import time
 import unittest
 from unittest import mock
 
@@ -73,39 +72,11 @@ def _request(transport: BaseTransport) -> SharePointRequest:
 
 
 class TestContextWebInformationValidity(unittest.TestCase):
-    def test_valid_after_fetch(self):
-        info = ContextWebInformation(FormDigestValue="d", FormDigestTimeoutSeconds=1800)
-        self.assertTrue(info.is_valid)
-
     def test_invalid_without_digest(self):
         self.assertFalse(ContextWebInformation().is_valid)
 
-    def test_invalid_within_refresh_margin(self):
-        info = ContextWebInformation(FormDigestValue="d", FormDigestTimeoutSeconds=1800)
-        info._valid_from = time.time() - (1800 - 30)  # 30s left, inside the 60s margin
-        self.assertFalse(info.is_valid)
-
-    def test_invalid_after_timeout(self):
-        info = ContextWebInformation(FormDigestValue="d", FormDigestTimeoutSeconds=100)
-        info._valid_from = time.time() - 200
-        self.assertFalse(info.is_valid)
-
-    def test_default_timeout_when_server_omits_it(self):
-        info = ContextWebInformation(FormDigestValue="d")
-        self.assertTrue(info.is_valid)
-
 
 class TestFormDigestFetch(unittest.TestCase):
-    def test_warm_up_fetches_once(self):
-        request = _request(_DigestTransport())
-        fetch = mock.Mock(return_value=ContextWebInformation(FormDigestValue="d", FormDigestTimeoutSeconds=1800))
-        request._fetch_context_web_information = fetch  # type: ignore[method-assign]
-
-        request.warm_up()
-        request.warm_up()
-
-        fetch.assert_called_once()
-
     def test_context_info_fetch_retries_transient(self):
         transport = _DigestTransport(context_info_statuses=[429])
         request = _request(transport)

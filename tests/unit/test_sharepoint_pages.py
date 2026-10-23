@@ -4,7 +4,6 @@ import unittest
 
 from office365.migration.sharepoint.pages import (
     PAGE_LIBRARY_TEMPLATE,
-    PageHandoff,
     detect_page_handoff,
     page_handoff_note,
 )
@@ -64,28 +63,6 @@ class TestDetectPageHandoff(unittest.TestCase):
         self.assertEqual(handoff.web_part_count, 2)
         self.assertEqual([page.kind for page in handoff.libraries[0].pages], ["unknown", "modern"])
 
-    def test_classic_wiki_page_is_classified(self):
-        library = _List(
-            "Wiki",
-            base_template=PAGE_LIBRARY_TEMPLATE,
-            items=[_page("Guide.aspx", wiki="<p>hello</p>")],
-        )
-
-        handoff = detect_page_handoff([library])
-
-        self.assertEqual(handoff.libraries[0].pages[0].kind, "classic")
-
-    def test_skips_hidden_lists_and_other_templates(self):
-        hidden = _List("Hidden Pages", base_template=PAGE_LIBRARY_TEMPLATE, hidden=True, items=[_page("A.aspx")])
-        doclib = _List("Documents", base_template=101, items=[_page("A.aspx")])
-
-        self.assertTrue(detect_page_handoff([hidden, doclib]).is_empty)
-
-    def test_ignores_non_aspx_items(self):
-        library = _List("Site Pages", base_template=PAGE_LIBRARY_TEMPLATE, items=[_Item(FileLeafRef="data.json")])
-
-        self.assertTrue(detect_page_handoff([library]).is_empty)
-
     def test_malformed_control_data_is_ignored(self):
         library = _List(
             "Site Pages",
@@ -97,16 +74,6 @@ class TestDetectPageHandoff(unittest.TestCase):
 
         self.assertEqual(handoff.page_count, 1)
         self.assertEqual(handoff.web_part_count, 0)
-
-    def test_generic_lists_are_not_queried(self):
-        doclib = _List("Documents", base_template=101)
-
-        detect_page_handoff([doclib])
-
-        self.assertEqual(doclib.items.select_calls, [])
-
-    def test_note_is_none_when_empty(self):
-        self.assertIsNone(page_handoff_note(PageHandoff()))
 
     def test_note_lists_libraries_pages_and_web_parts(self):
         library = _List(

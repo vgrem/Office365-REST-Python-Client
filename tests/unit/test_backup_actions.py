@@ -28,10 +28,8 @@ from office365.backuprestore.restoresessions.browse_query_order import BrowseQue
 from office365.backuprestore.serviceapps.service_app import ServiceApp
 from office365.backuprestore.sharepoint_browse_session import SharePointBrowseSession
 from office365.backuprestore.sharepoint_protection_policy import SharePointProtectionPolicy
-from office365.backuprestore.sharepoint_restore_session import SharePointRestoreSession
 from office365.common.mailbox_protection_unit import MailboxProtectionUnit
 from office365.common.restore_point import RestorePoint
-from office365.common.site_protection_rule import SiteProtectionRule
 from office365.graph_client import GraphClient
 from office365.runtime.http.http_method import HttpMethod
 from office365.runtime.paths.resource_path import ResourcePath
@@ -84,12 +82,6 @@ def test_protection_policy_activate_and_deactivate():
 # --- restore sessions -------------------------------------------------------
 
 
-def test_restore_session_activate():
-    client, transport = _client()
-    SharePointRestoreSession(client, ResourcePath("restoreSessions/1")).activate().execute_query()
-    assert _last(transport).url.endswith("/restoreSessions/1/activate")
-
-
 # --- protection units -------------------------------------------------------
 
 
@@ -103,15 +95,6 @@ def test_protection_unit_offboard_and_cancel():
 
 
 # --- protection rules -------------------------------------------------------
-
-
-def test_protection_rule_run_and_delete():
-    client, transport = _client()
-    SiteProtectionRule(client, ResourcePath("siteInclusionRules/1")).run().execute_query()
-    SiteProtectionRule(client, ResourcePath("siteInclusionRules/1")).delete_and_unprotect().execute_query()
-
-    assert _last(transport).url.endswith("/siteInclusionRules/1/deleteAndUnprotect")
-    assert transport.requests[0].url.endswith("/siteInclusionRules/1/run")
 
 
 # --- browse session ---------------------------------------------------------
@@ -133,14 +116,6 @@ def test_browse_session_builds_typed_payload():
     }
 
 
-def test_browse_session_omits_unset_optional_parameters():
-    client, transport = _client()
-    SharePointBrowseSession(client, ResourcePath("browseSessions/1")).browse(
-        "item-key", BrowsableResourceType.site
-    ).execute_query()
-    assert _last(transport).data == {"browseLocationItemKey": "item-key", "browseResourceType": "site"}
-
-
 # --- service apps -----------------------------------------------------------
 
 
@@ -151,12 +126,6 @@ def test_service_app_activate_formats_utc_datetime():
     request = _last(transport)
     assert request.url.endswith("/serviceApps/1/activate")
     assert request.data == {"effectiveDateTime": "2024-01-02T03:04:05Z"}
-
-
-def test_service_app_deactivate():
-    client, transport = _client()
-    ServiceApp(client, ResourcePath("serviceApps/1")).deactivate().execute_query()
-    assert _last(transport).url.endswith("/serviceApps/1/deactivate")
 
 
 # --- restore-point search ---------------------------------------------------
@@ -177,12 +146,6 @@ def test_restore_points_search_serializes_enum_names():
         "restorePointPreference": "latest",
         "tags": "fastRestore",
     }
-
-
-def test_restore_points_search_omits_unset_filters():
-    client, transport = _client()
-    RestorePointCollection(client, RestorePoint, ResourcePath("restorePoints")).search().execute_query()
-    assert _last(transport).data == {}
 
 
 def test_root_exposes_restore_point_collection():

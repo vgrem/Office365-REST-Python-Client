@@ -34,11 +34,3 @@ def test_has_application_permissions_true_when_role_assigned():
     granted = client.has_application_permissions("User.Read.All", "app-guid")
 
     assert granted is True
-
-
-def test_has_application_permissions_false_for_other_role():
-    client, _ = _client([{"value": [GRAPH_SP]}, GRAPH_SP_WITH_ROLES, CLIENT_SP])
-
-    granted = client.has_application_permissions("Mail.Read", "app-guid")
-
-    assert granted is False

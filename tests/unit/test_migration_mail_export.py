@@ -175,34 +175,6 @@ def test_source_records_the_envelope_that_mime_cannot_carry():
     assert first.size_bytes == _M1_SIZE
 
 
-def test_source_projects_every_property_it_reads():
-    """One projection: a field the envelope records must be in the `$select`."""
-    transport = _transport()
-    client = _client(transport)
-
-    MailFolderSource(_folder(client)).list_items()
-
-    url = next(request.url for request in transport.requests if "/messages?" in request.url)
-    for column in ("internetMessageId", "receivedDateTime", "lastModifiedDateTime", "categories"):
-        assert column in url, column
-
-
-def test_source_does_not_project_a_column_the_backend_rejects():
-    """`message.size` is documented but not selectable on the Exchange backend.
-
-    ``$select=size`` answers ``RequestBroker--ParseUri: Could not find a property named
-    'size' on type 'Microsoft.OutlookServices.Message'``, so an export that asked for it
-    failed on the first folder. The transported byte count is filled in by ``read()``.
-    """
-    transport = _transport()
-    client = _client(transport)
-
-    MailFolderSource(_folder(client)).list_items()
-
-    url = next(request.url for request in transport.requests if "/messages?" in request.url)
-    assert "size" not in url
-
-
 def test_source_reads_rfc822_bytes_and_checksums_them():
     client = _client(_transport())
     source = MailFolderSource(_folder(client))
@@ -212,26 +184,6 @@ def test_source_reads_rfc822_bytes_and_checksums_them():
 
     assert payload == _MIME["m1"]
     assert source.checksum(items[0]) == hashlib.md5(_MIME["m1"]).hexdigest()  # noqa: S324 - the toolkit's checksum
-
-
-def test_source_can_skip_subfolders_and_drafts():
-    client = _client(_transport())
-    flat = MailFolderSource(_folder(client), MailExportOptions(include_subfolders=False, include_drafts=False))
-
-    items = flat.list_items()
-
-    assert [item.metadata["graph_id"] for item in items] == ["m1", "m2"]
-
-
-def test_source_resolves_items_when_the_plan_came_from_disk():
-    client = _client(_transport())
-    source = MailFolderSource(_folder(client))
-    planned = source.list_items()[0]
-
-    # A second instance has no handles: reading an item re-enumerates once.
-    fresh = MailFolderSource(_folder(client))
-
-    assert fresh.read(planned) == _MIME["m1"]
 
 
 def test_dest_paths_are_safe_and_bounded():
@@ -259,18 +211,6 @@ def test_target_writes_eml_a_sidecar_and_the_index(tmp_path: Path):
     assert sidecar["eml_path"] == items[0].dest_path
     index = [json.loads(line) for line in (tmp_path / MANIFEST_NAME).read_text().splitlines()]
     assert {record["eml_path"] for record in index} == set(target.list_paths())
-
-
-def test_target_reads_back_the_metadata_it_recorded(tmp_path: Path):
-    client = _client(_transport())
-    source = MailFolderSource(_folder(client))
-    item = source.list_items()[0]
-    target = MailExportTarget(tmp_path)
-
-    target.write(item, source.read(item))
-
-    assert target.read_metadata(item)["subject"] == item.metadata["subject"]
-    assert target.checksum(item) == source.checksum(item)
 
 
 def test_export_job_round_trip(tmp_path: Path):

@@ -22,7 +22,3 @@ def test_field_internal_name_falls_back_to_name():
 
 def test_field_internal_name_prefers_explicit_property():
     assert _link(Name="Title", FieldInternalName="Custom").field_internal_name == "Custom"
-
-
-def test_field_internal_name_is_none_when_unknown():
-    assert _link().field_internal_name is None

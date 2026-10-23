@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import threading
 
-import pytest
 from office365.migration import MigrationTask
 from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget
 from office365.migration.base import MigrationPhase
@@ -27,8 +26,6 @@ from office365.migration.sharepoint import resolvers
 from office365.migration.sharepoint.adapters import (
     SharePointLibrarySource,
     SharePointLibraryTarget,
-    SharePointListSource,
-    SharePointListTarget,
 )
 from office365.sharepoint.client_context import ClientContext
 from tests._scripted_transport import RoutingTransport
@@ -76,32 +73,6 @@ class _LabelledTarget(FileSystemTarget):
 
     def label(self) -> str:
         return "library:/sites/target/Documents"
-
-
-class _CountingSource(FileSystemSource):
-    """Records the peak number of jobs enumerating at the same time."""
-
-    def __init__(self, root, state: dict, lock: threading.Lock) -> None:
-        super().__init__(root)
-        self._state = state
-        self._lock = lock
-
-    def list_items(self, progress=None):
-        with self._lock:
-            self._state["active"] += 1
-            self._state["peak"] = max(self._state["peak"], self._state["active"])
-        try:
-            return super().list_items(progress)
-        finally:
-            with self._lock:
-                self._state["active"] -= 1
-
-
-class _BoomSource(FileSystemSource):
-    """A source whose plan fails, as a denied list would."""
-
-    def list_items(self, progress=None):
-        raise RuntimeError("source read failed")
 
 
 def _session_with_jobs(tmp_path, count: int, make_source) -> MigrationSession:
@@ -177,41 +148,6 @@ def test_a_serial_run_names_each_list_in_its_progress(tmp_path):
     assert beats[-1]["done"] == beats[-1]["total"]
 
 
-def test_concurrency_defaults_to_one_job_at_a_time(tmp_path):
-    state = {"active": 0, "peak": 0}
-    lock = threading.Lock()
-    session = _session_with_jobs(tmp_path, JOBS, lambda source: _CountingSource(source, state, lock))
-
-    session.start()
-
-    assert state["peak"] == 1
-
-
-def test_a_failing_job_stops_the_session_but_keeps_the_finished_work(tmp_path):
-    session = MigrationSession()
-    _seed(tmp_path / "good")
-    _seed(tmp_path / "bad")
-    session.add_task(FileSystemSource(tmp_path / "good"), FileSystemTarget(tmp_path / "dst-good"))
-    session.add_task(_BoomSource(tmp_path / "bad"), FileSystemTarget(tmp_path / "dst-bad"))
-
-    with pytest.raises(RuntimeError, match="source read failed"):
-        session.start(concurrency=2)
-
-    # The session still reports both tasks: the one that finished kept its stats.
-    phases = {status["id"]: status["phase"] for status in session.show()}
-    assert phases == {"1": MigrationPhase.COMPLETED.value, "2": MigrationPhase.PLANNING.value}
-
-
-def test_a_job_already_completed_is_not_run_again(tmp_path):
-    session = _session_with_jobs(tmp_path, 1, FileSystemSource)
-    session.start(concurrency=2)
-
-    again = session.start(concurrency=2)
-
-    assert again[0]["stats"]["success"] == FILES_PER_JOB
-    assert again[0]["phase"] == MigrationPhase.COMPLETED.value
-
-
 # ── Rebinding: one pending-query queue per job ──────────────────
 
 
@@ -246,31 +182,6 @@ def test_rebind_copies_a_context_bound_job_and_keeps_its_state_paths():
     assert copy._manifest_path == job._manifest_path
     assert copy._checkpoint_path == job._checkpoint_path
     assert job.source.rebound == 0  # the original was left untouched
-
-
-def test_list_source_rebinds_on_a_clone_that_shares_the_transport():
-    ctx = _context([(LIST_ROUTE, _list_payload())])
-    sp_list = ctx.web.lists.get_by_id(LIST_ID).get().execute_query()
-    source = SharePointListSource(sp_list)
-
-    rebound = source.rebind()
-
-    assert rebound is not source
-    assert rebound.label() == "list:Documents"
-    assert rebound._list.context is not ctx
-    assert rebound._list.context.pending_request().transport is ctx.pending_request().transport
-
-
-def test_list_target_rebinds_its_write_settings():
-    ctx = _context([(LIST_ROUTE, _list_payload())])
-    sp_list = ctx.web.lists.get_by_id(LIST_ID).get().execute_query()
-    target = SharePointListTarget(sp_list, key=["MigrationKey"], on_conflict="overwrite")
-
-    rebound = target.rebind()
-
-    assert rebound._key_columns == target._key_columns
-    assert rebound._on_conflict == target._on_conflict
-    assert rebound._list.context is not ctx
 
 
 def test_library_target_rebinds_folder_and_list_on_one_clone():

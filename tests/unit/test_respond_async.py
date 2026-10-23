@@ -20,7 +20,7 @@ from office365.runtime.client_result import ClientResult
 from office365.runtime.lro import LongRunningOperationResult
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.respond_async import RespondAsyncRequest
-from tests._scripted_transport import AsyncScriptedTransport, RoutingTransport, ScriptedTransport
+from tests._scripted_transport import AsyncScriptedTransport, ScriptedTransport
 
 _MONITOR = "https://graph.microsoft.com/v1.0/drives/d1/items/i1/workbook/operations/op1"
 
@@ -104,26 +104,6 @@ def test_accepted_returns_pollable_result_and_waits():
     assert result.value == b""
 
 
-def test_prefer_header_includes_wait_and_targets_report():
-    transport = RoutingTransport([("reports", _lro(200, b"x"))])
-    client = _graph_client()
-    client.pending_request().transport = transport
-    _, query = _report_query(client)
-    RespondAsyncRequest(client, query, wait=5).execute()
-    sent = transport.requests[0]
-    assert sent.headers["Prefer"] == "respond-async, wait=5"
-    assert "getEmailActivityUserDetail" in sent.url
-
-
-def test_prefer_header_without_wait():
-    transport = RoutingTransport([("reports", _lro(200, b"x"))])
-    client = _graph_client()
-    client.pending_request().transport = transport
-    _, query = _report_query(client)
-    RespondAsyncRequest(client, query).execute()
-    assert transport.requests[0].headers["Prefer"] == "respond-async"
-
-
 def test_error_status_raises():
     client = _graph_client(sync_payloads=[_lro(403, {"error": {"code": "Forbidden"}})])
     _, query = _report_query(client)
@@ -131,36 +111,7 @@ def test_error_status_raises():
         RespondAsyncRequest(client, query).execute()
 
 
-def test_202_without_monitor_url_is_treated_as_sync():
-    # Accepted-but-not-pollable cannot be waited on; the response is still fed into
-    # the query, and the result is terminal rather than a poller that would raise.
-    client = _graph_client(sync_payloads=[_lro(202, b"")])
-    result, query = _report_query(client)
-    operation = RespondAsyncRequest(client, query).execute()
-    assert result.value == b""
-    assert operation.is_completed
-    assert operation.monitor_url is None
-
-
 # -- asynchronous submission ------------------------------------------------
-
-
-def test_async_completion_populates_query_result():
-    client = _graph_client(async_payloads=[_lro(200, b"csv")])
-    result, query = _report_query(client)
-    operation = asyncio.run(RespondAsyncRequest(client, query).execute_async())
-    assert result.value == b"csv"
-    assert operation.is_completed
-    status = asyncio.run(operation.wait_async())
-    assert status.is_success
-
-
-def test_async_accepted_returns_pollable_result():
-    client = _graph_client(async_payloads=[_lro(202, headers={"Location": _MONITOR})])
-    _, query = _report_query(client)
-    operation = asyncio.run(RespondAsyncRequest(client, query).execute_async())
-    assert isinstance(operation, LongRunningOperationResult)
-    assert operation.monitor_url == _MONITOR
 
 
 def test_async_accepted_can_be_polled():

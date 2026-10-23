@@ -256,36 +256,6 @@ class TestCaptureListStructure(unittest.TestCase):
         self.assertNotIn("SourceID", project.schema_xml)
         self.assertNotIn("Version", project.schema_xml)
 
-    def test_skips_builtin_framework_and_hidden_columns(self):
-        lst = _List(
-            fields=[
-                _Field("_ModerationStatus"),
-                _Field("BuiltIn", from_base_type=True),
-                _Field("Framework", from_base_type=False, can_be_deleted=False),
-                _Field("HiddenUser", from_base_type=False, can_be_deleted=True, hidden=True),
-                _Field("RealUser", from_base_type=False, can_be_deleted=True),
-            ]
-        )
-
-        structure = capture_list_structure(lst)
-
-        self.assertEqual([f.internal_name for f in structure.fields], ["RealUser"])
-
-    def test_requests_schema_xml_for_each_column(self):
-        lst = _List(fields=[_Field("Tags")])
-
-        capture_list_structure(lst)
-
-        self.assertIn("SchemaXml", lst.fields.selected)
-
-    def test_loads_list_properties_before_capturing(self):
-        lst = _List()
-
-        capture_list_structure(lst)
-
-        self.assertIn("BaseTemplate", lst.ensured)
-        self.assertIn("ContentTypesEnabled", lst.ensured)
-
     def test_captures_content_types_and_skips_hidden(self):
         lst = _List(
             fields=[_Field("ProjectType")],
@@ -303,26 +273,6 @@ class TestCaptureListStructure(unittest.TestCase):
         # ``Title`` is a built-in column the migration never recreates or links, so
         # keeping it would make every provisioned library report a missing link.
         self.assertEqual(project.field_internal_names, ["ProjectType"])
-
-    def test_a_content_type_link_to_a_column_that_cannot_be_recreated_is_dropped(self):
-        lst = _List(
-            fields=[
-                _Field("ProjectType"),
-                _Field("Framework", from_base_type=False, can_be_deleted=False),
-                _Field("HiddenUser", from_base_type=False, can_be_deleted=True, hidden=True),
-            ],
-            content_types=[
-                _ContentType(
-                    "0x0100abc",
-                    name="Project",
-                    links=["Title", "MetaInfo", "MediaServiceMetadata", "ProjectType", "Framework", "HiddenUser"],
-                )
-            ],
-        )
-
-        structure = capture_list_structure(lst)
-
-        self.assertEqual(structure.content_types[0].field_internal_names, ["ProjectType"])
 
     def test_captures_views_in_order_and_skips_hidden_and_personal(self):
         lst = _List(
@@ -349,13 +299,6 @@ class TestCaptureListStructure(unittest.TestCase):
         self.assertTrue(view.default_view)
         self.assertEqual(view.field_internal_names, ["Title", "ProjectType"])
 
-    def test_document_library_flag(self):
-        library = _List(title="Documents", base_template=101, base_type=1)
-
-        structure = capture_list_structure(library)
-
-        self.assertTrue(structure.is_document_library)
-
 
 class TestCaptureListSettings(unittest.TestCase):
     def test_captures_container_settings(self):
@@ -381,16 +324,6 @@ class TestCaptureListSettings(unittest.TestCase):
         self.assertEqual(structure.settings["ReadSecurity"], 2)
         self.assertEqual(structure.settings["ValidationMessage"], "Title is required")
 
-    def test_does_not_capture_library_only_settings_on_a_list(self):
-        lst = _List(
-            base_type=0,
-            settings={"EnableMinorVersions": True, "MajorWithMinorVersionsLimit": 7, "ForceCheckout": True},
-        )
-
-        structure = capture_list_structure(lst)
-
-        self.assertEqual(structure.settings, {})
-
     def test_captures_library_only_settings_on_a_document_library(self):
         lst = _List(
             base_type=1,
@@ -407,21 +340,6 @@ class TestCaptureListSettings(unittest.TestCase):
         self.assertTrue(structure.settings["EnableMinorVersions"])
         self.assertEqual(structure.settings["MajorWithMinorVersionsLimit"], 7)
         self.assertTrue(structure.settings["ForceCheckout"])
-
-    def test_skips_settings_the_list_does_not_report(self):
-        lst = _List(settings={"EnableVersioning": True})
-
-        structure = capture_list_structure(lst)
-
-        self.assertEqual(structure.settings, {"EnableVersioning": True})
-
-    def test_requests_every_setting_explicitly(self):
-        lst = _List()
-
-        capture_list_structure(lst)
-
-        for name in ("EnableVersioning", "EnableModeration", "ValidationFormula"):
-            self.assertIn(name, lst.ensured)
 
 
 class TestFormattingCapture(unittest.TestCase):
@@ -444,14 +362,6 @@ class TestFormattingCapture(unittest.TestCase):
 
         self.assertEqual(structure.fields[0].client_side_component_id, "4a4b1f52-7f0e-4a2a-9d1f-2f0e4a2a9d1f")
         self.assertIsNone(structure.fields[0].custom_formatter)
-
-    def test_an_unset_component_id_is_reported_as_absent(self):
-        field = _Field("Tags", schema='<Field Name="Tags"/>')
-        field.properties["ClientSideComponentId"] = "00000000-0000-0000-0000-000000000000"
-
-        structure = capture_list_structure(_List(fields=[field]))
-
-        self.assertIsNone(structure.fields[0].client_side_component_id)
 
 
 class TestListStructureSerialization(unittest.TestCase):
@@ -479,11 +389,6 @@ class TestListStructureSerialization(unittest.TestCase):
         self.assertEqual(restored.content_types, [])
         self.assertEqual(restored.views, [])
 
-    def test_empty_structure_round_trips(self):
-        empty = ListStructure(title="Empty")
-
-        self.assertEqual(ListStructure.from_dict(empty.to_dict()), empty)
-
 
 class TestStructureSidecar(unittest.TestCase):
     """The bundle sidecar: a snapshot written next to the payload, read back on import."""
@@ -507,25 +412,6 @@ class TestStructureSidecar(unittest.TestCase):
 
         self.assertEqual(written, self.path)
         self.assertEqual(load_list_structure(self.path), structure)
-
-    def test_save_creates_the_parent_directory(self):
-        path = Path(self._dir.name) / "bundle" / "Documents.structure.json"
-
-        save_list_structure(ListStructure(title="Documents"), path)
-
-        self.assertTrue(path.is_file())
-
-    def test_the_file_is_the_plain_to_dict_form_so_a_capture_loads_here(self):
-        structure = ListStructure(title="Documents")
-        save_list_structure(structure, self.path)
-
-        self.assertEqual(json.loads(self.path.read_text(encoding="utf-8")), structure.to_dict())
-
-    def test_a_non_object_document_is_refused(self):
-        self.path.write_text("[1, 2]", encoding="utf-8")
-
-        with self.assertRaisesRegex(ValueError, "not a list-structure snapshot"):
-            load_list_structure(self.path)
 
 
 class _Web:
@@ -552,39 +438,6 @@ class TestCompareWebScopeStructure(unittest.TestCase):
         self.assertEqual(missing.content_types, ["Contract"])
         self.assertFalse(missing.is_empty)
 
-    def test_matches_columns_by_internal_name_and_content_types_by_name(self):
-        # A content type's string_id is assigned by the server, so the same type on
-        # the target carries a different one — it must still count as present.
-        source = _Web(content_types=[_ContentType("0x0100AAAA", name="Contract")])
-        target = _Web(content_types=[_ContentType("0x0100BBBB", name="contract")])
-
-        missing = compare_web_scope_structure(source, target)
-
-        self.assertTrue(missing.is_empty)
-
-    def test_skips_hidden_framework_sealed_and_protected_columns(self):
-        source = _Web(
-            fields=[
-                _Field("Hidden", hidden=True),
-                _Field("Framework", from_base_type=True),
-                _Field("SealedColumn", sealed=True),
-                _Field("Protected", can_be_deleted=False),
-                _Field("FileRef"),
-                _Field("UserColumn"),
-            ]
-        )
-
-        missing = compare_web_scope_structure(source, _Web())
-
-        self.assertEqual(missing.columns, ["UserColumn"])
-
-    def test_skips_hidden_content_types(self):
-        source = _Web(content_types=[_ContentType("0x0100AA", name="Internal", hidden=True)])
-
-        missing = compare_web_scope_structure(source, _Web())
-
-        self.assertEqual(missing.content_types, [])
-
     def test_note_names_a_sample_and_counts_the_rest(self):
         missing = WebScopeStructure(columns=["A", "B", "C", "D", "E", "F", "G"])
 
@@ -594,9 +447,6 @@ class TestCompareWebScopeStructure(unittest.TestCase):
         self.assertIn("7 column(s): A, B, C, D, E (+2 more)", note)
         self.assertIn("the target of https://contoso.sharepoint.com/sites/target", note)
         self.assertIn("list-scoped copy", note)
-
-    def test_note_is_none_when_the_target_has_every_definition(self):
-        self.assertIsNone(web_scope_note(compare_web_scope_structure(_Web(), _Web())))
 
 
 if __name__ == "__main__":

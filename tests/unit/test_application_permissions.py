@@ -75,27 +75,6 @@ def test_service_principal_grant_creates_assignment():
     assert body["appRoleId"] == ROLE_ID
 
 
-def test_service_principal_grant_is_idempotent():
-    client, transport = _client([GRANTED_SP, CLIENT_SP])
-
-    client.service_principals.get_by_app_id(SHAREPOINT_APP_ID).grant_application_permissions(
-        CLIENT_APP_ID, "Sites.Selected"
-    ).execute_query()
-
-    assert HttpMethod.Post not in _methods(transport)
-
-
-def test_application_grant_resolves_resource_by_app_id():
-    client, transport = _client([APP_LIST, SHAREPOINT_SP, CLIENT_SP, {"id": "assignment"}])
-    app = client.applications.ensure("my-app").execute_query()
-
-    app.grant_permissions("Sites.Selected", SHAREPOINT_APP_ID).execute_query()
-
-    assert _methods(transport) == [HttpMethod.Get, HttpMethod.Get, HttpMethod.Get, HttpMethod.Post]
-    assert transport.requests[-1].url.endswith("appRoleAssignedTo")
-    assert transport.requests[-1].data["appRoleId"] == ROLE_ID
-
-
 def test_application_grant_resolves_resource_by_name():
     client, transport = _client([APP_LIST, {"value": [SHAREPOINT_SP]}, CLIENT_SP, {"id": "assignment"}])
     app = client.applications.ensure("my-app").execute_query()
@@ -104,15 +83,6 @@ def test_application_grant_resolves_resource_by_name():
 
     assert _methods(transport) == [HttpMethod.Get, HttpMethod.Get, HttpMethod.Get, HttpMethod.Post]
     assert "$filter=displayName eq 'Office 365 SharePoint Online'" in transport.requests[1].url
-
-
-def test_application_grant_is_idempotent():
-    client, transport = _client([APP_LIST, GRANTED_SP, CLIENT_SP])
-    app = client.applications.ensure("my-app").execute_query()
-
-    app.grant_permissions("Sites.Selected", SHAREPOINT_APP_ID).execute_query()
-
-    assert HttpMethod.Post not in _methods(transport)
 
 
 def test_application_revoke_permissions_deletes_the_assignment():
@@ -146,13 +116,3 @@ def test_service_principal_revoke_only_removes_the_requested_role():
     assert _methods(transport) == [HttpMethod.Get, HttpMethod.Get, HttpMethod.Delete]
     assert transport.requests[-1].url.endswith("appRoleAssignedTo/assignment-selected")
     assert all("assignment-read" not in request.url for request in transport.requests)
-
-
-def test_service_principal_revoke_is_a_noop_when_role_absent():
-    client, transport = _client([SHAREPOINT_SP, CLIENT_SP])
-
-    client.service_principals.get_by_app_id(SHAREPOINT_APP_ID).revoke_application_permissions(
-        CLIENT_APP_ID, "Sites.Selected"
-    ).execute_query()
-
-    assert HttpMethod.Delete not in _methods(transport)

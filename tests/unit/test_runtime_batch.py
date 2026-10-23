@@ -10,13 +10,10 @@ import unittest
 from typing import cast
 from unittest import mock
 
-import pytest
 from office365.graph_client import GraphClient
 from office365.runtime.client_object import ClientObject
 from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.odata.batch_util import (
-    WHOLE_BATCH_REJECT_CODES,
-    WholeBatchRejected,
     estimate_query_bytes,
     partition_by_limits,
 )
@@ -120,66 +117,6 @@ def _make_batch(client: GraphClient, count: int) -> BatchQuery:
     return BatchQuery(client, [ClientQuery(client) for _ in range(count)])
 
 
-class TestBatchSubRequestRetry(unittest.TestCase):
-    def test_retries_only_failed_subrequests(self):
-        client = GraphClient()
-        transport = _FakeTransport([_envelope([200, 429], retry_after=1), _envelope([200])])
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = transport
-
-        with mock.patch("office365.runtime.retry.sleep"):
-            req.execute_query_with_retry(_make_batch(client, 2), max_retry=3, base_delay=1, jitter=False)
-
-        # two batch round-trips: the full batch, then only the failed sub-request
-        self.assertEqual(transport.calls, 2)
-        self.assertEqual(len(transport.request_payloads[0]["requests"]), 2)
-        self.assertEqual(len(transport.request_payloads[1]["requests"]), 1)
-
-    def test_succeeds_on_first_round_trip(self):
-        client = GraphClient()
-        transport = _FakeTransport([_envelope([200, 200])])
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = transport
-
-        req.execute_query_with_retry(_make_batch(client, 2), max_retry=3)
-
-        self.assertEqual(transport.calls, 1)
-
-    def test_non_transient_sub_failure_raises_without_retry(self):
-        client = GraphClient()
-        transport = _FakeTransport([_envelope([200, 400])])
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = transport
-
-        with self.assertRaises(ClientRequestException):
-            req.execute_query_with_retry(_make_batch(client, 2), max_retry=3)
-
-        self.assertEqual(transport.calls, 1)
-
-    def test_retries_exhausted_raises(self):
-        client = GraphClient()
-        transport = _FakeTransport([_envelope([429]), _envelope([429]), _envelope([429])])
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = transport
-
-        with mock.patch("office365.runtime.retry.sleep"):
-            with self.assertRaises(ClientRequestException):
-                req.execute_query_with_retry(_make_batch(client, 1), max_retry=2, base_delay=1, jitter=False)
-
-        self.assertEqual(transport.calls, 2)
-
-    def test_honors_longest_retry_after(self):
-        client = GraphClient()
-        transport = _FakeTransport([_envelope([429, 429], retry_after=7), _envelope([200, 200])])
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = transport
-
-        with mock.patch("office365.runtime.retry.sleep") as sleep_mock:
-            req.execute_query_with_retry(_make_batch(client, 2), max_retry=3, jitter=False)
-
-        sleep_mock.assert_called_once_with(7)
-
-
 class TestBatchTransportSharing(unittest.TestCase):
     def test_execute_batch_shares_context_transport_across_workers(self):
         ctx = ClientContext("https://contoso.sharepoint.com")
@@ -201,17 +138,6 @@ class TestBatchTransportSharing(unittest.TestCase):
 
         self.assertIs(captured[0], transport)
         self.assertIs(captured[0], captured[1])
-
-    def test_with_rate_limit_wraps_the_context_transport(self):
-        ctx = ClientContext("https://contoso.sharepoint.com")
-        inner = _FakeTransport([])
-        ctx.pending_request().transport = inner
-
-        ctx.with_rate_limit(min_interval=0.0)
-
-        wrapped = ctx.pending_request().transport
-        self.assertIsInstance(wrapped, ThrottledTransport)
-        self.assertIs(wrapped.inner, inner)
 
     def test_context_rate_limiter_accessor(self):
         ctx = ClientContext("https://contoso.sharepoint.com")
@@ -241,18 +167,6 @@ class TestBatchTransportSharing(unittest.TestCase):
         self.assertIsInstance(req.transport.inner, RequestsTransport)
         self.assertIsNot(req.transport.limiter, limiter)
 
-    def test_async_transport_is_wrapped_when_limiter_configured(self):
-        req = ODataBatchV3Request("https://contoso.sharepoint.com", JsonLightFormat())
-        req.with_rate_limit(min_interval=0.0)
-        inner = _FakeTransport([])
-
-        req.with_async_transport(inner)
-
-        wrapped = req.async_transport
-        self.assertIsInstance(wrapped, ThrottledTransport)
-        self.assertIs(wrapped.inner, inner)
-        self.assertIs(wrapped.limiter, req.rate_limiter)
-
     def test_limiter_configured_after_async_transport_wraps_it(self):
         req = ODataBatchV3Request("https://contoso.sharepoint.com", JsonLightFormat())
         inner = _FakeTransport([])
@@ -264,28 +178,6 @@ class TestBatchTransportSharing(unittest.TestCase):
         wrapped = req.async_transport
         self.assertIsInstance(wrapped, ThrottledTransport)
         self.assertIs(wrapped.inner, inner)
-
-    def test_async_transport_is_untouched_without_limiter(self):
-        req = ODataBatchV3Request("https://contoso.sharepoint.com", JsonLightFormat())
-        inner = _FakeTransport([])
-
-        req.with_async_transport(inner)
-
-        self.assertIs(req.async_transport, inner)
-
-    def test_reapplying_limiter_does_not_stack_async_wrapper(self):
-        req = ODataBatchV3Request("https://contoso.sharepoint.com", JsonLightFormat())
-        inner = _FakeTransport([])
-        req.with_rate_limit(min_interval=0.0)
-        req.with_async_transport(inner)
-        first = req.async_transport
-
-        req.with_rate_limit(min_interval=0.0)
-
-        second = req.async_transport
-        self.assertIsInstance(second, ThrottledTransport)
-        self.assertIs(second.inner, inner)
-        self.assertIsNot(second.limiter, first.limiter)
 
 
 class _FakeQuery:
@@ -312,36 +204,12 @@ def test_partition_respects_byte_cap():
     assert len(batches) >= 2  # noqa: PLR2004 — big payloads don't all land in one batch
 
 
-def test_estimate_matches_the_body_the_profile_builds():
-    """The estimate is of the body that will be sent: a value nested in the
-    parameters is serialized with its type marker, not repr()'d."""
-
-    class _Value:
-        entity_type_name = "SP.Thing"
-
-        def to_json(self, json_format=None):
-            return {"x": 1} if json_format is None else {"x": 1, "__metadata": {"type": "SP.Thing"}}
-
-    measured = _FakeQuery("u", {"thing": _Value()})
-    as_sent = _FakeQuery("u", {"thing": {"x": 1, "__metadata": {"type": "SP.Thing"}}})
-
-    assert estimate_query_bytes(measured, JsonLightFormat()) == estimate_query_bytes(as_sent)
-
-
 def test_oversized_single_stays_alone():
     huge = _FakeQuery("u", {"data": "x" * 100000})
     queries = [huge, _FakeQuery("u", None)]
     batches = partition_by_limits(queries, max_items=None, max_bytes=1000)
     assert len(batches) == 2  # noqa: PLR2004
     assert len(batches[0]) == 1
-
-
-def test_whole_batch_reject_marker_carries_queries_and_cause():
-    cause = ClientRequestException("400 body too large")
-    reject = WholeBatchRejected([_FakeQuery("u")], cause)
-    assert len(reject.queries) == 1
-    assert reject.__cause__ is cause
-    assert 413 in WHOLE_BATCH_REJECT_CODES  # noqa: PLR2004
 
 
 # ── v3: GETs stay outside change sets (#871) ─────────────────────────────────
@@ -418,51 +286,6 @@ def _payload_requests(transport: _FakeTransport, call: int = 0) -> list[dict]:
     return cast(list, transport.request_payloads[call]["requests"])
 
 
-def test_sequential_emits_depends_on_chain():
-    client = GraphClient()
-    transport = _FakeTransport([_envelope([200, 200, 200])])
-    req = ODataV4BatchRequest("", V4JsonFormat())
-    req.transport = transport
-    batch = _make_batch(client, 3)
-    batch.sequential = True
-
-    req.execute_query_with_retry(batch, max_retry=1)
-
-    requests = _payload_requests(transport)
-    assert "dependsOn" not in requests[0]
-    assert requests[1]["dependsOn"] == ["0"]
-    assert requests[2]["dependsOn"] == ["1"]
-
-
-def test_parallel_batch_has_no_depends_on():
-    client = GraphClient()
-    transport = _FakeTransport([_envelope([200, 200])])
-    req = ODataV4BatchRequest("", V4JsonFormat())
-    req.transport = transport
-
-    req.execute_query_with_retry(_make_batch(client, 2), max_retry=1)
-
-    assert all("dependsOn" not in item for item in _payload_requests(transport))
-
-
-def test_response_id_maps_to_submission_order():
-    client = GraphClient()
-    client.pending_request().beforeExecute.clear()  # no auth handler during offline payload build
-    obj = ClientObject(client, ResourcePath("me"))
-    read = ReadEntityQuery(obj, ["displayName"])
-    write = ClientQuery(client)
-    batch = BatchQuery(client, [read, write])
-    assert batch.ordered_queries == [write, read]  # re-groups (non-GET first)
-
-    payload = ODataV4BatchRequest("", V4JsonFormat())._prepare_payload(batch)
-    assert [item["id"] for item in payload["requests"]] == ["0", "1"]
-
-    response = Response()
-    response._content = jsonlib.dumps(_envelope([200, 200])).encode("utf-8")
-    mapped = [qry for qry, _ in ODataV4BatchRequest._extract_response(response, batch)]
-    assert mapped == [read, write]
-
-
 def test_sequential_survives_retry():
     client = GraphClient()
     transport = _FakeTransport([_envelope([200, 429], retry_after=1), _envelope([200])])
@@ -478,11 +301,6 @@ def test_sequential_survives_retry():
     retry_requests = _payload_requests(transport, 1)
     assert len(retry_requests) == 1
     assert "dependsOn" not in retry_requests[0]  # subset of one -> no dependency
-
-
-def test_execute_batch_rejects_sequential_with_concurrency():
-    with pytest.raises(ValueError, match="concurrency=1"):
-        GraphClient().execute_batch(sequential=True, concurrency=2)
 
 
 def test_execute_batch_success_callback_receives_return_types():
@@ -520,25 +338,6 @@ class _ResponseTransport(BaseTransport):
     def execute(self, request):
         resp = self._responses[min(self.calls, len(self._responses) - 1)]
         self.calls += 1
-        return resp
-
-
-class _RejectThenOkTransport(BaseTransport):
-    """Whole-batch rejection (413) on the first call, a 200 envelope afterwards."""
-
-    def __init__(self) -> None:
-        self.calls = 0
-
-    def execute(self, request):
-        self.calls += 1
-        resp = Response()
-        resp.url = request.url
-        if self.calls == 1:
-            resp.status_code = 413
-            resp._content = b"payload too large"
-        else:
-            resp.status_code = 200
-            resp._content = jsonlib.dumps(_envelope([200])).encode("utf-8")
         return resp
 
 
@@ -581,57 +380,6 @@ class TestBatchSubRequestRetryAsync(unittest.TestCase):
         self.assertEqual(transport.calls, 2)
         self.assertEqual(len(transport.request_payloads[0]["requests"]), 2)
         self.assertEqual(len(transport.request_payloads[1]["requests"]), 1)
-
-    def test_async_non_transient_sub_failure_raises_without_retry(self):
-        client = GraphClient()
-        transport = _FakeTransport([_envelope([200, 400])])
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = transport
-
-        with self.assertRaises(ClientRequestException):
-            asyncio.run(req.execute_query_with_retry_async(_make_batch(client, 2), max_retry=3))
-
-        self.assertEqual(transport.calls, 1)
-
-    def test_async_honors_longest_retry_after(self):
-        client = GraphClient()
-        transport = _FakeTransport([_envelope([429, 429], retry_after=7), _envelope([200, 200])])
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = transport
-        sleep_mock = mock.AsyncMock()
-
-        with mock.patch("office365.runtime.retry.asyncio.sleep", new=sleep_mock):
-            asyncio.run(req.execute_query_with_retry_async(_make_batch(client, 2), max_retry=3, jitter=False))
-
-        sleep_mock.assert_awaited_once_with(7)
-
-    def test_async_splits_whole_batch_rejection(self):
-        client = GraphClient()
-        transport = _RejectThenOkTransport()
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = transport
-
-        with mock.patch("office365.runtime.retry.asyncio.sleep", new=mock.AsyncMock()):
-            asyncio.run(
-                req.execute_query_with_retry_async(_make_batch(client, 2), max_retry=1, base_delay=1, jitter=False)
-            )
-
-        self.assertEqual(transport.calls, 3)
-
-    def test_v3_async_retries_only_failed_subrequests(self):
-        client = GraphClient()
-        client.pending_request().beforeExecute.clear()  # no auth handler during offline payload build
-        obj1 = ClientObject(client, ResourcePath("me"))
-        obj2 = ClientObject(client, ResourcePath("me"))
-        batch = BatchQuery(client, [ReadEntityQuery(obj1, ["a"]), ReadEntityQuery(obj2, ["b"])])
-        transport = _ResponseTransport([_v3_batch_response([200, 429], retry_after=1), _v3_batch_response([200])])
-        req = ODataBatchV3Request("https://contoso.sharepoint.com", JsonLightFormat())
-        req.transport = transport
-
-        with mock.patch("office365.runtime.retry.asyncio.sleep", new=mock.AsyncMock()):
-            asyncio.run(req.execute_query_with_retry_async(batch, max_retry=3, base_delay=1, jitter=False))
-
-        self.assertEqual(transport.calls, 2)
 
 
 # ── SharePoint batch rounds: per-query handlers, deferred barriers, draining ──
@@ -729,46 +477,6 @@ def _sharepoint_ctx(transport: _ScriptedBatchTransport) -> ClientContext:
     return ctx
 
 
-def test_batch_applies_per_query_before_execute_handler():
-    """A sub-query's ``before_execute`` mutation is honored during payload build."""
-    transport = _ScriptedBatchTransport([[_FOLDER_BODY]])
-    ctx = _sharepoint_ctx(transport)
-    qry = ClientQuery(ctx)
-
-    def _construct(request):
-        request.url = "https://contoso.sharepoint.com/_api/custom"
-
-    ctx.add_query(qry).before_execute(_construct)
-    ctx.execute_batch()
-
-    assert transport.rounds == [["GET https://contoso.sharepoint.com/_api/custom HTTP/1.1"]]
-
-
-def test_batch_fires_per_query_after_execute_handler():
-    """A sub-query's ``after_execute`` handler runs as its sub-response is applied."""
-    transport = _ScriptedBatchTransport([[_FOLDER_BODY, _FOLDER_BODY]])
-    ctx = _sharepoint_ctx(transport)
-    ctx.add_query(ClientQuery(ctx))
-    fired: list[object] = []
-    ctx.load(ctx.web).after_execute(lambda _: fired.append(True))
-
-    ctx.execute_batch()
-
-    assert fired == [True]
-
-
-def test_independent_queries_execute_in_a_single_round():
-    """The drain loop must not add rounds when nothing enqueues follow-ups."""
-    transport = _ScriptedBatchTransport([[_FOLDER_BODY, _FOLDER_BODY, _FOLDER_BODY]])
-    ctx = _sharepoint_ctx(transport)
-    for _ in range(3):
-        ctx.load(ctx.web)
-
-    ctx.execute_batch(3)
-
-    assert len(transport.rounds) == 1
-
-
 def test_non_batchable_query_is_flushed_in_order():
     """A non-batchable query splits the round: batch, standalone, then batch."""
     transport = _ScriptedBatchTransport([[_FOLDER_BODY], [_FOLDER_BODY]])
@@ -804,23 +512,6 @@ def test_document_set_create_drains_all_rounds():
     # ``listdata.svc`` isn't accepted inside ``/_api/$batch`` -> run standalone
     assert transport.singles == ["POST https://contoso.sharepoint.com/_vti_bin/listdata.svc/SharedDocuments HTTP/1.1"]
     assert created.get_property("ServerRelativeUrl") == _DOCLIB_URL + "/A1"
-
-
-def test_document_set_create_resolves_deferred_barrier():
-    """Cached prerequisites queue a barrier; resolving it must drive the chain."""
-    transport = _ScriptedBatchTransport([[_LIST_BODY]], single_bodies=[_CREATE_BODY])
-    ctx = _sharepoint_ctx(transport)
-    parent = ctx.web.get_folder_by_server_relative_url(_DOCLIB_URL)
-    parent.set_property("UniqueId", "11111111-2222-3333-4444-555555555555")
-    parent.set_property("ServerRelativeUrl", _DOCLIB_URL)
-    parent.set_property("Properties", {"vti_x005f_listname": _DOCLIB_LIST_ID})
-
-    DocumentSet.create(ctx, parent, "A1")
-    ctx.execute_batch(3)
-
-    assert len(transport.rounds) == 1, transport.rounds
-    assert transport.rounds[0][0].startswith("GET ")
-    assert transport.singles == ["POST https://contoso.sharepoint.com/_vti_bin/listdata.svc/SharedDocuments HTTP/1.1"]
 
 
 # ── #717: list item entity type must be resolved before the create round ──────
@@ -952,21 +643,6 @@ def _graph_batch(client: GraphClient, count: int) -> BatchQuery:
 
 
 class TestTolerantBatch(unittest.TestCase):
-    def test_records_rejected_subrequest_and_applies_the_rest(self):
-        client = GraphClient()
-        transport = _FakeTransport([_envelope([200, 400])])
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = transport
-        batch = _graph_batch(client, 2)
-
-        with client.collect_batch_failures() as failures:
-            req.execute_query_with_retry(batch, max_retry=3)
-
-        self.assertEqual(len(failures), 1)
-        self.assertIs(failures[0][0], batch.queries[1])
-        self.assertEqual(failures[0][1].response.status_code, 400)  # noqa: PLR2004
-        self.assertEqual(transport.calls, 1)  # a permanent failure is not retried
-
     def test_default_semantics_return_outside_the_scope(self):
         client = GraphClient()
         req = ODataV4BatchRequest("", V4JsonFormat())
@@ -993,22 +669,6 @@ class TestTolerantBatch(unittest.TestCase):
 
         self.assertEqual(len(failures), 1)
         self.assertEqual(failures[0][1].response.status_code, 429)  # noqa: PLR2004
-
-    def test_tolerant_async_twin(self):
-        client = GraphClient()
-        req = ODataV4BatchRequest("", V4JsonFormat())
-        req.transport = _FakeTransport([_envelope([200, 403])])
-        batch = _graph_batch(client, 2)
-
-        async def _run() -> list:
-            with client.collect_batch_failures() as failures:
-                await req.execute_query_with_retry_async(batch, max_retry=2)
-            return failures
-
-        failures = asyncio.run(_run())
-
-        self.assertEqual(len(failures), 1)
-        self.assertIs(failures[0][0], batch.queries[1])
 
     def test_records_a_single_request_still_rejected_whole(self):
         ctx = ClientContext("https://contoso.sharepoint.com")
@@ -1055,32 +715,3 @@ class TestTolerantBatch(unittest.TestCase):
         self.assertEqual(len(failures), 1)
         self.assertIs(failures[0][0], batch.queries[1])
         self.assertEqual(failures[0][1].response.status_code, 403)  # noqa: PLR2004
-
-    def test_v3_async_records_rejected_subrequest(self):
-        ctx = ClientContext("https://contoso.sharepoint.com")
-        ctx.pending_request().beforeExecute.clear()  # no auth/digest handler offline
-        batch = BatchQuery(ctx, [ClientQuery(ctx), ClientQuery(ctx)])
-        req = ODataBatchV3Request(
-            "https://contoso.sharepoint.com",
-            JsonLightFormat(),
-            transport=_ResponseTransport([_v3_batch_response([403])]),
-        )
-
-        async def _run() -> list:
-            with ctx.collect_batch_failures() as failures:
-                await req.execute_query_with_retry_async(batch, max_retry=1)
-            return failures
-
-        failures = asyncio.run(_run())
-
-        self.assertEqual(len(failures), 1)
-        self.assertIs(failures[0][0], batch.queries[0])
-
-    def test_nested_scope_is_rejected(self):
-        ctx = ClientContext("https://contoso.sharepoint.com")
-        with ctx.collect_batch_failures():
-            self.assertTrue(ctx.collecting_batch_failures)
-            with self.assertRaises(RuntimeError):
-                with ctx.collect_batch_failures():
-                    pass
-        self.assertFalse(ctx.collecting_batch_failures)

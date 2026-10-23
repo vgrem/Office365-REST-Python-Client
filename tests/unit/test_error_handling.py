@@ -31,28 +31,6 @@ def _sp(payloads):
     return ctx
 
 
-def test_matching_handler_swallows_error():
-    ctx = _sp([_NOT_FOUND])
-    handled = []
-    ctx.pending_request().on_error(handled.append, condition=lambda: True)
-
-    ctx.web.get().execute_query()  # does not raise
-
-    assert len(handled) == 1
-    assert isinstance(handled[0], ObjectNotFoundException)
-
-
-def test_unmatched_handler_does_not_swallow_error():
-    ctx = _sp([_NOT_FOUND])
-    handled = []
-    ctx.pending_request().on_error(handled.append, condition=lambda: False)
-
-    with pytest.raises(ObjectNotFoundException):
-        ctx.web.get().execute_query()
-
-    assert handled == []
-
-
 def test_scoped_handler_left_by_finished_query_does_not_swallow_later_failure():
     # q1 succeeds; the handler registered for it stays on the request. q2 then
     # fails and must propagate because that stale handler no longer matches.
@@ -63,17 +41,6 @@ def test_scoped_handler_left_by_finished_query_does_not_swallow_later_failure():
 
     with pytest.raises(ObjectNotFoundException):
         ctx.execute_query()
-
-
-def test_scoped_handler_for_failing_query_still_swallows():
-    ctx = _sp([_NOT_FOUND])
-    handled = []
-    ctx.web.get()
-    ctx.on_error(handled.append)
-
-    ctx.execute_query()  # does not raise
-
-    assert len(handled) == 1
 
 
 def test_handler_once_is_removed_after_match():

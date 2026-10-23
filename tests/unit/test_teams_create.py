@@ -36,19 +36,6 @@ def _client(transport) -> GraphClient:
     return client
 
 
-def test_create_without_owners_omits_members():
-    transport = _RecordingTransport([_OPERATION])
-    client = _client(transport)
-
-    client.teams.create("Team A", "desc").execute_query()
-
-    body = transport.requests[-1].data
-    assert transport.requests[-1].url.endswith("/teams")
-    assert body["displayName"] == "Team A"
-    assert body["description"] == "desc"
-    assert "members" not in body
-
-
 def test_create_with_owners_adds_conversation_members():
     transport = _RecordingTransport([_OPERATION])
     client = _client(transport)

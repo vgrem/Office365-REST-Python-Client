@@ -21,13 +21,13 @@ import hashlib
 import json
 
 import pytest
-from office365.migration.outlook.calendar_codec import MAX_LINE_OCTETS, encode, rrule
+from office365.migration.outlook.calendar_codec import encode, rrule
 from office365.migration.outlook.calendar_models import (
     CalendarImportOptions,
     event_canonical,
     event_digest,
 )
-from office365.migration.outlook.calendar_profile import COMPARED, ICALENDAR
+from office365.migration.outlook.calendar_profile import ICALENDAR
 from office365.outlook.calendar.attendees.type import AttendeeType
 from office365.outlook.calendar.dayofweek import DayOfWeek
 from office365.outlook.calendar.events.sensitivity import Sensitivity
@@ -139,23 +139,6 @@ def test_the_codec_renders_the_golden_document():
     assert encode(SIDECAR).decode("utf-8") == GOLDEN
 
 
-def test_every_table_row_names_a_member_the_model_declares():
-    for table, enum, complete in TABLES:
-        members = {member.name for member in enum}
-        unknown = set(table) - members
-        assert not unknown, f"{enum.__name__} does not declare {sorted(unknown)}: a row for a word nothing sends"
-        if complete:
-            assert set(table) == members, f"{enum.__name__} members with no {enum.__name__} → token row"
-
-
-def test_the_partial_tables_spell_only_what_a_reader_cannot_assume():
-    """The two incomplete tables are incomplete on purpose: their absence *is* the token."""
-    assert set(ICALENDAR.transp) < {member.name for member in FreeBusyStatus}
-    assert set(ICALENDAR.status) < {member.name for member in FreeBusyStatus}
-    assert set(ICALENDAR.transp.values()) <= {"TRANSPARENT", "OPAQUE"}
-    assert set(ICALENDAR.status.values()) <= {"TENTATIVE", "CONFIRMED", "CANCELLED"}
-
-
 @pytest.mark.parametrize(
     ("pattern", "expected"),
     [
@@ -177,12 +160,6 @@ def test_the_frequency_table_spells_every_pattern_the_service_sends(pattern, exp
     assert rrule({"pattern": pattern, "range": {"type": "noEnd"}}) == expected
 
 
-def test_a_folded_line_never_exceeds_the_octet_limit():
-    document = encode({**SIDECAR, "subject": "\u00e9" * 200})
-    for line in document.split(b"\r\n"):
-        assert len(line) <= MAX_LINE_OCTETS
-
-
 def test_the_digest_is_stable_across_the_split():
     """A sidecar's digest is computed by both sides of an import, so it must not drift."""
     assert event_digest(SIDECAR) == "4a8cc8de9a99d71953700f67e72cb593"
@@ -194,13 +171,6 @@ def test_a_gated_field_leaves_the_digest_when_the_import_declines_to_restore_it(
     assert event_digest(SIDECAR, options) == event_digest({**SIDECAR, "attendees": someone_else}, options)
     restoring = CalendarImportOptions(restore_attendees=True)
     assert event_digest(SIDECAR, restoring) != event_digest({**SIDECAR, "attendees": someone_else}, restoring)
-
-
-def test_the_comparison_profile_covers_the_sidecars_own_bookkeeping_only_by_omission():
-    """Provenance is not content: the Graph id, the path and the calendar stay out."""
-    compared = {rule.key for rule in COMPARED}
-    assert compared.isdisjoint({"id", "iCalUId", "ics_path", "calendar_path", "calendar_display_path"})
-    assert {"start", "end", "subject", "body", "attendees", "categories"} <= compared
 
 
 def test_the_digest_is_the_md5_of_the_canonical_form():

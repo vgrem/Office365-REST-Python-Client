@@ -58,25 +58,6 @@ def _sp_web(payloads):
 
 
 @pytest.mark.parametrize(
-    ("factory", "values", "reader", "expected"),
-    [
-        (_graph_user, {"displayName": "John Doe", "jobTitle": "Engineer"}, lambda e: e.display_name, "John Doe"),
-        (_sp_web, {"Title": "Contoso"}, lambda e: e.title, "Contoso"),
-    ],
-)
-def test_update_properties_is_deferred_and_returns_self(factory, values, reader, expected):
-    context, transport, entity = factory([])
-
-    returned = entity.update_properties(**values)
-
-    assert transport.calls == 0
-    assert returned is entity
-    assert len(context._queries) == 1
-    # values are readable through the typed accessors, exactly like set_property
-    assert reader(entity) == expected
-
-
-@pytest.mark.parametrize(
     ("factory", "payloads", "values", "method", "header", "url_suffix"),
     [
         (

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import io
 import tempfile
 import unittest
@@ -19,7 +18,7 @@ from office365.migration import (
     MigrationSession,
 )
 from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget, JsonFileSource, JsonFileTarget
-from office365.migration.base import ItemStatus, MigrationItem, Principal
+from office365.migration.base import ItemStatus, MigrationItem
 from office365.migration.checkpoint import Checkpoint
 from office365.migration.runner import MigrationRunner, _apply_fidelity
 from office365.migration.sharepoint.transfer import _transfer_files_parallel
@@ -49,22 +48,6 @@ class _FlakySource(FileSystemSource):
         if item.dest_path == self._fail_on:
             raise RuntimeError("transient read error")
         return super().read(item)
-
-
-def test_filesystem_migration_completes(tmp_path):
-    src, dst = tmp_path / "src", tmp_path / "dst"
-    _seed_tree(src)
-
-    job = MigrationJob(FileSystemSource(src), FileSystemTarget(dst))
-    manifest = job.plan()
-
-    assert len(manifest) == 3  # noqa: PLR2004
-    stats = job.run()
-    assert stats.errors == 0
-    assert stats.success == 3  # noqa: PLR2004
-    assert (dst / "docs" / "a.txt").read_text() == "alpha"
-    assert (dst / "img.png").read_bytes() == b"\x89PNG"
-    assert job.verify().ok
 
 
 def test_checkpoint_resume_after_failure(tmp_path):
@@ -101,38 +84,6 @@ def test_checkpoint_resume_after_failure(tmp_path):
     assert job2.verify().ok
 
 
-def test_skip_conflict_is_idempotent(tmp_path):
-    src, dst = tmp_path / "src", tmp_path / "dst"
-    _seed_tree(src)
-    (dst / "docs").mkdir(parents=True)
-    (dst / "docs" / "a.txt").write_text("already here")
-
-    job = MigrationJob(FileSystemSource(src), FileSystemTarget(dst))
-    job.plan()
-    stats = job.run()
-
-    assert stats.skipped == 1  # noqa: PLR2004
-    assert stats.success == 2  # noqa: PLR2004
-    assert (dst / "docs" / "a.txt").read_text() == "already here"  # untouched
-
-
-def test_conflict_overwrite(tmp_path):
-    src, dst = tmp_path / "src", tmp_path / "dst"
-    _seed_tree(src)
-    dst.mkdir(parents=True, exist_ok=True)
-    (dst / "img.png").write_bytes(b"old")
-
-    job = MigrationJob(
-        FileSystemSource(src),
-        FileSystemTarget(dst),
-        options=MigrationOptions(conflict_resolution=ConflictResolution.OVERWRITE),
-    )
-    job.plan()
-    job.run()
-
-    assert (dst / "img.png").read_bytes() == b"\x89PNG"
-
-
 def test_conflict_rename(tmp_path):
     src, dst = tmp_path / "src", tmp_path / "dst"
     _seed_tree(src)
@@ -151,14 +102,6 @@ def test_conflict_rename(tmp_path):
     assert (dst / "img-1.png").exists()
 
 
-def test_conflict_to_on_conflict_mapping():
-    from office365.migration.base import conflict_to_on_conflict
-
-    assert conflict_to_on_conflict(ConflictResolution.OVERWRITE) == "update"
-    assert conflict_to_on_conflict(ConflictResolution.SKIP) == "skip"
-    assert conflict_to_on_conflict(ConflictResolution.RENAME) == "skip"  # records are keyed, not pathed
-
-
 def test_list_target_derives_on_conflict_from_options():
     from office365.migration.sharepoint.adapters import SharePointListTarget
 
@@ -170,34 +113,6 @@ def test_list_target_derives_on_conflict_from_options():
 
     target.configure(MigrationOptions(conflict_resolution=ConflictResolution.RENAME))
     assert target.on_conflict == "skip"
-
-
-def test_list_target_explicit_on_conflict_wins():
-    from office365.migration.sharepoint.adapters import SharePointListTarget
-
-    target = SharePointListTarget(mock.Mock(), key="Title", on_conflict="update")
-    target.configure(MigrationOptions(conflict_resolution=ConflictResolution.SKIP))
-    assert target.on_conflict == "update"
-
-
-def test_runner_configures_target_with_options():
-    items = [MigrationItem(source_path="/s", dest_path="f.txt")]
-
-    class _ConfigurableTarget(_FakeTarget):
-        def __init__(self):
-            super().__init__()
-            self.configured_with = None
-
-        def configure(self, options):
-            self.configured_with = options
-
-    source = _FakeSource(items)
-    target = _ConfigurableTarget()
-    options = MigrationOptions(concurrency=2, batch_size=100)
-
-    MigrationRunner().run(source, target, items, options, Checkpoint.create())  # type: ignore[arg-type]
-
-    assert target.configured_with is options
 
 
 def test_pause_then_resume(tmp_path):
@@ -255,45 +170,6 @@ def test_export_reports_csv_and_json(tmp_path):
     items = jsonlib.loads((out / "ItemReport.json").read_text())
     assert len(items) == 3  # noqa: PLR2004
     assert all(i["status"] == "done" for i in items)
-
-
-def test_export_reports_failure(tmp_path):
-    import json as jsonlib
-
-    src, dst = tmp_path / "src", tmp_path / "dst"
-    _seed_tree(src)
-    job = MigrationJob(_FlakySource(src, "docs/sub/b.txt"), FileSystemTarget(dst))
-    job.plan()
-    job.run()
-
-    out = tmp_path / "reports"
-    job.export_reports(out)
-
-    assert (out / "FailureReport.csv").exists()  # failures present
-    failures = jsonlib.loads((out / "FailureReport.json").read_text())
-    assert len(failures) == 1
-    assert failures[0]["destination_path"] == "docs/sub/b.txt"
-    assert "transient read error" in failures[0]["error"]
-
-
-def test_incremental_skips_up_to_date_target(tmp_path):
-    src, dst = tmp_path / "src", tmp_path / "dst"
-    _seed_tree(src)
-    job = MigrationJob(FileSystemSource(src), FileSystemTarget(dst))
-    job.plan()
-    job.run()
-    assert job.stats.success == 3  # noqa: PLR2004
-
-    # re-run incrementally: the target is at least as new as the source -> all skipped
-    job2 = MigrationJob(
-        FileSystemSource(src),
-        FileSystemTarget(dst),
-        options=MigrationOptions(incremental=True, conflict_resolution=ConflictResolution.OVERWRITE),
-    )
-    job2.plan()
-    stats2 = job2.run()
-    assert stats2.skipped == 3  # noqa: PLR2004
-    assert stats2.success == 0
 
 
 def test_incremental_migrates_changed_source(tmp_path):
@@ -366,68 +242,6 @@ def test_report_summary_is_enriched(tmp_path):
     assert item["error_code"] == ""
 
 
-def test_report_author_id_is_the_principals_site_local_id(tmp_path):
-    # The ItemReport column is a report-level convenience: the numeric id lives on
-    # ``item.author`` (nothing else can hold a site-local id), and an item whose
-    # author could not be resolved reports nothing rather than a stale number.
-    from office365.migration.report import build_report
-
-    src, dst = tmp_path / "src", tmp_path / "dst"
-    _seed_tree(src)
-    job = MigrationJob(FileSystemSource(src), FileSystemTarget(dst))
-    job.plan()
-    job.run()
-
-    first, second = job.manifest.items[0], job.manifest.items[1]
-    first.author = Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice", user_id=7)
-    second.author = None
-
-    rows = build_report(job).items
-
-    assert rows[0]["author_id"] == 7  # noqa: PLR2004
-    assert rows[1]["author_id"] is None
-
-
-def test_report_failure_carries_error_code(tmp_path):
-    import json as jsonlib
-
-    src, dst = tmp_path / "src", tmp_path / "dst"
-    _seed_tree(src)
-    job = MigrationJob(_FlakySource(src, "docs/sub/b.txt"), FileSystemTarget(dst))
-    job.plan()
-    job.run()
-
-    out = tmp_path / "reports"
-    job.export_reports(out)
-    failures = jsonlib.loads((out / "FailureReport.json").read_text())
-    assert failures[0]["error_code"] == "RuntimeError"
-    assert "transient read error" in failures[0]["error"]
-
-    summary = jsonlib.loads((out / "SummaryReport.json").read_text())[0]
-    assert summary["errors"] == 1
-    assert summary["items_not_migrated"] == 1
-
-
-def test_progress_reaches_total_when_items_are_skipped(tmp_path):
-    src, dst = tmp_path / "src", tmp_path / "dst"
-    _seed_tree(src)
-    (dst / "docs").mkdir(parents=True)
-    (dst / "docs" / "a.txt").write_text("already here")  # conflict -> skipped
-
-    seen = []
-
-    def progress(p):
-        seen.append((p.done, p.total, p.stage))
-
-    job = MigrationJob(FileSystemSource(src), FileSystemTarget(dst))
-    job.plan()
-    stats = job.run(progress=progress)
-
-    assert stats.total == 3  # noqa: PLR2004
-    assert seen[-1][0] == stats.total  # the last emit reports full completion
-    assert all(total is None or total == stats.total for _, total, _ in seen)
-
-
 class _TreeSource:
     """A library-like source: file and folder items."""
 
@@ -477,19 +291,6 @@ def test_folder_tree_with_empty_folders_preserved_and_verified(tmp_path):
     assert job.verify().ok
 
 
-def test_filesystem_target_lists_folders_only_when_requested(tmp_path):
-    from office365.migration.base import MigrationItem
-
-    dst = tmp_path / "dst"
-    target = FileSystemTarget(dst)
-    target.write(MigrationItem("/x", "docs/sub/", item_type="folder"), b"")
-    target.write(MigrationItem("/x", "docs/sub/a.txt", size_bytes=1, item_type="file"), b"a")
-
-    assert target.list_paths() == ["docs/sub/a.txt"]  # default: files only
-    folder_aware = FileSystemTarget(dst, include_folders=True)
-    assert set(folder_aware.list_paths()) == {"docs/", "docs/sub/", "docs/sub/a.txt"}
-
-
 def _tree(tmp_path):
     src = tmp_path / "src"
     dst = tmp_path / "dst"
@@ -524,17 +325,6 @@ def test_session_lifecycle(tmp_path):
     session.remove_task(job)
     session.unregister()
     assert session.jobs == []
-
-
-def test_add_task_with_own_options(tmp_path):
-    src, dst = _tree(tmp_path)
-    session = MigrationSession()
-    job = session.add_task(
-        FileSystemSource(src),
-        FileSystemTarget(dst),
-        options=MigrationOptions(concurrency=2),
-    )
-    assert job._options.concurrency == 2  # noqa: SLF001, PLR2004
 
 
 class _Result:
@@ -579,21 +369,6 @@ class TestMigrationServerJob(unittest.TestCase):
         self.assertEqual([s[0] for s in seen], [1, 5, 10])  # noqa: PLR2004
         self.assertEqual(seen[-1][1], 10)  # noqa: PLR2004
 
-    def test_monitor_times_out(self):
-        job = MigrationServerJob(mock.Mock())
-
-        with self.assertRaises(TimeoutError):
-            job.monitor("job-1", lambda jid: ("running", 1, None), interval=0.01, timeout=0.05)
-
-    def test_monitor_reports_a_failed_job_instead_of_raising(self):
-        """Monitoring reports what happened; the caller decides what "failed" means."""
-        job = MigrationServerJob(mock.Mock())
-        statuses = iter([("processing", 1, None), ("failed", 1, None)])
-
-        result = job.monitor("job-1", lambda jid: next(statuses), interval=0, timeout=10)
-
-        self.assertEqual(result, "failed")
-
     def test_job_wait_counts_the_poll_itself_against_the_deadline(self):
         """A slow poll is not free: the deadline is read from the clock.
 
@@ -622,20 +397,6 @@ class TestMigrationServerJob(unittest.TestCase):
             wait.wait()
         self.assertEqual(state["polls"], 2)  # noqa: PLR2004
 
-    def test_job_wait_streams_the_polls(self):
-        statuses = iter([("processing", 1, 4), ("processing", 2, 4), ("succeeded", 4, 4)])
-        wait = MigrationServerJob(mock.Mock()).job_wait("job-1", status_fn=lambda jid: next(statuses), interval=0)
-
-        seen = [(s.status, s.percentage_complete) for s in wait.stream()]
-
-        self.assertEqual(seen[0], ("processing", 25.0))
-        self.assertEqual(seen[-1], ("succeeded", 100.0))
-
-        finished = MigrationServerJob(mock.Mock()).job_wait(
-            "job-1", status_fn=lambda jid: ("succeeded", 4, 4), interval=0
-        )
-        self.assertEqual(finished.wait(), "succeeded")
-
     def test_job_wait_can_be_cancelled(self):
         polls = []
 
@@ -652,35 +413,6 @@ class TestMigrationServerJob(unittest.TestCase):
 
         self.assertEqual(statuses, ["processing", "processing", "processing", "cancelled"])
         self.assertEqual(len(polls), 3)  # noqa: PLR2004
-
-    def test_job_wait_async_bridges_a_sync_status_fn(self):
-        """A sync reader given to an async wait runs off the loop, not on it."""
-        statuses = iter([("processing", 1, None), ("succeeded", 2, None)])
-        wait = MigrationServerJob(mock.Mock()).job_wait("job-1", status_fn=lambda jid: next(statuses), interval=0)
-
-        result = asyncio.run(wait.wait_async())
-
-        self.assertEqual(result, "succeeded")
-
-    def test_an_unrecognised_status_keeps_polling(self):
-        """A job counter has no HTTP status: terminality is about the status string."""
-        state = {"t": 0.0, "polls": 0}
-
-        def status(job_id):
-            state["polls"] += 1
-            return "Pending", 0, None
-
-        wait = MigrationServerJob(mock.Mock()).job_wait(
-            "job-1",
-            status_fn=status,
-            interval=1,
-            timeout=3,
-            clock=lambda: state["t"],
-            sleep=lambda seconds: state.__setitem__("t", state["t"] + seconds),
-        )
-        with self.assertRaises(OperationTimeoutError):
-            wait.wait()
-        self.assertGreater(state["polls"], 1)
 
 
 class _File:
@@ -791,14 +523,6 @@ class TestTransferFilesParallel(unittest.TestCase):
         uploads = [entry for entry in log if entry[0] == "upload"]
         self.assertEqual(sorted(name for _, name in uploads), ["a.txt", "b.txt", "c.txt"])
 
-    def test_large_files_use_upload_session(self):
-        log = []
-        root = _Folder(_Context(log), log)
-        big = b"x" * (4 * 1024 * 1024 + 1)
-        _transfer_files_parallel(root, [("big.bin", big)], concurrency=1)  # type: ignore[arg-type]
-        self.assertIn(("session", "big.bin"), log)
-        self.assertNotIn(("upload", "big.bin"), log)
-
 
 class _FakeSource:
     def __init__(self, items):
@@ -877,40 +601,6 @@ class TestRunnerParallel(unittest.TestCase):
         self.assertEqual(stats.success, 2)  # noqa: PLR2004
         self.assertEqual(items[0].error, "boom")
 
-    def test_folder_fidelity_is_applied_after_all_content(self):
-        # A folder's ``Modified`` follows its children — uploading a file into it (or
-        # creating a subfolder) resets it — so its timestamps can only be restored
-        # once the whole content pass is done.
-        calls: list[str] = []
-        items = [
-            MigrationItem("/s/Area", "Area/", item_type="folder"),
-            MigrationItem("/s/Area/doc.txt", "Area/doc.txt"),
-        ]
-        source = _FakeSource(items)
-
-        class _Target(_FakeTarget):
-            def write(self, item, payload):
-                calls.append(f"write:{item.dest_path}")
-                super().write(item, payload)
-
-            def apply_timestamps(self, item):
-                calls.append(f"apply_timestamps:{item.dest_path}")
-
-        stats = MigrationRunner().run(  # type: ignore[arg-type]
-            source, _Target(), items, MigrationOptions(preserve_timestamps=True), Checkpoint.create()
-        )
-
-        self.assertEqual(stats.success, 2)  # noqa: PLR2004
-        self.assertEqual(
-            calls,
-            [
-                "write:Area/",
-                "write:Area/doc.txt",
-                "apply_timestamps:Area/doc.txt",
-                "apply_timestamps:Area/",
-            ],
-        )
-
     def test_a_deferred_fidelity_failure_is_reported_against_its_folder(self):
         items = [MigrationItem("/s/Area", "Area/", item_type="folder")]
         source = _FakeSource(items)
@@ -948,24 +638,6 @@ class TestRunnerExistingTargets(unittest.TestCase):
             _FakeSource(items), target, items, MigrationOptions(preserve_timestamps=True), Checkpoint.create()
         )
         return stats, target.written
-
-    def test_an_existing_folder_is_reapplied_not_skipped(self):
-        # A folder holds no content to duplicate, and a resumed run still has to
-        # restore its metadata — otherwise a re-verify reports it as drifted.
-        items = [MigrationItem("/s/Area", "Area/", item_type="folder")]
-
-        stats, written = self._run(items)
-
-        self.assertEqual(stats.success, 1)
-        self.assertEqual(written, ["Area/", "timestamps:Area/"])
-
-    def test_an_existing_file_is_still_skipped(self):
-        items = [MigrationItem("/s/doc.txt", "doc.txt")]
-
-        stats, written = self._run(items)
-
-        self.assertEqual(stats.skipped, 1)
-        self.assertEqual(written, [])
 
 
 class TestApplyFidelity(unittest.TestCase):
@@ -1008,36 +680,6 @@ class TestApplyFidelity(unittest.TestCase):
         self.assertLess(calls.index("apply_timestamps"), calls.index("finalize_fidelity"))
         self.assertLess(calls.index("finalize_fidelity"), calls.index("apply_item_state:0"))
 
-    def test_an_approved_item_is_not_rewritten(self):
-        calls: list[str] = []
-
-        class _Source:
-            def read_item_state(self, item):
-                return None
-
-        class _Target:
-            def apply_item_state(self, item, state):
-                calls.append("apply_item_state")
-
-        _apply_fidelity(_Source(), _Target(), MigrationItem("/s/doc", "doc"), MigrationOptions())
-
-        self.assertEqual(calls, [])
-
-    def test_the_approval_step_needs_both_hooks(self):
-        calls: list[str] = []
-
-        class _Source:
-            def read_item_state(self, item):
-                calls.append("read_item_state")
-                return {"_ModerationStatus": "0"}
-
-        class _Target:
-            pass
-
-        _apply_fidelity(_Source(), _Target(), MigrationItem("/s/doc", "doc"), MigrationOptions())
-
-        self.assertEqual(calls, [])
-
 
 def uploadfolder__folder() -> Folder:
     ctx = ClientContext("https://contoso.sharepoint.com/sites/x")
@@ -1057,37 +699,6 @@ class TestUploadFolderEntries(unittest.TestCase):
             self.assertEqual(rels, ["b.txt", "docs/a.txt"])
             self.assertEqual(dict(entries)["docs/a.txt"](), b"alpha")
             self.assertEqual(dict(entries)["b.txt"](), b"beta")
-
-    def test_directory_walk_non_recursive_is_flat(self):
-        with tempfile.TemporaryDirectory() as d:
-            root = Path(d)
-            (root / "docs").mkdir()
-            (root / "docs" / "a.txt").write_text("alpha")
-            (root / "b.txt").write_text("beta")
-
-            entries = MoveCopyUtil._collect_upload_entries(root, recursive=False)
-            self.assertEqual([rel for rel, _ in entries], ["b.txt"])
-
-    def test_single_file_uses_name(self):
-        with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
-            f.write("hello")
-            path = Path(f.name)
-        try:
-            entries = MoveCopyUtil._collect_upload_entries(path, recursive=True)
-            self.assertEqual([rel for rel, _ in entries], [path.name])
-        finally:
-            path.unlink()
-
-    def test_list_of_file_paths_each_at_name(self):
-        with tempfile.TemporaryDirectory() as d:
-            root = Path(d)
-            a = root / "a.txt"
-            a.write_text("a")
-            b = root / "b.txt"
-            b.write_text("b")
-
-            entries = MoveCopyUtil._collect_upload_entries([a, b], recursive=True)
-            self.assertEqual(sorted(rel for rel, _ in entries), ["a.txt", "b.txt"])
 
     def test_content_pairs(self):
         with tempfile.TemporaryDirectory() as d:

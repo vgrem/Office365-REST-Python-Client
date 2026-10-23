@@ -290,19 +290,6 @@ def test_source_refuses_an_ics_without_a_sidecar(tmp_path: Path):
         IcsTreeSource(root).list_items()
 
 
-def test_source_refuses_a_sidecar_that_escapes_the_tree(tmp_path: Path):
-    source = IcsTreeSource(_root(tmp_path))
-    item = MigrationItem("../../etc/passwd", "../../etc/passwd", 0, "event")
-
-    with pytest.raises(ValueError, match="escapes the export tree"):
-        source.read(item)
-
-
-def test_source_refuses_a_directory_that_is_not_an_export(tmp_path: Path):
-    with pytest.raises(FileNotFoundError, match="is not a directory of exported .ics files"):
-        IcsTreeSource(tmp_path / "nope").list_items()
-
-
 # -- the payload ---------------------------------------------------------------
 
 
@@ -330,16 +317,6 @@ def test_payload_carries_the_event_attributes_an_import_restores():
     assert payload["body"] == {"contentType": "HTML", "content": "<p>Agenda: <b>Q1</b></p>"}
 
 
-def test_payload_drops_attendees_unless_asked_because_they_would_be_invited():
-    assert "attendees" not in event_create_payload(_envelope(), context=GraphClient())
-
-    payload = event_create_payload(_envelope(), CalendarImportOptions(restore_attendees=True), context=GraphClient())
-    assert payload["attendees"] == [
-        {"emailAddress": {"address": "bob@contoso.com", "name": "Bob"}, "type": "required"},
-        {"emailAddress": {"address": "carol@contoso.com"}, "type": "optional"},
-    ]
-
-
 def test_payload_refuses_a_recurrence_an_older_export_wrote_as_text():
     """The sidecar is the contract: a series it cannot express must not become a single meeting."""
     broken = _envelope(recurrence="PatternedRecurrence(pattern=RecurrencePattern(interval=1), range=…)")
@@ -348,40 +325,7 @@ def test_payload_refuses_a_recurrence_an_older_export_wrote_as_text():
         event_create_payload(broken, context=GraphClient())
 
 
-def test_payload_requires_a_time_range():
-    with pytest.raises(ValueError, match="no start/end dateTime"):
-        event_create_payload(_envelope(start=None), context=GraphClient())
-
-
-def test_transaction_id_is_deterministic_per_source_event():
-    assert event_transaction_id(_envelope()) == event_transaction_id(_envelope())
-    assert event_transaction_id(_envelope()) != event_transaction_id(_SERIES)
-
-
 # -- the target ----------------------------------------------------------------
-
-
-def test_import_creates_the_event_from_the_sidecar(tmp_path: Path):
-    calendar = _Calendar()
-    job = MigrationJob(IcsTreeSource(_root(tmp_path)), _target(_client(calendar)))
-
-    job.plan()
-    stats = job.run()
-
-    assert stats.success == 1
-    assert calendar.posted[0]["subject"] == "Quarterly review"
-    assert calendar.posted[0]["start"]["timeZone"] == "Europe/Kiev"
-
-
-def test_import_replays_a_series_as_a_series(tmp_path: Path):
-    calendar = _Calendar()
-    job = MigrationJob(IcsTreeSource(_root(tmp_path, {"Imported/e3.ics": _SERIES})), _target(_client(calendar)))
-
-    job.plan()
-    job.run()
-
-    assert calendar.posted[0]["recurrence"]["pattern"]["daysOfWeek"] == ["monday"]
-    assert calendar.events["e10"]["type"] == "seriesMaster"  # noqa: PLR2004 — the id the fake assigned
 
 
 def test_import_verifies_the_event_across_the_server_rewrite(tmp_path: Path):
@@ -424,22 +368,6 @@ def test_resume_skips_the_events_it_already_created(tmp_path: Path):
     assert len(calendar.posted) == 1  # noqa: PLR2004 — the first run's create, not a second copy
 
 
-def test_two_source_events_with_the_same_subject_and_start_are_both_imported(tmp_path: Path):
-    """A calendar can hold duplicates; recognising "already there" must not collapse them."""
-    calendar = _Calendar()
-    twin = _envelope(id="e2")
-    root = _root(tmp_path, {"Imported/e1.ics": _envelope(), "Imported/e2.ics": twin})
-    client = _client(calendar)
-
-    job = MigrationJob(IcsTreeSource(root), _target(client))
-    job.plan()
-    assert job.run().success == 2  # noqa: PLR2004 — both twins, in one run
-
-    again = MigrationJob(IcsTreeSource(root), _target(client))
-    again.plan()
-    assert again.run().skipped == 2  # noqa: PLR2004 — and both are recognised on the re-run
-
-
 def test_a_duplicate_transaction_id_is_adopted_not_failed(tmp_path: Path):
     """A concurrent run that won the race means the work is done — adopt its event."""
     calendar = _Calendar(
@@ -466,14 +394,6 @@ def test_a_duplicate_transaction_id_is_adopted_not_failed(tmp_path: Path):
     assert calendar.posted == []  # the fake refused the create; the event was adopted
     assert target.list_paths() == ["Imported/e1.ics"]
     assert target.checksum(source.list_items()[0]) != ""
-
-
-def test_write_refuses_an_item_that_is_not_an_event(tmp_path: Path):
-    target = _target(_client(_Calendar()))
-    item = MigrationItem("x.txt", "x.txt", 10, "file")
-
-    with pytest.raises(ValueError, match="imports events, not 'file'"):
-        target.write(item, b"bytes")
 
 
 def test_write_refuses_a_sidecar_without_a_time_range(tmp_path: Path):

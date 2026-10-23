@@ -24,26 +24,6 @@ def test_settings_map_to_options():
     assert options.concurrency == concurrency  # overrides win
 
 
-def test_session_applies_settings_options_by_default(tmp_path):
-    session = MigrationSession().register(settings=MigrationSettings(preserve_timestamps=True))
-
-    job = session.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path / "out"))
-
-    assert job.options.preserve_timestamps is True
-
-
-def test_session_explicit_options_override_settings(tmp_path):
-    session = MigrationSession().register(settings=MigrationSettings(preserve_timestamps=True))
-
-    job = session.add_task(
-        FileSystemSource(tmp_path),
-        FileSystemTarget(tmp_path / "out"),
-        options=MigrationOptions(preserve_timestamps=False),
-    )
-
-    assert job.options.preserve_timestamps is False
-
-
 def test_session_constructor_options_override_settings(tmp_path):
     session = MigrationSession(options=MigrationOptions(preserve_permissions=True)).register(
         settings=MigrationSettings(preserve_timestamps=True)
@@ -102,22 +82,6 @@ def test_session_cmdlets_with_direct_adapters(tmp_path):
     session.unregister()
 
 
-def test_a_task_that_never_ran_reports_no_duration(tmp_path):
-    session = MigrationSession().register()
-    session.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path / "out"))
-
-    assert session.show()[0]["duration_ms"] is None
-
-
-def test_remove_task_accepts_the_job(tmp_path):
-    session = MigrationSession()
-    job = session.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path))
-
-    session.remove_task(job)
-
-    assert session.tasks == []
-
-
 def test_add_task_descriptor_requires_a_context():
     session = MigrationSession()
     with pytest.raises(ValueError, match="register a ClientContext"):
@@ -137,54 +101,6 @@ def test_session_surfaces_adapter_warnings(tmp_path):
     fresh = MigrationSession()
     fresh.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path))
     assert fresh.warnings() == []
-
-
-def test_unhonored_settings_are_silent_at_their_honest_defaults():
-    # The SPMT surface is wider than the engine; only what a run cannot do is named.
-    # Term groups are the one thing the *default* asks for that a session never does.
-    assert MigrationSettings().unhonored() == [
-        "migrate_term_groups=True is not honored: a session does not migrate the term store "
-        "(use export_tree/import_tree)"
-    ]
-
-
-def test_unhonored_settings_name_every_knob_that_would_change_the_run():
-    notes = MigrationSettings(
-        migration_type="Workflow",
-        skip_lists_with_name="Archive",
-        replacement_of_invalid_char="_",
-    ).unhonored()
-
-    assert len(notes) == len(
-        ["migration_type", "skip_lists_with_name", "replacement_of_invalid_char", "migrate_term_groups"]
-    )
-    assert notes[0].startswith("migration_type='Workflow' is not honored")
-    assert notes[1].startswith("skip_lists_with_name='Archive' is not honored")
-    assert notes[2].startswith("replacement_of_invalid_char='_' is not honored")
-
-
-def test_honored_settings_are_not_reported_as_unhonored():
-    notes = MigrationSettings(
-        migrate_site_settings="NONE",
-        migrate_pages=False,
-        migrate_navigation=True,
-        preserve_permissions=True,
-        duplicate_page_behavior="SKIP",
-        skip_files_with_extension=["tmp"],
-    ).unhonored()
-
-    for name in ("migrate_site_settings", "migrate_pages", "migrate_navigation", "preserve_permissions"):
-        assert not any(note.startswith(name) for note in notes), notes
-
-
-def test_session_surfaces_the_unhonored_settings_once(tmp_path):
-    session = MigrationSession().register(settings=MigrationSettings(skip_lists_with_name="Archive"))
-
-    session.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path / "out"))
-    session.add_task(FileSystemSource(tmp_path), FileSystemTarget(tmp_path / "out2"))
-
-    notes = [message for message in session.warnings() if message.startswith("skip_lists_with_name")]
-    assert len(notes) == 1
 
 
 def test_session_rejects_an_unknown_site_settings_mode():

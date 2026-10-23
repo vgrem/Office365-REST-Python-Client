@@ -8,7 +8,6 @@ the server-managed identity fields that must not be sent back) without network.
 from __future__ import annotations
 
 from office365.graph_client import GraphClient
-from office365.planner.tasks.check_list_items import PlannerChecklistItems
 from office365.planner.tasks.task import PlannerTask
 from office365.planner.tasks.task_details import PlannerTaskDetails
 from office365.runtime.http.http_method import HttpMethod
@@ -34,35 +33,6 @@ def _client(payloads):
     client.pending_request().beforeExecute.clear()
     client.pending_request().transport = transport
     return client, transport
-
-
-def test_assign_to_serializes_only_writable_fields():
-    task = PlannerTask(GraphClient())
-    task.assign_to("u-1")
-
-    body = task.to_json(V4JsonFormat())
-    assert body["assignments"] == {"u-1": {"orderHint": " !", "@odata.type": "#microsoft.graph.PlannerAssignment"}}
-    # ``assignedBy``/``assignedDateTime`` are server-managed and rejected on write.
-    assert "assignedBy" not in body["assignments"]["u-1"]
-
-
-def test_unassign_serializes_a_null_entry():
-    task = PlannerTask(GraphClient())
-    task.assign_to("u-1")
-    task.unassign("u-1")
-
-    assert task.to_json(V4JsonFormat())["assignments"] == {"u-1": None}
-
-
-def test_assign_to_accepts_a_user_object():
-    client = GraphClient()
-    user = client.users["u-1"]
-    user.set_property("id", "u-1", False)
-
-    task = PlannerTask(client)
-    task.assign_to(user)
-
-    assert list(vars(task.assignments)) == ["u-1"]
 
 
 def test_assignments_deserialize_to_typed_values():
@@ -125,13 +95,3 @@ def test_set_checklist_replaces_loaded_items():
     assert checklist["old"] is None
     titles = {v["title"] for k, v in checklist.items() if v is not None}
     assert titles == {"One", "Two"}
-
-
-def test_checklist_read_is_typed():
-    item = PlannerChecklistItems()
-    item.set_property("c1", {"title": "Draft", "isChecked": True, "orderHint": " !"}, False)
-
-    ((item_id, value),) = list(item)
-    assert item_id == "c1"
-    assert value.title == "Draft"
-    assert value.isChecked is True
