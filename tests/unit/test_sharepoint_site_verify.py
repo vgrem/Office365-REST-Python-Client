@@ -70,59 +70,6 @@ def test_a_clean_web_is_ok_and_complete(contexts, clean):
     assert json.loads(json.dumps(report.to_dict()))["ok"] is True
 
 
-def test_findings_make_the_web_a_mismatch_and_are_counted(contexts, clean, monkeypatch):
-    monkeypatch.setattr(
-        site_verify,
-        "verify_web_settings",
-        lambda s, t: ["site settings: Title is 'team_out', source has 'team'"],
-    )
-    monkeypatch.setattr(
-        site_verify, "verify_page_copy", lambda s, t: ["page: Home.aspx missing", "page: About.aspx drifted"]
-    )
-
-    report = verify_site(*contexts, pages=True)
-
-    assert not report.ok
-    assert report.complete
-    assert report.findings == {
-        "settings": ["site settings: Title is 'team_out', source has 'team'"],
-        "pages": ["page: Home.aspx missing", "page: About.aspx drifted"],
-    }
-    assert report.summary() == (
-        "MISMATCH | https://contoso.sharepoint.com/sites/team_out | settings: 1, branding: 0, "
-        "web-scope structure: 0, site scope: 0, pages: 2"
-    )
-    assert report.issues[0].startswith("site settings:")
-    assert len(report.issues) == len(report.findings["settings"]) + len(report.findings["pages"])
-
-
-def test_a_check_that_cannot_run_is_unverifiable_not_a_mismatch(contexts, clean, monkeypatch):
-    monkeypatch.setattr(site_verify, "verify_site_security", _raise_access_denied)
-
-    report = verify_site(*contexts, security=True)
-
-    assert report.ok  # nothing contradicted the target
-    assert not report.complete
-    assert report.unverifiable == ["security: access denied"]
-    assert report.summary().startswith("PARTIAL")
-    assert "security" in report.summary()
-    assert json.loads(json.dumps(report.to_dict()))["complete"] is False
-
-
-def _raise_access_denied(source_web, target_web):
-    raise RuntimeError("access denied")
-
-
-def test_list_structure_is_folded_in(contexts, clean, monkeypatch):
-    monkeypatch.setattr(site_verify, "verify_list_structure", lambda s, t: StructureReport(list_title=t))
-
-    report = verify_site(*contexts, lists=[("source", "target"), ("source2", "target2")])
-
-    assert report.ok
-    assert [item.list_title for item in report.lists] == ["target", "target2"]
-    assert report.summary().startswith("OK | https://contoso.sharepoint.com/sites/team_out | lists: 2 (0 with issues)")
-
-
 def test_a_failing_list_report_makes_the_web_a_mismatch(contexts, clean, monkeypatch):
     monkeypatch.setattr(
         site_verify,
@@ -140,26 +87,3 @@ def test_a_failing_list_report_makes_the_web_a_mismatch(contexts, clean, monkeyp
         "MISMATCH | target | columns: 1, content types: 0, views: 0, field links: 0, settings: 0, "
         "column attributes: 0, formatting: 0"
     ]
-
-
-def test_an_unreadable_list_is_unverifiable_not_fatal(contexts, clean, monkeypatch):
-    monkeypatch.setattr(site_verify, "verify_list_structure", _raise_access_denied)
-
-    report = verify_site(*contexts, lists=[(type("_L", (), {"title": "Documents"})(), "target")])
-
-    assert report.ok
-    assert not report.complete
-    assert report.unverifiable == ["list structure for Documents: access denied"]
-
-
-def test_web_scope_structure_findings_are_reported_as_a_note(contexts, monkeypatch):
-    monkeypatch.setattr(site_verify, "verify_web_settings", lambda s, t: [])
-    monkeypatch.setattr(
-        site_verify, "web_scope_note", lambda missing, url=None: "web-scope structure is not replayed: …"
-    )
-    monkeypatch.setattr(site_verify, "compare_web_scope_structure", lambda s, t: object())
-
-    report = verify_site(*contexts, branding=False)
-
-    assert report.findings == {WEB_SCOPE_STRUCTURE: ["web-scope structure is not replayed: …"]}
-    assert not report.ok

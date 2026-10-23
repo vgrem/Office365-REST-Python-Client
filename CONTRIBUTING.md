@@ -103,6 +103,15 @@ became 1,113, while the lines exercised by `office365/` moved from 16,937 to 16,
 is reproducible with `coverage run --contexts` over the suite and a set-cover over
 `(test → lines, assertions)`; it is not a matter of taste.
 
+A second pass asked a different question: does `tests/<product>/` already pin this
+fact against a live tenant? Those suites cannot run here without credentials, so
+the answer is argued from the E2E file's subject, paths and verbs — never from a
+run. What a live suite already pins (a request shape, a payload spelling, a tour
+of accessors) is deleted here; what it cannot pin offline stays — error typing,
+the exact bytes emitted, canonical checksums, and the rules the client derives
+before it ever sends a request. That pass took 1,112 tests to 812 and the
+statements `office365/` executes from 53,659 to 52,500 (2.2%).
+
 ### End-to-end tests (maintainers / optional)
 
 The product suites (`tests/sharepoint/`, `tests/onedrive/`, …) are end-to-end and

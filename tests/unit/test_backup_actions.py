@@ -28,7 +28,6 @@ from office365.backuprestore.restoresessions.browse_query_order import BrowseQue
 from office365.backuprestore.serviceapps.service_app import ServiceApp
 from office365.backuprestore.sharepoint_browse_session import SharePointBrowseSession
 from office365.backuprestore.sharepoint_protection_policy import SharePointProtectionPolicy
-from office365.common.mailbox_protection_unit import MailboxProtectionUnit
 from office365.common.restore_point import RestorePoint
 from office365.graph_client import GraphClient
 from office365.runtime.http.http_method import HttpMethod
@@ -85,15 +84,6 @@ def test_protection_policy_activate_and_deactivate():
 # --- protection units -------------------------------------------------------
 
 
-def test_protection_unit_offboard_and_cancel():
-    client, transport = _client()
-    MailboxProtectionUnit(client, ResourcePath("protectionUnits/1")).offboard().execute_query()
-    MailboxProtectionUnit(client, ResourcePath("protectionUnits/1")).cancel_offboard().execute_query()
-
-    assert _last(transport).url.endswith("/protectionUnits/1/cancelOffboard")
-    assert transport.requests[0].url.endswith("/protectionUnits/1/offboard")
-
-
 # --- protection rules -------------------------------------------------------
 
 
@@ -146,12 +136,3 @@ def test_restore_points_search_serializes_enum_names():
         "restorePointPreference": "latest",
         "tags": "fastRestore",
     }
-
-
-def test_root_exposes_restore_point_collection():
-    client, transport = _client()
-    collection = client.solutions.backup_restore.restore_points
-    assert isinstance(collection, RestorePointCollection)
-
-    collection.search(tags=RestorePointTags.none).execute_query()
-    assert _last(transport).url.endswith("/restorePoints/search")

@@ -5,14 +5,6 @@ from __future__ import annotations
 from office365.runtime.verification import VerificationReport
 
 
-def test_empty_report_is_ok_and_complete():
-    report = VerificationReport()
-
-    assert report.ok
-    assert report.complete
-    assert report.summary().startswith("OK")
-
-
 def test_to_dict_is_serializable_and_mirrors_properties():
     report = VerificationReport(
         source_count=2,

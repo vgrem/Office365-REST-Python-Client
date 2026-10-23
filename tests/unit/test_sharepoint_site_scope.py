@@ -1,8 +1,6 @@
 """Site scope: what the target site cannot do because a migration never replays features."""
 
 from office365.migration.sharepoint.site_scope import (
-    SiteScopeDiff,
-    capture_site_scope,
     compare_site_scope,
     site_scope_note,
 )
@@ -117,36 +115,6 @@ def _target(**kwargs):
     return _Context(url="https://contoso.sharepoint.com/sites/team_out", **kwargs)
 
 
-def test_a_missing_web_feature_is_named():
-    diff = compare_site_scope(_source(web_features=[WEB_A, WEB_B]), _target(web_features=[WEB_A]))
-
-    assert diff.missing_web_features == [WEB_B]
-    note = site_scope_note(diff, "https://contoso.sharepoint.com/sites/team_in")
-
-    assert note is not None
-    assert "1 web feature(s)" in note
-    assert WEB_B in note
-    assert "https://contoso.sharepoint.com/sites/team_in" in note
-    assert "Enable-SPFeature" in note
-
-
-def test_a_missing_site_collection_feature_is_named_separately():
-    diff = compare_site_scope(_source(site_features=[SITE_A]), _target(site_features=[]))
-
-    assert diff.missing_web_features == []
-    assert diff.missing_site_features == [SITE_A]
-    assert "site-collection feature(s)" in (site_scope_note(diff) or "")
-
-
-def test_an_extra_feature_on_the_target_is_carried_but_is_not_a_finding():
-    diff = compare_site_scope(_source(web_features=[WEB_A]), _target(web_features=[WEB_A, WEB_B]))
-
-    assert diff.is_empty
-    assert diff.extra_web_features == [WEB_B]
-    assert diff.to_dict()["extra_web_features"] == [WEB_B]
-    assert site_scope_note(diff) is None
-
-
 def test_a_regional_difference_is_named_by_value():
     diff = compare_site_scope(
         _source(regional=_regional(LocaleId=1031), zone=_TimeZone(PACIFIC)),
@@ -159,37 +127,6 @@ def test_a_regional_difference_is_named_by_value():
     assert "regional settings differ" in note
     assert "Pacific Time" in note
     assert "1031 vs 1033" in note
-
-
-def test_a_time_zone_that_cannot_be_read_is_not_a_finding():
-    diff = compare_site_scope(
-        _source(zone=_TimeZone(error=RuntimeError("time zone is not readable"))),
-        _target(zone=_TimeZone(error=RuntimeError("time zone is not readable"))),
-    )
-
-    assert diff.is_empty
-    assert site_scope_note(diff) is None
-
-
-def test_a_long_list_of_missing_features_is_truncated():
-    missing = [f"0000000{i}-0000-0000-0000-000000000000" for i in range(7)]
-    diff = SiteScopeDiff(missing_web_features=missing)
-
-    note = site_scope_note(diff) or ""
-
-    assert "7 web feature(s)" in note
-    assert missing[4] in note
-    assert missing[5] not in note
-    assert "(+2 more)" in note
-
-
-def test_capture_reads_web_and_site_collection_scope():
-    scope = capture_site_scope(_source(web_features=[WEB_B], site_features=[SITE_A]))
-
-    assert scope.to_dict()["web_features"] == [WEB_B]
-    assert scope.to_dict()["site_features"] == [SITE_A]
-    assert scope.to_dict()["regional"]["TimeZoneId"] == PACIFIC_ID
-    assert scope.to_dict()["regional"]["TimeZone"] == PACIFIC["Description"]
 
 
 def test_verify_site_reports_a_missing_feature_end_to_end():

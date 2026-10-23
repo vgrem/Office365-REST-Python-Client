@@ -1,24 +1,72 @@
-"""Offline tests for progress hooks on recursive scan operations (get_files/get_folders/get_all_webs)."""
-
-from __future__ import annotations
+"""Offline tests for the optional tqdm-backed progress hook."""
 
 import json as jsonlib
+import sys
+import types
 import unittest
 
+from office365.runtime.operations import Progress
+from office365.runtime.progress import progress_bar
 from office365.runtime.transport.base import BaseTransport
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.navigation.nodes.collection import NavigationNodeCollection
 from requests import Response
 
+_TOTAL = 10
+_FIRST_DONE = 3
+_SECOND_DONE = 10
+_ADOPTED_TOTAL = 12
+
+
+class _FakeBar:
+    """Minimal stand-in for ``tqdm.tqdm`` recording updates and closes."""
+
+    def __init__(self, desc=None, total=None):
+        self.desc = desc
+        self.total = total
+        self.n = 0
+        self.closed = False
+        self.updates: list[int] = []
+
+    def update(self, n):
+        self.n += n
+        self.updates.append(n)
+
+    def close(self):
+        self.closed = True
+
+
+def _install_fake_tqdm(monkeypatch) -> list[_FakeBar]:
+    """Register a fake ``tqdm`` module and return every bar it creates."""
+    instances: list[_FakeBar] = []
+
+    class FakeBar(_FakeBar):
+        def __init__(self, desc=None, total=None):
+            super().__init__(desc=desc, total=total)
+            instances.append(self)
+
+    fake = types.ModuleType("tqdm")
+    fake.tqdm = FakeBar
+    monkeypatch.setitem(sys.modules, "tqdm", fake)
+    return instances
+
+
+def test_progress_bar_advances_a_fake_tqdm(monkeypatch):
+    instances = _install_fake_tqdm(monkeypatch)
+
+    hook = progress_bar("scan", total=_TOTAL)
+    hook(Progress(done=_FIRST_DONE, total=_TOTAL))
+    hook(Progress(done=_SECOND_DONE, total=_ADOPTED_TOTAL))
+
+    bar = instances[0]
+    assert bar.desc == "scan"
+    assert bar.updates == [_FIRST_DONE, _SECOND_DONE - _FIRST_DONE]
+    assert bar.n == _SECOND_DONE
+    assert bar.total == _ADOPTED_TOTAL
+    assert bar.closed is False
+
+
 _METADATA = {"__metadata": {"type": "SP.Folder"}}
-
-
-def _files_result(urls: list[str]) -> dict:
-    return {"d": {"results": [{"__metadata": {"type": "SP.File"}, "ServerRelativeUrl": u} for u in urls]}}
-
-
-def _folders_result(urls: list[str]) -> dict:
-    return {"d": {"results": [{**_METADATA, "ServerRelativeUrl": u} for u in urls]}}
 
 
 class _ScriptedTransport(BaseTransport):
@@ -43,23 +91,6 @@ class TestScanProgress(unittest.TestCase):
         ctx.pending_request().beforeExecute.clear()  # no auth handler during offline build
         ctx.pending_request().transport = transport
         return ctx
-
-    def test_get_files_recursive_fires_per_folder(self):
-        payloads = [
-            _files_result(["/a.txt", "/b.txt"]),  # root folder's files
-            _folders_result(["/sub"]),  # root folder's sub-folders
-            _files_result(["/sub/c.txt"]),  # the sub-folder's files
-            _folders_result([]),  # the sub-folder has no further sub-folders
-        ]
-        ctx = self._context(_ScriptedTransport(payloads))
-        seen = []
-        folder = ctx.web.get_folder_by_server_relative_url("Shared Documents")
-
-        folder.get_files(True, progress=seen.append).execute_query()
-
-        # root scan then the sub-folder scan, with cumulative done
-        self.assertEqual([p.done for p in seen], [2, 3])  # noqa: PLR2004
-        self.assertEqual([f.server_relative_url for f in (seen[-1].items or [])], ["/sub/c.txt"])
 
 
 def _nav_node(node_id: int, title: str, url: str) -> dict:

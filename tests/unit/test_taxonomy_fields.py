@@ -55,18 +55,3 @@ def test_set_taxonomy_collection_writes_note_companion():
     item = ListItem(ctx, None, lst)
     item.set_property("Dept", TaxonomyFieldValueCollection([TaxonomyFieldValue(Label="TermA", TermGuid="a" * 8)]))
     assert item.properties.get("Dept_0") == "-1;#TermA|aaaaaaaa"
-
-
-def test_set_taxonomy_collection_missing_companion_is_ignored():
-    ctx = _ctx(
-        [
-            {
-                "http_status": 404,
-                "body": {"error": {"code": "System.ArgumentException", "message": "Column does not exist."}},
-            }
-        ]
-    )
-    lst = ctx.web.lists.get_by_title("Tasks")
-    item = ListItem(ctx, None, lst)
-    item.set_property("Dept", TaxonomyFieldValueCollection([TaxonomyFieldValue(Label="TermA", TermGuid="a" * 8)]))
-    assert "Dept_0" not in item.properties

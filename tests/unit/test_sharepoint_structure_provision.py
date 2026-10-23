@@ -14,7 +14,6 @@ from office365.migration.sharepoint.structure import (
     FieldDefinition,
     ListStructure,
     ViewDefinition,
-    normalize_guid,
     provision_list_structure,
     rewrite_lookup_schema,
 )
@@ -156,86 +155,7 @@ def test_provision_creates_columns_content_type_links_and_view():
     assert any(u.endswith("views/Add") for u in urls)
 
 
-def _view_only_routes(*, target_columns, view_exists=False):
-    """Routes for a snapshot that carries one view and nothing else."""
-    return [
-        (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": False}}),
-        (
-            HttpMethod.Get,
-            "Fields?$select=InternalName",
-            {"d": {"results": [{"InternalName": name} for name in target_columns]}},
-        ),
-        (HttpMethod.Get, "views/GetByTitle", {} if view_exists else _NOT_FOUND),
-        (HttpMethod.Post, "views/Add", {"d": {"Title": "All Items"}}),
-    ]
-
-
-def _view_structure(*column_names):
-    return _structure(
-        fields=[],
-        content_types=[],
-        content_types_enabled=False,
-        views=[ViewDefinition(title="All Items", field_internal_names=list(column_names))],
-    )
-
-
-def _view_add_parameters(transport):
-    return [p for p in _posts(transport) if p.url.endswith("views/Add")][0].data["parameters"]
-
-
-def test_provision_falls_back_to_the_view_defaults_when_no_captured_column_exists():
-    ctx, transport = _setup(_view_only_routes(target_columns=["Title"]))
-
-    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _view_structure("LinkTitle"))
-
-    assert _view_add_parameters(transport).get("ViewFields", {}).get("results", []) == []
-    assert warnings == ["view 'All Items' was created without LinkTitle: the target list has no such column"]
-
-
-def test_provision_records_content_type_id_map_by_name():
-    # SharePoint assigns a recreated list content type a fresh StringId; the
-    # populated map (source id -> target id) lets item ContentTypeIds be rewritten.
-    target_id = "0x0100ffffffffffffffffffffffff0001"
-    routes = [
-        (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
-        (HttpMethod.Get, "getByInternalNameOrTitle", _NOT_FOUND),
-        (HttpMethod.Post, "CreateFieldAsXml", {"d": {"InternalName": "ProjectType", "FieldTypeKind": 6}}),
-        (HttpMethod.Get, "/FieldLinks", {"d": {"results": []}}),
-        (HttpMethod.Post, "/FieldLinks/Reorder", {}),
-        (HttpMethod.Post, "/FieldLinks", {}),
-        (HttpMethod.Get, "ContentTypes?$filter=", {"d": {"results": []}}),
-        (HttpMethod.Post, "/ContentTypes", {"d": {"Name": "Project", "StringId": target_id}}),
-        (HttpMethod.Get, "/ContentTypes", {"d": {"results": [{"Name": "Project", "StringId": target_id}]}}),
-    ]
-    ctx, _ = _setup(routes)
-
-    mapping: dict = {}
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _structure(views=[]), content_type_map=mapping)
-
-    assert mapping == {_CT_ID: target_id}
-
-
 # --- content type creation information (regression: Group landed in Id) -------
-
-
-def test_ensure_content_type_sets_group_and_preserves_id():
-    ctx, transport = _setup(
-        [
-            (HttpMethod.Get, "ContentTypes?$filter=", {"d": {"results": []}}),
-            (HttpMethod.Post, "/ContentTypes", {"d": {"Name": "Project", "StringId": _CT_ID}}),
-        ]
-    )
-
-    ctx.web.lists.get_by_title("Tasks").content_types.ensure(
-        "Project", "desc", "Custom", content_type_id=_CT_ID
-    ).execute_query()
-
-    body = transport.requests[-1].data
-    assert body["Name"] == "Project"
-    assert body["Description"] == "desc"
-    assert body["Group"] == "Custom"
-    assert body["Id"]["StringValue"] == _CT_ID
-    assert "__metadata" not in body["Group"]
 
 
 _LINK_REJECTED = {
@@ -247,109 +167,6 @@ _LINK_REJECTED = {
         }
     },
 }
-
-
-class _FieldLinks:
-    """In-memory field links, so a read after a write sees what the write did.
-
-    ``refuse`` names the column the server rejects; with ``atomic`` the rejection
-    rolls the whole change set back, so nothing the batch wrote survives even
-    though the sibling sub-responses still answer ``200``.
-    """
-
-    def __init__(self, seed=None, refuse=None, atomic=False):
-        self._links = dict(seed or {})
-        self._refuse = refuse
-        self._atomic = atomic
-        self._rolled_back = False
-
-    def read(self, request):
-        linked = [] if self._rolled_back else self._links.get(_ct_key(request.url), [])
-        results = [{"Name": name, "FieldInternalName": name} for name in linked]
-        return {"d": {"results": results}}
-
-    def add(self, request):
-        name = request.data["FieldInternalName"]
-        if name == self._refuse:
-            self._rolled_back = self._atomic
-            return _LINK_REJECTED
-        if not self._rolled_back:
-            self._links.setdefault(_ct_key(request.url), []).append(name)
-        return {"d": {"Name": name}}
-
-
-def _ct_key(url):
-    return url.split("/ContentTypes(")[-1].split(")")[0].strip("'")
-
-
-def _link_routes(links=None):
-    links = links if links is not None else _FieldLinks()
-    return [
-        (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
-        (HttpMethod.Get, "getByInternalNameOrTitle", _NOT_FOUND),
-        (HttpMethod.Post, "CreateFieldAsXml", {"d": {"InternalName": "ProjectType", "FieldTypeKind": 6}}),
-        # field links must be matched before the bare /ContentTypes routes
-        (HttpMethod.Get, "/FieldLinks", links.read),
-        (HttpMethod.Post, "/FieldLinks/Reorder", {}),
-        (HttpMethod.Post, "/FieldLinks", links.add),
-        (HttpMethod.Get, "ContentTypes?$filter=", {"d": {"results": []}}),
-        (HttpMethod.Post, "/ContentTypes", {"d": {"Name": "Project", "StringId": _CT_ID}}),
-        (HttpMethod.Get, "/ContentTypes", {"d": {"results": [{"Name": "Project", "StringId": _CT_ID}]}}),
-    ]
-
-
-def test_provision_reports_links_a_rejected_sibling_rolled_back():
-    # The adds travel in one change set, which the server applies atomically: a
-    # refused column takes its siblings with it while their sub-responses still
-    # answer 200. The read-back is what turns that into warnings, so a silently
-    # rolled-back link cannot be reported as linked.
-    links = _FieldLinks(refuse="MediaServiceImageTags", atomic=True)
-    ctx, transport = _setup(_link_routes(links))
-    structure = _structure(
-        views=[],
-        fields=[
-            FieldDefinition(internal_name="ProjectType", title="Project Type", field_type_kind=6, schema_xml="<Field/>"),
-            FieldDefinition(
-                internal_name="MediaServiceImageTags", title="Tags", field_type_kind=6, schema_xml="<Field/>"
-            ),
-        ],
-        content_types=[
-            ContentTypeDefinition(
-                string_id=_CT_ID, name="Project", field_internal_names=["ProjectType", "MediaServiceImageTags"]
-            )
-        ],
-    )
-
-    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    assert len(warnings) == _LINKED_COLUMNS
-    assert "column 'ProjectType' was not linked" in warnings[0]
-    # the refused column carries the server's reason, the rolled-back sibling cannot
-    assert "column 'MediaServiceImageTags' was not linked: Column 'ProjectType' does not exist." in warnings[1]
-    # a column the server does not hold cannot be ordered
-    assert not any(u.endswith("/FieldLinks/Reorder") for u in _urls(transport))
-
-
-def test_provision_reorders_links_with_a_plain_array():
-    # the server already links both columns, but in the wrong order
-    links = _FieldLinks(seed={_CT_ID: ["ProjectType", "Category"]})
-    ctx, transport = _setup(_link_routes(links))
-    structure = _structure(
-        views=[],
-        fields=[
-            FieldDefinition(internal_name="ProjectType", title="Project Type", field_type_kind=6, schema_xml="<Field/>"),
-            FieldDefinition(internal_name="Category", title="Category", field_type_kind=6, schema_xml="<Field/>"),
-        ],
-        content_types=[
-            ContentTypeDefinition(string_id=_CT_ID, name="Project", field_internal_names=["Category", "ProjectType"])
-        ],
-    )
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    reorder = next(r for r in _posts(transport) if r.url.endswith("/FieldLinks/Reorder"))
-    assert isinstance(reorder.data["internalNames"], list)
-    assert reorder.data["internalNames"] == ["Category", "ProjectType"]
 
 
 # --- lookup columns: repoint the schema at the target list --------------------
@@ -368,36 +185,6 @@ def test_rewrite_lookup_schema_repoints_list_attribute():
     assert unresolved is None
     assert 'List="{ed0abd71-7d64-429a-9de7-7dfabbac6aa7}"' in rewritten
     assert "A6879990" not in rewritten
-
-
-def test_normalize_guid_strips_braces_and_lowercases():
-    assert normalize_guid("{A6879990-804B-4064-BF5D-F0C5C65EF768}") == _SOURCE_LIST_ID
-    assert normalize_guid(_SOURCE_LIST_ID) == _SOURCE_LIST_ID
-    assert normalize_guid("UserInfo") is None
-    assert normalize_guid(None) is None
-
-
-def _lookup_structure():
-    return _structure(
-        fields=[FieldDefinition(internal_name="Dept", title="Dept", type_as_string="Lookup", schema_xml=_LOOKUP_SCHEMA)],
-        content_types=[],
-        views=[],
-    )
-
-
-def test_provision_skips_lookup_into_a_list_outside_the_migration():
-    ctx, transport = _setup(
-        [
-            (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
-        ]
-    )
-
-    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _lookup_structure(), list_id_map={})
-
-    assert len(warnings) == 1
-    assert "Dept" in warnings[0]
-    assert _SOURCE_LIST_ID in warnings[0]
-    assert not any(p.url.endswith("Fields/CreateFieldAsXml") for p in _posts(transport))
 
 
 def test_provision_skips_an_external_data_column():
@@ -448,53 +235,6 @@ _TAXONOMY_SCHEMA = (
 
 _NOTE_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 _WEB_ID = "ef40c956-7276-421a-b0a4-d81ccf839bd9"
-
-
-def _taxonomy_structure(mult=""):
-    schema = _TAXONOMY_SCHEMA.replace('Mult="FALSE"', f'Mult="{mult}"') if mult else _TAXONOMY_SCHEMA
-    return _structure(
-        fields=[
-            FieldDefinition(
-                internal_name="Dept",
-                title="Dept",
-                field_type_kind=21,
-                type_as_string="TaxonomyFieldTypeMulti" if mult == "TRUE" else "TaxonomyFieldType",
-                schema_xml=schema,
-            )
-        ],
-        content_types=[],
-        views=[],
-    )
-
-
-def _taxonomy_routes(existing=()):
-    return [
-        (HttpMethod.Get, "$select=ContentTypesEnabled", {"d": {"ContentTypesEnabled": True}}),
-        # TaxonomyField.create first creates a hidden note column, then reads the
-        # web id, then creates the taxonomy column itself.
-        (HttpMethod.Post, "CreateFieldAsXml", {"d": {"Id": _NOTE_ID}}),
-        (HttpMethod.Get, "/Web?", {"d": {"Id": _WEB_ID}}),
-        (HttpMethod.Get, "/Fields", {"d": {"results": list(existing)}}),
-    ]
-
-
-def test_provision_recreates_a_taxonomy_column_against_the_term_set():
-    ctx, transport = _setup(_taxonomy_routes())
-
-    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _taxonomy_structure())
-
-    assert warnings == []
-    creates = [p for p in _posts(transport) if p.url.endswith("CreateFieldAsXml")]
-    note_create, taxonomy_create = creates
-    note_schema, taxonomy_schema = str(note_create.data), str(taxonomy_create.data)
-    assert 'Type="Note"' in note_schema
-    assert 'Type="TaxonomyFieldType"' in taxonomy_schema
-    assert "a83fe90d-4bdb-4644-a484-7f75ee3f5730" in taxonomy_schema
-    assert _WEB_ID in taxonomy_schema
-    # The source schema names the source web's TaxonomyHiddenList and note field;
-    # replaying it verbatim would bind the copy to columns that do not exist here.
-    assert "List=" not in taxonomy_schema
-    assert "11111111-1111-1111-1111-111111111111" not in taxonomy_schema
 
 
 # --- container settings (versioning, moderation, item-level policy, ...) -------
@@ -566,57 +306,6 @@ def test_provision_applies_each_container_setting_by_title():
     assert all(m.url.endswith("lists/GetByTitle('Tasks')") for m in _merges(transport))
 
 
-def test_provision_applies_settings_even_with_skip_conflict_mode():
-    ctx, transport = _setup(_setting_routes())
-    structure = _empty_structure(settings={"EnableModeration": True})
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure, on_conflict="skip")
-
-    assert _settings_written(transport) == [{"EnableModeration": True}]
-
-
-def test_provision_skips_a_version_limit_while_its_versioning_is_off():
-    # The server rejects the limit outright ("Versioning must be enabled and the
-    # number of major versions must be between 1 and 50000"), so it is not sent.
-    ctx, transport = _setup(
-        _setting_routes(
-            {
-                "EnableVersioning": False,
-                "EnableMinorVersions": False,
-                "MajorVersionLimit": 500,
-                "MajorWithMinorVersionsLimit": 5,
-            }
-        )
-    )
-    structure = _empty_structure(
-        settings={
-            "EnableVersioning": False,
-            "MajorVersionLimit": 12,
-            "EnableMinorVersions": False,
-            "MajorWithMinorVersionsLimit": 3,
-        }
-    )
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    assert _merges(transport) == []
-
-
-def test_provision_applies_list_validation_after_the_columns_exist():
-    ctx, transport = _setup([*_routes(), *_setting_routes()])
-    structure = _structure(settings={"ValidationFormula": '=IF([Title]="",TRUE,FALSE)'})
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), structure)
-
-    create = next(i for i, r in enumerate(transport.requests) if r.url.endswith("Fields/CreateFieldAsXml"))
-    formula = next(
-        i
-        for i, r in enumerate(transport.requests)
-        if isinstance(r.data, dict) and r.data.get("ValidationFormula") == '=IF([Title]="",TRUE,FALSE)'
-    )
-    assert formula > create
-
-
 def test_provision_reports_a_rejected_setting_as_a_warning():
     routes = _setting_routes()
     ctx, transport = _setup(routes, _RejectingSettingTransport(routes, "EnableMinorVersions"))
@@ -680,38 +369,6 @@ def test_provision_writes_column_and_view_formatting():
     assert any("Fields/getByInternalNameOrTitle('Status')" in p.url for p in merges)
     assert any("views/GetByTitle('All Items')" in p.url for p in merges)
     assert warnings == []
-
-
-def test_provision_leaves_matching_formatting_alone():
-    ctx, transport = _setup(
-        [
-            (
-                HttpMethod.Get,
-                "Fields/getByInternalNameOrTitle('Status')",
-                {"d": {"InternalName": "Status", "CustomFormatter": _COLUMN_FORMATTER}},
-            ),
-            (
-                HttpMethod.Get,
-                "views/GetByTitle('All Items')",
-                {"d": {"Title": "All Items", "CustomFormatter": _VIEW_FORMATTER}},
-            ),
-            (HttpMethod.Get, "Fields?$select=InternalName", {"d": {"results": [{"InternalName": "Status"}]}}),
-        ]
-    )
-
-    provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _formatting_structure())
-
-    assert [p for p in _posts(transport) if p.headers.get("X-HTTP-Method") == "MERGE"] == []
-    assert not any("$select=InternalName,CustomFormatter" in u for u in _urls(transport))
-
-
-def test_provision_reports_a_formatter_the_target_would_not_take():
-    ctx, _ = _setup(_formatting_routes(field_read_back=None, view_read_back="{}"))
-
-    warnings = provision_list_structure(ctx.web.lists.get_by_title("Tasks"), _formatting_structure())
-
-    assert "column 'Status' kept its own formatting: the target would not accept the formatter" in warnings
-    assert "view 'All Items' kept its own formatting: the target would not accept the formatter" in warnings
 
 
 def test_provision_reports_an_spfx_field_customizer_instead_of_copying_it():

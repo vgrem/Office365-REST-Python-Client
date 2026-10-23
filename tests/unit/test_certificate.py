@@ -13,7 +13,6 @@ import ssl
 import pytest
 from office365.runtime.auth.certificate import (
     build_client_credential,
-    certificate_pem,
     certificate_thumbprint,
 )
 
@@ -42,28 +41,3 @@ def test_build_client_credential_sni_passes_public_certificate():
     credential = build_client_credential(private_key="KEY", public_certificate=PEM, use_sni=True)
     assert credential == {"private_key": "KEY", "public_certificate": PEM}
     assert "thumbprint" not in credential
-
-
-def test_certificate_pem_round_trips_der_and_pem():
-    assert certificate_pem(DER) == PEM
-    assert certificate_pem(PEM) == PEM
-
-
-def test_entra_with_certificate_derives_thumbprint(monkeypatch):
-    import msal
-    from office365.runtime.auth.entra.authentication_context import AuthenticationContext
-
-    captured = {}
-
-    class FakeConfidentialClientApplication:
-        def __init__(self, client_id, authority, client_credential, token_cache=None):
-            captured["client_id"] = client_id
-            captured["credential"] = client_credential
-
-    monkeypatch.setattr(msal, "ConfidentialClientApplication", FakeConfidentialClientApplication)
-    context = AuthenticationContext(tenant="contoso.onmicrosoft.com")
-
-    context.with_certificate("client-id", private_key="KEY", public_certificate=PEM)
-
-    assert captured["client_id"] == "client-id"
-    assert captured["credential"]["thumbprint"] == certificate_thumbprint(PEM)

@@ -14,11 +14,5 @@ def _link(**props) -> FieldLink:
     return link
 
 
-def test_field_internal_name_falls_back_to_name():
-    # SharePoint's REST API returns the linked field's internal name in ``Name``
-    # and leaves ``FieldInternalName`` empty.
-    assert _link(Name="Modified_x0020_By").field_internal_name == "Modified_x0020_By"
-
-
 def test_field_internal_name_prefers_explicit_property():
     assert _link(Name="Title", FieldInternalName="Custom").field_internal_name == "Custom"

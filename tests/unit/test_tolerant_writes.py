@@ -74,24 +74,6 @@ def test_graph_delete_object_propagates_non_404_even_with_ignore_missing():
         client.users["x@contoso.com"].delete_object(ignore_missing=True).execute_query()
 
 
-def test_sharepoint_delete_object_tolerates_missing():
-    ctx, transport = _sp([_NOT_FOUND])
-
-    ctx.web.lists.get_by_title("Documents").delete_object(ignore_missing=True).execute_query()
-
-    assert transport.calls == 1
-
-
-def test_sharepoint_folder_recycle_tolerates_missing():
-    ctx, transport = _sp([_NOT_FOUND])
-
-    ctx.web.get_folder_by_server_relative_path("/sites/x/Shared Documents/sub").recycle(
-        ignore_missing=True
-    ).execute_query()
-
-    assert transport.calls == 1
-
-
 # --- ViewCollection.ensure_view ----------------------------------------------
 
 

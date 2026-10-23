@@ -11,13 +11,8 @@ from __future__ import annotations
 from urllib.parse import unquote_plus
 
 import pytest
-from office365.booking.business.business import BookingBusiness
-from office365.directory.licenses.subscribed_sku import SubscribedSku
-from office365.directory.users.user import User
 from office365.graph_client import GraphClient
-from office365.intune.devices.management.managed.managed import ManagedDevice
 from office365.runtime.types.exceptions import NotFoundException
-from office365.teams.team import Team
 from tests._scripted_transport import ScriptedTransport
 
 USER = {"id": "u1", "displayName": "Ada Lovelace", "mail": "ada@contoso.com"}
@@ -125,81 +120,6 @@ def test_named_find_by_defers_and_returns_match(lookup, key, payload, entity_id,
     assert filter_fragment in url
 
 
-def test_planner_task_find_by_title_matches_client_side():
-    client, transport = _client([{"id": "p1", "title": "Plan"}, {"value": [PLANNER_TASK]}])
-    plan = client.planner.plans["p1"].get().execute_query()
-
-    task = plan.tasks.find_by_title("Draft the plan")
-
-    assert len(transport.urls) == 1  # deferred: only the plan read so far
-    assert not task.is_loaded
-
-    task.execute_query()
-
-    assert task.is_loaded
-    assert task.get_property("id") == "pkt1"
-    url = unquote_plus(transport.urls[1])
-    assert "/planner/plans/p1/tasks" in url
-    # Graph ignores $filter on a plan's tasks, so the match is client-side.
-    assert "$filter" not in url
-
-
-def test_planner_bucket_find_by_name_matches_client_side():
-    client, transport = _client([{"id": "p1", "title": "Plan"}, {"value": [PLANNER_BUCKET]}])
-    plan = client.planner.plans["p1"].get().execute_query()
-
-    bucket = plan.buckets.find_by_name("Backlog")
-
-    assert len(transport.urls) == 1
-    assert not bucket.is_loaded
-
-    bucket.execute_query()
-
-    assert bucket.is_loaded
-    assert bucket.get_property("id") == "pbk1"
-    url = unquote_plus(transport.urls[1])
-    assert "/planner/plans/p1/buckets" in url
-    # Graph ignores $filter on a plan's buckets, so the match is client-side.
-    assert "$filter" not in url
-
-
-def test_find_by_mail_defers_and_returns_match():
-    client, transport = _client([{"value": [USER]}])
-
-    user = client.users.find_by_mail("ada@contoso.com")
-
-    assert transport.urls == []
-    assert not user.is_loaded
-
-    user.execute_query()
-
-    assert isinstance(user, User)
-    assert user.is_loaded
-    assert user.get_property("id") == "u1"
-    assert len(transport.urls) == 1
-    assert "/users" in transport.urls[0]
-    assert "mail eq 'ada@contoso.com'" in unquote_plus(transport.urls[0])
-
-
-def test_team_find_by_name_defers_and_returns_team():
-    client, transport = _client([{"value": [TEAM]}])
-
-    team = client.teams.find_by_name("Team One")
-
-    assert transport.urls == []
-    assert not team.is_loaded
-
-    team.execute_query()
-
-    assert isinstance(team, Team)
-    assert team.is_loaded
-    assert team.get_property("id") == "g1"
-    url = unquote_plus(transport.urls[0])
-    assert "/groups" in url
-    assert "resourceProvisioningOptions/Any(x:x eq 'Team')" in url
-    assert "displayName eq 'Team One'" in url
-
-
 def test_team_find_by_name_required_raises_on_miss():
     client, _ = _client([{"value": []}])
 
@@ -207,54 +127,3 @@ def test_team_find_by_name_required_raises_on_miss():
 
     with pytest.raises(NotFoundException):
         client.execute_query()
-
-
-def test_booking_find_by_name_matches_client_side():
-    client, transport = _client([{"value": [{"id": "b0", "displayName": "Other"}, BUSINESS]}])
-
-    business = client.solutions.booking_businesses.find_by_name("Contoso Bookings")
-
-    assert transport.urls == []
-    assert not business.is_loaded
-
-    business.execute_query()
-
-    assert isinstance(business, BookingBusiness)
-    assert business.is_loaded
-    assert business.get_property("id") == "b1"
-    assert "/solutions/bookingBusinesses" in transport.urls[0]
-    assert "$filter" not in transport.urls[0]
-
-
-def test_managed_device_find_by_name_defers_and_returns_device():
-    client, transport = _client([{"value": [DEVICE]}])
-
-    device = client.device_management.managed_devices.find_by_name("DESKTOP-1")
-
-    assert transport.urls == []
-    assert not device.is_loaded
-
-    device.execute_query()
-
-    assert isinstance(device, ManagedDevice)
-    assert device.is_loaded
-    assert device.get_property("id") == "d1"
-    url = unquote_plus(transport.urls[0])
-    assert "/deviceManagement/managedDevices" in url
-    assert "deviceName eq 'DESKTOP-1'" in url
-
-
-def test_subscribed_sku_find_by_part_number_is_case_insensitive():
-    client, transport = _client([{"value": [SKU]}])
-
-    sku = client.subscribed_skus.find_by_part_number("enterprisepack")
-
-    assert transport.urls == []
-    assert not sku.is_loaded
-
-    sku.execute_query()
-
-    assert isinstance(sku, SubscribedSku)
-    assert sku.is_loaded
-    assert sku.get_property("id") == "s1"
-    assert "/subscribedSkus" in transport.urls[0]

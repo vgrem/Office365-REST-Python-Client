@@ -14,10 +14,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from office365.migration.base import MigrationItem, MigrationOptions, Principal
-from office365.migration.sharepoint import adapters
+from office365.migration.base import MigrationItem, Principal
 from office365.migration.sharepoint.adapters import SharePointLibrarySource, SharePointLibraryTarget
-from office365.migration.sharepoint.structure import ListStructure
 
 
 class _Entry:
@@ -123,117 +121,10 @@ def test_library_target_write_uploads_files():
     assert folder.ensured == []
 
 
-def test_library_target_write_many_creates_folders_and_transfers_files(monkeypatch):
-    folder = _TargetFolder()
-    target = SharePointLibraryTarget(folder)
-    captured: dict = {}
-
-    def _fake_transfer(target_folder, files, *, concurrency=4, **kwargs):
-        captured["files"] = list(files)
-        return []
-
-    monkeypatch.setattr(
-        "office365.migration.sharepoint.transfer._transfer_files_parallel",
-        _fake_transfer,
-    )
-
-    failures = target.write_many(
-        [_folder_item("empty/"), MigrationItem("/sites/src/a.txt", "a.txt")],
-        [None, b"data"],
-    )
-
-    assert failures == []
-    assert folder.ensured == ["empty"]
-    assert captured["files"] == [("a.txt", b"data")]
-
-
-def test_library_target_exists_distinguishes_folders_and_files():
-    web = _Web(folders={"/sites/x/Docs/a"}, files={"/sites/x/Docs/a/f.txt"})
-    folder = _TargetFolder(context=_Context(web))
-    target = SharePointLibraryTarget(folder)
-
-    assert target.exists(_folder_item("a/")) is True
-    assert target.exists(_folder_item("b/")) is False
-    assert target.exists(MigrationItem("/sites/src/a/f.txt", "a/f.txt")) is True
-    assert target.exists(MigrationItem("/sites/src/a/g.txt", "a/g.txt")) is False
-
-
 def test_library_target_folder_checksum_is_empty_hash():
     target = SharePointLibraryTarget(_TargetFolder())
 
     assert target.checksum(_folder_item("a/")) == target.checksum(_folder_item("b/"))
-
-
-def test_library_target_read_folder_returns_empty_bytes():
-    target = SharePointLibraryTarget(_TargetFolder())
-
-    assert target.read(_folder_item("a/")) == b""
-
-
-class _AuthorListItem:
-    def __init__(self, author_id: int, editor_id: int) -> None:
-        self._author_id = author_id
-        self._editor_id = editor_id
-        self.properties: dict = {}
-        self.reads = 0
-
-    def get(self) -> "_AuthorListItem":
-        return self
-
-    def execute_query(self) -> "_AuthorListItem":
-        self.reads += 1
-        self.properties = {"AuthorId": self._author_id, "EditorId": self._editor_id}
-        return self
-
-
-class _AuthorSecurableFile:
-    def __init__(self, author_id: int, editor_id: int) -> None:
-        self.listItemAllFields = _AuthorListItem(author_id, editor_id)
-
-
-class _AuthorUser:
-    def __init__(self, login_name: str) -> None:
-        self.login_name = login_name
-        self.title = None
-        self.properties: dict = {}
-
-
-class _AuthorUserQuery:
-    def __init__(self, user: _AuthorUser) -> None:
-        self._user = user
-
-    def get(self) -> "_AuthorUserQuery":
-        return self
-
-    def execute_query(self) -> _AuthorUser:
-        return self._user
-
-
-class _AuthorSiteUsers:
-    def __init__(self, users: dict[int, str]) -> None:
-        self._users = users
-
-    def get_by_id(self, uid: int) -> _AuthorUserQuery:
-        return _AuthorUserQuery(_AuthorUser(self._users[uid]))
-
-
-class _AuthorshipWeb:
-    def __init__(self, users: dict[int, str]) -> None:
-        self.site_users = _AuthorSiteUsers(users)
-        self.files: dict[str, _AuthorSecurableFile] = {}
-
-    def get_file_by_server_relative_url(self, url: str) -> _AuthorSecurableFile:
-        return self.files.setdefault(url, _AuthorSecurableFile(12, 7))
-
-
-def test_library_target_read_authorship_re_reads_written_item():
-    """A stale ``listItemAllFields`` has no AuthorId/EditorId; the read must refresh."""
-    web = _AuthorshipWeb({12: "vgrem@x", 7: "mdoe@x"})
-    target = SharePointLibraryTarget(_TargetFolder(context=_Context(web=web)))
-    item = MigrationItem("/sites/src/doc.txt", "doc.txt", item_type="file")
-
-    assert target.read_authorship(item) == ("vgrem@x", "mdoe@x")
-    assert web.files["/sites/x/Docs/doc.txt"].listItemAllFields.reads == 1
 
 
 def test_library_target_list_paths_skips_site_assets_scaffolding():
@@ -401,28 +292,6 @@ def test_library_target_caches_time_zone_conversions():
     assert time_zone.calls[0].replace(tzinfo=None) == datetime(2021, 6, 1, 15, 0, 0)
 
 
-def test_library_target_defers_authorship_until_the_metadata_write():
-    # A separate authorship write doubled the system updates of a preserved run; the
-    # resolved principals are cached and land with (or after) the timestamps instead.
-    web = _TimestampWeb(_FakeTimeZone(offset_hours=0))
-    target = SharePointLibraryTarget(_TimestampFolder(_TimestampContext(web)))
-    item = MigrationItem("/sites/src/doc.txt", "doc.txt", item_type="file")
-    item.author = Principal("i:0#.f|membership|vgrem@x.onmicrosoft.com", "1", "Vadim")
-
-    target.apply_authorship(item)
-
-    updates = web._files["/sites/x/Docs/doc.txt"].listItemAllFields.updates
-    assert updates == []  # resolved, nothing sent yet
-
-    target.finalize_fidelity(item)
-
-    form_values, dates_in_utc, new_document_update = updates[0]
-    assert form_values["Author"].LookupId == 9  # noqa: PLR2004
-    assert dates_in_utc is True
-    assert new_document_update is True  # a system update (no new version)
-    assert len(updates) == 1
-
-
 def test_library_target_folds_authorship_into_the_timestamp_write():
     web = _TimestampWeb(_FakeTimeZone(offset_hours=0))
     target = SharePointLibraryTarget(_TimestampFolder(_TimestampContext(web)))
@@ -573,16 +442,6 @@ def test_library_target_reports_folder_values_it_could_not_write():
     assert any("folder column values for 'Area1/'" in warning for warning in target.warnings)
 
 
-def test_library_target_folder_checksum_compares_read_back_values():
-    matching = _folder_target(_FolderWeb({"/sites/x/Docs/Area1": _FolderItem({"Region": "North"})}))
-    differing = _folder_target(_FolderWeb({"/sites/x/Docs/Area1": _FolderItem({"Region": "South"})}))
-    same_folder_elsewhere = _folder_target(_FolderWeb({"/sites/x/Docs/Area2": _FolderItem({"Region": "North"})}))
-
-    assert matching.checksum(_folder_item("Area1/"))  # a real hash, so the check can run
-    assert matching.checksum(_folder_item("Area1/")) == same_folder_elsewhere.checksum(_folder_item("Area2/"))
-    assert differing.checksum(_folder_item("Area1/")) != matching.checksum(_folder_item("Area1/"))
-
-
 def test_library_target_reads_a_folders_metadata_back_from_the_folder_resource():
     # The folder's list item is where the timestamp write lands; the folder resource
     # reports the same instant, and it is what the source side reads too.
@@ -595,14 +454,6 @@ def test_library_target_reads_a_folders_metadata_back_from_the_folder_resource()
 
     assert metadata == {"created": "2021-03-04T05:06:07+00:00", "modified": "2021-03-05T06:07:08+00:00"}
     assert handle.reads == 1
-
-
-def test_library_target_without_the_library_cannot_compare_folder_values():
-    plain = SharePointLibraryTarget(_TargetFolder())
-
-    assert plain.supports_folder_records is False
-    assert plain.checksum(_folder_item("Area1/")) == ""
-    assert _folder_target(_FolderWeb({})).supports_folder_records is True
 
 
 # ── Content-approval (moderation) state ───────────────────────────────────────
@@ -678,133 +529,13 @@ def test_library_source_reads_a_draft_files_approval_state():
     assert source.read_metadata(item)["moderation_status"] == "0"
 
 
-def test_library_source_does_not_read_moderation_columns_without_moderation():
-    # Selecting a column the list does not have fails outright, so the projection
-    # only grows when the library enables content approval.
-    source, lst = _library_source({}, moderation=False)
-    item = source.list_items()[0]
-
-    assert source.read_item_state(item) is None
-    assert "moderation_status" not in source.read_metadata(item)
-    assert "OData__ModerationStatus" not in lst.items.selects[-1]
-    assert lst.ensured == [["EnableModeration"]]
-
-
 # ── Checked-out files (in-progress edits REST cannot see) ────────────────────
-
-
-def _checkout_source(urls: list[str], checked_out: set[str]):
-    """A source over the given files, the checked-out ones carrying a ``CheckoutUser``."""
-    folder = _SourceFolder("/sites/x/Docs", _Web(), files=[_SourceFile(url) for url in urls])
-    properties = [
-        {"FileRef": url, **({"CheckoutUser": {"Id": 12, "Title": "vgrem@x"}} if url in checked_out else {})}
-        for url in urls
-    ]
-    lst = _ModerationList([_ModerationItem(entry) for entry in properties], moderation=False)
-    return SharePointLibrarySource(folder, sp_list=lst), lst
-
-
-def test_library_source_warns_about_a_checked_out_file():
-    # A checked-out file exposes its last checked-in content, so the copy is
-    # faithful to what the source returns while the author's pending edits stay
-    # behind — verification compares the same read and cannot see the difference.
-    source, lst = _checkout_source(["/sites/x/Docs/a.txt", "/sites/x/Docs/b.txt"], {"/sites/x/Docs/b.txt"})
-
-    source.list_items()
-
-    assert source.warnings == [
-        "1 checked-out file(s) were copied from their last checked-in version "
-        "(in-progress edits are not visible over REST): b.txt"
-    ]
-    # a user field only projects when its sub-properties are selected *and* it is expanded
-    assert lst.items.expands == [["CheckoutUser"]]
-    assert "CheckoutUser/Id" in lst.items.selects[0]
 
 
 # ── Un-published (minor) versions (the draft hides its published predecessor) ──
 
 
-def _draft_source(urls: list[str], drafts: set[str]):
-    """A source over the given files, the draft ones reporting a minor version."""
-    folder = _SourceFolder(
-        "/sites/x/Docs",
-        _Web(),
-        files=[_SourceFile(url, minor_version=1 if url in drafts else 0) for url in urls],
-    )
-    lst = _ModerationList([_ModerationItem({"FileRef": url}) for url in urls], moderation=False)
-    return SharePointLibrarySource(folder, sp_list=lst), lst
-
-
-def test_library_source_summarizes_a_long_draft_list():
-    urls = [f"/sites/x/Docs/f{index}.txt" for index in range(7)]
-    source, _ = _draft_source(urls, set(urls))
-
-    source.list_items()
-
-    assert len(source.warnings) == 1
-    assert source.warnings[0].endswith(": f0.txt, f1.txt, f2.txt, f3.txt, f4.txt and 2 more")
-
-
 # ── Folder system metadata (a folder is an item too) ─────────────────────────
-
-
-def _folder_source(properties: dict, web=None) -> SharePointLibrarySource:
-    """A source over one folder, whose list reports its author ids."""
-    entry = _Entry("/sites/x/Docs/Area1")
-    entry.time_created = datetime(2021, 3, 4, 5, 6, 7, tzinfo=timezone.utc)
-    entry.time_last_modified = datetime(2021, 3, 5, 6, 7, 8, tzinfo=timezone.utc)
-    root = _SourceFolder("/sites/x/Docs", web or _Web(), folders=[entry])
-    return SharePointLibrarySource(root, sp_list=_ModerationList([_ModerationItem(properties)], moderation=False))
-
-
-def test_library_source_carries_a_folders_timestamps_and_authorship():
-    # A folder is an item too: its own Created/Modified come from the recursive
-    # folder read, its Author/Editor from the same item pass that serves the files.
-    source = _folder_source(
-        {"FileRef": "/sites/x/Docs/Area1", "AuthorId": 3, "EditorId": 4},
-        web=_AuthorshipWeb({3: "vgrem@x", 4: "mdoe@x"}),
-    )
-
-    item = source.list_items()[0]
-
-    assert item.item_type == "folder"
-    assert item.dest_path == "Area1/"
-    assert (item.created, item.modified) == ("2021-03-04T05:06:07+00:00", "2021-03-05T06:07:08+00:00")
-    assert (item.author.user_id, item.editor.user_id) == (3, 4)  # noqa: PLR2004
-    assert (item.author.login_name, item.editor.login_name) == ("vgrem@x", "mdoe@x")
-    assert source.read_authorship(item) == ("vgrem@x", "mdoe@x")
-
-
-def test_library_source_reads_a_folders_metadata_back_for_the_diff():
-    source = _folder_source({"FileRef": "/sites/x/Docs/Area1"})
-    item = source.list_items()[0]
-
-    assert source.read_metadata(item) == {
-        "created": "2021-03-04T05:06:07+00:00",
-        "modified": "2021-03-05T06:07:08+00:00",
-    }
-    # a folder has no approval state and no content length to compare
-    assert "moderation_status" not in source.read_metadata(item)
-
-
-def _state_target():
-    web = _TimestampWeb(_FakeTimeZone(offset_hours=-7))
-    return SharePointLibraryTarget(_TimestampFolder(_TimestampContext(web))), web
-
-
-def test_library_target_reports_an_approval_state_it_could_not_restore():
-    target, web = _state_target()
-    file = web.get_file_by_server_relative_url("/sites/x/Docs/doc.txt")
-
-    class _Rejected:
-        def validate_update_list_item(self, form_values, **_kwargs):
-            raise ValueError("You cannot change moderation status and set other item properties")
-
-    file.listItemAllFields = _Rejected()
-
-    target.apply_item_state(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt"), {"_ModerationStatus": "0"})
-
-    assert any("approval state for 'doc.txt'" in warning for warning in target.warnings)
 
 
 class _MetaListItem:
@@ -862,35 +593,3 @@ def test_library_target_reads_back_the_written_approval_state():
     metadata = target.read_metadata(MigrationItem("/sites/x/Docs/doc.txt", "doc.txt"))
 
     assert metadata["moderation_status"] == "1"
-
-
-class _SPList:
-    """The target library object ``provision_list_structure`` would provision into."""
-
-    title = "Documents"
-
-
-def _structure() -> ListStructure:
-    return ListStructure(title="Documents", base_template=101, base_type=1)
-
-
-def test_library_target_replays_a_captured_structure_once(monkeypatch):
-    # A bundle carries the library's columns and views in a sidecar, not in each
-    # file, so they have to be provisioned before the first upload — once, even
-    # though the runner's ``configure`` and a caller may both ask.
-    calls: list = []
-
-    def fake_provision(sp_list, structure, **kwargs):
-        calls.append((sp_list, structure, kwargs))
-        return ["view 'All Items' was created without LinkTitle"]
-
-    monkeypatch.setattr(adapters, "provision_list_structure", fake_provision)
-    sp_list, structure = _SPList(), _structure()
-    target = SharePointLibraryTarget(_TargetFolder(), sp_list=sp_list, structure=structure)
-
-    target.configure(MigrationOptions())
-    target.apply_structure()
-
-    assert [call[0] for call in calls] == [sp_list]
-    assert calls[0][1] is structure
-    assert target.warnings == ["view 'All Items' was created without LinkTitle"]

@@ -61,20 +61,6 @@ def _methods(transport: _RecordingTransport) -> list[str]:
     return [request.method for request in transport.requests]
 
 
-def test_service_principal_grant_creates_assignment():
-    client, transport = _client([SHAREPOINT_SP, CLIENT_SP, {"id": "assignment"}])
-
-    client.service_principals.get_by_app_id(SHAREPOINT_APP_ID).grant_application_permissions(
-        CLIENT_APP_ID, "Sites.Selected"
-    ).execute_query()
-
-    assert _methods(transport) == [HttpMethod.Get, HttpMethod.Get, HttpMethod.Post]
-    body = transport.requests[-1].data
-    assert body["principalId"] == CLIENT_SP_ID
-    assert body["resourceId"] == SHAREPOINT_SP_ID
-    assert body["appRoleId"] == ROLE_ID
-
-
 def test_application_grant_resolves_resource_by_name():
     client, transport = _client([APP_LIST, {"value": [SHAREPOINT_SP]}, CLIENT_SP, {"id": "assignment"}])
     app = client.applications.ensure("my-app").execute_query()
@@ -83,16 +69,6 @@ def test_application_grant_resolves_resource_by_name():
 
     assert _methods(transport) == [HttpMethod.Get, HttpMethod.Get, HttpMethod.Get, HttpMethod.Post]
     assert "$filter=displayName eq 'Office 365 SharePoint Online'" in transport.requests[1].url
-
-
-def test_application_revoke_permissions_deletes_the_assignment():
-    client, transport = _client([APP_LIST, GRANTED_SP, CLIENT_SP, {"http_status": 204}])
-    app = client.applications.ensure("my-app").execute_query()
-
-    app.revoke_permissions("Sites.Selected", SHAREPOINT_APP_ID).execute_query()
-
-    assert _methods(transport) == [HttpMethod.Get, HttpMethod.Get, HttpMethod.Get, HttpMethod.Delete]
-    assert transport.requests[-1].url.endswith(f"appRoleAssignedTo/{ASSIGNMENT_ID}")
 
 
 def test_service_principal_revoke_only_removes_the_requested_role():

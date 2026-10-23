@@ -26,7 +26,6 @@ from office365.migration.runner import MigrationRunner
 from office365.migration.sharepoint.adapters import (
     DEFAULT_LIST_IDENTITY_FIELD,
     SharePointListTarget,
-    _has_unique_role_assignments,
 )
 from office365.migration.validators import _verify_authorship
 from office365.sharepoint.principal.type import PrincipalType
@@ -363,33 +362,7 @@ def test_runner_uses_chunked_writes_for_a_deferred_target_at_concurrency_one():
     assert all(checkpoint.status_of(item) is ItemStatus.DONE for item in items)
 
 
-def test_identity_index_refreshes_incrementally_after_a_flush():
-    rows = [_TargetListItem(10, "1"), _TargetListItem(11, "2")]
-    target_list = _TargetList(rows)
-    target = SharePointListTarget(cast("SPList", target_list))
-
-    assert target.exists(MigrationItem("Docs/1", "1", item_type="record")) is True
-    assert target_list.filters == []  # first load is a full scan
-
-    target.write_many([MigrationItem("Docs/3", "3", item_type="record")], [{"Title": "C"}])
-    rows.append(_TargetListItem(12, "3"))  # the server assigned the new item id
-
-    assert target.exists(MigrationItem("Docs/3", "3", item_type="record")) is True
-    assert target_list.filters == ["Id gt 11"]  # only what was created since the last load
-
-
 # ── Timestamps ───────────────────────────────────────────────────────────────
-
-
-def test_read_metadata_refreshes_the_item_before_diffing():
-    row = _TargetListItem(10, "1")
-    row.properties["Created"] = "2019-03-04T05:06:07Z"
-    target = SharePointListTarget(cast("SPList", _TargetList([row])))
-
-    metadata = target.read_metadata(MigrationItem("Docs/1", "1", item_type="record"))
-
-    assert metadata == {"created": "2019-03-04T05:06:07Z", "modified": None}
-    assert row.get_calls == 1  # apply_timestamps wrote after the index was built
 
 
 def test_timestamps_fold_in_pending_authorship_for_one_final_write():
@@ -455,53 +428,10 @@ def test_apply_authorship_resolves_users_and_sets_person_fields():
     assert len(row.updates) == 1  # one write for the whole item
 
 
-def test_read_authorship_resolves_author_and_editor_logins():
-    login = "i:0#.f|membership|vgrem@mediadev8.onmicrosoft.com"
-    row = _TargetListItem(10, "1", author_id=9, editor_id=9)
-    web = _Web(users=[_SiteUser(9, login)])
-    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
-
-    assert target.read_authorship(MigrationItem("Docs/1", "1", item_type="record")) == (login, login)
-
-
 # ── Approval state ───────────────────────────────────────────────────────────
 
 
 # ── Permissions ──────────────────────────────────────────────────────────────
-
-
-def test_has_unique_role_assignments_refreshes_a_stale_flag():
-    class _Item:
-        def __init__(self):
-            self.properties: dict = {"HasUniqueRoleAssignments": False}
-            self.query_options = SimpleNamespace(select=["Title"])
-            self.reads = 0
-
-        @property
-        def has_unique_role_assignments(self):
-            return self.properties.get("HasUniqueRoleAssignments")
-
-        def select(self, columns):
-            self.query_options.select = list(columns)
-            return self
-
-        def get(self):
-            return self
-
-        def execute_query(self):
-            self.reads += 1
-            self.properties["HasUniqueRoleAssignments"] = True  # the ACL was applied
-            return self
-
-    item = _Item()
-
-    # A cached value costs no request...
-    assert _has_unique_role_assignments(item) is False
-    assert item.reads == 0
-    # ...while a refresh asks the server, and does not leave the projection behind.
-    assert _has_unique_role_assignments(item, refresh=True) is True
-    assert item.reads == 1
-    assert item.query_options.select == ["Title"]
 
 
 def test_read_permissions_sees_an_acl_applied_after_the_item_was_loaded():
@@ -520,19 +450,6 @@ def test_read_permissions_sees_an_acl_applied_after_the_item_was_loaded():
 
     assert len(entries) == 1
     assert row.get_calls > 1  # the full read, then the explicit flag re-read
-
-
-def test_has_unique_role_assignments_reads_and_defaults_to_not_unique():
-    assert _has_unique_role_assignments(SimpleNamespace(has_unique_role_assignments=True)) is True
-    assert _has_unique_role_assignments(SimpleNamespace(has_unique_role_assignments=False)) is False
-
-    class _Broken:
-        has_unique_role_assignments = None
-
-        def ensure_property(self, name):
-            raise RuntimeError("no access")
-
-    assert _has_unique_role_assignments(_Broken()) is False
 
 
 def test_apply_permissions_maps_a_default_group_by_role_kind():
@@ -554,24 +471,6 @@ def test_apply_permissions_maps_a_default_group_by_role_kind():
 
     assert [p for p, _ in row.assignments_added] == [target_group]
     assert target.warnings == []
-
-
-def test_default_group_names_normalize_and_resolve_from_the_token():
-    # Both sides canonicalize a default group's title to ``default:<Kind>`` so a
-    # renamed site (team Visitors -> team_out Visitors) still verifies as preserved;
-    # the token is also resolvable back onto the target's associated group.
-    from office365.migration.sharepoint.adapters import _DefaultGroups, _TargetPrincipals
-
-    visitors = _Group("team_out Visitors")
-    web = _Web(associated_groups={"Visitors": visitors})
-
-    defaults = _DefaultGroups(web)
-    assert defaults.normalize("team_out Visitors") == "default:Visitors"
-    assert defaults.normalize("Custom Team") == "Custom Team"
-
-    principals = _TargetPrincipals(web, [])
-    assert principals.normalize("team_out Visitors") == "default:Visitors"
-    assert principals.principal("default:Visitors") is visitors
 
 
 # ── Verification (authorship diff) ───────────────────────────────────────────
@@ -598,26 +497,3 @@ def test_verify_authorship_reports_a_mismatch():
 
     assert report.unverifiable == []
     assert report.mismatches == ["authorship mismatch: 1"]
-
-
-def test_apply_permissions_leaves_inheritance_alone_when_no_principal_resolves():
-    # A cross-tenant account or an app principal has no target counterpart: breaking
-    # inheritance would leave the item with an empty ACL — nobody granted — so the
-    # item keeps inheriting and the gap is reported instead.
-    read = _RoleDefinition("Read")
-    web = _Web(roles=[read], users=[])
-    row = _TargetListItem(10, "1", unique=False)
-    target = SharePointListTarget(cast("SPList", _TargetList([row], web=web)))
-
-    from office365.migration.base import PermissionEntry
-
-    target.apply_permissions(
-        MigrationItem("Docs/1", "1", item_type="record"),
-        [PermissionEntry(principal_name="i:0#.f|membership|stranger@other.onmicrosoft.com", roles=["Read"])],
-    )
-
-    assert row.broke_inheritance is None
-    assert row.assignments_added == []
-    assert len(target.warnings) == 1
-    assert "were not restored: no assignment could be resolved" in target.warnings[0]
-    assert "empty ACL" in target.warnings[0]

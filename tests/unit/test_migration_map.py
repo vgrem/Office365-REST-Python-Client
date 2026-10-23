@@ -27,12 +27,3 @@ def test_resolve_passes_through_unmapped_identifiers():
     assert mapping.resolve("0x0100SOURCE") == "0x0100TARGET"
     assert mapping.resolve("0x01") == "0x01"
     assert mapping.resolve(None) is None
-
-
-def test_to_dict_round_trips():
-    mapping = ContentTypeMap({"0x0100A": "0x0100B"})
-
-    restored = ContentTypeMap.from_dict(mapping.to_dict())
-
-    assert restored.entries == mapping.entries
-    assert ContentTypeMap.from_dict({}).entries == {}

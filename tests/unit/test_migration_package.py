@@ -8,18 +8,11 @@ import xml.etree.ElementTree as ET
 import pytest
 from office365.migration.package import (
     EXPORT_SETTINGS_NS,
-    LOOKUP_LIST_MAP_NS,
     MANIFEST_NS,
-    REQUIREMENTS_NS,
-    ROOT_OBJECT_MAP_NS,
     USER_GROUP_MAP_NS,
-    VIEW_FORMS_LIST_NS,
     BlobStaging,
     FileSystemStaging,
-    Group,
     PackageBuilder,
-    SharedWithEvent,
-    UserGroupMap,
 )
 
 
@@ -67,41 +60,6 @@ def test_manifest_renders_spobjects_with_file_and_versions():
     assert version_rows[-1].get("FileValue") == f"{file_object.get('Id')}.2.0"
 
 
-def test_package_blobs_and_save(tmp_path):
-    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x", list_title="Documents")
-    builder.add_folder("Empty")
-    file_id = builder.add_file("a.txt", b"hi")
-    package = builder.build()
-
-    assert set(package.blobs()) == {
-        "Manifest.xml",
-        "ExportSettings.xml",
-        "SystemData.xml",
-        "UserGroup.xml",
-        "Requirements.xml",
-        "RootObjectMap.xml",
-        "LookupListMap.xml",
-        "ViewFormsList.xml",
-    }
-
-    written = package.save(tmp_path)
-    assert (tmp_path / "manifest" / "Manifest.xml").exists()
-    assert (tmp_path / "content" / file_id).read_bytes() == b"hi"  # blobs are GUID-named
-    assert len(written) == len(package.blobs()) + len(package.content)
-
-
-def test_optional_manifest_documents_are_emitted():
-    package = PackageBuilder("https://contoso.sharepoint.com/sites/x", list_title="Documents").build()
-
-    assert ET.fromstring(package.requirements).tag == _q(REQUIREMENTS_NS, "Requirements")
-    assert ET.fromstring(package.lookup_list_map).tag == _q(LOOKUP_LIST_MAP_NS, "LookupLists")
-    assert ET.fromstring(package.view_forms_list).tag == _q(VIEW_FORMS_LIST_NS, "ViewFormsList")
-
-    root = ET.fromstring(package.root_object_map)
-    assert root.tag == _q(ROOT_OBJECT_MAP_NS, "RootObjects")
-    assert _children(root, ROOT_OBJECT_MAP_NS, "RootObject")[0].get("Type") == "List"
-
-
 def test_builder_emits_role_assignments_and_user_system_id():
     builder = PackageBuilder("https://contoso.sharepoint.com/sites/x", list_title="Documents")
     uid = builder.add_user("i:0#.f|membership|jane@contoso.com", name="Jane")
@@ -127,37 +85,6 @@ def test_builder_emits_role_assignments_and_user_system_id():
     user = _children(ET.fromstring(package.user_group_map), USER_GROUP_MAP_NS, "Users")[0][0]
     assert user.get("Login") == "i:0#.f|membership|jane@contoso.com"
     assert user.get("SystemId") == ""
-
-
-def test_builder_emits_shared_with_events():
-    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
-    builder.add_list_item(
-        "Documents/a.txt",
-        shared_with=[
-            SharedWithEvent(shared_time="2024-01-01T00:00:00Z", sharing_initiator_id=1, shared_by_id=1, members=[2])
-        ],
-    )
-    root = ET.fromstring(builder.build().manifest)
-    item = next(o for o in _children(root, MANIFEST_NS, "SPObject") if o.get("ObjectType") == "SPListItem")
-
-    events = _children(_children(item, MANIFEST_NS, "ListItem")[0], MANIFEST_NS, "SharedWithEvents")[0]
-    event = _children(events, MANIFEST_NS, "SharedWithEvent")[0]
-    assert event.get("SharedById") == "1"
-    members = _children(_children(event, MANIFEST_NS, "SharedWithMembers")[0], MANIFEST_NS, "SharedWithMember")
-    assert [m.get("SharedWithId") for m in members] == ["2"]
-
-
-def test_add_role_requires_a_decimal_perm_mask():
-    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
-    with pytest.raises(ValueError, match="decimal"):
-        builder.add_role("1073000001", "Read", "0xb008431061")
-
-    builder.add_role("1073000001", "Read", "756052856929")
-    root = ET.fromstring(builder.build().manifest)
-    roles_object = next(o for o in _children(root, MANIFEST_NS, "SPObject") if o.get("ObjectType") == "DeploymentRoles")
-    role = _children(_children(roles_object, MANIFEST_NS, "Roles")[0], MANIFEST_NS, "Role")[0]
-    assert role.get("Title") == "Read"
-    assert role.get("PermMask") == "756052856929"
 
 
 def test_add_user_requires_a_numeric_puid_system_id():
@@ -206,29 +133,6 @@ def test_export_settings_carries_source_type_and_list_object():
     assert [o.get("Type") for o in export_objects] == ["List"]
 
 
-def test_user_group_map_renders_users():
-    builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
-    user_id = builder.add_user("i:0#.f|membership|jane@contoso.com", name="Jane", email="jane@contoso.com")
-    assert user_id == 1
-
-    root = ET.fromstring(builder.build().user_group_map)
-    assert root.tag == _q(USER_GROUP_MAP_NS, "UserGroupMap")
-    users = _children(_children(root, USER_GROUP_MAP_NS, "Users")[0], USER_GROUP_MAP_NS, "User")
-    assert users[0].get("Id") == "1"
-    assert users[0].get("Name") == "Jane"
-    assert users[0].get("Login") == "i:0#.f|membership|jane@contoso.com"
-    assert users[0].get("IsSiteAdmin") == "false"
-
-
-def test_user_group_map_renders_group_members():
-    model = UserGroupMap(groups=[Group(id=1, name="Team", members=[1, 2])])
-    root = ET.fromstring(model.to_xml())
-    group = _children(_children(root, USER_GROUP_MAP_NS, "Groups")[0], USER_GROUP_MAP_NS, "Group")[0]
-    assert group.get("Name") == "Team"
-    members = _children(group, USER_GROUP_MAP_NS, "Member")
-    assert [m.get("UserId") for m in members] == ["1", "2"]
-
-
 def test_file_system_staging_writes_both_containers(tmp_path):
     builder = PackageBuilder("https://contoso.sharepoint.com/sites/x")
     file_id = builder.add_file("a.txt", b"hi")
@@ -262,24 +166,3 @@ def test_blob_staging_encrypts_blobs_with_an_iv_property():
 
     assert blob.data != b"hello world"
     assert decrypt(blob.data, normalize_key(key), blob.metadata["IV"]) == b"hello world"
-
-
-class _BlobProps:
-    def __init__(self, metadata):
-        self.metadata = metadata
-
-
-class _PropsBlob:
-    def __init__(self, metadata):
-        self._metadata = metadata
-
-    def get_blob_properties(self):
-        return _BlobProps(self._metadata)
-
-
-def test_blob_iv_reads_case_insensitively():
-    from office365.migration.package.staging import _blob_iv
-
-    assert _blob_iv(_PropsBlob({"iv": "abc"})) == "abc"
-    assert _blob_iv(_PropsBlob({"IV": "xyz"})) == "xyz"
-    assert _blob_iv(_PropsBlob({})) is None

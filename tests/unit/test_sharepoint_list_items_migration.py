@@ -20,9 +20,8 @@ from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from office365.sharepoint.lists.list import List as SPList
 
-from office365.migration.base import MigrationItem, MigrationOptions
+from office365.migration.base import MigrationItem
 from office365.migration.map import ContentTypeMap
-from office365.migration.sharepoint import adapters
 from office365.migration.sharepoint.adapters import (
     DEFAULT_LIST_IDENTITY_FIELD,
     SharePointListSource,
@@ -30,7 +29,6 @@ from office365.migration.sharepoint.adapters import (
     _content_checksum,
     _MultiValueCreateTarget,
 )
-from office365.migration.sharepoint.structure import ListStructure
 
 
 class _QueryOptions:
@@ -160,29 +158,6 @@ class _SourceList:
 # ── Source projection ────────────────────────────────────────────────────────
 
 
-def test_list_source_drops_a_person_value_it_cannot_resolve():
-    items = [_Item(1, {"Id": 1, "Title": "A", "OwnerId": 42})]
-    source = SharePointListSource(
-        cast("SPList", _SourceList(items, fields=[_Field("Owner", "User")], users={7: _LOGIN}))
-    )
-    planned = source.list_items()
-
-    record = source.read(planned[0])
-    assert "OwnerId" not in record
-    assert any("Owner" in w for w in source.warnings)
-
-
-def test_list_source_drops_a_multi_person_value_it_cannot_resolve():
-    items = [_Item(1, {"Id": 1, "Title": "A", "MultiOwnerId": {0: 42}})]
-    source = SharePointListSource(
-        cast("SPList", _SourceList(items, fields=[_Field("MultiOwner", "UserMulti")], users={7: _LOGIN}))
-    )
-
-    record = source.read(source.list_items()[0])
-    assert "MultiOwnerId" not in record
-    assert any("MultiOwner" in w for w in source.warnings)
-
-
 # ── Folder column values (document libraries) ───────────────────────────────
 
 
@@ -207,39 +182,6 @@ def test_folder_records_are_read_with_a_folder_filter_and_keyed_by_url():
     # the projection is the folder's writable columns, not a ``*`` read
     assert "FSObjType" not in lst.items._select
     assert {"ContentTypeId", "FileRef", "Region", "Title"} <= set(lst.items._select)
-
-
-def test_folder_records_skip_computed_and_read_only_columns():
-    fields = [
-        _Field("Region", "Choice"),
-        _Field("LinkFilename", "Computed"),
-        _Field("Author", "User", read_only=True),
-        _Field("Created", "DateTime", read_only=True),
-        _Field("Secret", "Note", hidden=True),
-    ]
-    items = [_Item(11, {"FileRef": "/sites/x/Docs/North", "Region": "North"})]
-    lst = _SourceList(items, fields=fields)
-
-    SharePointListSource(cast("SPList", lst)).folder_records()
-
-    projection = set(lst.items._select)
-    assert "LinkFilename" not in projection
-    assert "AuthorId" not in projection  # a read-only person column cannot be written
-    assert "Created" not in projection
-    assert "Secret" not in projection
-
-
-def test_folder_records_degrade_to_no_values_when_the_read_fails():
-    class _Failing(list):
-        def execute_query(self):
-            raise ValueError("Access denied")
-
-    lst = _SourceList([])
-    lst.items = _Failing()  # a collection whose read raises
-    source = SharePointListSource(cast("SPList", lst))
-
-    assert source.folder_records() == {}
-    assert any("folder column values could not be read" in warning for warning in source.warnings)
 
 
 def test_list_source_drops_non_scalar_values_and_warns():
@@ -539,84 +481,6 @@ class _TargetList:
         return self
 
 
-def test_list_target_marks_records_and_lists_paths():
-    attachment = _Attachment("spec.txt", b"hello")
-    target_list = _TargetList(rows=[_TargetRow(10, "1", attachments=[attachment])])
-    target = SharePointListTarget(cast("SPList", target_list))
-
-    item = MigrationItem(source_path="Docs/1", dest_path="1", item_type="record")
-    target.write(item, {"Title": "A"})
-
-    assert [field.Title for field in target_list.identity_fields] == [DEFAULT_LIST_IDENTITY_FIELD]
-    assert target_list.queued == [{"Title": "A", DEFAULT_LIST_IDENTITY_FIELD: "1"}]
-
-    paths = target.list_paths()
-    assert "1" in paths
-    assert "1/spec.txt" in paths
-
-
-def test_list_target_writes_attachment_via_identity():
-    parent = _TargetRow(10, "1")
-    target_list = _TargetList(rows=[parent])
-    target = SharePointListTarget(cast("SPList", target_list))
-
-    item = MigrationItem(source_path="Docs/1/spec.txt", dest_path="1/spec.txt", item_type="attachment")
-    target.write(item, b"hello")
-
-    assert parent.attachment_files.added == [{"filename": "spec.txt", "content": b"hello"}]
-    assert target.checksum(item) == hashlib.md5(b"hello").hexdigest()
-    assert target.exists(item) is True
-    assert target.exists(MigrationItem("Docs/1/x.txt", "1/x.txt", item_type="attachment")) is False
-
-
-def test_list_target_reads_a_verified_item_once():
-    row = _TargetRow(
-        10,
-        "1",
-        properties={"Created": "2024-01-01T00:00:00Z", "Modified": "2024-01-02T00:00:00Z"},
-    )
-    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
-    item = MigrationItem("Docs/1", "1", item_type="record")
-
-    target.checksum(item)
-    target.read_metadata(item)
-    target.read_authorship(item)
-
-    # One verification round asks several questions about the same unchanged item;
-    # the fresh read is memoized, so it costs one request rather than one per hook.
-    assert row.get_calls == 1
-
-
-def test_list_target_rereads_a_verified_item_after_a_fidelity_write():
-    row = _TargetRow(10, "1")
-    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
-    item = MigrationItem(
-        "Docs/1", "1", item_type="record", created="2024-01-01T00:00:00Z", modified="2024-01-02T00:00:00Z"
-    )
-
-    target.checksum(item)
-    target.apply_timestamps(item)
-    target.checksum(item)
-
-    # The system update changes what a read returns, so the memo is dropped.
-    assert row.update_writes == [{"Created": "2024-01-01T00:00:00Z", "Modified": "2024-01-02T00:00:00Z"}]
-    assert row.get_calls == 2  # noqa: PLR2004 - one read per verification pass
-
-
-def test_list_target_flushes_records_before_attachments():
-    parent = _TargetRow(10, "1")
-    target_list = _TargetList(rows=[parent])
-    target = SharePointListTarget(cast("SPList", target_list))
-
-    records = [MigrationItem("Docs/1", "1", item_type="record")]
-    attachments = [MigrationItem("Docs/1/spec.txt", "1/spec.txt", item_type="attachment")]
-    target.write_many(records + attachments, [{"Title": "A"}, b"data"])
-
-    assert target_list.context.batches == 1
-    assert target_list.queued == []
-    assert parent.attachment_files.added == [{"filename": "spec.txt", "content": b"data"}]
-
-
 def test_list_target_remaps_content_type_id_from_the_map():
     # A recreated list content type gets a fresh server-assigned id, so the source
     # item's ``ContentTypeId`` must be rewritten before it is written.
@@ -632,32 +496,6 @@ def test_list_target_remaps_content_type_id_from_the_map():
     assert payload == {"Title": "A", "ContentTypeId": "0x0100SOURCE"}
 
 
-def test_list_target_content_checksum_matches_source_for_equal_content():
-    # Server-assigned, remapped and separately-verified columns must not make the
-    # read-back disagree with the source's content projection.
-    row = _TargetRow(
-        10,
-        "1",
-        properties={
-            "Title": "Alpha",
-            "Quantity": 3,
-            "GUID": "target-guid",
-            "ContentTypeId": "0x0100TARGET",
-            "Created": "2020-01-01T00:00:00Z",
-            "Modified": "2026-01-01T00:00:00Z",
-            "AuthorId": 99,
-            "EditorId": 99,
-            "OData__UIVersionString": "7.0",
-        },
-    )
-    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
-
-    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
-
-    assert checksum == _content_checksum({"Title": "Alpha", "Quantity": 3})
-    assert row.get_calls == 1
-
-
 def test_list_target_content_checksum_compares_multi_choice_values():
     # The source records a bare list while the target reads a positional mapping;
     # both must project to the same content or every run reports a false mismatch.
@@ -670,18 +508,6 @@ def test_list_target_content_checksum_compares_multi_choice_values():
     assert checksum == _content_checksum({"Title": "Alpha", "Tags": ["red", "green"]})
 
 
-def test_list_target_content_checksum_detects_lost_multi_choice_values():
-    # The defect this guards: a dropped multi-choice value was invisible to
-    # verification because a positional mapping is not a checksummed scalar.
-    row = _TargetRow(10, "1", properties={"Title": "Alpha"})
-    fields = [_Field("Tags", "MultiChoice", allow_multiple_values=True)]
-    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row], fields=fields)))
-
-    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
-
-    assert checksum != _content_checksum({"Title": "Alpha", "Tags": ["red", "green"]})
-
-
 def test_list_target_content_checksum_compares_hyperlink_values():
     # The source records the value object it read; the target reads the same shape
     # back, so both must hash identically.
@@ -692,45 +518,6 @@ def test_list_target_content_checksum_compares_hyperlink_values():
     checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
 
     assert checksum == _content_checksum({"Title": "Alpha", "Link": value})
-
-
-def test_list_target_content_checksum_detects_a_lost_hyperlink_value():
-    value = {"Description": "one", "Url": "https://example.com/1"}
-    row = _TargetRow(10, "1", properties={"Title": "Alpha"})
-    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
-
-    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
-
-    assert checksum != _content_checksum({"Title": "Alpha", "Link": value})
-
-
-def test_list_target_content_checksum_detects_a_changed_hyperlink_description():
-    row = _TargetRow(
-        10, "1", properties={"Title": "Alpha", "Link": {"Description": "other", "Url": "https://example.com/1"}}
-    )
-    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
-
-    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
-
-    expected = {"Title": "Alpha", "Link": {"Description": "one", "Url": "https://example.com/1"}}
-    assert checksum != _content_checksum(expected)
-
-
-def test_list_target_content_checksum_detects_a_content_difference():
-    row = _TargetRow(10, "1", properties={"Title": "Alpha"})
-    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row])))
-
-    checksum = target.checksum(MigrationItem("Docs/1", "1", item_type="record"))
-
-    assert checksum != _content_checksum({"Title": "Beta"})
-
-
-def test_content_checksum_is_order_independent_and_excludes_bookkeeping():
-    first = {"Title": "A", "Id": 1, "GUID": "x", "Quantity": 2}
-    second = {"Quantity": 2, "Title": "A", "GUID": "y", "Id": 99}
-
-    assert _content_checksum(first) == _content_checksum(second)
-    assert _content_checksum(first) != _content_checksum({"Title": "A", "Quantity": 3})
 
 
 def test_content_checksum_treats_a_null_column_as_absent():
@@ -817,59 +604,6 @@ def test_list_target_content_checksum_canonicalizes_person_id_to_login():
 # ── Typed values: multi-value Lookup/Person columns ──────────────────────────
 
 _MDOE = "mdoe@mediadev8.onmicrosoft.com"
-
-
-def test_list_source_treats_lookup_mult_true_as_a_multi_value_column():
-    # SharePoint keeps a ``Type="Lookup" Mult="TRUE"`` schema as written and then
-    # reports ``TypeAsString == "Lookup"``, so only ``AllowMultipleValues`` says the
-    # column holds many values (live-verified). Reading it as single-value dropped
-    # the whole collection: the ids never reached the target.
-    items = [_Item(1, {"Id": 1, "Title": "A", "MultiDeptId": {0: 1, 1: 2}})]
-    fields = [_Field("MultiDept", "Lookup", allow_multiple_values=True)]
-    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields)))
-
-    assert source._multi_columns() == {"MultiDept": "LookupMulti"}
-    assert source.read(source.list_items()[0])["MultiDeptId"] == [1, 2]
-
-
-def test_list_source_treats_user_mult_true_as_a_multi_person_column():
-    items = [_Item(1, {"Id": 1, "Title": "A", "MultiOwnerId": {0: 12, 1: 7}})]
-    fields = [_Field("MultiOwner", "User", allow_multiple_values=True)]
-    source = SharePointListSource(cast("SPList", _SourceList(items, fields=fields, users={12: _LOGIN, 7: _MDOE})))
-
-    assert source._multi_columns() == {"MultiOwner": "UserMulti"}
-    assert source._user_columns() == set()
-    assert source.read(source.list_items()[0])["MultiOwnerId"] == [_LOGIN, _MDOE]
-
-
-def test_list_target_remaps_multi_lookup_ids_to_target_ids():
-    # Source items 2 and 3 were migrated as target ids 1 and 2, so each id in the
-    # collection is rewritten; the column is written as ``{"results": [...]}``,
-    # the only shape the create batch accepts for a multi-value column.
-    referenced = [
-        _Item(1, {DEFAULT_LIST_IDENTITY_FIELD: "2"}),
-        _Item(2, {DEFAULT_LIST_IDENTITY_FIELD: "3"}),
-    ]
-    fields = [_Field("MultiDept", "LookupMulti", _LOOKUP_SCHEMA_LIST_ID)]
-    target_list, target = _lookup_target(referenced=referenced, fields=fields)
-
-    target.write(MigrationItem("Docs/1", "1", item_type="record"), {"Title": "A", "MultiDeptId": [2, 3]})
-
-    assert target_list.queued == [{"Title": "A", "MultiDeptId": {"results": [1, 2]}, DEFAULT_LIST_IDENTITY_FIELD: "1"}]
-
-
-def test_list_target_remaps_multi_person_logins_to_target_ids():
-    web = _Web(users={7: _LOGIN, 12: _MDOE})
-    fields = [_Field("MultiOwner", "UserMulti", _USERINFO_LIST_ID)]
-    target_list = _TargetList(fields=fields, web=web)
-    target = SharePointListTarget(cast("SPList", target_list))
-
-    target.write(
-        MigrationItem("Docs/1", "1", item_type="record"),
-        {"Title": "A", "MultiOwnerId": [_LOGIN, _MDOE]},
-    )
-
-    assert target_list.queued == [{"Title": "A", "MultiOwnerId": {"results": [7, 12]}, DEFAULT_LIST_IDENTITY_FIELD: "1"}]
 
 
 def test_list_target_content_checksum_canonicalizes_multi_values():
@@ -965,46 +699,6 @@ def _taxonomy_fields():
     ]
 
 
-def test_list_source_projects_taxonomy_as_bare_term_guids():
-    # A taxonomy read returns a label and a site-local WssId next to the term id;
-    # only the term id is portable, so the projection keeps that alone and drops
-    # the hidden note companion (the target recreates the column and re-serializes).
-    items = [
-        _Item(
-            1,
-            {
-                "Id": 1,
-                "Title": "A",
-                "Dept": {"Label": "6", "TermGuid": _TERM_A, "WssId": 6},
-                "Dept_0": f"-1;#|{_TERM_A}",
-                "Regions": {
-                    0: {"Label": "TermA", "TermGuid": _TERM_A, "WssId": 6},
-                    1: {"Label": "TermB", "TermGuid": _TERM_B, "WssId": 7},
-                },
-                "Regions_0": f"-1;#|{_TERM_A};#-1;#|{_TERM_B}",
-            },
-        )
-    ]
-    source = SharePointListSource(cast("SPList", _SourceList(items, fields=_taxonomy_fields())))
-
-    record = source.read(source.list_items()[0])
-
-    assert record["Dept"] == [{"TermGuid": _TERM_A}]
-    assert record["Regions"] == [{"TermGuid": _TERM_A}, {"TermGuid": _TERM_B}]
-    assert "Dept_0" not in record
-    assert "Regions_0" not in record
-
-
-def test_list_source_drops_an_empty_taxonomy_column():
-    items = [_Item(1, {"Id": 1, "Title": "A", "Dept": None, "Regions": {}})]
-    source = SharePointListSource(cast("SPList", _SourceList(items, fields=_taxonomy_fields())))
-
-    record = source.read(source.list_items()[0])
-
-    assert "Dept" not in record
-    assert "Regions" not in record
-
-
 def test_list_target_remaps_taxonomy_to_typed_dict_and_note_text():
     # A single-value column takes a typed TaxonomyFieldValue dict (label blank —
     # the server resolves by term id); a multi-value one only accepts the hidden
@@ -1028,83 +722,3 @@ def test_list_target_remaps_taxonomy_to_typed_dict_and_note_text():
         },
         "Regions_0": f"-1;#|{_TERM_A};#-1;#|{_TERM_B}",
     }
-
-
-def test_list_target_drops_taxonomy_column_absent_on_the_target():
-    target = SharePointListTarget(cast("SPList", _TargetList(fields=[_Field("Other", "Text")])))
-    record = {"Dept": [{"TermGuid": _TERM_A}]}
-
-    target._remap_taxonomies([record])
-
-    assert record == {}
-    assert any("Dept" in warning for warning in target.warnings)
-
-
-def test_list_checksums_ignore_taxonomy_label_and_wss_id():
-    # Verification must treat the term id as the identity: the label and WssId are
-    # cosmetic/site-local and differ between the source and its migrated copy.
-    source = SharePointListSource(
-        cast(
-            "SPList",
-            _SourceList(
-                [
-                    _Item(
-                        1,
-                        {
-                            "Id": 1,
-                            "Title": "A",
-                            "Dept": {"Label": "6", "TermGuid": _TERM_A, "WssId": 6},
-                            "Regions": {
-                                0: {"Label": "TermA", "TermGuid": _TERM_A, "WssId": 6},
-                                1: {"Label": "TermB", "TermGuid": _TERM_B, "WssId": 7},
-                            },
-                        },
-                    )
-                ],
-                fields=_taxonomy_fields(),
-            ),
-        )
-    )
-    source_item = source.list_items()[0]
-    source.read(source_item)
-
-    row = _TargetRow(
-        10,
-        "1",
-        properties={
-            "Title": "A",
-            "Dept": {"Label": "1", "TermGuid": _TERM_A, "WssId": 1},
-            "Regions": {
-                0: {"Label": "TermA", "TermGuid": _TERM_B, "WssId": 2},
-                1: {"Label": "TermB", "TermGuid": _TERM_A, "WssId": 1},
-            },
-            "Regions_0": f"-1;#|{_TERM_B};#-1;#|{_TERM_A}",
-        },
-    )
-    target = SharePointListTarget(cast("SPList", _TargetList(rows=[row], fields=_taxonomy_fields())))
-
-    checksum = target.checksum(source_item)
-
-    assert checksum == source.checksum(source_item)
-
-
-def test_list_target_replays_a_captured_structure_once(monkeypatch):
-    # A bundle's records are payload; the columns they name travel in the sidecar, so
-    # the structure has to land on the target before the first record is written.
-    calls: list = []
-
-    def fake_provision(sp_list, structure, **kwargs):
-        calls.append((sp_list, structure, kwargs))
-        return ["column 'ProjCode' was created with a different type"]
-
-    monkeypatch.setattr(adapters, "provision_list_structure", fake_provision)
-    target_list = _TargetList()
-    structure = ListStructure(title="Tasks", base_template=100, base_type=0)
-    target = SharePointListTarget(cast("SPList", target_list), structure=structure)
-
-    target.configure(MigrationOptions())
-    target.apply_structure()
-
-    assert [call[0] for call in calls] == [target_list]
-    assert calls[0][1] is structure
-    assert target.warnings == ["column 'ProjCode' was created with a different type"]

@@ -8,12 +8,10 @@ propagate.
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 from office365.graph_client import GraphClient
 from office365.runtime.client_request_exception import ClientRequestException
-from tests._scripted_transport import AsyncScriptedTransport, ScriptedTransport
+from tests._scripted_transport import ScriptedTransport
 
 _NOT_FOUND = {
     "http_status": 404,
@@ -59,26 +57,3 @@ def test_get_or_none_propagates_non_404_errors():
         team.execute_query()
 
     assert not team.is_loaded
-
-
-def _async_client(payloads):
-    transport = AsyncScriptedTransport(payloads)
-    client = GraphClient()
-    client.pending_request().beforeExecute.clear()
-    client.pending_request()._async_transport = transport
-    return client, transport
-
-
-def test_get_or_none_async_defers_and_tolerates_404():
-    client, transport = _async_client([_NOT_FOUND])
-
-    async def _run():
-        team = client.teams["missing-team"].get_or_none()
-        assert transport.calls == 0  # still deferred
-        await team.execute_query_async()
-        return team
-
-    team = asyncio.run(_run())
-
-    assert not team.is_loaded
-    assert transport.calls == 1

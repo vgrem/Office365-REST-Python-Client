@@ -2,12 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from office365.sharepoint.webhooks.subscription import Subscription
 from office365.sharepoint.webhooks.subscription_information import SubscriptionInformation
-
-
-class _FakeContext:
-    pass
 
 
 def test_subscription_information_expiration_is_utc_z():
@@ -17,12 +12,6 @@ def test_subscription_information_expiration_is_utc_z():
         expirationDateTime=datetime(2026, 1, 1, 12, 0, 0, 123456, tzinfo=timezone.utc),
     )
     assert info.to_json()["expirationDateTime"] == "2026-01-01T12:00:00Z"
-
-
-def test_subscription_expiration_setter_is_utc_z():
-    subscription = Subscription(_FakeContext())
-    subscription.expiration_datetime = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-    assert subscription.properties["expirationDateTime"] == "2026-01-01T12:00:00Z"
 
 
 def _graph_client():
@@ -42,15 +31,3 @@ def test_graph_subscription_add_accepts_resource_path():
         expiration=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
     )
     assert client._queries[-1]._parameters_type["resource"] == "me/drive/root"
-
-
-def test_graph_subscription_expiration_setter_serialises_utc_z():
-    client = _graph_client()
-    subscription = client.subscriptions.add(
-        change_type="updated",
-        notification_url="https://example.com/hook",
-        resource="users",
-        expiration=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
-    )
-    subscription.expiration_datetime = datetime(2027, 2, 2, 9, 0, 0, tzinfo=timezone.utc)
-    assert subscription.to_json()["expirationDateTime"] == "2027-02-02T09:00:00Z"

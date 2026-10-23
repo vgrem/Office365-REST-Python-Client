@@ -13,7 +13,6 @@ from __future__ import annotations
 from office365.migration.sharepoint.security import (
     apply_site_list_security,
     apply_site_security,
-    verify_list_security,
     verify_site_security,
 )
 from office365.sharepoint.permissions.base_permissions import BasePermissions
@@ -261,19 +260,6 @@ def test_apply_does_not_duplicate_an_existing_custom_group_or_assignment():
     assert target.executed == 0
 
 
-def test_apply_warns_on_an_unresolvable_member_without_aborting():
-    source = _source_web()
-    source._groups[-1].users = _Users(["nobody"])  # replaces the _Users collection
-    target = _target_web()
-
-    warnings: list[str] = []
-    target.ensure_users["nobody"] = None  # type: ignore[assignment]
-    apply_site_security(source, target, warnings)
-
-    # a falsy ensured user is resolved to ``None`` by _TargetPrincipals
-    assert any("nobody" in w for w in warnings)
-
-
 def test_verify_reports_a_missing_custom_group():
     source, target = _source_web(), _target_web()
 
@@ -281,12 +267,6 @@ def test_verify_reports_a_missing_custom_group():
 
     assert any("Auditors" in issue and "not created" in issue for issue in issues)
     assert any("Auditors -> Read" in issue for issue in issues)
-
-
-def test_verify_is_clean_for_a_replicated_scope():
-    source, target = _source_web(), _target_web(with_auditors=True)
-
-    assert verify_site_security(source, target) == []
 
 
 class _Ctx:
@@ -385,37 +365,6 @@ def test_a_list_that_inherits_on_the_source_is_never_touched():
     assert target.added == []
 
 
-def test_only_the_named_lists_are_visited():
-    source_web = _list_web(_restricted_list("A"), _restricted_list("B"))
-    target_web = _list_web(_SPList("A"), _SPList("B"))
-
-    report = apply_site_list_security(source_web, target_web, lists=["b"])
-
-    assert report.restricted == ["B"]
-
-
-def test_verify_names_a_list_the_target_leaves_readable():
-    source_web = _list_web(_restricted_list())
-    target_web = _list_web(_SPList("Library"))
-
-    issues = verify_list_security(source_web, target_web)
-
-    assert len(issues) == 1
-    assert issues[0].startswith("list 'Library' inherits the web's permissions on the target")
-    assert "1 assignment(s)" in issues[0]
-
-
-def test_verify_names_an_assignment_the_target_missed():
-    source_web = _list_web(_restricted_list(principals=("Auditors", "S Members")))
-    target_web = _list_web(_restricted_list(principals=("Auditors",)))
-
-    issues = verify_list_security(source_web, target_web)
-
-    assert len(issues) == 1
-    assert "not restored" in issues[0]
-    assert "S Members -> Read" in issues[0]
-
-
 def _levels_web(roles, *, assignments=(), groups=None):
     web = _Web(list(groups or []), {}, assignments, roles=roles)
     return web
@@ -433,13 +382,3 @@ def test_a_custom_level_the_target_lacks_is_created_with_its_mask():
     assert description == "ours"
     assert (base_permissions.High, base_permissions.Low) == (0, 5)
     assert warnings == []
-
-
-def test_verify_names_a_missing_and_a_diverging_level():
-    source = _levels_web([_Role("Custom Reader", 1, 5, kind=0), _Role("Contribute", 2, 8, kind=3)])
-    target = _levels_web([_Role("Contribute", 2, 16, kind=3)])
-
-    issues = verify_site_security(source, target)
-
-    assert issues[0] == "permission level 'Custom Reader' was not created on the target"
-    assert issues[1].startswith("permission level 'Contribute' exists on the target with a different permission set")

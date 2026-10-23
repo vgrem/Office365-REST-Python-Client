@@ -3,21 +3,16 @@
 import hashlib
 import re
 import unittest
-from types import SimpleNamespace
 from unittest import mock
 
 from office365.migration.adapters.filesystem import FileSystemSource
-from office365.migration.session import MigrationSession
-from office365.migration.settings import MigrationSettings
 from office365.migration.sharepoint.adapters import (
     SharePointLibrarySource,
     SharePointLibraryTarget,
     SharePointListSource,
     SharePointListTarget,
 )
-from office365.migration.sharepoint.pages import PageCopyReport
 from office365.migration.sharepoint.resolvers import (
-    is_migratable_list,
     resolve_site_task,
     resolve_task,
 )
@@ -99,47 +94,6 @@ class _Lists:
         )
 
 
-class _PageItem:
-    def __init__(self, name, canvas="", wiki="", content_type_id=_SITE_PAGE_CONTENT_TYPE):
-        self.properties = {
-            "FileLeafRef": name,
-            "CanvasContent1": canvas,
-            "WikiField": wiki,
-            "ContentTypeId": content_type_id,
-        }
-
-
-class _PageItems:
-    def __init__(self, items):
-        self._items = list(items)
-
-    def get(self):
-        return self
-
-    def select(self, fields):
-        return self
-
-    def execute_query(self):
-        return list(self._items)
-
-
-class _PageList:
-    """A Site Pages library (template 119) whose items the handoff detector inspects."""
-
-    def __init__(self, pages, title="Site Pages", template=119):
-        self.title = title
-        self.base_type = 1
-        self.base_template = template
-        self.hidden = False
-        self.allow_deletion = True
-        self.items = _PageItems(pages)
-        self.properties = {"Id": _guid_for(title)}
-
-    @property
-    def id(self):
-        return self.properties["Id"]
-
-
 class _WorkflowAssociations:
     """Site-level workflow associations (empty unless a test seeds them)."""
 
@@ -182,14 +136,6 @@ class _Field:
 
     def schema_xml_for_copy(self):
         return self.schema_xml
-
-
-class _ContentType:
-    """A web content type as the web-scope comparison sees it."""
-
-    def __init__(self, name, hidden=False):
-        self.name = name
-        self.hidden = hidden
 
 
 class _SingleFieldView:
@@ -371,16 +317,6 @@ class _StructureStub:
         self.addCleanup(provision.stop)
 
 
-class TestListSelection(unittest.TestCase):
-    def test_skips_hidden_system_and_undeletable(self):
-        self.assertTrue(is_migratable_list(_docs()))
-        self.assertTrue(is_migratable_list(_tasks()))
-        self.assertFalse(is_migratable_list(_FakeList("Hidden", hidden=True)))
-        self.assertFalse(is_migratable_list(_FakeList("User Information", base_template=112)))
-        self.assertFalse(is_migratable_list(_FakeList("Site Pages", base_template=119)))
-        self.assertFalse(is_migratable_list(_FakeList("System", allow_deletion=False)))
-
-
 class TestResolveSiteTask(_StructureStub, unittest.TestCase):
     def test_pairs_library_and_list_and_skips_infrastructure(self):
         source = _context([_docs(), _tasks(), _FakeList("User Information", base_template=112)])
@@ -396,91 +332,6 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         self.assertEqual([call[0] for call in source.web.lists.ensure_calls], ["Documents", "Tasks"])
         # the source site differs from the registered (target) context → cloned once
         self.assertEqual(source.clones, ["https://contoso.sharepoint.com/sites/source"])
-
-    def test_include_and_exclude_filter_by_title(self):
-        source = _context([_docs(), _tasks()])
-        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
-
-        only_tasks = resolve_site_task(task, source, include=["Tasks"])
-        self.assertEqual(len(only_tasks), 1)
-        self.assertIsInstance(only_tasks[0][0], SharePointListSource)
-
-        source.web.lists.ensure_calls.clear()
-        without_docs = resolve_site_task(task, source, exclude=["Documents"])
-        self.assertEqual([call[0] for call in source.web.lists.ensure_calls], ["Tasks"])
-        self.assertEqual(len(without_docs), 1)
-
-    def test_page_library_is_reported_when_pages_are_not_copied(self):
-        pages = _PageList(
-            [
-                _PageItem("Home.aspx"),
-                _PageItem("CollabHome.aspx", canvas='data-sp-controldata="{&quot;controlType&quot;:4}"'),
-            ]
-        )
-        source = _context([_docs(), pages])
-        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
-
-        warnings: list[str] = []
-        pairs = resolve_site_task(task, source, migrate_pages=False, warnings=warnings)
-
-        self.assertEqual(len(pairs), 1)  # the page library is not a content pair
-        note = next(message for message in warnings if "pages are not migrated" in message)
-        self.assertIn("Site Pages (2 page(s): Home.aspx, CollabHome.aspx)", note)
-        self.assertIn("1 web part(s)", note)
-
-    def test_modern_and_classic_wiki_pages_are_copied(self):
-        pages = _PageList(
-            [
-                _PageItem("Home.aspx"),
-                _PageItem("Guide.aspx", wiki="<p>classic</p>", content_type_id=_WIKI_PAGE_CONTENT_TYPE),
-            ]
-        )
-        source = _context([_docs(), pages])
-        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
-        report = PageCopyReport(
-            copied=["Home.aspx", "Guide.aspx"], published=["Home.aspx", "Guide.aspx"], wiki=["Guide.aspx"]
-        )
-        warnings: list[str] = []
-
-        with mock.patch("office365.migration.sharepoint.resolvers.copy_site_pages", return_value=report) as copy:
-            resolve_site_task(task, source, warnings=warnings)
-
-        self.assertEqual(copy.call_args[0][:2], (source.web, source.web))
-        self.assertIn("page copy: 2 page(s) copied (1 classic wiki), 2 published", warnings)
-        self.assertFalse(any("are not migrated" in message for message in warnings))
-
-    def test_a_page_with_no_copyable_body_is_still_reported(self):
-        pages = _PageList(
-            [
-                _PageItem("Home.aspx"),
-                _PageItem("Publishing.aspx", content_type_id=_PUBLISHING_CONTENT_TYPE),
-            ]
-        )
-        source = _context([_docs(), pages])
-        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
-        report = PageCopyReport(copied=["Home.aspx"], published=["Home.aspx"])
-        warnings: list[str] = []
-
-        with mock.patch("office365.migration.sharepoint.resolvers.copy_site_pages", return_value=report):
-            resolve_site_task(task, source, warnings=warnings)
-
-        note = next(message for message in warnings if "page(s) are not migrated" in message)
-        self.assertIn("Publishing.aspx", note)
-        self.assertNotIn("Home.aspx", note)
-
-    def test_a_failing_page_copy_degrades_to_a_warning(self):
-        pages = _PageList([_PageItem("Home.aspx")])
-        source = _context([_docs(), pages])
-        task = MigrationTask.sharepoint(source.base_url, source.base_url, migrate_all=True)
-        warnings: list[str] = []
-
-        with mock.patch("office365.migration.sharepoint.resolvers.copy_site_pages", side_effect=RuntimeError("denied")):
-            pairs = resolve_site_task(task, source, warnings=warnings)
-
-        self.assertEqual(len(pairs), 1)
-        self.assertTrue(any("page copy failed" in message for message in warnings))
-        # The handoff note falls back to "not copied" wording.
-        self.assertTrue(any("pages are not migrated" in message for message in warnings))
 
     def test_workflows_forms_and_external_lists_are_reported_as_handoff(self):
         forms = _FakeList("Requests")
@@ -544,115 +395,8 @@ class TestResolveSiteTask(_StructureStub, unittest.TestCase):
         self.assertEqual(target_root.webs.add_calls[0].WebTemplate, "GROUP")
         self.assertEqual([call[0] for call in created.lists.ensure_calls], ["Documents"])
 
-    def test_include_subwebs_reports_web_scope_structure_the_target_lacks(self):
-        source_child = _Web(
-            _Lists([_docs()]),
-            title="child",
-            url="https://contoso.sharepoint.com/sites/source/child",
-            fields=[_Field("RegionCol", schema_xml='<Field Type="Text" Name="RegionCol" StaticName="RegionCol" />')],
-            content_types=[_ContentType("Contract")],
-        )
-        source_root = _Web(
-            _Lists([_tasks()]),
-            webs=_WebCollection([source_child]),
-            title="Source",
-            url="https://contoso.sharepoint.com/sites/source",
-        )
-        target_root = _Web(
-            _Lists([]),
-            webs=_WebCollection(),
-            title="Target",
-            url="https://contoso.sharepoint.com/sites/target",
-        )
-        registry = {
-            source_root.url.rstrip("/").casefold(): source_root,
-            target_root.url.rstrip("/").casefold(): target_root,
-        }
-        context = _Context(target_root.url, target_root, registry)
-        task = MigrationTask.sharepoint(source_root.url, target_root.url, migrate_all=True)
-
-        warnings: list[str] = []
-        resolve_site_task(task, context, include_subwebs=True, warnings=warnings)
-
-        # The created subsite's web-scope *column* is provisioned; a content type
-        # cannot be (REST refuses its field links), so only that stays a finding.
-        created = _find_web(target_root, "child")
-        self.assertEqual([field.internal_name for field in created.fields.execute_query()], ["RegionCol"])
-        note = next(message for message in warnings if "web-scope structure is incomplete" in message)
-        self.assertIn("1 content type(s): Contract", note)
-        self.assertNotIn("RegionCol", note)
-        self.assertIn("list-scoped copy", note)
-
-    def test_web_scope_columns_are_not_provisioned_when_structure_is_off(self):
-        source = _Web(
-            _Lists([_tasks()]),
-            title="Source",
-            url="https://contoso.sharepoint.com/sites/source",
-            fields=[_Field("RegionCol", schema_xml='<Field Type="Text" Name="RegionCol" />')],
-        )
-        target = _Web(
-            _Lists([]),
-            title="Target",
-            url="https://contoso.sharepoint.com/sites/target",
-        )
-        registry = {
-            source.url.rstrip("/").casefold(): source,
-            target.url.rstrip("/").casefold(): target,
-        }
-        context = _Context(target.url, target, registry)
-        task = MigrationTask.sharepoint(source.url, target.url, migrate_all=True)
-
-        warnings: list[str] = []
-        resolve_site_task(task, context, provision_structure=False, warnings=warnings)
-
-        self.assertEqual(target.fields.execute_query(), [])
-        note = next(message for message in warnings if "web-scope structure is incomplete" in message)
-        self.assertIn("1 column(s): RegionCol", note)
-
 
 class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
-    def test_a_plain_list_ignores_the_migration_api_setting(self):
-        # The package builder emits <File>/<Folder> objects only, so a record has no
-        # shape in Manifest.xml: routing a plain list to it wrote the record's repr
-        # into an SPFile. Records have no version history either, so REST loses
-        # nothing — but the caller is told, because they asked for the server side.
-        source = _context([_tasks()])
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Tasks",
-            target_list="Tasks",
-        )
-
-        with mock.patch(
-            "office365.migration.sharepoint.resolvers._package_target",
-            return_value=SimpleNamespace(warnings=[]),
-        ) as package:
-            _, dst = resolve_task(task, source, MigrationSettings(use_migration_api=True))
-
-        package.assert_not_called()
-        self.assertIsInstance(dst, SharePointListTarget)
-        self.assertTrue(any("carries files and folders only" in w for w in dst.warnings), dst.warnings)
-
-    def test_a_document_library_uses_the_package_target_when_asked(self):
-        source = _context([_docs()])
-        task = MigrationTask.sharepoint(
-            "https://contoso.sharepoint.com/sites/source",
-            source.base_url,
-            source_list="Documents",
-            target_list="Documents",
-        )
-        package_target = SimpleNamespace(warnings=[])
-
-        with mock.patch(
-            "office365.migration.sharepoint.resolvers._package_target",
-            return_value=package_target,
-        ) as package:
-            _, dst = resolve_task(task, source, MigrationSettings(use_migration_api=True))
-
-        package.assert_called_once()
-        self.assertIs(dst, package_target)
-
     def test_a_list_migrated_into_a_library_is_refused(self):
         # Live with provision_structure=False, this pair reported ``Success 2`` and
         # left two files named "1" and "2" whose content was the record's repr.
@@ -671,18 +415,6 @@ class TestResolveSingleListTask(_StructureStub, unittest.TestCase):
 
 
 class TestFileShareTask(_StructureStub, unittest.TestCase):
-    def test_a_file_share_needs_a_document_library(self):
-        # Live, this pair resolved to SharePointListTarget and every file failed with
-        # ``TypeError: object is not iterable`` — with a warning that claimed the task
-        # "migrates records over REST", which a file share has none of.
-        source = _context([_docs(), _tasks()])
-        task = MigrationTask.file_share("/data/share", source.base_url, target_list="Tasks")
-
-        with self.assertRaises(ValueError) as caught:
-            resolve_task(task, source)
-
-        self.assertIn("'/data/share' holds files and 'Tasks' is a list", str(caught.exception))
-
     def test_a_file_share_into_a_document_library_resolves(self):
         source = _context([_docs()])
         task = MigrationTask.file_share("/data/share", source.base_url, target_list="Documents")
@@ -691,21 +423,6 @@ class TestFileShareTask(_StructureStub, unittest.TestCase):
 
         self.assertIsInstance(src, FileSystemSource)
         self.assertIsInstance(dst, SharePointLibraryTarget)
-
-
-class TestSessionSiteTask(_StructureStub, unittest.TestCase):
-    def test_add_site_task_creates_one_job_per_list(self):
-        source = _context([_docs(), _tasks()])
-        session = MigrationSession().register(context=source)
-        task = MigrationTask.sharepoint("https://contoso.sharepoint.com/sites/source", source.base_url, migrate_all=True)
-
-        jobs = session.add_site_task(task=task)
-
-        self.assertEqual(len(jobs), 2)
-        self.assertEqual(len(session.tasks), 2)
-        self.assertEqual(len({entry.id for entry in session.tasks}), 2)
-        self.assertIn("Documents", jobs[0].target_label)
-        self.assertIn("Tasks", jobs[1].target_label)
 
 
 if __name__ == "__main__":

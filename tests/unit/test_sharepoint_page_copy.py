@@ -3,13 +3,8 @@
 import unittest
 
 from office365.migration.sharepoint.pages import (
-    DUPLICATE_OVERWRITE,
     DUPLICATE_RENAME,
-    DUPLICATE_SKIP,
     PAGE_LIBRARY_TEMPLATE,
-    PagePayload,
-    apply_home_page,
-    apply_page_payload,
     capture_site_pages,
     copy_site_pages,
     detect_page_handoff,
@@ -302,19 +297,6 @@ class TestCaptureSitePages(unittest.TestCase):
         self.assertEqual(payloads[1].to_dict()["wiki_length"], len("<p>wiki</p>"))
 
 
-class TestApplyPagePayload(unittest.TestCase):
-    def test_writes_only_the_values_the_source_carries(self):
-        store = _PageStore({1: {"Id": 1, "FileLeafRef": "A.aspx"}})
-        item = _Item(store, 1)
-
-        apply_page_payload(item, PagePayload(name="A.aspx", canvas="<div>x</div>", title="A"))
-
-        self.assertEqual(item.properties["CanvasContent1"], "<div>x</div>")
-        self.assertEqual(item.properties["Title"], "A")
-        self.assertNotIn("Description", item.properties)
-        self.assertEqual(len(item.updates), 1)
-
-
 class TestCopySitePages(unittest.TestCase):
     def test_copies_a_modern_page_and_publishes_it(self):
         source = _source_web(_page_props("Home.aspx", canvas="<div>home</div>"))
@@ -355,18 +337,6 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(verify_page_copy(source, target), [])
         self.assertIsNone(page_handoff_note(detect_page_handoff(source._lists), modern_copied=True))
 
-    def test_a_classic_wiki_page_can_be_overwritten_in_place(self):
-        source = _source_web(_wiki_page_props("Guide.aspx", "<p>source</p>"))
-        target = _target_web()
-        target.store[1] = {"Id": 1, "FileLeafRef": "Guide.aspx", "WikiField": "<p>target</p>"}
-
-        report = copy_site_pages(source, target, duplicate_behavior=DUPLICATE_OVERWRITE)
-
-        self.assertEqual(report.overwritten, ["Guide.aspx"])
-        self.assertEqual(target.wiki_created, [])
-        self.assertEqual(target.store[1]["WikiField"], "<p>source</p>")
-        self.assertEqual(len(target.store), 1)
-
     def test_a_second_run_finds_its_own_renamed_copy_and_leaves_it_alone(self):
         source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"))
         target = _target_web(_page_props("Home.aspx", canvas="<div>target</div>"))
@@ -383,83 +353,6 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(len(target.store), 2)
         self.assertEqual(second.summary(), "page copy: 1 already copied")
         self.assertEqual(verify_page_copy(source, target), [])
-
-    def test_a_page_with_no_canvas_is_not_copied_again(self):
-        # A created page gets an empty canvas of its own that a copy never writes
-        # over, so an empty body has to count as the copy's identity too.
-        source = _source_web(_page_props("Home.aspx", canvas=""))
-        target = _target_web(_page_props("Home.aspx", canvas="<div>target</div>"))
-
-        first = copy_site_pages(source, target)
-        second = copy_site_pages(source, target)
-
-        self.assertEqual(first.copied, ["Home-1.aspx"])
-        self.assertEqual(second.copied, [])
-        self.assertEqual(second.unchanged, ["Home.aspx"])
-        self.assertEqual(len(target.store), 2)
-        self.assertEqual(verify_page_copy(source, target), [])
-
-    def test_a_page_the_target_already_carries_identically_is_not_copied_again(self):
-        source = _source_web(_page_props("Home.aspx", canvas="<div>same</div>"))
-        target = _target_web(_page_props("Home.aspx", canvas="<div>same</div>"))
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.copied, [])
-        self.assertEqual(report.unchanged, ["Home.aspx"])
-        self.assertEqual(report.renamed, [])
-        self.assertEqual(len(target.store), 1)
-
-    def test_the_home_page_follows_a_copy_an_earlier_run_renamed(self):
-        source = _source_web(
-            _page_props("Welcome.aspx", canvas="<div>source</div>"), welcome_page="SitePages/Welcome.aspx"
-        )
-        target = _target_web(
-            _page_props("Welcome.aspx", canvas="<div>target</div>"), welcome_page="SitePages/Welcome.aspx"
-        )
-        copy_site_pages(source, target)
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.unchanged, ["Welcome.aspx"])
-        self.assertEqual(report.home_page, "SitePages/Welcome-1.aspx")
-        self.assertEqual(target.properties["WelcomePage"], "SitePages/Welcome-1.aspx")
-
-    def test_a_page_without_a_canvas_or_a_wiki_body_is_reported(self):
-        source = _source_web(_page_props("Publishing.aspx", canvas=None, content_type=_PUBLISHING_CONTENT_TYPE))
-        target = _target_web()
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.classic, ["Publishing.aspx"])
-        self.assertTrue(report.is_empty)
-        self.assertEqual(target.store, {})
-        note = page_handoff_note(detect_page_handoff(source._lists), modern_copied=True)
-        self.assertIn("page(s) are not migrated", note)
-        self.assertIn("Publishing.aspx", note)
-
-    def test_duplicate_page_is_renamed_by_default(self):
-        source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"))
-        target = _target_web()
-        target.store[1] = {"Id": 1, "FileLeafRef": "Home.aspx", "CanvasContent1": "<div>target</div>"}
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.copied, ["Home-1.aspx"])
-        self.assertEqual(report.renamed, [("Home.aspx", "Home-1.aspx")])
-        self.assertEqual(target.store[1]["CanvasContent1"], "<div>target</div>")
-        self.assertIn("1 renamed around an existing page", report.summary())
-
-    def test_unknown_duplicate_behavior_falls_back_to_rename(self):
-        source = _source_web(_page_props("Home.aspx"))
-        target = _target_web()
-        target.store[1] = {"Id": 1, "FileLeafRef": "Home.aspx"}
-        warnings: list[str] = []
-
-        report = copy_site_pages(source, target, duplicate_behavior="MOVE", warnings=warnings)
-
-        self.assertEqual(report.copied, ["Home-1.aspx"])
-        self.assertTrue(any("unknown duplicate behavior" in note for note in warnings))
 
     def test_a_draft_page_is_copied_without_publishing(self):
         source = _source_web(_page_props("Draft.aspx", status=3))
@@ -497,27 +390,6 @@ class TestCopySitePages(unittest.TestCase):
         self.assertEqual(report.mismatched, ["Home.aspx"])
         self.assertTrue(any("did not read back their canvas" in note for note in warnings))
 
-    def test_web_part_pages_are_reported(self):
-        source = _source_web(_page_props("News.aspx", canvas=_WEB_PART_CONTROL))
-        target = _target_web()
-        warnings: list[str] = []
-
-        report = copy_site_pages(source, target, warnings=warnings)
-
-        self.assertEqual(report.web_part_pages, ["News.aspx"])
-        self.assertTrue(any("client-side web parts" in note for note in warnings))
-
-    def test_a_target_without_a_page_library_is_reported(self):
-        source = _source_web(_page_props("Home.aspx"))
-        target = _Web(_PageList("Documents", _PageStore(), base_template=101))
-        warnings: list[str] = []
-
-        report = copy_site_pages(source, target, warnings=warnings)
-
-        self.assertTrue(report.is_empty)
-        self.assertEqual(report.classic, [])
-        self.assertTrue(any("no target page library matches" in note for note in warnings))
-
 
 class TestHomePage(unittest.TestCase):
     """A migrated site must open on the copy of the source's home page."""
@@ -532,53 +404,6 @@ class TestHomePage(unittest.TestCase):
         self.assertEqual(target.properties["WelcomePage"], "SitePages/Home.aspx")
         self.assertEqual(target.root_folder.written, {"WelcomePage": "SitePages/Home.aspx"})
         self.assertIn("home page is now SitePages/Home.aspx", report.summary())
-
-    def test_a_renamed_home_page_is_followed(self):
-        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
-        target = _target_web(_page_props("Home.aspx", canvas="<div>other</div>"))
-
-        report = copy_site_pages(source, target)
-
-        self.assertEqual(report.renamed, [("Home.aspx", "Home-1.aspx")])
-        self.assertEqual(report.home_page, "SitePages/Home-1.aspx")
-        self.assertEqual(target.properties["WelcomePage"], "SitePages/Home-1.aspx")
-
-    def test_a_matching_home_page_is_not_rewritten(self):
-        # A re-run that finds the page already there (SKIP) leaves the home page alone.
-        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
-        target = _target_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
-
-        report = copy_site_pages(source, target, duplicate_behavior=DUPLICATE_SKIP)
-
-        self.assertIsNone(report.home_page)
-        self.assertEqual(target.root_folder.written, {})
-        self.assertNotIn("home page", report.summary() or "")
-
-    def test_a_home_page_that_was_not_copied_is_reported(self):
-        source = _source_web(_page_props("Home.aspx"), welcome_page="SitePages/Home.aspx")
-        target = _target_web()
-        notes: list[str] = []
-
-        applied = apply_home_page(source, target, warnings=notes)
-
-        self.assertIsNone(applied)
-        self.assertEqual(target.root_folder.written, {})
-        self.assertEqual(len(notes), 1)
-        self.assertIn("home page 'SitePages/Home.aspx' was not copied", notes[0])
-
-    def test_the_home_page_check_names_a_target_home_that_is_not_the_copy(self):
-        source = _source_web(_page_props("Home.aspx", canvas="<div>source</div>"), welcome_page="SitePages/Home.aspx")
-        target = _target_web(
-            _page_props("Home.aspx", canvas="<div>source</div>"),
-            _page_props("Other.aspx", canvas="<div>target</div>"),
-            welcome_page="SitePages/Other.aspx",
-        )
-
-        notes = verify_page_copy(source, target)
-
-        self.assertEqual(len(notes), 1)
-        self.assertIn("the target's home page is 'SitePages/Other.aspx'", notes[0])
-        self.assertIn("'SitePages/Home.aspx'", notes[0])
 
 
 if __name__ == "__main__":

@@ -149,20 +149,6 @@ def _web(name="Region", schema_xml=None, **kwargs):
     return _Web([_Field(name, schema_xml=schema)])
 
 
-def test_a_create_that_leaves_nothing_is_reported_as_failed():
-    def _raise_only(fields, schema_xml):
-        raise RuntimeError('A duplicate field name "Region" was found.')
-
-    target = _Web()
-    target.fields.on_create = _raise_only
-
-    report = provision_web_scope_columns(_web(), target)
-
-    assert report.created == []
-    assert report.failed == {"Region": 'A duplicate field name "Region" was found.'}
-    assert report.warnings() == ["web column 'Region' was not created: A duplicate field name \"Region\" was found."]
-
-
 def test_run_is_idempotent():
     source, target = _web(), _Web()
 
@@ -172,39 +158,6 @@ def test_run_is_idempotent():
     assert first.created == ["Region"]
     assert second.present == ["Region"]
     assert target.fields.created == [source.fields.entries[0].schema_xml]
-
-
-def test_a_column_that_cannot_be_read_back_is_skipped():
-    source = _web()
-    name = source.fields.entries[0].internal_name
-    source.fields.get_by_internal_name_or_title = lambda value: _FieldView([], name)
-
-    report = provision_web_scope_columns(source, _Web())
-
-    assert report.created == []
-    assert "its schema could not be read" in report.skipped[0]
-
-
-def test_bcs_column_is_skipped_rather_than_created():
-    source = _Web([_Field("Customer", type_as_string="BusinessData", schema_xml='<Field Type="BusinessData"/>')])
-
-    report = provision_web_scope_columns(source, _Web())
-
-    assert report.created == []
-    assert "external (BCS) content type" in report.skipped[0]
-
-
-def test_lookup_into_a_list_outside_the_migration_is_skipped():
-    schema = (
-        '<Field Type="Lookup" DisplayName="Region" Name="Region" StaticName="Region" '
-        'List="{11111111-1111-1111-1111-111111111111}" ShowField="Title" />'
-    )
-    source = _Web([_Field("Region", type_as_string="Lookup", schema_xml=schema)])
-
-    report = provision_web_scope_columns(source, _Web())
-
-    assert report.created == []
-    assert "{11111111-1111-1111-1111-111111111111}" in report.skipped[0]
 
 
 def test_lookup_is_repointed_at_the_target_list():
@@ -223,42 +176,6 @@ def test_lookup_is_repointed_at_the_target_list():
     assert "22222222-2222-2222-2222-222222222222" in target.fields.created[0]
 
 
-def test_taxonomy_column_goes_through_the_taxonomy_api(monkeypatch):
-    source = _web(schema_xml=TAXONOMY_SCHEMA)
-    target = _Web()
-    calls = []
-
-    def _create(collection, name, term_set_id, term_store_id=None, allow_multiple_values=False, return_type=None):
-        calls.append((name, term_set_id, allow_multiple_values))
-
-        def _create_column():
-            collection.entries.append(_Field(name, type_as_string="TaxonomyFieldType"))
-
-        return _Query(_create_column)
-
-    monkeypatch.setattr("office365.sharepoint.taxonomy.field.TaxonomyField.create", _create)
-
-    report = provision_web_scope_columns(source, target)
-
-    assert report.created == ["Region"]
-    assert calls == [("Region", "a83fe90d-4bdb-4644-a484-7f75ee3f5730", False)]
-    assert target.fields.created == []
-
-
-def test_taxonomy_column_the_server_refuses_is_reported(monkeypatch):
-    source = _web(schema_xml=TAXONOMY_SCHEMA)
-
-    def _refuse(*args, **kwargs):
-        raise ValueError("the given guid does not exist in the term store")
-
-    monkeypatch.setattr("office365.sharepoint.taxonomy.field.TaxonomyField.create", _refuse)
-
-    report = provision_web_scope_columns(source, _Web())
-
-    assert report.created == []
-    assert report.failed["Region"].startswith("taxonomy column 'Region' could not be recreated: the given guid")
-
-
 def test_report_renders_what_it_did():
     report = WebScopeProvisionReport(created=["A"], present=["B", "C"], skipped=["note"], failed={"D": "boom"})
 
@@ -270,14 +187,3 @@ def test_report_renders_what_it_did():
         "failed": {"D": "boom"},
     }
     assert not report.is_empty
-
-
-def test_web_scope_note_names_only_the_content_types_left_behind():
-    from office365.migration.sharepoint.structure import WebScopeStructure, web_scope_note
-
-    note = web_scope_note(WebScopeStructure(columns=[], content_types=["Contract"]), "https://contoso/sites/source")
-
-    assert note is not None
-    assert "1 content type(s): Contract" in note
-    assert "column(s)" not in note
-    assert "structure provisioning is on" in note

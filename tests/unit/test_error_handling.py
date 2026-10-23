@@ -8,13 +8,11 @@ unrelated errors (e.g. a rejected content-type field link).
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 from office365.runtime.exceptions import ObjectNotFoundException
 from office365.sharepoint.client_context import ClientContext
 from tests import test_site_url
-from tests._scripted_transport import AsyncScriptedTransport, ScriptedTransport
+from tests._scripted_transport import ScriptedTransport
 
 _NOT_FOUND = {
     "http_status": 404,
@@ -53,18 +51,3 @@ def test_handler_once_is_removed_after_match():
         ctx.web.get().execute_query()
 
     assert len(handled) == 1
-
-
-def test_unmatched_handler_does_not_swallow_async():
-    ctx = ClientContext(test_site_url)
-    ctx.pending_request().beforeExecute.clear()
-    ctx.pending_request()._async_transport = AsyncScriptedTransport([_NOT_FOUND])
-    handled = []
-    ctx.pending_request().on_error(handled.append, condition=lambda: False)
-
-    async def _run():
-        with pytest.raises(ObjectNotFoundException):
-            await ctx.web.get().execute_query_async()
-
-    asyncio.run(_run())
-    assert handled == []

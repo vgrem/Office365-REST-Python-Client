@@ -41,22 +41,6 @@ def _pages(client):
     return client.me.onenote.sections["section-1"].pages
 
 
-def test_add_accepts_html_string():
-    transport = _RecordingTransport([_PAGE])
-    client = _client(transport)
-
-    page = _pages(client).add(presentation_file="<html><head><title>Notes</title></head><body/></html>").execute_query()
-
-    request = transport.requests[-1]
-    assert str(request.method) == "POST"
-    assert request.url.endswith("/onenote/sections/section-1/pages")
-    assert "multipart/form-data; boundary=" in request.headers["Content-Type"]
-    assert b'name="Presentation"' in request.data
-    assert b"text/html" in request.data
-    assert b"<html>" in request.data
-    assert page.get_property("id") == "page-1"
-
-
 def test_add_accepts_bytes_and_named_file_attachments():
     transport = _RecordingTransport([_PAGE])
     client = _client(transport)

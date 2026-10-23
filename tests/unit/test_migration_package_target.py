@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import xml.etree.ElementTree as ET
 
-from office365.migration.base import MigrationItem, MigrationOptions, PermissionEntry, Principal
+from office365.migration.base import MigrationItem, MigrationOptions, PermissionEntry
 from office365.migration.package import FileSystemStaging
 from office365.migration.sharepoint import package_target
 from office365.migration.sharepoint.package_target import SharePointPackageTarget
@@ -67,23 +67,6 @@ def _target(tmp_path, site=None, **kwargs):
     )
 
 
-def test_write_accumulates_files_and_folders(tmp_path):
-    target = _target(tmp_path)
-    target.write(MigrationItem("src/a", "Folder/", item_type="folder"), b"")
-    target.write(MigrationItem("src/b", "Folder/b.txt", item_type="file", created="2020-01-01T00:00:00"), b"hi")
-
-    package = target.build()
-    root = ET.fromstring(package.manifest)
-    assert [o.get("ObjectType") for o in root] == [
-        "SPFolder",
-        "SPDocumentLibrary",
-        "SPFolder",
-        "SPFile",
-        "SPListItem",
-    ]
-    assert len(package.content) == 1
-
-
 def test_commit_stages_and_submits(tmp_path):
     site = _Site()
     target = _target(tmp_path, site=site, azure_queue_report_uri="https://a/queue?sig=z")
@@ -100,19 +83,6 @@ def test_commit_stages_and_submits(tmp_path):
     assert kwargs["azure_queue_report_uri"] == "https://a/queue?sig=z"
     assert (tmp_path / "manifest" / "Manifest.xml").exists()
     assert list((tmp_path / "content").iterdir())  # a content blob was staged
-
-
-def test_commit_uses_encrypted_submit_with_a_key(tmp_path):
-    site = _Site()
-    target = _target(tmp_path, site=site, encryption_key=b"secret")
-    target.write(MigrationItem("src/b.txt", "b.txt", item_type="file"), b"hi")
-
-    target.commit()
-
-    assert target.job_id == "job-2"
-    kind, kwargs = site.calls[0]
-    assert kind == "encrypted"
-    assert kwargs["aes256_cbc_key"] == b"secret"
 
 
 def test_configure_replays_a_captured_structure_once(tmp_path, monkeypatch):
@@ -136,36 +106,6 @@ def test_configure_replays_a_captured_structure_once(tmp_path, monkeypatch):
     assert [call[0] for call in calls] == [sp_list]
     assert calls[0][1] is structure
     assert target.warnings == ["view 'All Items' was created without LinkTitle"]
-
-
-def test_diagnose_falls_back_to_events_without_a_log(tmp_path):
-    target = _target(tmp_path)  # FileSystemStaging has no manifest log
-    target.job_id = "job-1"
-
-    assert target.diagnose() == ["· JobEnd:"]
-
-
-def test_write_registers_author_and_editor_in_usergroup(tmp_path):
-    target = _target(tmp_path)
-    item = MigrationItem(
-        "src/b.txt",
-        "b.txt",
-        item_type="file",
-        author=Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice", "a@contoso.com"),
-        editor=Principal("i:0#.f|membership|b@contoso.com", "2003200065102863", "Bob"),
-    )
-
-    target.write(item, b"hi")
-    package = target.build()
-
-    file_object = next(o for o in ET.fromstring(package.manifest) if o.get("ObjectType") == "SPFile")
-    file_element = file_object.find("{urn:deployment-manifest-schema}File")
-    assert file_element is not None
-    assert file_element.get("Author") == "1"
-    assert file_element.get("ModifiedBy") == "2"
-    user_group = package.user_group_map.decode()
-    assert 'SystemId="1003200065102863"' in user_group
-    assert "i:0#.f|membership|a@contoso.com" in user_group
 
 
 def test_apply_permissions_emits_role_and_assignment(tmp_path):
@@ -205,37 +145,6 @@ def test_apply_permissions_skips_principal_without_a_puid(tmp_path):
 
     assert any("PUID" in w for w in target.warnings)
     assert b"DeploymentRoleAssignments" not in target.build().manifest
-
-
-def test_apply_permissions_grants_a_sharepoint_group_by_title(tmp_path):
-    target = _target(tmp_path)
-    target.configure(MigrationOptions(preserve_permissions=True))
-    item = MigrationItem("src/b.txt", "b.txt", item_type="file")
-    target.write(item, b"hi")
-    target.apply_permissions(
-        item,
-        [
-            PermissionEntry(
-                principal_name="default:members",
-                roles=["Read"],
-                display_name="Test site Members",
-                role_masks={"Read": "756052856929"},
-                principal_type="group",
-                owner=Principal("i:0#.f|membership|a@contoso.com", "1003200065102863", "Alice"),
-            )
-        ],
-    )
-
-    package = target.build()
-    group_map = ET.fromstring(package.user_group_map)
-    groups = [element for element in group_map.iter() if element.tag.endswith("}Group")]
-    assert [group.get("Name") for group in groups] == ["Test site Members"]  # its title, not the normalized name
-    users = [element for element in group_map.iter() if element.tag.endswith("}User")]
-    assert [user.get("SystemId") for user in users] == ["1003200065102863"]  # the owner's PUID
-    assert groups[0].get("Owner") == users[0].get("Id")
-    assert groups[0].get("OwnerIsUser") == "true"
-    assert f'PrincipalId="{groups[0].get("Id")}"' in package.manifest.decode()
-    assert target.warnings == []
 
 
 def test_apply_permissions_writes_a_group_self_owned_when_its_owner_is_unknown(tmp_path):

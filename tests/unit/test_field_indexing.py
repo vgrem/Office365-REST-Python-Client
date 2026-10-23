@@ -16,12 +16,3 @@ def test_field_ensure_indexed_queues_enable():
 
     assert len(ctx._queries) == 1  # enableIndex was queued
     assert field.properties["Indexed"] is False  # only the server flips it
-
-
-def test_list_ensure_indexed_does_not_create_field():
-    ctx = ClientContext(test_site_url)
-    lst = ctx.web.lists.get_by_title("X")
-
-    lst.ensure_indexed("Status")
-
-    assert len(ctx._queries) == 1  # only enableIndex, no create-field

@@ -8,9 +8,7 @@ and ``Store`` must never shadow the payload ``to_json``.
 
 from __future__ import annotations
 
-import pytest
 from office365.onedrive.termstore.store import Store
-from office365.onedrive.termstore.store_manager import StoreManager
 
 # ---------------------------------------------------------------------------
 # Fakes: deferred collections whose ``after_execute`` fires immediately.
@@ -148,20 +146,3 @@ def test_store_import_tree_creates_queued_nodes():
 # ---------------------------------------------------------------------------
 # Naming contract
 # ---------------------------------------------------------------------------
-
-
-def test_store_manager_legacy_names_are_deprecated_aliases():
-    manager = StoreManager(_store_with(_sample_tree()))
-
-    with pytest.warns(DeprecationWarning, match=r"StoreManager\.to_json"):
-        assert manager.to_json().value == EXPECTED_TREE
-
-    with pytest.warns(DeprecationWarning, match=r"StoreManager\.from_json"):
-        assert manager.from_json([{"name": "G"}]) is manager.store
-
-
-def test_store_legacy_from_json_is_a_deprecated_alias():
-    store = _store_with(_FakeGroups())
-
-    with pytest.warns(DeprecationWarning, match=r"Store\.from_json"):
-        assert store.from_json([{"name": "G"}]) is store

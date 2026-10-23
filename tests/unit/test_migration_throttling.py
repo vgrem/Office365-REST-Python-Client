@@ -12,7 +12,6 @@ from office365.migration import MigrationSession, ThrottleMonitor
 from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget
 from office365.migration.job import MigrationJob
 from office365.migration.logging import LOGGER_NAME
-from office365.migration.throttling import _CountingTransport
 from office365.runtime.transport.base import BaseTransport
 
 THROTTLE_AFTER = 10
@@ -100,18 +99,6 @@ def _events(handler, name):
 # ── counting ─────────────────────────────────────────────────────
 
 
-def test_an_ordinary_or_client_error_response_is_not_a_throttle():
-    monitor = ThrottleMonitor()
-    responses = [None, _Response(), _Response(200), _Response(404), _Response(500)]
-
-    for response in responses:
-        monitor.observe(response)
-
-    assert monitor.responses == len(responses)
-    assert monitor.throttled == 0
-    assert monitor.summary() == ""
-
-
 def test_an_http_date_retry_after_is_parsed():
     monitor = ThrottleMonitor()
     when = datetime.now(timezone.utc) + timedelta(seconds=THROTTLE_AFTER)
@@ -123,37 +110,7 @@ def test_an_http_date_retry_after_is_parsed():
 # ── reading ──────────────────────────────────────────────────────
 
 
-def test_reset_clears_the_counters():
-    monitor = ThrottleMonitor()
-    monitor.observe(_Response(TOO_MANY_REQUESTS))
-
-    monitor.reset()
-
-    assert monitor.snapshot() == {
-        "responses": 0,
-        "throttled": 0,
-        "retry_after_s": 0.0,
-        "by_status": {},
-    }
-
-
 # ── wiring ───────────────────────────────────────────────────────
-
-
-def test_attach_counts_the_responses_a_transport_returns():
-    inner = _Transport(_Response(TOO_MANY_REQUESTS, {"Retry-After": "7"}))
-    context = _Context(_Request(inner))
-
-    monitor = ThrottleMonitor().attach(context)
-    wrapped = context.pending_request().transport
-    response = wrapped.execute(object())
-
-    assert isinstance(wrapped, _CountingTransport)
-    assert wrapped.inner is inner
-    assert wrapped.monitor is monitor
-    assert response.status_code == TOO_MANY_REQUESTS
-    assert inner.calls == 1
-    assert monitor.throttled == 1
 
 
 def test_attach_counts_the_async_path_too():

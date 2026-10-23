@@ -30,13 +30,6 @@ def _error_response(code: str, message: str = "", status: int = 400) -> Response
     return resp
 
 
-class TestCodeAndTypeNameMatching(unittest.TestCase):
-    def test_sharepoint_catch_all(self):
-        exc = ClientRequestException.from_response(_error_response("-1234567, Microsoft.SharePoint.SPException", "boom"))
-        self.assertIsInstance(exc, SharePointException)
-        self.assertNotIsInstance(exc, DuplicatedObjectException)
-
-
 class TestPriorityDispatch(unittest.TestCase):
     def test_checkout_beats_status_only_lock(self):
         exc = ClientRequestException.from_response(

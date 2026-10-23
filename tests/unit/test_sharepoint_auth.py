@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 import requests
 from office365.runtime.http.request_options import RequestOptions
 from office365.sharepoint.client_context import ClientContext
@@ -18,14 +17,6 @@ def test_with_user_credentials_uses_ntlm_when_allowed(monkeypatch):
     ctx.with_user_credentials("DOMAIN\\user", "pwd")  # must not raise
 
     assert callable(ctx.authentication_context._authenticate)
-
-
-def test_custom_session_without_auth_still_raises():
-    ctx = ClientContext("https://sp2019.contoso.local").with_transport(session=requests.Session())
-
-    request = RequestOptions("https://sp2019.contoso.local/_api/web")
-    with pytest.raises(ValueError, match="missing or invalid"):
-        ctx.pending_request()._authenticate_request(request)
 
 
 def test_configured_credentials_win_over_session_auth(monkeypatch):

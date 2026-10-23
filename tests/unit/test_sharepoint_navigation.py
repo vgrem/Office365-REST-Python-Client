@@ -124,17 +124,6 @@ def test_apply_creates_missing_nodes_with_rewritten_links():
     assert target.executed == 1
 
 
-def test_apply_only_flips_use_shared_for_an_inheriting_source():
-    source = _Web("https://t/sites/in", _Navigation(use_shared=True, quick_launch=[_Node("X", "/sites/in/x")]))
-    target = _target_web()
-
-    apply_navigation(source, target, [])
-
-    assert target.navigation.use_shared is True
-    assert target.navigation.updates == 1
-    assert [n.title for n in target.navigation.quick_launch.execute_query()] == ["Home", "Recent"]  # untouched
-
-
 def test_verify_reports_missing_and_mismatched_nodes_and_is_clean_when_replicated():
     source, target = _source_web(), _target_web()
 
@@ -146,13 +135,3 @@ def test_verify_reports_missing_and_mismatched_nodes_and_is_clean_when_replicate
 
     target.navigation.quick_launch.execute_query()[0].url = "/sites/team_out/Elsewhere"
     assert any("Home" in i and "expected" in i for i in verify_navigation(source, target))
-
-
-def test_verify_skips_dynamic_nodes_and_reports_inheritance_difference():
-    source = _source_web()
-    target = _Web("https://t/sites/t", _Navigation(use_shared=True, quick_launch=[_Node("Recent", "")]))
-
-    issues = verify_navigation(source, target)
-
-    assert any("use_shared" in i for i in issues)
-    assert not any("'Recent'" in i for i in issues)

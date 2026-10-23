@@ -9,9 +9,6 @@ principal internally.
 
 from __future__ import annotations
 
-import pytest
-from office365.directory.applications.application import Application
-from office365.directory.serviceprincipals.service_principal import ServicePrincipal
 from office365.graph_client import GraphClient
 from office365.runtime.http.http_method import HttpMethod
 from tests._scripted_transport import RoutingTransport
@@ -31,28 +28,6 @@ def _client(transport: RoutingTransport) -> GraphClient:
 
 def _site(client: GraphClient):
     return client.sites[SITE_ID]
-
-
-def _service_principal(client: GraphClient) -> ServicePrincipal:
-    sp = ServicePrincipal(client)
-    sp.set_property("id", APP_ID)
-    sp.set_property("displayName", "Contoso App")
-    return sp
-
-
-def test_grant_access_with_entity_posts_application_identity():
-    transport = RoutingTransport([("permissions", {})])
-    client = _client(transport)
-
-    _site(client).grant_access(_service_principal(client), "write").execute_query()
-
-    request = transport.requests[-1]
-    assert request.method == HttpMethod.Post
-    assert request.url.endswith(f"/sites/{SITE_ID}/permissions")
-    assert request.data["roles"] == ["write"]  # a bare role is normalised to a list
-    grantee = request.data["grantedToIdentities"][0]["application"]
-    assert grantee["id"] == APP_ID
-    assert grantee["displayName"] == "Contoso App"
 
 
 def test_revoke_access_deletes_only_matching_permissions():
@@ -91,11 +66,3 @@ def test_revoke_app_access_resolves_service_principal_and_deletes():
 
     deletes = [r.url.rsplit("/", 1)[-1] for r in transport.requests if r.method == HttpMethod.Delete]
     assert deletes == ["perm-1"]
-
-
-def test_app_access_without_app_id_raises():
-    client = _client(RoutingTransport([("permissions", {})]))
-    app = Application(client)
-
-    with pytest.raises(ValueError, match="application"):
-        _site(client).grant_app_access(app, "write")

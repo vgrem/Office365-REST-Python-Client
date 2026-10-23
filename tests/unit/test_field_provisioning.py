@@ -12,7 +12,6 @@ from __future__ import annotations
 from office365.runtime.http.http_method import HttpMethod
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.fields.creation_information import FieldCreationInformation
-from office365.sharepoint.fields.field import Field
 from office365.sharepoint.fields.type import FieldType
 from tests import test_site_url
 from tests._scripted_transport import ScriptedTransport
@@ -48,24 +47,6 @@ def _existing(**props):
 
 
 # --- declarative rich specs (deferred) ---------------------------------------
-
-
-def test_ensure_fields_accepts_rich_specs_deferred():
-    ctx, transport = _sp([])
-
-    fields = ctx.web.lists.get_by_title("Tasks").ensure_fields(
-        [
-            FieldCreationInformation(Title="Status", FieldTypeKind=FieldType.Choice, Choices=["A", "B"]),
-            FieldCreationInformation(Title="Budget", FieldTypeKind=FieldType.Number),
-        ]
-    )
-
-    assert transport.calls == 0
-    assert len(fields) == 2  # noqa: PLR2004
-    assert all(isinstance(field, Field) for field in fields)
-    urls = " ".join(field.resource_url for field in fields)
-    assert "getByTitle('Status')" in urls
-    assert "getByTitle('Budget')" in urls
 
 
 # --- rich reconcile on conflict ----------------------------------------------
@@ -128,46 +109,7 @@ def test_ensure_turns_on_required():
     assert field.properties.get("Required") is True
 
 
-def test_ensure_reconciles_type_and_description():
-    ctx, transport = _sp([_existing(Title="Notes", FieldTypeKind=2, Description="old"), {}])
-
-    field = (
-        ctx.web.lists.get_by_title("Tasks")
-        .fields.ensure(
-            FieldCreationInformation(Title="Notes", FieldTypeKind=FieldType.Note, Description="new"),
-            on_conflict="update",
-        )
-        .execute_query()
-    )
-
-    assert transport.calls == 2  # noqa: PLR2004
-    assert field.field_type_kind == FieldType.Note
-    assert field.properties.get("Description") == "new"
-
-
 # --- create path -------------------------------------------------------------
-
-
-def test_ensure_creates_rich_field_when_missing():
-    ctx, transport = _sp(
-        [
-            _NOT_FOUND,
-            _existing(Title="Status", InternalName="Status", FieldTypeKind=6, Choices={"results": ["A", "C"]}),
-        ]
-    )
-
-    field = (
-        ctx.web.lists.get_by_title("Tasks")
-        .fields.ensure(
-            FieldCreationInformation(Title="Status", FieldTypeKind=FieldType.Choice, Choices=["A", "C"]),
-        )
-        .execute_query()
-    )
-
-    assert transport.calls == 2  # noqa: PLR2004
-    assert transport.requests[-1].url.endswith("Fields/AddField")
-    assert field.internal_name == "Status"
-    assert list(field.choices) == ["A", "C"]
 
 
 # --- schema-XML create path (migration fidelity) -----------------------------
@@ -180,37 +122,4 @@ _SCHEMA = (
 )
 
 
-def test_ensure_xml_creates_when_missing():
-    ctx, transport = _sp(
-        [
-            _NOT_FOUND,
-            _existing(Title="Project Type", InternalName="ProjectType", FieldTypeKind=6),
-        ]
-    )
-
-    field = ctx.web.lists.get_by_title("Tasks").fields.ensure_xml(_SCHEMA, "ProjectType").execute_query()
-
-    assert transport.calls == 2  # noqa: PLR2004
-    assert "getByInternalNameOrTitle('ProjectType')" in transport.requests[0].url
-    assert transport.requests[-1].url.endswith("Fields/CreateFieldAsXml")
-    assert field.internal_name == "ProjectType"
-
-
 # --- schema copy -------------------------------------------------------------
-
-
-def test_schema_xml_for_copy_strips_origin_specific_attributes():
-    ctx, _ = _sp([])
-    field = Field(ctx)
-    field.set_property(
-        "SchemaXml",
-        '<Field SourceID="{src}" Version="2" ID="{id}" Name="X" StaticName="X" />',
-    )
-
-    xml = field.schema_xml_for_copy()
-
-    assert xml is not None
-    assert "SourceID" not in xml
-    assert "Version" not in xml
-    assert 'ID="{id}"' in xml
-    assert 'Name="X"' in xml

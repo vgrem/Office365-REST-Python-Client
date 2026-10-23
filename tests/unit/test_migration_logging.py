@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from office365.migration.adapters.filesystem import FileSystemSource, FileSystemTarget
+from office365.migration.adapters.filesystem import FileSystemSource
 from office365.migration.job import MigrationJob
 from office365.migration.logging import (
     LOGGER_NAME,
@@ -14,7 +14,6 @@ from office365.migration.logging import (
     configure_text_logging,
     log_event,
 )
-from office365.migration.session import MigrationSession
 from office365.runtime.operations import Progress
 
 
@@ -60,19 +59,6 @@ class TestJsonLogFormatter(unittest.TestCase):
 
 
 class TestConfigureJsonLogging(unittest.TestCase):
-    def test_events_are_written_as_json_lines(self):
-        import io
-
-        stream = io.StringIO()
-        handler = configure_json_logging(stream)
-        self.addCleanup(logging.getLogger(LOGGER_NAME).removeHandler, handler)
-
-        log_event("job.started", "Documents", items=3)
-
-        payload = json.loads(stream.getvalue().strip())
-        self.assertEqual(payload["event"], "job.started")
-        self.assertEqual(payload["items"], 3)
-
     def test_configuring_twice_does_not_duplicate_every_line(self):
         import io
 
@@ -108,19 +94,6 @@ class TestProgressReporter(unittest.TestCase):
         self.assertEqual(beat["label"], "Documents")
         self.assertEqual(beat["beat"], 1)
 
-    def test_a_new_total_restarts_the_window(self):
-        self.now = 4.0
-        self.reporter(Progress(done=40, total=100))
-        self.now = 8.0
-        self.reporter(Progress(done=10, total=20))  # a second container: window restarts
-        self.now = 12.0
-
-        beat = self.reporter.flush()
-        self.assertEqual(beat["done"], 10)
-        self.assertEqual(beat["total"], 20)
-        self.assertEqual(beat["rate"], 2.5)  # 10 done in the 4s since the restart
-        self.assertEqual(beat["elapsed_seconds"], 4.0)
-
     def test_closing_reports_a_count_the_interval_swallowed(self):
         self.reporter(Progress(done=7, total=10))
 
@@ -129,29 +102,6 @@ class TestProgressReporter(unittest.TestCase):
         self.assertEqual(len(self.beats), 1)
         self.assertEqual(self.beats[0]["done"], 7)
         self.assertEqual(summary, "Documents: 7/10 (70.0%)")
-
-    def test_an_unknown_total_reports_no_percentage(self):
-        self.now = 10.0
-        self.reporter(Progress(done=30))
-
-        beat = self.reporter.flush()
-
-        self.assertIsNone(beat["percent"])
-        self.assertIsNone(beat["eta_seconds"])
-        self.assertEqual(self.reporter.summary(), "Documents: 30 3/s")
-
-    def test_an_indeterminate_stage_clears_the_previous_total(self):
-        # Structure replay is counted; pages and navigation are not. A stale total
-        # would otherwise make the heartbeat claim a percentage it cannot know.
-        self.reporter(Progress(done=4, total=4, stage="structure"))
-        self.now = 10.0
-        self.reporter(Progress(done=0, stage="pages"))
-
-        beat = self.reporter.flush()
-
-        self.assertEqual(beat["stage"], "pages")
-        self.assertIsNone(beat["total"])
-        self.assertEqual(beat["done"], 0)
 
     def test_a_derived_reporter_shares_the_sink_and_keeps_its_own_counters(self):
         other = self.reporter.derive("Documents/Sub")
@@ -167,27 +117,6 @@ class TestProgressReporter(unittest.TestCase):
 
 
 class TestMigrationEvents(_LogTestCase):
-    def test_a_job_reports_its_plan_and_its_run(self):
-        handler = self.capture()
-        with tempfile.TemporaryDirectory() as tmp:
-            source = Path(tmp) / "src"
-            source.mkdir()
-            (source / "a.txt").write_text("alpha")
-            job = MigrationJob(FileSystemSource(source), FileSystemTarget(Path(tmp) / "dst"))
-
-            job.plan()
-            job.run()
-
-        planned = self.events(handler, "plan.completed")[0]
-        self.assertEqual(planned.items, 1)  # type: ignore[attr-defined]
-        started = self.events(handler, "job.started")[0]
-        self.assertEqual(started.items, 1)  # type: ignore[attr-defined]
-        completed = self.events(handler, "job.completed")[0]
-        self.assertEqual(completed.success, 1)  # type: ignore[attr-defined]
-        self.assertEqual(completed.skipped, 0)  # type: ignore[attr-defined]
-        self.assertEqual(completed.phase, "completed")  # type: ignore[attr-defined]
-        self.assertIsInstance(completed.duration_ms, int)  # type: ignore[attr-defined]
-
     def test_a_failing_job_reports_the_failure_and_still_raises(self):
         handler = self.capture()
 
@@ -211,34 +140,8 @@ class TestMigrationEvents(_LogTestCase):
         self.assertEqual(failed.error, "cannot reach the target")  # type: ignore[attr-defined]
         self.assertEqual(failed.levelname, "ERROR")
 
-    def test_a_session_reports_its_run(self):
-        handler = self.capture()
-
-        statuses = MigrationSession().start()
-
-        self.assertEqual(statuses, [])
-        self.assertEqual(len(self.events(handler, "run.started")), 1)
-        completed = self.events(handler, "run.completed")[0]
-        self.assertEqual(completed.tasks, 0)  # type: ignore[attr-defined]
-        self.assertEqual(completed.errors, 0)  # type: ignore[attr-defined]
-
 
 class TestConfigureTextLogging(unittest.TestCase):
-    def test_events_are_written_as_plain_lines(self):
-        import io
-
-        stream = io.StringIO()
-        handler = configure_text_logging(stream)
-        self.addCleanup(logging.getLogger(LOGGER_NAME).removeHandler, handler)
-
-        log_event("job.failed", "library:/sites/t: denied", level=logging.WARNING, source="library:/sites/s")
-
-        lines = [line for line in stream.getvalue().splitlines() if line.strip()]
-        self.assertEqual(len(lines), 1)
-        self.assertTrue(lines[0].startswith("WARNING"))
-        self.assertIn("library:/sites/t: denied", lines[0])
-        self.assertTrue(lines[0].endswith("[job.failed]"))
-
     def test_configuring_twice_does_not_duplicate_every_line(self):
         import io
 

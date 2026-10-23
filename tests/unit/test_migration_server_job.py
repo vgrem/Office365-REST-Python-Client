@@ -62,35 +62,6 @@ def test_submit_and_submit_encrypted_use_the_right_methods():
     assert kwargs["aes256_cbc_key"] == b"key"
 
 
-def test_status_fn_accumulates_pages():
-    pages = [
-        (
-            [
-                json.dumps({"Event": "JobStart"}),
-                json.dumps({"Event": "JobProgress", "ObjectsProcessed": "2", "TotalExpectedSPObjects": "5"}),
-            ],
-            "1",
-        ),
-        (
-            [
-                json.dumps(
-                    {
-                        "Event": "JobEnd",
-                        "ObjectsProcessed": "5",
-                        "TotalExpectedSPObjects": "5",
-                        "TotalErrors": "0",
-                    }
-                )
-            ],
-            "2",
-        ),
-    ]
-    status = MigrationServerJob(_Site(pages)).status_fn()
-
-    assert status("job-1") == ("processing", 2, 5)
-    assert status("job-1") == ("succeeded", 5, 5)
-
-
 def test_monitor_returns_when_terminal():
     pages = [([json.dumps({"Event": "JobEnd", "TotalErrors": "0"})], "1")]
     assert MigrationServerJob(_Site(pages)).monitor("job-1", interval=0, timeout=5) == "succeeded"
@@ -130,21 +101,3 @@ def test_status_fn_async_accumulates_pages():
         return await status("job-1"), await status("job-1")
 
     assert asyncio.run(_run()) == (("processing", 2, 5), ("succeeded", 5, 5))
-
-
-def test_monitor_async_returns_when_terminal():
-    pages = [([json.dumps({"Event": "JobEnd", "TotalErrors": "0"})], "1")]
-
-    async def _run():
-        return await MigrationServerJob(_Site(pages)).monitor_async("job-1", interval=0, timeout=5)
-
-    assert asyncio.run(_run()) == "succeeded"
-
-
-def test_errors_async_returns_job_error_events():
-    pages = [([json.dumps({"Event": "JobError", "Message": "boom"})], "1")]
-
-    async def _run():
-        return await MigrationServerJob(_Site(pages)).errors_async("job-1")
-
-    assert [e["Message"] for e in asyncio.run(_run())] == ["boom"]

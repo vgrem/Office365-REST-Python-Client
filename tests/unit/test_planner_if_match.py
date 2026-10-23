@@ -8,8 +8,6 @@ pin both behaviours without touching the network.
 
 from __future__ import annotations
 
-from urllib.parse import unquote_plus
-
 from office365.graph_client import GraphClient
 from office365.runtime.http.http_method import HttpMethod
 from tests._scripted_transport import ScriptedTransport
@@ -63,25 +61,6 @@ def test_plan_update_sends_if_match_and_refreshes_etag():
     assert plan.properties.get("__etag") == 'W/"etag-2"'
 
 
-def test_consecutive_updates_track_the_latest_etag():
-    client, transport = _client(
-        [
-            {"http_status": 200, "headers": {"ETag": ETAG}, "body": PLAN},
-            {"http_status": 200, "headers": {"ETag": 'W/"etag-2"'}, "body": {"id": "p1"}},
-            {"http_status": 200, "headers": {"ETag": 'W/"etag-3"'}, "body": {"id": "p1"}},
-        ]
-    )
-    plan = client.planner.plans["p1"].get().execute_query()
-
-    plan.title = "First"
-    plan.update().execute_query()
-    plan.title = "Second"
-    plan.update().execute_query()
-
-    assert transport.requests[-2].headers.get("If-Match") == ETAG
-    assert transport.requests[-1].headers.get("If-Match") == 'W/"etag-2"'
-
-
 def test_plan_delete_sends_if_match():
     client, transport = _client(
         [
@@ -96,61 +75,6 @@ def test_plan_delete_sends_if_match():
     delete = transport.requests[-1]
     assert delete.method == HttpMethod.Delete
     assert delete.headers.get("If-Match") == ETAG
-
-
-def test_nested_bucket_add_posts_to_top_level_endpoint():
-    client, transport = _client(
-        [
-            {"http_status": 200, "headers": {}, "body": PLAN},
-            {
-                "http_status": 201,
-                "headers": {"ETag": 'W/"b1"'},
-                "body": {"id": "b1", "name": "Backlog", "planId": "p1"},
-            },
-        ]
-    )
-    plan = client.planner.plans["p1"].get().execute_query()
-
-    bucket = plan.buckets.add("Backlog").execute_query()
-
-    create = transport.requests[-1]
-    assert create.method == HttpMethod.Post
-    assert create.url.endswith("/planner/buckets")
-    assert create.data["name"] == "Backlog"
-    assert create.data["planId"] == "p1"
-    assert bucket.resource_path.to_url().endswith("/planner/buckets/b1")
-
-
-def test_listed_bucket_update_targets_top_level_item_path():
-    client, transport = _client(
-        [
-            {"http_status": 200, "headers": {}, "body": PLAN},
-            {
-                "http_status": 200,
-                "headers": {},
-                "body": {"value": [{"id": "b1", "name": "Backlog", "@odata.etag": 'W/"b1"'}]},
-            },
-            {
-                "http_status": 200,
-                "headers": {"ETag": 'W/"b2"'},
-                "body": {"id": "b1", "name": "Backlog (renamed)"},
-            },
-        ]
-    )
-    plan = client.planner.plans["p1"].get().execute_query()
-
-    listed = plan.buckets.get().execute_query()
-    listed_bucket = list(listed)[0]
-    assert "/planner/plans/p1/buckets" in unquote_plus(transport.requests[-1].url)
-
-    listed_bucket.name = "Backlog (renamed)"
-    listed_bucket.update().execute_query()
-
-    patch = transport.requests[-1]
-    assert patch.method == HttpMethod.Patch
-    assert patch.url.endswith("/planner/buckets/b1")
-    assert patch.headers.get("If-Match") == 'W/"b1"'
-    assert listed_bucket.properties.get("__etag") == 'W/"b2"'
 
 
 def test_nested_task_add_posts_to_top_level_endpoint():

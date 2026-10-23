@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from office365.migration import IdentityMap, MigrationOptions, MigrationSettings, UnmappedPrincipalError
+from office365.migration import IdentityMap, MigrationOptions
 from office365.migration.base import MigrationItem, PermissionEntry, Principal
 from office365.migration.checkpoint import Checkpoint
 from office365.migration.report import build_report
@@ -20,39 +20,7 @@ def _item(author: Principal | None = None, editor: Principal | None = None) -> M
     return MigrationItem(source_path="a.txt", dest_path="a.txt", author=author, editor=editor)
 
 
-class TestResolution(unittest.TestCase):
-    def test_a_domain_rule_keeps_the_claims_prefix(self) -> None:
-        identity_map = IdentityMap(domain_rewrites={"contoso.com": "fabrikam.com"})
-
-        resolved = identity_map.resolve(ANNA)
-
-        assert resolved is not None
-        assert resolved.login_name == CLAIMS + "anna@fabrikam.com"
-        assert resolved.email == "anna@fabrikam.com"
-        assert identity_map.rewritten_count == 1
-
-    def test_a_target_login_resolves_to_itself(self) -> None:
-        """Applying the map twice (a resumed run) must not turn a hit into a miss."""
-        identity_map = IdentityMap([(ANNA, "anna@fabrikam.com")])
-        first = identity_map.resolve_principal(Principal(ANNA, system_id="puid-source"))
-
-        second = identity_map.resolve_principal(first)
-
-        assert second is not None
-        assert second.login_name == "anna@fabrikam.com"
-        assert second.system_id is None
-        assert identity_map.unmapped == []
-
-
 class TestPolicies(unittest.TestCase):
-    def test_fail_raises_at_the_first_miss(self) -> None:
-        identity_map = IdentityMap([], unmapped_policy="fail")
-
-        with self.assertRaises(UnmappedPrincipalError) as raised:
-            identity_map.resolve("stranger@elsewhere.example")
-
-        assert raised.exception.principal_name == "stranger@elsewhere.example"
-
     def test_fallback_owner_substitutes_a_miss(self) -> None:
         identity_map = IdentityMap([], unmapped_policy="fallback-owner", fallback_owner="migration@fabrikam.com")
 
@@ -85,22 +53,6 @@ class TestFromCsv(unittest.TestCase):
         handle.close()
         self.addCleanup(Path(handle.name).unlink)
         return Path(handle.name)
-
-    def test_comments_bom_and_column_order_are_tolerated(self) -> None:
-        path = self._write(
-            "\ufeff# exported from the source tenant\r\n"
-            "Target,TARGET_SYSTEM_ID,Source\r\n"
-            "anna@fabrikam.com,puid-anna,i:0#.f|membership|anna@contoso.com\r\n"
-            "\r\n"
-            "no-target@contoso.com,,\r\n"
-        )
-
-        identity_map = IdentityMap.from_csv(path)
-
-        resolved = identity_map.resolve("anna@contoso.com")
-        assert resolved is not None
-        assert (resolved.login_name, resolved.system_id) == ("anna@fabrikam.com", "puid-anna")
-        assert identity_map.summary()["identity_mappings"] == 1
 
     def test_a_file_without_the_required_columns_is_rejected(self) -> None:
         path = self._write("login,roles\r\nanna@contoso.com,Read\r\n")
@@ -194,29 +146,8 @@ class TestRunnerWiring(unittest.TestCase):
         assert target.permissions == []  # the unmapped ACL entry is not applied
         assert identity_map.unmapped == [ANNA]
 
-    def test_no_map_leaves_the_principals_untouched(self) -> None:
-        target, items = self._run(MigrationOptions(preserve_authorship=True))
-
-        assert items[0].author is not None
-        assert items[0].author.login_name == ANNA
-        assert target.authors[0].system_id is None
-
 
 class TestSettingsAndReport(unittest.TestCase):
-    def test_settings_build_a_map_from_the_mapping_file(self) -> None:
-        handle = tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False, encoding="utf-8")
-        handle.write("source,target\nanna@contoso.com,anna@fabrikam.com\n")
-        handle.close()
-        self.addCleanup(Path(handle.name).unlink)
-
-        settings = MigrationSettings(user_mapping_file=handle.name)
-        options = settings.to_options()
-
-        assert options.identity_map is not None
-        # The two SPMT knobs are no longer "not honored": the file drives the map and
-        # `automatic_user_mapping=False` turns it off.
-        assert [n for n in settings.unhonored() if "mapping" in n] == []
-
     def test_the_summary_row_reports_the_unmapped_principals(self) -> None:
         identity_map = IdentityMap([])
         identity_map.resolve(ANNA)

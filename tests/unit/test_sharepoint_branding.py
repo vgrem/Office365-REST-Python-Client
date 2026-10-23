@@ -1,7 +1,6 @@
 """Web branding: rebase the source's paths, copy only what the target can resolve."""
 
 from office365.migration.sharepoint.branding import (
-    WebBranding,
     apply_web_branding,
     verify_web_branding,
 )
@@ -71,23 +70,6 @@ class _Web:
         return _Request()
 
 
-def test_capture_projects_the_carried_properties():
-    web = _Web(MasterUrl=SOURCE_MASTER, SiteLogoUrl="", AlternateCssUrl=None)
-
-    branding = WebBranding.capture(web)
-
-    assert web.selected == [
-        "ServerRelativeUrl",
-        "SiteLogoUrl",
-        "AlternateCssUrl",
-        "MasterUrl",
-        "CustomMasterUrl",
-        "ThemedCssFolderUrl",
-    ]
-    assert branding.master_url == SOURCE_MASTER
-    assert branding.site_logo_url == ""
-
-
 def test_apply_rebases_the_source_paths_onto_the_target():
     source = _Web(
         "/sites/team_in",
@@ -113,43 +95,6 @@ def test_apply_rebases_the_source_paths_onto_the_target():
         "branding: copied AlternateCssUrl, CustomMasterUrl, MasterUrl, SiteLogoUrl onto "
         "https://contoso.sharepoint.com/sites/team_out"
     )
-
-
-def test_apply_skips_a_master_page_the_target_does_not_have():
-    source = _Web("/sites/team_in", MasterUrl="/sites/team_in/_catalogs/masterpage/custom.master")
-    target = _Web()
-
-    report = apply_web_branding(source, target)
-
-    assert not report.changed
-    assert target.written == {}
-    assert report.skipped == {"MasterUrl": "the target has no /sites/team_out/_catalogs/masterpage/custom.master"}
-    assert report.summary() == (
-        "branding: https://contoso.sharepoint.com/sites/team_out keeps its own MasterUrl — "
-        "the target has no /sites/team_out/_catalogs/masterpage/custom.master"
-    )
-
-
-def test_apply_skips_a_theme_folder_the_target_does_not_have():
-    source = _Web("/sites/team_in", ThemedCssFolderUrl="/sites/team_in/_catalogs/theme/15")
-    target = _Web()
-
-    report = apply_web_branding(source, target)
-
-    assert report.skipped == {"ThemedCssFolderUrl": "the target has no /sites/team_out/_catalogs/theme/15"}
-    assert "ThemedCssFolderUrl" not in target.written
-
-
-def test_apply_clears_a_logo_and_css_the_source_lacks():
-    # A web always has a master page, but a logo and an alternate CSS can be unset,
-    # and an unset source value has to clear the target's (these reject ``null``).
-    source = _Web("/sites/team_in")
-    target = _Web(SiteLogoUrl="/sites/team_out/SiteAssets/old.png", AlternateCssUrl="/sites/team_out/a.css")
-
-    report = apply_web_branding(source, target)
-
-    assert report.applied == {"SiteLogoUrl": "", "AlternateCssUrl": ""}
-    assert target.written == {"SiteLogoUrl": "", "AlternateCssUrl": ""}
 
 
 def test_apply_is_idempotent():
