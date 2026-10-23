@@ -330,6 +330,8 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   `event_ics`, `event_create_payload`, `event_dest_path`, `event_dedup_key`,
   `event_digest`, `event_dropped_attendees`, `event_transaction_id`, `event_key` — which
   is what the adapters call and what callers outside this package already import.
+  `event_create_payload` alone also takes the `context` its `Event` lives in: the body is
+  spelled by the model, and a `ClientObject` is a handle that does not exist without one.
   `ContactRecord` stays: unlike the calendar record it never re-spelled anything (its
   payload has been the model's JSON since `fa2977db9`), so it is a payload plus its
   derived artefacts rather than a second vocabulary. The digest is unchanged

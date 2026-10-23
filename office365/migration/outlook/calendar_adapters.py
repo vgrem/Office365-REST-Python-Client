@@ -328,11 +328,11 @@ class CalendarTarget(DataTarget):
         """
         if item.item_type != "event":
             raise ValueError(f"a calendar imports events, not {item.item_type!r} ({item.dest_path})")
+        collection = self._calendar.events
         try:
-            body = event_create_payload(item.metadata or {}, self._options)
+            body = event_create_payload(item.metadata or {}, self._options, context=collection.context)
         except ValueError as e:
             raise ValueError(f"{item.dest_path}: {e}") from None
-        collection = self._calendar.events
         event = collection.create_typed_object()
         collection.context.add_query(CreateEntityQuery(collection, body, event))
         try:

@@ -630,15 +630,51 @@ class _Drafted(Entity):
 class TestAPropertyTheServiceOwns(unittest.TestCase):
     def test_it_is_read_from_a_response_and_never_written_back(self):
         """A response carries the id the service assigned; a request must not claim it."""
-        target = _Drafted(None)  # type: ignore[arg-type]
+        target = _Drafted(GraphClient())
         V4JsonFormat().hydrate(target, {"subject": "Q1", "iCalUId": "0400"}, persist_changes=True)
 
         self.assertEqual({"subject": "Q1"}, target.to_json(V4JsonFormat("none")))
         self.assertEqual({"subject": "Q1", "iCalUId": "0400"}, target.to_json())
 
     def test_a_response_is_not_a_draft_and_marks_nothing(self):
-        target = _Drafted(None)  # type: ignore[arg-type]
+        target = _Drafted(GraphClient())
         V4JsonFormat().hydrate(target, {"subject": "Q1"})
 
         self.assertEqual({}, target.to_json(V4JsonFormat("none")))
         self.assertEqual({"subject": "Q1"}, target.to_json())
+
+
+class TestReadingAPayloadTheCallerAlreadyHasAnObjectFor(unittest.TestCase):
+    """``hydrate`` is the mirror of ``to_json``: the payload is the whole record."""
+
+    def test_it_reads_every_value_the_payload_says(self):
+        """A payload read as content is not a response: nothing is left unmarked."""
+        target = _Drafted(GraphClient()).hydrate({"subject": "Q1", "iCalUId": "0400"}, V4JsonFormat())
+
+        self.assertEqual({"subject": "Q1"}, target.to_json(V4JsonFormat("none")))
+        self.assertEqual({"subject": "Q1", "iCalUId": "0400"}, target.to_json())
+
+    def test_it_fills_the_object_the_caller_made_and_keeps_its_place(self):
+        """The object exists before the payload does — reading does not relocate it."""
+        context = GraphClient()
+        target = _Drafted(context)
+
+        self.assertIs(target, target.hydrate({"subject": "Q1"}, V4JsonFormat()))
+        self.assertIs(context, target.context)
+
+    def test_the_profile_decides_how_a_payload_is_read(self):
+        """JSON Light wraps an entity in ``d``; the same mapping means nothing to V4."""
+        payload = {"d": {"subject": "Q1"}}
+
+        self.assertEqual("Q1", _Drafted(GraphClient()).hydrate(payload, JsonLightFormat()).subject)
+        self.assertIsNone(_Drafted(GraphClient()).hydrate(payload, V4JsonFormat()).subject)
+
+    def test_reading_a_record_the_type_wrote_returns_the_same_record(self):
+        target = _Drafted(GraphClient()).hydrate({"subject": "Q1", "iCalUId": "0400"}, V4JsonFormat())
+
+        for profile in (V4JsonFormat("none"), V4JsonFormat()):
+            with self.subTest(profile=profile.metadata_level):
+                self.assertEqual(
+                    target.to_json(profile),
+                    _Drafted(GraphClient()).hydrate(target.to_json(profile), profile).to_json(profile),
+                )

@@ -37,6 +37,7 @@ from office365.migration.outlook.calendar_codec import MAX_LINE_OCTETS, encode
 from office365.migration.outlook.calendar_profile import COMPARED, wall_clock
 from office365.migration.outlook.models import mail_slug
 from office365.outlook.calendar.events.event import Event
+from office365.runtime.client_runtime_context import ClientRuntimeContext
 from office365.runtime.converters.value import serialize_value
 from office365.runtime.odata.v4.json_format import V4JsonFormat
 
@@ -186,7 +187,12 @@ def event_ics(envelope: Mapping[str, Any]) -> bytes:
     return encode(envelope)
 
 
-def event_create_payload(envelope: Mapping[str, Any], options: CalendarImportOptions | None = None) -> dict[str, Any]:
+def event_create_payload(
+    envelope: Mapping[str, Any],
+    options: CalendarImportOptions | None = None,
+    *,
+    context: ClientRuntimeContext,
+) -> dict[str, Any]:
     """The Graph ``POST /events`` body for an envelope.
 
     The model reads its own sidecar and spells the body: ``hydrate`` fills an ``Event``
@@ -196,14 +202,16 @@ def event_create_payload(envelope: Mapping[str, Any], options: CalendarImportOpt
     stamps) and the ``extra_properties`` an export records only to survive a round trip.
     What is left is exactly what an import may restore; the options then decide how much
     of it to send. Nothing here spells a Graph field.
+
+    ``context`` is where the model lives, not something it asks: a ``ClientObject`` is a
+    handle, so an ``Event`` cannot exist without one. Nothing is queried while a body is
+    spelled, so a client with no credentials is enough to build one offline.
     """
     options = options or CalendarImportOptions()
     _model_spelling(envelope)
 
-    # A draft has no context: nothing is queried through it, it is only spelled back out.
-    draft = Event(None)  # type: ignore[arg-type]
-    V4JsonFormat().hydrate(draft, envelope, persist_changes=True)
-    spelled = cast(Dict[str, Any], draft.to_json(V4JsonFormat("none")))
+    event = Event(context).hydrate(envelope, V4JsonFormat())
+    spelled = cast(Dict[str, Any], event.to_json(V4JsonFormat("none")))
     body: dict[str, Any] = {
         name: value
         for name, value in spelled.items()

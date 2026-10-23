@@ -307,7 +307,7 @@ def test_source_refuses_a_directory_that_is_not_an_export(tmp_path: Path):
 
 
 def test_payload_keeps_the_wall_clock_zone_and_the_recurrence():
-    payload = event_create_payload(_SERIES)
+    payload = event_create_payload(_SERIES, context=GraphClient())
 
     assert payload["start"] == {"dateTime": "2026-03-09T09:00:00.0000000", "timeZone": "Europe/Kiev"}
     assert payload["recurrence"] == _SERIES["recurrence"]
@@ -318,7 +318,7 @@ def test_payload_keeps_the_wall_clock_zone_and_the_recurrence():
 
 
 def test_payload_carries_the_event_attributes_an_import_restores():
-    payload = event_create_payload(_envelope())
+    payload = event_create_payload(_envelope(), context=GraphClient())
 
     assert payload["showAs"] == "tentative"
     assert payload["sensitivity"] == "private"
@@ -331,9 +331,9 @@ def test_payload_carries_the_event_attributes_an_import_restores():
 
 
 def test_payload_drops_attendees_unless_asked_because_they_would_be_invited():
-    assert "attendees" not in event_create_payload(_envelope())
+    assert "attendees" not in event_create_payload(_envelope(), context=GraphClient())
 
-    payload = event_create_payload(_envelope(), CalendarImportOptions(restore_attendees=True))
+    payload = event_create_payload(_envelope(), CalendarImportOptions(restore_attendees=True), context=GraphClient())
     assert payload["attendees"] == [
         {"emailAddress": {"address": "bob@contoso.com", "name": "Bob"}, "type": "required"},
         {"emailAddress": {"address": "carol@contoso.com"}, "type": "optional"},
@@ -345,12 +345,12 @@ def test_payload_refuses_a_recurrence_an_older_export_wrote_as_text():
     broken = _envelope(recurrence="PatternedRecurrence(pattern=RecurrencePattern(interval=1), range=…)")
 
     with pytest.raises(ValueError, match="re-export the calendar"):
-        event_create_payload(broken)
+        event_create_payload(broken, context=GraphClient())
 
 
 def test_payload_requires_a_time_range():
     with pytest.raises(ValueError, match="no start/end dateTime"):
-        event_create_payload(_envelope(start=None))
+        event_create_payload(_envelope(start=None), context=GraphClient())
 
 
 def test_transaction_id_is_deterministic_per_source_event():

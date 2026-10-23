@@ -584,6 +584,34 @@ class ClientObject:
         """
         return self._parent_collection
 
+    def hydrate(self, payload: Any, profile: JsonProfile) -> Self:
+        """Read this object's content from a payload: the mirror of :meth:`to_json`.
+
+        One direction spells, the other reads, and neither is a procedure: the object
+        knows its declarations, the profile knows the dialect, and the payload is all
+        that is left over.
+
+        ``profile`` is required here although :meth:`to_json` takes it optionally, and
+        the asymmetry is the point. An object with no profile writes itself exactly as it
+        holds it — a response, or a sidecar — while a payload cannot be read without
+        knowing how it was spelled: JSON Light wraps an entity in ``d``, OData V4 does
+        not, and guessing is how a reader quietly returns an empty object.
+
+        Everything the payload says becomes this object's own content
+        (``persist_changes``): content meant to be posted, not a response that happened
+        to arrive. A response is filled the other way — ``profile.hydrate(self, payload)``
+        — because what a service said is not what a caller changed.
+
+        Args:
+            payload: The payload to read (an entity, or a list of them)
+            profile: The profile that spells the payload
+
+        Returns:
+            This object, so reading and spelling chain.
+        """
+        profile.hydrate(self, payload, persist_changes=True)
+        return self
+
     def to_json(self, profile: Optional[JsonProfile] = None) -> Dict[str, Any] | List[Any]:
         """
         Serializes the client object to a JSON-compatible dictionary.
