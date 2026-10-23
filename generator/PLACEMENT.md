@@ -1,7 +1,7 @@
 # Placement contract
 
 How the generator decides where a generated type lives. Everything here is
-enforced (or asserted) by the tests in `tests/unit/test_generator_placement_contract.py`.
+enforced (or asserted) by the tests in `tests/tooling/test_generator_placement_contract.py`.
 
 ## Target levels
 

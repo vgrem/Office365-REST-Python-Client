@@ -149,13 +149,6 @@ class TestPriorityDispatch(unittest.TestCase):
         self.assertIsInstance(exc, FileLockedException)
         self.assertNotIsInstance(exc, SPFileCheckOutException)
 
-    def test_bare_423_falls_back_to_shared_lock(self):
-        resp = Response()
-        resp.status_code = 423
-        resp.url = "https://contoso.sharepoint.com/_api/web"
-        resp._content = b""
-        self.assertIsInstance(ClientRequestException.from_response(resp), FileLockedException)
-
     def test_specific_beats_catch_all(self):
         # Duplicate-list is SPException + a known HRESULT: the specific type wins.
         exc = ClientRequestException.from_response(

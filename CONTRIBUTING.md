@@ -80,13 +80,24 @@ uv run pyright
 uv run pytest --offline -q
 ```
 
-This runs `tests/unit` fully offline and is what CI runs on Python 3.10 and 3.13.
-It is the fastest way to validate a change, and where new tests should go.
+This runs the offline suites and is what CI runs on Python 3.10 and 3.13. It is the
+fastest way to validate a change, and where new tests should go.
+
+The offline tests are split by what they describe:
+
+| Directory | Subject |
+| --- | --- |
+| `tests/unit` | the shipped library — one file per feature of `office365` |
+| `tests/tooling` | the code generator under `generator/`, which is development tooling and is not part of the wheel |
+| `tests/test_settings.py` | the `tests/settings.py` configuration loader |
+
+A test belongs in `tests/unit` when it pins behaviour a user of the library can
+observe; it belongs in `tests/tooling` when it pins how the library is generated.
 
 ### End-to-end tests (maintainers / optional)
 
-The `tests/` suites outside `tests/unit` are end-to-end and need real Microsoft 365
-credentials. The full setup — `.env` template, the authentication flows, certificate
+The product suites (`tests/sharepoint/`, `tests/onedrive/`, …) are end-to-end and
+need real Microsoft 365 credentials. The full setup — `.env` template, the authentication flows, certificate
 generation, required tenant roles and troubleshooting — lives in
 [README-dev.md](README-dev.md). In short:
 
