@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import cast
 
 from office365.communications.callrecords.call_record import CallRecord
@@ -32,6 +32,13 @@ class TestScalarConverters(unittest.TestCase):
         parsed = parse_datetime(value)
         assert parsed is not None
         self.assertEqual(parsed.microsecond, 123456)
+
+    def test_parse_datetime_with_seven_fraction_digits(self):
+        """A .NET stamp carries seven digits; the fraction is truncated, not refused."""
+        parsed = parse_datetime("2026-10-21T09:05:30.0000000+02:00")
+        assert parsed is not None
+        self.assertEqual(parsed, datetime(2026, 10, 21, 9, 5, 30, tzinfo=timezone(timedelta(hours=2))))
+        self.assertEqual(parse_datetime("2026-10-21T09:05:30.1234567Z").microsecond, 123456)
 
 
 def _new_user(properties: dict) -> User:

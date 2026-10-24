@@ -183,4 +183,12 @@ def parse_datetime(value: Union[str, datetime, None]) -> Optional[datetime]:
             return result
         except ValueError:
             continue
-    return None
+    # Anything ISO-8601 the fixed list does not spell (a space separator, no
+    # seconds, ...). The fraction is normalized first, so this answers the same
+    # thing on every supported interpreter: ``fromisoformat`` only learned to
+    # accept more than six fractional digits in 3.11, and a .NET stamp carries
+    # seven.
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None

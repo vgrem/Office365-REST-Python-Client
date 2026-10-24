@@ -394,6 +394,13 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
   it even when the service asks for an hour, and a caller who passes none waits as
   long as the service asked. Pinned offline: `Retry-After: 7` sleeps exactly 7 s
   before the second attempt, and `max_delay=30` turns a `Retry-After: 600` into 30 s.
+- **A timestamp with seven fractional digits is read on every supported interpreter.**
+  `datetime.fromisoformat` only accepted more than six digits from Python 3.11 on, and
+  a .NET stamp carries seven (`.0000000`), so `parse_datetime` truncated the fraction
+  before parsing and now also falls back to `fromisoformat` for the ISO-8601 shapes the
+  fixed format list does not spell (a space separator, an omitted seconds field). The
+  long-running-operation status snapshot reads its stamps through it, so
+  `OperationStatus.last_action_date_time` no longer answers `None` on Python 3.10.
 
 **SharePoint (client)**
 

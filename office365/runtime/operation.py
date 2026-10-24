@@ -48,6 +48,7 @@ from typing import Any, AsyncIterator, Awaitable, Callable, Generic, Iterator, T
 
 from requests import Response
 
+from office365.runtime.converters.scalars import parse_datetime
 from office365.runtime.retry import response_retry_after
 
 #: Response headers that may carry the operation-status URL, in resolution order.
@@ -122,13 +123,19 @@ def _percentage(data: Any) -> float | None:
 
 
 def _timestamp(data: Any, *keys: str) -> datetime | None:
-    """Read an ISO-8601 stamp, timezone-aware (an offset-less value is read as UTC)."""
+    """Read an ISO-8601 stamp, timezone-aware (an offset-less value is read as UTC).
+
+    Parsed by :func:`~office365.runtime.converters.scalars.parse_datetime`, which
+    normalizes the fraction to six digits first: a .NET stamp carries seven
+    (``...09:05:30.0000000+02:00``), and ``datetime.fromisoformat`` refused those
+    before 3.11 — so the whole status read answered ``None`` on the interpreters
+    this package still supports.
+    """
     raw = _first(data, *keys)
     if not isinstance(raw, str) or not raw:
         return None
-    try:
-        value = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-    except ValueError:
+    value = parse_datetime(raw)
+    if value is None:
         return None
     return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
 

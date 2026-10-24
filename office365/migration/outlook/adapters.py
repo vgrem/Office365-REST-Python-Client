@@ -47,7 +47,7 @@ from office365.migration.outlook.models import (
     mail_envelope,
     mail_slug,
 )
-from office365.runtime.converters.scalars import iso_or_none
+from office365.runtime.converters.scalars import iso_or_none, parse_datetime
 from office365.runtime.operations import emit_progress
 
 #: The index file a target writes at ``commit()`` (one JSON record per line).
@@ -203,7 +203,9 @@ class SidecarTreeTarget(DataTarget):
         path = self._path(item)
         if not stamp or not path.exists():
             return
-        parsed = datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
+        parsed = parse_datetime(str(stamp))
+        if parsed is None:
+            return
         if parsed.tzinfo is None:
             parsed = parsed.replace(tzinfo=timezone.utc)
         seconds = parsed.timestamp()
