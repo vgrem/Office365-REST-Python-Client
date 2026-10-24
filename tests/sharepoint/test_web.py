@@ -214,6 +214,14 @@ class TestSharePointWeb(SPTestCase):
     #    self.assertIsNotNone(result.value)
 
     def test_25_get_access_request_list(self):
-        """Get the access request list."""
+        """Get the access request list.
+
+        The list only exists once access requests are enabled on the web; while
+        they are off the web carries no ``AccessRequestListUrl`` to follow.
+        """
+        web = self.client.web.select(["AccessRequestListUrl"]).get().execute_query()
+        list_url = web.get_property("AccessRequestListUrl")
+        if not list_url:
+            self.skipTest("Access requests are not enabled on this web")
         result = self.client.web.get_access_request_list().get().execute_query()
         self.assertIsNotNone(result.resource_path)

@@ -49,9 +49,11 @@ class TestSPListPermissions(SPTestCase):
         """Revoke contributor permission from current user"""
         target_role_def = self.client.web.role_definitions.get_by_type(RoleType.Contributor)
         target_user = self.client.web.current_user
-        result = self.target_list.remove_role_assignment(target_user, target_role_def).execute_query()
-        self.assertIsNotNone(result.parent_collection)
-        self.assertEqual(len(result.parent_collection), 0)
+        self.target_list.remove_role_assignment(target_user, target_role_def).execute_query()
+        # ``remove_role_assignment`` answers with the securable object, not with the
+        # role assignment collection, so the fact to pin is the collection itself.
+        assignments = self.target_list.role_assignments.get().execute_query()
+        self.assertEqual(len(assignments), 0)
 
     def test_06_reset_role_inheritance(self):
         """Reset role inheritance on the list"""

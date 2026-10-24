@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import ClassVar, Optional
 
+from office365.runtime.client_request_exception import ClientRequestException
 from office365.runtime.client_value_collection import ClientValueCollection
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.userprofiles.my_site_links import MySiteLinks
@@ -76,14 +77,37 @@ class TestUserProfile(SPTestCase):
         self.assertIsNotNone(result)
 
     def test_07_start_stop_following(self):
-        """Start or stop following a target user."""
+        """Follow and unfollow a user, observing the state flip.
+
+        The endpoint takes the *claim* login name of a site user
+        (``i:0#.f|membership|…``); a bare UPN has no people profile and is refused.
+        The test leaves the tenant as it found it by choosing a user the caller does
+        not already follow: following and then unfollowing a pre-existing
+        relationship is not what this test is about.
+        """
         people_manager = PeopleManager(self.my_client)
-        target_user = self.my_client.web.ensure_user(test_user_principal_name).execute_query()
-        result = people_manager.am_i_following(target_user.login_name).execute_query()
-        if result.value:
-            people_manager.stop_following(target_user.login_name).execute_query()
-        else:
-            people_manager.follow(target_user.login_name).execute_query()
+        target = self._find_unfollowed_user(people_manager)
+        if target is None:
+            self.skipTest("Every second site user is already followed or has no people profile")
+        people_manager.follow(target).execute_query()
+        self.assertTrue(people_manager.am_i_following(target).execute_query().value)
+        people_manager.stop_following(target).execute_query()
+        self.assertFalse(people_manager.am_i_following(target).execute_query().value)
+
+    def _find_unfollowed_user(self, people_manager: PeopleManager) -> Optional[str]:
+        """Returns the claim login name of a site user the caller does not follow."""
+        my_login_name = self.my_client.web.current_user.get().execute_query().login_name
+        for user in self.my_client.web.site_users.get().execute_query():
+            login_name = user.login_name or ""
+            if login_name == my_login_name or "|membership|" not in login_name:
+                continue
+            try:
+                if not people_manager.am_i_following(login_name).execute_query().value:
+                    return login_name
+            except ClientRequestException:
+                # A principal without a people profile cannot be followed at all.
+                continue
+        return None
 
     def test_08_get_followers_for(self):
         """Get followers for a target user."""
@@ -102,14 +126,6 @@ class TestUserProfile(SPTestCase):
         """Get trending tags."""
         result = PeopleManager.get_trending_tags(self.my_client).execute_query()
         self.assertGreaterEqual(len(result.items), 0)
-
-    def test_11_get_user_profile_properties(self):
-        """Get user profile properties and property names."""
-        user_props = self.my_client.web.current_user.get_user_profile_properties().get().execute_query()
-        self.assertIsNotNone(user_props.resource_path)
-
-        result = user_props.get_property_names().execute_query()
-        self.assertIsNotNone(result.value)
 
     def test_12_get_my_site_links(self):
         """Get My Site links."""

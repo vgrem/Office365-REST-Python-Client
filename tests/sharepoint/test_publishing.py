@@ -9,6 +9,7 @@ from office365.sharepoint.publishing.video.service_discoverer import (
     VideoServiceDiscoverer,
 )
 
+from tests import answered_null
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
@@ -35,8 +36,14 @@ class TestPublishing(SPTestCase):
         self.assertIsNotNone(result.value)
 
     def test_04_org_assets(self):
-        """Retrieve organization assets."""
+        """Retrieve organization assets.
+
+        Organization assets are a tenant opt-in: a tenant that has not provisioned
+        them answers ``OrgAssets: null`` for every site.
+        """
         result = SitePageService.org_assets(self.client).execute_query()
+        if answered_null(result):
+            self.skipTest("The tenant has not provisioned organization assets")
         self.assertIsNotNone(result.value)
 
     def test_05_get_video_service_manager(self):

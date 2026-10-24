@@ -79,6 +79,7 @@ __all__ = [
     "test_username",
     "create_unique_name",
     "create_unique_file_name",
+    "answered_null",
 ]
 
 # Credential containers are only built when their inputs are configured, so
@@ -96,3 +97,14 @@ def create_unique_name(prefix: str) -> str:
 
 def create_unique_file_name(prefix: str, ext: str) -> str:
     return ".".join([create_unique_name(prefix), ext])
+
+
+def answered_null(result) -> bool:
+    """True when the service answered a ``null`` payload for a ``ClientResult``.
+
+    ``ClientResult.value`` asserts that something was read, so a live test that
+    checks the *absence* of a value has to ask the result, not the value. The empty
+    form is what ``ClientResult.__str__`` prints; this is the one place that knows
+    the spelling.
+    """
+    return str(result) == "ClientResult(<empty>)"

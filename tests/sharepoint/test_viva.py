@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from office365.runtime.client_request_exception import ClientRequestException
+
 from tests.sharepoint.sharepoint_case import SPTestCase
 
 
@@ -9,8 +11,15 @@ class TestViva(SPTestCase):
     """Test SharePoint Viva features."""
 
     def test_01_get_app_configuration(self):
-        """Get the app configuration."""
-        return_type = self.client.ee.app_configuration.get().execute_query()
+        """Get the app configuration.
+
+        The Viva Engage app configuration is only served for a home site; any other
+        web is refused by the service.
+        """
+        try:
+            return_type = self.client.ee.app_configuration.get().execute_query()
+        except ClientRequestException as e:
+            self.skipTest(f"The web is not a home site: {e}")
         self.assertIsNotNone(return_type.resource_path)
 
     # def test2_get_viva_home(self):

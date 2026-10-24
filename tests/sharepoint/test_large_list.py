@@ -34,8 +34,10 @@ class TestLargeListPaging(SPTestCase):
         self.assertIsNotNone(TestLargeListPaging.target_list)
         records = [{"Title": f"item{i}"} for i in range(4)]
         TestLargeListPaging.target_list.from_records([records]).execute_query()
-        TestLargeListPaging.target_list.ensure_property("ItemCount").execute_query()
-        self.assertEqual(TestLargeListPaging.target_list.item_count, 4)
+        # ``List.ItemCount`` is a denormalised counter the service does not refresh
+        # on this path, so the seeded rows are counted where they are authoritative.
+        items = TestLargeListPaging.target_list.items.get().execute_query()
+        self.assertEqual(len(items), 4)
 
     def test_03_get_all_pages_without_skip_conflict(self):
         """REST paging follows __next/$skiptoken and does not fall back to $skip."""

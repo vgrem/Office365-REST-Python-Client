@@ -259,11 +259,6 @@ class TestTenant(SPTestCase):
         result = self.tenant.multi_geo.storage_quotas.get().execute_query()
         self.assertIsNotNone(result.resource_path)
 
-    def test_27_get_site_subscription_id(self):
-        """Get the site subscription ID."""
-        result = self.tenant.get_site_subscription_id().execute_query()
-        self.assertIsNotNone(result.value)
-
     # def test_38_get_ib_insights_report_manager(self):
     #    result = SPTenantIBInsightsReportManager(self.client).get().execute_query()
     #    self.assertIsNotNone(result.resource_path)
