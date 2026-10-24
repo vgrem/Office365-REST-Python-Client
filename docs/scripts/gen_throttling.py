@@ -1,33 +1,23 @@
 """Generate the throttling guide + quotas table (mkdocs-gen-files plugin).
 
-The table is derived from the **model** — the ``@limit`` declarations on the
-Graph resource classes — so it can't drift from the code. mkdocs-gen-files
-executes this module with ``runpy``, so emission happens at module level.
+The table is derived from the **catalogs** (`office365.limits.catalog`), so it can't
+drift from the declarations, and its **Bound at** column is scanned from the `@limit`
+decorators on the model. mkdocs-gen-files executes this module with ``runpy``, so
+emission happens at module level.
 """
 
 from __future__ import annotations
 
-import mkdocs_gen_files
-from office365.communications.callrecords.call_record import CallRecord
-from office365.communications.calls.call import Call
-from office365.communications.presences.presence import Presence
-from office365.communications.virtualevents.virtual_event import VirtualEvent
-from office365.directory.domains.domain import Domain
-from office365.directory.licenses.subscribed_sku import SubscribedSku
-from office365.directory.objects.object import DirectoryObject
-from office365.onedrive.workbooks.workbook import Workbook
+import pathlib
+import sys
 
-#: The Graph resource classes that declare throttling quotas (``@limit``).
-_QUOTA_CLASSES = (
-    DirectoryObject,
-    SubscribedSku,
-    Domain,
-    CallRecord,
-    Workbook,
-    Call,
-    Presence,
-    VirtualEvent,
-)
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+
+import mkdocs_gen_files  # noqa: E402
+from _limit_bindings import bound_at, row_attrs, scan_bindings  # noqa: E402
+from office365.limits import Limit, catalog, catalog_products  # noqa: E402
+
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 _HEADER = """# Throttling
 
@@ -39,9 +29,9 @@ exponential backoff with jitter) and can pace a whole fleet proactively.
 Unlike SharePoint's static [service limits](limits.md), Graph throttling is
 **dynamic** — evaluated per scope (per app, per tenant, per app + tenant, per
 resource) and per request type — so the library reacts to the signals rather
-than enforcing a fixed budget. The quotas below are declared on the Graph
-resource classes with `@limit(...)` (reference-only) and shown in the **Bound
-at** column.
+than enforcing a fixed budget. The quotas below are still declared as data (one
+`quotas` module per product, plus the one row no product owns) so a workload can
+be designed from the numbers instead of discovered by being throttled.
 
 ## Signals
 
@@ -86,6 +76,11 @@ See `office365.runtime.http.throttling` and `office365.runtime.retry`.
   oversized `$top` and deep expansions that inflate server cost.
 - Prefer **delta queries** and **change notifications** over polling/scanning.
 - **Batch** related operations (JSON batching) and reduce operations per request.
+  Outlook also caps how many requests a mailbox may have **in flight**: four at a
+  time, and four sub-requests per JSON batch — so `execute_batch(concurrency=4)` is
+  the ceiling a mailbox workload should ask for (`OUTLOOK_QUOTAS` in
+  `office365.outlook.quotas`). A higher `concurrency` does not go faster: the
+  surplus queues inside the service.
 - Watch `X-SharePointHealthScore` — when the farm is busy, ease off before it
   throttles you (the rate limiter already does this).
 - Set a descriptive `User-Agent` (e.g. `ISV|Contoso|MyApp/1.0`) so Microsoft can
@@ -94,9 +89,10 @@ See `office365.runtime.http.throttling` and `office365.runtime.retry`.
 
 ## Quotas (reference)
 
-The numbers below are the tested limits Graph enforces; the first one reached
-triggers throttling. They're declared on the model (`@limit`) — see the
-**Bound at** column.
+The numbers below are the limits Microsoft publishes; the first one reached triggers
+throttling. A **Window** of *in flight* means concurrency rather than a rate. Every row
+answers `catalog(product=...)`; the **Bound at** column names the model that declares
+it (most rows are referenced by no model, and are reference data only).
 
 """
 
@@ -106,21 +102,34 @@ def _emit(path: str, content: str) -> None:
         f.write(content)
 
 
-# Collect each distinct quota and the classes that declare it (dedup by identity).
-_quotas: dict[int, tuple[object, list[str]]] = {}
-for _cls in _QUOTA_CLASSES:
-    for _limit in _cls.declared_limits():
-        _entry = _quotas.setdefault(id(_limit), (_limit, []))
-        _entry[1].append(_cls.__name__)
+def _window(row: Limit) -> str:
+    if row.window_seconds is None:
+        return "—"
+    if row.window_seconds == 0:
+        return "in flight"
+    return f"{row.window_seconds}s"
+
+
+def _value(row: Limit) -> str:
+    unit = row.unit[:-1] if row.value == 1 and row.unit.endswith("s") else row.unit
+    return f"{row.value:,} {unit}"
+
+
+_bindings = scan_bindings(_REPO_ROOT / "office365")
+_names = row_attrs()
+_products = [name for name in catalog_products() if name not in ("sharepoint", "model")]
+_products.sort(key=lambda name: (name != "graph", name))
 
 _rows = [
-    "| Service | Limit | Scope | Type | Bound at |",
-    "| --- | --- | --- | --- | --- |",
+    "| Product | Limit | Value | Window | Scope | Type | Bound at | Notes |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
 ]
-for _limit, _classes in sorted(_quotas.values(), key=lambda item: (item[0].name, -item[0].value)):  # type: ignore[attr-defined]
-    _rows.append(
-        f"| {_limit.name} | {_limit} | {_limit.scope} | {_limit.request_type or 'any'} "  # type: ignore[attr-defined]
-        f"| {', '.join(_classes)} |"
-    )
+for _product in _products:
+    for _row in catalog(product=_product):
+        _name = f"[{_row.name}]({_row.doc})" if _row.doc else _row.name
+        _rows.append(
+            f"| `{_product}` | {_name} | {_value(_row)} | {_window(_row)} | {_row.scope} "
+            f"| {_row.request_type or 'any'} | {bound_at(_row, _bindings, _names) or '—'} | {_row.note} |"
+        )
 
 _emit("throttling.md", "\n".join([_HEADER, *_rows, ""]))

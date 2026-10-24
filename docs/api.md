@@ -223,7 +223,7 @@ Service limits are first-class: declare them on the model with `@limit`, enforce
 them at a call site, and discover them from any resource or tool.
 
 ```python
-from office365.limits import catalog, limit, limits_of, verify_limits
+from office365.limits import catalog, catalog_products, limit, limits_of, verify_limits
 from office365.sharepoint.thresholds import Limits
 
 
@@ -234,20 +234,30 @@ def get_items(page_size=None): ...
 lst.get_items(page_size=6000)  # warns; the limit is discoverable
 lst.declared_limits()  # the limits declared on the class
 verify_limits(lst.get_items, page_size=6000).ok  # False
-catalog("sharepoint")  # every registered SharePoint limit
+catalog_products()  # ['graph', 'directory', 'outlook', 'teams', ...]
+catalog("sharepoint")  # every registered SharePoint limit, as data
+catalog("outlook")  # ... and every Outlook throttling quota
 ```
 
 - **Mechanics** — `office365.limits` re-exports `Limit` (a static threshold *or*
   a rate quota), the `@limit` decorator, and the guardrails (`exceeds` /
   `warn_if_exceeds` / `ensure_within` / `hint`).
-- **Catalogs** — `sharepoint.thresholds.Limits`; Graph quotas are declared on the
-  resource classes (`DirectoryObject`, `CallRecord`, …).
+- **Catalogs** — `sharepoint.thresholds.Limits` for boundaries and thresholds, and
+  one `quotas` module per Graph product (`outlook`, `teams`, `reports`, `security`,
+  `onedrive`, `onedrive.workbooks`, `directory`, `communications`) for throttling
+  quotas. A model references a catalog row (`@limit(*CALL_RECORD_QUOTAS)`) rather
+  than re-spelling it. Graph quotas are reference data: the library reads the server
+  signals (`Retry-After`, `x-ms-throttle-*`, `RateLimit-*`) and never simulates the
+  token bucket.
 - **Registry** — products register their catalogs (`register_catalog`); `@limit`
-  on a class registers it; `catalog(product)` aggregates them.
+  on a class registers it; `catalog(product)` aggregates them and
+  `catalog_products()` lists the keys. Importing `office365.limits` imports every
+  catalog, so discovery doesn't depend on which product the caller touched first.
 - **Migration** — assessment findings carry the authoritative `Limit`
   (`AssessmentIssue.limit`) alongside the product-specific `risk_code`.
 
-See [Service limits](limits.md) for the SharePoint catalog.
+See [Service limits](limits.md) for the SharePoint catalog and the Graph
+throttling quota tables.
 
 ## Error handling
 

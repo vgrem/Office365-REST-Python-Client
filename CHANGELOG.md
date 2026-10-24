@@ -262,6 +262,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Both pollers are the shared wait, so `poll_for_status` also gained a real
   `cancel()` and the stream.
 
+**Service limits (Graph throttling)**
+
+- Microsoft Graph's **throttling quotas are now data**: one `quotas` module per
+  product — `office365.outlook.quotas`, `office365.teams.quotas`,
+  `office365.onedrive.quotas` (files and lists), `office365.onedrive.workbooks.quotas`
+  (Excel), `office365.reports.quotas`, `office365.security.quotas`,
+  `office365.directory.quotas` and `office365.communications.quotas` — plus the one
+  row no product owns, `GLOBAL_QUOTAS` in `office365.runtime.limits` (**130,000
+  requests / 10 s per app across all tenants**). Each is a tuple of `Limit` rows that
+  registers itself at import (`register_catalog(..., product=...)`), so
+  `office365.limits.catalog(product="outlook")` answers from a fresh interpreter and
+  `catalog_products()` lists the keys. The rows are **reference only**: the library
+  reacts to the server signals it already parses (`Retry-After`, `x-ms-throttle-*`,
+  `RateLimit-*`, `X-SharePointHealthScore`) and deliberately does not simulate a
+  token bucket — a quota is a published fact to design a workload around, not a
+  client-side gate. Concurrency appears where the service states it
+  (`window_seconds=0`): Outlook's *4 concurrent requests per mailbox* and *4
+  sub-requests per JSON batch*.
+- A model **references** a quota row instead of re-spelling it: `CallRecord` and
+  `Workbook` carried their own inline `@limit(Limit(...))` declarations, which is the
+  same fact written twice and — for the four `CallRecord` rows — a fact that lived in
+  no catalog at all (`catalog()` grew by six unnamed rows merely because a model
+  module got imported). They now declare `@limit(*CALL_RECORD_QUOTAS)` and
+  `@limit(*EXCEL_QUOTAS)`, and importing `office365.graph_client`,
+  `onedrive.workbooks.workbook` or `sharepoint.client_context` leaves the registry
+  byte-identical: a row lives in a catalog, a model points at it.
+- Importing `office365.limits` **imports every catalog** (ten modules, ~3 ms), so
+  discovery does not depend on which product the caller happened to touch first; the
+  four SharePoint rows that had no `doc` now cite the limits page they come from, and
+  `Limit.request_type` documents the `delete` value the Teams table needs.
+- The **Service limits** page (`docs/scripts/gen_limits.py`) is regenerated from both
+  registries — the SharePoint boundaries table plus one Graph quota table with the
+  window, scope, request class and the model that declares each row — so the
+  published numbers cannot drift from the declarations.
+
 ### Changed
 
 **Runtime**

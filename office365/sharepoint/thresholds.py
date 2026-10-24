@@ -64,6 +64,10 @@ _DOC_ONLINE = (
     "sharepoint-online-service-description/sharepoint-online-limits"
 )
 _DOC_SERVER = "https://learn.microsoft.com/en-us/sharepoint/install/software-boundaries-limits-2019"
+_DOC_THROTTLING = (
+    "https://learn.microsoft.com/en-us/sharepoint/dev/general-development/"
+    "how-to-avoid-getting-throttled-or-blocked-in-sharepoint-online"
+)
 
 _KB = 1024
 _MB = 1024 * _KB
@@ -212,7 +216,7 @@ class Limits:
         "bytes",
         "file",
         "larger files use a resumable upload session",
-        "",
+        f"{_DOC_ONLINE}#file-size-and-file-path-length",
     )
     UPLOAD_SESSION_CHUNK = Limit(
         "upload session chunk",
@@ -221,7 +225,7 @@ class Limits:
         "bytes",
         "file",
         "default chunk size for resumable uploads",
-        "",
+        f"{_DOC_ONLINE}#file-size-and-file-path-length",
     )
     FILE_PATH_LENGTH = Limit(
         "decoded file path length",
@@ -277,7 +281,7 @@ class Limits:
         "bytes",
         "batch",
         "conservative client cap for a SharePoint OData batch",
-        "",
+        f"{_DOC_THROTTLING}#how-to-handle-throttling",
     )
 
     # --- Managed metadata ---------------------------------------------------
@@ -503,7 +507,7 @@ class Limits:
         "bytes",
         "file",
         "SMAT flags files over this as slow/hard to migrate; SPO upload allows 250 GB (SP2019 10-15 GB)",
-        "",
+        f"{_DOC_ONLINE}#file-size-and-file-path-length",
     )
     SYNC_FILES = Limit(
         "files in a synced library",

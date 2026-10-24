@@ -1,9 +1,11 @@
 """Generate the service-limits reference page (mkdocs-gen-files plugin).
 
-The table mirrors :meth:`office365.sharepoint.thresholds.Limits.catalog`, so the
-docs can't drift from the code, and adds a **Bound at** column scanned from the
-``@limit`` decorators on the model. mkdocs-gen-files executes this module with
-``runpy``, so emission happens at module level.
+The table mirrors :meth:`office365.sharepoint.thresholds.Limits.catalog`, so the docs
+can't drift from the code, and adds a **Bound at** column scanned from the ``@limit``
+decorators on the model. The Graph throttling quotas — the other half of the same
+``Limit`` vocabulary — are tabulated in [Throttling](throttling.md), because there they
+have to be read next to the signals that make them dynamic. mkdocs-gen-files executes
+this module with ``runpy``, so emission happens at module level.
 """
 
 from __future__ import annotations
@@ -14,32 +16,43 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import mkdocs_gen_files  # noqa: E402
-from _limit_bindings import scan_bindings  # noqa: E402
-from office365.sharepoint.thresholds import Limit, Limits  # noqa: E402
+from _limit_bindings import bound_at, row_attrs, scan_bindings  # noqa: E402
+from office365.sharepoint.thresholds import Limits  # noqa: E402
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 _HEADER = """# Service limits
 
 SharePoint enforces the limits below. The library declares them in
-`office365.sharepoint.thresholds.Limits` and binds them to the model with the
-`@limit` decorator — **warnings by default**, never a silent truncation. The list
-view threshold is the one most callers meet; see
+`office365.sharepoint.thresholds.Limits` and binds the ones a call can be measured
+against to the model with the `@limit` decorator — **warnings by default**, never a
+silent truncation. The list view threshold is the one most callers meet; see
 [Large lists and folders](large-lists.md) for the paging and indexing recipes.
 
-Sources:
-
-- [SharePoint in Microsoft 365 limits](https://learn.microsoft.com/en-us/office365/servicedescriptions/sharepoint-online-service-description/sharepoint-online-limits)
-- [Software boundaries and limits (SharePoint Server 2016/2019)](https://learn.microsoft.com/en-us/sharepoint/install/software-boundaries-limits-2019)
+The other kind of row in the same vocabulary is a **throttling quota** — a rate Graph
+allows per app, tenant, mailbox or resource. Those are **reference only**: the library
+reacts to the server signals (`Retry-After`, `x-ms-throttle-*`, `RateLimit-*`,
+`X-SharePointHealthScore`) rather than simulating the token bucket. They are tabulated
+with the signals in [Throttling](throttling.md), and every row is answerable as data:
 
 ```python
+from office365.limits import catalog, catalog_products
 from office365.sharepoint.thresholds import Limits, limit, warn_if_exceeds
 
 warn_if_exceeds(Limits.LIST_VIEW, item_count, context="list 'Orders'")
 
 @limit(Limits.LIST_VIEW, arg="page_size")   # declare + enforce on the model
 def get_items(page_size=None): ...
+
+catalog_products()  # ['graph', 'directory', 'outlook', 'teams', 'sharepoint', ...]
+catalog("sharepoint")  # the table below, as data
 ```
+
+Sources:
+
+- [SharePoint in Microsoft 365 limits](https://learn.microsoft.com/en-us/office365/servicedescriptions/sharepoint-online-service-description/sharepoint-online-limits)
+- [Software boundaries and limits (SharePoint Server 2016/2019)](https://learn.microsoft.com/en-us/sharepoint/install/software-boundaries-limits-2019)
+- [Microsoft Graph throttling limits](https://learn.microsoft.com/en-us/graph/throttling-limits)
 """
 
 _ASSESSMENT = """## Migration assessment
@@ -69,22 +82,17 @@ def _emit(path: str, content: str) -> None:
 
 
 _bindings = scan_bindings(_REPO_ROOT / "office365")
-_bound: dict[int, list[str]] = {}
-for _attr, _obj in vars(Limits).items():
-    if isinstance(_obj, Limit) and _bindings.get(_attr):
-        _bound.setdefault(id(_obj), []).extend(_bindings[_attr])
-
-
-def _bound_at(limit: Limit) -> str:
-    return ", ".join(sorted(set(_bound.get(id(limit), [])))) or "—"
-
+_names = row_attrs()
 
 _rows = [
     "| Limit | Value | Kind | Scope | Bound at | Notes |",
     "| --- | --- | --- | --- | --- | --- |",
 ]
-for _limit in Limits.catalog():
-    _name = f"[{_limit.name}]({_limit.doc})" if _limit.doc else _limit.name
-    _rows.append(f"| {_name} | {_limit} | {_limit.kind.value} | {_limit.scope} | {_bound_at(_limit)} | {_limit.note} |")
+for _row in Limits.catalog():
+    _name = f"[{_row.name}]({_row.doc})" if _row.doc else _row.name
+    _rows.append(
+        f"| {_name} | {_row} | {_row.kind.value} | {_row.scope} "
+        f"| {bound_at(_row, _bindings, _names) or '—'} | {_row.note} |"
+    )
 
 _emit("limits.md", "\n".join([_HEADER, *_rows, "", _ASSESSMENT]))

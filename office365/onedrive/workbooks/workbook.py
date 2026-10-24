@@ -10,6 +10,7 @@ from office365.onedrive.workbooks.comments.comment import WorkbookComment
 from office365.onedrive.workbooks.functions.functions import WorkbookFunctions
 from office365.onedrive.workbooks.names.collection import WorkbookNamedItemCollection
 from office365.onedrive.workbooks.operations.workbook import WorkbookOperation
+from office365.onedrive.workbooks.quotas import EXCEL_QUOTAS
 from office365.onedrive.workbooks.session_info import WorkbookSessionInfo
 from office365.onedrive.workbooks.tables.collection import WorkbookTableCollection
 from office365.onedrive.workbooks.worksheets.collection import (
@@ -17,18 +18,13 @@ from office365.onedrive.workbooks.worksheets.collection import (
 )
 from office365.runtime.client_result import ClientResult
 from office365.runtime.http.request_options import RequestOptions
-from office365.runtime.limits import Limit, LimitKind, limit
+from office365.runtime.limits import limit
 from office365.runtime.paths.resource_path import ResourcePath
 from office365.runtime.queries.function import FunctionQuery
 from office365.runtime.queries.service_operation import ServiceOperationQuery
 
-_DOC = "https://learn.microsoft.com/en-us/graph/throttling-limits"
 
-
-@limit(
-    Limit("excel", 5_000, LimitKind.SUPPORTED, "requests", "app", doc=_DOC, window_seconds=10),
-    Limit("excel", 1_500, LimitKind.SUPPORTED, "requests", "app+tenant", doc=_DOC, window_seconds=10),
-)
+@limit(*EXCEL_QUOTAS)
 class Workbook(Entity):
     """The top-level object that contains related workbook objects such as worksheets, tables, and ranges."""
 

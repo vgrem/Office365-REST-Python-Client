@@ -11,9 +11,12 @@ The helpers :func:`exceeds` / :func:`warn_if_exceeds` / :func:`ensure_within`
 apply a limit imperatively at a call site; :func:`limits_of` / :func:`verify_limits`
 inspect what a method/class declares.
 
-Product packages (e.g. ``office365.sharepoint.thresholds``,
-``office365.graph_limits``) declare the concrete values; this module only owns
-the mechanics so the runtime and every product share them.
+Product packages declare the concrete values — ``office365.sharepoint.thresholds``
+for SharePoint/CSOM limits, and the ``quotas`` module of each Graph product
+(``outlook``, ``teams``, ``reports``, ``security``, ``onedrive``, ``onedrive.workbooks``,
+``directory``, ``communications``) for throttling quotas. This module owns the
+mechanics so the runtime and every product share them, plus the single Graph-wide
+row (:data:`GLOBAL_QUOTAS`) that no product can own.
 """
 
 from __future__ import annotations
@@ -72,7 +75,7 @@ class Limit:
         doc: Link to the authoritative documentation.
         window_seconds: The rate window in seconds (``None`` for a static
             threshold; ``0`` for a concurrency limit).
-        request_type: ``""`` (n/a) | ``read`` | ``write`` | ``any``.
+        request_type: ``""`` (n/a) | ``read`` | ``write`` | ``delete`` | ``any``.
     """
 
     name: str
@@ -345,21 +348,25 @@ _SOURCES: dict[str, list[Any]] = {}
 
 
 def _limits_from(source: Any) -> list[Limit]:
+    if isinstance(source, (list, tuple)):
+        return list(source)
     catalog_fn = getattr(source, "catalog", None)
     if catalog_fn is not None:
         return list(catalog_fn())
     declared = getattr(source, "declared_limits", None)
     if declared is not None:
         return list(declared())
-    raise TypeError(f"{source!r} is not a Limit catalog (needs catalog() or declared_limits())")
+    raise TypeError(f"{source!r} is not a Limit catalog (needs catalog()/declared_limits() or be a sequence)")
 
 
 def register_catalog(*sources: Any, product: str = "model") -> None:
-    """Register limit sources — catalogs (``catalog()``) or classes (``declared_limits()``).
+    """Register limit sources — catalogs (``catalog()``), classes, or plain sequences.
 
-    Products register their own catalogs at import time (e.g.
-    ``register_catalog(Limits, product="sharepoint")``); ``@limit`` on a class
-    registers that class under ``product="model"``.
+    A product catalog is a tuple of :class:`Limit` rows or an object that answers
+    ``catalog()``; a ``@limit``-decorated class answers ``declared_limits()``. Sources
+    register themselves at import time (e.g. ``register_catalog(OUTLOOK_QUOTAS,
+    product="outlook")``); ``@limit`` on a class registers that class automatically
+    (under ``product="model"``).
     """
     bucket = _SOURCES.setdefault(product, [])
     for source in sources:
@@ -379,6 +386,11 @@ def catalog(product: Optional[str] = None) -> list[Limit]:
                     seen.add(id(item))
                     result.append(item)
     return result
+
+
+def catalog_products() -> list[str]:
+    """The registered products, in registration order — the keys :func:`catalog` accepts."""
+    return list(_SOURCES)
 
 
 def collect_class_limits(cls: type) -> Tuple[LimitDecl, ...]:
@@ -459,3 +471,23 @@ def verify_limits(target: Any, **values: int) -> LimitReport:
         if decl.arg is not None and decl.arg in values and decl.limit.exceeds(values[decl.arg])
     )
     return LimitReport(target=name, decls=decls, violations=violations)
+
+
+#: The one vendor-wide ceiling: every Microsoft Graph request, whatever the product,
+#: counts against the calling app's global budget. It lives here rather than in a
+#: product catalog because no single product owns it — a SharePoint workload and a
+#: Teams workload spend from the same budget once both go through Graph.
+GLOBAL_QUOTAS = (
+    Limit(
+        "any Microsoft Graph request",
+        130_000,
+        LimitKind.SUPPORTED,
+        "requests",
+        "app",
+        note="across all tenants",
+        doc="https://learn.microsoft.com/en-us/graph/throttling-limits",
+        window_seconds=10,
+    ),
+)
+
+register_catalog(GLOBAL_QUOTAS, product="graph")

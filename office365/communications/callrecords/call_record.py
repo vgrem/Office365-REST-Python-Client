@@ -7,34 +7,19 @@ from office365.communications.callrecords.session import Session
 from office365.communications.callrecords.type import CallType
 from office365.communications.calls.organizer import Organizer
 from office365.communications.calls.participant import Participant
+from office365.communications.quotas import CALL_RECORD_QUOTAS
 from office365.directory.permissions.identity_set import IdentitySet
 from office365.entity import Entity
 from office365.entity_collection import EntityCollection
 from office365.runtime.client_value_collection import ClientValueCollection
-from office365.runtime.limits import Limit, LimitKind, limit
+from office365.runtime.limits import limit
 from office365.runtime.paths.resource_path import ResourcePath
 
 if TYPE_CHECKING:
     from office365.communications.callrecords.modality import Modality
 
-_DOC = "https://learn.microsoft.com/en-us/graph/throttling-limits"
 
-
-@limit(
-    Limit("call records", 15_000, LimitKind.SUPPORTED, "requests", "app", doc=_DOC, window_seconds=20),
-    Limit("call records", 10_000, LimitKind.SUPPORTED, "requests", "tenant", doc=_DOC, window_seconds=20),
-    Limit("call records", 1_500, LimitKind.SUPPORTED, "requests", "app+tenant", doc=_DOC, window_seconds=20),
-    Limit(
-        "call records",
-        40,
-        LimitKind.SUPPORTED,
-        "requests",
-        "resource",
-        note="per call record",
-        doc=_DOC,
-        window_seconds=20,
-    ),
-)
+@limit(*CALL_RECORD_QUOTAS)
 class CallRecord(Entity):
     """Represents a single peer-to-peer call or a group call between multiple participants,
     sometimes referred to as an online meeting."""
