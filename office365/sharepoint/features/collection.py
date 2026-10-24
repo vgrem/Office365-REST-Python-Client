@@ -30,10 +30,10 @@ class FeatureCollection(EntityCollection[Feature]):
             featdef_scope: The feature scope for this feature.
             verify_if_activated: Verify if activated first to avoid System.Data.DuplicateNameException.
         """
-        return_type = Feature(self.context)
-        self.add_child(return_type)
-
         fid = feature_id.value if isinstance(feature_id, KnownFeaturesList) else feature_id
+
+        return_type = self.get_by_id(fid)
+        self.add_child(return_type)
 
         def _create_query():
             payload = {
@@ -43,12 +43,17 @@ class FeatureCollection(EntityCollection[Feature]):
             }
             return ServiceOperationQuery(self, "Add", None, payload, None, return_type)
 
-        def _create_if_not_activated(f: Feature) -> None:
-            if not f.properties:
+        def _create_if_not_activated(_: FeatureCollection) -> None:
+            # The activation state is read from the collection, not from
+            # ``GetById``: at site scope the latter answers a null payload even for
+            # an activated feature, so a truthiness test on that response reports
+            # "activated" and silently never queues the add.
+            activated = "".join(str(f.definition_id).lower() for f in self)
+            if str(fid).lower() not in activated:
                 self.context.add_query(_create_query())
 
         if verify_if_activated:
-            self.get_by_id(fid).get().after_execute(_create_if_not_activated)
+            self.get().after_execute(_create_if_not_activated)
         else:
             self.context.add_query(_create_query())
 

@@ -8,7 +8,15 @@ from office365.sharepoint.entity import Entity
 
 
 class UserProfilePropertiesForUser(Entity):
-    """The UserProfilePropertiesForUser class represents a set of user profile properties for a user."""
+    """The UserProfilePropertiesForUser class represents a set of user profile properties for a user.
+
+    CSOM only: SharePoint Online does not expose this type as a REST resource —
+    addressing ``SP.UserProfiles.UserProfilePropertiesForUser`` answers ``null`` for
+    ``GetPropertyNames`` and rejects any ``propertyNames`` argument as an invalid
+    query expression. Read profile properties through
+    :meth:`~office365.sharepoint.userprofiles.people_manager.PeopleManager.get_user_profile_properties`
+    instead; this type is kept for CSOM-shaped payloads.
+    """
 
     def get_property_names(self) -> ClientResult[StringCollection]:
         """

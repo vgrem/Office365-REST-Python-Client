@@ -96,10 +96,28 @@ class ClientQuery(Generic[ReturnT]):
 
     @property
     def url(self) -> str:
-        """Builds the full request URL from the query's service root and resource path."""
-        if self.binding_type is not None:
-            return "".join([self.context.service_root_url, str(self.path)])
-        return self.context.service_root_url
+        """Builds the full request URL for the bound object.
+
+        The bound object owns its address, not the query. A query's path is
+        expressed relative to that object, so the request is the object's
+        ``resource_url`` with the part of the path that goes beyond the object
+        itself appended. For most objects ``resource_url`` is simply
+        ``service_root_url + resource_path`` and this is the path as spelled by
+        the query; for an object that lives at another service root (a
+        SharePoint subweb is addressed by its own ``_api`` URL) every verb —
+        read, update, delete and service operation — follows that root.
+        """
+        if self.binding_type is None:
+            return self.context.service_root_url
+        path = str(self.path)
+        base = self.binding_type.resource_url
+        own_path = self.binding_type.resource_path
+        if base and own_path is not None:
+            own = str(own_path)
+            if path.startswith(own):
+                return base + path[len(own) :]
+        # An object with no address of its own leaves the URL to its path.
+        return "".join([self.context.service_root_url, path])
 
     @property
     def query_options(self) -> QueryOptions | None:

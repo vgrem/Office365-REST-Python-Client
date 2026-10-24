@@ -378,6 +378,37 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
 
 ### Fixed
 
+**SharePoint (client)**
+
+- **A query bound to a subweb addresses the subweb.** `ClientQuery.url` pasted the
+  query's own path onto the service root, so `sp.web.get_sub_web_by_url(...).webs`
+  and everything else reached through a subweb read the *root* web's collection —
+  the same object answered differently depending on which context built it. The URL
+  now derives from the bound object's own address (`binding_type.resource_url`, plus
+  whatever the query's path adds beyond `binding_type.resource_path`), with the
+  service-root fallback kept for a collection-bound query that has no `Url` yet. A
+  live probe against a subweb documents the difference the fix makes; the whole
+  `tests/sharepoint` suite now reaches the web it names.
+- **`FeatureCollection.add(verify_if_activated=True)` activates a feature the
+  collection does not list.** The guard asked `Site/Features/GetById('<guid>')`
+  whether the feature was on, but at site scope that endpoint answers
+  `{"d":{"GetById":null}}` *even for an activated feature* — and a dict holding one
+  `None` is truthy, so the guard read "activated" and queued nothing, silently. The
+  guard now reads the collection the operation already fetches and only writes when
+  the `DefinitionId` is absent. `tests/unit/test_feature_activation.py` pins both
+  halves offline: it asserts no `GetById` request is made at all, one `POST` when
+  the feature is missing and none when it is already present.
+- **`Utility.resolve_principal_in_current_context` accepts its flags as enums.**
+  `scopes` and `sources` are `Edm.Int32` bit flags, not strings; the call sent the
+  enum's repr where the service expects an integer and every input came back `null`.
+  Both parameters now take the enum *or* the integer and coerce, and neither is
+  omitted (an omitted flag is answered `null` too, not refused).
+- Two endpoints that cannot work over REST now say so where they are read:
+  `UserProfilePropertiesForUser` is a CSOM complex type — `GetPropertyNames`
+  answers `null` and any `propertyNames` argument is rejected as an invalid query
+  expression, so `PeopleManager.get_user_profile_properties` is the reader — and
+  `Tenant.get_site_subscription_id` raises `System.NotSupportedException`.
+
 **Migration (client-side)**
 
 - Verification reads each verified record once: the fresh target read behind

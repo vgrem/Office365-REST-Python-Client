@@ -618,7 +618,13 @@ class Tenant(Entity):
         self.context.add_query(qry)
         return return_type
 
-    def get_site_subscription_id(self):
+    def get_site_subscription_id(self) -> ClientResult[str]:
+        """Returns the site subscription identifier.
+
+        CSOM only: the tenant administration REST endpoint answers
+        ``System.NotSupportedException`` ("Specified method is not supported."), so
+        this operation has no live equivalent to test against.
+        """
         return_type = ClientResult(self.context, str())
         qry = ServiceOperationQuery(self, "GetSiteSubscriptionId", None, None, None, return_type)
         self.context.add_query(qry)
