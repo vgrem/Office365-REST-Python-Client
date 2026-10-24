@@ -128,6 +128,16 @@ def response_retry_after(response: Any) -> Optional[int]:
     return max(0, ceil(delay))
 
 
+def retry_after_policy(_attempt: int, ex: Exception) -> Optional[int]:
+    """The default ``on_failure`` policy: wait for what the server asked of you.
+
+    Signature-compatible with ``on_failure``/``failure_callback`` so a caller can
+    pass it as-is; it exists because :func:`retry_after_delay` reads one argument
+    and the retry loops promise two.
+    """
+    return retry_after_delay(ex)
+
+
 def backoff_delay(attempt: int, base: int, max_delay: Optional[int] = None, jitter: bool = True) -> float:
     """Compute the delay before retry ``attempt``.
 
@@ -149,6 +159,26 @@ def backoff_delay(attempt: int, base: int, max_delay: Optional[int] = None, jitt
         delay = min(delay, max_delay)
     if jitter:
         delay = random.uniform(0, delay)
+    return delay
+
+
+def delay_before_attempt(
+    attempt: int,
+    retry_after: Optional[int],
+    timeout_secs: int,
+    max_delay: Optional[int],
+    jitter: bool,
+) -> float:
+    """Seconds to wait before retry ``attempt``: the server's request, else the backoff.
+
+    ``max_delay`` bounds whichever is chosen, so a caller that caps its retries
+    also caps the wait a server is allowed to ask for — a ``Retry-After`` of an
+    hour is honored by a caller who asked for it and bounded by one who asked
+    for a ceiling.
+    """
+    delay = retry_after if retry_after is not None else backoff_delay(attempt, timeout_secs, max_delay, jitter)
+    if max_delay is not None:
+        delay = min(delay, max_delay)
     return delay
 
 
@@ -175,10 +205,8 @@ def _run_with_retry(
             if not callable(is_retriable) or not is_retriable(e):
                 raise
             last_ex = e
-            retry_after: Optional[int] = None
-            if callable(on_failure):
-                retry_after = on_failure(attempt, e)
-            delay = retry_after if retry_after is not None else backoff_delay(attempt, timeout_secs, max_delay, jitter)
+            retry_after = on_failure(attempt, e) if callable(on_failure) else retry_after_policy(attempt, e)
+            delay = delay_before_attempt(attempt, retry_after, timeout_secs, max_delay, jitter)
             sleep(delay)
     assert last_ex is not None
     raise last_ex
@@ -198,10 +226,11 @@ def retry(
     """Run ``func`` with retries — or, called without ``func``, return a decorator.
 
     Permanent failures re-raise immediately; the last exception is re-raised
-    once retries are exhausted. The delay between attempts is exponential with
-    jitter (:func:`backoff_delay`); when ``on_failure`` returns a delay (e.g.
-    the server's ``Retry-After`` via :func:`retry_after_delay`) that value
-    overrides the backoff.
+    once retries are exhausted. The delay between attempts is the one the server
+    named (``Retry-After``, via :func:`retry_after_policy`) and falls back to
+    exponential backoff with jitter (:func:`backoff_delay`) when it named none;
+    ``on_failure`` replaces that policy, and ``max_delay`` bounds whichever delay
+    results.
 
     Two forms::
 
@@ -215,12 +244,13 @@ def retry(
         func: Callable to execute. Omit to get a decorator.
         max_retry: Maximum number of retry attempts
         timeout_secs: Base delay for exponential backoff (seconds)
-        max_delay: Optional cap for the exponential delay (seconds)
-        jitter: Whether to randomize the delay (default True)
+        max_delay: Optional cap for any delay, the server's included (seconds)
+        jitter: Whether to randomize the backoff delay (default True)
         exceptions: Exception types that are candidates for retry
         is_retriable: Classifier deciding whether a caught exception is retried
         on_failure: Called after each failed attempt with ``(attempt, ex)``;
-            may return a retry delay (seconds) to override the backoff
+            may return a retry delay (seconds) to override the policy. Defaults
+            to :func:`retry_after_policy` — the server's ``Retry-After``
         on_success: Called with ``func()`` result on success
     """
     options = {
@@ -261,20 +291,21 @@ async def retry_async(
     """Run an awaitable ``func`` with retries, without blocking the event loop.
 
     Async counterpart of :func:`retry`: identical retry/backoff semantics
-    (transient-only by default, exponential backoff with jitter, ``Retry-After``
-    override), but the wait between attempts uses ``asyncio.sleep`` so
+    (transient-only by default, the server's ``Retry-After`` ahead of exponential
+    backoff with jitter), but the wait between attempts uses ``asyncio.sleep`` so
     concurrently-running tasks keep making progress.
 
     Args:
         func: Awaitable callable to execute.
         max_retry: Maximum number of retry attempts
         timeout_secs: Base delay for exponential backoff (seconds)
-        max_delay: Optional cap for the exponential delay (seconds)
-        jitter: Whether to randomize the delay (default True)
+        max_delay: Optional cap for any delay, the server's included (seconds)
+        jitter: Whether to randomize the backoff delay (default True)
         exceptions: Exception types that are candidates for retry
         is_retriable: Classifier deciding whether a caught exception is retried
         on_failure: Called after each failed attempt with ``(attempt, ex)``;
-            may return a retry delay (seconds) to override the backoff
+            may return a retry delay (seconds) to override the policy. Defaults
+            to :func:`retry_after_policy` — the server's ``Retry-After``
         on_success: Called with ``await func()`` result on success
     """
     last_ex: Exception | None = None
@@ -288,10 +319,8 @@ async def retry_async(
             if not callable(is_retriable) or not is_retriable(e):
                 raise
             last_ex = e
-            retry_after: Optional[int] = None
-            if callable(on_failure):
-                retry_after = on_failure(attempt, e)
-            delay = retry_after if retry_after is not None else backoff_delay(attempt, timeout_secs, max_delay, jitter)
+            retry_after = on_failure(attempt, e) if callable(on_failure) else retry_after_policy(attempt, e)
+            delay = delay_before_attempt(attempt, retry_after, timeout_secs, max_delay, jitter)
             await asyncio.sleep(delay)
     assert last_ex is not None
     raise last_ex

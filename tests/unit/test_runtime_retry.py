@@ -106,6 +106,16 @@ class TestExecuteQueryRetry(unittest.TestCase):
         self.assertEqual(execute_query.call_count, 2)
         sleep_mock.assert_called_once_with(5)
 
+    def test_retry_after_is_waited_by_default(self):
+        """Microsoft's first instruction for a throttled request: wait what it asked for."""
+        ctx, execute_query = _make_context([_make_exception(429, {"Retry-After": "7"}), None])
+
+        with mock.patch("office365.runtime.retry.sleep") as sleep_mock:
+            ctx.execute_query_retry(max_retry=5, timeout_secs=1, jitter=False)
+
+        self.assertEqual(execute_query.call_count, 2)
+        sleep_mock.assert_called_once_with(7)
+
 
 class TestRetryFunction(unittest.TestCase):
     def test_retries_exhausted_raises_last_error(self):
@@ -127,6 +137,15 @@ class TestRetryFunction(unittest.TestCase):
 
         self.assertEqual(func.call_count, 1)
         sleep_mock.assert_not_called()
+
+    def test_max_delay_bounds_the_wait_the_server_asks_for(self):
+        """A caller who names a ceiling keeps it, whatever ``Retry-After`` says."""
+        func = mock.Mock(side_effect=[_make_exception(429, {"Retry-After": "600"}), None])
+
+        with mock.patch("office365.runtime.retry.sleep") as sleep_mock:
+            retry(func, max_retry=5, max_delay=30)
+
+        sleep_mock.assert_called_once_with(30)
 
 
 class TestTransportErrorClassification(unittest.TestCase):

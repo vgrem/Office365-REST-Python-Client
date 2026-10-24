@@ -378,6 +378,23 @@ with `author_id=`/`editor_id=` now raises `TypeError` — pass
 
 ### Fixed
 
+**Runtime**
+
+- **A throttled request now waits the interval the service asked for.**
+  `execute_query_retry` retried a `429`/`503` on its exponential backoff and ignored
+  `Retry-After` unless the caller passed a `failure_callback` of their own, so the
+  one entry point the docs recommend for polite retries was the one that re-sent a
+  throttled request at the worst moment — Microsoft's first instruction is *wait the
+  interval named in the header; do not retry immediately*. The transport paths
+  (`execute_query_retry_parallel`, the async sibling) already honoured it, which made
+  the same library answer two ways. The default `on_failure` policy is now the
+  server's `Retry-After` (`runtime.retry.retry_after_policy`), falling back to the
+  backoff only when the response names no interval, and `max_delay` bounds *any*
+  delay rather than just the exponential one — so a caller who passes a ceiling keeps
+  it even when the service asks for an hour, and a caller who passes none waits as
+  long as the service asked. Pinned offline: `Retry-After: 7` sleeps exactly 7 s
+  before the second attempt, and `max_delay=30` turns a `Retry-After: 600` into 30 s.
+
 **SharePoint (client)**
 
 - **A query bound to a subweb addresses the subweb.** `ClientQuery.url` pasted the

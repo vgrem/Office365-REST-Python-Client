@@ -170,25 +170,26 @@ class ClientRuntimeContext(ABC):
         are retried. Permanent failures (e.g. HTTP 400/401/403/404) are re-raised
         immediately, and the last exception is re-raised once retries are exhausted.
 
-        Delays between attempts use exponential backoff with jitter; a delay
-        returned by ``failure_callback`` (e.g. the server's ``Retry-After`` via
-        ``retry_after_delay``) overrides the backoff.
+        Delays between attempts use exponential backoff with jitter, and the wait a
+        throttled response asks for (``Retry-After``) overrides the backoff — a
+        ``failure_callback`` replaces that default policy.
 
         Args:
             max_retry: Maximum number of retry attempts
             timeout_secs: Base delay for exponential backoff (seconds)
-            max_delay: Optional cap on the exponential delay (seconds)
-            jitter: Whether to randomize the delay (default True)
+            max_delay: Optional cap on any delay, the server's included (seconds)
+            jitter: Whether to randomize the backoff delay (default True)
             success_callback: Called on successful execution
             failure_callback: Called after each failed attempt; may return a
-                retry delay in seconds to override the backoff
+                retry delay in seconds to override the backoff. Defaults to the
+                server's ``Retry-After`` (:func:`~office365.runtime.retry.retry_after_policy`).
             exceptions: Exception types that trigger retries
             is_retriable: Optional predicate deciding whether a caught exception
                 is retried. Defaults to :func:`~office365.runtime.retry.is_transient_error`;
                 pass :func:`~office365.runtime.retry.retry_on` to also retry
                 otherwise-permanent errors such as a locked file (HTTP 423).
         """
-        from office365.runtime.retry import is_transient_error, retry, should_reset_connections
+        from office365.runtime.retry import is_transient_error, retry, retry_after_policy, should_reset_connections
 
         def _on_failure(_attempt: int, ex: Exception) -> Optional[int]:
             # Drop a poisoned keep-alive socket before retrying a 503/connection
@@ -199,7 +200,10 @@ class ClientRuntimeContext(ABC):
             # otherwise the context is left with a stale, un-executed query.
             if _attempt < max_retry and self.current_query is not None:
                 self.add_query(self.current_query)
-            return failure_callback(_attempt, ex) if callable(failure_callback) else None
+            # Microsoft's first instruction for a throttled request: wait the
+            # interval the server named. Without a ``Retry-After`` (or with a
+            # ``failure_callback`` of your own) the backoff decides.
+            return (failure_callback or retry_after_policy)(_attempt, ex)
 
         def _on_success(_) -> None:
             if callable(success_callback) and self.current_query is not None:
@@ -550,23 +554,25 @@ class ClientRuntimeContext(ABC):
         """Executes pending queries with retry logic, without blocking the loop.
 
         Async counterpart of :meth:`execute_query_retry` — same retry policy
-        (transient-only by default, exponential backoff with jitter), but the
-        delay between attempts uses ``asyncio.sleep``.
+        (transient-only by default, exponential backoff with jitter, the server's
+        ``Retry-After`` ahead of it), but the delay between attempts uses
+        ``asyncio.sleep``.
 
         Args:
             max_retry: Maximum number of retry attempts
             timeout_secs: Base delay for exponential backoff (seconds)
-            max_delay: Optional cap on the exponential delay (seconds)
-            jitter: Whether to randomize the delay (default True)
+            max_delay: Optional cap on any delay, the server's included (seconds)
+            jitter: Whether to randomize the backoff delay (default True)
             success_callback: Called on successful execution
             failure_callback: Called after each failed attempt; may return a
-                retry delay in seconds to override the backoff
+                retry delay in seconds to override the backoff. Defaults to the
+                server's ``Retry-After`` (:func:`~office365.runtime.retry.retry_after_policy`).
             exceptions: Exception types that trigger retries
             is_retriable: Optional predicate deciding whether a caught exception
                 is retried. Defaults to
                 :func:`~office365.runtime.retry.is_transient_error`.
         """
-        from office365.runtime.retry import is_transient_error, retry_async, should_reset_connections
+        from office365.runtime.retry import is_transient_error, retry_after_policy, retry_async, should_reset_connections
 
         def _on_failure(_attempt: int, ex: Exception) -> Optional[int]:
             # Drop a poisoned keep-alive socket before retrying a 503/connection
@@ -577,7 +583,7 @@ class ClientRuntimeContext(ABC):
             # otherwise the context is left with a stale, un-executed query.
             if _attempt < max_retry and self.current_query is not None:
                 self.add_query(self.current_query)
-            return failure_callback(_attempt, ex) if callable(failure_callback) else None
+            return (failure_callback or retry_after_policy)(_attempt, ex)
 
         def _on_success(_) -> None:
             if callable(success_callback) and self.current_query is not None:
