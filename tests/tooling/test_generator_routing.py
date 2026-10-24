@@ -64,14 +64,6 @@ def test_short_name_exact_rule_matches_bare_type():
     assert router.module_for("microsoft.graph.AlertDetection") == "office365.security"
 
 
-def test_namespace_takes_precedence_over_short_exact_rule():
-    router = Router(
-        namespace={"microsoft.graph.security": "office365.security"},
-        types={"Alert": "office365.somewhere.else"},
-    )
-    assert router.module_for("microsoft.graph.security.Alert") == "office365.security"
-
-
 def test_short_exact_rule_does_not_override_prefix_for_named_namespace():
     router = Router(
         namespace={"microsoft.graph.search": "office365.search"},

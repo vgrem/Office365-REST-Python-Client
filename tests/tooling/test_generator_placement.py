@@ -80,10 +80,11 @@ def test_descend_strips_a_module_path_prefix(tmp_path: Path):
     package.mkdir(parents=True)
     (package / "__init__.py").write_text("", encoding="utf-8")
 
-    module, stem = descend_module("office365.onedrive.workbooks.charts", "WorkbookChartAxisFormat", str(tmp_path))
-
-    assert module == "office365.onedrive.workbooks.charts"
-    assert stem == "axis_format"
+    for module_path in ("office365.onedrive.workbooks.charts", "office365.onedrive.workbooks"):
+        module, stem = descend_module(module_path, "WorkbookChartAxisFormat", str(tmp_path))
+        # the leaf package is the module, whether the path already names it or descends into it
+        assert module == "office365.onedrive.workbooks.charts"
+        assert stem == "axis_format"
 
 
 def test_descend_strips_path_segments_in_any_order(tmp_path: Path):
@@ -99,17 +100,3 @@ def test_descend_strips_path_segments_in_any_order(tmp_path: Path):
 
     assert module == "office365.directory.certificates.x509"
     assert stem == "authentication_method_configuration"
-
-
-def test_descend_strips_path_prefix_then_enters_subpackage(tmp_path: Path):
-    package = tmp_path / "onedrive" / "workbooks"
-    package.mkdir(parents=True)
-    (package / "__init__.py").write_text("", encoding="utf-8")
-    charts = package / "charts"
-    charts.mkdir()
-    (charts / "__init__.py").write_text("", encoding="utf-8")
-
-    module, stem = descend_module("office365.onedrive.workbooks", "WorkbookChartAxisFormat", str(tmp_path))
-
-    assert module == "office365.onedrive.workbooks.charts"
-    assert stem == "axis_format"

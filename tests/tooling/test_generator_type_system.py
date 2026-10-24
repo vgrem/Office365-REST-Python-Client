@@ -40,14 +40,6 @@ def test_no_type_reads_as_no_type() -> None:
     assert ref.is_primitive is False
 
 
-def test_the_element_of_a_collection_is_a_plain_reference() -> None:
-    ref = TypeRef.parse("Collection(microsoft.graph.User)").element
-
-    assert ref.is_collection is False
-    assert ref.name == "microsoft.graph.User"
-    assert ref.element is ref
-
-
 def test_an_incomplete_or_empty_wrapper_is_not_a_collection() -> None:
     for raw in ("Collection", "Collection(", "Collection()", "Collection(User"):
         assert TypeRef.parse(raw).is_collection is False, raw

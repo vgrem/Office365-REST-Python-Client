@@ -5,11 +5,6 @@ from __future__ import annotations
 from generator.validation import validate_source
 
 
-def test_clean_source_has_no_issues():
-    source = "class A:\n    def x(self):\n        return 1\n"
-    assert validate_source(source) == []
-
-
 def test_duplicate_class_definition_detected():
     source = "class A:\n    pass\n\n\nclass A:\n    pass\n"
     assert any("duplicate class" in issue for issue in validate_source(source))

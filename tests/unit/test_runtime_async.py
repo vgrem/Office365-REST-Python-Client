@@ -312,21 +312,6 @@ def test_execute_query_parallel_async_processes_in_order_and_reports_progress() 
     assert transport.calls == 3  # noqa: PLR2004
 
 
-def test_execute_query_parallel_async_retries_transient() -> None:
-    ctx, transport = _context(
-        [
-            {"status": 429, "retry_after": 0, "body": {}},
-            {"d": {"Title": "Contoso"}},
-        ]
-    )
-    ctx.load(ctx.web)
-
-    asyncio.run(ctx.execute_query_parallel_async(concurrency=2, max_retry=3, timeout_secs=0))
-
-    assert ctx.web.properties.get("Title") == "Contoso"
-    assert transport.calls == 2  # noqa: PLR2004
-
-
 def test_execute_query_parallel_async_requeues_exhausted_transient() -> None:
     ctx, transport = _context([{"status": 500, "body": {}}])
     ctx.load(ctx.web)

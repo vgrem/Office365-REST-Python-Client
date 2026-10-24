@@ -96,18 +96,6 @@ def test_inherited_members_arent_redeclared_from_metadata(tmp_path: Path, monkey
     assert builder.status is None
 
 
-def test_inherited_members_are_not_redeclared(tmp_path: Path, monkeypatch):
-    """A property already present on the base class is skipped."""
-    target = tmp_path / "test_thing.py"
-    target.write_text("class TestThing:\n    pass\n", encoding="utf8")
-    monkeypatch.setattr(placement, "module_file", lambda name: str(target))
-
-    # ``title`` is reported as already existing (e.g. inherited) -> not generated
-    builder = TypeBuilder(_schema(), _options(tmp_path), resolver=_StubResolver(members={"title"}))
-    builder.build()
-    assert builder.status is None
-
-
 def test_inherited_dataclass_field_arent_redeclared(tmp_path: Path, monkeypatch):
     """A camelCase dataclass field inherited from an on-disk base is not re-added.
 

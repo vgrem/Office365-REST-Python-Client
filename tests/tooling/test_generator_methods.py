@@ -214,17 +214,12 @@ def test_generate_methods_disabled_skips_methods_and_imports(tmp_path: Path):
 
 
 def test_generate_methods_enabled_emits_method_and_imports(tmp_path: Path):
-    source = _build_static_method_type(tmp_path, "true")
-    assert "def sp_test_thing_do_it(context: ClientContext, value: str)" in source
-    assert "from office365.runtime.queries.service_operation import ServiceOperationQuery" in source
-    assert "from office365.sharepoint.client_context import ClientContext" in source
-    _compile(source)
-
-
-def test_generate_methods_flag_is_case_insensitive(tmp_path: Path):
-    source = _build_static_method_type(tmp_path, "True")
-    assert "def sp_test_thing_do_it(context: ClientContext, value: str)" in source
-    _compile(source)
+    for flag in ("true", "True"):  # the flag is read case-insensitively
+        source = _build_static_method_type(tmp_path, flag)
+        assert "def sp_test_thing_do_it(context: ClientContext, value: str)" in source
+        assert "from office365.runtime.queries.service_operation import ServiceOperationQuery" in source
+        assert "from office365.sharepoint.client_context import ClientContext" in source
+        _compile(source)
 
 
 def _compile(source: str) -> ast.Module:
