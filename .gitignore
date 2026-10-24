@@ -35,3 +35,6 @@ generator/documentation/graphopenapi.cache.json
 
 # Coverage database (per-run artifact, not a source file)
 .coverage
+
+# JetBrains AI assistant plans/session state (local tooling, not project source)
+.junie/
