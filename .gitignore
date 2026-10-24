@@ -32,3 +32,6 @@ generator/documentation/graphopenapi.cache.json
 
 # local virtualenvs
 .repro-venv/
+
+# Coverage database (per-run artifact, not a source file)
+.coverage
