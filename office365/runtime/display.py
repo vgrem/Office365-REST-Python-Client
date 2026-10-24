@@ -156,7 +156,7 @@ def _render_table(
 
 def describe_collection(
     items: Any,
-    name: str,
+    name: str | None = None,
     *,
     max_items: int | None = MAX_ITEMS,
     max_column_width: int | None = MAX_COLUMN_WIDTH,
@@ -166,12 +166,17 @@ def describe_collection(
 
     Only the items handed in are inspected — nothing is fetched, so calling
     ``repr()``/``str()`` on a collection is always safe and cheap. Record-like
-    items (client objects/values) render as an aligned table; primitive items
-    render as a concise list. Pass ``max_items=None`` to render every item and
-    ``max_column_width=None`` to disable per-column truncation (both used by
-    ``to_string()`` for full reports).
+    items (client objects/values) render as an aligned table under a header; a
+    sequence of scalars renders as the list it already is, because a list of
+    values needs no title (``str(StringCollection(["a"])) == "[a]"``). Pass
+    ``max_items=None`` to render every item and ``max_column_width=None`` to
+    disable per-column truncation (both used by ``to_string()`` for reports).
 
     Args:
+        name: Header for a record preview, and for an empty one (``[]`` alone
+            would not say which collection is empty). A non-empty sequence of
+            scalars ignores it: the items are the whole rendering. ``None``
+            derives the header from the first item's type.
         more: Whether the server may hold further, not-yet-loaded pages. When
             true the count is marked with ``+`` and a hint to call
             ``get_all()`` is appended, so a preview never implies the
@@ -180,14 +185,15 @@ def describe_collection(
     footer = f"{_INDENT}(more pages available — call get_all() to load them)" if more else ""
     total = len(items)
     if total == 0:
-        return "\n".join(part for part in (f"{name}([])", footer) if part)
+        empty = f"{name}([])" if name else "[]"
+        return "\n".join(part for part in (empty, footer) if part)
     limit = total if max_items is None else max_items
     preview = list(islice(items, limit))
     columns, records = _columns_and_rows(preview)
     if columns is None or records is None or not columns:
-        return "\n".join(part for part in (f"{name}({format_value(items, max_items=limit)})", footer) if part)
+        return "\n".join(part for part in (format_value(items, max_items=limit), footer) if part)
     lines = [
-        f"{name}(count={total}{'+' if more else ''})",
+        f"{name or type(preview[0]).__name__}(count={total}{'+' if more else ''})",
         _render_table(columns, records, max_column_width),
     ]
     if len(preview) < total:

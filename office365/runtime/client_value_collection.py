@@ -107,20 +107,25 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
         self._data.clear()
 
     def _display_name(self) -> str:
-        """Name used in rendered previews."""
-        if self._item_type is not None:
+        """Type label used by ``repr`` and by report/notebook headers."""
+        if type(self) is ClientValueCollection and self._item_type is not None:
             return f"ClientValueCollection[{self._item_type.__name__}]"
-        return "ClientValueCollection"
+        return type(self).__name__
 
     def __str__(self) -> str:
-        """Items as a bounded list (primitive) or aligned table (complex)."""
+        """Items as a bounded list (scalars) or an aligned table (records)."""
         from office365.runtime.display import describe_collection
 
-        return describe_collection(self._data, self._display_name())
+        return describe_collection(self._data)
 
     def __repr__(self) -> str:
-        """Return the same bounded preview as :meth:`__str__`."""
-        return self.__str__()
+        """A type-qualified, quoted preview: ``StringCollection(['a', 'b'])``."""
+        from office365.runtime.display import MAX_ITEMS
+
+        items: list[Any] = list(self._data[:MAX_ITEMS])
+        if len(self._data) > MAX_ITEMS:
+            items.append("…")
+        return f"{self._display_name()}({items!r})"
 
     def _repr_html_(self) -> str:
         """Render the items as an HTML table (Jupyter/rich display)."""
@@ -138,7 +143,7 @@ class ClientValueCollection(ClientValue, Generic[ValueT]):
         """
         from office365.runtime.display import describe_collection
 
-        return describe_collection(self._data, self._display_name(), max_items=max_items, max_column_width=None)
+        return describe_collection(self._data, max_items=max_items, max_column_width=None)
 
     def to_json(self, profile: JsonProfile | None = None) -> list[Any] | dict[str, Any]:
         """Serializes the collection to OData JSON format.

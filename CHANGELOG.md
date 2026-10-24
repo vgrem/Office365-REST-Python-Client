@@ -264,6 +264,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+**Runtime**
+
+- **A collection of scalars prints as the list it is.** `str()` on a
+  `ClientValueCollection`/`StringCollection`/`GuidCollection` used to wrap the
+  values in the internal type name —
+  `ClientValueCollection[str]([freeBusyRead, limitedRead, read])` — so an example
+  that printed `allowed roles: {p.allowed_roles}` showed the generic spelling of
+  a type it was not even holding (`allowed_roles` is a `StringCollection`), at a
+  width that pushed the values off the line. It now renders `[freeBusyRead,
+  limitedRead, read]`, which is what the same collection already rendered as when
+  it appeared *inside* another value, so the nested and top-level renderings
+  finally agree. The type name moved to where it is unambiguous: `repr()` is
+  quoted and type-qualified (`StringCollection(['freeBusyRead', 'read'])`), a
+  record collection keeps its aligned table, and report/HTML headers keep the
+  label. Collection subclasses also keep their own `__repr__` now: the
+  dataclass-seeding in `ClientValue.__init_subclass__` copied `_render` over every
+  subclass, so `repr(StringCollection([...]))` was
+  `StringCollection(_data=[...], _item_type=<class 'str'>)` — private fields, no
+  bounding, and none of the collection's own rendering.
+
 **Transports**
 
 - The bundled transports now bound the read phase as well as the connect phase:

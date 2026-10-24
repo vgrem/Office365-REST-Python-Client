@@ -30,13 +30,18 @@ class ClientValue:
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         # ``@dataclass`` generates a ``__repr__`` unless one is already present
-        # in the class ``__dict__``, which would shadow the bounded rendering.
-        # Subclasses run ``__init_subclass__`` before the decorator is applied,
-        # so seeding the method here keeps dataclass-backed values consistent
-        # with every other ClientValue (and with domain overrides that define
-        # their own ``__repr__``).
+        # in the class ``__dict__``, which would shadow the bounded rendering
+        # inherited from the nearest ancestor — ``_render`` for a plain value,
+        # the list/table preview for a collection subclass. Subclasses run
+        # ``__init_subclass__`` before the decorator is applied, so seeding the
+        # nearest ancestor's method here keeps dataclass-backed values
+        # consistent with every other ClientValue (and with domain overrides
+        # that define their own ``__repr__``).
         if "__repr__" not in cls.__dict__:
-            cls.__repr__ = _render
+            for klass in cls.__mro__[1:]:
+                if "__repr__" in klass.__dict__:
+                    cls.__repr__ = klass.__dict__["__repr__"]
+                    break
 
     def __str__(self) -> str:
         return _render(self)
